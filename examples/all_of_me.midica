@@ -1,87 +1,134 @@
-# several beats of "All of me" with the attempt to mix a bachata
-# beat into the song
+# Some beats of "All of me" with the attempt to mix a Bachata
+# rhythm into the song.
+#
+# This file assumes the following program configuration:
+# - Note System:      German (lower)
+# - Half Tone Symbol: -is (cis, dis, fis, ...)
+# - Octave Naming:    +/-
+# - Syntax:           Programmer Syntax II
+
+
+# Definition of instruments
+# 1st column: MIDI channel number
+# 2nd column: program number (instrument number) like it's defined by General MIDI
+# 3rd column: channel comment
 
 INSTRUMENTS
-	0       0		Klavir
-	1		0		Klavir
-	5       34		Bass
+	0       0       Piano (right hand)
+	1       0       Piano (left hand)
+	5       34      Bass
 END
 
-CHORD chord_1	f    c+
-CHORD chord_2	f    cis+
-CHORD chord_3	dis  gis  c+
-CHORD chord_4	dis  g    b
 
-*	bpm		128
+# Definition of chords (several tones that can later be played simultanously in the same chanel)
+# The CHORD keyword is followed by
+# - a self-given chord name; and
+# - all the notes that belong to the chord
+
+CHORD chord_1     f     c+
+CHORD chord_2     f     cis+
+CHORD chord_3     dis   gis    c+
+CHORD chord_4     dis   g      b
 
 
-MACRO strophe_1
-	1	f-		1   vol=110
-	0	chord_1		4.  vol=110
-	0	chord_1		4.
-	0	chord_1		4
+# Speed definition:
+# *:   necessary because a tempo definition is a global (channel-independent) command.
+#      The * is the symbol for "global"
+# bpm: Beats per Minute (tempo definition)
+# 128: From now on all channels run with 128 beats per minute.
 
-	1	cis-		1
-	0	chord_2		4.
-	0	chord_2		4.
-	0	chord_2		4
+*    bpm    128
 
-	1	gis--		1
-	0	chord_3		4.
-	0	chord_3		4.
-	0	chord_3		4
 
-	1	dis-		1
-	0	chord_4		4.
-	0	chord_4		4.
-	0	chord_4		4
+# Macro definition for the piano part
+# 1st column: channel (like defined in the INSTRUMENTS section)
+# 2nd column: note or chord
+# 3rd column: note length
+# Right from the 3rd column: optional options.
+# In this case only the relative velocity (volume) information for
+# the according channel.
+
+MACRO verse_1
+	1     f-          1   vol=110
+	0     chord_1     4.  vol=110
+	0     chord_1     4.
+	0     chord_1     4
+
+	1     cis-        1
+	0     chord_2     4.
+	0     chord_2     4.
+	0     chord_2     4
+
+	1     gis--       1
+	0     chord_3     4.
+	0     chord_3     4.
+	0     chord_3     4
+
+	1     dis-        1
+	0     chord_4     4.
+	0     chord_4     4.
+	0     chord_4     4
 END
 
-MACRO basslauf_1
-	5	f-		4.	vol=90
-	5	f-		8
-	5	c-		4
-	5	f-		4
 
-	5	g-		4.
-	5	g-		8
-	5	h--		4
-	5	g-		4
+# Macro definition for the bass part
 
-	5	gis-		4.
-	5	gis-		8
-	5	c-		4
-	5	gis-		4
+MACRO bassrun_1
+	5     f-     4.   vol=90
+	5     f-     8
+	5     c-     4
+	5     f-     4
 
-	5	g-		4.
-	5	g-		8
-	5	h--		4
-	5	g-		4
+	5     g-     4.
+	5     g-     8
+	5     h--    4
+	5     g-     4
+
+	5     gis-   4.
+	5     gis-   8
+	5     c-     4
+	5     gis-   4
+
+	5     g-     4.
+	5     g-     8
+	5     h--    4
+	5     g-     4
 
 END
+
+
+# Macro definition for the percussion part
 
 MACRO bongo_1
-	9	60		4	vol=120
-	9	60		4
-	9	60		4
-	9	35		4
+	9     60     4   vol=120
+	9     60     4
+	9     60     4
+	9     35     4
 END
 
+
+# The actual music playing part.
+# The INCLUDE statement applies a previously defined MACRO.
+# Several includes run parallel.
+# The * synchronizes the timers (or more precisely: current ticks) of all
+# channels.
+
 *
-INCLUDE strophe_1
+INCLUDE verse_1
 *
-INCLUDE basslauf_1
-INCLUDE strophe_1
+INCLUDE bassrun_1
+INCLUDE verse_1
 *
-INCLUDE strophe_1
-INCLUDE basslauf_1
+INCLUDE verse_1
+INCLUDE bassrun_1
 INCLUDE bongo_1
 INCLUDE bongo_1
 INCLUDE bongo_1
 INCLUDE bongo_1
 *
-INCLUDE strophe_1
+INCLUDE verse_1
 INCLUDE bongo_1
 INCLUDE bongo_1
 INCLUDE bongo_1
 INCLUDE bongo_1
+
