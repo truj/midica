@@ -1,0 +1,87 @@
+# several beats of "All of me" with the attempt to mix a bachata
+# beat into the song
+
+INSTRUMENTS
+	0       0		Klavir
+	1		0		Klavir
+	5       34		Bass
+END
+
+CHORD chord_1	f    c+
+CHORD chord_2	f    cis+
+CHORD chord_3	dis  gis  c+
+CHORD chord_4	dis  g    b
+
+*	bpm		128
+
+
+MACRO strophe_1
+	1	f-		1   vol=110
+	0	chord_1		4.  vol=110
+	0	chord_1		4.
+	0	chord_1		4
+
+	1	cis-		1
+	0	chord_2		4.
+	0	chord_2		4.
+	0	chord_2		4
+
+	1	gis--		1
+	0	chord_3		4.
+	0	chord_3		4.
+	0	chord_3		4
+
+	1	dis-		1
+	0	chord_4		4.
+	0	chord_4		4.
+	0	chord_4		4
+END
+
+MACRO basslauf_1
+	5	f-		4.	vol=90
+	5	f-		8
+	5	c-		4
+	5	f-		4
+
+	5	g-		4.
+	5	g-		8
+	5	h--		4
+	5	g-		4
+
+	5	gis-		4.
+	5	gis-		8
+	5	c-		4
+	5	gis-		4
+
+	5	g-		4.
+	5	g-		8
+	5	h--		4
+	5	g-		4
+
+END
+
+MACRO bongo_1
+	9	60		4	vol=120
+	9	60		4
+	9	60		4
+	9	35		4
+END
+
+*
+INCLUDE strophe_1
+*
+INCLUDE basslauf_1
+INCLUDE strophe_1
+*
+INCLUDE strophe_1
+INCLUDE basslauf_1
+INCLUDE bongo_1
+INCLUDE bongo_1
+INCLUDE bongo_1
+INCLUDE bongo_1
+*
+INCLUDE strophe_1
+INCLUDE bongo_1
+INCLUDE bongo_1
+INCLUDE bongo_1
+INCLUDE bongo_1
