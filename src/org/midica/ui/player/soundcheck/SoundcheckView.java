@@ -38,7 +38,9 @@ import org.midica.ui.player.PlayerView;
  * @author Jan Trukenmüller
  */
 public class SoundcheckView extends JDialog {
-	
+
+	private static final long serialVersionUID = 1L;
+    
 	public static final Dimension DIM_TEXT_FIELD   = new Dimension( 60, 20 );
 	public static final int       VOL_LABEL        =    30;
 	public static final int       DEFAULT_DURATION =   300;

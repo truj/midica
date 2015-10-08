@@ -18,7 +18,9 @@ import org.midica.config.Dict;
  * @author Jan Trukenmüller
  */
 public class NoteTableModel extends MidicaTableModel {
-	
+
+	private static final long serialVersionUID = 1L;
+    
 	/**
 	 * Creates a new instance of the notes table data model.
 	 * Initializes the table header names according to the currently configured language.

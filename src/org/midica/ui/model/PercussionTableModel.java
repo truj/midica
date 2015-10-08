@@ -22,7 +22,9 @@ import org.midica.config.Dict;
  * @author Jan Trukenmüller
  */
 public class PercussionTableModel extends MidicaTableModel {
-	
+
+	private static final long serialVersionUID = 1L;
+    
 	private ArrayList<Integer> instrumentNumbers = new ArrayList<Integer>();
 	
 	/**

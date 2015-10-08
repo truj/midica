@@ -15,7 +15,9 @@ import javax.swing.table.DefaultTableModel;
  * @author Jan Trukenmüller
  */
 public abstract class MidicaTableModel extends DefaultTableModel {
-	
+
+	private static final long serialVersionUID = 1L;
+    
 	// table header
 	protected String[] columnNames = new String[ 0 ];
 	

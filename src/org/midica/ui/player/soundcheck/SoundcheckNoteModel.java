@@ -23,6 +23,8 @@ import org.midica.file.NamedInteger;
  */
 public class SoundcheckNoteModel extends DefaultComboBoxModel {
 	
+	private static final long serialVersionUID = 1L;
+    
 	public static final int DEFAULT_NOTE       = 48;
 	public static final int DEFAULT_PERCUSSION = 38;
 	

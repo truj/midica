@@ -42,6 +42,8 @@ import org.midica.ui.model.ConfigComboboxModel;
  */
 public class UiView extends JDialog {
 	
+	private static final long serialVersionUID = 1L;
+    
 	public static final String NAME_SELECT_LANGUAGE   = "name_select_language";
 	public static final String NAME_SELECT_SYSTEM     = "name_select_system";
 	public static final String NAME_SELECT_HALF_TONE  = "name_select_half_tone";

@@ -22,7 +22,9 @@ import org.midica.config.SyntaxElement;
  * @author Jan Trukenmüller
  */
 public class SyntaxTableModel extends MidicaTableModel {
-	
+
+	private static final long serialVersionUID = 1L;
+    
 	private ArrayList<SyntaxElement> syntaxList = null;
 	
 	/**
