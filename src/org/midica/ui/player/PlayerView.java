@@ -56,6 +56,8 @@ import org.midica.ui.UiView;
  */
 public class PlayerView extends JDialog {
 	
+	private static final long serialVersionUID = 1L;
+	
 	// Constants for sliders
 	// progress slider
 	public static final String    NAME_PROGRESS     = "name_progress";
@@ -586,6 +588,8 @@ public class PlayerView extends JDialog {
 	 */
 	private JSlider createChannelVolumeSlider( byte channel ) {
 		JSlider volSlider = new JSlider( JSlider.HORIZONTAL ) {
+			private static final long serialVersionUID = 1L;
+			
 			@Override
 			public void setValue( int value ) {
 				if ( value < CH_VOL_MIN_VAL )

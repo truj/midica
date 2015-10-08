@@ -71,13 +71,13 @@ public class UiView extends JDialog {
 	private JLabel                lblChosenMidicaPLFile  = null;
 	private JLabel                lblChosenMidiFile      = null;
 	private JLabel                lblChosenSoundbankFile = null;
-	private JComboBox<String>     cbxGuiLang             = null;
-	private JComboBox<String>     cbxNoteSys             = null;
-	private JComboBox<String>     cbxHalfTone            = null;
-	private JComboBox<String>     cbxOctave              = null;
-	private JComboBox<String>     cbxSyntax              = null;
-	private JComboBox<String>     cbxPercussion          = null;
-	private JComboBox<String>     cbxInstrument          = null;
+	private JComboBox             cbxGuiLang             = null;
+	private JComboBox             cbxNoteSys             = null;
+	private JComboBox             cbxHalfTone            = null;
+	private JComboBox             cbxOctave              = null;
+	private JComboBox             cbxSyntax              = null;
+	private JComboBox             cbxPercussion          = null;
+	private JComboBox             cbxInstrument          = null;
 	private JLabel                configFeedbackLabel    = null;
 	private JLabel                lblTranspose           = null;
 	private JButton               btnConfigView          = null;
@@ -229,7 +229,7 @@ public class UiView extends JDialog {
 		
 		// gui language selection
 		constraints.gridx++;
-		cbxGuiLang = new JComboBox<String>();
+		cbxGuiLang = new JComboBox();
 		cbxGuiLang.setName( NAME_SELECT_LANGUAGE );
 		cbxGuiLang.setModel( ConfigComboboxModel.getModel(Config.LANGUAGE) );
 		cbxGuiLang.addActionListener( controller );
@@ -243,7 +243,7 @@ public class UiView extends JDialog {
 		
 		// note system selection
 		constraints.gridx++;
-		cbxNoteSys = new JComboBox<String>();
+		cbxNoteSys = new JComboBox();
 		cbxNoteSys.setName( NAME_SELECT_SYSTEM );
 		cbxNoteSys.setModel( ConfigComboboxModel.getModel(Config.NOTE) );
 		cbxNoteSys.addActionListener( controller );
@@ -258,7 +258,7 @@ public class UiView extends JDialog {
 		
 		// half tone selection
 		constraints.gridx++;
-		cbxHalfTone = new JComboBox<String>();
+		cbxHalfTone = new JComboBox();
 		cbxHalfTone.setName( NAME_SELECT_HALF_TONE );
 		cbxHalfTone.setModel( ConfigComboboxModel.getModel(Config.HALF_TONE) );
 		cbxHalfTone.addActionListener( controller );
@@ -273,7 +273,7 @@ public class UiView extends JDialog {
 		
 		// octave selection
 		constraints.gridx++;
-		cbxOctave = new JComboBox<String>();
+		cbxOctave = new JComboBox();
 		cbxOctave.setName( NAME_SELECT_OCTAVE );
 		cbxOctave.setModel( ConfigComboboxModel.getModel(Config.OCTAVE) );
 		cbxOctave.addActionListener( controller );
@@ -288,7 +288,7 @@ public class UiView extends JDialog {
 		
 		// syntax selection
 		constraints.gridx++;
-		cbxSyntax = new JComboBox<String>();
+		cbxSyntax = new JComboBox();
 		cbxSyntax.setName( NAME_SELECT_SYNTAX );
 		cbxSyntax.setModel( ConfigComboboxModel.getModel(Config.SYNTAX) );
 		cbxSyntax.addActionListener( controller );
@@ -303,7 +303,7 @@ public class UiView extends JDialog {
 		
 		// percussion selection
 		constraints.gridx++;
-		cbxPercussion = new JComboBox<String>();
+		cbxPercussion = new JComboBox();
 		cbxPercussion.setName( NAME_SELECT_PERCUSSION );
 		cbxPercussion.setModel( ConfigComboboxModel.getModel(Config.PERCUSSION) );
 		cbxPercussion.addActionListener( controller );
@@ -318,7 +318,7 @@ public class UiView extends JDialog {
 		
 		// instrument naming selection
 		constraints.gridx++;
-		cbxInstrument = new JComboBox<String>();
+		cbxInstrument = new JComboBox();
 		cbxInstrument.setName( NAME_SELECT_INSTRUMENT );
 		cbxInstrument.setModel( ConfigComboboxModel.getModel(Config.INSTRUMENT) );
 		cbxInstrument.addActionListener( controller );

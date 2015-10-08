@@ -23,6 +23,8 @@ import org.midica.config.CategorizedElement;
  * @author Jan Trukenmüller
  */
 public class CategorizedComboboxRenderer extends JLabel implements ListCellRenderer {
+
+	private static final long serialVersionUID = 1L;
 	
 	public static final Color COLOR_CATEGORY_FOREGROUND = new Color(  50, 100, 255 );
 	public static final Color COLOR_CATEGORY_BACKGROUND = new Color( 200, 255, 200 );

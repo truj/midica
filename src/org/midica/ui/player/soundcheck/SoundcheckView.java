@@ -52,9 +52,9 @@ public class SoundcheckView extends JDialog {
 	public static final String NAME_VOLUME   = "name_volume";
 	public static final String NAME_DURATION = "name_duration";
 	
-	private JComboBox<NamedInteger>      cbxChannel    = null;
-	private JComboBox<InstrumentElement> cbxInstrument = null;
-	private JComboBox<NamedInteger>      cbxNote       = null;
+	private JComboBox  cbxChannel    = null;
+	private JComboBox  cbxInstrument = null;
+	private JComboBox  cbxNote       = null;
 	private JTextField fldVolume     = null;
 	private JSlider    sldVolume     = null;
 	private JTextField fldDuration   = null;
@@ -112,7 +112,7 @@ public class SoundcheckView extends JDialog {
 		// channel checkbox
 		constraints.gridx++;
 		constraints.gridwidth = 2;
-		cbxChannel = new JComboBox<NamedInteger>();
+		cbxChannel = new JComboBox();
 		cbxChannel.setModel( new SoundcheckChannelModel() );
 		cbxChannel.setActionCommand( CMD_CHANNEL );
 		cbxChannel.addActionListener( controller );
@@ -128,7 +128,7 @@ public class SoundcheckView extends JDialog {
 		// instrument checkbox
 		constraints.gridx++;
 		constraints.gridwidth = 2;
-		cbxInstrument = new JComboBox<InstrumentElement>();
+		cbxInstrument = new JComboBox();
 		cbxInstrument.setModel( new SoundcheckInstrumentModel() );
 		cbxInstrument.setRenderer( new CategorizedComboboxRenderer() );
 		cbxInstrument.setActionCommand( CMD_INSTR );
@@ -146,7 +146,7 @@ public class SoundcheckView extends JDialog {
 		// note checkbox
 		constraints.gridx++;
 		constraints.gridwidth = 2;
-		cbxNote = new JComboBox<NamedInteger>();
+		cbxNote = new JComboBox();
 		cbxNote.setModel( noteModel );
 		cbxNote.setActionCommand( CMD_NOTE );
 		cbxNote.addActionListener( controller );

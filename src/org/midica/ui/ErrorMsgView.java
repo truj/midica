@@ -26,6 +26,8 @@ import org.midica.config.Dict;
  * @author Jan Trukenmüller
  */
 public class ErrorMsgView extends MessageView {
+
+	private static final long serialVersionUID = 1L;
 	
 	private ActionListener controller  = null;
 	private Container      content     = null;

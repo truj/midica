@@ -25,6 +25,8 @@ import org.midica.config.Dict;
  * @author Jan Trukenmüller
  */
 public class ConfigComboboxModel extends DefaultComboBoxModel {
+
+	private static final long serialVersionUID = 1L;
 	
 	private static HashMap<String, ConfigComboboxModel> models = new HashMap<String, ConfigComboboxModel>();
 	

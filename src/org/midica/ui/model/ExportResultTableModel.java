@@ -28,6 +28,8 @@ import org.midica.file.ExportResult;
  * @author Jan Trukenmüller
  */
 public class ExportResultTableModel extends MidicaTableModel {
+
+	private static final long serialVersionUID = 1L;
 	
 	private ArrayList<HashMap<String, String>> warnings = null;
 	

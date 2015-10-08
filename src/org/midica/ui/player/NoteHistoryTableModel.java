@@ -23,6 +23,8 @@ import org.midica.midi.MidiDevices;
  * @author Jan Trukenmüller
  */
 public class NoteHistoryTableModel extends AbstractTableModel {
+
+	private static final long serialVersionUID = 1L;
 	
 	private byte              channel;
 	private ArrayList<Long[]> tableData = null;

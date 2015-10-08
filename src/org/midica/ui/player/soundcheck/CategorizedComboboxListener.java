@@ -26,15 +26,15 @@ import org.midica.config.InstrumentElement;
  */
 public class CategorizedComboboxListener implements ActionListener {
 	
-	private JComboBox<InstrumentElement> combobox;
-	private int             lastIndex;
+	private JComboBox combobox;
+	private int       lastIndex;
 	
 	/**
 	 * Creates a combobox listener preventing that categories cannot be selected.
 	 * 
 	 * @param combobox  The combobox containing categorized entries.
 	 */
-	public CategorizedComboboxListener( JComboBox<InstrumentElement> combobox ) {
+	public CategorizedComboboxListener( JComboBox combobox ) {
 		this.combobox = combobox;
 		
 		// make sure that we don't start with a selected category

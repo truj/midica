@@ -22,6 +22,8 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 public class InstrumentTableCellRenderer extends DefaultTableCellRenderer {
 	
+	private static final long serialVersionUID = 1L;
+	
 	/** List containing all instruments including instrument category entries */
 	private ArrayList<InstrumentElement> instrumentList;
 	

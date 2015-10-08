@@ -22,6 +22,8 @@ import org.midica.config.InstrumentElement;
  * @author Jan Trukenmüller
  */
 public class InstrumentTableModel extends MidicaTableModel {
+
+	private static final long serialVersionUID = 1L;
 	
 	private ArrayList<InstrumentElement> instrumentList = null;
 	

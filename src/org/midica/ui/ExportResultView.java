@@ -32,6 +32,8 @@ import org.midica.ui.model.ExportResultTableModel;
  * @author Jan Trukenmüller
  */
 public class ExportResultView extends MessageView {
+
+	private static final long serialVersionUID = 1L;
 	
 	// table sizes and color
 	private static final int   COL_WIDTH_TICK     =  80;

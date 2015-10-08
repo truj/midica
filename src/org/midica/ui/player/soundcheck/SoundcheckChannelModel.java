@@ -18,7 +18,9 @@ import org.midica.file.NamedInteger;
  * 
  * @author Jan Trukenmüller
  */
-public class SoundcheckChannelModel extends DefaultComboBoxModel<NamedInteger> {
+public class SoundcheckChannelModel extends DefaultComboBoxModel {
+
+	private static final long serialVersionUID = 1L;
 	
 	/**
 	 * Writes the channel number to every entry. Marks the percussion channel as

@@ -22,6 +22,8 @@ import javax.swing.table.DefaultTableCellRenderer;
  */
 public class SyntaxTableCellRenderer extends DefaultTableCellRenderer {
 	
+	private static final long serialVersionUID = 1L;
+	
 	/** List containing all syntax elements including category entries */
 	private ArrayList<SyntaxElement> syntaxList;
 	

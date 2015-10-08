@@ -42,6 +42,8 @@ import org.midica.ui.model.SyntaxTableModel;
  */
 public class ConfigView extends JDialog {
 	
+	private static final long serialVersionUID = 1L;
+	
 	// column widths
 	private static final int COL_WIDTH_NOTE_NUM       =  60;
 	private static final int COL_WIDTH_NOTE_NAME      = 140;

@@ -32,6 +32,8 @@ import javax.swing.JDialog;
  * @author Jan Trukenmüller
  */
 public abstract class MessageView extends JDialog {
+
+	private static final long serialVersionUID = 1L;
 	
 	public static final String CMD_CLOSE = "close_message";
 	

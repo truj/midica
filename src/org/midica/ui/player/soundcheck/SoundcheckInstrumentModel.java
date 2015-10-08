@@ -20,7 +20,7 @@ import org.midica.config.InstrumentElement;
  * 
  * @author Jan Trukenmüller
  */
-public class SoundcheckInstrumentModel extends DefaultComboBoxModel<InstrumentElement> {
+public class SoundcheckInstrumentModel extends DefaultComboBoxModel {
 	
 	private ArrayList<InstrumentElement> instrumentList = null;
 	

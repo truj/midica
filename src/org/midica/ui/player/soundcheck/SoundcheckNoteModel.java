@@ -21,7 +21,7 @@ import org.midica.file.NamedInteger;
  * 
  * @author Jan Trukenmüller
  */
-public class SoundcheckNoteModel extends DefaultComboBoxModel<NamedInteger> {
+public class SoundcheckNoteModel extends DefaultComboBoxModel {
 	
 	public static final int DEFAULT_NOTE       = 48;
 	public static final int DEFAULT_PERCUSSION = 38;

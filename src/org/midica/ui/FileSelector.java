@@ -21,6 +21,8 @@ import org.midica.config.Dict;
  * @author Jan Trukenmüller
  */
 public class FileSelector extends JDialog {
+
+	private static final long serialVersionUID = 1L;
 	
 	// file extensions
 	public static final String FILE_EXTENSION_MPL       = "midica";

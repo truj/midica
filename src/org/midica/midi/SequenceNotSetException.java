@@ -16,6 +16,8 @@ import org.midica.config.Dict;
  */
 public class SequenceNotSetException extends Exception {
 	
+	private static final long serialVersionUID = 1L;
+	
 	/**
 	 * Creates a new exception because a MIDI sequence is not yet set.
 	 */

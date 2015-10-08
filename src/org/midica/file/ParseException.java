@@ -15,6 +15,8 @@ package org.midica.file;
  */
 public class ParseException extends Exception {
 	
+	private static final long serialVersionUID = 1L;
+	
 	private int    lineNumber = 0;
 	private String fileName   = null;
 	

@@ -16,6 +16,8 @@ import org.midica.config.Dict;
  */
 public class ExportException extends Exception {
 	
+	private static final long serialVersionUID = 1L;
+	
 	/** false: simple string messge; true: complex message containing string, tick, channel, note */
 	private boolean composed = false;
 	private Long    tick     = -1L;
