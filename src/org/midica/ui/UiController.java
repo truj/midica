@@ -104,9 +104,9 @@ public class UiController implements ActionListener, WindowListener {
 		
 		// combobox changes
 		if ( CMD_COMBOBOX_CHANGED.equals(cmd) ) {
-			JComboBox cbx                       = (JComboBox) e.getSource();
+			JComboBox<String> cbx               = (JComboBox<String>) e.getSource();
 			String name                         = cbx.getName();
-			DefaultComboBoxModel model          = (DefaultComboBoxModel) cbx.getModel();
+			DefaultComboBoxModel<String> model  = (DefaultComboBoxModel<String>) cbx.getModel();
 			ComboboxStringOption selectedOption = (ComboboxStringOption) model.getSelectedItem();
 			String selectedId                   = selectedOption.getIdentifier();
 			

@@ -99,7 +99,7 @@ public class SoundcheckControler implements ActionListener, ChangeListener, Mous
 		
 		// channel selected
 		else if ( SoundcheckView.CMD_CHANNEL.equals(cmd) ) {
-			NamedInteger option = (NamedInteger) ( (JComboBox) component ).getSelectedItem();
+			NamedInteger option = (NamedInteger) ( (JComboBox<?>) component ).getSelectedItem();
 			int channel = option.value;
 			if ( 9 == channel ) {
 				noteModel.setPercussion( true );

@@ -24,7 +24,7 @@ import org.midica.config.Dict;
  * 
  * @author Jan Trukenmüller
  */
-public class ConfigComboboxModel extends DefaultComboBoxModel {
+public class ConfigComboboxModel extends DefaultComboBoxModel<ComboboxStringOption> {
 
 	private static final long serialVersionUID = 1L;
 	

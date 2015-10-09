@@ -20,7 +20,7 @@ import org.midica.config.InstrumentElement;
  * 
  * @author Jan Trukenmüller
  */
-public class SoundcheckInstrumentModel extends DefaultComboBoxModel {
+public class SoundcheckInstrumentModel extends DefaultComboBoxModel<InstrumentElement> {
 
 	private static final long serialVersionUID = 1L;
     

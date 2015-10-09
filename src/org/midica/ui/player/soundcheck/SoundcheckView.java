@@ -54,13 +54,13 @@ public class SoundcheckView extends JDialog {
 	public static final String NAME_VOLUME   = "name_volume";
 	public static final String NAME_DURATION = "name_duration";
 	
-	private JComboBox  cbxChannel    = null;
-	private JComboBox  cbxInstrument = null;
-	private JComboBox  cbxNote       = null;
-	private JTextField fldVolume     = null;
-	private JSlider    sldVolume     = null;
-	private JTextField fldDuration   = null;
-	private JButton    btnPlay       = null;
+	private JComboBox<NamedInteger>      cbxChannel    = null;
+	private JComboBox<InstrumentElement> cbxInstrument = null;
+	private JComboBox<NamedInteger>      cbxNote       = null;
+	private JTextField                   fldVolume     = null;
+	private JSlider                      sldVolume     = null;
+	private JTextField                   fldDuration   = null;
+	private JButton                      btnPlay       = null;
 	
 	private        KeyEventPostProcessor keyProcessor   = null;
 	private static SoundcheckView        soundcheckView = null;
@@ -114,7 +114,7 @@ public class SoundcheckView extends JDialog {
 		// channel checkbox
 		constraints.gridx++;
 		constraints.gridwidth = 2;
-		cbxChannel = new JComboBox();
+		cbxChannel = new JComboBox<NamedInteger>();
 		cbxChannel.setModel( new SoundcheckChannelModel() );
 		cbxChannel.setActionCommand( CMD_CHANNEL );
 		cbxChannel.addActionListener( controller );
@@ -130,7 +130,7 @@ public class SoundcheckView extends JDialog {
 		// instrument checkbox
 		constraints.gridx++;
 		constraints.gridwidth = 2;
-		cbxInstrument = new JComboBox();
+		cbxInstrument = new JComboBox<InstrumentElement>();
 		cbxInstrument.setModel( new SoundcheckInstrumentModel() );
 		cbxInstrument.setRenderer( new CategorizedComboboxRenderer() );
 		cbxInstrument.setActionCommand( CMD_INSTR );
@@ -148,7 +148,7 @@ public class SoundcheckView extends JDialog {
 		// note checkbox
 		constraints.gridx++;
 		constraints.gridwidth = 2;
-		cbxNote = new JComboBox();
+		cbxNote = new JComboBox<NamedInteger>();
 		cbxNote.setModel( noteModel );
 		cbxNote.setActionCommand( CMD_NOTE );
 		cbxNote.addActionListener( controller );

@@ -21,7 +21,7 @@ import org.midica.file.NamedInteger;
  * 
  * @author Jan Trukenmüller
  */
-public class SoundcheckNoteModel extends DefaultComboBoxModel {
+public class SoundcheckNoteModel extends DefaultComboBoxModel<NamedInteger> {
 	
 	private static final long serialVersionUID = 1L;
     
