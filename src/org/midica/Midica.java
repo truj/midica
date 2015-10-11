@@ -18,6 +18,9 @@ import org.midica.ui.UiController;
  */
 public class Midica {
 	
+	public static final int VERSION_MAJOR = 0;
+	public static final int VERSION_MINOR = 1444601776;
+	
 	/**
 	 * The entry method which is launched on program startup.
 	 * 
