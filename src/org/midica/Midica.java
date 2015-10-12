@@ -18,8 +18,11 @@ import org.midica.ui.UiController;
  */
 public class Midica {
 	
+	/** Major version number. This has to be incremented manually. */
 	public static final int VERSION_MAJOR = 0;
-	public static final int VERSION_MINOR = 1444601776;
+	
+	/** Minor version number. This is intended to be incremented automatically by precommit.pl. */
+	public static final int VERSION_MINOR = 1444667842;
 	
 	/**
 	 * The entry method which is launched on program startup.
