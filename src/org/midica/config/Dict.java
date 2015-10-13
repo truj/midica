@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Set;
 
+import org.midica.Midica;
 import org.midica.file.NamedInteger;
 import org.midica.ui.model.ConfigComboboxModel;
 
@@ -35,8 +36,7 @@ import org.midica.ui.model.ConfigComboboxModel;
  * 
  * - **SYNTAX_** - Keys beginning with this string identify keys for MidicaPL syntax keywords.
  * - **PERCUSSION_** - Those keys identify shortcuts for percussion instruments.
- * - **INSTR_** - Those keys identify instrument shortcuts. They end with the instrument's
- *                MIDI value.
+ * - **INSTR_** - Those keys identify instrument shortcuts.
  * - Most member variables without a special beginning identify language-specific translations.
  * 
  * This class contains only static methods.
@@ -105,149 +105,184 @@ public class Dict {
 	public static final String SYNTAX_TUPLET_FOR    = "TUPLET_FOR";
 	
 	// percussion identifiers
-	public static final String PERCUSSION_BASS_DRUM     = "percussion_35";
-	public static final String PERCUSSION_RIM_SHOT      = "percussion_37";
-	public static final String PERCUSSION_SNARE_DRUM    = "percussion_38";
-	public static final String PERCUSSION_TOM_1         = "percussion_41";
-	public static final String PERCUSSION_TOM_2         = "percussion_43";
-	public static final String PERCUSSION_TOM_3         = "percussion_45";
-	public static final String PERCUSSION_TOM_4         = "percussion_47";
-	public static final String PERCUSSION_TOM_5         = "percussion_48";
-	public static final String PERCUSSION_TOM_6         = "percussion_50";
-	public static final String PERCUSSION_HI_HAT_CLOSED = "percussion_42";
-	public static final String PERCUSSION_HI_HAT_OPEN   = "percussion_46";
-	public static final String PERCUSSION_CYMBAL        = "percussion_49";
+	public static final String PERCUSSION_BASS_DRUM_2     = "percussion_35";
+	public static final String PERCUSSION_BASS_DRUM_1     = "percussion_36";
+	public static final String PERCUSSION_RIM_SHOT        = "percussion_37";
+	public static final String PERCUSSION_SNARE_DRUM_1    = "percussion_38";
+	public static final String PERCUSSION_HAND_CLAP       = "percussion_39";
+	public static final String PERCUSSION_SNARE_DRUM_2    = "percussion_40";
+	public static final String PERCUSSION_TOM_1           = "percussion_41";
+	public static final String PERCUSSION_HI_HAT_CLOSED   = "percussion_42";
+	public static final String PERCUSSION_TOM_2           = "percussion_43";
+	public static final String PERCUSSION_HI_HAT_PEDAL    = "percussion_44";
+	public static final String PERCUSSION_TOM_3           = "percussion_45";
+	public static final String PERCUSSION_HI_HAT_OPEN     = "percussion_46";
+	public static final String PERCUSSION_TOM_4           = "percussion_47";
+	public static final String PERCUSSION_TOM_5           = "percussion_48";
+	public static final String PERCUSSION_CRASH_CYMBAL_1  = "percussion_49";
+	public static final String PERCUSSION_TOM_6           = "percussion_50";
+	public static final String PERCUSSION_RIDE_CYMBAL_1   = "percussion_51";
+	public static final String PERCUSSION_CHINESE_CYMBAL  = "percussion_52";
+	public static final String PERCUSSION_RIDE_BELL       = "percussion_53";
+	public static final String PERCUSSION_TAMBOURINE      = "percussion_54";
+	public static final String PERCUSSION_SPLASH_CYMBAL   = "percussion_55";
+	public static final String PERCUSSION_COWBELL         = "percussion_56";
+	public static final String PERCUSSION_CRASH_CYMBAL_2  = "percussion_57";
+	public static final String PERCUSSION_VIBRA_SLAP      = "percussion_58";
+	public static final String PERCUSSION_RIDE_CYMBAL_2   = "percussion_59";
+	public static final String PERCUSSION_BONGO_HIGH      = "percussion_60";
+	public static final String PERCUSSION_BONGO_LOW       = "percussion_61";
+	public static final String PERCUSSION_CONGA_MUTE      = "percussion_62";
+	public static final String PERCUSSION_CONGA_OPEN      = "percussion_63";
+	public static final String PERCUSSION_CONGA_LOW       = "percussion_64";
+	public static final String PERCUSSION_TIMBALES_HIGH   = "percussion_65";
+	public static final String PERCUSSION_TIMBALES_LOW    = "percussion_66";
+	public static final String PERCUSSION_AGOGO_HIGH      = "percussion_67";
+	public static final String PERCUSSION_AGOGO_LOW       = "percussion_68";
+	public static final String PERCUSSION_CABASA          = "percussion_69";
+	public static final String PERCUSSION_MARACAS         = "percussion_70";
+	public static final String PERCUSSION_WHISTLE_SHORT   = "percussion_71";
+	public static final String PERCUSSION_WHISTLE_LONG    = "percussion_72";
+	public static final String PERCUSSION_GUIRO_SHORT     = "percussion_73";
+	public static final String PERCUSSION_GUIRO_LONG      = "percussion_74";
+	public static final String PERCUSSION_CLAVE           = "percussion_75";
+	public static final String PERCUSSION_WOOD_BLOCK_HIGH = "percussion_76";
+	public static final String PERCUSSION_WOOD_BLOCK_LOW  = "percussion_77";
+	public static final String PERCUSSION_CUICA_MUTE      = "percussion_78";
+	public static final String PERCUSSION_CUICA_OPEN      = "percussion_79";
+	public static final String PERCUSSION_TRIANGLE_MUTE   = "percussion_80";
+	public static final String PERCUSSION_TRIANGLE_OPEN   = "percussion_81";
 	
-	// TODO: delete
+	// TODO: use for the syntax or delete
 	// instrument identifiers
-	public static final String INSTR_0                  = "instr_0";
-	public static final String INSTR_1                  = "instr_1";
-	public static final String INSTR_2                  = "instr_2";
-	public static final String INSTR_3                  = "instr_3";
-	public static final String INSTR_4                  = "instr_4";
-	public static final String INSTR_5                  = "instr_5";
-	public static final String INSTR_6                  = "instr_6";
-	public static final String INSTR_7                  = "instr_7";
-	public static final String INSTR_8                  = "instr_8";
-	public static final String INSTR_9                  = "instr_9";
-	public static final String INSTR_10                 = "instr_10";
-	public static final String INSTR_11                 = "instr_11";
-	public static final String INSTR_12                 = "instr_12";
-	public static final String INSTR_13                 = "instr_13";
-	public static final String INSTR_14                 = "instr_14";
-	public static final String INSTR_15                 = "instr_15";
-	public static final String INSTR_16                 = "instr_16";
-	public static final String INSTR_17                 = "instr_17";
-	public static final String INSTR_18                 = "instr_18";
-	public static final String INSTR_19                 = "instr_19";
-	public static final String INSTR_20                 = "instr_20";
-	public static final String INSTR_21                 = "instr_21";
-	public static final String INSTR_22                 = "instr_22";
-	public static final String INSTR_23                 = "instr_23";
-	public static final String INSTR_24                 = "instr_24";
-	public static final String INSTR_25                 = "instr_25";
-	public static final String INSTR_26                 = "instr_26";
-	public static final String INSTR_27                 = "instr_27";
-	public static final String INSTR_28                 = "instr_28";
-	public static final String INSTR_29                 = "instr_29";
-	public static final String INSTR_30                 = "instr_30";
-	public static final String INSTR_31                 = "instr_31";
-	public static final String INSTR_32                 = "instr_32";
-	public static final String INSTR_33                 = "instr_33";
-	public static final String INSTR_34                 = "instr_34";
-	public static final String INSTR_35                 = "instr_35";
-	public static final String INSTR_36                 = "instr_36";
-	public static final String INSTR_37                 = "instr_37";
-	public static final String INSTR_38                 = "instr_38";
-	public static final String INSTR_39                 = "instr_39";
-	public static final String INSTR_40                 = "instr_40";
-	public static final String INSTR_41                 = "instr_41";
-	public static final String INSTR_42                 = "instr_42";
-	public static final String INSTR_43                 = "instr_43";
-	public static final String INSTR_44                 = "instr_44";
-	public static final String INSTR_45                 = "instr_45";
-	public static final String INSTR_46                 = "instr_46";
-	public static final String INSTR_47                 = "instr_47";
-	public static final String INSTR_48                 = "instr_48";
-	public static final String INSTR_49                 = "instr_49";
-	public static final String INSTR_50                 = "instr_50";
-	public static final String INSTR_51                 = "instr_51";
-	public static final String INSTR_52                 = "instr_52";
-	public static final String INSTR_53                 = "instr_53";
-	public static final String INSTR_54                 = "instr_54";
-	public static final String INSTR_55                 = "instr_55";
-	public static final String INSTR_56                 = "instr_56";
-	public static final String INSTR_57                 = "instr_57";
-	public static final String INSTR_58                 = "instr_58";
-	public static final String INSTR_59                 = "instr_59";
-	public static final String INSTR_60                 = "instr_60";
-	public static final String INSTR_61                 = "instr_61";
-	public static final String INSTR_62                 = "instr_62";
-	public static final String INSTR_63                 = "instr_63";
-	public static final String INSTR_64                 = "instr_64";
-	public static final String INSTR_65                 = "instr_65";
-	public static final String INSTR_66                 = "instr_66";
-	public static final String INSTR_67                 = "instr_67";
-	public static final String INSTR_68                 = "instr_68";
-	public static final String INSTR_69                 = "instr_69";
-	public static final String INSTR_70                 = "instr_70";
-	public static final String INSTR_71                 = "instr_71";
-	public static final String INSTR_72                 = "instr_72";
-	public static final String INSTR_73                 = "instr_73";
-	public static final String INSTR_74                 = "instr_74";
-	public static final String INSTR_75                 = "instr_75";
-	public static final String INSTR_76                 = "instr_76";
-	public static final String INSTR_77                 = "instr_77";
-	public static final String INSTR_78                 = "instr_78";
-	public static final String INSTR_79                 = "instr_79";
-	public static final String INSTR_80                 = "instr_80";
-	public static final String INSTR_81                 = "instr_81";
-	public static final String INSTR_82                 = "instr_82";
-	public static final String INSTR_83                 = "instr_83";
-	public static final String INSTR_84                 = "instr_84";
-	public static final String INSTR_85                 = "instr_85";
-	public static final String INSTR_86                 = "instr_86";
-	public static final String INSTR_87                 = "instr_87";
-	public static final String INSTR_88                 = "instr_88";
-	public static final String INSTR_89                 = "instr_89";
-	public static final String INSTR_90                 = "instr_90";
-	public static final String INSTR_91                 = "instr_91";
-	public static final String INSTR_92                 = "instr_92";
-	public static final String INSTR_93                 = "instr_93";
-	public static final String INSTR_94                 = "instr_94";
-	public static final String INSTR_95                 = "instr_95";
-	public static final String INSTR_96                 = "instr_96";
-	public static final String INSTR_97                 = "instr_97";
-	public static final String INSTR_98                 = "instr_98";
-	public static final String INSTR_99                 = "instr_99";
-	public static final String INSTR_100                = "instr_100";
-	public static final String INSTR_101                = "instr_101";
-	public static final String INSTR_102                = "instr_102";
-	public static final String INSTR_103                = "instr_103";
-	public static final String INSTR_104                = "instr_104";
-	public static final String INSTR_105                = "instr_105";
-	public static final String INSTR_106                = "instr_106";
-	public static final String INSTR_107                = "instr_107";
-	public static final String INSTR_108                = "instr_108";
-	public static final String INSTR_109                = "instr_109";
-	public static final String INSTR_110                = "instr_110";
-	public static final String INSTR_111                = "instr_111";
-	public static final String INSTR_112                = "instr_112";
-	public static final String INSTR_113                = "instr_113";
-	public static final String INSTR_114                = "instr_114";
-	public static final String INSTR_115                = "instr_115";
-	public static final String INSTR_116                = "instr_116";
-	public static final String INSTR_117                = "instr_117";
-	public static final String INSTR_118                = "instr_118";
-	public static final String INSTR_119                = "instr_119";
-	public static final String INSTR_120                = "instr_120";
-	public static final String INSTR_121                = "instr_121";
-	public static final String INSTR_122                = "instr_122";
-	public static final String INSTR_123                = "instr_123";
-	public static final String INSTR_124                = "instr_124";
-	public static final String INSTR_125                = "instr_125";
-	public static final String INSTR_126                = "instr_126";
-	public static final String INSTR_127                = "instr_127";
+	public static final String INSTR_ACOUSTIC_GRAND_PIANO  = "instr_0";   // 0-7: Piano
+	public static final String INSTR_BRIGHT_ACOUSTIC_PIANO = "instr_1";
+	public static final String INSTR_ELECTRIC_GRAND_PIANO  = "instr_2";
+	public static final String INSTR_HONKY_TONK_PIANO      = "instr_3";
+	public static final String INSTR_ELECTRIC_PIANO_1      = "instr_4";
+	public static final String INSTR_ELECTRIC_PIANO_2      = "instr_5";
+	public static final String INSTR_HARPSICHORD           = "instr_6";
+	public static final String INSTR_CLAVINET              = "instr_7";
+	public static final String INSTR_CELESTA               = "instr_8";   // 8-15: Chromatic Percussion
+	public static final String INSTR_GLOCKENSPIEL          = "instr_9";
+	public static final String INSTR_MUSIC_BOX             = "instr_10";
+	public static final String INSTR_VIBRAPHONE            = "instr_11";
+	public static final String INSTR_MARIMBA               = "instr_12";
+	public static final String INSTR_XYLOPHONE             = "instr_13";
+	public static final String INSTR_TUBULAR_BELL          = "instr_14";
+	public static final String INSTR_DULCIMER              = "instr_15";
+	public static final String INSTR_DRAWBAR_ORGAN         = "instr_16";  // 16-23: Organ
+	public static final String INSTR_PERCUSSIVE_ORGAN      = "instr_17";
+	public static final String INSTR_ROCK_ORGAN            = "instr_18";
+	public static final String INSTR_CHURCH_ORGAN          = "instr_19";
+	public static final String INSTR_REED_ORGAN            = "instr_20";
+	public static final String INSTR_ACCORDION             = "instr_21";
+	public static final String INSTR_HARMONICA             = "instr_22";
+	public static final String INSTR_TANGO_ACCORDION       = "instr_23";
+	public static final String INSTR_NYLON_GUITAR          = "instr_24";  // 24-31: Guitar
+	public static final String INSTR_STEEL_GUITAR          = "instr_25";
+	public static final String INSTR_E_GUITAR_JAZZ         = "instr_26";
+	public static final String INSTR_E_GUITAR_CLEAN        = "instr_27";
+	public static final String INSTR_E_GUITAR_MUTED        = "instr_28";
+	public static final String INSTR_OVERDRIVEN_GUITAR     = "instr_29";
+	public static final String INSTR_DISTORTION_GUITAR     = "instr_30";
+	public static final String INSTR_GUITAR_HARMONICS      = "instr_31";
+	public static final String INSTR_ACOUSTIC_BASS         = "instr_32";  // 32-39: Bass
+	public static final String INSTR_E_BASS_FINGER         = "instr_33";
+	public static final String INSTR_E_BASS_PICK           = "instr_34";
+	public static final String INSTR_FRETLESS_BASS         = "instr_35";
+	public static final String INSTR_SLAP_BASS_1           = "instr_36";
+	public static final String INSTR_SLAP_BASS_2           = "instr_37";
+	public static final String INSTR_SYNTH_BASS_1          = "instr_38";
+	public static final String INSTR_SYNTH_BASS_2          = "instr_39";
+	public static final String INSTR_VIOLIN                = "instr_40";  // 40-47: Strings
+	public static final String INSTR_VIOLA                 = "instr_41";
+	public static final String INSTR_CELLO                 = "instr_42";
+	public static final String INSTR_CONTRABASS            = "instr_43";
+	public static final String INSTR_TREMOLO_STRINGS       = "instr_44";
+	public static final String INSTR_PIZZACATO_STRINGS     = "instr_45";
+	public static final String INSTR_ORCHESTRAL_HARP       = "instr_46";
+	public static final String INSTR_TIMPANI               = "instr_47";
+	public static final String INSTR_STRING_ENSEMBLE_1     = "instr_48";  // 48-55: Ensemble
+	public static final String INSTR_STRING_ENSEMBLE_2     = "instr_49";
+	public static final String INSTR_SYNTH_STRINGS_1       = "instr_50";
+	public static final String INSTR_SYNTH_STRINGS_2       = "instr_51";
+	public static final String INSTR_CHOIR_AAHS            = "instr_52";
+	public static final String INSTR_VOICE_OOHS            = "instr_53";
+	public static final String INSTR_SYNTH_CHOIR           = "instr_54";
+	public static final String INSTR_ORCHESTRA_HIT         = "instr_55";
+	public static final String INSTR_TRUMPET               = "instr_56";  // 56-63: Brass
+	public static final String INSTR_TROMBONE              = "instr_57";
+	public static final String INSTR_TUBA                  = "instr_58";
+	public static final String INSTR_MUTED_TRUMPET         = "instr_59";
+	public static final String INSTR_FRENCH_HORN           = "instr_60";
+	public static final String INSTR_BRASS_SECTION         = "instr_61";
+	public static final String INSTR_SYNTH_BRASS_1         = "instr_62";
+	public static final String INSTR_SYNTH_BRASS_2         = "instr_63";
+	public static final String INSTR_SOPRANO_SAX           = "instr_64";  // 64-71 :Reed
+	public static final String INSTR_ALTO_SAX              = "instr_65";
+	public static final String INSTR_TENOR_SAX             = "instr_66";
+	public static final String INSTR_BARITONE_SAX          = "instr_67";
+	public static final String INSTR_OBOE                  = "instr_68";
+	public static final String INSTR_ENGLISH_HORN          = "instr_69";
+	public static final String INSTR_BASSOON               = "instr_70";
+	public static final String INSTR_CLARINET              = "instr_71";
+	public static final String INSTR_PICCOLO               = "instr_72";  // 72-79: Pipe
+	public static final String INSTR_FLUTE                 = "instr_73";
+	public static final String INSTR_RECORDER              = "instr_74";
+	public static final String INSTR_PAN_FLUTE             = "instr_75";
+	public static final String INSTR_BLOWN_BOTTLE          = "instr_76";
+	public static final String INSTR_SHAKUHACHI            = "instr_77";
+	public static final String INSTR_WHISTLE               = "instr_78";
+	public static final String INSTR_OCARINA               = "instr_79";
+	public static final String INSTR_LEAD_SQUARE           = "instr_80";  // 80-87: Synth Lead
+	public static final String INSTR_LEAD_SAWTOOTH         = "instr_81";
+	public static final String INSTR_LEAD_CALLIOPE         = "instr_82";
+	public static final String INSTR_LEAD_CHIFF            = "instr_83";
+	public static final String INSTR_LEAD_CHARANGO         = "instr_84";
+	public static final String INSTR_LEAD_VOICE            = "instr_85";
+	public static final String INSTR_LEAD_FIFTHS           = "instr_86";
+	public static final String INSTR_LEAD_BASS_LEAD        = "instr_87";
+	public static final String INSTR_PAD_NEW_AGE           = "instr_88";  // 88-95: Synth Pad
+	public static final String INSTR_PAD_WARM              = "instr_89";
+	public static final String INSTR_PAD_POLYSYNTH         = "instr_90";
+	public static final String INSTR_PAD_CHOIR             = "instr_91";
+	public static final String INSTR_PAD_POWED             = "instr_92";
+	public static final String INSTR_PAD_METALLIC          = "instr_93";
+	public static final String INSTR_PAD_HALO              = "instr_94";
+	public static final String INSTR_PAD_SWEEP             = "instr_95";
+	public static final String INSTR_FX_RAIN               = "instr_96";  // 69-103: Synth Effects
+	public static final String INSTR_FX_SOUNDTRACK         = "instr_97";
+	public static final String INSTR_FX_CRYSTAL            = "instr_98";
+	public static final String INSTR_FX_ATMOSPHERE         = "instr_99";
+	public static final String INSTR_FX_BRIGHTNESS         = "instr_100";
+	public static final String INSTR_FX_GOBLINS            = "instr_101";
+	public static final String INSTR_FX_ECHOES             = "instr_102";
+	public static final String INSTR_FX_SCI_FI             = "instr_103";
+	public static final String INSTR_SITAR                 = "instr_104"; // 104-111: Ethnic
+	public static final String INSTR_BANJO                 = "instr_105";
+	public static final String INSTR_SHAMISEN              = "instr_106";
+	public static final String INSTR_KOTO                  = "instr_107";
+	public static final String INSTR_KALIMBA               = "instr_108";
+	public static final String INSTR_BAG_PIPE              = "instr_109";
+	public static final String INSTR_FIDDLE                = "instr_110";
+	public static final String INSTR_SHANAI                = "instr_111";
+	public static final String INSTR_TINKLE_BELL           = "instr_112"; // 112.119: Percussive
+	public static final String INSTR_AGOGO                 = "instr_113";
+	public static final String INSTR_STEEL_DRUMS           = "instr_114";
+	public static final String INSTR_WOODBLOCK             = "instr_115";
+	public static final String INSTR_TAIKO_DRUM            = "instr_116";
+	public static final String INSTR_MELODIC_TOM           = "instr_117";
+	public static final String INSTR_SYNTH_DRUM            = "instr_118";
+	public static final String INSTR_REVERSE_CYMBAL        = "instr_119";
+	public static final String INSTR_GUITAR_FRET_NOISE     = "instr_120"; // 120-127: Sound Effects
+	public static final String INSTR_BREATH_NOISE          = "instr_121";
+	public static final String INSTR_SEASHORE              = "instr_122";
+	public static final String INSTR_BIRD_TWEET            = "instr_123";
+	public static final String INSTR_TELEPHONE_RING        = "instr_124";
+	public static final String INSTR_HELICOPTER            = "instr_125";
+	public static final String INSTR_APPLAUSE              = "instr_126";
+	public static final String INSTR_GUNSHOT               = "instr_127";
 	
 	// UiView
 	public static final String TITLE_MAIN_WINDOW           = "title_main";
@@ -547,7 +582,7 @@ public class Dict {
 		set( SYNTAX,                       "Syntax"                        );
 		set( PERCUSSION,                   "Percussion Shortcuts"          );
 		set( INSTRUMENT,                   "Instrument Shortcuts"          );
-		set( TITLE_MAIN_WINDOW,            "Midica"                        );
+		set( TITLE_MAIN_WINDOW,            "Midica " + Midica.VERSION      );
 		set( SHOW_CONFIG,                  "Show Configuration Details"    );
 		set( SHOW_CONFIG_FROM_PLAYER,      "Configuration"                 );
 		set( IMPORT,                       "Import"                        );
@@ -839,7 +874,7 @@ public class Dict {
 		set( SYNTAX,                                 "Syntax"                                );
 		set( PERCUSSION,                             "Percussion-Bezeichner"                 );
 		set( INSTRUMENT,                             "Instrumenten-Bezeichner"               );
-		set( TITLE_MAIN_WINDOW,                      "Midica"                                );
+		set( TITLE_MAIN_WINDOW,                      "Midica " + Midica.VERSION              );
 		set( SHOW_CONFIG,                            "Konfigurationsdetails anzeigen"        );
 		set( SHOW_CONFIG_FROM_PLAYER,                "Konfiguration"                         );
 		set( IMPORT,                                 "Laden"                                 );
@@ -1142,18 +1177,53 @@ public class Dict {
 		// init names to integers
 		percussionNameToInt = new HashMap<String, Integer>();
 		
-		percussionNameToInt.put( get(PERCUSSION_BASS_DRUM),     35 );
-		percussionNameToInt.put( get(PERCUSSION_RIM_SHOT),      37 );
-		percussionNameToInt.put( get(PERCUSSION_SNARE_DRUM),    38 );
-		percussionNameToInt.put( get(PERCUSSION_TOM_1),         41 );
-		percussionNameToInt.put( get(PERCUSSION_TOM_2),         43 );
-		percussionNameToInt.put( get(PERCUSSION_TOM_3),         45 );
-		percussionNameToInt.put( get(PERCUSSION_TOM_4),         47 );
-		percussionNameToInt.put( get(PERCUSSION_TOM_5),         48 );
-		percussionNameToInt.put( get(PERCUSSION_TOM_6),         50 );
-		percussionNameToInt.put( get(PERCUSSION_HI_HAT_CLOSED), 42 );
-		percussionNameToInt.put( get(PERCUSSION_HI_HAT_OPEN),   46 );
-		percussionNameToInt.put( get(PERCUSSION_CYMBAL),        49 );
+		percussionNameToInt.put( get(PERCUSSION_BASS_DRUM_2),     35 );
+		percussionNameToInt.put( get(PERCUSSION_BASS_DRUM_1),     36 );
+		percussionNameToInt.put( get(PERCUSSION_RIM_SHOT),        37 );
+		percussionNameToInt.put( get(PERCUSSION_SNARE_DRUM_1),    38 );
+		percussionNameToInt.put( get(PERCUSSION_HAND_CLAP),       39 );
+		percussionNameToInt.put( get(PERCUSSION_SNARE_DRUM_2),    40 );
+		percussionNameToInt.put( get(PERCUSSION_TOM_1),           41 );
+		percussionNameToInt.put( get(PERCUSSION_HI_HAT_CLOSED),   42 );
+		percussionNameToInt.put( get(PERCUSSION_TOM_2),           43 );
+		percussionNameToInt.put( get(PERCUSSION_HI_HAT_PEDAL),    44 );
+		percussionNameToInt.put( get(PERCUSSION_TOM_3),           45 );
+		percussionNameToInt.put( get(PERCUSSION_HI_HAT_OPEN),     46 );
+		percussionNameToInt.put( get(PERCUSSION_TOM_4),           47 );
+		percussionNameToInt.put( get(PERCUSSION_TOM_5),           48 );
+		percussionNameToInt.put( get(PERCUSSION_CRASH_CYMBAL_1),  49 );
+		percussionNameToInt.put( get(PERCUSSION_TOM_6),           50 );
+		percussionNameToInt.put( get(PERCUSSION_RIDE_CYMBAL_1),   51 );
+		percussionNameToInt.put( get(PERCUSSION_CHINESE_CYMBAL),  52 );
+		percussionNameToInt.put( get(PERCUSSION_RIDE_BELL),       53 );
+		percussionNameToInt.put( get(PERCUSSION_TAMBOURINE),      54 );
+		percussionNameToInt.put( get(PERCUSSION_SPLASH_CYMBAL),   55 );
+		percussionNameToInt.put( get(PERCUSSION_COWBELL),         56 );
+		percussionNameToInt.put( get(PERCUSSION_CRASH_CYMBAL_2),  57 );
+		percussionNameToInt.put( get(PERCUSSION_VIBRA_SLAP),      58 );
+		percussionNameToInt.put( get(PERCUSSION_RIDE_CYMBAL_2),   59 );
+		percussionNameToInt.put( get(PERCUSSION_BONGO_HIGH),      60 );
+		percussionNameToInt.put( get(PERCUSSION_BONGO_LOW),       61 );
+		percussionNameToInt.put( get(PERCUSSION_CONGA_MUTE),      62 );
+		percussionNameToInt.put( get(PERCUSSION_CONGA_OPEN),      63 );
+		percussionNameToInt.put( get(PERCUSSION_CONGA_LOW),       64 );
+		percussionNameToInt.put( get(PERCUSSION_TIMBALES_HIGH),   65 );
+		percussionNameToInt.put( get(PERCUSSION_TIMBALES_LOW),    66 );
+		percussionNameToInt.put( get(PERCUSSION_AGOGO_HIGH),      67 );
+		percussionNameToInt.put( get(PERCUSSION_AGOGO_LOW),       68 );
+		percussionNameToInt.put( get(PERCUSSION_CABASA),          69 );
+		percussionNameToInt.put( get(PERCUSSION_MARACAS),         70 );
+		percussionNameToInt.put( get(PERCUSSION_WHISTLE_SHORT),   71 );
+		percussionNameToInt.put( get(PERCUSSION_WHISTLE_LONG),    72 );
+		percussionNameToInt.put( get(PERCUSSION_GUIRO_SHORT),     73 );
+		percussionNameToInt.put( get(PERCUSSION_GUIRO_LONG),      74 );
+		percussionNameToInt.put( get(PERCUSSION_CLAVE),           75 );
+		percussionNameToInt.put( get(PERCUSSION_WOOD_BLOCK_HIGH), 76 );
+		percussionNameToInt.put( get(PERCUSSION_WOOD_BLOCK_LOW),  77 );
+		percussionNameToInt.put( get(PERCUSSION_CUICA_MUTE),      78 );
+		percussionNameToInt.put( get(PERCUSSION_CUICA_OPEN),      79 );
+		percussionNameToInt.put( get(PERCUSSION_TRIANGLE_MUTE),   80 );
+		percussionNameToInt.put( get(PERCUSSION_TRIANGLE_OPEN),   81 );
 		
 		// init integers to names
 		percussionIntToName = new HashMap<Integer, String>();
@@ -1427,18 +1497,53 @@ public class Dict {
 	 */
 	private static void initPercussionSetEnglish1() {
 		// percussion instruments
-		set( PERCUSSION_BASS_DRUM,     "BASS_DRUM"     );
-		set( PERCUSSION_RIM_SHOT,      "RIM_SHOT"      );
-		set( PERCUSSION_SNARE_DRUM,    "SNARE_DRUM"    );
-		set( PERCUSSION_TOM_1,         "TOM_1"         );
-		set( PERCUSSION_TOM_2,         "TOM_2"         );
-		set( PERCUSSION_TOM_3,         "TOM_3"         );
-		set( PERCUSSION_TOM_4,         "TOM_4"         );
-		set( PERCUSSION_TOM_5,         "TOM_5"         );
-		set( PERCUSSION_TOM_6,         "TOM_6"         );
-		set( PERCUSSION_HI_HAT_CLOSED, "HI_HAT_CLOSED" );
-		set( PERCUSSION_HI_HAT_OPEN,   "HI_HAT_OPEN"   );
-		set( PERCUSSION_CYMBAL,        "CYMBAL"        );
+		set( PERCUSSION_BASS_DRUM_2,     "BASS_DRUM_2" );
+		set( PERCUSSION_BASS_DRUM_1,     "BASS_DRUM_1" );
+		set( PERCUSSION_RIM_SHOT,        "RIM_SHOT" );
+		set( PERCUSSION_SNARE_DRUM_1,    "SNARE_DRUM_1" );
+		set( PERCUSSION_HAND_CLAP,       "HAND_CLAP" );
+		set( PERCUSSION_SNARE_DRUM_2,    "SNARE_DRUM_2" );
+		set( PERCUSSION_TOM_1,           "TOM_1" );
+		set( PERCUSSION_HI_HAT_CLOSED,   "HI_HAT_CLOSED" );
+		set( PERCUSSION_TOM_2,           "TOM_2" );
+		set( PERCUSSION_HI_HAT_PEDAL,    "HI_HAT_PEDAL" );
+		set( PERCUSSION_TOM_3,           "TOM_3" );
+		set( PERCUSSION_HI_HAT_OPEN,     "HI_HAT_OPEN" );
+		set( PERCUSSION_TOM_4,           "TOM_4" );
+		set( PERCUSSION_TOM_5,           "TOM_5" );
+		set( PERCUSSION_CRASH_CYMBAL_1,  "CRASH_CYMBAL_1" );
+		set( PERCUSSION_TOM_6,           "TOM_6" );
+		set( PERCUSSION_RIDE_CYMBAL_1,   "RIDE_CYMBAL_1" );
+		set( PERCUSSION_CHINESE_CYMBAL,  "CHINESE_CYMBAL" );
+		set( PERCUSSION_RIDE_BELL,       "RIDE_BELL" );
+		set( PERCUSSION_TAMBOURINE,      "TAMBOURINE" );
+		set( PERCUSSION_SPLASH_CYMBAL,   "SPLASH_CYMBAL" );
+		set( PERCUSSION_COWBELL,         "COWBELL" );
+		set( PERCUSSION_CRASH_CYMBAL_2,  "CRASH_CYMBAL_2" );
+		set( PERCUSSION_VIBRA_SLAP,      "VIBRA_SLAP" );
+		set( PERCUSSION_RIDE_CYMBAL_2,   "RIDE_CYMBAL_2" );
+		set( PERCUSSION_BONGO_HIGH,      "BONGO_HIGH" );
+		set( PERCUSSION_BONGO_LOW,       "BONGO_LOW" );
+		set( PERCUSSION_CONGA_MUTE,      "CONGA_MUTE" );
+		set( PERCUSSION_CONGA_OPEN,      "CONGA_OPEN" );
+		set( PERCUSSION_CONGA_LOW,       "CONGA_LOW" );
+		set( PERCUSSION_TIMBALES_HIGH,   "TIMBALES_HIGH" );
+		set( PERCUSSION_TIMBALES_LOW,    "TIMBALES_LOW" );
+		set( PERCUSSION_AGOGO_HIGH,      "AGOGO_HIGH" );
+		set( PERCUSSION_AGOGO_LOW,       "AGOGO_LOW" );
+		set( PERCUSSION_CABASA,          "CABASA" );
+		set( PERCUSSION_MARACAS,         "MARACAS" );
+		set( PERCUSSION_WHISTLE_SHORT,   "WHISTLE_SHORT" );
+		set( PERCUSSION_WHISTLE_LONG,    "WHISTLE_LONG" );
+		set( PERCUSSION_GUIRO_SHORT,     "GUIRO_SHORT" );
+		set( PERCUSSION_GUIRO_LONG,      "GUIRO_LONG" );
+		set( PERCUSSION_CLAVE,           "CLAVE" );
+		set( PERCUSSION_WOOD_BLOCK_HIGH, "WOOD_BLOCK_HIGH" );
+		set( PERCUSSION_WOOD_BLOCK_LOW,  "WOOD_BLOCK_LOW" );
+		set( PERCUSSION_CUICA_MUTE,      "CUICA_MUTE" );
+		set( PERCUSSION_CUICA_OPEN,      "CUICA_OPEN" );
+		set( PERCUSSION_TRIANGLE_MUTE,   "TRIANGLE_MUTE" );
+		set( PERCUSSION_TRIANGLE_OPEN,   "TRIANGLE_OPEN" );
 	}
 	
 	/**
@@ -1446,18 +1551,53 @@ public class Dict {
 	 */
 	private static void initPercussionSetGerman1() {
 		// percussion instruments
-		set( PERCUSSION_BASS_DRUM,     "BASSTROMMEL"        );
-		set( PERCUSSION_RIM_SHOT,      "RIMSHOT"            );
-		set( PERCUSSION_SNARE_DRUM,    "KLEINE_TROMMEL"     );
-		set( PERCUSSION_TOM_1,         "TOMTOM-1"           );
-		set( PERCUSSION_TOM_2,         "TOMTOM-2"           );
-		set( PERCUSSION_TOM_3,         "TOMTOM-3"           );
-		set( PERCUSSION_TOM_4,         "TOMTOM-4"           );
-		set( PERCUSSION_TOM_5,         "TOMTOM-5"           );
-		set( PERCUSSION_TOM_6,         "TOMTOM-6"           );
-		set( PERCUSSION_HI_HAT_CLOSED, "HI-HAT_GESCHLOSSEN" );
-		set( PERCUSSION_HI_HAT_OPEN,   "HI-HAT_OFFEN"       );
-		set( PERCUSSION_CYMBAL,        "BECKEN"             );
+		set( PERCUSSION_BASS_DRUM_2,     "BASSTROMMEL_2" );
+		set( PERCUSSION_BASS_DRUM_1,     "BASSTROMMEL_1" );
+		set( PERCUSSION_RIM_SHOT,        "RIMSHOT" );
+		set( PERCUSSION_SNARE_DRUM_1,    "KLEINE_TROMMEL_1" );
+		set( PERCUSSION_HAND_CLAP,       "KLATSCHEN" );
+		set( PERCUSSION_SNARE_DRUM_2,    "KLEINE_TROMMEL_2" );
+		set( PERCUSSION_TOM_1,           "TOMTOM_1" );
+		set( PERCUSSION_HI_HAT_CLOSED,   "HI_HAT_GESCHLOSSEN" );
+		set( PERCUSSION_TOM_2,           "TOMTOM_2" );
+		set( PERCUSSION_HI_HAT_PEDAL,    "HI_HAT_PEDAL" );
+		set( PERCUSSION_TOM_3,           "TOMTOM_3" );
+		set( PERCUSSION_HI_HAT_OPEN,     "HI_HAT_OFFEN" );
+		set( PERCUSSION_TOM_4,           "TOMTOM_4" );
+		set( PERCUSSION_TOM_5,           "TOMTOM_5" );
+		set( PERCUSSION_CRASH_CYMBAL_1,  "CRASH_BECKEN_1" );
+		set( PERCUSSION_TOM_6,           "TOMTOM_6" );
+		set( PERCUSSION_RIDE_CYMBAL_1,   "RIDE_BECKEN_1" );
+		set( PERCUSSION_CHINESE_CYMBAL,  "CHINESISCHES_BECKEN" );
+		set( PERCUSSION_RIDE_BELL,       "RIDE_BELL" );
+		set( PERCUSSION_TAMBOURINE,      "TAMBURIN" );
+		set( PERCUSSION_SPLASH_CYMBAL,   "SPLASH_BECKEN" );
+		set( PERCUSSION_COWBELL,         "KUHGLOCKE" );
+		set( PERCUSSION_CRASH_CYMBAL_2,  "CRASH_BECKEN_2" );
+		set( PERCUSSION_VIBRA_SLAP,      "VIBRASLAP" );
+		set( PERCUSSION_RIDE_CYMBAL_2,   "RIDE_BECKEN_2" );
+		set( PERCUSSION_BONGO_HIGH,      "BONGO_HOCH" );
+		set( PERCUSSION_BONGO_LOW,       "BONGO_TIEF" );
+		set( PERCUSSION_CONGA_MUTE,      "CONGA_GEDÄMPFT" );
+		set( PERCUSSION_CONGA_OPEN,      "CONGA_OFFEN" );
+		set( PERCUSSION_CONGA_LOW,       "CONGA_TIEF" );
+		set( PERCUSSION_TIMBALES_HIGH,   "TIMBALES_HOCH" );
+		set( PERCUSSION_TIMBALES_LOW,    "TIMBALES_TIEF" );
+		set( PERCUSSION_AGOGO_HIGH,      "AGOGO_HOCH" );
+		set( PERCUSSION_AGOGO_LOW,       "AGOGO_TIEF" );
+		set( PERCUSSION_CABASA,          "CABASA" );
+		set( PERCUSSION_MARACAS,         "MARACAS" );
+		set( PERCUSSION_WHISTLE_SHORT,   "PFEIFE_KURZ" );
+		set( PERCUSSION_WHISTLE_LONG,    "PFEIFE_LANG" );
+		set( PERCUSSION_GUIRO_SHORT,     "GUIRO_KURZ" );
+		set( PERCUSSION_GUIRO_LONG,      "GUIRO_LANG" );
+		set( PERCUSSION_CLAVE,           "CLAVE" );
+		set( PERCUSSION_WOOD_BLOCK_HIGH, "HOLZBLOCK_HOCH" );
+		set( PERCUSSION_WOOD_BLOCK_LOW,  "HOLZBLOCK_TIEF" );
+		set( PERCUSSION_CUICA_MUTE,      "CUICA_GEDÄMPFT" );
+		set( PERCUSSION_CUICA_OPEN,      "CUICA_OFFEN" );
+		set( PERCUSSION_TRIANGLE_MUTE,   "TRIANGEL_GEDÄMPFT" );
+		set( PERCUSSION_TRIANGLE_OPEN,   "TRIANGEL_OFFEN" );
 	}
 	
 	/**

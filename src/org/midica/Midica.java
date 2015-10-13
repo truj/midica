@@ -11,6 +11,8 @@ import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.ui.UiController;
 
+import com.sun.corba.se.impl.util.Version;
+
 /**
  * This is the main class to be defined by the MANIFEST.MF in the jar archive.
  * 
@@ -22,7 +24,10 @@ public class Midica {
 	public static final int VERSION_MAJOR = 0;
 	
 	/** Minor version number. This is intended to be incremented automatically by precommit.pl. */
-	public static final int VERSION_MINOR = 1444667842;
+	public static final int VERSION_MINOR = 1444756101;
+	
+	/** Full version string. */
+	public static final String VERSION = VERSION_MAJOR + "." + VERSION_MINOR;
 	
 	/**
 	 * The entry method which is launched on program startup.
