@@ -15,9 +15,8 @@ import java.awt.Insets;
 import java.awt.KeyEventPostProcessor;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 
 import javax.swing.JDialog;
@@ -431,10 +430,9 @@ public class ConfigView extends JDialog {
 		// timestamp content
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.WEST;
-		DateTimeFormatter formatter  = DateTimeFormatter.ofPattern( Dict.get(Dict.TIMESTAMP_FORMAT) );
-		ZoneId            zoneId     = ZoneId.of( "GMT+1" );
-		String            timestamp  = Instant.ofEpochSecond( Midica.VERSION_MINOR ).atZone( zoneId ).format( formatter );
-		JLabel lblTimestampContent   = new JLabel( timestamp );
+		Date             timestamp = new Date( Midica.VERSION_MINOR * 1000L );
+		SimpleDateFormat formatter = new SimpleDateFormat( Dict.get(Dict.TIMESTAMP_FORMAT) );
+		JLabel lblTimestampContent = new JLabel( formatter.format(timestamp) );
 		area.add( lblTimestampContent, constraints );
 		
 		// author translation
