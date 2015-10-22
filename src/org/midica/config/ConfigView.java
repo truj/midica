@@ -15,6 +15,9 @@ import java.awt.Insets;
 import java.awt.KeyEventPostProcessor;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -23,6 +26,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 
+import org.midica.Midica;
 import org.midica.ui.model.InstrumentTableModel;
 import org.midica.ui.model.NoteTableModel;
 import org.midica.ui.model.PercussionTableModel;
@@ -110,6 +114,7 @@ public class ConfigView extends JDialog {
 		content.addTab( Dict.get(Dict.PERCUSSION_DETAILS), createPercussionArea() );
 		content.addTab( Dict.get(Dict.SYNTAX),             createSyntaxArea()     );
 		content.addTab( Dict.get(Dict.INSTRUMENT),         createInstrumentArea() );
+		content.addTab( Dict.get(Dict.VERSION),            createVersionArea()    );
 		
 		// enable key bindings
 		ConfigController controller = new ConfigController( this );
@@ -291,6 +296,100 @@ public class ConfigView extends JDialog {
 		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_INSTR_NUM  );
 		table.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_INSTR_NAME );
 		table.getTableHeader().setBackground( Config.TABLE_HEADER_COLOR );
+		
+		return area;
+	}
+	
+	// TODO: define and document
+	private Container createVersionArea() {
+		// content
+		JPanel area = new JPanel();
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout( layout );
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill       = GridBagConstraints.NONE;
+		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 0;
+		constraints.weighty    = 0;
+		
+		// version translation
+		constraints.anchor = GridBagConstraints.EAST;
+		JLabel lblVersion  = new JLabel( Dict.get(Dict.VERSION) + ": " );
+		area.add( lblVersion, constraints );
+		
+		// version content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.WEST;
+		JLabel lblVersionContent = new JLabel( Midica.VERSION );
+		area.add( lblVersionContent, constraints );
+		
+		// timestamp translation
+		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.anchor = GridBagConstraints.EAST;
+		JLabel lblTimestamp = new JLabel( Dict.get(Dict.DATE) + ": " );
+		area.add( lblTimestamp, constraints );
+		
+		// timestamp content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.WEST;
+		DateTimeFormatter formatter  = DateTimeFormatter.ofPattern( Dict.get(Dict.TIMESTAMP_FORMAT) );
+		ZoneId            zoneId     = ZoneId.of( "GMT+1" );
+		String            timestamp  = Instant.ofEpochSecond( Midica.VERSION_MINOR ).atZone( zoneId ).format( formatter );
+		JLabel lblTimestampContent   = new JLabel( timestamp );
+		area.add( lblTimestampContent, constraints );
+		
+		// author translation
+		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.anchor = GridBagConstraints.EAST;
+		JLabel lblAuthor   = new JLabel( Dict.get(Dict.AUTHOR) + ": " );
+		area.add( lblAuthor, constraints );
+		
+		// author content
+		constraints.gridx++;
+		constraints.anchor      = GridBagConstraints.WEST;
+		JLabel lblAuthorContent = new JLabel( Midica.AUTHOR );
+		area.add( lblAuthorContent, constraints );
+		
+		// source URL translation
+		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.anchor = GridBagConstraints.EAST;
+		JLabel lblSource   = new JLabel( Dict.get(Dict.SOURCE_URL) + ": " );
+		area.add( lblSource, constraints );
+		
+		// source URL content
+		constraints.gridx++;
+		constraints.anchor      = GridBagConstraints.WEST;
+		JLabel lblSourceContent = new JLabel( Midica.SOURCE_URL );
+		area.add( lblSourceContent, constraints );
+		
+		// website translation
+		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.anchor = GridBagConstraints.EAST;
+		JLabel lblWebsite  = new JLabel( Dict.get(Dict.WEBSITE) + ": " );
+		area.add( lblWebsite, constraints );
+		
+		// website content
+		constraints.gridx++;
+		constraints.anchor       = GridBagConstraints.WEST;
+		JLabel lblWebsiteContent = new JLabel( Midica.URL );
+		area.add( lblWebsiteContent, constraints );
+		
+		// spacer
+		constraints.gridy++;
+		constraints.gridx   = 0;
+		constraints.weighty = 1;
+		JLabel spacer = new JLabel( " " );
+		area.add( spacer, constraints );
 		
 		return area;
 	}

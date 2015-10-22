@@ -323,6 +323,12 @@ public class Dict {
 	public static final String NOTE_DETAILS                = "note_details";
 	public static final String PERCUSSION_DETAILS          = "percussion_details";
 	public static final String SYNTAX_DETAILS              = "syntax_details";
+	public static final String VERSION                     = "version";
+	public static final String DATE                        = "date";
+	public static final String AUTHOR                      = "author";
+	public static final String SOURCE_URL                  = "source_url";
+	public static final String WEBSITE                     = "website";
+	public static final String TIMESTAMP_FORMAT            = "timestamp_format";
 	public static final String CONF_COL_NOTE_NUM           = "conf_col_note_num";
 	public static final String CONF_COL_NOTE_NAME          = "conf_col_note_name";
 	public static final String CONF_COL_SYNTAX_NAME        = "conf_col_syntax_name";
@@ -612,6 +618,12 @@ public class Dict {
 		set( NOTE_DETAILS,                           "Note Table"                   );
 		set( PERCUSSION_DETAILS,                     "Percussion Shortcuts"         );
 		set( SYNTAX_DETAILS,                         "Commands"                     );
+		set( VERSION,                                "Version"                      );
+		set( DATE,                                   "Date"                         );
+		set( AUTHOR,                                 "Author"                       );
+		set( SOURCE_URL,                             "Source"                       );
+		set( WEBSITE,                                "Website"                      );
+		set( TIMESTAMP_FORMAT,                       "yyyy-MM-dd HH:mm:ss"          );
 		set( CONF_COL_NOTE_NUM,                      "Number"                       );
 		set( CONF_COL_NOTE_NAME,                     "Name"                         );
 		set( CONF_COL_SYNTAX_NAME,                   "Name"                         );
@@ -875,6 +887,7 @@ public class Dict {
 		set( PERCUSSION,                             "Percussion-Bezeichner"                 );
 		set( INSTRUMENT,                             "Instrumenten-Bezeichner"               );
 		set( TITLE_MAIN_WINDOW,                      "Midica " + Midica.VERSION              );
+		set( TIMESTAMP_FORMAT,                       "dd.MM.yyyy HH:mm:ss"                   );
 		set( SHOW_CONFIG,                            "Konfigurationsdetails anzeigen"        );
 		set( SHOW_CONFIG_FROM_PLAYER,                "Konfiguration"                         );
 		set( IMPORT,                                 "Laden"                                 );
