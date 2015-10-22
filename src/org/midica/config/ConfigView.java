@@ -18,6 +18,7 @@ import java.awt.event.KeyEvent;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -67,6 +68,7 @@ public class ConfigView extends JDialog {
 	
 	private static ConfigView configView = null;
 	
+	private ConfigController      controller   = null;
 	private KeyEventPostProcessor keyProcessor = null;
 	private JTabbedPane           content      = null;
 	
@@ -109,16 +111,17 @@ public class ConfigView extends JDialog {
 		content = new JTabbedPane( JTabbedPane.TOP );
 		getContentPane().add( content );
 		
+		// enable key bindings
+		this.controller = new ConfigController( this );
+		addWindowListener( this.controller );
+		
 		// add tabs
 		content.addTab( Dict.get(Dict.NOTE_DETAILS),       createNoteArea()       );
 		content.addTab( Dict.get(Dict.PERCUSSION_DETAILS), createPercussionArea() );
 		content.addTab( Dict.get(Dict.SYNTAX),             createSyntaxArea()     );
 		content.addTab( Dict.get(Dict.INSTRUMENT),         createInstrumentArea() );
+		content.addTab( Dict.get(Dict.SOUNDBANK),          createSoundbankArea()  );
 		content.addTab( Dict.get(Dict.VERSION),            createVersionArea()    );
-		
-		// enable key bindings
-		ConfigController controller = new ConfigController( this );
-		addWindowListener( controller );
 	}
 	
 	/**
@@ -300,7 +303,96 @@ public class ConfigView extends JDialog {
 		return area;
 	}
 	
-	// TODO: define and document
+	/**
+	 * Creates the version area containing version, author and general information.
+	 * 
+	 * @return the created version area
+	 */
+	private Container createSoundbankArea() {
+		// content
+		JPanel area = new JPanel();
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout( layout );
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill       = GridBagConstraints.NONE;
+		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 0;
+		constraints.weighty    = 0;
+		
+		// get general soundbank info
+		HashMap<String, String> soundbankInfo = controller.getSoundbankInfo();
+		
+		// file translation
+		constraints.anchor = GridBagConstraints.EAST;
+		JLabel lblFile     = new JLabel( Dict.get(Dict.FILE) + ": " );
+		area.add( lblFile, constraints );
+		
+		// file name
+		constraints.gridx++;
+		constraints.anchor    = GridBagConstraints.WEST;
+		JLabel lblFileContent = new JLabel( soundbankInfo.get("file") );
+		area.add( lblFileContent, constraints );
+		
+		// name translation
+		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.anchor = GridBagConstraints.EAST;
+		JLabel lblname     = new JLabel( Dict.get(Dict.NAME) + ": " );
+		area.add( lblname, constraints );
+		
+		// name content
+		constraints.gridx++;
+		constraints.anchor    = GridBagConstraints.WEST;
+		JLabel lblNameContent = new JLabel( soundbankInfo.get("name") );
+		area.add( lblNameContent, constraints );
+		
+		// version translation
+		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.anchor = GridBagConstraints.EAST;
+		JLabel lblVersion  = new JLabel( Dict.get(Dict.VERSION) + ": " );
+		area.add( lblVersion, constraints );
+		
+		// version content
+		constraints.gridx++;
+		constraints.anchor       = GridBagConstraints.WEST;
+		JLabel lblVersionContent = new JLabel( soundbankInfo.get("version") );
+		area.add( lblVersionContent, constraints );
+		
+		// description translation
+		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.anchor    = GridBagConstraints.EAST;
+		JLabel lblDescription = new JLabel( Dict.get(Dict.DESCRIPTION) + ": " );
+		area.add( lblDescription, constraints );
+		
+		// description content
+		constraints.gridx++;
+		constraints.anchor      = GridBagConstraints.WEST;
+		JLabel lblDescriptionContent = new JLabel( soundbankInfo.get("description") );
+		area.add( lblDescriptionContent, constraints );
+		
+		// spacer
+		constraints.gridy++;
+		constraints.gridx   = 0;
+		constraints.weighty = 1;
+		JLabel spacer = new JLabel( " " );
+		area.add( spacer, constraints );
+		
+		return area;
+	}
+	
+	/**
+	 * Creates the version area containing version, author and general information.
+	 * 
+	 * @return the created version area
+	 */
 	private Container createVersionArea() {
 		// content
 		JPanel area = new JPanel();

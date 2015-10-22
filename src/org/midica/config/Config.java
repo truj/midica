@@ -43,7 +43,7 @@ public class Config {
 	// directories
 	public static final String DIRECTORY_MPL        = "directory_mpl";
 	public static final String DIRECTORY_MID        = "directory_mid";
-	public static final String DIRECTORY_GM         = "directory_gm";
+	public static final String DIRECTORY_SF2        = "directory_sf2";
 	public static final String DIRECTORY_EXPORT_MPL = "directory_export_mpl";
 	public static final String DIRECTORY_EXPORT_MID = "directory_export_mid";
 	
@@ -186,7 +186,7 @@ public class Config {
 		defaults.put( DIRECTORY_MID,        homeDir );
 		defaults.put( DIRECTORY_EXPORT_MPL, homeDir );
 		defaults.put( DIRECTORY_EXPORT_MID, homeDir );
-		defaults.put( DIRECTORY_GM,         homeDir );
+		defaults.put( DIRECTORY_SF2,        homeDir );
 		
 		// init config with defaults
 		config = new HashMap<String, String>();

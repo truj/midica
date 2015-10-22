@@ -468,7 +468,6 @@ public class UiView extends JDialog {
 		constraints.gridx++;
 		btnSelectSoundbank = new JButton( Dict.get(Dict.CHOOSE_FILE) );
 		btnSelectSoundbank.setActionCommand( CMD_OPEN_SNDBNK_FILE );
-		btnSelectSoundbank.setActionCommand( CMD_OPEN_FCT_NOT_READY ); // TODO: delete when implemented
 		btnSelectSoundbank.addActionListener( controller );
 		area.add( btnSelectSoundbank, constraints );
 		

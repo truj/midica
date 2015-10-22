@@ -27,7 +27,7 @@ public class FileSelector extends JDialog {
 	// file extensions
 	public static final String FILE_EXTENSION_MPL       = "midica";
 	public static final String FILE_EXTENSION_MIDI      = "mid";
-	public static final String FILE_EXTENSION_SOUNDBANK = "gm";
+	public static final String FILE_EXTENSION_SOUNDBANK = "sf2";
 	public static final byte   READ                     = 1;
 	public static final byte   WRITE                    = 2;
 	
@@ -64,7 +64,7 @@ public class FileSelector extends JDialog {
     		if ( suffix.equals(FILE_EXTENSION_MIDI) )
     			fileChooser = new JFileChooser( Config.get(Config.DIRECTORY_MID) );
     		else if ( suffix.equals(FILE_EXTENSION_SOUNDBANK) )
-    			fileChooser = new JFileChooser( Config.get(Config.DIRECTORY_GM) );
+    			fileChooser = new JFileChooser( Config.get(Config.DIRECTORY_SF2) );
     		else
     			fileChooser = new JFileChooser( Config.get(Config.DIRECTORY_MPL) );
     		}
@@ -100,7 +100,7 @@ public class FileSelector extends JDialog {
 				if ( FILE_EXTENSION_MIDI.equals(suffix) )
 					Config.set( Config.DIRECTORY_MID, directory );
     			else if ( FILE_EXTENSION_SOUNDBANK.equals(suffix) )
-    				Config.set( Config.DIRECTORY_GM, directory );
+    				Config.set( Config.DIRECTORY_SF2, directory );
     			else
     				Config.set( Config.DIRECTORY_MPL, directory );
     		}

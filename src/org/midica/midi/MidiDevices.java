@@ -195,7 +195,7 @@ public final class MidiDevices {
 				         ;
 		
 		// load chosen soundbank and initialize it's instruments
-		if ( null != selectedSoundbank ) {
+		if ( selectedSoundbank != null ) {
 			if ( synthesizer.isSoundbankSupported(selectedSoundbank) ) {
 				synthesizer.loadAllInstruments( selectedSoundbank );
 				initInstrumentsIfNotYetDone( selectedSoundbank );
@@ -815,6 +815,33 @@ public final class MidiDevices {
 	 */
 	public static void setSoundbank( Soundbank soundbank ) {
 		selectedSoundbank = soundbank;
+	}
+	
+	/**
+	 * Returns the currently selected soundbank if available,
+	 * or otherwise the default soundbank if available, or **null**
+	 * if neither is available.
+	 * 
+	 * @return the soundbank.
+	 */
+	public static Soundbank getSoundbank() {
+		
+		// selected soundbank available?
+		if ( selectedSoundbank != null )
+			return selectedSoundbank;
+		
+		// create a synthesizer, if not yet done
+		if ( null == synthesizer ) {
+			try {
+				synthesizer = MidiSystem.getSynthesizer();
+			}
+			catch (MidiUnavailableException e) {
+				return null;
+			}
+		}
+		
+		// return default soundbank or null if a default soundbank doesn't exist
+		return synthesizer.getDefaultSoundbank();
 	}
 	
 	/**

@@ -329,6 +329,9 @@ public class Dict {
 	public static final String SOURCE_URL                  = "source_url";
 	public static final String WEBSITE                     = "website";
 	public static final String TIMESTAMP_FORMAT            = "timestamp_format";
+	public static final String NAME                        = "name";
+	public static final String FILE                        = "file";
+	public static final String DESCRIPTION                 = "description";
 	public static final String CONF_COL_NOTE_NUM           = "conf_col_note_num";
 	public static final String CONF_COL_NOTE_NAME          = "conf_col_note_name";
 	public static final String CONF_COL_SYNTAX_NAME        = "conf_col_syntax_name";
@@ -624,6 +627,9 @@ public class Dict {
 		set( SOURCE_URL,                             "Source"                       );
 		set( WEBSITE,                                "Website"                      );
 		set( TIMESTAMP_FORMAT,                       "yyyy-MM-dd HH:mm:ss"          );
+		set( NAME,                                   "Name"                         );
+		set( FILE,                                   "File"                         );
+		set( DESCRIPTION,                            "Description"                  );
 		set( CONF_COL_NOTE_NUM,                      "Number"                       );
 		set( CONF_COL_NOTE_NAME,                     "Name"                         );
 		set( CONF_COL_SYNTAX_NAME,                   "Name"                         );

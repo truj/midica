@@ -97,6 +97,15 @@ public class UiController implements ActionListener, WindowListener {
 	}
 	
 	/**
+	 * Returns the view of the main window.
+	 * 
+	 * @return main window view.
+	 */
+	public UiView getView() {
+		return this.view;
+	}
+	
+	/**
 	 * This method processes all action events in the {@link UiView}.
 	 */
 	public void actionPerformed( ActionEvent e ) {
