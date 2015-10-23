@@ -622,7 +622,7 @@ public class Dict {
 		set( PERCUSSION_DETAILS,                     "Percussion Shortcuts"         );
 		set( SYNTAX_DETAILS,                         "Commands"                     );
 		set( VERSION,                                "Version"                      );
-		set( DATE,                                   "Date"                         );
+		set( DATE,                                   "Date (UTC)"                   );
 		set( AUTHOR,                                 "Author"                       );
 		set( SOURCE_URL,                             "Source"                       );
 		set( WEBSITE,                                "Website"                      );
