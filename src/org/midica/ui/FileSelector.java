@@ -6,6 +6,7 @@
  */
 
 package org.midica.ui;
+
 import java.io.File;
 import java.io.IOException;
 
@@ -27,7 +28,7 @@ public class FileSelector extends JDialog {
 	// file extensions
 	public static final String FILE_EXTENSION_MPL       = "midica";
 	public static final String FILE_EXTENSION_MIDI      = "mid";
-	public static final String FILE_EXTENSION_SOUNDBANK = "sf2";
+	public static final String FILE_EXTENSION_SOUNDFONT = "sf2";
 	public static final byte   READ                     = 1;
 	public static final byte   WRITE                    = 2;
 	
@@ -63,7 +64,7 @@ public class FileSelector extends JDialog {
 		if ( READ == this.filePurpose ) {
     		if ( suffix.equals(FILE_EXTENSION_MIDI) )
     			fileChooser = new JFileChooser( Config.get(Config.DIRECTORY_MID) );
-    		else if ( suffix.equals(FILE_EXTENSION_SOUNDBANK) )
+    		else if ( suffix.equals(FILE_EXTENSION_SOUNDFONT) )
     			fileChooser = new JFileChooser( Config.get(Config.DIRECTORY_SF2) );
     		else
     			fileChooser = new JFileChooser( Config.get(Config.DIRECTORY_MPL) );
@@ -99,7 +100,7 @@ public class FileSelector extends JDialog {
 			if ( READ == this.filePurpose ) {
 				if ( FILE_EXTENSION_MIDI.equals(suffix) )
 					Config.set( Config.DIRECTORY_MID, directory );
-    			else if ( FILE_EXTENSION_SOUNDBANK.equals(suffix) )
+    			else if ( FILE_EXTENSION_SOUNDFONT.equals(suffix) )
     				Config.set( Config.DIRECTORY_SF2, directory );
     			else
     				Config.set( Config.DIRECTORY_MPL, directory );

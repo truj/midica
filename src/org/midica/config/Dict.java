@@ -306,7 +306,7 @@ public class Dict {
 	public static final String PLAYER                      = "player";
 	public static final String MIDICAPL_FILE               = "midicapl_file";
 	public static final String MIDI_FILE                   = "midi_file";
-	public static final String SOUNDBANK                   = "soundbank";
+	public static final String SOUNDFONT                   = "soundfont";
 	public static final String PLAYER_BUTTON               = "player_button";
 	public static final String UNCHOSEN_FILE               = "unchosen_file";
 	public static final String CHOOSE_FILE                 = "choose_file";
@@ -604,7 +604,7 @@ public class Dict {
 		set( UNKNOWN_SYNTAX,               "?"                             );
 		set( UNKNOWN_INSTRUMENT,           "unknown"                       );
 		set( MIDI_FILE,                    "Midi file"                     );
-		set( SOUNDBANK,                    "Soundbank"                     );
+		set( SOUNDFONT,                    "Soundfont"                     );
 		set( PLAYER_BUTTON,                "Start Player"                  );
 		set( UNCHOSEN_FILE,                "no file loaded"                );
 		set( CHOOSE_FILE,                  "select file"                   );
@@ -906,7 +906,7 @@ public class Dict {
 		set( UNKNOWN_SYNTAX,                         "?"                                     );
 		set( UNKNOWN_INSTRUMENT,                     "unbekannt"                             );
 		set( MIDI_FILE,                              "Midi-Datei"                            );
-		set( SOUNDBANK,                              "Soundbank-Datei"                       );
+		set( SOUNDFONT,                              "Soundfont-Datei"                       );
 		set( PLAYER_BUTTON,                          "Abspielen"                             );
 		set( UNCHOSEN_FILE,                          "keine Datei geladen"                   );
 		set( CHOOSE_FILE,                            "Öffnen"                                );

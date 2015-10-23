@@ -17,26 +17,26 @@ import javax.sound.midi.Soundbank;
 import org.midica.midi.MidiDevices;
 
 /**
- * This class is used in order to load a user-defined soundbank file.
+ * This class is used in order to load a user-defined soundfont file.
  * Users who want to stick with the standard soundfonts of the JVM do not need it.
  * 
  * @author Jan Trukenmüller
  */
-public class SoundbankParser extends Parser {
+public class SoundfontParser extends Parser {
 	
-	/** The currently loaded user-defined soundbank. */
-	private Soundbank soundbank = null;
+	/** The currently loaded user-defined soundfont. */
+	private Soundbank soundfont = null;
 	
 	/**
-	 * Parses a soundbank file.
+	 * Parses a soundfont file.
 	 * 
-	 * @param file             Soundbank file chosen by the user.
+	 * @param file             Soundfont file chosen by the user.
 	 * @throws ParseException  If the file can not be loaded correctly.
 	 */
 	public void parse( File file ) throws ParseException{
 		try {
-			soundbank = MidiSystem.getSoundbank( file );
-			MidiDevices.setSoundbank( soundbank );
+			soundfont = MidiSystem.getSoundbank( file );
+			MidiDevices.setSoundfont( soundfont );
 		}
 		catch ( InvalidMidiDataException e ) {
 			throw new ParseException( e.getMessage() );

@@ -28,7 +28,7 @@ import org.midica.file.MidicaPLExporter;
 import org.midica.file.ParseException;
 import org.midica.file.Parser;
 import org.midica.file.MidicaPLParser;
-import org.midica.file.SoundbankParser;
+import org.midica.file.SoundfontParser;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.player.PlayerView;
@@ -51,12 +51,12 @@ public class UiController implements ActionListener, WindowListener {
 	private UiView           view               = null;
 	private FileSelector     mplSelector        = null;
 	private FileSelector     midiSelector       = null;
-	private FileSelector     soundbankSelector  = null;
+	private FileSelector     soundfontSelector  = null;
 	private FileSelector     midiExportSelector = null;
 	private FileSelector     mplExportSelector  = null;
 	private MidicaPLParser   mplParser          = null;
 	private MidiParser       midiParser         = null;
-	private SoundbankParser  soundbankParser    = null;
+	private SoundfontParser  soundfontParser    = null;
 	private ErrorMsgView     errorMsg           = null;
 	private ExportResultView warningView        = null;
 	private PlayerView       player             = null;
@@ -73,7 +73,7 @@ public class UiController implements ActionListener, WindowListener {
 		
 		mplParser       = new MidicaPLParser( true );
 		midiParser      = new MidiParser();
-		soundbankParser = new SoundbankParser();
+		soundfontParser = new SoundfontParser();
 	}
 	
 	/**
@@ -88,8 +88,8 @@ public class UiController implements ActionListener, WindowListener {
 		mplSelector.init( FileSelector.FILE_EXTENSION_MPL, FileSelector.READ );
 		midiSelector = new FileSelector( view, this );
 		midiSelector.init( FileSelector.FILE_EXTENSION_MIDI, FileSelector.READ );
-		soundbankSelector = new FileSelector( view, this );
-		soundbankSelector.init( FileSelector.FILE_EXTENSION_SOUNDBANK, FileSelector.READ );
+		soundfontSelector = new FileSelector( view, this );
+		soundfontSelector.init( FileSelector.FILE_EXTENSION_SOUNDFONT, FileSelector.READ );
 		midiExportSelector = new FileSelector( view, this );
 		midiExportSelector.init( FileSelector.FILE_EXTENSION_MIDI, FileSelector.WRITE );
 		mplExportSelector = new FileSelector( view, this );
@@ -135,10 +135,10 @@ public class UiController implements ActionListener, WindowListener {
 			midiSelector.setVisible( true );
 		}
 		
-		// button pressed: open soundbank file
-		else if ( UiView.CMD_OPEN_SNDBNK_FILE.equals(cmd) ) {
+		// button pressed: open soundfont file
+		else if ( UiView.CMD_OPEN_SNDFNT_FILE.equals(cmd) ) {
 			currentFilePurpose = FILE_PURPOSE_PARSE;
-			soundbankSelector.setVisible( true );
+			soundfontSelector.setVisible( true );
 		}
 		
 		// button pressed: export MIDI file
@@ -163,7 +163,7 @@ public class UiController implements ActionListener, WindowListener {
 		else if ( CMD_CANCELED.equals(cmd) ) {
 			mplSelector.setVisible( false );
 			midiSelector.setVisible( false );
-			soundbankSelector.setVisible( false );
+			soundfontSelector.setVisible( false );
 			midiExportSelector.setVisible( false );
 			mplExportSelector.setVisible( false );
 		}
@@ -243,10 +243,10 @@ public class UiController implements ActionListener, WindowListener {
 			parser   = midiParser;
 			selector = midiSelector;
 		}
-		else if ( FileSelector.FILE_EXTENSION_SOUNDBANK.equals(type) ) {
-			file     = soundbankSelector.getFile();
-			parser   = soundbankParser;
-			selector = soundbankSelector;
+		else if ( FileSelector.FILE_EXTENSION_SOUNDFONT.equals(type) ) {
+			file     = soundfontSelector.getFile();
+			parser   = soundfontParser;
+			selector = soundfontSelector;
 		}
 		else {
 			return;
@@ -370,9 +370,9 @@ public class UiController implements ActionListener, WindowListener {
 			// hide MidicaPL file
 			view.getChosenMidicaPLFileLbl().setText( Dict.get(Dict.UNCHOSEN_FILE) );
 		}
-		else if ( FileSelector.FILE_EXTENSION_SOUNDBANK.equals(type) )
-			// show soundbank file
-			view.getChosenSoundbankFileLbl().setText( filename );
+		else if ( FileSelector.FILE_EXTENSION_SOUNDFONT.equals(type) )
+			// show soundfont file
+			view.getChosenSoundfontFileLbl().setText( filename );
 	}
 	
 	/**

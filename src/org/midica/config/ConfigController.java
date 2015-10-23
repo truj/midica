@@ -78,25 +78,25 @@ public class ConfigController implements WindowListener {
 	}
 	
 	/**
-	 * Obtains and returns information from the currently loaded soundbank.
+	 * Obtains and returns information from the currently loaded soundfont.
 	 * 
-	 * @return soundbank information.
+	 * @return soundfont information.
 	 */
-	public HashMap<String, String> getSoundbankInfo() {
+	public HashMap<String, String> getSoundfontInfo() {
 		HashMap<String, String> info = new HashMap<String, String>();
 		
-		info.put( "file", Midica.uiController.getView().getChosenSoundbankFileLbl().getText() );
+		info.put( "file", Midica.uiController.getView().getChosenSoundfontFileLbl().getText() );
 		
-		Soundbank soundbank = MidiDevices.getSoundbank();
-		if ( soundbank != null ) {
-			// soundbank available
-			info.put( "name",        soundbank.getName()        );
-			info.put( "version",     soundbank.getVersion()     );
-			info.put( "vendor",      soundbank.getVendor()      );
-			info.put( "description", soundbank.getDescription() );
+		Soundbank soundfont = MidiDevices.getSoundfont();
+		if ( soundfont != null ) {
+			// soundfont available
+			info.put( "name",        soundfont.getName()        );
+			info.put( "version",     soundfont.getVersion()     );
+			info.put( "vendor",      soundfont.getVendor()      );
+			info.put( "description", soundfont.getDescription() );
 		}
 		else {
-			// no soundbank loaded
+			// no soundfont loaded
 			info.put( "name",        "-" );
 			info.put( "version",     "-" );
 			info.put( "vendor",      "-" );
@@ -104,13 +104,13 @@ public class ConfigController implements WindowListener {
 		}
 		
 		// TODO: delete
-//		SoundbankResource[] resources = soundbank.getResources();
+//		SoundbankResource[] resources = soundfont.getResources();
 //		for ( int i=0; i < resources.length; i++ ) {
 //			Dumper.print( i + " : " + resources[ i ] );
 //		}
 //		Dumper.print( resources.length );
 //		
-//		Instrument[] instruments = soundbank.getInstruments();
+//		Instrument[] instruments = soundfont.getInstruments();
 //		for ( int i=0; i < instruments.length; i++ ) {
 //			Instrument instr = instruments[ i ];
 //			Patch      patch = instr.getPatch();

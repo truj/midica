@@ -56,7 +56,7 @@ public class UiView extends JDialog {
 	public static final String CMD_START_PLAYER        = "start_player";
 	public static final String CMD_OPEN_MIDICAPL_FILE  = "cmd_open_midicapl_file";
 	public static final String CMD_OPEN_MIDI_FILE      = "cmd_open_midi_file";
-	public static final String CMD_OPEN_SNDBNK_FILE    = "cmd_open_soundbank_file";
+	public static final String CMD_OPEN_SNDFNT_FILE    = "cmd_open_soundfont_file";
 	public static final String CMD_SHOW_CONFIG_DETAILS = "cmd_show_config_details";
 	public static final String CMD_EXPORT_MIDI         = "cmd_export_midi";
 	public static final String CMD_EXPORT_MIDICAPL     = "cmd_export_midicapl";
@@ -72,7 +72,7 @@ public class UiView extends JDialog {
 	private UiController          controller             = null;
 	private JLabel                lblChosenMidicaPLFile  = null;
 	private JLabel                lblChosenMidiFile      = null;
-	private JLabel                lblChosenSoundbankFile = null;
+	private JLabel                lblChosenSoundfontFile = null;
 	private JComboBox             cbxGuiLang             = null;
 	private JComboBox             cbxNoteSys             = null;
 	private JComboBox             cbxHalfTone            = null;
@@ -86,7 +86,7 @@ public class UiView extends JDialog {
 	private JButton               btnPlayer              = null;
 	private JButton               btnSelectMidicaPL      = null;
 	private JButton               btnSelectMidi          = null;
-	private JButton               btnSelectSoundbank     = null;
+	private JButton               btnSelectSoundfont     = null;
 	private JButton               btnExportMidi          = null;
 	private JButton               btnExportMidicaPL      = null;
 	
@@ -458,25 +458,25 @@ public class UiView extends JDialog {
 		area.add( new JSeparator(JSeparator.HORIZONTAL), constraints );
 		
 		
-		// soundbank label
+		// soundfont label
 		constraints.gridy++;
 		constraints.gridwidth = 1;
-		JLabel lblSndBnk = new JLabel( Dict.get(Dict.SOUNDBANK) );
+		JLabel lblSndBnk = new JLabel( Dict.get(Dict.SOUNDFONT) );
 		area.add( lblSndBnk, constraints );
 		
 		// file selector
 		constraints.gridx++;
-		btnSelectSoundbank = new JButton( Dict.get(Dict.CHOOSE_FILE) );
-		btnSelectSoundbank.setActionCommand( CMD_OPEN_SNDBNK_FILE );
-		btnSelectSoundbank.addActionListener( controller );
-		area.add( btnSelectSoundbank, constraints );
+		btnSelectSoundfont = new JButton( Dict.get(Dict.CHOOSE_FILE) );
+		btnSelectSoundfont.setActionCommand( CMD_OPEN_SNDFNT_FILE );
+		btnSelectSoundfont.addActionListener( controller );
+		area.add( btnSelectSoundfont, constraints );
 		
-		// chosen soundbank file name
+		// chosen soundfont file name
 		constraints.gridx = 0;
 		constraints.gridy++;
 		constraints.gridwidth = 2;
-		lblChosenSoundbankFile = new JLabel( Dict.get(Dict.UNCHOSEN_FILE) );
-		area.add( lblChosenSoundbankFile, constraints );
+		lblChosenSoundfontFile = new JLabel( Dict.get(Dict.UNCHOSEN_FILE) );
+		area.add( lblChosenSoundfontFile, constraints );
 		
 		return area;
 	}
@@ -581,12 +581,12 @@ public class UiView extends JDialog {
 	}
 	
 	/**
-	 * Returns the label displaying the successfully imported soundbank file.
+	 * Returns the label displaying the successfully imported soundfont file.
 	 * 
 	 * @return    Label displaying the file name.
 	 */
-	public JLabel getChosenSoundbankFileLbl() {
-		return lblChosenSoundbankFile;
+	public JLabel getChosenSoundfontFileLbl() {
+		return lblChosenSoundfontFile;
 	}
 	
 	/**

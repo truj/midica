@@ -119,7 +119,7 @@ public class ConfigView extends JDialog {
 		content.addTab( Dict.get(Dict.PERCUSSION_DETAILS), createPercussionArea() );
 		content.addTab( Dict.get(Dict.SYNTAX),             createSyntaxArea()     );
 		content.addTab( Dict.get(Dict.INSTRUMENT),         createInstrumentArea() );
-		content.addTab( Dict.get(Dict.SOUNDBANK),          createSoundbankArea()  );
+		content.addTab( Dict.get(Dict.SOUNDFONT),          createSoundfontArea()  );
 		content.addTab( Dict.get(Dict.VERSION),            createVersionArea()    );
 	}
 	
@@ -307,7 +307,7 @@ public class ConfigView extends JDialog {
 	 * 
 	 * @return the created version area
 	 */
-	private Container createSoundbankArea() {
+	private Container createSoundfontArea() {
 		// content
 		JPanel area = new JPanel();
 		
@@ -324,8 +324,8 @@ public class ConfigView extends JDialog {
 		constraints.weightx    = 0;
 		constraints.weighty    = 0;
 		
-		// get general soundbank info
-		HashMap<String, String> soundbankInfo = controller.getSoundbankInfo();
+		// get general soundfont info
+		HashMap<String, String> soundfontInfo = controller.getSoundfontInfo();
 		
 		// file translation
 		constraints.anchor = GridBagConstraints.EAST;
@@ -335,7 +335,7 @@ public class ConfigView extends JDialog {
 		// file name
 		constraints.gridx++;
 		constraints.anchor    = GridBagConstraints.WEST;
-		JLabel lblFileContent = new JLabel( soundbankInfo.get("file") );
+		JLabel lblFileContent = new JLabel( soundfontInfo.get("file") );
 		area.add( lblFileContent, constraints );
 		
 		// name translation
@@ -348,7 +348,7 @@ public class ConfigView extends JDialog {
 		// name content
 		constraints.gridx++;
 		constraints.anchor    = GridBagConstraints.WEST;
-		JLabel lblNameContent = new JLabel( soundbankInfo.get("name") );
+		JLabel lblNameContent = new JLabel( soundfontInfo.get("name") );
 		area.add( lblNameContent, constraints );
 		
 		// version translation
@@ -361,7 +361,7 @@ public class ConfigView extends JDialog {
 		// version content
 		constraints.gridx++;
 		constraints.anchor       = GridBagConstraints.WEST;
-		JLabel lblVersionContent = new JLabel( soundbankInfo.get("version") );
+		JLabel lblVersionContent = new JLabel( soundfontInfo.get("version") );
 		area.add( lblVersionContent, constraints );
 		
 		// description translation
@@ -374,7 +374,7 @@ public class ConfigView extends JDialog {
 		// description content
 		constraints.gridx++;
 		constraints.anchor      = GridBagConstraints.WEST;
-		JLabel lblDescriptionContent = new JLabel( soundbankInfo.get("description") );
+		JLabel lblDescriptionContent = new JLabel( soundfontInfo.get("description") );
 		area.add( lblDescriptionContent, constraints );
 		
 		// spacer
