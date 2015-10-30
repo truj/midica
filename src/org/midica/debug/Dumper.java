@@ -44,4 +44,12 @@ public class Dumper {
 		System.out.println( dump(o) );
 	}
 	
+	/**
+	 * Prints the given object (or it's toString() result) to STDOUT.
+	 * 
+	 * @param o  The data structure to be dumped.
+	 */
+	public static void printString( Object o ) {
+		System.out.println( o );
+	}
 }

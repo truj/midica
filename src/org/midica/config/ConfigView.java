@@ -27,6 +27,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 
 import org.midica.Midica;
+import org.midica.file.SoundfontParser;
 import org.midica.ui.model.InstrumentTableModel;
 import org.midica.ui.model.NoteTableModel;
 import org.midica.ui.model.PercussionTableModel;
@@ -325,7 +326,7 @@ public class ConfigView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// get general soundfont info
-		HashMap<String, String> soundfontInfo = controller.getSoundfontInfo();
+		HashMap<String, String> soundfontInfo = SoundfontParser.getSoundfontInfo();
 		
 		// file translation
 		constraints.anchor = GridBagConstraints.EAST;

@@ -9,12 +9,6 @@ package org.midica.config;
 
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.HashMap;
-
-import javax.sound.midi.Soundbank;
-
-import org.midica.Midica;
-import org.midica.midi.MidiDevices;
 
 /**
  * Controller for the config overview window.
@@ -77,48 +71,4 @@ public class ConfigController implements WindowListener {
 	public void windowOpened( WindowEvent e ) {
 	}
 	
-	/**
-	 * Obtains and returns information from the currently loaded soundfont.
-	 * 
-	 * @return soundfont information.
-	 */
-	public HashMap<String, String> getSoundfontInfo() {
-		HashMap<String, String> info = new HashMap<String, String>();
-		
-		info.put( "file", Midica.uiController.getView().getChosenSoundfontFileLbl().getText() );
-		
-		Soundbank soundfont = MidiDevices.getSoundfont();
-		if ( soundfont != null ) {
-			// soundfont available
-			info.put( "name",        soundfont.getName()        );
-			info.put( "version",     soundfont.getVersion()     );
-			info.put( "vendor",      soundfont.getVendor()      );
-			info.put( "description", soundfont.getDescription() );
-		}
-		else {
-			// no soundfont loaded
-			info.put( "name",        "-" );
-			info.put( "version",     "-" );
-			info.put( "vendor",      "-" );
-			info.put( "description", "-" );
-		}
-		
-		// TODO: delete
-//		SoundbankResource[] resources = soundfont.getResources();
-//		for ( int i=0; i < resources.length; i++ ) {
-//			Dumper.print( i + " : " + resources[ i ] );
-//		}
-//		Dumper.print( resources.length );
-//		
-//		Instrument[] instruments = soundfont.getInstruments();
-//		for ( int i=0; i < instruments.length; i++ ) {
-//			Instrument instr = instruments[ i ];
-//			Patch      patch = instr.getPatch();
-//			System.out.println( i + " : " + patch.getProgram() + "/" + patch.getBank() + " / " + instr.getName() );
-//		}
-//		Dumper.print( instruments.length );
-//		
-		
-		return info;
-	}
 }

@@ -253,7 +253,12 @@ public class UiController implements ActionListener, WindowListener {
 		}
 		selector.setVisible( false );
 		try {
-			displayFilename( type, Dict.get(Dict.UNCHOSEN_FILE) );
+			// Reset the filename for the case that it cannot be parsed.
+			// But don't do that for soundfonts because the last successfully
+			// parsed soundfont file will stay valid.
+			if ( ! FileSelector.FILE_EXTENSION_SOUNDFONT.equals(type) )
+				displayFilename( type, Dict.get(Dict.UNCHOSEN_FILE) );
+			
 			parser.parse( file );
 			// show the filename of the successfully parsed file
 			displayFilename( type, file.getName() );
