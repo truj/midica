@@ -26,10 +26,10 @@ import javax.swing.JSlider;
 import javax.swing.JTextField;
 
 import org.midica.config.Dict;
-import org.midica.config.InstrumentElement;
 import org.midica.file.NamedInteger;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.SliderHelper;
+import org.midica.ui.info.InstrumentElement;
 import org.midica.ui.player.PlayerView;
 
 /**

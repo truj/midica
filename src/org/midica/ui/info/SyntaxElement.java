@@ -5,7 +5,8 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.midica.config;
+package org.midica.ui.info;
+
 
 /**
  * Objects of this class represent either a MidicaPL syntax element (keyword or symbol)

@@ -10,12 +10,12 @@ package org.midica.ui.model;
 import java.util.ArrayList;
 
 import org.midica.config.Dict;
-import org.midica.config.SyntaxElement;
+import org.midica.ui.info.SyntaxElement;
 
 
 /**
  * This class represents the data model of the syntax table in the
- * configuration details window.
+ * configuration details view of the info window.
  * 
  * Each row represents either a command category or a syntax command.
  * 

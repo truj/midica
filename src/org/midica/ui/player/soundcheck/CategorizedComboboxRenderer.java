@@ -14,7 +14,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 
-import org.midica.config.CategorizedElement;
+import org.midica.ui.info.CategorizedElement;
 
 /**
  * Renders the items of a categorized combobox. Makes sure that categories

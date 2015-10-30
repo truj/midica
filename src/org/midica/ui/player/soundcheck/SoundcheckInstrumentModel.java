@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import javax.swing.DefaultComboBoxModel;
 
 import org.midica.config.Dict;
-import org.midica.config.InstrumentElement;
+import org.midica.ui.info.InstrumentElement;
 
 /**
  * This class provides the model for the instruments combobox in the soundcheck

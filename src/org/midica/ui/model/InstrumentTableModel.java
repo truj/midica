@@ -10,12 +10,12 @@ package org.midica.ui.model;
 import java.util.ArrayList;
 
 import org.midica.config.Dict;
-import org.midica.config.InstrumentElement;
+import org.midica.ui.info.InstrumentElement;
 
 
 /**
  * This class represents the data model of the instruments table in the
- * configuration details window.
+ * configuration details view of the info window.
  * 
  * Each row represents either an instrument category or an instrument.
  * 

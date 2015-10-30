@@ -12,8 +12,8 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JComboBox;
 
-import org.midica.config.CategorizedElement;
-import org.midica.config.InstrumentElement;
+import org.midica.ui.info.CategorizedElement;
+import org.midica.ui.info.InstrumentElement;
 
 
 /**

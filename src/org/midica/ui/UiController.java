@@ -18,7 +18,6 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 
 import org.midica.config.Config;
-import org.midica.config.ConfigView;
 import org.midica.config.Dict;
 import org.midica.file.ExportException;
 import org.midica.file.ExportResult;
@@ -30,6 +29,7 @@ import org.midica.file.Parser;
 import org.midica.file.MidicaPLParser;
 import org.midica.file.SoundfontParser;
 import org.midica.midi.MidiDevices;
+import org.midica.ui.info.InfoView;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.player.PlayerView;
 
@@ -190,9 +190,9 @@ public class UiController implements ActionListener, WindowListener {
 			}
 		}
 		
-		// button pressed: show config details
-		else if ( UiView.CMD_SHOW_CONFIG_DETAILS.equals(cmd) ) {
-			ConfigView.showConfig();
+		// button pressed: show info view
+		else if ( UiView.CMD_SHOW_INFO_WINDOW.equals(cmd) ) {
+			InfoView.showInfoWindow();
 		}
 		
 		// not yet implemented function used

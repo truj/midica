@@ -14,6 +14,8 @@ import java.util.Set;
 
 import org.midica.Midica;
 import org.midica.file.NamedInteger;
+import org.midica.ui.info.InstrumentElement;
+import org.midica.ui.info.SyntaxElement;
 import org.midica.ui.model.ConfigComboboxModel;
 
 /**
@@ -290,7 +292,7 @@ public class Dict {
 	public static final String UNKNOWN_PERCUSSION_NAME     = "unknown_percussion_name";
 	public static final String UNKNOWN_SYNTAX              = "unknown_syntax";
 	public static final String UNKNOWN_INSTRUMENT          = "unknown_instrument";
-	public static final String CONFIG                      = "config";
+	public static final String CONFIGURATION               = "configuration";
 	public static final String LANGUAGE                    = "language";
 	public static final String NOTE_SYSTEM                 = "note_system";
 	public static final String HALF_TONE_SYMBOL            = "half_tone_symbol";
@@ -298,8 +300,8 @@ public class Dict {
 	public static final String SYNTAX                      = "syntax";
 	public static final String PERCUSSION                  = "percussion";
 	public static final String INSTRUMENT                  = "instrument";
-	public static final String SHOW_CONFIG                 = "show_config";
-	public static final String SHOW_CONFIG_FROM_PLAYER     = "show_config_from_player";
+	public static final String SHOW_INFO                   = "show_info";
+	public static final String SHOW_INFO_FROM_PLAYER       = "show_info_from_player";
 	public static final String IMPORT                      = "import";
 	public static final String EXPORT                      = "export";
 	public static final String TRANSPOSE_LEVEL             = "transpose_level";
@@ -318,8 +320,8 @@ public class Dict {
 	public static final String CONF_ERROR_HALFTONE_SYNTAX  = "conf_Error_halftone_syntax";
 	public static final String ERROR_NOT_YET_IMPLEMENTED   = "error_not_yet_implemented";
 	
-	// ConfigView
-	public static final String TITLE_CONFIG_VIEW           = "title_config_view";
+	// InfoView
+	public static final String TITLE_INFO_VIEW             = "title_info_view";
 	public static final String NOTE_DETAILS                = "note_details";
 	public static final String PERCUSSION_DETAILS          = "percussion_details";
 	public static final String SYNTAX_DETAILS              = "syntax_details";
@@ -515,13 +517,14 @@ public class Dict {
 	 * This includes:
 	 * 
 	 * - Initializing language specific translations using {@link #initLanguage()}
-	 * - Initializing the note system (including half tone and octave symbols) using {@link #initNoteSystem()}
+	 * - Initializing the note system (including half tone and octave symbols)
+	 *   using {@link #initNoteSystem()}
 	 * - Initializing percussion shortcuts using {@link #initPercussion()}
 	 * - Initializing MidicaPL syntax keywords using {@link #initSyntax()}
 	 * - Initializing instrument shortcuts using {@link #initInstruments()}
 	 * 
-	 * This method is called initially on program startup and then always if the user changes
-	 * a configuration using the GUI.
+	 * This method is called initially on program startup and then always if
+	 * the user changes a configuration using the GUI.
 	 */
 	public static void init() {
 		initLanguage();
@@ -583,7 +586,7 @@ public class Dict {
 		set( Config.CBX_INSTR_DE_1,                  "German"                                );
 		
 		// UiView
-		set( CONFIG,                       "Configuration"                 );
+		set( CONFIGURATION,                "Configuration"                 );
 		set( LANGUAGE,                     "Language"                      );
 		set( NOTE_SYSTEM,                  "Note System"                   );
 		set( HALF_TONE_SYMBOL,             "Half Tone Symbol"              );
@@ -592,8 +595,8 @@ public class Dict {
 		set( PERCUSSION,                   "Percussion Shortcuts"          );
 		set( INSTRUMENT,                   "Instrument Shortcuts"          );
 		set( TITLE_MAIN_WINDOW,            "Midica " + Midica.VERSION      );
-		set( SHOW_CONFIG,                  "Show Configuration Details"    );
-		set( SHOW_CONFIG_FROM_PLAYER,      "Configuration"                 );
+		set( SHOW_INFO,                    "Info & Configuration Details"  );
+		set( SHOW_INFO_FROM_PLAYER,        "Info & Configuration"          );
 		set( IMPORT,                       "Import"                        );
 		set( PLAYER,                       "Player"                        );
 		set( EXPORT,                       "Export"                        );
@@ -616,8 +619,8 @@ public class Dict {
 		set( ERROR_NOT_YET_IMPLEMENTED,    "This functionality is not yet implemented" );
 		
 		
-		// ConfigView
-		set( TITLE_CONFIG_VIEW,                      "Midica Configuration Details" );
+		// InfoView
+		set( TITLE_INFO_VIEW,                        "Midica Info"                  );
 		set( NOTE_DETAILS,                           "Note Table"                   );
 		set( PERCUSSION_DETAILS,                     "Percussion Shortcuts"         );
 		set( SYNTAX_DETAILS,                         "Commands"                     );
@@ -661,7 +664,7 @@ public class Dict {
 		set( INSTR_CAT_PERCUSSIVE,                   "Percussive"                   );
 		set( INSTR_CAT_SOUND_EFFECTS,                "Sound Effects"                );
 		
-		// syntax for ConfigView
+		// syntax for InfoView
 		set( SYNTAX_DEFINE,          "syntax element definition"            );
 		set( SYNTAX_COMMENT,         "comment character"                    );
 		set( SYNTAX_GLOBAL,          "global command (all channels)"        );
@@ -884,7 +887,7 @@ public class Dict {
 		set( Config.CBX_INSTR_DE_1,                  "Deutsch"                               );
 		
 		// UiView
-		set( CONFIG,                                 "Konfiguration"                         );
+		set( CONFIGURATION,                          "Konfiguration"                         );
 		set( LANGUAGE,                               "Sprache"                               );
 		set( NOTE_SYSTEM,                            "Notensystem"                           );
 		set( HALF_TONE_SYMBOL,                       "Halbton-Symbol"                        );
@@ -894,8 +897,8 @@ public class Dict {
 		set( INSTRUMENT,                             "Instrumenten-Bezeichner"               );
 		set( TITLE_MAIN_WINDOW,                      "Midica " + Midica.VERSION              );
 		set( TIMESTAMP_FORMAT,                       "dd.MM.yyyy HH:mm:ss"                   );
-		set( SHOW_CONFIG,                            "Konfigurationsdetails anzeigen"        );
-		set( SHOW_CONFIG_FROM_PLAYER,                "Konfiguration"                         );
+		set( SHOW_INFO,                              "Info & Konfigurationsdetails"          );
+		set( SHOW_INFO_FROM_PLAYER,                  "Info & Konfiguration"                  );
 		set( IMPORT,                                 "Laden"                                 );
 		set( PLAYER,                                 "Abspielen"                             );
 		set( EXPORT,                                 "Speichern"                             );
@@ -1007,7 +1010,8 @@ public class Dict {
 	}
 	
 	/**
-	 * Initializes the internal data structures for translations between note values and the configured note symbols.
+	 * Initializes the internal data structures for translations between note values
+	 * and the configured note symbols.
 	 * This includes:
 	 * 
 	 * - initializing the raw note name translations
@@ -1058,11 +1062,12 @@ public class Dict {
 	}
 	
 	/**
-	 * Creates the translation structures between note values and their configured symbols.
+	 * Creates the translation structures between note values and their configured
+	 * symbols.
 	 * 
-	 * Reads the currently configured note names and half tone symbols which have been
-	 * created before. Creates full translation structures including the configured octave
-	 * symbols for each possible note value.
+	 * Reads the currently configured note names and half tone symbols which have
+	 * been created before. Creates full translation structures including the
+	 * configured octave symbols for each possible note value.
 	 */
 	public static void initOctaves() {
 		
@@ -1127,52 +1132,52 @@ public class Dict {
 		syntaxList = new ArrayList<SyntaxElement>();
 		
 		addSyntaxCategory( get(SYNTAX_CAT_DEFINITION) );
-		addSyntaxForConfig( SYNTAX_DEFINE       );
-		addSyntaxForConfig( SYNTAX_INSTRUMENTS  );
-		addSyntaxForConfig( SYNTAX_CHORD        );
-		addSyntaxForConfig( SYNTAX_MACRO        );
-		addSyntaxForConfig( SYNTAX_END          );
+		addSyntaxForInfoView( SYNTAX_DEFINE       );
+		addSyntaxForInfoView( SYNTAX_INSTRUMENTS  );
+		addSyntaxForInfoView( SYNTAX_CHORD        );
+		addSyntaxForInfoView( SYNTAX_MACRO        );
+		addSyntaxForInfoView( SYNTAX_END          );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_CALL) );
-		addSyntaxForConfig( SYNTAX_INCLUDE      );
-		addSyntaxForConfig( SYNTAX_INCLUDE_FILE );
+		addSyntaxForInfoView( SYNTAX_INCLUDE      );
+		addSyntaxForInfoView( SYNTAX_INCLUDE_FILE );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_OTHER) );
-		addSyntaxForConfig( SYNTAX_COMMENT      );
-		addSyntaxForConfig( SYNTAX_GLOBAL       );
-		addSyntaxForConfig( SYNTAX_BPM          );
-		addSyntaxForConfig( SYNTAX_PAUSE        );
-		addSyntaxForConfig( SYNTAX_P            );
+		addSyntaxForInfoView( SYNTAX_COMMENT      );
+		addSyntaxForInfoView( SYNTAX_GLOBAL       );
+		addSyntaxForInfoView( SYNTAX_BPM          );
+		addSyntaxForInfoView( SYNTAX_PAUSE        );
+		addSyntaxForInfoView( SYNTAX_P            );
 
 		addSyntaxCategory( get(SYNTAX_CAT_OPTION) );
-		addSyntaxForConfig( SYNTAX_OPT_SEPARATOR );
-		addSyntaxForConfig( SYNTAX_OPT_ASSIGNER  );
-		addSyntaxForConfig( SYNTAX_VOLUME        );
-		addSyntaxForConfig( SYNTAX_V             );
-		addSyntaxForConfig( SYNTAX_STACCATO      );
-		addSyntaxForConfig( SYNTAX_S             );
-		addSyntaxForConfig( SYNTAX_MULTIPLE      );
-		addSyntaxForConfig( SYNTAX_M             );
-		addSyntaxForConfig( SYNTAX_QUANTITY      );
-		addSyntaxForConfig( SYNTAX_Q             );
+		addSyntaxForInfoView( SYNTAX_OPT_SEPARATOR );
+		addSyntaxForInfoView( SYNTAX_OPT_ASSIGNER  );
+		addSyntaxForInfoView( SYNTAX_VOLUME        );
+		addSyntaxForInfoView( SYNTAX_V             );
+		addSyntaxForInfoView( SYNTAX_STACCATO      );
+		addSyntaxForInfoView( SYNTAX_S             );
+		addSyntaxForInfoView( SYNTAX_MULTIPLE      );
+		addSyntaxForInfoView( SYNTAX_M             );
+		addSyntaxForInfoView( SYNTAX_QUANTITY      );
+		addSyntaxForInfoView( SYNTAX_Q             );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_NOTE_LENGTH) );
-		addSyntaxForConfig( SYNTAX_32            );
-		addSyntaxForConfig( SYNTAX_16            );
-		addSyntaxForConfig( SYNTAX_8             );
-		addSyntaxForConfig( SYNTAX_4             );
-		addSyntaxForConfig( SYNTAX_2             );
-		addSyntaxForConfig( SYNTAX_1             );
-		addSyntaxForConfig( SYNTAX_M1            );
-		addSyntaxForConfig( SYNTAX_M2            );
-		addSyntaxForConfig( SYNTAX_M4            );
-		addSyntaxForConfig( SYNTAX_M8            );
-		addSyntaxForConfig( SYNTAX_M16           );
-		addSyntaxForConfig( SYNTAX_M32           );
-		addSyntaxForConfig( SYNTAX_DOT           );
-		addSyntaxForConfig( SYNTAX_TRIPLET       );
-		addSyntaxForConfig( SYNTAX_TUPLET        );
-		addSyntaxForConfig( SYNTAX_TUPLET_FOR    );
+		addSyntaxForInfoView( SYNTAX_32            );
+		addSyntaxForInfoView( SYNTAX_16            );
+		addSyntaxForInfoView( SYNTAX_8             );
+		addSyntaxForInfoView( SYNTAX_4             );
+		addSyntaxForInfoView( SYNTAX_2             );
+		addSyntaxForInfoView( SYNTAX_1             );
+		addSyntaxForInfoView( SYNTAX_M1            );
+		addSyntaxForInfoView( SYNTAX_M2            );
+		addSyntaxForInfoView( SYNTAX_M4            );
+		addSyntaxForInfoView( SYNTAX_M8            );
+		addSyntaxForInfoView( SYNTAX_M16           );
+		addSyntaxForInfoView( SYNTAX_M32           );
+		addSyntaxForInfoView( SYNTAX_DOT           );
+		addSyntaxForInfoView( SYNTAX_TRIPLET       );
+		addSyntaxForInfoView( SYNTAX_TUPLET        );
+		addSyntaxForInfoView( SYNTAX_TUPLET_FOR    );
 	}
 	
 	/**
@@ -1753,8 +1758,8 @@ public class Dict {
 	
 	/**
 	 * Sets one specific syntax keyword.
-	 * This is called indirectly by {@link #initSyntax()} while initializing the currently
-	 * configured MidicaPL syntax.
+	 * This is called indirectly by {@link #initSyntax()} while initializing the
+	 * currently configured MidicaPL syntax.
 	 * 
 	 * @param id        identifier defining the meaning of the keyword to specify
 	 * @param keyword   the keyword to be configured
@@ -1764,13 +1769,14 @@ public class Dict {
 	}
 	
 	/**
-	 * Creates a plain syntax element and adds it to the internal data structure of syntax elements.
+	 * Creates a plain syntax element and adds it to the internal data structure of
+	 * syntax elements.
 	 * This is used later in order to display the syntax categories and elements
-	 * in the config view of the GUI.
+	 * in the info view of the GUI.
 	 * 
 	 * @param id identifier of the syntax element to add
 	 */
-	private static void addSyntaxForConfig( String id ) {
+	private static void addSyntaxForInfoView( String id ) {
 		String description = get( id );
 		String keyword     = getSyntax( id );
 		SyntaxElement elem = new SyntaxElement( id, description, keyword, false );
@@ -1778,9 +1784,10 @@ public class Dict {
 	}
 	
 	/**
-	 * Creates a syntax category and adds it to the internal data structure of syntax elements.
+	 * Creates a syntax category and adds it to the internal data structure of
+	 * syntax elements.
 	 * This is used later in order to display the syntax categories and elements
-	 * in the config view of the GUI.
+	 * in the info view of the GUI.
 	 * 
 	 * @param categoryName name of the syntax category
 	 */
@@ -2156,7 +2163,8 @@ public class Dict {
 	
 	/**
 	 * Sets the translation for one specific instrument.
-	 * Also makes the instrument name available for the config view and for the soundcheck.
+	 * Also makes the instrument name available for the info view and for the
+	 * soundcheck.
 	 * 
 	 * @param number  instrument number as it is defined by MIDI
 	 * @param name    name of the instrument as it is used by the Midica user
@@ -2165,14 +2173,14 @@ public class Dict {
 		instrIntToName.put( number, name ); // TODO: check if this is needed
 		instrNameToInt.put( name, number );
 		
-		// prepare for the config view
+		// prepare for the info view
 		InstrumentElement elem = new InstrumentElement( number, name, false );
 		instrumentList.add( elem );
 	}
 	
 	/**
 	 * Adds an instrument category to the list of instruments used by
-	 * config view and soundcheck.
+	 * info view and soundcheck.
 	 * 
 	 * @param categoryId  identifier of the category to be added
 	 */

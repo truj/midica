@@ -15,7 +15,7 @@ import org.midica.config.Dict;
 
 /**
  * This class represents the data model of the percussion table in the
- * configuration details window.
+ * configuration details view of the info window.
  * 
  * Each row represents a percussion instrument.
  * 
@@ -45,7 +45,8 @@ public class PercussionTableModel extends MidicaTableModel {
 	}
 	
 	/**
-	 * Returns the number of rows in the table - same as the configured percussion instruments.
+	 * Returns the number of rows in the table - same as the configured
+	 * percussion instruments.
 	 * 
 	 * @return    Number of rows (percussion instruments).
 	 */

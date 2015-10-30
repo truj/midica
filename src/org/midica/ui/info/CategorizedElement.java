@@ -5,7 +5,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.midica.config;
+package org.midica.ui.info;
 
 /**
  * This class can be extended by categorizable list element classes.

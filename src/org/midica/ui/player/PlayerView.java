@@ -113,7 +113,7 @@ public class PlayerView extends JDialog {
 	// action commands
 	public static final String CMD_REPARSE    = "cmd_reparse";
 	public static final String CMD_SOUNDCHECK = "cmd_soundcheck";
-	public static final String CMD_CONFIG     = "cmd_config";
+	public static final String CMD_INFO       = "cmd_info";
 	public static final String CMD_JUMP       = "cmd_jump";
 	public static final String CMD_MEMORIZE   = "cmd_memorize";
 	public static final String CMD_SHOW_HIDE  = "cmd_show_hide_";
@@ -156,7 +156,7 @@ public class PlayerView extends JDialog {
 	private JButton         btnPlayPause    = null;
 	private JButton         btnReparse      = null;
 	private JButton         btnSoundcheck   = null;
-	private JButton         btnConfig       = null;
+	private JButton         btnInfo         = null;
 	private JButton         btnForw         = null;
 	private JButton         btnFastForw     = null;
 	private JButton         btnRew          = null;
@@ -431,14 +431,14 @@ public class PlayerView extends JDialog {
 		btnSoundcheck.addActionListener( controller );
 		area.add( btnSoundcheck, constraints );
 		
-		// config button
+		// info button
 		constraints.gridx = 0;
 		constraints.gridy++;
 		constraints.gridwidth = 2;
-		btnConfig = new JButton( Dict.get(Dict.SHOW_CONFIG_FROM_PLAYER) );
-		btnConfig.setActionCommand( CMD_CONFIG );
-		btnConfig.addActionListener( controller );
-		area.add( btnConfig, constraints );
+		btnInfo = new JButton( Dict.get(Dict.SHOW_INFO_FROM_PLAYER) );
+		btnInfo.setActionCommand( CMD_INFO );
+		btnInfo.addActionListener( controller );
+		area.add( btnInfo, constraints );
 		
 		return area;
 	}
@@ -1099,8 +1099,8 @@ public class PlayerView extends JDialog {
 //		btnSoundcheck.doClick();
 //	}
 //	
-//	public void pressConfigButton() {
-//		btnConfig.doClick();
+//	public void pressInfoButton() {
+//		btnInfo.doClick();
 //	}
 //	
 //	public void pressForwardButton() {

@@ -57,7 +57,7 @@ public class UiView extends JDialog {
 	public static final String CMD_OPEN_MIDICAPL_FILE  = "cmd_open_midicapl_file";
 	public static final String CMD_OPEN_MIDI_FILE      = "cmd_open_midi_file";
 	public static final String CMD_OPEN_SNDFNT_FILE    = "cmd_open_soundfont_file";
-	public static final String CMD_SHOW_CONFIG_DETAILS = "cmd_show_config_details";
+	public static final String CMD_SHOW_INFO_WINDOW    = "cmd_show_info_window";
 	public static final String CMD_EXPORT_MIDI         = "cmd_export_midi";
 	public static final String CMD_EXPORT_MIDICAPL     = "cmd_export_midicapl";
 	public static final String CMD_OPEN_FCT_NOT_READY  = "cmd_open_fct_not_ready";
@@ -82,7 +82,7 @@ public class UiView extends JDialog {
 	private JComboBox             cbxInstrument          = null;
 	private JLabel                configFeedbackLabel    = null;
 	private JLabel                lblTranspose           = null;
-	private JButton               btnConfigView          = null;
+	private JButton               btnInfo                = null;
 	private JButton               btnPlayer              = null;
 	private JButton               btnSelectMidicaPL      = null;
 	private JButton               btnSelectMidi          = null;
@@ -107,8 +107,8 @@ public class UiView extends JDialog {
 	}
 	
 	/**
-	 * Separates the main window by the left part (configuration area and player button) and
-	 * the right part (import/export area).
+	 * Separates the main window by the left part (configuration area and player button)
+	 * and the right part (import/export area).
 	 * Those areas are filled by calling {@link #createLeftArea()} and
 	 * {@link #createRightArea()}.
 	 */
@@ -138,9 +138,10 @@ public class UiView extends JDialog {
 	}
 	
 	/**
-	 * Creates the left area consisting of the (upper) configuration area and the (lower)
-	 * area for the player button.
-	 * Fills those areas by calling {@link #createConfigArea()} and {@link #createPlayerArea()}.
+	 * Creates the left area consisting of the (upper) configuration area and the
+	 * (lower) area for the player button.
+	 * Fills those areas by calling {@link #createConfigArea()} and
+	 * {@link #createPlayerArea()}.
 	 * 
 	 * @return    The created area.
 	 */
@@ -204,13 +205,13 @@ public class UiView extends JDialog {
 	
 	/**
 	 * Creates the configuration area containing the dropdown boxes with their labels,
-	 * the feedback label and the button to show the configuration details.
+	 * the feedback label and the info button.
 	 * 
 	 * @return    The created area.
 	 */
 	private Container createConfigArea() {
 		JPanel area = new JPanel();
-		area.setBorder( createTitledBorder(Dict.get(Dict.CONFIG)) );
+		area.setBorder( createTitledBorder(Dict.get(Dict.CONFIGURATION)) );
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
@@ -336,15 +337,15 @@ public class UiView extends JDialog {
 		
 		area.add( configFeedbackLabel, constraints );
 		
-		// config detail button
+		// info button
 		constraints.gridx++;
 		constraints.gridy++;
 		constraints.gridwidth = 1;
-		btnConfigView = new JButton( Dict.get(Dict.SHOW_CONFIG) );
-		btnConfigView.setActionCommand( CMD_SHOW_CONFIG_DETAILS );
-		btnConfigView.addActionListener( controller );
+		btnInfo = new JButton( Dict.get(Dict.SHOW_INFO) );
+		btnInfo.setActionCommand( CMD_SHOW_INFO_WINDOW );
+		btnInfo.addActionListener( controller );
 		
-		area.add( btnConfigView, constraints );
+		area.add( btnInfo, constraints );
 		
 		return area;
 	}
@@ -613,8 +614,8 @@ public class UiView extends JDialog {
 	}
 	
 	/**
-	 * Refreshes the label telling the user if the chosen combination of config options is
-	 * valid.
+	 * Refreshes the label telling the user if the chosen combination of config
+	 * options is valid.
 	 */
 	public void refreshConfigFeedback() {
 		String[] feedback = Dict.getConfigFeedback();
@@ -657,7 +658,7 @@ public class UiView extends JDialog {
 	 * 
 	 * The following bindings are added:
 	 * 
-	 * - C: Open configuration details.
+	 * - I: Open info window.
 	 * - P: Open the player.
 	 */
 	public void addKeyBindings() {
@@ -678,8 +679,8 @@ public class UiView extends JDialog {
 						}
 						
 						switch ( e.getKeyCode() ) {
-							case KeyEvent.VK_C:
-								btnConfigView.doClick();
+							case KeyEvent.VK_I:
+								btnInfo.doClick();
 								break;
 							case KeyEvent.VK_P:
 								btnPlayer.doClick();

@@ -186,11 +186,18 @@ public class SoundfontParser extends Parser {
 		// sort instruments
 		// drumkits first, then chromatic instruments, then unknown types
 		// inside a type category: order by program number, then by bank number
-		HashMap<String, Integer> typePriority = new HashMap<String, Integer>();
-		typePriority.put( "drumkit",   3 );
-		typePriority.put( "chromatic", 2 );
-		typePriority.put( "-",         1 );
 		Comparator<HashMap<String, String>> instrumentComparator = new Comparator<HashMap<String, String>>() {
+			
+			/** Sorting priority for the type. */
+			private HashMap<String, Integer> typePriority = new HashMap<String, Integer>();
+			
+			// initialize type sorting priorities
+			{
+				typePriority.put( "drumkit",   3 );
+				typePriority.put( "chromatic", 2 );
+				typePriority.put( "-",         1 );
+			}
+			
 			@Override
 			public int compare( HashMap<String, String> instrA, HashMap<String, String> instrB ) {
 				

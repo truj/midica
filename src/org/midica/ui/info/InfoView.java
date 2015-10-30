@@ -5,7 +5,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.midica.config;
+package org.midica.ui.info;
 
 import java.awt.Container;
 import java.awt.Dimension;
@@ -27,6 +27,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 
 import org.midica.Midica;
+import org.midica.config.Config;
+import org.midica.config.Dict;
 import org.midica.file.SoundfontParser;
 import org.midica.ui.model.InstrumentTableModel;
 import org.midica.ui.model.NoteTableModel;
@@ -34,18 +36,24 @@ import org.midica.ui.model.PercussionTableModel;
 import org.midica.ui.model.SyntaxTableModel;
 
 /**
- * This class defines the GUI view for the configuration overview window.
- * The window shows the currently configured values for different configurable elements.
- * It contains areas and tables for:
+ * This class defines the GUI view for the informations about the current state
+ * of the program instance. It contains the following types of information:
  * 
- * - Note names
- * - Percussion instrument shortcuts
- * - Syntax keywords for MidicaPL
- * - Instrument shortcuts for non-percussion instruments
+ * - General version and build information.
+ * - Configuration (currently configured value4s for different configurable elements)
+ *     - Note names
+ *     - Percussion instrument shortcuts
+ *     - Syntax keywords for MidicaPL
+ *     - Instrument shortcuts for non-percussion instruments
+ * - Information about the currently loaded soundbank
+ *     - General information
+ *     - Drum kits and Instruments
+ *     - Resources
+ * - Information about the currently loaded MIDI stream. (NOT YET IMPLEMENTED)
  * 
  * @author Jan Trukenmüller
  */
-public class ConfigView extends JDialog {
+public class InfoView extends JDialog {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -66,27 +74,27 @@ public class ConfigView extends JDialog {
 	private static Dimension syntaxTableDim = null;
 	private static Dimension instrTableDim  = null;
 	
-	private static ConfigView configView = null;
+	private static InfoView infoView = null;
 	
-	private ConfigController      controller   = null;
+	private InfoController      controller   = null;
 	private KeyEventPostProcessor keyProcessor = null;
 	private JTabbedPane           content      = null;
 	
 	/**
-	 * Creates a new config view window with owner = null.
+	 * Creates a new info view window with owner = null.
 	 */
-	private ConfigView() {
+	private InfoView() {
 		this( (JDialog) null );
 	}
 	
 	/**
-	 * Creates a new config view window and sets the given owner Dialog.
+	 * Creates a new info view window and sets the given owner Dialog.
 	 * 
-	 * @param owner  window to be set as the config view's owner
+	 * @param owner  window to be set as the info view's owner
 	 */
-	private ConfigView( JDialog owner ) {
+	private InfoView( JDialog owner ) {
 		super( owner );
-		setTitle( Dict.get(Dict.TITLE_CONFIG_VIEW) );
+		setTitle( Dict.get(Dict.TITLE_INFO_VIEW) );
 		
 		int noteWidth   = COL_WIDTH_NOTE_NUM    + COL_WIDTH_NOTE_NAME;
 		int percWidth   = COL_WIDTH_PERC_NUM    + COL_WIDTH_PERC_NAME;
@@ -104,7 +112,7 @@ public class ConfigView extends JDialog {
 	}
 	
 	/**
-	 * Initializes the content of all the tabs inside the config view.
+	 * Initializes the content of all the tabs inside the info view.
 	 */
 	private void init() {
 		// content
@@ -112,7 +120,7 @@ public class ConfigView extends JDialog {
 		getContentPane().add( content );
 		
 		// enable key bindings
-		this.controller = new ConfigController( this );
+		this.controller = new InfoController( this );
 		addWindowListener( this.controller );
 		
 		// add tabs
@@ -486,45 +494,46 @@ public class ConfigView extends JDialog {
 	}
 	
 	/**
-	 * Creates and shows the config view passing **owner = null** to the constructor.
-	 * This is done by calling {@link #showConfig(JDialog)} with parameter **null**.
+	 * Creates and shows the info view passing **owner = null** to the constructor.
+	 * This is done by calling {@link #showInfoWindow(JDialog)} with parameter **null**.
 	 */
-	public static void showConfig() {
-		showConfig( null );
+	public static void showInfoWindow() {
+		showInfoWindow( null );
 	}
 	
 	/**
-	 * Creates and shows the config view passing the specified owner window to the constructor.
+	 * Creates and shows the info view passing the specified owner window to the constructor.
 	 * 
-	 * If a config view already exists it will be destroyed before.
-	 * This is done in order to make sure that the newly created config view:
+	 * If an info view already exists it will be destroyed before.
+	 * This is done in order to make sure that the newly created info view:
 	 * 
 	 * - exists only once
 	 * - will be in the foreground
 	 * - will be focused
 	 * 
-	 * @param owner  The GUI window owning the config window.
+	 * @param owner  The GUI window owning the info window.
 	 */
-	public static void showConfig( JDialog owner ) {
+	public static void showInfoWindow( JDialog owner ) {
 		
-		// it cannot be guaranteed that the config view can be focused
+		// it cannot be guaranteed that the info view can be focused
 		// so we have to destroy and rebuild it
-		if ( null != configView )
-			configView.close();
-		configView = new ConfigView( owner );
+		if ( null != infoView )
+			infoView.close();
+		infoView = new InfoView( owner );
 	}
 	
 	/**
-	 * Closes and destroys the configuration window.
+	 * Closes and destroys the info window.
 	 */
 	public void close() {
 		setVisible( false );
 		dispose();
-		configView = null;
+		infoView = null;
 	}
 	
+	// TODO: add key bindings for nested tabs
 	/**
-	 * Creates key bindings for the config view and adds them
+	 * Creates key bindings for the info view and adds them
 	 * to the {@link java.awt.KeyboardFocusManager}.
 	 * The following key bindings are created:
 	 * 
@@ -576,7 +585,7 @@ public class ConfigView extends JDialog {
 	}
 	
 	/**
-	 * Removes the key bindings for the config view
+	 * Removes the key bindings for the info view
 	 * from the {@link java.awt.KeyboardFocusManager}.
 	 */
 	public void removeKeyBindings() {

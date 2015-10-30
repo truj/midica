@@ -30,13 +30,13 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
-import org.midica.config.ConfigView;
 import org.midica.config.Dict;
 import org.midica.file.ParseException;
 import org.midica.file.Parser;
 import org.midica.midi.MidiDevices;
 import org.midica.midi.SequenceNotSetException;
 import org.midica.ui.ErrorMsgView;
+import org.midica.ui.info.InfoView;
 import org.midica.ui.player.soundcheck.SoundcheckView;
 
 
@@ -122,9 +122,9 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			SoundcheckView.showSoundcheck( view );
 		}
 		
-		// button pushed to open the config window
-		else if ( PlayerView.CMD_CONFIG.equals(cmd) ) {
-			ConfigView.showConfig( view );
+		// button pushed to open the info window
+		else if ( PlayerView.CMD_INFO.equals(cmd) ) {
+			InfoView.showInfoWindow( view );
 		}
 		
 		// button pushed to close the error message window

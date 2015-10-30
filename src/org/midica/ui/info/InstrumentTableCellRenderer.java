@@ -5,7 +5,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.midica.config;
+package org.midica.ui.info;
 
 import java.awt.Component;
 import java.util.ArrayList;
@@ -13,31 +13,36 @@ import java.util.ArrayList;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
+import org.midica.config.Config;
+import org.midica.config.Dict;
+
 /**
- * Cell renderer for the syntax table in the configuration overview.
+ * Cell renderer for the instrument table in the configuration overview of
+ * the info window.
  * 
- * The categories are displayed in another color than the plain syntax elements.
+ * The categories are displayed in another color than the plain instruments.
  * 
  * @author Jan Trukenmüller
  */
-public class SyntaxTableCellRenderer extends DefaultTableCellRenderer {
+public class InstrumentTableCellRenderer extends DefaultTableCellRenderer {
 	
 	private static final long serialVersionUID = 1L;
 	
-	/** List containing all syntax elements including category entries */
-	private ArrayList<SyntaxElement> syntaxList;
+	/** List containing all instruments including instrument category entries */
+	private ArrayList<InstrumentElement> instrumentList;
 	
 	/**
-	 * Creates a cell renderer for the syntax table in the configuration overview.
+	 * Creates a cell renderer for the instruments table in the configuration
+	 * overview of the info window.
 	 */
-	public SyntaxTableCellRenderer() {
-		this.syntaxList = Dict.getSyntaxList();
+	public InstrumentTableCellRenderer() {
+		instrumentList = Dict.getInstrumentList();
 	}
 	
 	@Override
 	public Component getTableCellRendererComponent( JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col ) {
 		Component cell = super.getTableCellRendererComponent( table, value, isSelected, hasFocus, row, col );
-		if ( syntaxList.get(row).category ) {
+		if ( instrumentList.get(row).category ) {
 			cell.setBackground( Config.TABLE_CELL_CATEGORY_COLOR );
 		}
 		else {

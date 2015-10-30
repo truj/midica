@@ -11,7 +11,7 @@ import org.midica.config.Dict;
 
 /**
  * This class represents the data model of the notes table in the
- * configuration details window.
+ * configuration details view of the info window.
  * 
  * Each row represents a note.
  * 

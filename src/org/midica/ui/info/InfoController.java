@@ -5,55 +5,56 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.midica.config;
+package org.midica.ui.info;
 
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 
+
 /**
- * Controller for the config overview window.
- * This is only used to add or remove key bindings to/from the config view
+ * Controller for the info window.
+ * This is only used to add or remove key bindings to/from the info view
  * because this view doesn't support more interaction.
  * 
  * @author Jan Trukenmüller
  */
-public class ConfigController implements WindowListener {
+public class InfoController implements WindowListener {
 	
-	private ConfigView view = null;
+	private InfoView view = null;
 	
 	/**
-	 * Creates a new instance of the controller for the given config view.
-	 * This is called during the initialization of the config view.
+	 * Creates a new instance of the controller for the given info view.
+	 * This is called during the initialization of the info view.
 	 * 
-	 * @param view  config view to which the controller is connected.
+	 * @param view  info view to which the controller is connected.
 	 */
-	public ConfigController( ConfigView view ) {
+	public InfoController( InfoView view ) {
 		this.view = view;
 	}
 	
 	/**
-	 * Adds config view specific key bindings.
+	 * Adds info view specific key bindings.
 	 */
 	public void windowActivated( WindowEvent e ) {
 		view.addKeyBindings();
 	}
 	
 	/**
-	 * Removes config view specific key bindings.
+	 * Removes info view specific key bindings.
 	 */
 	public void windowClosed( WindowEvent e ) {
 		view.removeKeyBindings();
 	}
 	
 	/**
-	 * Removes config view specific key bindings.
+	 * Removes info view specific key bindings.
 	 */
 	public void windowClosing( WindowEvent e ) {
 		view.removeKeyBindings();
 	}
 	
 	/**
-	 * Removes config view specific key bindings.
+	 * Removes info view specific key bindings.
 	 */
 	public void windowDeactivated( WindowEvent e ) {
 		view.removeKeyBindings();
