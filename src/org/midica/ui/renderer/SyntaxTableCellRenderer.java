@@ -11,7 +11,6 @@ import java.awt.Component;
 import java.util.ArrayList;
 
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 
 import org.midica.config.Config;
 import org.midica.config.Dict;
@@ -24,7 +23,7 @@ import org.midica.ui.info.SyntaxElement;
  * 
  * @author Jan Trukenmüller
  */
-public class SyntaxTableCellRenderer extends DefaultTableCellRenderer {
+public class SyntaxTableCellRenderer extends MidicaTableCellRenderer {
 	
 	private static final long serialVersionUID = 1L;
 	

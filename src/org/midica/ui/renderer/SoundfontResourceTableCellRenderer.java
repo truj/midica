@@ -11,8 +11,8 @@ import java.awt.Component;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.swing.JComponent;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 
 import org.midica.config.Config;
 import org.midica.file.SoundfontParser;
@@ -24,9 +24,12 @@ import org.midica.file.SoundfontParser;
  * The categories are displayed in another color than the plain syntax
  * elements.
  * 
+ * For the format and class columns the tooltips have to show more information
+ * than the cell content.
+ * 
  * @author Jan Trukenmüller
  */
-public class SoundfontResourceTableCellRenderer extends DefaultTableCellRenderer {
+public class SoundfontResourceTableCellRenderer extends MidicaTableCellRenderer {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -46,13 +49,27 @@ public class SoundfontResourceTableCellRenderer extends DefaultTableCellRenderer
 		Component cell = super.getTableCellRendererComponent( table, value, isSelected, hasFocus, row, col );
 		
 		// category entries have an element with key=category and value=category
-		boolean isCategory = resources.get( row ).get("category") != null;
+		HashMap<String, Object> resource = resources.get( row );
+		boolean isCategory = resource.get("category") != null;
 		if (isCategory) {
 			cell.setBackground( Config.TABLE_CELL_CATEGORY_COLOR );
 		}
 		else {
 			cell.setBackground( Config.TABLE_CELL_DEFAULT_COLOR );
 		}
+		
+		// change the format tooltip
+		if ( 4 == col && cell instanceof JComponent ) {
+			JComponent jCell   = (JComponent) cell;
+			jCell.setToolTipText( (String) resource.get("formatDetail") );
+		}
+		
+		// change the class tooltip
+		if ( 5 == col && cell instanceof JComponent ) {
+			JComponent jCell   = (JComponent) cell;
+			jCell.setToolTipText( (String) resource.get("classDetail") );
+		}
+		
 		return cell;
 	}
 }

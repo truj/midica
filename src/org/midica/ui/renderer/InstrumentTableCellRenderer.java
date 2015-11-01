@@ -11,7 +11,6 @@ import java.awt.Component;
 import java.util.ArrayList;
 
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 
 import org.midica.config.Config;
 import org.midica.config.Dict;
@@ -25,7 +24,7 @@ import org.midica.ui.info.InstrumentElement;
  * 
  * @author Jan Trukenmüller
  */
-public class InstrumentTableCellRenderer extends DefaultTableCellRenderer {
+public class InstrumentTableCellRenderer extends MidicaTableCellRenderer {
 	
 	private static final long serialVersionUID = 1L;
 	
