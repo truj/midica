@@ -35,8 +35,8 @@ public class InstrumentTableModel extends MidicaTableModel {
 		
 		// table header
 		columnNames = new String[ 2 ];
-		columnNames[ 0 ] = Dict.get( Dict.CONF_COL_INSTR_NUM  );
-		columnNames[ 1 ] = Dict.get( Dict.CONF_COL_INSTR_NAME );
+		columnNames[ 0 ] = Dict.get( Dict.INFO_COL_INSTR_NUM  );
+		columnNames[ 1 ] = Dict.get( Dict.INFO_COL_INSTR_NAME );
 		
 		instrumentList = Dict.getInstrumentList();
 	}

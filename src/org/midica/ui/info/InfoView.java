@@ -33,6 +33,8 @@ import org.midica.file.SoundfontParser;
 import org.midica.ui.model.InstrumentTableModel;
 import org.midica.ui.model.NoteTableModel;
 import org.midica.ui.model.PercussionTableModel;
+import org.midica.ui.model.SoundfontInstrumentsTableModel;
+import org.midica.ui.model.SoundfontResourceTableModel;
 import org.midica.ui.model.SyntaxTableModel;
 
 /**
@@ -58,27 +60,42 @@ public class InfoView extends JDialog {
 	private static final long serialVersionUID = 1L;
 	
 	// column widths
-	private static final int COL_WIDTH_NOTE_NUM       =  60;
-	private static final int COL_WIDTH_NOTE_NAME      = 140;
-	private static final int COL_WIDTH_PERC_NUM       =  60;
-	private static final int COL_WIDTH_PERC_NAME      = 140;
-	private static final int COL_WIDTH_SYNTAX_NAME    = 180;
-	private static final int COL_WIDTH_SYNTAX_DESC    = 230;
-	private static final int COL_WIDTH_SYNTAX_KEYWORD = 130;
-	private static final int COL_WIDTH_INSTR_NUM      =  60;
-	private static final int COL_WIDTH_INSTR_NAME     = 180;
-	private static final int TABLE_HEIGHT             = 400;
+	private static final int COL_WIDTH_NOTE_NUM          =  60;
+	private static final int COL_WIDTH_NOTE_NAME         = 140;
+	private static final int COL_WIDTH_PERC_NUM          =  60;
+	private static final int COL_WIDTH_PERC_NAME         = 140;
+	private static final int COL_WIDTH_SYNTAX_NAME       = 180;
+	private static final int COL_WIDTH_SYNTAX_DESC       = 230;
+	private static final int COL_WIDTH_SYNTAX_KEYWORD    = 130;
+	private static final int COL_WIDTH_INSTR_NUM         =  60;
+	private static final int COL_WIDTH_INSTR_NAME        = 180;
+	private static final int COL_WIDTH_SF_INSTR_PROGRAM  =  60;
+	private static final int COL_WIDTH_SF_INSTR_BANK     =  60;
+	private static final int COL_WIDTH_SF_INSTR_NAME     = 200;
+	private static final int COL_WIDTH_SF_INSTR_CHANNELS =  80;
+	private static final int COL_WIDTH_SF_INSTR_KEYS     = 120;
+	private static final int COL_WIDTH_SF_RES_INDEX      =  45;
+	private static final int COL_WIDTH_SF_RES_TYPE       =  55;
+	private static final int COL_WIDTH_SF_RES_NAME       = 120;
+	private static final int COL_WIDTH_SF_RES_FRAMES     =  60;
+	private static final int COL_WIDTH_SF_RES_FORMAT     = 400;
+	private static final int COL_WIDTH_SF_RES_CLASS      = 260;
+	private static final int TABLE_HEIGHT                = 400;
 	
-	private static Dimension noteTableDim   = null;
-	private static Dimension percTableDim   = null;
-	private static Dimension syntaxTableDim = null;
-	private static Dimension instrTableDim  = null;
+	private static Dimension noteTableDim       = null;
+	private static Dimension percTableDim       = null;
+	private static Dimension syntaxTableDim     = null;
+	private static Dimension instrTableDim      = null;
+	private static Dimension sfInstrTableDim    = null;
+	private static Dimension sfResourceTableDim = null;
 	
 	private static InfoView infoView = null;
 	
-	private InfoController      controller   = null;
-	private KeyEventPostProcessor keyProcessor = null;
-	private JTabbedPane           content      = null;
+	private InfoController        controller       = null;
+	private KeyEventPostProcessor keyProcessor     = null;
+	private JTabbedPane           content          = null;
+	private JTabbedPane           contentConfig    = null;
+	private JTabbedPane           contentSoundfont = null;
 	
 	/**
 	 * Creates a new info view window with owner = null.
@@ -96,14 +113,24 @@ public class InfoView extends JDialog {
 		super( owner );
 		setTitle( Dict.get(Dict.TITLE_INFO_VIEW) );
 		
-		int noteWidth   = COL_WIDTH_NOTE_NUM    + COL_WIDTH_NOTE_NAME;
-		int percWidth   = COL_WIDTH_PERC_NUM    + COL_WIDTH_PERC_NAME;
-		int syntaxWidth = COL_WIDTH_SYNTAX_NAME + COL_WIDTH_SYNTAX_KEYWORD + COL_WIDTH_SYNTAX_DESC;
-		int instrWidth  = COL_WIDTH_INSTR_NUM   + COL_WIDTH_INSTR_NAME;
-		noteTableDim   = new Dimension( noteWidth,   TABLE_HEIGHT );
-		percTableDim   = new Dimension( percWidth,   TABLE_HEIGHT );
-		syntaxTableDim = new Dimension( syntaxWidth, TABLE_HEIGHT );
-		instrTableDim  = new Dimension( instrWidth,  TABLE_HEIGHT );
+		// initialize table dimensions
+		int noteWidth       = COL_WIDTH_NOTE_NUM    + COL_WIDTH_NOTE_NAME;
+		int percWidth       = COL_WIDTH_PERC_NUM    + COL_WIDTH_PERC_NAME;
+		int syntaxWidth     = COL_WIDTH_SYNTAX_NAME + COL_WIDTH_SYNTAX_KEYWORD
+		                    + COL_WIDTH_SYNTAX_DESC;
+		int instrWidth      = COL_WIDTH_INSTR_NUM        + COL_WIDTH_INSTR_NAME;
+		int sfInstrWidth    = COL_WIDTH_SF_INSTR_PROGRAM + COL_WIDTH_SF_INSTR_BANK
+		                    + COL_WIDTH_SF_INSTR_NAME    + COL_WIDTH_SF_INSTR_CHANNELS
+		                    + COL_WIDTH_SF_INSTR_KEYS;
+		int sfResourceWidth = COL_WIDTH_SF_RES_INDEX  + COL_WIDTH_SF_RES_TYPE
+		                    + COL_WIDTH_SF_RES_NAME   + COL_WIDTH_SF_RES_FRAMES
+		                    + COL_WIDTH_SF_RES_FORMAT + COL_WIDTH_SF_RES_CLASS;
+		noteTableDim       = new Dimension( noteWidth,       TABLE_HEIGHT );
+		percTableDim       = new Dimension( percWidth,       TABLE_HEIGHT );
+		syntaxTableDim     = new Dimension( syntaxWidth,     TABLE_HEIGHT );
+		instrTableDim      = new Dimension( instrWidth,      TABLE_HEIGHT );
+		sfInstrTableDim    = new Dimension( sfInstrWidth,    TABLE_HEIGHT );
+		sfResourceTableDim = new Dimension( sfResourceWidth, TABLE_HEIGHT );
 		
 		init();
 		
@@ -116,7 +143,7 @@ public class InfoView extends JDialog {
 	 */
 	private void init() {
 		// content
-		content = new JTabbedPane( JTabbedPane.TOP );
+		content = new JTabbedPane( JTabbedPane.LEFT );
 		getContentPane().add( content );
 		
 		// enable key bindings
@@ -124,19 +151,62 @@ public class InfoView extends JDialog {
 		addWindowListener( this.controller );
 		
 		// add tabs
-		content.addTab( Dict.get(Dict.NOTE_DETAILS),       createNoteArea()       );
-		content.addTab( Dict.get(Dict.PERCUSSION_DETAILS), createPercussionArea() );
-		content.addTab( Dict.get(Dict.SYNTAX),             createSyntaxArea()     );
-		content.addTab( Dict.get(Dict.INSTRUMENT),         createInstrumentArea() );
-		content.addTab( Dict.get(Dict.SOUNDFONT),          createSoundfontArea()  );
-		content.addTab( Dict.get(Dict.VERSION),            createVersionArea()    );
+		content.addTab( Dict.get(Dict.TAB_CONFIG),    createConfigArea()    );
+		content.addTab( Dict.get(Dict.TAB_SOUNDFONT), createSoundfontArea() );
+		content.addTab( Dict.get(Dict.TAB_MIDICA),    createVersionArea()   );
+	}
+	
+	/**
+	 * Creates the configuration tab.
+	 * This contains the following sub tabs:
+	 * 
+	 * - Note details
+	 * - Percussion details
+	 * - Syntax details
+	 * - Instrument details
+	 * 
+	 * @return the created configuration area.
+	 */
+	private Container createConfigArea() {
+		// content
+		contentConfig = new JTabbedPane( JTabbedPane.TOP );
+		
+		// add tabs
+		contentConfig.addTab( Dict.get(Dict.NOTE_DETAILS),       createNoteArea()       );
+		contentConfig.addTab( Dict.get(Dict.PERCUSSION_DETAILS), createPercussionArea() );
+		contentConfig.addTab( Dict.get(Dict.SYNTAX),             createSyntaxArea()     );
+		contentConfig.addTab( Dict.get(Dict.INSTRUMENT),         createInstrumentArea() );
+		
+		return contentConfig;
+	}
+	
+	/**
+	 * Creates the soundfont tab.
+	 * This contains the following sub tabs:
+	 * 
+	 * - General soundfont info
+	 * - Instruments and drum kits
+	 * - Resources
+	 * 
+	 * @return the created soundfont area.
+	 */
+	private Container createSoundfontArea() {
+		// content
+		contentSoundfont = new JTabbedPane( JTabbedPane.TOP );
+		
+		// add tabs
+		contentSoundfont.addTab( Dict.get(Dict.SOUNDFONT_INFO),        createSoundfontInfoArea()       );
+		contentSoundfont.addTab( Dict.get(Dict.SOUNDFONT_INSTRUMENTS), createSoundfontInstrumentArea() );
+		contentSoundfont.addTab( Dict.get(Dict.SOUNDFONT_RESOURCES),   createSoundfontResourceArea()   );
+		
+		return contentSoundfont;
 	}
 	
 	/**
 	 * Creates the note area containing the translation table for note names.
 	 * The table translates between MIDI note values and their configured names.
 	 * 
-	 * @return the created note area
+	 * @return the created note area.
 	 */
 	private Container createNoteArea() {
 		// content
@@ -312,11 +382,11 @@ public class InfoView extends JDialog {
 	}
 	
 	/**
-	 * Creates the version area containing version, author and general information.
+	 * Creates the area for general soundfont information.
 	 * 
-	 * @return the created version area
+	 * @return the created soundfont info area.
 	 */
-	private Container createSoundfontArea() {
+	private Container createSoundfontInfoArea() {
 		// content
 		JPanel area = new JPanel();
 		
@@ -364,7 +434,7 @@ public class InfoView extends JDialog {
 		constraints.gridx = 0;
 		constraints.gridy++;
 		constraints.anchor = GridBagConstraints.EAST;
-		JLabel lblVersion  = new JLabel( Dict.get(Dict.VERSION) + ": " );
+		JLabel lblVersion  = new JLabel( Dict.get(Dict.TAB_MIDICA) + ": " );
 		area.add( lblVersion, constraints );
 		
 		// version content
@@ -397,6 +467,101 @@ public class InfoView extends JDialog {
 	}
 	
 	/**
+	 * Creates the area for instruments and drumkits of the currently loaded soundfont.
+	 * 
+	 * @return the created soundfont instruments area.
+	 */
+	private Container createSoundfontInstrumentArea() {
+		// content
+		JPanel area = new JPanel();
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout( layout );
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill   = GridBagConstraints.NONE;
+		constraints.insets = new Insets( 2, 2, 2, 2 );
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 1;
+		constraints.weighty    = 1;
+		
+		// label
+		JLabel label = new JLabel( Dict.get(Dict.SOUNDFONT_INSTRUMENTS) );
+		area.add( label, constraints );
+
+		// table
+		constraints.gridy++;
+		JTable table = new JTable();
+		table.setModel( new SoundfontInstrumentsTableModel() );
+		table.setDefaultRenderer( Object.class, new SoundfontInstrumentTableCellRenderer() );
+		JScrollPane scroll = new JScrollPane( table );
+		scroll.setPreferredSize( sfInstrTableDim );
+		scroll.setMinimumSize( sfInstrTableDim );
+		area.add( scroll, constraints );
+		
+		// set column sizes and colors
+		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_SF_INSTR_PROGRAM  );
+		table.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_SF_INSTR_BANK     );
+		table.getColumnModel().getColumn( 2 ).setPreferredWidth( COL_WIDTH_SF_INSTR_NAME     );
+		table.getColumnModel().getColumn( 3 ).setPreferredWidth( COL_WIDTH_SF_INSTR_CHANNELS );
+		table.getColumnModel().getColumn( 4 ).setPreferredWidth( COL_WIDTH_SF_INSTR_KEYS     );
+		table.getTableHeader().setBackground( Config.TABLE_HEADER_COLOR );
+		
+		return area;
+	}
+	
+	/**
+	 * Creates the area for resources of the currently loaded soundfont.
+	 * 
+	 * @return the created soundfont resource area.
+	 */
+	private Container createSoundfontResourceArea() {
+		// content
+		JPanel area = new JPanel();
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout( layout );
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill   = GridBagConstraints.NONE;
+		constraints.insets = new Insets( 2, 2, 2, 2 );
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 1;
+		constraints.weighty    = 1;
+		
+		// label
+		JLabel label = new JLabel( Dict.get(Dict.SOUNDFONT_RESOURCES) );
+		area.add( label, constraints );
+		
+		// table
+		constraints.gridy++;
+		JTable table = new JTable();
+		table.setModel( new SoundfontResourceTableModel() );
+		table.setDefaultRenderer( Object.class, new SoundfontResourceTableCellRenderer() );
+		JScrollPane scroll = new JScrollPane( table );
+		scroll.setPreferredSize( sfResourceTableDim );
+		scroll.setMinimumSize( sfResourceTableDim );
+		area.add( scroll, constraints );
+		
+		// set column sizes and colors
+		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_SF_RES_INDEX  );
+		table.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_SF_RES_TYPE   );
+		table.getColumnModel().getColumn( 2 ).setPreferredWidth( COL_WIDTH_SF_RES_NAME   );
+		table.getColumnModel().getColumn( 3 ).setPreferredWidth( COL_WIDTH_SF_RES_FRAMES );
+		table.getColumnModel().getColumn( 4 ).setPreferredWidth( COL_WIDTH_SF_RES_FORMAT );
+		table.getColumnModel().getColumn( 5 ).setPreferredWidth( COL_WIDTH_SF_RES_CLASS  );
+		table.getTableHeader().setBackground( Config.TABLE_HEADER_COLOR );
+		
+		return area;
+	}
+	
+	/**
 	 * Creates the version area containing version, author and general information.
 	 * 
 	 * @return the created version area
@@ -420,7 +585,7 @@ public class InfoView extends JDialog {
 		
 		// version translation
 		constraints.anchor = GridBagConstraints.EAST;
-		JLabel lblVersion  = new JLabel( Dict.get(Dict.VERSION) + ": " );
+		JLabel lblVersion  = new JLabel( Dict.get(Dict.TAB_MIDICA) + ": " );
 		area.add( lblVersion, constraints );
 		
 		// version content
@@ -537,11 +702,11 @@ public class InfoView extends JDialog {
 	 * to the {@link java.awt.KeyboardFocusManager}.
 	 * The following key bindings are created:
 	 * 
-	 * - **ESC** - close the window
-	 * - **N** - switch to the note names translation tab
-	 * - **P** - switch to the percussion shortcut translation tab
-	 * - **S** - switch to the syntax keyword definition tab
-	 * - **I** - switch to the instrument shortcut translation tab
+	 * - **ESC** -- close the window
+	 * - **N**   -- switch to the note names translation tab
+	 * - **P**   -- switch to the percussion shortcut translation tab
+	 * - **S**   -- switch to the syntax keyword definition tab
+	 * - **I**   -- switch to the instrument shortcut translation tab
 	 */
 	public void addKeyBindings() {
 		
@@ -562,18 +727,22 @@ public class InfoView extends JDialog {
 						
 						else if ( KeyEvent.VK_N == e.getKeyCode() ) {
 							content.setSelectedIndex( 0 );
+							contentConfig.setSelectedIndex( 0 );
 						}
 						
 						else if ( KeyEvent.VK_P == e.getKeyCode() ) {
-							content.setSelectedIndex( 1 );
+							content.setSelectedIndex( 0 );
+							contentConfig.setSelectedIndex( 1 );
 						}
 						
 						else if ( KeyEvent.VK_S == e.getKeyCode() ) {
-							content.setSelectedIndex( 2 );
+							content.setSelectedIndex( 0 );
+							contentConfig.setSelectedIndex( 2 );
 						}
 						
 						else if ( KeyEvent.VK_I == e.getKeyCode() ) {
-							content.setSelectedIndex( 3 );
+							content.setSelectedIndex( 0 );
+							contentConfig.setSelectedIndex( 3 );
 						}
 					}
 					return e.isConsumed();

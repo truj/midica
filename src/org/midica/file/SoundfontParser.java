@@ -25,7 +25,7 @@ import javax.sound.midi.SoundbankResource;
 import javax.sound.sampled.AudioInputStream;
 
 import org.midica.Midica;
-import org.midica.debug.Dumper;
+import org.midica.config.Dict;
 import org.midica.midi.MidiDevices;
 
 import com.sun.media.sound.SF2Instrument;
@@ -102,8 +102,12 @@ public class SoundfontParser extends Parser {
 	 */
 	public static ArrayList<HashMap<String, String>> getSoundfontInstruments() {
 		
+		// initialize
 		ArrayList<HashMap<String, String>> result = new ArrayList<HashMap<String, String>>();
 		Soundbank soundfont = MidiDevices.getSoundfont();
+		boolean needCategoryDrumkit   = false;
+		boolean needCategoryChromatic = false;
+		boolean needCategoryUnknown   = false;
 		
 		// no soundfont loaded?
 		if ( null == soundfont )
@@ -118,69 +122,107 @@ public class SoundfontParser extends Parser {
 			result.add( instrument );
 			Instrument midiInstr = instruments[ i ];
 			Patch      patch     = midiInstr.getPatch();
+			int        bank      = patch.getBank();
 			instrument.put( "name",    midiInstr.getName()                  );
-			instrument.put( "bank",    Integer.toString(patch.getBank())    );
 			instrument.put( "program", Integer.toString(patch.getProgram()) );
+			instrument.put( "bank",    Integer.toString(bank)               );
+			instrument.put( "bankMSB", Integer.toString(bank >> 7)          );
+			instrument.put( "bankLSB", Integer.toString(bank % 128)         );
 			
 			// add class specific instrument data
-			instrument.put( "channels", "-" );
-			instrument.put( "keys",     "-" );
-			instrument.put( "type",     "-" ); // instrument or drum kit
-			if ( midiInstr instanceof SF2Instrument ) {
-				SF2Instrument sf2Instr = (SF2Instrument) midiInstr;
+			if ( ! (midiInstr instanceof SF2Instrument) ) {
 				
-				// get channels
-				boolean   hasChannel0 = false;
-				boolean   hasChannel9 = false;
-				boolean[] sf2Channels = sf2Instr.getChannels();
-				ArrayList<Integer> channels = new ArrayList<Integer>();
-				for ( int channel = 0; channel < sf2Channels.length; channel++ ) {
-					
-					// channel not supported?
-					if ( ! sf2Channels[channel] )
-						continue;
-					
-					// remember the channel
-					channels.add( channel );
-					
-					// remember if channel 0 or 9 is supported (that's a hint if this is a drum kit or an instrument)
-					if ( 0 == channel )
-						hasChannel0 = true;
-					else if ( 9 == channel )
-						hasChannel9 = true;
-				}
-				instrument.put( "channels", makeNumberRangeString(channels) );
+				// unknown class
+				needCategoryUnknown = true;
+				instrument.put( "channels", "-" );
+				instrument.put( "keys",     "-" );
+				instrument.put( "type",     "-" );
 				
-				// get keys
-				ArrayList<Integer> keys = new ArrayList<Integer>();
-				String[] sf2keys = sf2Instr.getKeys();
-				for ( int key = 0; key < sf2keys.length; key++ ) {
-					
-					// key not available?
-					if ( null == sf2keys[key] )
-						continue;
-					
-					// remember the key
-					keys.add( key );
-				}
-				instrument.put( "keys", makeNumberRangeString(keys) );
-				
-				// guess if this is a chromatic instrument or a drum kit
-				Pattern pattern = Pattern.compile( "^Drumkit:.*" );
-				Matcher matcher = pattern.matcher( sf2Instr.toString() );
-				if ( matcher.matches() ) {
-					instrument.put( "type", "drumkit" );
-					continue;
-				}
-				if ( hasChannel9 && ! hasChannel0 ) {
-					instrument.put( "type", "drumkit" );
-					continue;
-				}
-				if ( hasChannel0 && ! hasChannel9 ) {
-					instrument.put( "type", "chromatic" );
-					continue;
-				}
+				continue;
 			}
+			
+			// get channels
+			boolean            hasChannel0 = false;
+			boolean            hasChannel9 = false;
+			SF2Instrument      sf2Instr    = (SF2Instrument) midiInstr;
+			boolean[]          sf2Channels = sf2Instr.getChannels();
+			ArrayList<Integer> channels    = new ArrayList<Integer>();
+			for ( int channel = 0; channel < sf2Channels.length; channel++ ) {
+				
+				// channel not supported?
+				if ( ! sf2Channels[channel] )
+					continue;
+				
+				// remember the channel
+				channels.add( channel );
+				
+				// remember if channel 0 or 9 is supported (that's a hint if this is a drum kit or an instrument)
+				if ( 0 == channel )
+					hasChannel0 = true;
+				else if ( 9 == channel )
+					hasChannel9 = true;
+			}
+			instrument.put( "channels", makeNumberRangeString(channels) );
+			
+			// get keys
+			ArrayList<Integer> keys = new ArrayList<Integer>();
+			String[] sf2keys = sf2Instr.getKeys();
+			for ( int key = 0; key < sf2keys.length; key++ ) {
+				
+				// key not available?
+				if ( null == sf2keys[key] )
+					continue;
+				
+				// remember the key
+				keys.add( key );
+			}
+			instrument.put( "keys", makeNumberRangeString(keys) );
+			
+			// Try to guess the type: chromatic or drum kit.
+			Pattern pattern = Pattern.compile( "^Drumkit:.*" );
+			Matcher matcher = pattern.matcher( sf2Instr.toString() );
+			if ( matcher.matches() ) {
+				needCategoryDrumkit = true;
+				instrument.put( "type", "drumkit" );
+				continue;
+			}
+			if ( hasChannel9 && ! hasChannel0 ) {
+				needCategoryDrumkit = true;
+				instrument.put( "type", "drumkit" );
+				continue;
+			}
+			if ( hasChannel0 && ! hasChannel9 ) {
+				needCategoryChromatic = true;
+				instrument.put( "type", "chromatic" );
+				continue;
+			}
+			
+			// Still in the loop, so we failed to guess.
+			needCategoryUnknown = true;
+			instrument.put( "type", "-" );
+		}
+		
+		// add categories
+		if (needCategoryChromatic) {
+			HashMap<String, String> category = new HashMap<String, String>();
+			category.put( "category", "category" );
+			category.put( "type",     "categoryChromatic" );
+			category.put( "name",     Dict.get(Dict.SF_INSTR_CAT_CHROMATIC) );
+			result.add( category );
+		}
+		if (needCategoryDrumkit) {
+			HashMap<String, String> category = new HashMap<String, String>();
+			category.put( "category", "category" );
+			category.put( "type",     "categoryDrumkit" );
+			category.put( "name",     Dict.get(Dict.SF_INSTR_CAT_DRUMKIT) );
+			result.add( category );
+		}
+		if (needCategoryUnknown) {
+			HashMap<String, String> category = new HashMap<String, String>();
+			category.put( "category", "category" );
+			category.put( "type",     "categoryUnknown" );
+			category.put( "name",     Dict.get(Dict.SF_INSTR_CAT_UNKNOWN) );
+			result.add( category );
 		}
 		
 		// sort instruments
@@ -193,15 +235,18 @@ public class SoundfontParser extends Parser {
 			
 			// initialize type sorting priorities
 			{
-				typePriority.put( "drumkit",   3 );
-				typePriority.put( "chromatic", 2 );
-				typePriority.put( "-",         1 );
+				typePriority.put( "categoryDrumkit",   6 );
+				typePriority.put( "drumkit",           5 );
+				typePriority.put( "categoryChromatic", 4 );
+				typePriority.put( "chromatic",         3 );
+				typePriority.put( "categoryUnknown",   2 );
+				typePriority.put( "-",                 1 );
 			}
 			
 			@Override
 			public int compare( HashMap<String, String> instrA, HashMap<String, String> instrB ) {
 				
-				// first priority: type ( drumkit > chromatic > unknown )
+				// first priority: type
 				int priorityA = typePriority.get( instrA.get("type") );
 				int priorityB = typePriority.get( instrB.get("type") );
 				if ( priorityA > priorityB )
@@ -231,11 +276,6 @@ public class SoundfontParser extends Parser {
 		};
 		Collections.sort( result, instrumentComparator );
 		
-		// TODO: delete
-		for ( HashMap<String, String> instr : result ) {
-			Dumper.printString( instr );
-		}
-		
 		return result;
 	}
 	
@@ -248,8 +288,12 @@ public class SoundfontParser extends Parser {
 	 */
 	public static ArrayList<HashMap<String, Object>> getSoundfontResources() {
 		
+		// initialize
 		ArrayList<HashMap<String, Object>> result = new ArrayList<HashMap<String, Object>>();
 		Soundbank soundfont = MidiDevices.getSoundfont();
+		boolean needCategorySample  = false;
+		boolean needCategoryLayer   = false;
+		boolean needCategoryUnknown = false;
 		
 		// no soundfont loaded?
 		if ( null == soundfont )
@@ -263,16 +307,23 @@ public class SoundfontParser extends Parser {
 			result.add( resource );
 			
 			// apply general information and defaults
+			resource.put( "index",       i );
 			resource.put( "name",        resources[i].getName() );
 			resource.put( "class",       "-" );
 			resource.put( "type",        "-" );
 			resource.put( "format",      "-" );
 			resource.put( "frameLength", "-" );
-			String classDesc = resources[i].toString();
-			Pattern pattern  = Pattern.compile( "^(.+):.*" );
-			Matcher matcher  = pattern.matcher( classDesc );
+			String classDesc      = resources[i].toString();
+			Pattern pattern       = Pattern.compile( "^(.+):.*" );
+			Matcher matcher       = pattern.matcher( classDesc );
+			String identifiedType = null;
 			if ( matcher.matches() ) {
-				resource.put( "type", matcher.group(1) );
+				String type = matcher.group( 1 );
+				resource.put( "type", type );
+				if ( "Layer".equals(type) ) {
+					needCategoryLayer = true;
+					identifiedType    = type;
+				}
 			}
 			
 			// apply null-class information
@@ -289,14 +340,90 @@ public class SoundfontParser extends Parser {
 			// apply class-dependant information
 			if ( dataClass == AudioInputStream.class ) {
 				
+				needCategorySample      = true;
+				identifiedType          = "Sample";
 				AudioInputStream stream = (AudioInputStream) resources[i].getData();
 				resource.put( "format",      String.valueOf(stream.getFormat())      );
 				resource.put( "frameLength", String.valueOf(stream.getFrameLength()) );
+				
+				// close the stream to avoid an exception caused by "too many open files"
+				try {
+	                stream.close();
+                }
+                catch ( IOException e ) {
+                }
 			}
+			
+			// We failed to guess the type?
+			if ( null == identifiedType )
+				needCategoryUnknown = true;
 		}
 		
-		// TODO: sort resources
+		// add categories
+		if (needCategorySample) {
+			HashMap<String, Object> category = new HashMap<String, Object>();
+			category.put( "category", "category" );
+			category.put( "type",     "categorySample" );
+			category.put( "name",     Dict.get(Dict.SF_RESOURCE_CAT_SAMPLE) );
+			result.add( category );
+		}
+		if (needCategoryLayer) {
+			HashMap<String, Object> category = new HashMap<String, Object>();
+			category.put( "category", "category" );
+			category.put( "type",     "categoryLayer" );
+			category.put( "name",     Dict.get(Dict.SF_RESOURCE_CAT_LAYER) );
+			result.add( category );
+		}
+		if (needCategoryUnknown) {
+			HashMap<String, Object> category = new HashMap<String, Object>();
+			category.put( "category", "category" );
+			category.put( "type",     "categoryUnknown" );
+			category.put( "name",     Dict.get(Dict.SF_RESOURCE_CAT_UNKNOWN) );
+			result.add( category );
+		}
 		
+		// sort resources
+		// samples first, then layers, then unknown types
+		// inside a type category: keep the order of the soundfont (order by index)
+		Comparator<HashMap<String, Object>> instrumentComparator = new Comparator<HashMap<String, Object>>() {
+			
+			/** Sorting priority for the type. */
+			private HashMap<String, Integer> typePriority = new HashMap<String, Integer>();
+			
+			// initialize type sorting priorities
+			{
+				typePriority.put( "categorySample",  6 );
+				typePriority.put( "Sample",          5 );
+				typePriority.put( "categoryLayer",   4 );
+				typePriority.put( "Layer",           3 );
+				typePriority.put( "categoryUnknown", 2 );
+				typePriority.put( "-",               1 );
+			}
+			
+			@Override
+			public int compare( HashMap<String, Object> resourceA, HashMap<String, Object> resourceB ) {
+				
+				// first priority: type
+				int priorityA = typePriority.get( resourceA.get("type") );
+				int priorityB = typePriority.get( resourceB.get("type") );
+				if ( priorityA > priorityB )
+					return -1;
+				else if ( priorityA < priorityB )
+					return 1;
+				
+				// second priority: index
+				int programA = (Integer) resourceA.get("index");
+				int programB = (Integer) resourceB.get("index");
+				if ( programA < programB )
+					return -1;
+				else if ( programA > programB )
+					return 1;
+				
+				// default compare result
+				return 0;
+			}
+		};
+		Collections.sort( result, instrumentComparator );
 		
 		return result;
 	}

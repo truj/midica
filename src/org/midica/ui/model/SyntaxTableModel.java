@@ -36,9 +36,9 @@ public class SyntaxTableModel extends MidicaTableModel {
 		
 		// table header
 		columnNames = new String[ 3 ];
-		columnNames[ 0 ] = Dict.get( Dict.CONF_COL_SYNTAX_NAME     );
-		columnNames[ 1 ] = Dict.get( Dict.CONF_COL_SYNTAX_SHORTCUT );
-		columnNames[ 2 ] = Dict.get( Dict.CONF_COL_SYNTAX_DESC     );
+		columnNames[ 0 ] = Dict.get( Dict.INFO_COL_SYNTAX_NAME     );
+		columnNames[ 1 ] = Dict.get( Dict.INFO_COL_SYNTAX_SHORTCUT );
+		columnNames[ 2 ] = Dict.get( Dict.INFO_COL_SYNTAX_DESC     );
 		
 		syntaxList = Dict.getSyntaxList();
 	}

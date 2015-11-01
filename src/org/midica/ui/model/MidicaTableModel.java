@@ -12,6 +12,9 @@ import javax.swing.table.DefaultTableModel;
 /**
  * This class represents the data model of most tables used in this project.
  * 
+ * It supports a headline for each column. However the number and content of
+ * the columns and headlines has to be specified in the derived class.
+ * 
  * @author Jan Trukenmüller
  */
 public abstract class MidicaTableModel extends DefaultTableModel {

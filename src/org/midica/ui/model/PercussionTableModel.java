@@ -35,8 +35,8 @@ public class PercussionTableModel extends MidicaTableModel {
 		
 		// table header
 		columnNames = new String[ 2 ];
-		columnNames[ 0 ] = Dict.get( Dict.CONF_COL_PERC_NUM  );
-		columnNames[ 1 ] = Dict.get( Dict.CONF_COL_PERC_NAME );
+		columnNames[ 0 ] = Dict.get( Dict.INFO_COL_PERC_NUM  );
+		columnNames[ 1 ] = Dict.get( Dict.INFO_COL_PERC_NAME );
 		
 		for ( int instrNum : Dict.getPercussionNotes() ) {
 			instrumentNumbers.add( instrNum );
