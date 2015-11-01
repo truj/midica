@@ -5,7 +5,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.midica.ui.info;
+package org.midica.ui.renderer;
 
 import java.awt.Component;
 import java.util.ArrayList;
@@ -18,7 +18,7 @@ import org.midica.config.Config;
 import org.midica.file.SoundfontParser;
 
 /**
- * Cell renderer for the soundfont instrument and drum kit table in the
+ * Cell renderer for the soundfont resource table in the
  * configuration overview of the info window.
  * 
  * The categories are displayed in another color than the plain syntax
@@ -26,19 +26,19 @@ import org.midica.file.SoundfontParser;
  * 
  * @author Jan Trukenmüller
  */
-public class SoundfontInstrumentTableCellRenderer extends DefaultTableCellRenderer {
+public class SoundfontResourceTableCellRenderer extends DefaultTableCellRenderer {
 	
 	private static final long serialVersionUID = 1L;
 	
 	/** List containing all elements including category entries */
-	private ArrayList<HashMap<String, String>> instruments;
+	private ArrayList<HashMap<String, Object>> resources;
 	
 	/**
-	 * Creates a cell renderer for the soundfont instruments and drum kits table
+	 * Creates a cell renderer for the soundfont resource table
 	 * in the configuration overview of the info window.
 	 */
-	public SoundfontInstrumentTableCellRenderer() {
-		this.instruments = SoundfontParser.getSoundfontInstruments();
+	public SoundfontResourceTableCellRenderer() {
+		this.resources = SoundfontParser.getSoundfontResources();
 	}
 	
 	@Override
@@ -46,7 +46,7 @@ public class SoundfontInstrumentTableCellRenderer extends DefaultTableCellRender
 		Component cell = super.getTableCellRendererComponent( table, value, isSelected, hasFocus, row, col );
 		
 		// category entries have an element with key=category and value=category
-		boolean isCategory = instruments.get( row ).get("category") != null;
+		boolean isCategory = resources.get( row ).get("category") != null;
 		if (isCategory) {
 			cell.setBackground( Config.TABLE_CELL_CATEGORY_COLOR );
 		}

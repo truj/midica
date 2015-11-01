@@ -22,6 +22,7 @@ import javax.sound.midi.MidiSystem;
 import javax.sound.midi.Patch;
 import javax.sound.midi.Soundbank;
 import javax.sound.midi.SoundbankResource;
+import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 
 import org.midica.Midica;
@@ -310,6 +311,7 @@ public class SoundfontParser extends Parser {
 			resource.put( "index",       i );
 			resource.put( "name",        resources[i].getName() );
 			resource.put( "class",       "-" );
+			resource.put( "classDetail", "-" );
 			resource.put( "type",        "-" );
 			resource.put( "format",      "-" );
 			resource.put( "frameLength", "-" );
@@ -329,12 +331,22 @@ public class SoundfontParser extends Parser {
 			// apply null-class information
 			Class<?> dataClass = resources[ i ].getDataClass();
 			if ( null == dataClass ) {
-				resource.put( "class", "null" );
+				resource.put( "class",       "null" );
+				resource.put( "classDetail", "null" );
 			}
 			
-			// apply general non-null-class information
+			// apply class name information
 			else {
-				resource.put( "class", dataClass.getCanonicalName() );
+				String fullClassName = dataClass.getCanonicalName();
+				Pattern classPattern = Pattern.compile( ".+\\.([^.]+)$" );
+				Matcher classMatcher = classPattern.matcher( fullClassName );
+				if ( classMatcher.matches() ) {
+					resource.put( "class", classMatcher.group(1) );
+				}
+				else {
+					resource.put( "class", fullClassName );
+				}
+				resource.put( "classDetail", fullClassName );
 			}
 			
 			// apply class-dependant information
@@ -343,8 +355,23 @@ public class SoundfontParser extends Parser {
 				needCategorySample      = true;
 				identifiedType          = "Sample";
 				AudioInputStream stream = (AudioInputStream) resources[i].getData();
-				resource.put( "format",      String.valueOf(stream.getFormat())      );
-				resource.put( "frameLength", String.valueOf(stream.getFrameLength()) );
+				resource.put( "frameLength",  String.valueOf(stream.getFrameLength()) );
+				resource.put( "formatDetail", String.valueOf(stream.getFormat())      );
+				
+				// construct and add a format summary field
+				AudioFormat format    = stream.getFormat();
+				String      encoding  = format.getEncoding().toString().toLowerCase();
+				float       frameRate = format.getFrameRate();
+				int         frameSize = format.getFrameSize();
+				int         bitRate   = format.getSampleSizeInBits();
+				String      frameKHz  = String.format( "%.1f", frameRate / 1000 );
+				String      channels  = "m"; // m=mono, s=stereo
+				if ( 2 == format.getChannels() ) {
+					channels = "s";
+				}
+				String formatStr = encoding + " " + frameKHz + " kHz, " + bitRate + " bit "
+				                 + channels + ", " + frameSize + " B/frm";
+				resource.put( "format", formatStr );
 				
 				// close the stream to avoid an exception caused by "too many open files"
 				try {

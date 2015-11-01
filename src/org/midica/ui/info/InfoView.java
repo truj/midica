@@ -36,6 +36,10 @@ import org.midica.ui.model.PercussionTableModel;
 import org.midica.ui.model.SoundfontInstrumentsTableModel;
 import org.midica.ui.model.SoundfontResourceTableModel;
 import org.midica.ui.model.SyntaxTableModel;
+import org.midica.ui.renderer.InstrumentTableCellRenderer;
+import org.midica.ui.renderer.SoundfontInstrumentTableCellRenderer;
+import org.midica.ui.renderer.SoundfontResourceTableCellRenderer;
+import org.midica.ui.renderer.SyntaxTableCellRenderer;
 
 /**
  * This class defines the GUI view for the informations about the current state
@@ -76,10 +80,10 @@ public class InfoView extends JDialog {
 	private static final int COL_WIDTH_SF_INSTR_KEYS     = 120;
 	private static final int COL_WIDTH_SF_RES_INDEX      =  45;
 	private static final int COL_WIDTH_SF_RES_TYPE       =  55;
-	private static final int COL_WIDTH_SF_RES_NAME       = 120;
+	private static final int COL_WIDTH_SF_RES_NAME       = 130;
 	private static final int COL_WIDTH_SF_RES_FRAMES     =  60;
-	private static final int COL_WIDTH_SF_RES_FORMAT     = 400;
-	private static final int COL_WIDTH_SF_RES_CLASS      = 260;
+	private static final int COL_WIDTH_SF_RES_FORMAT     = 260;
+	private static final int COL_WIDTH_SF_RES_CLASS      = 130;
 	private static final int TABLE_HEIGHT                = 400;
 	
 	private static Dimension noteTableDim       = null;
