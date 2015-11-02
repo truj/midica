@@ -59,13 +59,13 @@ public class SoundfontResourceTableCellRenderer extends MidicaTableCellRenderer 
 		}
 		
 		// change the format tooltip
-		if ( 4 == col && cell instanceof JComponent ) {
+		if ( 4 == col && ! isCategory && cell instanceof JComponent ) {
 			JComponent jCell   = (JComponent) cell;
 			jCell.setToolTipText( (String) resource.get("formatDetail") );
 		}
 		
 		// change the class tooltip
-		if ( 5 == col && cell instanceof JComponent ) {
+		if ( 5 == col && ! isCategory && cell instanceof JComponent ) {
 			JComponent jCell   = (JComponent) cell;
 			jCell.setToolTipText( (String) resource.get("classDetail") );
 		}
