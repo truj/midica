@@ -43,6 +43,16 @@ public class SoundfontParser extends Parser {
 	/** The currently loaded user-defined soundfont. */
 	private Soundbank soundfont = null;
 	
+	/** Data structure for general information of the currently loaded soundbank. */
+	private static HashMap<String, String> generalInfo = null;
+	
+	/** Data structure for instruments and drum kits of the currently loaded soundbank. */
+	private static ArrayList<HashMap<String, String>> soundfontInstruments = null;
+	
+	/** Data structure for resources of the currently loaded soundbank. */
+	private static ArrayList<HashMap<String, Object>> soundfontResources = null;
+	
+	
 	/**
 	 * Parses a soundfont file.
 	 * 
@@ -51,8 +61,14 @@ public class SoundfontParser extends Parser {
 	 */
 	public void parse( File file ) throws ParseException{
 		try {
+			// load the soundfont
 			soundfont = MidiSystem.getSoundbank( file );
 			MidiDevices.setSoundfont( soundfont );
+			
+			// read it and build up data structures
+			parseSoundfontInstruments();
+			parseSoundfontResources();
+			parseSoundfontInfo();
 		}
 		catch ( InvalidMidiDataException e ) {
 			throw new ParseException( e.getMessage() );
@@ -63,56 +79,91 @@ public class SoundfontParser extends Parser {
 	}
 	
 	/**
-	 * Retrieves and returns general information from the currently loaded soundfont.
+	 * Returns general information from the currently loaded soundfont.
 	 * 
 	 * @return general soundfont information.
 	 */
 	public static HashMap<String, String> getSoundfontInfo() {
 		
-		HashMap<String, String> info = new HashMap<String, String>();
-		Soundbank soundfont = MidiDevices.getSoundfont();
+		// parse, if not yet done
+		if ( null == generalInfo )
+			parseSoundfontInfo();
 		
-		// get file name from the UI
-		info.put( "file", Midica.uiController.getView().getChosenSoundfontFileLbl().getText() );
-		
-		// no soundfont loaded?
-		if ( null == soundfont ) {
-			info.put( "name",        "-" );
-			info.put( "version",     "-" );
-			info.put( "vendor",      "-" );
-			info.put( "description", "-" );
-			
-			return info;
-		}
-		
-		// get general information
-		info.put( "name",        soundfont.getName()        );
-		info.put( "version",     soundfont.getVersion()     );
-		info.put( "vendor",      soundfont.getVendor()      );
-		info.put( "description", soundfont.getDescription() );
-		
-		return info;
+		return generalInfo;
 	}
 	
 	/**
-	 * Retrieves and returns instruments and drum kits from the currently loaded soundfont.
+	 * Returns instruments and drum kits from the currently loaded soundfont.
 	 * 
-	 * @param soundfont  The currently loaded soundfont object.
-	 * @param info       The data structure to be enriched with the instruments.
 	 * @return Instruments from the soundfont.
 	 */
 	public static ArrayList<HashMap<String, String>> getSoundfontInstruments() {
 		
-		// initialize
-		ArrayList<HashMap<String, String>> result = new ArrayList<HashMap<String, String>>();
+		// parse, if not yet done
+		if ( null == soundfontInstruments )
+			parseSoundfontInstruments();
+		
+		return soundfontInstruments;
+	}
+	
+	/**
+	 * Returns resources from the currently loaded soundfont.
+	 * 
+	 * @return Resources from the soundfont.
+	 */
+	public static ArrayList<HashMap<String, Object>> getSoundfontResources() {
+		// parse, if not yet done
+		if ( null == soundfontResources )
+			parseSoundfontResources();
+		
+		return soundfontResources;
+	}
+	
+	/**
+	 * Retrieves general information from the currently loaded soundfont.
+	 */
+	private static void parseSoundfontInfo() {
+		
+		generalInfo = new HashMap<String, String>();
 		Soundbank soundfont = MidiDevices.getSoundfont();
+		
+		// get file name from the UI
+		generalInfo.put( "file", Midica.uiController.getView().getChosenSoundfontFileLbl().getText() );
+		
+		// no soundfont loaded?
+		if ( null == soundfont ) {
+			generalInfo.put( "name",        "-" );
+			generalInfo.put( "version",     "-" );
+			generalInfo.put( "vendor",      "-" );
+			generalInfo.put( "description", "-" );
+			
+			return;
+		}
+		
+		// get general information
+		generalInfo.put( "name",        soundfont.getName()        );
+		generalInfo.put( "version",     soundfont.getVersion()     );
+		generalInfo.put( "vendor",      soundfont.getVendor()      );
+		generalInfo.put( "description", soundfont.getDescription() );
+		
+		return;
+	}
+	
+	/**
+	 * Retrieves instruments and drum kits from the currently loaded soundfont.
+	 */
+	private static void parseSoundfontInstruments() {
+		
+		// initialize
+		soundfontInstruments = new ArrayList<HashMap<String, String>>();
+		Soundbank soundfont  = MidiDevices.getSoundfont();
 		boolean needCategoryDrumkit   = false;
 		boolean needCategoryChromatic = false;
 		boolean needCategoryUnknown   = false;
 		
 		// no soundfont loaded?
 		if ( null == soundfont )
-			return result;
+			return;
 		
 		// collect instruments
 		Instrument[] instruments = soundfont.getInstruments();
@@ -120,7 +171,7 @@ public class SoundfontParser extends Parser {
 			
 			// add general instrument data
 			HashMap<String, String> instrument = new HashMap<String, String>();
-			result.add( instrument );
+			soundfontInstruments.add( instrument );
 			Instrument midiInstr = instruments[ i ];
 			Patch      patch     = midiInstr.getPatch();
 			int        bank      = patch.getBank();
@@ -209,21 +260,21 @@ public class SoundfontParser extends Parser {
 			category.put( "category", "category" );
 			category.put( "type",     "categoryChromatic" );
 			category.put( "name",     Dict.get(Dict.SF_INSTR_CAT_CHROMATIC) );
-			result.add( category );
+			soundfontInstruments.add( category );
 		}
 		if (needCategoryDrumkit) {
 			HashMap<String, String> category = new HashMap<String, String>();
 			category.put( "category", "category" );
 			category.put( "type",     "categoryDrumkit" );
 			category.put( "name",     Dict.get(Dict.SF_INSTR_CAT_DRUMKIT) );
-			result.add( category );
+			soundfontInstruments.add( category );
 		}
 		if (needCategoryUnknown) {
 			HashMap<String, String> category = new HashMap<String, String>();
 			category.put( "category", "category" );
 			category.put( "type",     "categoryUnknown" );
 			category.put( "name",     Dict.get(Dict.SF_INSTR_CAT_UNKNOWN) );
-			result.add( category );
+			soundfontInstruments.add( category );
 		}
 		
 		// sort instruments
@@ -275,22 +326,18 @@ public class SoundfontParser extends Parser {
 				return 0;
 			}
 		};
-		Collections.sort( result, instrumentComparator );
+		Collections.sort( soundfontInstruments, instrumentComparator );
 		
-		return result;
+		return;
 	}
 	
 	/**
-	 * Retrieves resources from the soundfont and adds them to the info collection.
-	 * 
-	 * @param soundfont  The currently loaded soundfont object.
-	 * @param info       The data structure to be enriched with the resources.
-	 * @return Resources from the soundfont.
+	 * Retrieves resources from the soundfont.
 	 */
-	public static ArrayList<HashMap<String, Object>> getSoundfontResources() {
+	public static void parseSoundfontResources() {
 		
 		// initialize
-		ArrayList<HashMap<String, Object>> result = new ArrayList<HashMap<String, Object>>();
+		soundfontResources  = new ArrayList<HashMap<String, Object>>();
 		Soundbank soundfont = MidiDevices.getSoundfont();
 		boolean needCategorySample  = false;
 		boolean needCategoryLayer   = false;
@@ -298,14 +345,14 @@ public class SoundfontParser extends Parser {
 		
 		// no soundfont loaded?
 		if ( null == soundfont )
-			return result;
+			return;
 		
 		// collect resources
 		SoundbankResource[] resources = soundfont.getResources();
 		for ( int i=0; i < resources.length; i++ ) {
 			
 			HashMap<String, Object> resource = new HashMap<String, Object>();
-			result.add( resource );
+			soundfontResources.add( resource );
 			
 			// apply general information and defaults
 			resource.put( "index",       i );
@@ -392,21 +439,21 @@ public class SoundfontParser extends Parser {
 			category.put( "category", "category" );
 			category.put( "type",     "categorySample" );
 			category.put( "name",     Dict.get(Dict.SF_RESOURCE_CAT_SAMPLE) );
-			result.add( category );
+			soundfontResources.add( category );
 		}
 		if (needCategoryLayer) {
 			HashMap<String, Object> category = new HashMap<String, Object>();
 			category.put( "category", "category" );
 			category.put( "type",     "categoryLayer" );
 			category.put( "name",     Dict.get(Dict.SF_RESOURCE_CAT_LAYER) );
-			result.add( category );
+			soundfontResources.add( category );
 		}
 		if (needCategoryUnknown) {
 			HashMap<String, Object> category = new HashMap<String, Object>();
 			category.put( "category", "category" );
 			category.put( "type",     "categoryUnknown" );
 			category.put( "name",     Dict.get(Dict.SF_RESOURCE_CAT_UNKNOWN) );
-			result.add( category );
+			soundfontResources.add( category );
 		}
 		
 		// sort resources
@@ -450,9 +497,9 @@ public class SoundfontParser extends Parser {
 				return 0;
 			}
 		};
-		Collections.sort( result, instrumentComparator );
+		Collections.sort( soundfontResources, instrumentComparator );
 		
-		return result;
+		return;
 	}
 	
 	/**
