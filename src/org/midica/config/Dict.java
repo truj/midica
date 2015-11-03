@@ -345,6 +345,7 @@ public class Dict {
 	public static final String TIMESTAMP_FORMAT            = "timestamp_format";
 	public static final String NAME                        = "name";
 	public static final String FILE                        = "file";
+	public static final String VERSION                     = "version";
 	public static final String DESCRIPTION                 = "description";
 	public static final String INFO_COL_NOTE_NUM           = "info_col_note_num";
 	public static final String INFO_COL_NOTE_NAME          = "info_col_note_name";
@@ -666,6 +667,7 @@ public class Dict {
 		set( TIMESTAMP_FORMAT,                       "yyyy-MM-dd HH:mm:ss"           );
 		set( NAME,                                   "Name"                          );
 		set( FILE,                                   "File"                          );
+		set( VERSION,                                "Version"                       );
 		set( DESCRIPTION,                            "Description"                   );
 		set( INFO_COL_NOTE_NUM,                      "Number"                        );
 		set( INFO_COL_NOTE_NAME,                     "Name"                          );

@@ -36,6 +36,7 @@ import org.midica.ui.model.PercussionTableModel;
 import org.midica.ui.model.SoundfontInstrumentsTableModel;
 import org.midica.ui.model.SoundfontResourceTableModel;
 import org.midica.ui.model.SyntaxTableModel;
+import org.midica.ui.renderer.FlowLabel;
 import org.midica.ui.renderer.InstrumentTableCellRenderer;
 import org.midica.ui.renderer.SoundfontInstrumentTableCellRenderer;
 import org.midica.ui.renderer.SoundfontResourceTableCellRenderer;
@@ -63,7 +64,7 @@ public class InfoView extends JDialog {
 	
 	private static final long serialVersionUID = 1L;
 	
-	// column widths
+	// widths and heights, used for dimensions
 	private static final int COL_WIDTH_NOTE_NUM          =  60;
 	private static final int COL_WIDTH_NOTE_NAME         = 140;
 	private static final int COL_WIDTH_PERC_NUM          =  60;
@@ -85,13 +86,19 @@ public class InfoView extends JDialog {
 	private static final int COL_WIDTH_SF_RES_FORMAT     = 260;
 	private static final int COL_WIDTH_SF_RES_CLASS      = 130;
 	private static final int TABLE_HEIGHT                = 400;
+	private static final int GENERAL_INFO_VALUE_WIDTH    = 500;
+	private static final int GENERAL_INFO_VALUE_HEIGHT   =  16;
+	private static final int SOUNDFONT_DESC_HEIGHT       = 300;
 	
+	// dimensions
 	private static Dimension noteTableDim       = null;
 	private static Dimension percTableDim       = null;
 	private static Dimension syntaxTableDim     = null;
 	private static Dimension instrTableDim      = null;
 	private static Dimension sfInstrTableDim    = null;
 	private static Dimension sfResourceTableDim = null;
+	private static Dimension sfDescriptionDim   = null;
+	private static Dimension generalInfoDim     = null;
 	
 	private static InfoView infoView = null;
 	
@@ -136,8 +143,14 @@ public class InfoView extends JDialog {
 		sfInstrTableDim    = new Dimension( sfInstrWidth,    TABLE_HEIGHT );
 		sfResourceTableDim = new Dimension( sfResourceWidth, TABLE_HEIGHT );
 		
+		// initialize dimensions for info value labels
+		generalInfoDim   = new Dimension( GENERAL_INFO_VALUE_WIDTH, GENERAL_INFO_VALUE_HEIGHT );
+		sfDescriptionDim = new Dimension( GENERAL_INFO_VALUE_WIDTH, SOUNDFONT_DESC_HEIGHT );
+		
+		// create content
 		init();
 		
+		// show everything
 		pack();
 		setVisible( true );
 	}
@@ -411,61 +424,59 @@ public class InfoView extends JDialog {
 		HashMap<String, String> soundfontInfo = SoundfontParser.getSoundfontInfo();
 		
 		// file translation
-		constraints.anchor = GridBagConstraints.EAST;
+		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblFile     = new JLabel( Dict.get(Dict.FILE) + ": " );
 		area.add( lblFile, constraints );
 		
 		// file name
 		constraints.gridx++;
-		constraints.anchor    = GridBagConstraints.WEST;
-		JLabel lblFileContent = new JLabel( soundfontInfo.get("file") );
+		constraints.anchor    = GridBagConstraints.NORTHWEST;
+		FlowLabel lblFileContent = new FlowLabel( soundfontInfo.get("file") );
+		lblFileContent.setPreferredSize( generalInfoDim );
 		area.add( lblFileContent, constraints );
 		
 		// name translation
 		constraints.gridx = 0;
 		constraints.gridy++;
-		constraints.anchor = GridBagConstraints.EAST;
+		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblname     = new JLabel( Dict.get(Dict.NAME) + ": " );
 		area.add( lblname, constraints );
 		
 		// name content
 		constraints.gridx++;
-		constraints.anchor    = GridBagConstraints.WEST;
-		JLabel lblNameContent = new JLabel( soundfontInfo.get("name") );
+		constraints.anchor    = GridBagConstraints.NORTHWEST;
+		FlowLabel lblNameContent = new FlowLabel( soundfontInfo.get("name") );
+		lblNameContent.setPreferredSize( generalInfoDim );
 		area.add( lblNameContent, constraints );
 		
 		// version translation
 		constraints.gridx = 0;
 		constraints.gridy++;
-		constraints.anchor = GridBagConstraints.EAST;
-		JLabel lblVersion  = new JLabel( Dict.get(Dict.TAB_MIDICA) + ": " );
+		constraints.anchor = GridBagConstraints.NORTHEAST;
+		JLabel lblVersion  = new JLabel( Dict.get(Dict.VERSION) + ": " );
 		area.add( lblVersion, constraints );
 		
 		// version content
 		constraints.gridx++;
-		constraints.anchor       = GridBagConstraints.WEST;
-		JLabel lblVersionContent = new JLabel( soundfontInfo.get("version") );
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		FlowLabel lblVersionContent = new FlowLabel( soundfontInfo.get("version") );
+		lblVersionContent.setPreferredSize( generalInfoDim );
 		area.add( lblVersionContent, constraints );
 		
 		// description translation
 		constraints.gridx = 0;
 		constraints.gridy++;
-		constraints.anchor    = GridBagConstraints.EAST;
+		constraints.anchor    = GridBagConstraints.NORTHEAST;
 		JLabel lblDescription = new JLabel( Dict.get(Dict.DESCRIPTION) + ": " );
 		area.add( lblDescription, constraints );
 		
 		// description content
 		constraints.gridx++;
-		constraints.anchor      = GridBagConstraints.WEST;
-		JLabel lblDescriptionContent = new JLabel( soundfontInfo.get("description") );
-		area.add( lblDescriptionContent, constraints );
-		
-		// spacer
-		constraints.gridy++;
-		constraints.gridx   = 0;
+		constraints.anchor  = GridBagConstraints.NORTHWEST;
 		constraints.weighty = 1;
-		JLabel spacer = new JLabel( " " );
-		area.add( spacer, constraints );
+		FlowLabel lblDescriptionContent = new FlowLabel( soundfontInfo.get("description") );
+		lblDescriptionContent.setPreferredSize( sfDescriptionDim );
+		area.add( lblDescriptionContent, constraints );
 		
 		return area;
 	}
