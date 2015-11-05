@@ -58,16 +58,22 @@ public class SoundfontResourceTableCellRenderer extends MidicaTableCellRenderer 
 			cell.setBackground( Config.TABLE_CELL_DEFAULT_COLOR );
 		}
 		
+		// change the frames tooltip
+		if ( 3 == col && ! isCategory && cell instanceof JComponent ) {
+			JComponent jCell = (JComponent) cell;
+			jCell.setToolTipText( (String) resource.get("length_detail") );
+		}
+		
 		// change the format tooltip
 		if ( 4 == col && ! isCategory && cell instanceof JComponent ) {
-			JComponent jCell   = (JComponent) cell;
-			jCell.setToolTipText( (String) resource.get("formatDetail") );
+			JComponent jCell = (JComponent) cell;
+			jCell.setToolTipText( (String) resource.get("format_detail") );
 		}
 		
 		// change the class tooltip
 		if ( 5 == col && ! isCategory && cell instanceof JComponent ) {
-			JComponent jCell   = (JComponent) cell;
-			jCell.setToolTipText( (String) resource.get("classDetail") );
+			JComponent jCell = (JComponent) cell;
+			jCell.setToolTipText( (String) resource.get("class_detail") );
 		}
 		
 		return cell;

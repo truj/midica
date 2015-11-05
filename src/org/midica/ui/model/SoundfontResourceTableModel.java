@@ -102,7 +102,7 @@ public class SoundfontResourceTableModel extends MidicaTableModel {
 		
 		// frames
 		else if ( 3 == colIndex ) {
-			return resources.get( rowIndex ).get( "frameLength" );
+			return resources.get( rowIndex ).get( "frame_length" );
 		}
 		
 		// format

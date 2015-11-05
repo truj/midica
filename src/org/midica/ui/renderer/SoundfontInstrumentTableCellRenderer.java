@@ -61,8 +61,8 @@ public class SoundfontInstrumentTableCellRenderer extends MidicaTableCellRendere
 		// change the format tooltip
 		if ( 1 == col && ! isCategory && cell instanceof JComponent ) {
 			JComponent jCell = (JComponent) cell;
-			String text = "MSB: " + instrument.get("bankMSB") + ", "
-			            + "LSB: " + instrument.get("bankLSB");
+			String text = "MSB: " + instrument.get("bank_msb") + ", "
+			            + "LSB: " + instrument.get("bank_lsb");
 			jCell.setToolTipText( text );
 		}
 		

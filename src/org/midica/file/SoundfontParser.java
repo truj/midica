@@ -43,13 +43,13 @@ public class SoundfontParser extends Parser {
 	/** The currently loaded user-defined soundfont. */
 	private Soundbank soundfont = null;
 	
-	/** Data structure for general information of the currently loaded soundbank. */
+	/** Data structure for general information of the currently loaded soundfont. */
 	private static HashMap<String, String> generalInfo = null;
 	
-	/** Data structure for instruments and drum kits of the currently loaded soundbank. */
+	/** Data structure for instruments and drum kits of the currently loaded soundfont. */
 	private static ArrayList<HashMap<String, String>> soundfontInstruments = null;
 	
-	/** Data structure for resources of the currently loaded soundbank. */
+	/** Data structure for resources of the currently loaded soundfont. */
 	private static ArrayList<HashMap<String, Object>> soundfontResources = null;
 	
 	
@@ -59,7 +59,7 @@ public class SoundfontParser extends Parser {
 	 * @param file             Soundfont file chosen by the user.
 	 * @throws ParseException  If the file can not be loaded correctly.
 	 */
-	public void parse( File file ) throws ParseException{
+	public void parse( File file ) throws ParseException {
 		try {
 			// load the soundfont
 			soundfont = MidiSystem.getSoundbank( file );
@@ -86,8 +86,19 @@ public class SoundfontParser extends Parser {
 	public static HashMap<String, String> getSoundfontInfo() {
 		
 		// parse, if not yet done
-		if ( null == generalInfo )
+		if ( null == generalInfo ) {
+			
+			// The soundfont info parsing relies on the other data structures.
+			// so we have to parse them first, before building up the info
+			// structure itself.
+			if (  null == soundfontInstruments )
+				parseSoundfontInstruments();
+			if ( null == soundfontResources )
+				parseSoundfontResources();
+			
+			// Now we can parse the info.
 			parseSoundfontInfo();
+		}
 		
 		return generalInfo;
 	}
@@ -146,6 +157,93 @@ public class SoundfontParser extends Parser {
 		generalInfo.put( "vendor",      soundfont.getVendor()      );
 		generalInfo.put( "description", soundfont.getDescription() );
 		
+		// count instruments and drumkits
+		int chromaticCount    = 0;
+		int drumSingleCount   = 0;
+		int drumMultiCount    = 0;
+		int unknownInstrCount = 0;
+		if ( soundfontInstruments != null ) {
+			for ( HashMap<String, String> instrument : soundfontInstruments ) {
+				String type = instrument.get( "type" );
+				if ( "chromatic".equals(type) )
+					chromaticCount++;
+				else if ( "drumkit_single".equals(type) )
+					drumSingleCount++;
+				else if ( "drumkit_multi".equals(type) )
+					drumMultiCount++;
+				else if ( "-".equals(type) )
+					unknownInstrCount++;
+			}
+		}
+		generalInfo.put( "chromatic_count",          Integer.toString(chromaticCount)    );
+		generalInfo.put( "drumkit_single_count",     Integer.toString(drumSingleCount)   );
+		generalInfo.put( "drumkit_multi_count",      Integer.toString(drumMultiCount)    );
+		generalInfo.put( "unknown_instrument_count", Integer.toString(unknownInstrCount) );
+		
+		// count resources
+		int    layerCount      = 0;
+		int    sampleCount     = 0;
+		int    unknownResCount = 0;
+		long   framesCount     = 0;
+		double secondsCount    = 0;
+		long   bytesCount      = 0;
+		if ( soundfontResources != null ) {
+			for ( HashMap<String, Object> resource : soundfontResources ) {
+				String type = (String) resource.get( "type" );
+				if ( "Layer".equals(type) )
+					layerCount++;
+				else if ( "Sample".equals(type) )
+					sampleCount++;
+				else if ( "-".equals(type) )
+					unknownResCount++;
+				
+				// count frames, seconds and bytes
+				if ( "Sample".equals(type) ) {
+					
+					Object frames = resource.get( "frame_length" );
+					if ( frames != null )
+						framesCount += (long) frames;
+					
+					Object seconds = resource.get( "seconds" );
+					if ( seconds != null )
+						secondsCount += (double) seconds;
+					
+					Object bytes = resource.get( "bytes" );
+					if ( bytes != null )
+						bytesCount += (long) bytes;
+				}
+			}
+		}
+		generalInfo.put( "layer_count",            Integer.toString(layerCount)        );
+		generalInfo.put( "sample_count",           Integer.toString(sampleCount)       );
+		generalInfo.put( "unknown_resource_count", Integer.toString(unknownResCount)   );
+		generalInfo.put( "frames_count",           Long.toString(framesCount)          );
+		generalInfo.put( "seconds_count",          String.format("%.2f", secondsCount) );
+		generalInfo.put( "bytes_count",            Long.toString(bytesCount)           );
+		
+		// calculate average values
+		float  avgFrames  = 0;
+		double avgSeconds = 0;
+		float  avgBytes   = 0;
+		try {
+			avgFrames = (float) framesCount / sampleCount;
+		}
+		catch ( ArithmeticException e ) {
+		}
+		try {
+			avgSeconds = secondsCount / sampleCount;
+		}
+		catch ( ArithmeticException e ) {
+		}
+		try {
+			avgBytes = (float) framesCount / sampleCount;
+		}
+		catch ( ArithmeticException e ) {
+		}
+		generalInfo.put( "frames_avg",  String.format("%.2f", avgFrames)  );
+		generalInfo.put( "seconds_avg", String.format("%.2f", avgSeconds) );
+		generalInfo.put( "bytes_avg",   String.format("%.2f", avgBytes)   );
+		
 		return;
 	}
 	
@@ -157,9 +255,10 @@ public class SoundfontParser extends Parser {
 		// initialize
 		soundfontInstruments = new ArrayList<HashMap<String, String>>();
 		Soundbank soundfont  = MidiDevices.getSoundfont();
-		boolean needCategoryDrumkit   = false;
-		boolean needCategoryChromatic = false;
-		boolean needCategoryUnknown   = false;
+		boolean needCategoryDrumkitSingle = false;
+		boolean needCategoryDrumkitMulti  = false;
+		boolean needCategoryChromatic     = false;
+		boolean needCategoryUnknown       = false;
 		
 		// no soundfont loaded?
 		if ( null == soundfont )
@@ -175,11 +274,11 @@ public class SoundfontParser extends Parser {
 			Instrument midiInstr = instruments[ i ];
 			Patch      patch     = midiInstr.getPatch();
 			int        bank      = patch.getBank();
-			instrument.put( "name",    midiInstr.getName()                  );
-			instrument.put( "program", Integer.toString(patch.getProgram()) );
-			instrument.put( "bank",    Integer.toString(bank)               );
-			instrument.put( "bankMSB", Integer.toString(bank >> 7)          );
-			instrument.put( "bankLSB", Integer.toString(bank % 128)         );
+			instrument.put( "name",     midiInstr.getName()                  );
+			instrument.put( "program",  Integer.toString(patch.getProgram()) );
+			instrument.put( "bank",     Integer.toString(bank)               );
+			instrument.put( "bank_msb", Integer.toString(bank >> 7)          );
+			instrument.put( "bank_lsb", Integer.toString(bank % 128)         );
 			
 			// add class specific instrument data
 			if ( ! (midiInstr instanceof SF2Instrument) ) {
@@ -194,8 +293,8 @@ public class SoundfontParser extends Parser {
 			}
 			
 			// get channels
-			boolean            hasChannel0 = false;
-			boolean            hasChannel9 = false;
+			boolean            hasChromaticChannel = false;
+			boolean            hasDrumChannel      = false;
 			SF2Instrument      sf2Instr    = (SF2Instrument) midiInstr;
 			boolean[]          sf2Channels = sf2Instr.getChannels();
 			ArrayList<Integer> channels    = new ArrayList<Integer>();
@@ -208,11 +307,11 @@ public class SoundfontParser extends Parser {
 				// remember the channel
 				channels.add( channel );
 				
-				// remember if channel 0 or 9 is supported (that's a hint if this is a drum kit or an instrument)
-				if ( 0 == channel )
-					hasChannel0 = true;
-				else if ( 9 == channel )
-					hasChannel9 = true;
+				// remember if channel 9 or another one is supported
+				if ( 9 == channel )
+					hasDrumChannel = true;
+				else
+					hasChromaticChannel = true;
 			}
 			instrument.put( "channels", makeNumberRangeString(channels) );
 			
@@ -230,26 +329,25 @@ public class SoundfontParser extends Parser {
 			}
 			instrument.put( "keys", makeNumberRangeString(keys) );
 			
-			// Try to guess the type: chromatic or drum kit.
-			Pattern pattern = Pattern.compile( "^Drumkit:.*" );
-			Matcher matcher = pattern.matcher( sf2Instr.toString() );
-			if ( matcher.matches() ) {
-				needCategoryDrumkit = true;
-				instrument.put( "type", "drumkit" );
+			// Get the type: chromatic, single channel drum kit
+			// or multi channel drum kit.
+			if ( hasDrumChannel && hasChromaticChannel ) {
+				needCategoryDrumkitMulti = true;
+				instrument.put( "type", "drumkit_multi" );
 				continue;
 			}
-			if ( hasChannel9 && ! hasChannel0 ) {
-				needCategoryDrumkit = true;
-				instrument.put( "type", "drumkit" );
+			else if ( hasDrumChannel && ! hasChromaticChannel ) {
+				needCategoryDrumkitSingle = true;
+				instrument.put( "type", "drumkit_single" );
 				continue;
 			}
-			if ( hasChannel0 && ! hasChannel9 ) {
+			else if ( hasChromaticChannel && ! hasDrumChannel ) {
 				needCategoryChromatic = true;
 				instrument.put( "type", "chromatic" );
 				continue;
 			}
 			
-			// Still in the loop, so we failed to guess.
+			// no channels at all
 			needCategoryUnknown = true;
 			instrument.put( "type", "-" );
 		}
@@ -258,21 +356,28 @@ public class SoundfontParser extends Parser {
 		if (needCategoryChromatic) {
 			HashMap<String, String> category = new HashMap<String, String>();
 			category.put( "category", "category" );
-			category.put( "type",     "categoryChromatic" );
+			category.put( "type",     "category_chromatic" );
 			category.put( "name",     Dict.get(Dict.SF_INSTR_CAT_CHROMATIC) );
 			soundfontInstruments.add( category );
 		}
-		if (needCategoryDrumkit) {
+		if (needCategoryDrumkitSingle) {
 			HashMap<String, String> category = new HashMap<String, String>();
 			category.put( "category", "category" );
-			category.put( "type",     "categoryDrumkit" );
-			category.put( "name",     Dict.get(Dict.SF_INSTR_CAT_DRUMKIT) );
+			category.put( "type",     "category_drumkit_single" );
+			category.put( "name",     Dict.get(Dict.SF_INSTR_CAT_DRUMKIT_SINGLE) );
+			soundfontInstruments.add( category );
+		}
+		if (needCategoryDrumkitMulti) {
+			HashMap<String, String> category = new HashMap<String, String>();
+			category.put( "category", "category" );
+			category.put( "type",     "category_drumkit_multi" );
+			category.put( "name",     Dict.get(Dict.SF_INSTR_CAT_DRUMKIT_MULTI) );
 			soundfontInstruments.add( category );
 		}
 		if (needCategoryUnknown) {
 			HashMap<String, String> category = new HashMap<String, String>();
 			category.put( "category", "category" );
-			category.put( "type",     "categoryUnknown" );
+			category.put( "type",     "category_unknown" );
 			category.put( "name",     Dict.get(Dict.SF_INSTR_CAT_UNKNOWN) );
 			soundfontInstruments.add( category );
 		}
@@ -287,12 +392,14 @@ public class SoundfontParser extends Parser {
 			
 			// initialize type sorting priorities
 			{
-				typePriority.put( "categoryDrumkit",   6 );
-				typePriority.put( "drumkit",           5 );
-				typePriority.put( "categoryChromatic", 4 );
-				typePriority.put( "chromatic",         3 );
-				typePriority.put( "categoryUnknown",   2 );
-				typePriority.put( "-",                 1 );
+				typePriority.put( "category_drumkit_single", 8 );
+				typePriority.put( "drumkit_single",          7 );
+				typePriority.put( "category_drumkit_multi",  6 );
+				typePriority.put( "drumkit_multi",           5 );
+				typePriority.put( "category_chromatic",      4 );
+				typePriority.put( "chromatic",               3 );
+				typePriority.put( "category_unknown",        2 );
+				typePriority.put( "-",                       1 );
 			}
 			
 			@Override
@@ -355,17 +462,17 @@ public class SoundfontParser extends Parser {
 			soundfontResources.add( resource );
 			
 			// apply general information and defaults
-			resource.put( "index",       i );
-			resource.put( "name",        resources[i].getName() );
-			resource.put( "class",       "-" );
-			resource.put( "classDetail", "-" );
-			resource.put( "type",        "-" );
-			resource.put( "format",      "-" );
-			resource.put( "frameLength", "-" );
-			String classDesc      = resources[i].toString();
-			Pattern pattern       = Pattern.compile( "^(.+):.*" );
-			Matcher matcher       = pattern.matcher( classDesc );
-			String identifiedType = null;
+			resource.put( "index",        i );
+			resource.put( "name",         resources[i].getName() );
+			resource.put( "class",        "-" );
+			resource.put( "class_detail", "-" );
+			resource.put( "type",         "-" );
+			resource.put( "format",       "-" );
+			resource.put( "frame_length", 0   );
+			String  classDesc      = resources[i].toString();
+			Pattern pattern        = Pattern.compile( "^(.+):.*" );
+			Matcher matcher        = pattern.matcher( classDesc );
+			String  identifiedType = null;
 			if ( matcher.matches() ) {
 				String type = matcher.group( 1 );
 				resource.put( "type", type );
@@ -378,8 +485,8 @@ public class SoundfontParser extends Parser {
 			// apply null-class information
 			Class<?> dataClass = resources[ i ].getDataClass();
 			if ( null == dataClass ) {
-				resource.put( "class",       "null" );
-				resource.put( "classDetail", "null" );
+				resource.put( "class",        "null" );
+				resource.put( "class_detail", "null" );
 			}
 			
 			// apply class name information
@@ -393,32 +500,47 @@ public class SoundfontParser extends Parser {
 				else {
 					resource.put( "class", fullClassName );
 				}
-				resource.put( "classDetail", fullClassName );
+				resource.put( "class_detail", fullClassName );
 			}
 			
 			// apply class-dependant information
 			if ( dataClass == AudioInputStream.class ) {
 				
-				needCategorySample      = true;
-				identifiedType          = "Sample";
-				AudioInputStream stream = (AudioInputStream) resources[i].getData();
-				resource.put( "frameLength",  String.valueOf(stream.getFrameLength()) );
-				resource.put( "formatDetail", String.valueOf(stream.getFormat())      );
+				needCategorySample = true;
+				identifiedType     = "Sample";
 				
-				// construct and add a format summary field
-				AudioFormat format    = stream.getFormat();
-				String      encoding  = format.getEncoding().toString().toLowerCase();
-				float       frameRate = format.getFrameRate();
-				int         frameSize = format.getFrameSize();
-				int         bitRate   = format.getSampleSizeInBits();
-				String      frameKHz  = String.format( "%.1f", frameRate / 1000 );
-				String      channels  = "m"; // m=mono, s=stereo
-				if ( 2 == format.getChannels() ) {
-					channels = "s";
-				}
-				String formatStr = encoding + " " + frameKHz + " kHz, " + bitRate + " bit "
-				                 + channels + ", " + frameSize + " B/frm";
-				resource.put( "format", formatStr );
+				// get stream and format information
+				AudioInputStream stream       = (AudioInputStream) resources[i].getData();
+				long             frameCount   = stream.getFrameLength();
+				AudioFormat      format       = stream.getFormat();
+				String           formatDetail = format.toString();
+				String           encoding     = format.getEncoding().toString().toLowerCase();
+				float            frameRate    = format.getFrameRate();
+				int              frameSize    = format.getFrameSize();
+				int              bitRate      = format.getSampleSizeInBits();
+				String           frameKHz     = String.format( "%.1f", frameRate / 1000 );
+				double           seconds      = ( frameCount + 0.0 ) / frameRate;
+				int              channels     = format.getChannels();
+				long             bytes        = frameCount * frameSize * channels;
+				
+				// construct a frame length details field (for the frames tooltip text)
+				String lengthDetail = frameCount + " " + Dict.get( Dict.FRAMES ) + ", "
+				                    + String.format( "%.2f", seconds ) + " "
+				                    + Dict.get( Dict.SEC ) + ", "
+				                    + bytes + " " + Dict.get( Dict.BYTES );
+				
+				// construct a format summary field (for the format tooltip text)
+				String monoStereo = 2 == channels ? "s" : "m"; // m=mono, s=stereo
+				String formatStr  = encoding   + " "  + frameKHz  + " kHz, " + bitRate + " bit "
+				                  + monoStereo + ", " + frameSize + " B/frm";
+				
+				// store everything into the data structure
+				resource.put( "frame_length",  frameCount   ); // content of the frames column
+				resource.put( "length_detail", lengthDetail ); // tooltip for the frames column
+				resource.put( "format",        formatStr    ); // content of the f column
+				resource.put( "format_detail", formatDetail ); // tooltip for the format column
+				resource.put( "seconds",       seconds      );
+				resource.put( "bytes",         bytes        );
 				
 				// close the stream to avoid an exception caused by "too many open files"
 				try {
@@ -437,21 +559,21 @@ public class SoundfontParser extends Parser {
 		if (needCategorySample) {
 			HashMap<String, Object> category = new HashMap<String, Object>();
 			category.put( "category", "category" );
-			category.put( "type",     "categorySample" );
+			category.put( "type",     "category_sample" );
 			category.put( "name",     Dict.get(Dict.SF_RESOURCE_CAT_SAMPLE) );
 			soundfontResources.add( category );
 		}
 		if (needCategoryLayer) {
 			HashMap<String, Object> category = new HashMap<String, Object>();
 			category.put( "category", "category" );
-			category.put( "type",     "categoryLayer" );
+			category.put( "type",     "category_layer" );
 			category.put( "name",     Dict.get(Dict.SF_RESOURCE_CAT_LAYER) );
 			soundfontResources.add( category );
 		}
 		if (needCategoryUnknown) {
 			HashMap<String, Object> category = new HashMap<String, Object>();
 			category.put( "category", "category" );
-			category.put( "type",     "categoryUnknown" );
+			category.put( "type",     "category_unknown" );
 			category.put( "name",     Dict.get(Dict.SF_RESOURCE_CAT_UNKNOWN) );
 			soundfontResources.add( category );
 		}
@@ -466,12 +588,12 @@ public class SoundfontParser extends Parser {
 			
 			// initialize type sorting priorities
 			{
-				typePriority.put( "categorySample",  6 );
-				typePriority.put( "Sample",          5 );
-				typePriority.put( "categoryLayer",   4 );
-				typePriority.put( "Layer",           3 );
-				typePriority.put( "categoryUnknown", 2 );
-				typePriority.put( "-",               1 );
+				typePriority.put( "category_sample",  6 );
+				typePriority.put( "Sample",           5 );
+				typePriority.put( "category_layer",   4 );
+				typePriority.put( "Layer",            3 );
+				typePriority.put( "category_unknown", 2 );
+				typePriority.put( "-",                1 );
 			}
 			
 			@Override

@@ -22,7 +22,8 @@ import org.midica.file.SoundfontParser;
  * A category can be one of the following:
  * 
  * - Chromatic instruments
- * - Drum kits
+ * - Single channel drum kits
+ * - Multi channel drum kits
  * - Unknown
  * 
  * The bank column is special. A bank can consist of 2 bytes. However in most cases
@@ -94,14 +95,14 @@ public class SoundfontInstrumentsTableModel extends MidicaTableModel {
 				return "";
 			
 			// if the LSB is 0, only show the MSB
-			String lsb = instruments.get( rowIndex ).get( "bankLSB" );
+			String lsb = instruments.get( rowIndex ).get( "bank_lsb" );
 			if ( lsb.equals("0") )
-				return instruments.get( rowIndex ).get( "bankMSB" );
+				return instruments.get( rowIndex ).get( "bank_msb" );
 			
 			// show MSB and LSB, separated according to the configured syntax
-			return instruments.get( rowIndex ).get( "bankMSB" )
+			return instruments.get( rowIndex ).get( "bank_msb" )
 			     + Dict.getSyntax( Dict.SYNTAX_BANK_SEP )
-			     + instruments.get( rowIndex ).get( "bankLSB" );
+			     + instruments.get( rowIndex ).get( "bank_lsb" );
 		}
 		
 		// name

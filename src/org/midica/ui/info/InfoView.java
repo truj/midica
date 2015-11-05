@@ -88,7 +88,7 @@ public class InfoView extends JDialog {
 	private static final int TABLE_HEIGHT                = 400;
 	private static final int GENERAL_INFO_VALUE_WIDTH    = 500;
 	private static final int GENERAL_INFO_VALUE_HEIGHT   =  16;
-	private static final int SOUNDFONT_DESC_HEIGHT       = 300;
+	private static final int SOUNDFONT_DESC_HEIGHT       = 250;
 	
 	// dimensions
 	private static Dimension noteTableDim       = null;
@@ -462,6 +462,95 @@ public class InfoView extends JDialog {
 		FlowLabel lblVersionContent = new FlowLabel( soundfontInfo.get("version") );
 		lblVersionContent.setPreferredSize( generalInfoDim );
 		area.add( lblVersionContent, constraints );
+		
+		// chromatic instruments translation
+		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.anchor = GridBagConstraints.NORTHEAST;
+		JLabel lblChromatic  = new JLabel( Dict.get(Dict.SF_INSTR_CAT_CHROMATIC) + ": " );
+		area.add( lblChromatic, constraints );
+		
+		// chromatic instruments content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		FlowLabel lblChromaticContent = new FlowLabel( soundfontInfo.get("chromatic_count") );
+		lblChromaticContent.setPreferredSize( generalInfoDim );
+		area.add( lblChromaticContent, constraints );
+		
+		// drum kits translation
+		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.anchor       = GridBagConstraints.NORTHEAST;
+		JLabel lblDrumkitsSingle = new JLabel( Dict.get(Dict.SOUNDFONT_DRUMKITS) + ": " );
+		area.add( lblDrumkitsSingle, constraints );
+		
+		// drum kits content
+		int drumSingle = Integer.parseInt( soundfontInfo.get("drumkit_single_count") );
+		int drumMulti  = Integer.parseInt( soundfontInfo.get("drumkit_multi_count")  );
+		int drumTotal  = drumSingle + drumMulti;
+		String drumkitsContent = drumTotal  + " ("
+		                       + drumSingle + " " + Dict.get( Dict.SINGLE_CHANNEL ) + ", "
+		                       + drumMulti  + " " + Dict.get( Dict.MULTI_CHANNEL  ) + ")";
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		FlowLabel lblDrumkitsSingleContent = new FlowLabel( drumkitsContent );
+		lblDrumkitsSingleContent.setPreferredSize( generalInfoDim );
+		area.add( lblDrumkitsSingleContent, constraints );
+		
+		// resources translation
+		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.anchor = GridBagConstraints.NORTHEAST;
+		JLabel lblLayers  = new JLabel( Dict.get(Dict.SOUNDFONT_RESOURCES) + ": " );
+		area.add( lblLayers, constraints );
+		
+		// resources content
+		int resLayer   = Integer.parseInt( soundfontInfo.get("layer_count")            );
+		int resSample  = Integer.parseInt( soundfontInfo.get("sample_count")           );
+		int resUnknown = Integer.parseInt( soundfontInfo.get("unknown_resource_count") );
+		int resourcesTotal = resLayer + resSample + resUnknown;
+		String resourcesContent = resourcesTotal + " ("
+		             + resLayer   + " " + Dict.get( Dict.SF_RESOURCE_CAT_LAYER  ) + ", "
+		             + resSample  + " " + Dict.get( Dict.SF_RESOURCE_CAT_SAMPLE ) + ")";
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		FlowLabel lblLayersContent = new FlowLabel( resourcesContent );
+		lblLayersContent.setPreferredSize( generalInfoDim );
+		area.add( lblLayersContent, constraints );
+		
+		// total length translation
+		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.anchor = GridBagConstraints.NORTHEAST;
+		JLabel lblTotal    = new JLabel( Dict.get(Dict.SAMPLES_TOTAL) + ": " );
+		area.add( lblTotal, constraints );
+		
+		// total length content
+		constraints.gridx++;
+		constraints.anchor  = GridBagConstraints.NORTHWEST;
+		String totalContent = soundfontInfo.get( "frames_count" )  + " " + Dict.get( Dict.FRAMES ) + ", "
+		                    + soundfontInfo.get( "seconds_count" ) + " " + Dict.get( Dict.SEC    ) + ", "
+		                    + soundfontInfo.get( "bytes_count" )   + " " + Dict.get( Dict.BYTES  );
+		FlowLabel lblTotalContent = new FlowLabel( totalContent );
+		lblTotalContent.setPreferredSize( generalInfoDim );
+		area.add( lblTotalContent, constraints );
+		
+		// average length translation
+		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.anchor = GridBagConstraints.NORTHEAST;
+		JLabel lblAverage  = new JLabel( Dict.get(Dict.SAMPLES_AVERAGE) + ": " );
+		area.add( lblAverage, constraints );
+		
+		// average length content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		String avgContent  = soundfontInfo.get( "frames_avg"  ) + " " + Dict.get( Dict.FRAMES ) + ", "
+		                   + soundfontInfo.get( "seconds_avg" ) + " " + Dict.get( Dict.SEC    ) + ", "
+                           + soundfontInfo.get( "bytes_avg"   ) + " " + Dict.get( Dict.BYTES  );
+		FlowLabel lblAverageContent = new FlowLabel( avgContent );
+		lblAverageContent.setPreferredSize( generalInfoDim );
+		area.add( lblAverageContent, constraints );
 		
 		// description translation
 		constraints.gridx = 0;
