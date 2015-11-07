@@ -30,6 +30,7 @@ import org.midica.config.Dict;
 import org.midica.midi.MidiDevices;
 
 import com.sun.media.sound.SF2Instrument;
+import com.sun.media.sound.SF2Soundbank;
 
 /**
  * This class is used in order to load a user-defined soundfont file.
@@ -143,19 +144,54 @@ public class SoundfontParser extends Parser {
 		
 		// no soundfont loaded?
 		if ( null == soundfont ) {
-			generalInfo.put( "name",        "-" );
-			generalInfo.put( "version",     "-" );
-			generalInfo.put( "vendor",      "-" );
-			generalInfo.put( "description", "-" );
+			generalInfo.put( "name",                     "-" );
+			generalInfo.put( "version",                  "-" );
+			generalInfo.put( "vendor",                   "-" );
+			generalInfo.put( "description",              "-" );
+			generalInfo.put( "creation_date",            "-" );
+			generalInfo.put( "tools",                    "-" );
+			generalInfo.put( "product",                  "-" );
+			generalInfo.put( "target_engine",            "-" );
+			generalInfo.put( "chromatic_count",          "-" );
+			generalInfo.put( "drumkit_single_count",     "-" );
+			generalInfo.put( "drumkit_multi_count",      "-" );
+			generalInfo.put( "unknown_instrument_count", "-" );
+			generalInfo.put( "layer_count",              "-" );
+			generalInfo.put( "sample_count",             "-" );
+			generalInfo.put( "unknown_resource_count",   "-" );
+			generalInfo.put( "frames_count",             "-" );
+			generalInfo.put( "seconds_count",            "-" );
+			generalInfo.put( "bytes_count",              "-" );
+			generalInfo.put( "frames_avg",               "-" );
+			generalInfo.put( "seconds_avg",              "-" );
+			generalInfo.put( "bytes_avg",                "-" );
 			
 			return;
 		}
 		
 		// get general information
-		generalInfo.put( "name",        soundfont.getName()        );
-		generalInfo.put( "version",     soundfont.getVersion()     );
-		generalInfo.put( "vendor",      soundfont.getVendor()      );
-		generalInfo.put( "description", soundfont.getDescription() );
+		String unknown     = Dict.get( Dict.UNKNOWN );
+		String name        = soundfont.getName();
+		String version     = soundfont.getVersion();
+		String vendor      = soundfont.getVendor();
+		String description = soundfont.getDescription();
+		generalInfo.put( "name",        name        != null ? name        : unknown );
+		generalInfo.put( "version",     version     != null ? version     : unknown );
+		generalInfo.put( "vendor",      vendor      != null ? vendor      : unknown );
+		generalInfo.put( "description", description != null ? description : unknown );
+		
+		// get sf2 specific information
+		if ( soundfont instanceof SF2Soundbank ) {
+			SF2Soundbank sf2    = (SF2Soundbank) soundfont;
+			String creationDate = sf2.getCreationDate();
+			String tools        = sf2.getTools();
+			String product      = sf2.getProduct();
+			String targetEngine = sf2.getTargetEngine();
+			generalInfo.put( "creation_date", creationDate != null ? creationDate : unknown );
+			generalInfo.put( "tools",         tools        != null ? tools        : unknown );
+			generalInfo.put( "product",       product      != null ? product      : unknown );
+			generalInfo.put( "target_engine", targetEngine != null ? targetEngine : unknown );
+		}
 		
 		// count instruments and drumkits
 		int chromaticCount    = 0;
@@ -202,15 +238,15 @@ public class SoundfontParser extends Parser {
 					
 					Object frames = resource.get( "frame_length" );
 					if ( frames != null )
-						framesCount += (long) frames;
+						framesCount += (Long) frames;
 					
 					Object seconds = resource.get( "seconds" );
 					if ( seconds != null )
-						secondsCount += (double) seconds;
+						secondsCount += (Double) seconds;
 					
 					Object bytes = resource.get( "bytes" );
 					if ( bytes != null )
-						bytesCount += (long) bytes;
+						bytesCount += (Long) bytes;
 				}
 			}
 		}

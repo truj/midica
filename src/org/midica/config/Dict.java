@@ -333,6 +333,11 @@ public class Dict {
 	public static final String SOUNDFONT_INSTRUMENTS       = "soundfont_instruments";
 	public static final String SOUNDFONT_DRUMKITS          = "soundfont_drumkits";
 	public static final String SOUNDFONT_RESOURCES         = "soundfont_resources";
+	public static final String SOUNDFONT_VENDOR            = "soundfont_vendor";
+	public static final String SOUNDFONT_CREA_DATE         = "soundfont_crea_date";
+	public static final String SOUNDFONT_CREA_TOOLS        = "soundfont_crea_tools";
+	public static final String SOUNDFONT_PRODUCT           = "soundfont_product";
+	public static final String SOUNDFONT_TARGET_ENGINE     = "soundfont_target_engine";
 	public static final String SAMPLES_TOTAL               = "samples_total";
 	public static final String SAMPLES_AVERAGE             = "samples_average";
 	public static final String FRAMES                      = "frames";
@@ -664,6 +669,11 @@ public class Dict {
 		set( SOUNDFONT_INFO,                         "General Info"                  );
 		set( SOUNDFONT_INSTRUMENTS,                  "Instruments & Drum Kits"       );
 		set( SOUNDFONT_RESOURCES,                    "Resources"                     );
+		set( SOUNDFONT_VENDOR,                       "Vendor"                        );
+		set( SOUNDFONT_CREA_DATE,                    "Creation Date"                 );
+		set( SOUNDFONT_CREA_TOOLS,                   "Creation Tools"                );
+		set( SOUNDFONT_PRODUCT,                      "Product"                       );
+		set( SOUNDFONT_TARGET_ENGINE,                "Target Sound Engine"           );
 		set( SAMPLES_TOTAL,                          "Samples (Total)"               );
 		set( SAMPLES_AVERAGE,                        "Samples (Average)"             );
 		set( FRAMES,                                 "Frames"                        );

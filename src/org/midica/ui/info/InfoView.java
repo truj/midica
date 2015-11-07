@@ -88,7 +88,7 @@ public class InfoView extends JDialog {
 	private static final int TABLE_HEIGHT                = 400;
 	private static final int GENERAL_INFO_VALUE_WIDTH    = 500;
 	private static final int GENERAL_INFO_VALUE_HEIGHT   =  16;
-	private static final int SOUNDFONT_DESC_HEIGHT       = 250;
+	private static final int SOUNDFONT_DESC_HEIGHT       = 155;
 	
 	// dimensions
 	private static Dimension noteTableDim       = null;
@@ -444,7 +444,7 @@ public class InfoView extends JDialog {
 		
 		// name content
 		constraints.gridx++;
-		constraints.anchor    = GridBagConstraints.NORTHWEST;
+		constraints.anchor       = GridBagConstraints.NORTHWEST;
 		FlowLabel lblNameContent = new FlowLabel( soundfontInfo.get("name") );
 		lblNameContent.setPreferredSize( generalInfoDim );
 		area.add( lblNameContent, constraints );
@@ -462,6 +462,76 @@ public class InfoView extends JDialog {
 		FlowLabel lblVersionContent = new FlowLabel( soundfontInfo.get("version") );
 		lblVersionContent.setPreferredSize( generalInfoDim );
 		area.add( lblVersionContent, constraints );
+		
+		// vendor translation
+		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.anchor = GridBagConstraints.NORTHEAST;
+		JLabel lblVendor  = new JLabel( Dict.get(Dict.SOUNDFONT_VENDOR) + ": " );
+		area.add( lblVendor, constraints );
+		
+		// vendor content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		FlowLabel lblVendorContent = new FlowLabel( soundfontInfo.get("vendor") );
+		lblVendorContent.setPreferredSize( generalInfoDim );
+		area.add( lblVendorContent, constraints );
+		
+		// creation date translation
+		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.anchor     = GridBagConstraints.NORTHEAST;
+		JLabel lblCreationDate = new JLabel( Dict.get(Dict.SOUNDFONT_CREA_DATE) + ": " );
+		area.add( lblCreationDate, constraints );
+		
+		// creation date content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		FlowLabel lblCreationDateContent = new FlowLabel( soundfontInfo.get("creation_date") );
+		lblCreationDateContent.setPreferredSize( generalInfoDim );
+		area.add( lblCreationDateContent, constraints );
+		
+		// creation tools translation
+		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.anchor = GridBagConstraints.NORTHEAST;
+		JLabel lblTools    = new JLabel( Dict.get(Dict.SOUNDFONT_CREA_TOOLS) + ": " );
+		area.add( lblTools, constraints );
+		
+		// version content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		FlowLabel lblToolsContent = new FlowLabel( soundfontInfo.get("tools") );
+		lblToolsContent.setPreferredSize( generalInfoDim );
+		area.add( lblToolsContent, constraints );
+		
+		// product translation
+		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.anchor = GridBagConstraints.NORTHEAST;
+		JLabel lblProduct  = new JLabel( Dict.get(Dict.SOUNDFONT_PRODUCT) + ": " );
+		area.add( lblProduct, constraints );
+		
+		// version content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		FlowLabel lblProductContent = new FlowLabel( soundfontInfo.get("product") );
+		lblProductContent.setPreferredSize( generalInfoDim );
+		area.add( lblProductContent, constraints );
+		
+		// target engine translation
+		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.anchor     = GridBagConstraints.NORTHEAST;
+		JLabel lblTargetEngine = new JLabel( Dict.get(Dict.SOUNDFONT_TARGET_ENGINE) + ": " );
+		area.add( lblTargetEngine, constraints );
+		
+		// version content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		FlowLabel lblTargetEngineContent = new FlowLabel( soundfontInfo.get("target_engine") );
+		lblTargetEngineContent.setPreferredSize( generalInfoDim );
+		area.add( lblTargetEngineContent, constraints );
 		
 		// chromatic instruments translation
 		constraints.gridx = 0;
@@ -689,7 +759,7 @@ public class InfoView extends JDialog {
 		
 		// version translation
 		constraints.anchor = GridBagConstraints.EAST;
-		JLabel lblVersion  = new JLabel( Dict.get(Dict.TAB_MIDICA) + ": " );
+		JLabel lblVersion  = new JLabel( Dict.get(Dict.VERSION) + ": " );
 		area.add( lblVersion, constraints );
 		
 		// version content
