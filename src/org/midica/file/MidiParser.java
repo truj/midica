@@ -21,7 +21,6 @@ import javax.sound.midi.SysexMessage;
 import javax.sound.midi.Track;
 
 import org.midica.config.Dict;
-import org.midica.midi.MidiDevices;
 import org.midica.midi.SequenceCreator;
 
 /**
@@ -34,7 +33,7 @@ import org.midica.midi.SequenceCreator;
  * 
  * @author Jan Trukenmüller
  */
-public class MidiParser extends Parser {
+public class MidiParser extends SequenceParser {
 	
 	// Midi control messages
 	public static final int CTRL_CHANGE_BANK_SELECT      =  0;
@@ -53,7 +52,7 @@ public class MidiParser extends Parser {
 		try {
 			Sequence sequence = MidiSystem.getSequence( file );
 			createSequence( sequence );
-			postProcess();
+			postprocessMidiStream();
 		}
 		catch ( InvalidMidiDataException e ) {
 			throw new ParseException( e.getMessage() );
@@ -191,12 +190,5 @@ public class MidiParser extends Parser {
 			// another channel command
 			SequenceCreator.addMessageGeneric( msg, channel, tick );
 		}
-	}
-	
-	/**
-	 * Forwards the created MIDI sequence to {@link MidiDevices} so that it can be played.
-	 */
-	private void postProcess() {
-		MidiDevices.setSequence( SequenceCreator.getSequence() );
 	}
 }

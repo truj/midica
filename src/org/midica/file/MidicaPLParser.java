@@ -30,7 +30,7 @@ import org.midica.midi.SequenceCreator;
  * 
  * @author Jan Trukenmüller
  */
-public class MidicaPLParser extends Parser {
+public class MidicaPLParser extends SequenceParser {
 	
 	/* *****************
 	 * constants
@@ -183,8 +183,8 @@ public class MidicaPLParser extends Parser {
 			// open file for reading
 			FileReader     fr         = new FileReader( file );
 			BufferedReader br         = new BufferedReader( fr );
-			String         line;
 			int            lineNumber = 0;
+			String         line;
 			
 			// parse line by line
 			while ( null != (line = br.readLine()) ) {
@@ -213,7 +213,7 @@ public class MidicaPLParser extends Parser {
 		}
 		
 		// tell the parser that EOF has been reached
-		postProcess();
+		postprocessMidiStream();
 	}
 	
 	/**
@@ -1216,14 +1216,6 @@ public class MidicaPLParser extends Parser {
 		input = input.replaceFirst( "^\\s+", "" ); // eliminate leading whitespaces
 		input = input.replaceFirst( "\\s+$", "" ); // eliminate trailing whitespaces
 		return input;
-	}
-	
-	/**
-	 * Publishes the newly created MIDI sequence to the {@link MidiDevices} class.
-	 * This is called at the end of parse().
-	 */
-	private void postProcess() {
-		MidiDevices.setSequence( SequenceCreator.getSequence() );
 	}
 	
 	/**

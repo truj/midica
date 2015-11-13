@@ -25,8 +25,9 @@ import org.midica.file.MidiExporter;
 import org.midica.file.MidiParser;
 import org.midica.file.MidicaPLExporter;
 import org.midica.file.ParseException;
-import org.midica.file.Parser;
+import org.midica.file.IParser;
 import org.midica.file.MidicaPLParser;
+import org.midica.file.SequenceParser;
 import org.midica.file.SoundfontParser;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.info.InfoView;
@@ -231,7 +232,7 @@ public class UiController implements ActionListener, WindowListener {
 	private void parseChosenFile( ActionEvent e ) {
 		String type = ((FileExtensionFilter)((JFileChooser)e.getSource()).getFileFilter()).getExtension();
 		File         file;
-		Parser       parser;
+		IParser      parser;
 		FileSelector selector;
 		if ( FileSelector.FILE_EXTENSION_MPL.equals(type) ) {
 			file     = mplSelector.getFile();
@@ -387,7 +388,7 @@ public class UiController implements ActionListener, WindowListener {
 	 * @param e    Window activation event.
 	 */
 	public void windowActivated( WindowEvent e ) {
-		view.setTransposeLevel( Parser.getTransposeLevel() );
+		view.setTransposeLevel( SequenceParser.getTransposeLevel() );
 		view.addKeyBindings();
 	}
 	

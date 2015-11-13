@@ -41,7 +41,7 @@ import javax.swing.table.TableModel;
 
 import org.midica.config.Config;
 import org.midica.config.Dict;
-import org.midica.file.Parser;
+import org.midica.file.SequenceParser;
 import org.midica.midi.MidiListener;
 import org.midica.ui.SliderHelper;
 import org.midica.ui.UiView;
@@ -192,7 +192,7 @@ public class PlayerView extends JDialog {
 	 * @param parser       Parser object that can be used for reparsing the current file.
 	 * @param currentFile  Currently loaded and parsed file.
 	 */
-	public PlayerView( UiView view, Parser parser, File currentFile ) {
+	public PlayerView( UiView view, SequenceParser parser, File currentFile ) {
 		super( view, Dict.get(Dict.TITLE_PLAYER), true );
 		
 		if( null != currentFile ) {

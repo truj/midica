@@ -32,7 +32,7 @@ import javax.swing.text.Document;
 
 import org.midica.config.Dict;
 import org.midica.file.ParseException;
-import org.midica.file.Parser;
+import org.midica.file.SequenceParser;
 import org.midica.midi.MidiDevices;
 import org.midica.midi.SequenceNotSetException;
 import org.midica.ui.ErrorMsgView;
@@ -53,7 +53,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	private PlayerView      view        = null;
 	private ErrorMsgView    errorMsg    = null;
 	private RefresherThread refresher   = null;
-	private Parser          parser      = null;
+	private SequenceParser  parser      = null;
 	private File            currentFile = null;
 	
 	/**
@@ -64,7 +64,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * @param parser         The parser that has successfully parsed the current file.
 	 * @param currentFile    The last loaded (successfully parsed) file.
 	 */
-	public PlayerController( PlayerView view, Parser parser, File currentFile ) {
+	public PlayerController( PlayerView view, SequenceParser parser, File currentFile ) {
 		this.view        = view;
 		this.parser      = parser;
 		this.currentFile = currentFile;
@@ -173,7 +173,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 					byte level = view.getTransposeFromField(); // throws NumberFormatException
 					if ( level < PlayerView.TRANSPOSE_MIN || level > PlayerView.TRANSPOSE_MAX )
 						throw new NumberFormatException();
-					Parser.setTransposeLevel( level );
+					SequenceParser.setTransposeLevel( level );
 					view.setTransposeSlider( level );
 					reparse();
 				}
@@ -295,7 +295,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 		// init tick labels and progress slider
 		view.setTickAndTimeLength( MidiDevices.getTickLength(), MidiDevices.getTimeLength() );
 		view.initProgressSlider();
-		view.setGlobalSlidersAndFields( MidiDevices.getVolume(), MidiDevices.getTempo(), Parser.getTransposeLevel() );
+		view.setGlobalSlidersAndFields( MidiDevices.getVolume(), MidiDevices.getTempo(), SequenceParser.getTransposeLevel() );
 		
 		// restore the channel based widgets in the view
 		for ( byte channel = 0; channel < MidiDevices.NUMBER_OF_CHANNELS; channel++ ) {
@@ -426,7 +426,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 				return;
 			byte level = (byte) ( (JSlider) e.getSource() ).getValue();
 			view.setTransposeField( level );
-			Parser.setTransposeLevel( level );
+			SequenceParser.setTransposeLevel( level );
 			reparse();
 		}
 		
@@ -543,7 +543,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			// set new slider state and apply the resulting actions
 			view.setTransposeSlider( (byte) sliderTicks );
 			view.setTransposeField( (byte) sliderTicks );
-			Parser.setTransposeLevel( (byte) sliderTicks );
+			SequenceParser.setTransposeLevel( (byte) sliderTicks );
 			reparse();
 		}
 		

@@ -7,19 +7,31 @@
 
 package org.midica.file;
 
-import java.io.File;
+import java.util.HashMap;
 
 import org.midica.config.Dict;
+import org.midica.midi.MidiDevices;
+import org.midica.midi.SequenceCreator;
+import org.midica.ui.info.InfoView;
 
 /**
- * This class can be extended by parser classes which parse an input file.
+ * This class can be extended by specialized parser classes
+ * which parse an input file and create a MIDI stream.
  * 
- * The derived classes {@link MidiParser} and {@link MidicaPLParser} create a MIDI string
- * from the parsed file(s).
+ * Derived classes are:
+ * 
+ * - {@link MidiParser} (parses a MIDI file; extension: .mid)
+ * - {@link MidicaPLParser} (parses a MidicaPL file; extension: .midica)
  * 
  * @author Jan Trukenmüller
  */
-public abstract class Parser {
+public abstract class SequenceParser implements IParser {
+	
+	/**
+	 * Contains information about the currently loaded MIDI stream - no matter where
+	 * it has been loaded from.
+	 */
+	public static HashMap<String, Object> streamInfo = new HashMap<String, Object>();
 	
 	/**
 	 * Defines how much the parsed input has to be transposed.
@@ -79,11 +91,21 @@ public abstract class Parser {
 	}
 
 	/**
-	 * Parses an input file.
+	 * Postprocesses the loaded MIDI stream.
 	 * 
-	 * @param file             Input file written in a format that the derived parser class
-	 *                         can parse.
-	 * @throws ParseException  If the file can not be parsed correctly.
+	 * The following steps are included:
+	 * 
+	 * - Adding a META event for note-on and note-off events.
+	 * - Collecting information from the stream to be shown in the {@link InfoView}.
+	 * - Making the stream available for the player.
 	 */
-	public abstract void parse( File file ) throws ParseException;
+	protected void postprocessMidiStream() {
+		
+		// TODO: build up statistic data and add note-on / note-off events
+		
+		
+		// publish the stream
+		MidiDevices.setSequence( SequenceCreator.getSequence() );
+	}
+
 }

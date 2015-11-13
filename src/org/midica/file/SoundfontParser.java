@@ -39,7 +39,7 @@ import com.sun.media.sound.SF2Soundbank;
  * 
  * @author Jan Trukenmüller
  */
-public class SoundfontParser extends Parser {
+public class SoundfontParser implements IParser {
 	
 	/** The currently loaded user-defined soundfont. */
 	private Soundbank soundfont = null;
