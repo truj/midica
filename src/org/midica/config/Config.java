@@ -17,6 +17,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
@@ -137,7 +138,7 @@ public class Config {
 	
 	// private constants
 	private static File configFile;
-	private static HashMap<String, String> defaults = null;
+	private static TreeMap<String, String> defaults = null;
 	private static HashMap<String, String> config   = null;
 	
 	/**
@@ -173,7 +174,7 @@ public class Config {
 	private static void restoreDefaults( String homeDir ) {
 		
 		// init defaults
-		defaults = new HashMap<String, String>();
+		defaults = new TreeMap<String, String>();
 		defaults.put( LANGUAGE,    CBX_LANG_ENGLISH             );
 		defaults.put( HALF_TONE,   CBX_HALFTONE_ID_SHARP        );
 		defaults.put( NOTE,        CBX_NOTE_ID_INTERNATIONAL_LC );
@@ -263,8 +264,14 @@ public class Config {
 	 */
 	private static void parseConfig( String line ) {
 		line = line.replaceFirst( "\\s+$", "" ); // eliminate trailing whitespaces
-		String[] splitted = line.split( " " );
-		set( splitted[0], splitted[1] );
+		String[] splitted = line.split( " ", 2 );
+		try {
+			set( splitted[0], splitted[1] );
+		}
+		catch ( ArrayIndexOutOfBoundsException e ) {
+			// nothing to set
+			return;
+		}
 	}
 	
 	/**
