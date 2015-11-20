@@ -30,6 +30,7 @@ import org.midica.Midica;
 import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.SoundfontParser;
+import org.midica.midi.SequenceCreator;
 import org.midica.ui.model.InstrumentTableModel;
 import org.midica.ui.model.NoteTableModel;
 import org.midica.ui.model.PercussionTableModel;
@@ -168,9 +169,10 @@ public class InfoView extends JDialog {
 		addWindowListener( this.controller );
 		
 		// add tabs
-		content.addTab( Dict.get(Dict.TAB_CONFIG),    createConfigArea()    );
-		content.addTab( Dict.get(Dict.TAB_SOUNDFONT), createSoundfontArea() );
-		content.addTab( Dict.get(Dict.TAB_MIDICA),    createVersionArea()   );
+		content.addTab( Dict.get(Dict.TAB_CONFIG),      createConfigArea()     );
+		content.addTab( Dict.get(Dict.TAB_SOUNDFONT),   createSoundfontArea()  );
+		content.addTab( Dict.get(Dict.TAB_MIDI_STREAM), createMidiStreamArea() );
+		content.addTab( Dict.get(Dict.TAB_MIDICA),      createVersionArea()    );
 	}
 	
 	/**
@@ -215,6 +217,27 @@ public class InfoView extends JDialog {
 		contentSoundfont.addTab( Dict.get(Dict.SOUNDFONT_INFO),        createSoundfontInfoArea()       );
 		contentSoundfont.addTab( Dict.get(Dict.SOUNDFONT_INSTRUMENTS), createSoundfontInstrumentArea() );
 		contentSoundfont.addTab( Dict.get(Dict.SOUNDFONT_RESOURCES),   createSoundfontResourceArea()   );
+		
+		return contentSoundfont;
+	}
+	
+	/**
+	 * Creates the midi stream tab.
+	 * This contains the following sub tabs:
+	 * 
+	 * TODO: complete docu
+	 * - General stream info
+	 * - Used banks
+	 * 
+	 * @return the created soundfont area.
+	 */
+	private Container createMidiStreamArea() {
+		// content
+		contentSoundfont = new JTabbedPane( JTabbedPane.TOP );
+		
+		// add tabs
+		contentSoundfont.addTab( Dict.get(Dict.MIDI_STREAM_INFO), createMidiStreamInfoArea() );
+//		contentSoundfont.addTab( Dict.get(Dict.USED_BANKS),       createUsedBanksArea()      );
 		
 		return contentSoundfont;
 	}
@@ -641,6 +664,289 @@ public class InfoView extends JDialog {
 	}
 	
 	/**
+	 * Creates the area for general MIDI stream information.
+	 * 
+	 * @return the created MIDI stream info area.
+	 */
+	private Container createMidiStreamInfoArea() {
+		// content
+		JPanel area = new JPanel();
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout( layout );
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill       = GridBagConstraints.NONE;
+		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 0;
+		constraints.weighty    = 0;
+		
+		// get general stream info
+		HashMap<String, Object> streamInfo = SequenceCreator.getStreamInfo();
+		
+		// file translation
+		constraints.anchor = GridBagConstraints.NORTHEAST;
+		JLabel lblFile     = new JLabel( Dict.get(Dict.FILE) + ": " );
+		area.add( lblFile, constraints );
+		
+		// file name
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		String filename    = "-";
+		String type        = (String) streamInfo.get( "parser_type" );
+		if ( "midica".equals(type) )
+			filename = Midica.uiController.getView().getChosenMidicaPLFileLbl().getText();
+		else if ( "mid".equals(type) )
+			filename = Midica.uiController.getView().getChosenMidiFileLbl().getText();
+		FlowLabel lblFileContent = new FlowLabel( filename );
+		lblFileContent.setPreferredSize( generalInfoDim );
+		area.add( lblFileContent, constraints );
+		
+		// ticks translation
+		constraints.gridy++;
+		constraints.gridx  = 0;
+		constraints.anchor = GridBagConstraints.NORTHEAST;
+		JLabel lblTicks    = new JLabel( Dict.get(Dict.TICK_LENGTH) + ": " );
+		area.add( lblTicks, constraints );
+		
+		// ticks content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		Long ticks = 0L;
+		Object ticksObj = streamInfo.get("ticks");
+		if ( ticksObj != null )
+			ticks = (Long) ticksObj;
+		FlowLabel lblTicksContent = new FlowLabel( ticks.toString() );
+		lblTicksContent.setPreferredSize( generalInfoDim );
+		area.add( lblTicksContent, constraints );
+		
+		// time translation
+		constraints.gridy++;
+		constraints.gridx  = 0;
+		constraints.anchor = GridBagConstraints.NORTHEAST;
+		JLabel lblTime     = new JLabel( Dict.get(Dict.TIME_LENGTH) + ": " );
+		area.add( lblTime, constraints );
+		
+		// time content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		FlowLabel lblTimeContent = new FlowLabel( (String) streamInfo.get("time_length") );
+		lblTimeContent.setPreferredSize( generalInfoDim );
+		area.add( lblTimeContent, constraints );
+		
+		// resolution translation
+		constraints.gridy++;
+		constraints.gridx    = 0;
+		constraints.anchor   = GridBagConstraints.NORTHEAST;
+		JLabel lblResolution = new JLabel( Dict.get(Dict.RESOLUTION) + ": " );
+		area.add( lblResolution, constraints );
+		
+		// resolution content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		String resolution  = "-";
+		if ( null != streamInfo.get("resolution") )
+			resolution = streamInfo.get("resolution") + " " + Dict.get( Dict.RESOLUTION_UNIT );
+		FlowLabel lblResolutionContent = new FlowLabel( resolution );
+		lblResolutionContent.setPreferredSize( generalInfoDim );
+		area.add( lblResolutionContent, constraints );
+		
+		// spacer
+		constraints.gridy++;
+		constraints.gridx   = 0;
+		JLabel spacerLine1 = new JLabel( " " );
+		area.add( spacerLine1, constraints );
+		
+		// tempo BPM headline
+		constraints.gridwidth = 2; // colspan
+		constraints.gridy++;
+		constraints.gridx    = 0;
+		constraints.anchor   = GridBagConstraints.NORTHWEST;
+		JLabel lblTempoBpmHeadline = new JLabel( Dict.get(Dict.TEMPO_BPM) );
+		area.add( lblTempoBpmHeadline, constraints );
+		constraints.gridwidth = 1; // end of colspan
+		
+		// BPM average translation
+		constraints.gridy++;
+		constraints.gridx    = 0;
+		constraints.anchor   = GridBagConstraints.NORTHEAST;
+		JLabel lblBpmAvg = new JLabel( Dict.get(Dict.AVERAGE) + ": " );
+		area.add( lblBpmAvg, constraints );
+		
+		// BPM average content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		String tempoStr = "-";
+		Object tempoObj = streamInfo.get("tempo_bpm_avg");
+		if ( null != tempoObj )
+			tempoStr = (String) tempoObj;
+		FlowLabel lblBpmAvgContent = new FlowLabel( tempoStr );
+		lblBpmAvgContent.setPreferredSize( generalInfoDim );
+		area.add( lblBpmAvgContent, constraints );
+		
+		// BPM min translation
+		constraints.gridy++;
+		constraints.gridx    = 0;
+		constraints.anchor   = GridBagConstraints.NORTHEAST;
+		JLabel lblBpmMin = new JLabel( Dict.get(Dict.MIN) + ": " );
+		area.add( lblBpmMin, constraints );
+		
+		// BPM min content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		tempoObj           = streamInfo.get("tempo_bpm_min");
+		if ( null != tempoObj )
+			tempoStr = (String) tempoObj;
+		FlowLabel lblBpmMinContent = new FlowLabel( tempoStr );
+		lblBpmMinContent.setPreferredSize( generalInfoDim );
+		area.add( lblBpmMinContent, constraints );
+		
+		// BPM max translation
+		constraints.gridy++;
+		constraints.gridx    = 0;
+		constraints.anchor   = GridBagConstraints.NORTHEAST;
+		JLabel lblBpmMax = new JLabel( Dict.get(Dict.MAX) + ": " );
+		area.add( lblBpmMax, constraints );
+		
+		// BPM max content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		tempoObj           = streamInfo.get("tempo_bpm_max");
+		if ( null != tempoObj )
+			tempoStr = (String) tempoObj;
+		FlowLabel lblBpmMaxContent = new FlowLabel( tempoStr );
+		lblBpmMaxContent.setPreferredSize( generalInfoDim );
+		area.add( lblBpmMaxContent, constraints );
+		
+		// spacer
+		constraints.gridy++;
+		constraints.gridx   = 0;
+		JLabel spacerLine2 = new JLabel( " " );
+		area.add( spacerLine2, constraints );
+		
+		// tempo MPQ headline
+		constraints.gridwidth = 2; // colspan
+		constraints.gridy++;
+		constraints.gridx    = 0;
+		constraints.anchor   = GridBagConstraints.NORTHWEST;
+		JLabel lblTempoMpqHeadline = new JLabel( Dict.get(Dict.TEMPO_MPQ) );
+		area.add( lblTempoMpqHeadline, constraints );
+		constraints.gridwidth = 1; // end of colspan
+		
+		// MPQ average translation
+		constraints.gridy++;
+		constraints.gridx    = 0;
+		constraints.anchor   = GridBagConstraints.NORTHEAST;
+		JLabel lblMpqAvg = new JLabel( Dict.get(Dict.AVERAGE) + ": " );
+		area.add( lblMpqAvg, constraints );
+		
+		// MPQ average content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		tempoObj           = streamInfo.get("tempo_mpq_avg");
+		if ( null != tempoObj )
+			tempoStr = (String) tempoObj;
+		FlowLabel lblMpqAvgContent = new FlowLabel( tempoStr );
+		lblMpqAvgContent.setPreferredSize( generalInfoDim );
+		area.add( lblMpqAvgContent, constraints );
+		
+		// MPQ min translation
+		constraints.gridy++;
+		constraints.gridx    = 0;
+		constraints.anchor   = GridBagConstraints.NORTHEAST;
+		JLabel lblMpqMin = new JLabel( Dict.get(Dict.MIN) + ": " );
+		area.add( lblMpqMin, constraints );
+		
+		// MPQ min content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		tempoObj           = streamInfo.get("tempo_mpq_min");
+		if ( null != tempoObj )
+			tempoStr = (String) tempoObj;
+		FlowLabel lblMpqMinContent = new FlowLabel( tempoStr );
+		lblMpqMinContent.setPreferredSize( generalInfoDim );
+		area.add( lblMpqMinContent, constraints );
+		
+		// MPQ max translation
+		constraints.gridy++;
+		constraints.gridx    = 0;
+		constraints.anchor   = GridBagConstraints.NORTHEAST;
+		JLabel lblMpqMax = new JLabel( Dict.get(Dict.MAX) + ": " );
+		area.add( lblMpqMax, constraints );
+		
+		// MPQ max content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		tempoObj           = streamInfo.get("tempo_mpq_max");
+		if ( null != tempoObj )
+			tempoStr = (String) tempoObj;
+		FlowLabel lblMpqMaxContent = new FlowLabel( tempoStr );
+		lblMpqMaxContent.setPreferredSize( generalInfoDim );
+		area.add( lblMpqMaxContent, constraints );
+		
+		// spacer
+		constraints.gridy++;
+		constraints.gridx   = 0;
+		constraints.weighty = 1;
+		JLabel spacer = new JLabel( " " );
+		area.add( spacer, constraints );
+		
+		return area;
+	}
+	
+	/**
+	 * Creates the area for banks used by the loaded MIDI stream.
+	 * 
+	 * @return the created banks area.
+	 */
+	private Container createUsedBanksArea() {
+		// content
+		JPanel area = new JPanel();
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout( layout );
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill       = GridBagConstraints.NONE;
+		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 0;
+		constraints.weighty    = 0;
+		
+		// get general stream info
+		HashMap<String, String> streamInfo = null;
+//		HashMap<String, String> soundfontInfo = SoundfontParser.getSoundfontInfo();
+		
+		// file translation
+		constraints.anchor = GridBagConstraints.NORTHEAST;
+		JLabel lblFile     = new JLabel( Dict.get(Dict.FILE) + ": " );
+		area.add( lblFile, constraints );
+		
+		// file name
+//		constraints.gridx++;
+//		constraints.anchor    = GridBagConstraints.NORTHWEST;
+//		FlowLabel lblFileContent = new FlowLabel( streamInfo.get("file") );
+//		lblFileContent.setPreferredSize( generalInfoDim );
+//		area.add( lblFileContent, constraints );
+		
+		// spacer
+		constraints.gridy++;
+		constraints.gridx   = 0;
+		constraints.weighty = 1;
+		JLabel spacer = new JLabel( " " );
+		area.add( spacer, constraints );
+		
+		return area;
+	}
+	
+	/**
 	 * Creates the area for instruments and drumkits of the currently loaded soundfont.
 	 * 
 	 * @return the created soundfont instruments area.
@@ -757,7 +1063,13 @@ public class InfoView extends JDialog {
 		constraints.weightx    = 0;
 		constraints.weighty    = 0;
 		
+		// spacer
+		JLabel spacerTop   = new JLabel( "<html><br><br><br>" );
+		area.add( spacerTop, constraints );
+		
 		// version translation
+		constraints.gridy++;
+		constraints.gridx  = 0;
 		constraints.anchor = GridBagConstraints.EAST;
 		JLabel lblVersion  = new JLabel( Dict.get(Dict.VERSION) + ": " );
 		area.add( lblVersion, constraints );

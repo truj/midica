@@ -95,14 +95,16 @@ public abstract class SequenceParser implements IParser {
 	 * 
 	 * The following steps are included:
 	 * 
-	 * - Adding a META event for note-on and note-off events.
-	 * - Collecting information from the stream to be shown in the {@link InfoView}.
+	 * - Collecting some last informations to be shown in the {@link InfoView}.
 	 * - Making the stream available for the player.
+	 * 
+	 * 
+	 * @param type "mid" or "midica", depending on the parser class.
 	 */
-	protected void postprocessMidiStream() {
+	protected void postprocessMidiStream( String type ) {
 		
-		// TODO: build up statistic data and add note-on / note-off events
-		
+		// collect some last informations of the created stream
+		SequenceCreator.postprocess( type );
 		
 		// publish the stream
 		MidiDevices.setSequence( SequenceCreator.getSequence() );

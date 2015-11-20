@@ -20,7 +20,7 @@ INSTRUMENTS
 END
 
 
-# Definition of chords (several tones that can later be played simultanously in the same chanel)
+# Definition of chords (several tones that can later be played simultaneously in the same channel)
 # The CHORD keyword is followed by
 # - a self-given chord name; and
 # - all the notes that belong to the chord

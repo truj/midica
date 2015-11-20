@@ -46,15 +46,16 @@ import org.midica.ui.player.PlayerController;
 public final class MidiDevices {
 	
 	// constants
-	public static final int  WAITING_TIME_BEFORE_REMEMBER =  2; // milliseconds
-	public static final int  DEFAULT_VOLUME               = 64;
-	public static final int  NUMBER_OF_CHANNELS           = 16;
-	public static final byte NOTE_HISTORY_BUFFER_SIZE     =  5;
+	public static final int  WAITING_TIME_BEFORE_REMEMBER =        2; // milliseconds
+	public static final int  DEFAULT_VOLUME               =       64; // TODO: change to 100 ???
+	public static final int  DEFAULT_TEMPO_BPM            =      120; // beats per minute
+	public static final int  DEFAULT_TEMPO_MPQ            = 60000000; // microseconds per quarter note
+	public static final int  NUMBER_OF_CHANNELS           =       16;
+	public static final byte NOTE_HISTORY_BUFFER_SIZE     =        5;
 	
-	private static PlayerController  playerControler   = null;
-	//private static int              bpm             =  60; // beats per minute ???
-	private static float            tempoFactor       =   1;
-	private static byte             volume            = DEFAULT_VOLUME;
+	private static PlayerController playerControler = null;
+	private static float            tempoFactor     =   1;
+	private static byte             volume          = DEFAULT_VOLUME;
 	private static Sequence         seq;
 	private static Sequencer        sequencer;
 	private static Synthesizer      synthesizer;
@@ -471,7 +472,7 @@ public final class MidiDevices {
 	 * @param microseconds    number of microseconds to be transformed.
 	 * @return                time string in the format **hh:mm:ss**.
 	 */
-	private static String microsecondsToTimeString( long microseconds ) {
+	public static String microsecondsToTimeString( long microseconds ) {
 		// get number of full seconds ignoring the rest of an opened second
 		int rest    = (int) microseconds / 1000000; // full seconds
 		int seconds = rest % 60;

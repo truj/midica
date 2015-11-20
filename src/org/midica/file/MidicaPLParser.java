@@ -213,7 +213,7 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// tell the parser that EOF has been reached
-		postprocessMidiStream();
+		postprocessMidiStream( "midica" );
 	}
 	
 	/**
