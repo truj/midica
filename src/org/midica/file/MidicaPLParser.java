@@ -212,8 +212,8 @@ public class MidicaPLParser extends SequenceParser {
 			e.printStackTrace();
 		}
 		
-		// tell the parser that EOF has been reached
-		postprocessMidiStream( "midica" );
+		// EOF has been reached
+		postprocessSequence( SequenceCreator.getSequence(), "midica" );
 	}
 	
 	/**

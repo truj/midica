@@ -7,10 +7,6 @@
 
 package org.midica.midi;
 
-import java.util.HashMap;
-import java.util.TreeMap;
-import java.util.TreeSet;
-
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiEvent;
@@ -28,9 +24,6 @@ import com.sun.media.sound.MidiUtils;
  * This class is used to create a MIDI sequence. It is used by one of the parser methods while
  * parsing a MidicaPL or MIDI file.
  * 
- * It also collects statistic information about the stream so they can be showed
- * later in the {@link InfoView}
- * 
  * @author Jan Trukenmüller
  */
 public class SequenceCreator {
@@ -41,10 +34,7 @@ public class SequenceCreator {
 	private static int      resolution = DEFAULT_RESOLUTION;
 	private static Track[]  tracks     = null;
 	private static Sequence seq;
-	private static HashMap<String, Object> streamInfo = null;
 	
-	private static TreeMap<Integer, TreeMap<Integer, Integer>> keysByChannel     = null;
-	private static TreeMap<Integer, TreeSet<Integer>>          programsByChannel = null;
 	
 	/**
 	 * This class is only used statically so a public constructor is not needed.
@@ -84,101 +74,7 @@ public class SequenceCreator {
 			tracks[ i ] = seq.createTrack();
 		}
 		
-		// initialize the stream info
-		streamInfo = new HashMap<String, Object>();
-		streamInfo.put( "resolution",          Integer.toString(resolution)    );
-		streamInfo.put( "used_channels",       new TreeSet<Integer>()          );
-		streamInfo.put( "used_banks",          new TreeSet<String>()           );
-		streamInfo.put( "banks_by_channel",    new TreeMap<Integer, String>()  );
-		streamInfo.put( "tempo_mpq",           new TreeMap<Long, Integer>()    );
-		streamInfo.put( "tempo_bpm",           new TreeMap<Long, Integer>()    );
-		
-		keysByChannel     = new TreeMap<Integer, TreeMap<Integer, Integer>>();
-		programsByChannel = new TreeMap<Integer, TreeSet<Integer>>();
-		streamInfo.put( "keys_by_channel",     keysByChannel     );
-		streamInfo.put( "programs_by_channel", programsByChannel );
-		
 		return;
-	}
-	
-	/**
-	 * Adds last informations to the info data structure about the MIDI stream.
-	 * 
-	 * @param type "mid" or "midica", depending on the parser class.
-	 */
-	public static void postprocess( String type ) {
-		
-		// parser type, needed to get the right file name
-		streamInfo.put( "parser_type", type );
-		
-		// stream length in ticks
-		long tickLength = seq.getTickLength();
-		streamInfo.put( "ticks", tickLength );
-		
-		// stream length in a human-readable time string
-		long microseconds = seq.getMicrosecondLength();
-		String time       = MidiDevices.microsecondsToTimeString( microseconds );
-		streamInfo.put( "time_length", time );
-		
-		// average, min and max tempo
-		TreeMap<Long, Integer> tempoMpq = (TreeMap<Long, Integer>) streamInfo.get( "tempo_mpq" );
-		TreeMap<Long, Integer> tempoBpm = (TreeMap<Long, Integer>) streamInfo.get( "tempo_bpm" );
-		long lastTick   = 0;
-		int  lastBpm    = MidiDevices.DEFAULT_TEMPO_BPM;
-		int  lastMpq    = MidiDevices.DEFAULT_TEMPO_MPQ;
-		int  minBpm     = 0;
-		int  maxBpm     = 0;
-		int  minMpq     = 0;
-		int  maxMpq     = 0;
-		long bpmProduct = 0;
-		long mpqProduct = 0;
-		for ( long tick : tempoBpm.keySet() ) {
-			
-			// average
-			int  newBpm   = tempoBpm.get( tick );
-			int  newMpq   = tempoMpq.get( tick );
-			long tickDiff = tick - lastTick;
-			bpmProduct   += tickDiff * lastBpm;
-			mpqProduct   += tickDiff * lastMpq;
-			lastBpm       = newBpm;
-			lastMpq       = newMpq;
-			lastTick      = tick;
-			
-			// min, max
-			if ( tick > 0 && 0 == minBpm && 0 == maxBpm ) {
-				minBpm = MidiDevices.DEFAULT_TEMPO_BPM;
-				maxBpm = MidiDevices.DEFAULT_TEMPO_BPM;
-				minMpq = MidiDevices.DEFAULT_TEMPO_MPQ;
-				maxMpq = MidiDevices.DEFAULT_TEMPO_MPQ;
-			}
-			if ( 0 == minBpm || minBpm > newBpm )
-				minBpm = newBpm;
-			if ( 0 == maxBpm || maxBpm < newBpm )
-				maxBpm = newBpm;
-			if ( 0 == minMpq || minMpq > newMpq )
-				minMpq = newMpq;
-			if ( 0 == maxMpq || maxMpq < newMpq )
-				maxMpq = newMpq;
-		}
-		long tickDiff = tickLength - lastTick;
-		bpmProduct   += tickDiff * lastBpm;
-		mpqProduct   += tickDiff * lastMpq;
-		if ( 0 == minBpm )
-			minBpm = lastBpm;
-		if ( 0 == maxBpm )
-			maxBpm = lastBpm;
-		if ( 0 == minMpq )
-			minMpq = lastMpq;
-		if ( 0 == maxMpq )
-			maxMpq = lastMpq;
-		double avgBpm = (double) bpmProduct / tickLength;
-		double avgMpq = (double) mpqProduct / tickLength;
-		streamInfo.put( "tempo_bpm_avg", String.format("%.2f", avgBpm) );
-		streamInfo.put( "tempo_bpm_min", Integer.toString(minBpm) );
-		streamInfo.put( "tempo_bpm_max", Integer.toString(maxBpm) );
-		streamInfo.put( "tempo_mpq_avg", String.format("%.1f", avgMpq) );
-		streamInfo.put( "tempo_mpq_min", Integer.toString(minMpq) );
-		streamInfo.put( "tempo_mpq_max", Integer.toString(maxMpq) );
 	}
 	
 	/**
@@ -188,18 +84,6 @@ public class SequenceCreator {
 	 */
 	public static Sequence getSequence() {
 		return seq;
-	}
-	
-	/**
-	 * Returns information about the parsed MIDI stream, if available.
-	 * If no MIDI stream is loaded, returns an empty data structure.
-	 * 
-	 * @return MIDI stream info.
-	 */
-	public static HashMap<String, Object> getStreamInfo() {
-		if ( null == streamInfo )
-			return new HashMap<String, Object>();
-		return streamInfo;
 	}
 	
 	/**
@@ -227,14 +111,6 @@ public class SequenceCreator {
 		ShortMessage msg = new ShortMessage();
 		msg.setMessage( ShortMessage.PROGRAM_CHANGE, channel, instrNum, 0 );
 		tracks[ channel ].add( new MidiEvent(msg, tick) );
-		
-		// add to info structure
-		TreeSet<Integer> programs = programsByChannel.get( channel );
-		if ( null == programs ) {
-			programs = new TreeSet<Integer>();
-			programsByChannel.put( channel, programs );
-		}
-		programs.add( instrNum );
 	}
 	
 	/**
@@ -281,19 +157,6 @@ public class SequenceCreator {
 		msg.setMessage( ShortMessage.NOTE_ON, channel, note, volume );
 		event = new MidiEvent( msg, tick );
 		tracks[ channel ].add( event );
-		
-		// add to info structure
-		TreeMap<Integer, Integer> keys = keysByChannel.get( channel );
-		if ( null == keys ) {
-			keys = new TreeMap<Integer, Integer>();
-			keysByChannel.put( channel, keys );
-		}
-		Integer keyCount = keys.get( note );
-		if ( null == keyCount )
-			keyCount = 1;
-		else
-			keyCount++;
-		keys.put( note, keyCount );
 	}
 	
 	/**
@@ -344,12 +207,6 @@ public class SequenceCreator {
 		msg.setMessage( cmd, data, data.length );
 		MidiEvent event = new MidiEvent( msg, tick );
 		tracks[ 0 ].add( event );
-		
-		// add to info structure
-		TreeMap<Long, Integer> tempoMpq = (TreeMap<Long, Integer>) streamInfo.get( "tempo_mpq" );
-		tempoMpq.put( tick, mpq );
-		TreeMap<Long, Integer> tempoBpm = (TreeMap<Long, Integer>) streamInfo.get( "tempo_bpm" );
-		tempoBpm.put( tick, newBpm );
 	}
 	
 	/**

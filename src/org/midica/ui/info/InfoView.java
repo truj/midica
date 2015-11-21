@@ -30,7 +30,7 @@ import org.midica.Midica;
 import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.SoundfontParser;
-import org.midica.midi.SequenceCreator;
+import org.midica.midi.SequenceAnalyzer;
 import org.midica.ui.model.InstrumentTableModel;
 import org.midica.ui.model.NoteTableModel;
 import org.midica.ui.model.PercussionTableModel;
@@ -686,7 +686,7 @@ public class InfoView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// get general stream info
-		HashMap<String, Object> streamInfo = SequenceCreator.getStreamInfo();
+		HashMap<String, Object> streamInfo = SequenceAnalyzer.getStreamInfo();
 		
 		// file translation
 		constraints.anchor = GridBagConstraints.NORTHEAST;
@@ -716,11 +716,11 @@ public class InfoView extends JDialog {
 		// ticks content
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		Long ticks = 0L;
+		String lenghStr = "-";
 		Object ticksObj = streamInfo.get("ticks");
 		if ( ticksObj != null )
-			ticks = (Long) ticksObj;
-		FlowLabel lblTicksContent = new FlowLabel( ticks.toString() );
+			lenghStr = Long.toString( (Long) ticksObj );
+		FlowLabel lblTicksContent = new FlowLabel( lenghStr );
 		lblTicksContent.setPreferredSize( generalInfoDim );
 		area.add( lblTicksContent, constraints );
 		
@@ -734,7 +734,11 @@ public class InfoView extends JDialog {
 		// time content
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		FlowLabel lblTimeContent = new FlowLabel( (String) streamInfo.get("time_length") );
+		lenghStr = "-";
+		Object timeObj = streamInfo.get("time_length");
+		if ( timeObj != null )
+			lenghStr = (String) timeObj;
+		FlowLabel lblTimeContent = new FlowLabel( (String) lenghStr );
 		lblTimeContent.setPreferredSize( generalInfoDim );
 		area.add( lblTimeContent, constraints );
 		

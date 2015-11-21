@@ -9,14 +9,17 @@ package org.midica.file;
 
 import java.util.HashMap;
 
+import javax.sound.midi.Sequence;
+
 import org.midica.config.Dict;
 import org.midica.midi.MidiDevices;
+import org.midica.midi.SequenceAnalyzer;
 import org.midica.midi.SequenceCreator;
 import org.midica.ui.info.InfoView;
 
 /**
  * This class can be extended by specialized parser classes
- * which parse an input file and create a MIDI stream.
+ * which parse an input file and create a MIDI sequence.
  * 
  * Derived classes are:
  * 
@@ -28,8 +31,13 @@ import org.midica.ui.info.InfoView;
 public abstract class SequenceParser implements IParser {
 	
 	/**
-	 * Contains information about the currently loaded MIDI stream - no matter where
-	 * it has been loaded from.
+	 * Contains information about the currently loaded MIDI stream.
+	 * 
+	 * If this stream has been loaded from a MIDI file, this is structure contains
+	 * information about the **original** stream.
+	 * 
+	 * If it has been created from a MidicaPL file, it contains information about
+	 * the created stream.
 	 */
 	public static HashMap<String, Object> streamInfo = new HashMap<String, Object>();
 	
@@ -89,25 +97,30 @@ public abstract class SequenceParser implements IParser {
 		
 		return note;
 	}
-
+	
 	/**
-	 * Postprocesses the loaded MIDI stream.
+	 * Postprocesses the loaded MIDI sequence.
 	 * 
-	 * The following steps are included:
+	 * Retrieves information from the given sequence and makes them available
+	 * for the {@link InfoView}.
 	 * 
-	 * - Collecting some last informations to be shown in the {@link InfoView}.
-	 * - Making the stream available for the player.
+	 * Makes the created sequence available for the player.
 	 * 
+	 * The sequence to be analyzed is not necessarily the same
+	 * that will be published. After parsing a MidicaPL file it's
+	 * the same. But after parsing a MIDI file the original sequence
+	 * will be analyzed while the sequence created by the
+	 * {@link SequenceCreator} will be published.
 	 * 
+	 * @param seq  The MIDI sequence to be analyzed.
 	 * @param type "mid" or "midica", depending on the parser class.
 	 */
-	protected void postprocessMidiStream( String type ) {
+	protected void postprocessSequence( Sequence seq, String type ) {
 		
-		// collect some last informations of the created stream
-		SequenceCreator.postprocess( type );
+		// analyze
+		SequenceAnalyzer.analyze( seq, type );
 		
-		// publish the stream
+		// publish
 		MidiDevices.setSequence( SequenceCreator.getSequence() );
 	}
-
 }

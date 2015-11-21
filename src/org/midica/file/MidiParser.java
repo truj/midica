@@ -52,7 +52,7 @@ public class MidiParser extends SequenceParser {
 		try {
 			Sequence sequence = MidiSystem.getSequence( file );
 			createSequence( sequence );
-			postprocessMidiStream( "mid" );
+			postprocessSequence( sequence, "mid" ); // we want to analyze the loaded sequence - not the created one
 		}
 		catch ( InvalidMidiDataException e ) {
 			throw new ParseException( e.getMessage() );
