@@ -66,7 +66,6 @@ public final class MidiDevices {
 	private static String[]         instruments       = null;
 	private static String[]         channelComments   = new String[ NUMBER_OF_CHANNELS ];
 	private static Soundbank        selectedSoundfont = null;
-	private static byte[]           channelActivity   = new byte[ NUMBER_OF_CHANNELS ];
 	private static byte[]           channelVolume     = new byte[ NUMBER_OF_CHANNELS ];
 	private static boolean[]        channelMute       = new boolean[ NUMBER_OF_CHANNELS ];
 	private static boolean[]        channelSolo       = new boolean[ NUMBER_OF_CHANNELS ];
@@ -145,7 +144,8 @@ public final class MidiDevices {
 		}
 		
 		// initialize channel activity state
-		resetChannelActivity();
+		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
+			playerControler.setChannelActivity( channel, false );
 		
 		// initialize note history
 		noteHistoryBuffer = new ArrayList<ArrayList<Long[]>>();
@@ -249,36 +249,15 @@ public final class MidiDevices {
 	}
 	
 	/**
-	 * Resets the channel activity of each channel to 0. The channel activity is used in
-	 * the player in order to display, if there are notes being currently played in a channel.
-	 */
-	public static void resetChannelActivity() {
-		for ( byte i = 0; i < 16; i++ )
-			channelActivity[ i ] = 0;
-	}
-	
-	/**
-	 * Increments the channel activity by one. That means, one more instrument is playing in
-	 * that channel.
+	 * Is called if the activity of a channel has changed from
+	 * active to inactive or the other way round.
+	 * Gets the new channel activity from the {@link SequenceAnalyzer}.
 	 * 
 	 * @param channel    Channel number from 0 to 15.
 	 */
-	public static void incrementChannelActivity( byte channel ) {
-		channelActivity[ channel ] ++;
-		playerControler.channelActivityChanged( channel );
-	}
-	
-	/**
-	 * Decrements the channel activity by one. That means, one instrument has stopped to play
-	 * in that channel.
-	 * 
-	 * @param channel    Channel number from 0 to 15.
-	 */
-	public static void decrementChannelActivity( byte channel ) {
-		channelActivity[ channel ] --;
-		if ( channelActivity[channel] < 0 )
-			channelActivity[ channel ] = 0;
-		playerControler.channelActivityChanged( channel );
+	public static void refreshChannelActivity( byte channel ) {
+		boolean active = SequenceAnalyzer.getChannelActivity( channel, getTickPosition() );
+		playerControler.setChannelActivity( channel, active );
 	}
 	
 	/**
@@ -491,7 +470,10 @@ public final class MidiDevices {
 	public static void setTickPosition( long pos ) {
 		if ( null != sequencer )
 			sequencer.setTickPosition( pos );
-		resetChannelActivity();
+		
+		// reload channel activity
+		for ( byte channel = 0; channel < 16; channel++ )
+			refreshChannelActivity( channel );
 		
 		rememberVolume();
 	}
@@ -686,19 +668,6 @@ public final class MidiDevices {
 		if ( null == synthesizer )
 			return;
 		synthesizer.getChannels()[ channel ].setSolo( solo );
-	}
-	
-	/**
-	 * Determines if the given channel is currently playing.
-	 * 
-	 * @param channel    Channel number from 0 to 15.
-	 * @return           **true**, if the channel is currently playing. Otherwise; **false**.
-	 */
-	public static boolean getChannelActivity( int channel ) {
-		if ( channelActivity[channel] > 0 )
-			return true;
-		else
-			return false;
 	}
 	
 	/**

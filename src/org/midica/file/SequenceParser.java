@@ -114,10 +114,12 @@ public abstract class SequenceParser implements IParser {
 	 * 
 	 * @param seq  The MIDI sequence to be analyzed.
 	 * @param type "mid" or "midica", depending on the parser class.
+	 * @throws ParseException if a marker event cannot be created during
+	 *                        the postprocessing of the analyzing process
 	 */
-	protected void postprocessSequence( Sequence seq, String type ) {
+	protected void postprocessSequence( Sequence seq, String type ) throws ParseException {
 		
-		// analyze
+		// analyze sequence and add marker events
 		SequenceAnalyzer.analyze( seq, type );
 		
 		// publish

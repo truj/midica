@@ -337,13 +337,12 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	}
 	
 	/**
-	 * Turns the activity LED of the given channel on or off - called, if a note in
-	 * the channel is pressed or released.
+	 * Turns the given channel's activity LED on or off.
 	 * 
-	 * @param channel    Channel number.
+	 * @param channel MIDI channel number.
+	 * @param active  **true** to turn the LED on, **false** to turn it off.
 	 */
-	public void channelActivityChanged( int channel ) {
-		boolean active = MidiDevices.getChannelActivity( channel );
+	public void setChannelActivity( int channel, boolean active ) {
 		view.setActivityLED( channel, active );
 	}
 	

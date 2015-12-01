@@ -117,22 +117,12 @@ public class MidiListener implements MetaEventListener {
 			MidiDevices.setChannelComment( track, text );
 		}
 		
-		else if ( META_SEQUENCER_SPECIFIC == type ) {
-			if ( 2 == data.length || 4 == data.length ) {
-				byte channel = data[ 0 ];
-				byte cmd     = data[ 1 ];
-				
-				if ( ACTIVITY_ON == cmd ) {
-					// process channel activity message
-					MidiDevices.incrementChannelActivity( channel );
-					
-					// log note to history
-					byte note   = data[ 2 ];
-					byte volume = data[ 3 ];
-					MidiDevices.addNoteHistory( channel, note, volume );
-				}
-				else if ( ACTIVITY_OFF == cmd ) {
-					MidiDevices.decrementChannelActivity( channel );
+		else if ( META_MARKER == type ) {
+			if ( data.length > 0 && data.length <= 16 ) {
+				for ( byte channel : data ) {
+					MidiDevices.refreshChannelActivity( channel );
+					// TODO: refresh note history
+					// MidiDevices.addNoteHistory( channel, note, volume );
 				}
 			}
 		}

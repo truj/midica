@@ -468,6 +468,9 @@ public class Dict {
 	public static final String ERROR_CHANNEL_UNDEFINED          = "error_channel_undefined";
 	public static final String ERROR_INVALID_CHANNEL_NUMBER     = "error_invalid_channel_number";
 	
+	// SequenceParser
+	public static final String ERROR_ANALYZE_POSTPROCESS        = "error_analyze_postprocess";
+	
 	// Exporter
 	public static final String ERROR_EXPORT                     = "error_export";
 	public static final String ERROR_FILE_NOT_WRITABLE          = "error_file_not_writable";

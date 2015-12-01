@@ -7,6 +7,10 @@
 
 package org.midica.midi;
 
+import java.util.Map.Entry;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiEvent;
@@ -243,6 +247,47 @@ public class SequenceCreator {
 	 */
 	public static int getResolution() {
 		return resolution;
+	}
+	
+	/**
+	 * Adds meta events of the type **marker** to the sequence. These events
+	 * show that the activity state of some channels change at this point.
+	 * 
+	 * This is called by the {@link SequenceAnalyzer} after all other analyzing
+	 * is done.
+	 * 
+	 * @param markers  First dimension: **tick**; Second dimension: **channels**
+	 *                 that change their activity at this tick.
+	 * @throws InvalidMidiDataException if one of the marker messages cannot be created.
+	 */
+	public static void addMarkers ( TreeMap<Long, TreeSet<Byte>> markers ) throws InvalidMidiDataException {
+		
+		for ( Entry<Long, TreeSet<Byte>> eventData : markers.entrySet() ) {
+			
+			// get general parameters for the event to be created
+			long          tick         = eventData.getKey();
+			TreeSet<Byte> channels     = eventData.getValue();
+			int           length       = channels.size();
+			int           firstChannel = -1;
+			
+			// message part (all channels with activity change)
+			byte[] content = new byte[ length ];
+			int i = 0;
+			for ( Object channelObj : channels.toArray() ) {
+				byte channel = (byte) channelObj;
+				content[ i ] = channel;
+				if ( 0 == i )
+					firstChannel = channel;
+				i++;
+			}
+			
+			// create and add the event
+			MetaMessage metaMsg = new MetaMessage();
+			metaMsg.setMessage( MidiListener.META_MARKER, content, length );
+			MidiEvent event = new MidiEvent( metaMsg, tick );
+			tracks[ firstChannel ].add( event );
+		}
+		
 	}
 	
 	/**
