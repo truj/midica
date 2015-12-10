@@ -256,8 +256,8 @@ public class SequenceCreator {
 	 * This is called by the {@link SequenceAnalyzer} after all other analyzing
 	 * is done.
 	 * 
-	 * @param markers  First dimension: **tick**; Second dimension: **channels**
-	 *                 that change their activity at this tick.
+	 * @param markers  First dimension: **tick**; Second dimension: **bitmasked channels**
+	 *                 that change their activity (and/or other properties) at this tick.
 	 * @throws InvalidMidiDataException if one of the marker messages cannot be created.
 	 */
 	public static void addMarkers ( TreeMap<Long, TreeSet<Byte>> markers ) throws InvalidMidiDataException {
@@ -265,17 +265,18 @@ public class SequenceCreator {
 		for ( Entry<Long, TreeSet<Byte>> eventData : markers.entrySet() ) {
 			
 			// get general parameters for the event to be created
-			long          tick         = eventData.getKey();
-			TreeSet<Byte> channels     = eventData.getValue();
-			int           length       = channels.size();
-			int           firstChannel = -1;
+			long          tick              = eventData.getKey();
+			TreeSet<Byte> bitmaskedChannels = eventData.getValue();
+			int           length            = bitmaskedChannels.size();
+			int           firstChannel      = -1;
 			
-			// message part (all channels with activity change)
+			// message part (all channels in the current tick's marker)
 			byte[] content = new byte[ length ];
 			int i = 0;
-			for ( Object channelObj : channels.toArray() ) {
-				byte channel = (byte) channelObj;
-				content[ i ] = channel;
+			for ( Object channelObj : bitmaskedChannels.toArray() ) {
+				byte bitmaskedChannel = (byte) channelObj;
+				byte channel          = (byte) (bitmaskedChannel & MidiListener.MARKER_BITMASK_CHANNEL);
+				content[ i ] = bitmaskedChannel;
 				if ( 0 == i )
 					firstChannel = channel;
 				i++;
@@ -287,7 +288,6 @@ public class SequenceCreator {
 			MidiEvent event = new MidiEvent( metaMsg, tick );
 			tracks[ firstChannel ].add( event );
 		}
-		
 	}
 	
 	/**

@@ -13,6 +13,7 @@ import javax.swing.table.AbstractTableModel;
 
 import org.midica.config.Dict;
 import org.midica.midi.MidiDevices;
+import org.midica.midi.SequenceAnalyzer;
 
 
 /**
@@ -26,7 +27,9 @@ public class NoteHistoryTableModel extends AbstractTableModel {
 
 	private static final long serialVersionUID = 1L;
 	
-	private byte              channel;
+	private byte channel;
+	
+	/** note number -- volume -- tick -- 0=past,1=future */
 	private ArrayList<Long[]> tableData = null;
 	
 	// table header
@@ -122,7 +125,7 @@ public class NoteHistoryTableModel extends AbstractTableModel {
 	}
 	
 	/**
-	 * Refreshes the model's data with the note history ring buffer of it's channel.
+	 * Refreshes the model's data with the note history obtained by the {@link SequenceAnalyzer}.
 	 * 
 	 * Then: calls the overridden method to inform the parent class about the data change.
 	 * 
@@ -131,8 +134,25 @@ public class NoteHistoryTableModel extends AbstractTableModel {
 	@Override
 	public void fireTableDataChanged() {
 		// refresh table data
-		tableData = MidiDevices.getNoteHistory( channel );
+		tableData = SequenceAnalyzer.getNoteHistory( channel, MidiDevices.getTickPosition() );
 		super.fireTableDataChanged();
+	}
+	
+	/**
+	 * Determines if the given table row consists a note from the future or from the past.
+	 * 
+	 * This is called by the cell renderer for choosing the right background color.
+	 * 
+	 * @param rowIndex  Table row index.
+	 * @return **true**, if it's a future note. Otherwise: **false**.
+	 */
+	public boolean isFuture( int rowIndex ) {
+		
+		long futureFlag = tableData.get( rowIndex )[ 3 ];
+		if ( 1L == futureFlag )
+			return true;
+		
+		return false;
 	}
 }
 

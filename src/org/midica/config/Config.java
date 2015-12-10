@@ -52,6 +52,7 @@ public class Config {
 	public static final Color  TABLE_HEADER_COLOR        = new Color( 200, 230, 255 );
 	public static final Color  TABLE_CELL_DEFAULT_COLOR  = new Color( 255, 255, 255 );
 	public static final Color  TABLE_CELL_CATEGORY_COLOR = new Color( 200, 255, 200 );
+	public static final Color  TABLE_CELL_FUTURE_COLOR   = new Color( 255, 255, 150 ); // future notes for the note history
 	
 	// language combobox
 	public static final String CBX_LANG_ENGLISH = "English";

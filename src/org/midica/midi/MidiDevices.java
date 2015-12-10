@@ -51,7 +51,6 @@ public final class MidiDevices {
 	public static final int  DEFAULT_TEMPO_BPM            =      120; // beats per minute
 	public static final int  DEFAULT_TEMPO_MPQ            = 60000000; // microseconds per quarter note
 	public static final int  NUMBER_OF_CHANNELS           =       16;
-	public static final byte NOTE_HISTORY_BUFFER_SIZE     =        5;
 	
 	private static PlayerController playerControler = null;
 	private static float            tempoFactor     =   1;
@@ -71,7 +70,6 @@ public final class MidiDevices {
 	private static boolean[]        channelSolo       = new boolean[ NUMBER_OF_CHANNELS ];
 	
 	// ring buffer for note history
-	private static ArrayList<ArrayList<Long[]>>  noteHistoryBuffer    = null;
 	private static ArrayList<AbstractTableModel> noteHistoryObservers = null;
 	
 	/**
@@ -148,9 +146,8 @@ public final class MidiDevices {
 			playerControler.setChannelActivity( channel, false );
 		
 		// initialize note history
-		noteHistoryBuffer = new ArrayList<ArrayList<Long[]>>();
 		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
-			noteHistoryBuffer.add( new ArrayList<Long[]>() );
+			refreshNoteHistory( channel );
 	}
 	
 	/**
@@ -465,6 +462,8 @@ public final class MidiDevices {
 	/**
 	 * Sets the position of the current MIDI stream to the given value in ticks.
 	 * 
+	 * Also refreshes the channel activity and note history.
+	 * 
 	 * @param pos    Tickstamp to be set.
 	 */
 	public static void setTickPosition( long pos ) {
@@ -474,6 +473,12 @@ public final class MidiDevices {
 		// reload channel activity
 		for ( byte channel = 0; channel < 16; channel++ )
 			refreshChannelActivity( channel );
+		
+		// reload note history
+		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
+			refreshNoteHistory( channel );
+		
+		// TODO: refresh instrument name, bank number and channel comment
 		
 		rememberVolume();
 	}
@@ -711,49 +716,13 @@ public final class MidiDevices {
 	}
 	
 	/**
-	 * Puts a new note or percussion activity element into the ring buffer for
-	 * the channel activity.
-	 * Informs the note history table model about the change.
+	 * Is called if at least one NOTE-ON event an a channel has occurred.
+	 * Informs the according table model about the change.
 	 * 
-	 * @param channel    Channel number from 0 to 15.
-	 * @param note       Note or percussion instrument number.
-	 * @param volume     velocity
+	 * @param channel  Channel number from 0 to 15.
 	 */
-	public static void addNoteHistory( byte channel, byte note, byte volume ) {
-		// get channel specific note history buffer
-		ArrayList<Long[]> buffer = noteHistoryBuffer.get( channel );
-		
-		// create new note history buffer entry
-		Long[] bufferEntry = new Long[ 3 ];
-		bufferEntry[ 0 ] = (long) note;
-		bufferEntry[ 1 ] = (long) volume;
-		bufferEntry[ 2 ] = getTickPosition();
-		
-		// add the new entry
-		buffer.add( bufferEntry );
-		
-		// cut the buffer to it's maximum size
-		while ( buffer.size() > NOTE_HISTORY_BUFFER_SIZE )
-			buffer.remove( 0 );
-		
-		// inform note history listener
+	public static void refreshNoteHistory( byte channel ) {
 		noteHistoryObservers.get( channel ).fireTableDataChanged();
-	}
-	
-	/**
-	 * Returns the note history of the given channel.
-	 * The note history is a ring buffer consisting of the newest notes.
-	 * Each entry is an array consisting of the following elements:
-	 * 
-	 * - note value
-	 * - volume (velocity)
-	 * - tick position
-	 * 
-	 * @param channel    Channel number from 0 to 15.
-	 * @return           Note history ring buffer.
-	 */
-	public static ArrayList<Long[]> getNoteHistory( byte channel ) {
-		return noteHistoryBuffer.get( channel );
 	}
 	
 	/**

@@ -47,6 +47,13 @@ public class MidiListener implements MetaEventListener {
 	public static final int META_KEY_SIGNATURE      =  89;
 	public static final int META_SEQUENCER_SPECIFIC = 127;
 	
+	// marker bitmasks
+	public static final byte MARKER_BITMASK_ACTIVITY   =  0b01000000;
+	public static final byte MARKER_BITMASK_HISTORY    =  0b00100000;
+	public static final byte MARKER_BITMASK_INSTRUMENT =  0b00010000;
+	public static final byte MARKER_BITMASK_CHANNEL    =  0b00001111;
+	
+	
 	private static final HashMap<Integer, String> metaEventTypeName = new HashMap<Integer, String>();
 	
 	// constants for channel activity
@@ -99,6 +106,7 @@ public class MidiListener implements MetaEventListener {
 			}
 		}
 		
+		// TODO: change???
 		else if ( META_TRACK_NAME == type ) {
 			// get track number (== channel) - works only for Midica-produced MIDI streams
 			byte track = data[ 0 ];
@@ -118,12 +126,16 @@ public class MidiListener implements MetaEventListener {
 		}
 		
 		else if ( META_MARKER == type ) {
-			if ( data.length > 0 && data.length <= 16 ) {
-				for ( byte channel : data ) {
+			for ( byte bitmaskedChannel : data ) {
+				byte channel = (byte) (bitmaskedChannel & MARKER_BITMASK_CHANNEL);
+				boolean isActivityChange   = 0 != ( bitmaskedChannel & MARKER_BITMASK_ACTIVITY );
+				boolean isHistoryChange    = 0 != ( bitmaskedChannel & MARKER_BITMASK_HISTORY );
+				boolean isInstrumentChange = 0 != ( bitmaskedChannel & MARKER_BITMASK_INSTRUMENT );
+				if (isActivityChange)
 					MidiDevices.refreshChannelActivity( channel );
-					// TODO: refresh note history
-					// MidiDevices.addNoteHistory( channel, note, volume );
-				}
+				if (isHistoryChange)
+					MidiDevices.refreshNoteHistory( channel );
+				// TODO: refresh instrument
 			}
 		}
 		

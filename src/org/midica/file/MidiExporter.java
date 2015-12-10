@@ -101,6 +101,7 @@ public class MidiExporter extends Exporter {
 					if ( MidiListener.META_TRACK_NAME == type) {
 						continue EVENT;
 					}
+					// TODO: change to ...MARKER...
 					if ( MidiListener.META_SEQUENCER_SPECIFIC == type && 4 == data.length ) {
 						byte channel = data[ 0 ];
 						byte cmd     = data[ 1 ];

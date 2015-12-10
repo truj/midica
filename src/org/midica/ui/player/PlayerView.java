@@ -140,7 +140,7 @@ public class PlayerView extends JDialog {
 	
 	// for channel details
 	public static       int   NOTE_HISTORY_WIDTH   =   0; // will be set later
-	public static final int   NOTE_HISTORY_HEIGHT  = 100;
+	public static final int   NOTE_HISTORY_HEIGHT  = 150;
 	public static final HashMap<String, Integer> COLUMN_WIDTH = new HashMap<String, Integer>();
 	
 	private Container             content      = null;
@@ -978,11 +978,13 @@ public class PlayerView extends JDialog {
 	 */
 	private Component createNoteHistoryTable( byte channel ) {
 		
-		// table model
-		TableModel model = new NoteHistoryTableModel( channel );
+		// table model and renderer
+		NoteHistoryTableModel        model    = new NoteHistoryTableModel( channel );
+		NoteHistoryTableCellRenderer renderer = new NoteHistoryTableCellRenderer( model );
 		
 		// table
 		JTable table = new JTable( model );
+		table.setDefaultRenderer( Object.class, renderer );
 		JTableHeader header = table.getTableHeader();
 		header.setBackground( Config.TABLE_HEADER_COLOR );
 		JScrollPane pane = new JScrollPane( table );
