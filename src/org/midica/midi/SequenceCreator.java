@@ -91,9 +91,15 @@ public class SequenceCreator {
 	}
 	
 	/**
-	 * Initiates the given channel by providing a meta event with the comment as the track name
-	 * and a program change event to set the channel to the default instrument.
-	 * This is also done if the instrument (program number) of a channel is changed.
+	 * Initiates or changes the given channel's instrument, bank and channel comment.
+	 * 
+	 * The following steps are performed:
+	 * 
+	 * - change bank select MSB (if necessary) -- TODO: not yet implemented
+	 * - change bank select LSB (if necessary) -- TODO: not yet implemented
+	 * - program change
+	 * 
+	 * TODO: implement bank select
 	 * 
 	 * @param channel     Channel number from 0 to 15.
 	 * @param instrNum    Instrument number - corresponds to the MIDI program number.
@@ -104,11 +110,11 @@ public class SequenceCreator {
 	 */
 	public static void initChannel( int channel, int instrNum, String comment, long tick ) throws InvalidMidiDataException {
 		
-		// meta message: track name
+		// meta message: instrument name
 		MetaMessage metaMsg = new MetaMessage();
 		byte[] data = comment.getBytes();
 		data = unshift( data, (byte)channel );  // the first byte marks the channel number
-		metaMsg.setMessage( MidiListener.META_TRACK_NAME, data, data.length );
+		metaMsg.setMessage( MidiListener.META_INSTRUMENT_NAME, data, data.length );
 		tracks[ channel ].add( new MidiEvent(metaMsg, tick) );
 		
 		// program change
@@ -119,7 +125,6 @@ public class SequenceCreator {
 	
 	/**
 	 * Adds the note-ON and note-OFF messages for one note to be played.
-	 * Also adds the according meta messages.
 	 * 
 	 * @param channel      Channel number from 0 to 15.
 	 * @param note         Note number.
@@ -134,7 +139,7 @@ public class SequenceCreator {
 	}
 	
 	/**
-	 * Adds a note-ON event and the according meta event.
+	 * Adds a note-ON event.
 	 * 
 	 * @param channel    Channel number from 0 to 15.
 	 * @param note       Note number.
@@ -143,28 +148,14 @@ public class SequenceCreator {
 	 * @throws InvalidMidiDataException if invalid MIDI data is used to create a MIDI message.
 	 */
 	public static void addMessageNoteON( int channel, int note, long tick, int volume ) throws InvalidMidiDataException {
-		
-		// meta message for note ON
-		MetaMessage metaMsg = new MetaMessage();
-		byte[] dataOn = {
-			(byte) channel,
-			MidiListener.ACTIVITY_ON,
-			(byte) note,
-			(byte) volume,
-		};
-		metaMsg.setMessage( MidiListener.META_SEQUENCER_SPECIFIC, dataOn, dataOn.length );
-		MidiEvent event = new MidiEvent( metaMsg, tick );
-		tracks[ channel ].add( event );
-		
-		// note ON
 		ShortMessage msg = new ShortMessage();
 		msg.setMessage( ShortMessage.NOTE_ON, channel, note, volume );
-		event = new MidiEvent( msg, tick );
+		MidiEvent event = new MidiEvent( msg, tick );
 		tracks[ channel ].add( event );
 	}
 	
 	/**
-	 * Adds a note-OFF event and the according meta event.
+	 * Adds a note-OFF event.
 	 * 
 	 * @param channel    Channel number from 0 to 15.
 	 * @param note       Note number.
@@ -172,21 +163,9 @@ public class SequenceCreator {
 	 * @throws InvalidMidiDataException if invalid MIDI data is used to create a MIDI message.
 	 */
 	public static void addMessageNoteOFF( int channel, int note, long tick ) throws InvalidMidiDataException {
-		
-		// meta message for note OFF
-		MetaMessage metaMsg = new MetaMessage();
-		byte[] dataOff = {
-			(byte) channel,
-			MidiListener.ACTIVITY_OFF,
-		};
-		metaMsg.setMessage( MidiListener.META_SEQUENCER_SPECIFIC, dataOff, dataOff.length );
-		MidiEvent event = new MidiEvent( metaMsg, tick );
-		tracks[ channel ].add( event );
-		
-		// note OFF
 		ShortMessage msg = new ShortMessage();
 		msg.setMessage( ShortMessage.NOTE_OFF, channel, note, 0 );
-		event = new MidiEvent( msg, tick );
+		MidiEvent event = new MidiEvent( msg, tick );
 		tracks[ channel ].add( event );
 	}
 	

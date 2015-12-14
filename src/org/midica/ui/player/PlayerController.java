@@ -18,7 +18,6 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiUnavailableException;
 import javax.swing.JCheckBox;
 import javax.swing.JSlider;
@@ -106,7 +105,6 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 				long pos = Long.parseLong( memory );
 				MidiDevices.setTickPosition( pos );
 				view.setTextFieldColor( PlayerView.NAME_JUMP, PlayerView.COLOR_NORMAL );
-				view.resetChannelActivity();
 			}
 			catch( NumberFormatException ex ) {
 			}
@@ -115,7 +113,6 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 		// button pushed for reparsing the currently loaded file
 		else if ( PlayerView.CMD_REPARSE.equals(cmd) ) {
 			reparse();
-			view.resetChannelActivity();
 		}
 		
 		else if ( PlayerView.CMD_SOUNDCHECK.equals(cmd) ) {
@@ -348,19 +345,24 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	
 	/**
 	 * Updates the channel information labels of the given channel.
-	 * Called, if a MIDI {@link MetaMessage} of the type *TRACK NAME* occurs.
+	 * 
 	 * The following information is updated:
 	 * 
+	 * - bank number
 	 * - program number
 	 * - instrument name
 	 * - track comment
 	 * 
-	 * @param channel    Channel number (0-15).
+	 * @param channel      Channel number (0-15).
+	 * @param bankNumber   bank number
+	 * @param bankDesc     bank description -- MSB, if LSB is null; otherwise: MSB and LSB,
+	 *                     separated by the currently configured separator
+	 * @param program      program number
+	 * @param instrName    instrument name
+	 * @param comment      channel comment
 	 */
-	public void channelInfoChanged( int channel ) {
-		// program number / instrument name / comment
-		String[] info = MidiDevices.getChannelInfo( channel );
-		view.setInstrumentInfo( channel, info );
+	public void setChannelInfo( byte channel, String bankNumber, String bankDesc, String program, String instrName, String comment ) {
+		view.setInstrumentInfo( channel, bankNumber, bankDesc, program, instrName, comment );
 	}
 	
 	/**
@@ -392,7 +394,6 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			if ( ! view.isProgressSliderAdjusting() )
 				return;
 			MidiDevices.setTickPosition( ((JSlider)e.getSource()).getValue() );
-			view.resetChannelActivity();
 		}
 		
 		// handle volume slider changes
@@ -494,7 +495,6 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			// set new slider state and apply the resulting actions
 			MidiDevices.setTickPosition( sliderTicks );
 			view.setProgressSlider( sliderTicks );
-			view.resetChannelActivity();
 		}
 		
 		// volume slider scrolls
@@ -695,24 +695,19 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			}
 			else if ( PlayerView.CMD_FWD.equals(cmd) ) {
 				MidiDevices.forward();
-				view.resetChannelActivity();
 			}
 			else if ( PlayerView.CMD_REW.equals(cmd) ) {
 				MidiDevices.rewind();
-				view.resetChannelActivity();
 			}
 			else if ( PlayerView.CMD_FAST_FWD.equals(cmd) ) {
 				MidiDevices.fastForward();
-				view.resetChannelActivity();
 			}
 			else if ( PlayerView.CMD_FAST_REW.equals(cmd) ) {
 				MidiDevices.fastRewind();
-				view.resetChannelActivity();
 			}
 			else if ( PlayerView.CMD_STOP.equals(cmd) ) {
 				MidiDevices.stop();
 				view.togglePlayPauseButton( PlayerView.CMD_PAUSE );
-				view.resetChannelActivity();
 			}
 		}
 		catch ( InvalidMidiDataException e ) {

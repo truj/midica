@@ -37,12 +37,10 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
 
 import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.SequenceParser;
-import org.midica.midi.MidiListener;
 import org.midica.ui.SliderHelper;
 import org.midica.ui.UiView;
 
@@ -1469,19 +1467,29 @@ public class PlayerView extends JDialog {
 	}
 	
 	/**
-	 * Sets the Channel information after the {@link MidiListener} received a **track name**
-	 * meta event.
+	 * Sets the Channel information.
+	 * This consists of bank number, program number, instrument name and channel comment.
 	 * 
-	 * @param channel  MIDI channel number.
-	 * @param info     Program number, instrument name and channel comment.
+	 * @param channel    MIDI channel number.
+	 * @param bankNum    bank number
+	 * @param bankDesc   bank description -- MSB, if LSB is null; otherwise: MSB and LSB,
+	 *                   separated by the currently configured separator
+	 * @param program    program (instrument) number
+	 * @param instrName  instrument name
+	 * @param comment    channel comment (META event INSTRUMENT NAME)
 	 */
-	public void setInstrumentInfo( int channel, String[] info ) {
+	public void setInstrumentInfo( int channel, String bankNum, String bankDesc, String program, String instrName, String comment ) {
+		
 		// program number
-		channelProgramNumbers.get( channel ).setText( info[0] );
+		channelProgramNumbers.get( channel ).setText( program );
+		
 		// instrument name
-		channelInstruments.get( channel ).setText( info[1] );
+		channelInstruments.get( channel ).setText( instrName );
+		
 		// comment
-		channelComments.get( channel ).setText( info[2] );
+		channelComments.get( channel ).setText( comment );
+		
+		// TODO: implement the rest
 	}
 	
 	/**
@@ -1500,15 +1508,6 @@ public class PlayerView extends JDialog {
 		else {
 			lbl.setToolTipText( Dict.get(Dict.ACTIVITY_INACTIVE) );
 			lbl.setIcon( AC_ICON_INACTIVE );
-		}
-	}
-	
-	/**
-	 * Resets all channel's activity LEDs and their tooltips to an inactive state.
-	 */
-	public void resetChannelActivity() {
-		for ( int channel = 0; channel < 16; channel++ ) {
-			setActivityLED( channel, false );
 		}
 	}
 	

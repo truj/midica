@@ -56,10 +56,6 @@ public class MidiListener implements MetaEventListener {
 	
 	private static final HashMap<Integer, String> metaEventTypeName = new HashMap<Integer, String>();
 	
-	// constants for channel activity
-	public static final byte ACTIVITY_ON            = 0x00;
-	public static final byte ACTIVITY_OFF           = 0x01;
-	
 	/**
 	 * Creates a new meta event listener object.
 	 * 
@@ -106,63 +102,22 @@ public class MidiListener implements MetaEventListener {
 			}
 		}
 		
-		// TODO: change???
-		else if ( META_TRACK_NAME == type ) {
-			// get track number (== channel) - works only for Midica-produced MIDI streams
-			byte track = data[ 0 ];
-			
-			if ( 0 <= track && track <= MidiDevices.NUMBER_OF_CHANNELS ) {
-				// it's probably a Midica-produced stream
-				data = shift( data );
-			}
-			else {
-				// it's probably from a third-party MIDI file
-				return;
-			}
-			
-			// set the channel comment
-			String text = new String( data );
-			MidiDevices.setChannelComment( track, text );
-		}
-		
 		else if ( META_MARKER == type ) {
 			for ( byte bitmaskedChannel : data ) {
-				byte channel = (byte) (bitmaskedChannel & MARKER_BITMASK_CHANNEL);
-				boolean isActivityChange   = 0 != ( bitmaskedChannel & MARKER_BITMASK_ACTIVITY );
-				boolean isHistoryChange    = 0 != ( bitmaskedChannel & MARKER_BITMASK_HISTORY );
-				boolean isInstrumentChange = 0 != ( bitmaskedChannel & MARKER_BITMASK_INSTRUMENT );
+				byte    channel            = (byte) ( bitmaskedChannel & MARKER_BITMASK_CHANNEL    );
+				boolean isActivityChange   =   0 != ( bitmaskedChannel & MARKER_BITMASK_ACTIVITY   );
+				boolean isHistoryChange    =   0 != ( bitmaskedChannel & MARKER_BITMASK_HISTORY    );
+				boolean isInstrumentChange =   0 != ( bitmaskedChannel & MARKER_BITMASK_INSTRUMENT );
 				if (isActivityChange)
 					MidiDevices.refreshChannelActivity( channel );
 				if (isHistoryChange)
 					MidiDevices.refreshNoteHistory( channel );
-				// TODO: refresh instrument
+				if (isInstrumentChange)
+					MidiDevices.refreshInstrument( channel );
 			}
 		}
 		
 		else {
 		}
-	}
-	
-	/**
-	 * Returns an array that is one element smaller than the given array.
-	 * The first element is thrown away. All other elements are moved one index down.
-	 * 
-	 * Something more or less similar to Perl's shift function that is not available
-	 * in Java. However the shifted element is not returned.
-	 * 
-	 * @param array    The original array.
-	 * @return         The shifted array.
-	 */
-	private static byte[] shift( byte[] array ) {
-		
-		int newLength = array.length - 1;
-		
-		// create a new array which is on element smaller
-		byte[] result = new byte[ newLength ];
-		
-		// fill the resulting array
-		System.arraycopy( array, 1, result, 0, newLength );
-		
-		return result;
 	}
 }

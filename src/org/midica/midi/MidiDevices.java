@@ -63,7 +63,6 @@ public final class MidiDevices {
 	private static int              skipTicks         = 480 * 4;  //  4 quarter notes = 1 bar
 	private static int              skipFastTicks     = 480 * 16; // 16 quarter notes = 4 bars
 	private static String[]         instruments       = null;
-	private static String[]         channelComments   = new String[ NUMBER_OF_CHANNELS ];
 	private static Soundbank        selectedSoundfont = null;
 	private static byte[]           channelVolume     = new byte[ NUMBER_OF_CHANNELS ];
 	private static boolean[]        channelMute       = new boolean[ NUMBER_OF_CHANNELS ];
@@ -148,6 +147,10 @@ public final class MidiDevices {
 		// initialize note history
 		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
 			refreshNoteHistory( channel );
+		
+		// initialize channel and instrument info
+		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
+			refreshInstrument( channel );
 	}
 	
 	/**
@@ -283,9 +286,6 @@ public final class MidiDevices {
 		
 		// reset instruments
 		instruments = null;
-		
-		// reset channel comments
-		channelComments = new String[ NUMBER_OF_CHANNELS ];
 	}
 	
 	/**
@@ -478,7 +478,9 @@ public final class MidiDevices {
 		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
 			refreshNoteHistory( channel );
 		
-		// TODO: refresh instrument name, bank number and channel comment
+		// refresh instrument name, bank number and channel comment
+		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
+			refreshInstrument( channel );
 		
 		rememberVolume();
 	}
@@ -676,46 +678,6 @@ public final class MidiDevices {
 	}
 	
 	/**
-	 * Returns the channel configuration. That consists of:
-	 * 
-	 * - program number
-	 * - instrument name
-	 * - channel comment
-	 * 
-	 * @param channelNumber    Channel number from 0 to 15.
-	 * @return                 Channel configuration in the order described above.
-	 */
-	public static String[] getChannelInfo( int channelNumber ) {
-		String[] info = new String[ 3 ];
-		info[0] = Dict.get( Dict.DEFAULT_PROGRAM_NUMBER );
-		info[1] = Dict.get( Dict.DEFAULT_INSTRUMENT_NAME );
-		info[2] = Dict.get( Dict.DEFAULT_CHANNEL_COMMENT );;
-		if ( null == synthesizer )
-			return info;
-		MidiChannel channel = synthesizer.getChannels()[ channelNumber ];
-		if ( null == channel )
-			return info;
-		int program = channel.getProgram();
-		info[0] = Integer.toString( program );
-		info[1] = instruments[ program ];
-		info[2] = channelComments[ channelNumber ];
-		
-		return info;
-	}
-	
-	/**
-	 * Sets the comment for the given channel.
-	 * Also triggers the {@link PlayerController} to refresh the changed channel info.
-	 * 
-	 * @param channel    Channel number from 0 to 15.
-	 * @param comment    Channel comment.
-	 */
-	public static void setChannelComment( int channel, String comment ) {
-		channelComments[ channel ] = comment;
-		playerControler.channelInfoChanged( channel );
-	}
-	
-	/**
 	 * Is called if at least one NOTE-ON event an a channel has occurred.
 	 * Informs the according table model about the change.
 	 * 
@@ -723,6 +685,45 @@ public final class MidiDevices {
 	 */
 	public static void refreshNoteHistory( byte channel ) {
 		noteHistoryObservers.get( channel ).fireTableDataChanged();
+	}
+	
+	/**
+	 * Queries the current bank and instrument information and channel comment
+	 * from the {@link SequenceAnalyzer} and displays it on the player UI.
+	 * 
+	 * @param channel  Channel number from 0 to 15.
+	 */
+	public static void refreshInstrument( byte channel ) {
+		
+		// query information
+		long   tick           = getTickPosition();
+		Byte[] instrumentInfo = SequenceAnalyzer.getInstrument( channel, tick );
+		String comment        = SequenceAnalyzer.getChannelComment( channel, tick );
+		
+		// channel not used at all?
+		if ( -1 == instrumentInfo[0] ) {
+			// return default config
+			playerControler.setChannelInfo( channel, "", "", "", "", "" );
+			
+			return;
+		}
+		
+		// bank number = MSB * 128 + LSB
+		int bankNum = instrumentInfo[ 0 ] << 7 + instrumentInfo[ 1 ];
+		String bankNumStr = Integer.toString( bankNum );
+		
+		// bank description:
+		// if LSB is set: MSB, separator, LSB
+		// otherwise: MSB
+		String bankDesc = Byte.toString( instrumentInfo[0] );
+		if ( instrumentInfo[1] > 0 )
+			bankDesc += Dict.getSyntax( Dict.SYNTAX_BANK_SEP ) + Byte.toString( instrumentInfo[1] );
+		
+		// program number
+		String progNumStr = Byte.toString( instrumentInfo[2] );
+		String instrName  = instruments[ instrumentInfo[2] ];
+		
+		playerControler.setChannelInfo( channel, bankNumStr, bankDesc, progNumStr, instrName, comment );
 	}
 	
 	/**

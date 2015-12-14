@@ -93,22 +93,15 @@ public class MidiExporter extends Exporter {
 				MidiEvent   event = oldTrack.get( i );
 				MidiMessage msg   = event.getMessage();
 				
-				// ignore some meta messages created by the 
+				// ignore marker messages created by the SequenceCreator
 				if ( msg instanceof MetaMessage ) {
 					int    type = ((MetaMessage) msg).getType();
 					byte[] data = ((MetaMessage) msg).getData();
 					
-					if ( MidiListener.META_TRACK_NAME == type) {
+					if ( MidiListener.META_MARKER == type
+					  && data.length > 0
+					  && data.length < 16 ) {
 						continue EVENT;
-					}
-					// TODO: change to ...MARKER...
-					if ( MidiListener.META_SEQUENCER_SPECIFIC == type && 4 == data.length ) {
-						byte channel = data[ 0 ];
-						byte cmd     = data[ 1 ];
-						
-						if ( channel >= 0 && channel <= 15 )
-							if ( MidiListener.ACTIVITY_ON == cmd || MidiListener.ACTIVITY_OFF == cmd )
-								continue EVENT;
 					}
 				}
 				
