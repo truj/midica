@@ -777,17 +777,18 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * 
 	 * @param e    Exception containing the error message to be shown.
 	 */
-	private void showErrorMessage ( Exception e ) {
+	private void showErrorMessage( Exception e ) {
 		errorMsg = new ErrorMsgView( view, this );
 		errorMsg.init( e.getMessage() );
 	}
 	
 	/**
 	 * Shows an error message based on a message string.
+	 * This is also called from {@link MidiDevices} if a soundfont file fails to load.
 	 * 
 	 * @param message    Error message.
 	 */
-	private void showErrorMessage( String message ) {
+	public void showErrorMessage( String message ) {
 		errorMsg = new ErrorMsgView( view, this );
 		errorMsg.init( message );
 	}

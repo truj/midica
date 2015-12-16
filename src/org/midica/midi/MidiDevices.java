@@ -9,8 +9,10 @@ package org.midica.midi;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
+import java.util.TreeMap;
 
-import javax.sound.midi.Instrument;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiChannel;
 import javax.sound.midi.MidiSystem;
@@ -26,6 +28,8 @@ import javax.swing.table.AbstractTableModel;
 
 import org.midica.config.Dict;
 import org.midica.file.MidiParser;
+import org.midica.file.SoundfontParser;
+import org.midica.ui.info.InstrumentElement;
 import org.midica.ui.player.PlayerController;
 
 /**
@@ -59,14 +63,16 @@ public final class MidiDevices {
 	private static Sequencer        sequencer;
 	private static Synthesizer      synthesizer;
 	private static Receiver         receiver;
-	// number of ticks to skip on forward/rewind
-	private static int              skipTicks         = 480 * 4;  //  4 quarter notes = 1 bar
-	private static int              skipFastTicks     = 480 * 16; // 16 quarter notes = 4 bars
-	private static String[]         instruments       = null;
+	// number of bars to skip on forward/rewind
+	private static int              skipQuarters      = 4;  //  4 quarter notes = 1 bar
+	private static int              skipFastQuarters  = 16; // 16 quarter notes = 4 bars
 	private static Soundbank        selectedSoundfont = null;
 	private static byte[]           channelVolume     = new byte[ NUMBER_OF_CHANNELS ];
 	private static boolean[]        channelMute       = new boolean[ NUMBER_OF_CHANNELS ];
 	private static boolean[]        channelSolo       = new boolean[ NUMBER_OF_CHANNELS ];
+	
+	/**   channel  --  program * 2^14 + bankMSB * 2^7 + bankLSB  --  instrument name */
+	private static TreeMap<Byte, TreeMap<Integer, String>> instruments = null;
 	
 	// ring buffer for note history
 	private static ArrayList<AbstractTableModel> noteHistoryObservers = null;
@@ -180,6 +186,7 @@ public final class MidiDevices {
 	
 	/**
 	 * Initializes a software or hardware synthesizer.
+	 * If a soundfont file has been selected, loads this file into the synthesizer.
 	 * 
 	 * @return    A receiver object, connected to the hardware or software synthesizer.
 	 * @throws MidiUnavailableException    if a device is not reachable.
@@ -190,61 +197,139 @@ public final class MidiDevices {
 		synthesizer = MidiSystem.getSynthesizer();
 		
 		// hardware or software?
-		boolean software = ( null == synthesizer.getDefaultSoundbank() )
-				         ? false
-				         : true
-				         ;
-		
-		// load chosen soundfont and initialize it's instruments
-		if ( selectedSoundfont != null ) {
-			if ( synthesizer.isSoundbankSupported(selectedSoundfont) ) {
-				synthesizer.loadAllInstruments( selectedSoundfont );
-				initInstrumentsIfNotYetDone( selectedSoundfont );
-			}
-		}
+		boolean isSoftware = ( null == synthesizer.getDefaultSoundbank() ) ? false : true;
 		
 		Receiver rec = null;
-		if (software) {
-			Soundbank soundfont = synthesizer.getDefaultSoundbank();
-			initInstrumentsIfNotYetDone( soundfont );
-			
+		if (isSoftware) {
 			synthesizer.open();
+			
+			// load chosen soundfont and initialize it's instruments
+			boolean isCustomSoundfontLoaded = false;
+			if ( selectedSoundfont != null ) {
+				
+				// soundfont supported?
+				if ( synthesizer.isSoundbankSupported(selectedSoundfont) ) {
+					isCustomSoundfontLoaded = synthesizer.loadAllInstruments( selectedSoundfont );
+					
+					// load instruments from custom soundfont
+					if (isCustomSoundfontLoaded)
+						initInstrumentsIfNotYetDone( isSoftware );
+					
+					// soundbank not loaded
+					else
+						playerControler.showErrorMessage( Dict.get(Dict.ERROR_SOUNDFONT_LOADING_FAILED) );
+				}
+				else {
+					// soundfont not supported
+					playerControler.showErrorMessage( Dict.get(Dict.ERROR_SOUNDFONT_NOT_SUPPORTED) );
+				}
+			}
+			
+			// load instruments from default soundfont
+			if ( ! isCustomSoundfontLoaded )
+				initInstrumentsIfNotYetDone( isSoftware );
+			
 			rec = synthesizer.getReceiver();
 		}
 		else {
 			// hardware
 			rec = receiver = MidiSystem.getReceiver();
-			initInstrumentsIfNotYetDone( null );
+			initInstrumentsIfNotYetDone( isSoftware );
 		}
 		
 		return rec;
 	}
 	
 	/**
-	 * Initializes the instruments of the right soundfont.
+	 * Initializes the instruments of the right soundfont, if not yet done.
 	 * 
-	 * @param soundfont    Selected or default soundfont - or **null** if a
-	 *                     hardware soundbank is used.
+	 * @param soundfontAvailable  **true** if a software soundfont is available;
+	 *                            **false** if a hardware synthesizer is used.
 	 */
-	private static void initInstrumentsIfNotYetDone( Soundbank soundfont ) {
+	private static void initInstrumentsIfNotYetDone( boolean soundfontAvailable ) {
 		if ( null != instruments )
 			return;
 		
-		if ( null == soundfont ) {
-			int instrCnt = 128;
-			instruments = new String[ instrCnt ];
-			for ( int i=0; i<instrCnt; i++ ) {
-				instruments[ i ] = Dict.get( Dict.DEFAULT_INSTRUMENT_NAME );
+		// initialize channels
+		instruments = new TreeMap<Byte, TreeMap<Integer, String>>();
+		for ( byte channel = 0; channel < 15; channel++ )
+			instruments.put( channel, new TreeMap<Integer, String>() );
+		
+		// software synthesizer
+		if (soundfontAvailable) {
+			ArrayList<HashMap<String, String>> soundfontInstruments = SoundfontParser.getSoundfontInstruments();
+			for ( byte channel = 0; channel < 15; channel ++ )
+				initSoftwareInstruments( channel, soundfontInstruments );
+		}
+		
+		// hardware synthesizer
+		else {
+			
+			// assume: 9: percussion, everything else: chromatic
+			for ( byte channel = 0; channel < 15; channel++ ) {
+				TreeMap<Integer, String> channelInstruments = instruments.get( channel );
+				
+				// percussion
+				if ( 9 == channel ) {
+					// assume: MSB=0, LSB=0, program: 27-87
+					Set<Integer> predefinedDrumkits = Dict.getDrumkitList();
+					for ( int program : predefinedDrumkits ) {
+						String name = Dict.getDrumkit( program );
+						int    key  = program << 14;   // program * 2^14 + 0 + 0
+						channelInstruments.put( key, name );
+					}
+				}
+				
+				// chromatic
+				else {
+					// assume: MSB=0, LSB=0, program: 0-127
+					ArrayList<InstrumentElement> predefinedInstruments = Dict.getInstrumentList();
+					for ( InstrumentElement instr : predefinedInstruments ) {
+						int key = instr.instrNum << 14;           // program * 2^14 + 0 + 0
+						channelInstruments.put( key, instr.name );
+					}
+				}
 			}
 		}
-		else {
-			int instrCnt = soundfont.getInstruments().length;
-			instruments = new String[ instrCnt ];
-			int i = 0;
-			for ( Instrument instrument : soundfont.getInstruments() ) {
-				instruments[ i ] = instrument.getName();
-				i++;
-			}
+	}
+	
+	/**
+	 * Initializes the instruments of a software soundfont, that are
+	 * supported for the given channel.
+	 * 
+	 * @param channel                 MIDI channel
+	 * @param soundfontInstruments    pre-analyzed soundfont instruments
+	 */
+	private static void initSoftwareInstruments( byte channel, ArrayList<HashMap<String, String>> soundfontInstruments ) {
+		
+		INSTRUMENT:
+		for ( HashMap<String, String> instr : soundfontInstruments ) {
+			
+			// ignore categories
+			String category = instr.get("category");
+			if ( category != null )
+				continue INSTRUMENT;
+			
+			// ignore un-supported channels
+			boolean isChannelSupported = false;
+			String[] allowedChannels = instr.get("channels_long").split( "," );
+			for ( String channelStr : allowedChannels )
+				if ( String.valueOf(channel).equals(channelStr) )
+					isChannelSupported = true;
+			if ( ! isChannelSupported )
+				continue INSTRUMENT;
+			
+			// get instrument data
+			int    bankMSB   = Integer.parseInt( instr.get("bank_msb") );
+			int    bankLSB   = Integer.parseInt( instr.get("bank_lsb") );
+			int    program   = Integer.parseInt( instr.get("program")  );
+			String instrName = instr.get( "name" );
+			
+			// construct key for the data structure: program * 2^14 + bankMSB * 2^7 + bankLSB
+			int key = ( program << 14 ) | ( bankMSB << 7 ) | bankLSB;
+			
+			// remember instrument name
+			instruments.get( channel ).put( key, instrName );
 		}
 	}
 	
@@ -341,7 +426,7 @@ public final class MidiDevices {
 		if ( null != sequencer ) {
 			long totalTicks   = sequencer.getTickLength();
 			long currentTicks = sequencer.getTickPosition();
-			currentTicks += skipTicks;
+			currentTicks += skipQuarters * SequenceCreator.getResolution();
 			if ( currentTicks >= totalTicks )
 				currentTicks = totalTicks - 1;
 			setTickPosition( currentTicks );
@@ -355,7 +440,7 @@ public final class MidiDevices {
 		if ( null != sequencer ) {
 			long totalTicks   = sequencer.getTickLength();
 			long currentTicks = sequencer.getTickPosition();
-			currentTicks += skipFastTicks;
+			currentTicks += skipFastQuarters * SequenceCreator.getResolution();
 			if ( currentTicks >= totalTicks )
 				currentTicks = totalTicks - 1;
 			setTickPosition( currentTicks );
@@ -368,7 +453,7 @@ public final class MidiDevices {
 	public static void rewind() {
 		if ( null != sequencer ) {
 			long currentTicks = sequencer.getTickPosition();
-			currentTicks -= skipTicks;
+			currentTicks -= skipQuarters * SequenceCreator.getResolution();
 			if ( currentTicks < 0 )
 				currentTicks = 0;
 			setTickPosition( currentTicks );
@@ -381,7 +466,7 @@ public final class MidiDevices {
 	public static void fastRewind() {
 		if ( null != sequencer ) {
 			long currentTicks = sequencer.getTickPosition();
-			currentTicks -= skipFastTicks;
+			currentTicks -= skipFastQuarters * SequenceCreator.getResolution();
 			if ( currentTicks < 0 )
 				currentTicks = 0;
 			setTickPosition( currentTicks );
@@ -699,9 +784,12 @@ public final class MidiDevices {
 		long   tick           = getTickPosition();
 		Byte[] instrumentInfo = SequenceAnalyzer.getInstrument( channel, tick );
 		String comment        = SequenceAnalyzer.getChannelComment( channel, tick );
+		byte   bankMSB        = instrumentInfo[ 0 ];
+		byte   bankLSB        = instrumentInfo[ 1 ];
+		byte   program        = instrumentInfo[ 2 ];
 		
 		// channel not used at all?
-		if ( -1 == instrumentInfo[0] ) {
+		if ( -1 == bankMSB ) {
 			// return default config
 			playerControler.setChannelInfo( channel, "", "", "", "", "" );
 			
@@ -709,19 +797,31 @@ public final class MidiDevices {
 		}
 		
 		// bank number = MSB * 128 + LSB
-		int bankNum = instrumentInfo[ 0 ] << 7 + instrumentInfo[ 1 ];
+		int bankNum = bankMSB << 7 + bankLSB;
 		String bankNumStr = Integer.toString( bankNum );
 		
 		// bank description:
 		// if LSB is set: MSB, separator, LSB
 		// otherwise: MSB
-		String bankDesc = Byte.toString( instrumentInfo[0] );
-		if ( instrumentInfo[1] > 0 )
-			bankDesc += Dict.getSyntax( Dict.SYNTAX_BANK_SEP ) + Byte.toString( instrumentInfo[1] );
+		String bankDesc = Byte.toString( bankMSB );
+		if ( bankLSB > 0 )
+			bankDesc += Dict.getSyntax( Dict.SYNTAX_BANK_SEP ) + Byte.toString( bankLSB );
 		
 		// program number
-		String progNumStr = Byte.toString( instrumentInfo[2] );
-		String instrName  = instruments[ instrumentInfo[2] ];
+		String progNumStr = Byte.toString( program );
+		
+		// instrument name
+		String instrName = Dict.get( Dict.UNKNOWN_INSTRUMENT );
+		try {
+			// construct key for the data structure: program * 2^14 + bankMSB * 2^7 + bankLSB
+			int key     = ( ((int) program) << 14 ) | ( ((int) bankMSB) << 7 ) | ((int) bankLSB);
+			String name = instruments.get( channel ).get( key );
+			if ( null != name )
+				instrName = name;
+		}
+		catch ( NullPointerException e ) {
+			// nothing more to do
+		}
 		
 		playerControler.setChannelInfo( channel, bankNumStr, bankDesc, progNumStr, instrName, comment );
 	}

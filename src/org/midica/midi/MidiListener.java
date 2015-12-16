@@ -48,10 +48,10 @@ public class MidiListener implements MetaEventListener {
 	public static final int META_SEQUENCER_SPECIFIC = 127;
 	
 	// marker bitmasks
-	public static final byte MARKER_BITMASK_ACTIVITY   =  0b01000000;
-	public static final byte MARKER_BITMASK_HISTORY    =  0b00100000;
-	public static final byte MARKER_BITMASK_INSTRUMENT =  0b00010000;
-	public static final byte MARKER_BITMASK_CHANNEL    =  0b00001111;
+	public static final byte MARKER_BITMASK_ACTIVITY   = 0b0100_0000;
+	public static final byte MARKER_BITMASK_HISTORY    = 0b0010_0000;
+	public static final byte MARKER_BITMASK_INSTRUMENT = 0b0001_0000;
+	public static final byte MARKER_BITMASK_CHANNEL    = 0b0000_1111;
 	
 	
 	private static final HashMap<Integer, String> metaEventTypeName = new HashMap<Integer, String>();

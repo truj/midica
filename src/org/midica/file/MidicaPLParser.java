@@ -46,6 +46,8 @@ public class MidicaPLParser extends SequenceParser {
 	private static final int MODE_MACRO       = 1;
 	private static final int MODE_DEFAULT     = 2;
 	
+	private static final int TICK_BANK_BEFORE_PROGRAM = 1000; // how many ticks a bank select will be made before the program change
+	
 	private static final int  PAUSE_VALUE = -1;
 	
 	/* *****************
@@ -84,7 +86,7 @@ public class MidicaPLParser extends SequenceParser {
 	public static String LENGTH_M2     = null;
 	public static String LENGTH_M4     = null;
 	public static String LENGTH_M8     = null;
-	public static String LENGTH_M16     = null;
+	public static String LENGTH_M16    = null;
 	public static String LENGTH_M32    = null;
 	public static String DOT           = null;
 	public static String TRIPLET       = null;
@@ -201,9 +203,11 @@ public class MidicaPLParser extends SequenceParser {
 						e.setLineNumber( lineNumber );
 					if ( null == e.getFileName() )
 						e.setFileName( file.getCanonicalPath() );
+					br.close();
 					throw e;
 				}
 			}
+			br.close();
 		}
 		catch ( FileNotFoundException e ) {
 			e.printStackTrace();
@@ -783,6 +787,9 @@ public class MidicaPLParser extends SequenceParser {
 	/**
 	 * Parses an instrument command inside an INSTRUMENTS block.
 	 * This command assigns a certain instrument to a certain channel.
+	 * A bank number can also be assigned for the channel.
+	 * 
+	 * TODO: test soundfonts with bankLSB > 0
 	 * 
 	 * @param tokens             Token array.
 	 * @throws ParseException    If the command cannot be parsed.
@@ -792,24 +799,75 @@ public class MidicaPLParser extends SequenceParser {
 			throw new ParseException( Dict.get(Dict.ERROR_INSTR_NUM_OF_ARGS) );
 		
 		int    channel   = toChannel( tokens[0] );
-		int    instrNum  = toInt( tokens[1] );
+		String instrStr  = tokens[ 1 ];
 		String instrName = tokens[ 2 ];
+		int    bankMSB   = 0;
+		int    bankLSB   = 0;
+		int    instrNum;
 		
-		// don't allow to manipulate the percussion channel
-		if ( 9 == channel )
-			throw new ParseException( Dict.get(Dict.ERROR_PERCUSSION_CH_UNCHANGEABLE) );
+		// program number and banks
+		String [] instrBank = instrStr.split( Dict.getSyntax(Dict.SYNTAX_PROG_BANK_SEP), 2 );
+		instrNum            = toInt( instrBank[0] );
+		if ( 1 == instrBank.length ) {
+			// only program number, no bank defined - nothing more to do
+		}
+		else if ( 2 == instrBank.length ) {
+			// program number and bank are both defined
+			
+			// bank MSB / LSB / full number
+			String[] msbLsb = instrBank[ 1 ].split( Dict.getSyntax(Dict.SYNTAX_BANK_SEP), 2 );
+			bankMSB         = toInt( msbLsb[0] );
+			if ( 1 == msbLsb.length ) {
+				if ( bankMSB > 127 * 127 ) {
+					// too big
+					throw new ParseException( Dict.get(Dict.ERROR_INSTR_BANK) );
+				}
+				else if ( bankMSB > 127 ) {
+					// full number
+					bankLSB   = bankMSB &  0b00000000_01111111;
+					bankMSB >>= 7;
+				}
+				else {
+					// only MSB - nothing more to do
+				}
+			}
+			else {
+				// MSB and LSB
+				bankLSB = toInt( msbLsb[1] );
+			}
+		}
 		
-		if ( instrumentsParsed ) {
+		// wrong syntax?
+		if ( bankMSB > 127 || bankLSB > 127 ) {
+			throw new ParseException( Dict.get(Dict.ERROR_INSTR_BANK) );
+		}
+		
+		// TODO: delete
+		System.out.println( "instrNum: " + instrNum + ", MSB: " + bankMSB + ", LSB: " + bankLSB + ", full: " + ((bankMSB << 7) | bankLSB) );
+		
+		if (instrumentsParsed) {
 			// instruments are already parsed
 			// this is an instrument change command for the channel
-			Instrument instr = instruments.get( channel );
+			Instrument instr       = instruments.get( channel );
 			instr.autoChannel      = false;
 			instr.instrumentNumber = instrNum;
 			instr.instrumentName   = instrName;
-			long tick = instr.getCurrentTicks();
+			long tick              = instr.getCurrentTicks();
+			
+			boolean[] isChanged = instr.setBank( bankMSB, bankLSB );
 			
 			try {
-				SequenceCreator.initChannel( channel, instrNum, instrName, tick );
+				// bank select, if necessary
+				if ( isChanged[0] )
+					SequenceCreator.setBank( channel, tick, bankMSB, false );
+				if ( isChanged[1] )
+					SequenceCreator.setBank( channel, tick, bankLSB, true );
+				
+				// program change and instrument name
+				long bankTick = tick - TICK_BANK_BEFORE_PROGRAM;
+				if ( bankTick < 0 )
+					bankTick = 0;
+				SequenceCreator.initChannel( channel, instrNum, instrName, bankTick );
 			}
 			catch ( InvalidMidiDataException e ) {
 				throw new ParseException( Dict.get(Dict.ERROR_MIDI_PROBLEM) + e.getMessage() );
@@ -823,6 +881,7 @@ public class MidicaPLParser extends SequenceParser {
 				instrName,
 				false      // no auto channel
 			);
+			instr.setBank( bankMSB, bankLSB );
 			instruments.add( instr );
 		}
 	}
@@ -1133,10 +1192,17 @@ public class MidicaPLParser extends SequenceParser {
 				int    channel      = instr.channel;
 				int    instrNum     = instr.instrumentNumber;
 				String instrComment = instr.instrumentName;
+				int    bankMSB      = instr.getBankMSB();
+				int    bankLSB      = instr.getBankLSB();
 				// reset instrument
 				instr.resetCurrentTicks();
-				if ( ! instr.autoChannel )
+				if ( ! instr.autoChannel ) {
+					if ( bankMSB != 0 )
+						SequenceCreator.setBank( channel, 0L, bankMSB, false );
+					if ( bankLSB != 0 )
+						SequenceCreator.setBank( channel, 0L, bankLSB, true );
 					SequenceCreator.initChannel( channel, instrNum, instrComment, SequenceCreator.NOW );
+				}
 			}
 		}
 		catch ( InvalidMidiDataException e ) {
@@ -1235,5 +1301,4 @@ public class MidicaPLParser extends SequenceParser {
 			refreshSyntax();
 		}
 	}
-
 }

@@ -91,15 +91,40 @@ public class SequenceCreator {
 	}
 	
 	/**
+	 * Sets the bank MSB or LSB by sending an according control change message.
+	 * 
+	 * @param channel    Channel number from 0 to 15.
+	 * @param tick       Tickstamp of the bank select or -1 if the method is called
+	 *                   during initialization.
+	 *                   TODO: test, how much the tick must be BEFORE the program change
+	 * @param value      The value to set.
+	 * @param isLSB      **false**: set the MSB; **true**: set the LSB
+	 */
+	public static void setBank( int channel, long tick, int value, boolean isLSB ) throws InvalidMidiDataException {
+		
+		// choose the right controller
+		int controller = 0x00;
+		if (isLSB)
+			controller = 0x20;
+		
+		// make sure that the tick is not negative
+		if ( tick < 0 )
+			tick = 0;
+		
+		// set bank MSB or LSB
+		ShortMessage msg = new ShortMessage();
+		msg.setMessage( ShortMessage.CONTROL_CHANGE, channel, controller, value );
+		tracks[ channel ].add( new MidiEvent(msg, tick) );
+	}
+	
+	/**
 	 * Initiates or changes the given channel's instrument, bank and channel comment.
 	 * 
 	 * The following steps are performed:
 	 * 
-	 * - change bank select MSB (if necessary) -- TODO: not yet implemented
-	 * - change bank select LSB (if necessary) -- TODO: not yet implemented
-	 * - program change
-	 * 
-	 * TODO: implement bank select
+	 * - adding a meta message (INSTRUMENT NAME) containing the channel number
+	 *   and the channel comment
+	 * - adding a program change message
 	 * 
 	 * @param channel     Channel number from 0 to 15.
 	 * @param instrNum    Instrument number - corresponds to the MIDI program number.

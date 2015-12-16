@@ -43,6 +43,10 @@ public class Instrument implements Comparable<Instrument> {
 	public String instrumentName;
 	/** Indicates if this channel has been automatically (true) or explicitely (false) defined. */
 	public boolean autoChannel;
+	/** MSB of the bank number (0-127) */
+	private int bankMSB;
+	/** LSB of the bank number (0-127) */
+	private int bankLSB;
 	
 	/** Relative volume */
 	private int volume = DEFAULT_VOLUME;
@@ -63,12 +67,14 @@ public class Instrument implements Comparable<Instrument> {
 	 *                          (if not defined explicitly) the default channel comment (in the
 	 *                          parsing procedure) or the pre-configured instrument name (in the
 	 *                          export procedure)
-	 * @param automatic         false, as soon as the instrument has been defined explicitly
+	 * @param automatic         **false**, as soon as the instrument has been defined explicitly
 	 *                          inside an INSTRUMENTS block; otherwise (or until the first
-	 *                          definition inside an INSTRUMENTS block): true
+	 *                          definition inside an INSTRUMENTS block): **true**
 	 */
 	public Instrument( int channel, int instrumentNumber, String instrumentName, boolean automatic ) {
 		this.channel          = channel;
+		this.bankMSB          = 0;
+		this.bankLSB          = 0;
 		this.instrumentNumber = instrumentNumber;
 		this.instrumentName   = instrumentName;
 		if ( automatic )
@@ -201,5 +207,53 @@ public class Instrument implements Comparable<Instrument> {
 					 ;
 		}
 		return maxTicks;
+	}
+	
+	/**
+	 * Sets the bank.
+	 * 
+	 * Returns the following two values.
+	 * 
+	 * - **true**, if the new MSB is different from the old MSB. **false**, if the MSB is unchanged.
+	 * - **true**, if the new LSB is different from the old LSB. **false**, if the LSB is unchanged.
+	 * 
+	 * @param msb  bank MSB
+	 * @param lsb  bank LSB
+	 * @return  What has been changed (see description above).
+	 */
+	public boolean[] setBank( int msb, int lsb ) {
+		boolean[] result = { false, false };
+		
+		// MSB changed?
+		if ( this.bankMSB != msb )
+			result[ 0 ] = true;
+		
+		// LSB changed?
+		if ( this.bankLSB != lsb )
+			result[ 1 ] = true;
+		
+		// set the values
+		this.bankMSB = msb;
+		this.bankLSB = lsb;
+		
+		return result;
+	}
+	
+	/**
+	 * Returns the currently configured bank MSB.
+	 * 
+	 * @return bank MSB
+	 */
+	public int getBankMSB() {
+		return bankMSB;
+	}
+	
+	/**
+	 * Returns the currently configured bank LSB.
+	 * 
+	 * @return bank LSB
+	 */
+	public int getBankLSB() {
+		return bankLSB;
 	}
 }

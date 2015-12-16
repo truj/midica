@@ -56,6 +56,8 @@ public class Dict {
 	private static HashMap<Integer, String>     noteIntToName       = null;
 	private static HashMap<String, Integer>     percussionNameToInt = null;
 	private static HashMap<Integer, String>     percussionIntToName = null;
+	private static HashMap<String, Integer>     drumkitNameToInt    = null;
+	private static HashMap<Integer, String>     drumkitIntToName    = null;
 	private static HashMap<String, String>      syntax              = null;
 	private static HashMap<String, Integer>     instrNameToInt      = null;
 	private static HashMap<Integer, String>     instrIntToName      = null;
@@ -78,6 +80,7 @@ public class Dict {
 	public static final String SYNTAX_BPM           = "BPM";
 	public static final String SYNTAX_OPT_SEPARATOR = "OPT_SEPARATOR";
 	public static final String SYNTAX_OPT_ASSIGNER  = "OPT_ASSIGNER";
+	public static final String SYNTAX_PROG_BANK_SEP = "PROGRAM_BANK_SEPARATOR";
 	public static final String SYNTAX_BANK_SEP      = "BANK_SEPARATOR";
 	public static final String SYNTAX_VOLUME        = "VOLUME";
 	public static final String SYNTAX_V             = "VOLUME_SHORT";
@@ -107,7 +110,27 @@ public class Dict {
 	public static final String SYNTAX_TUPLET        = "TUPLET";
 	public static final String SYNTAX_TUPLET_FOR    = "TUPLET_FOR";
 	
+	// drumkit identifiers
+	public static final String DRUMKIT_STANDARD   = "drumkit_0";
+	public static final String DRUMKIT_ROOM       = "drumkit_8";
+	public static final String DRUMKIT_POWER      = "drumkit_16";
+	public static final String DRUMKIT_ELECTRONIC = "drumkit_24";
+	public static final String DRUMKIT_TR808      = "drumkit_25";
+	public static final String DRUMKIT_JAZZ       = "drumkit_32";
+	public static final String DRUMKIT_BRUSH      = "drumkit_40";
+	public static final String DRUMKIT_ORCHESTRA  = "drumkit_48";
+	public static final String DRUMKIT_SOUND_FX   = "drumkit_56";
+	public static final String DRUMKIT_CM64_CM32  = "drumkit_127";
+	
 	// percussion identifiers
+	public static final String PERCUSSION_HIGH_Q          = "percussion_27";
+	public static final String PERCUSSION_SLAP            = "percussion_28";
+	public static final String PERCUSSION_SCRATCH_PUSH    = "percussion_29";
+	public static final String PERCUSSION_SCRATCH_PULL    = "percussion_30";
+	public static final String PERCUSSION_STICKS          = "percussion_31";
+	public static final String PERCUSSION_SQUARE_CLICK    = "percussion_32";
+	public static final String PERCUSSION_METRONOME_CLICK = "percussion_33";
+	public static final String PERCUSSION_METRONOME_BELL  = "percussion_34";
 	public static final String PERCUSSION_BASS_DRUM_2     = "percussion_35";
 	public static final String PERCUSSION_BASS_DRUM_1     = "percussion_36";
 	public static final String PERCUSSION_RIM_SHOT        = "percussion_37";
@@ -155,6 +178,12 @@ public class Dict {
 	public static final String PERCUSSION_CUICA_OPEN      = "percussion_79";
 	public static final String PERCUSSION_TRIANGLE_MUTE   = "percussion_80";
 	public static final String PERCUSSION_TRIANGLE_OPEN   = "percussion_81";
+	public static final String PERCUSSION_SHAKER          = "percussion_82";
+	public static final String PERCUSSION_JINGLE_BELL     = "percussion_83";
+	public static final String PERCUSSION_BELLTREE        = "percussion_84";
+	public static final String PERCUSSION_CASTANETS       = "percussion_85";
+	public static final String PERCUSSION_SURDO_MUTE      = "percussion_86";
+	public static final String PERCUSSION_SURDO_OPEN      = "percussion_87";
 	
 	// TODO: use for the syntax or delete
 	// instrument identifiers
@@ -291,6 +320,7 @@ public class Dict {
 	public static final String TITLE_MAIN_WINDOW           = "title_main";
 	public static final String UNKNOWN_NOTE_NAME           = "unknown_note_name";
 	public static final String UNKNOWN_PERCUSSION_NAME     = "unknown_percussion_name";
+	public static final String UNKNOWN_DRUMKIT_NAME        = "unknown_drumkit_name";
 	public static final String UNKNOWN_SYNTAX              = "unknown_syntax";
 	public static final String UNKNOWN_INSTRUMENT          = "unknown_instrument";
 	public static final String CONFIGURATION               = "configuration";
@@ -455,7 +485,7 @@ public class Dict {
 	public static final String ERROR_NOTE_LENGTH_INVALID        = "error_note_length_invalid";
 	public static final String ERROR_UNKNOWN_MACRO_CMD          = "error_unknown_macro_cmd";
 	public static final String ERROR_INSTR_NUM_OF_ARGS          = "error_num_of_args";
-	public static final String ERROR_PERCUSSION_CH_UNCHANGEABLE = "error_percussion_ch_unchangeable";
+	public static final String ERROR_INSTR_BANK                 = "error_instr_bank";
 	public static final String ERROR_GLOBAL_NUM_OF_ARGS         = "error_global_num_of_args";
 	public static final String ERROR_UNKNOWN_GLOBAL_CMD         = "error_unknown_global_cmd: ";
 	public static final String ERROR_MIDI_PROBLEM               = "error_midi_problem";
@@ -501,6 +531,8 @@ public class Dict {
 	public static final String DEFAULT_INSTRUMENT_NAME          = "default_instrument_name";
 	public static final String DEFAULT_PROGRAM_NUMBER           = "default_program_number";
 	public static final String PERCUSSION_CHANNEL               = "percussion_channel";
+	public static final String ERROR_SOUNDFONT_NOT_SUPPORTED    = "error_soundfont_not_supported";
+	public static final String ERROR_SOUNDFONT_LOADING_FAILED   = "error_soundfont_loading_failed";
 	
 	// SequenceNotSetException
 	public static final String ERROR_SEQUENCE_NOT_SET           = "error_sequence_not_set";
@@ -658,6 +690,7 @@ public class Dict {
 		set( MIDICAPL_FILE,                "MidicaPL file"                 );
 		set( UNKNOWN_NOTE_NAME,            "unknown"                       );
 		set( UNKNOWN_PERCUSSION_NAME,      "unknown"                       );
+		set( UNKNOWN_DRUMKIT_NAME,         "unknown"                       );
 		set( UNKNOWN_SYNTAX,               "?"                             );
 		set( UNKNOWN_INSTRUMENT,           "unknown"                       );
 		set( MIDI_FILE,                    "Midi file"                     );
@@ -769,45 +802,46 @@ public class Dict {
 		set( INSTR_CAT_SOUND_EFFECTS,                "Sound Effects"                 );
 		
 		// syntax for InfoView
-		set( SYNTAX_DEFINE,          "syntax element definition"            );
-		set( SYNTAX_COMMENT,         "comment character"                    );
-		set( SYNTAX_GLOBAL,          "global command (all channels)"        );
-		set( SYNTAX_P,               "percussion channel"                   );
-		set( SYNTAX_END,             "end of a definition block"            );
-		set( SYNTAX_MACRO,           "macro definition"                     );
-		set( SYNTAX_INCLUDE,         "macro execution"                      );
-		set( SYNTAX_INSTRUMENTS,     "definition of instruments"            );
-		set( SYNTAX_BPM,             "tempo definition in BPM"              );
-		set( SYNTAX_OPT_SEPARATOR,   "option separating character"          );
-		set( SYNTAX_OPT_ASSIGNER,    "option assignment character"          );
-		set( SYNTAX_BANK_SEP,        "MSB / LSB separator for bank select"  );
-		set( SYNTAX_VOLUME,          "volume option (long)"                 );
-		set( SYNTAX_V,               "volume option (short)"                );
-		set( SYNTAX_STACCATO,        "staccato option (long)"               );
-		set( SYNTAX_S,               "staccato option (short)"              );
-		set( SYNTAX_MULTIPLE,        "multiple notes option (long)"         );
-		set( SYNTAX_M,               "multiple notes option (short)"        );
-		set( SYNTAX_QUANTITY,        "quantity: how often to play the note" );
-		set( SYNTAX_Q,               "quantity option (short)"              );
-		set( SYNTAX_PAUSE,           "pause character"                      );
-		set( SYNTAX_CHORD,           "chord definition"                     );
-		set( SYNTAX_INCLUDE_FILE,    "including another file"               );
-		set( SYNTAX_32,              "32nd"                                 );
-		set( SYNTAX_16,              "16th"                                 );
-		set( SYNTAX_8,               "8th"                                  );
-		set( SYNTAX_4,               "quarter"                              );
-		set( SYNTAX_2,               "half"                                 );
-		set( SYNTAX_1,               "full"                                 );
-		set( SYNTAX_M1,              "full"                                 );
-		set( SYNTAX_M2,              "2 full notes"                         );
-		set( SYNTAX_M4,              "4 full notes"                         );
-		set( SYNTAX_M8,              "8 full notes"                         );
-		set( SYNTAX_M16,             "16 full notes"                        );
-		set( SYNTAX_M32,             "32 full notes"                        );
-		set( SYNTAX_DOT,             "dot (note length multiplied by 1.5)"  );
-		set( SYNTAX_TRIPLET,         "triplet (note length devided by 1.5)" );
-		set( SYNTAX_TUPLET,          "tuplet"                               );
-		set( SYNTAX_TUPLET_FOR,      "tuplet definition separator"          );
+		set( SYNTAX_DEFINE,          "syntax element definition"                        );
+		set( SYNTAX_COMMENT,         "comment character"                                );
+		set( SYNTAX_GLOBAL,          "global command (all channels)"                    );
+		set( SYNTAX_P,               "percussion channel"                               );
+		set( SYNTAX_END,             "end of a definition block"                        );
+		set( SYNTAX_MACRO,           "macro definition"                                 );
+		set( SYNTAX_INCLUDE,         "macro execution"                                  );
+		set( SYNTAX_INSTRUMENTS,     "definition of instruments"                        );
+		set( SYNTAX_BPM,             "tempo definition in BPM"                          );
+		set( SYNTAX_OPT_SEPARATOR,   "option separating character"                      );
+		set( SYNTAX_OPT_ASSIGNER,    "option assignment character"                      );
+		set( SYNTAX_PROG_BANK_SEP,   "Separator between program number and bank select" );
+		set( SYNTAX_BANK_SEP,        "MSB / LSB separator for bank select"              );
+		set( SYNTAX_VOLUME,          "volume option (long)"                             );
+		set( SYNTAX_V,               "volume option (short)"                            );
+		set( SYNTAX_STACCATO,        "staccato option (long)"                           );
+		set( SYNTAX_S,               "staccato option (short)"                          );
+		set( SYNTAX_MULTIPLE,        "multiple notes option (long)"                     );
+		set( SYNTAX_M,               "multiple notes option (short)"                    );
+		set( SYNTAX_QUANTITY,        "quantity: how often to play the note"             );
+		set( SYNTAX_Q,               "quantity option (short)"                          );
+		set( SYNTAX_PAUSE,           "pause character"                                  );
+		set( SYNTAX_CHORD,           "chord definition"                                 );
+		set( SYNTAX_INCLUDE_FILE,    "including another file"                           );
+		set( SYNTAX_32,              "32nd"                                             );
+		set( SYNTAX_16,              "16th"                                             );
+		set( SYNTAX_8,               "8th"                                              );
+		set( SYNTAX_4,               "quarter"                                          );
+		set( SYNTAX_2,               "half"                                             );
+		set( SYNTAX_1,               "full"                                             );
+		set( SYNTAX_M1,              "full"                                             );
+		set( SYNTAX_M2,              "2 full notes"                                     );
+		set( SYNTAX_M4,              "4 full notes"                                     );
+		set( SYNTAX_M8,              "8 full notes"                                     );
+		set( SYNTAX_M16,             "16 full notes"                                    );
+		set( SYNTAX_M32,             "32 full notes"                                    );
+		set( SYNTAX_DOT,             "dot (note length multiplied by 1.5)"              );
+		set( SYNTAX_TRIPLET,         "triplet (note length devided by 1.5)"             );
+		set( SYNTAX_TUPLET,          "tuplet"                                           );
+		set( SYNTAX_TUPLET_FOR,      "tuplet definition separator"                      );
 		
 		// UiControler + PlayerControler
 		set( ERROR_IN_LINE,                       "<html>parsing error in file:<br>%s<br>line: %s<br>" );
@@ -850,7 +884,7 @@ public class Dict {
 		set( ERROR_NOTE_LENGTH_INVALID,           "invalid note length expression: "                                  );
 		set( ERROR_UNKNOWN_MACRO_CMD,             "unknown macro command: "                                           );
 		set( ERROR_INSTR_NUM_OF_ARGS,             "wrong number of arguments in instrument command"                   );
-		set( ERROR_PERCUSSION_CH_UNCHANGEABLE,    "the percussion channel (channel 9) can't be changed"               );
+		set( ERROR_INSTR_BANK,                    "Instrument and/or Bank definition erroneous"                       );
 		set( ERROR_GLOBAL_NUM_OF_ARGS,            "wrong number of arguments in global command"                       );
 		set( ERROR_UNKNOWN_GLOBAL_CMD,            "unknown global command: "                                          );
 		set( ERROR_MIDI_PROBLEM,                  "<html>Midi Problem!<br>"                                           );
@@ -894,6 +928,8 @@ public class Dict {
 		set( DEFAULT_CHANNEL_COMMENT,             "undefined"                  );
 		set( DEFAULT_INSTRUMENT_NAME,             "Fake Instrument"            );
 		set( DEFAULT_PROGRAM_NUMBER,              "-"                          );
+		set( ERROR_SOUNDFONT_NOT_SUPPORTED,       "Soundfont not supported"    );
+		set( ERROR_SOUNDFONT_LOADING_FAILED,      "Soundfont failed to load"   );
 		
 		// SequenceNotSetException
 		set( ERROR_SEQUENCE_NOT_SET,              "<html>A Sequence is not yet set<br>"
@@ -1011,6 +1047,7 @@ public class Dict {
 		set( MIDICAPL_FILE,                          "MidicaPL-Datei"                        );
 		set( UNKNOWN_NOTE_NAME,                      "unbekannt"                             );
 		set( UNKNOWN_PERCUSSION_NAME,                "unbekannt"                             );
+		set( UNKNOWN_DRUMKIT_NAME,                   "unbekannt"                             );
 		set( UNKNOWN_SYNTAX,                         "?"                                     );
 		set( UNKNOWN_INSTRUMENT,                     "unbekannt"                             );
 		set( MIDI_FILE,                              "Midi-Datei"                            );
@@ -1257,6 +1294,7 @@ public class Dict {
 		addSyntaxCategory( get(SYNTAX_CAT_OPTION) );
 		addSyntaxForInfoView( SYNTAX_OPT_SEPARATOR );
 		addSyntaxForInfoView( SYNTAX_OPT_ASSIGNER  );
+		addSyntaxForInfoView( SYNTAX_PROG_BANK_SEP );
 		addSyntaxForInfoView( SYNTAX_BANK_SEP      );
 		addSyntaxForInfoView( SYNTAX_VOLUME        );
 		addSyntaxForInfoView( SYNTAX_V             );
@@ -1287,8 +1325,12 @@ public class Dict {
 	}
 	
 	/**
-	 * Creates translations between note values and the corresponding configured
-	 * percussion instrument shortcuts.
+	 * Creates drumkit and percussion instrument translations.
+	 * 
+	 * - Creates translations between note values and the corresponding configured
+	 *   percussion instrument shortcuts.
+	 * - Creates translations between program numbers and the corresponding configured
+	 *   drumkit shortcuts.
 	 */
 	public static void initPercussion() {
 		
@@ -1304,9 +1346,17 @@ public class Dict {
 			initPercussionSetGerman1();
 		}
 		
-		// init names to integers
+		// init names to integers (for percussion instruments)
 		percussionNameToInt = new HashMap<String, Integer>();
 		
+		percussionNameToInt.put( get(PERCUSSION_HIGH_Q),          27 );
+		percussionNameToInt.put( get(PERCUSSION_SLAP),            28 );
+		percussionNameToInt.put( get(PERCUSSION_SCRATCH_PUSH),    29 );
+		percussionNameToInt.put( get(PERCUSSION_SCRATCH_PULL),    30 );
+		percussionNameToInt.put( get(PERCUSSION_STICKS),          31 );
+		percussionNameToInt.put( get(PERCUSSION_SQUARE_CLICK),    32 );
+		percussionNameToInt.put( get(PERCUSSION_METRONOME_CLICK), 33 );
+		percussionNameToInt.put( get(PERCUSSION_METRONOME_BELL),  34 );
 		percussionNameToInt.put( get(PERCUSSION_BASS_DRUM_2),     35 );
 		percussionNameToInt.put( get(PERCUSSION_BASS_DRUM_1),     36 );
 		percussionNameToInt.put( get(PERCUSSION_RIM_SHOT),        37 );
@@ -1354,11 +1404,37 @@ public class Dict {
 		percussionNameToInt.put( get(PERCUSSION_CUICA_OPEN),      79 );
 		percussionNameToInt.put( get(PERCUSSION_TRIANGLE_MUTE),   80 );
 		percussionNameToInt.put( get(PERCUSSION_TRIANGLE_OPEN),   81 );
+		percussionNameToInt.put( get(PERCUSSION_SHAKER),          82 );
+		percussionNameToInt.put( get(PERCUSSION_JINGLE_BELL),     83 );
+		percussionNameToInt.put( get(PERCUSSION_BELLTREE),        84 );
+		percussionNameToInt.put( get(PERCUSSION_CASTANETS),       85 );
+		percussionNameToInt.put( get(PERCUSSION_SURDO_MUTE),      86 );
+		percussionNameToInt.put( get(PERCUSSION_SURDO_OPEN),      87 );
 		
-		// init integers to names
+		// init integers to names (for percussion instruments)
 		percussionIntToName = new HashMap<Integer, String>();
 		for ( String key : percussionNameToInt.keySet() ) {
 			percussionIntToName.put( percussionNameToInt.get(key), key );
+		}
+		
+		// init names to integers (for drum kits)
+		drumkitNameToInt = new HashMap<String, Integer>();
+		
+		drumkitNameToInt.put( get(DRUMKIT_STANDARD),     0 );
+		drumkitNameToInt.put( get(DRUMKIT_ROOM),         8 );
+		drumkitNameToInt.put( get(DRUMKIT_POWER),       16 );
+		drumkitNameToInt.put( get(DRUMKIT_ELECTRONIC),  24 );
+		drumkitNameToInt.put( get(DRUMKIT_TR808),       25 );
+		drumkitNameToInt.put( get(DRUMKIT_JAZZ),        32 );
+		drumkitNameToInt.put( get(DRUMKIT_BRUSH),       40 );
+		drumkitNameToInt.put( get(DRUMKIT_ORCHESTRA),   48 );
+		drumkitNameToInt.put( get(DRUMKIT_SOUND_FX),    56 );
+		drumkitNameToInt.put( get(DRUMKIT_CM64_CM32),  127 );
+		
+		// init integers to names (for drum kits)
+		drumkitIntToName = new HashMap<Integer, String>();
+		for ( String key : drumkitNameToInt.keySet() ) {
+			drumkitIntToName.put( drumkitNameToInt.get(key), key );
 		}
 	}
 	
@@ -1623,111 +1699,163 @@ public class Dict {
 	}
 	
 	/**
-	 * Sets up english percussion instrument translation shortcuts.
+	 * Sets up english drumkit and percussion instrument translation shortcuts.
 	 */
 	private static void initPercussionSetEnglish1() {
 		// percussion instruments
-		set( PERCUSSION_BASS_DRUM_2,     "BASS_DRUM_2" );
-		set( PERCUSSION_BASS_DRUM_1,     "BASS_DRUM_1" );
-		set( PERCUSSION_RIM_SHOT,        "RIM_SHOT" );
-		set( PERCUSSION_SNARE_DRUM_1,    "SNARE_DRUM_1" );
-		set( PERCUSSION_HAND_CLAP,       "HAND_CLAP" );
-		set( PERCUSSION_SNARE_DRUM_2,    "SNARE_DRUM_2" );
-		set( PERCUSSION_TOM_1,           "TOM_1" );
-		set( PERCUSSION_HI_HAT_CLOSED,   "HI_HAT_CLOSED" );
-		set( PERCUSSION_TOM_2,           "TOM_2" );
-		set( PERCUSSION_HI_HAT_PEDAL,    "HI_HAT_PEDAL" );
-		set( PERCUSSION_TOM_3,           "TOM_3" );
-		set( PERCUSSION_HI_HAT_OPEN,     "HI_HAT_OPEN" );
-		set( PERCUSSION_TOM_4,           "TOM_4" );
-		set( PERCUSSION_TOM_5,           "TOM_5" );
-		set( PERCUSSION_CRASH_CYMBAL_1,  "CRASH_CYMBAL_1" );
-		set( PERCUSSION_TOM_6,           "TOM_6" );
-		set( PERCUSSION_RIDE_CYMBAL_1,   "RIDE_CYMBAL_1" );
-		set( PERCUSSION_CHINESE_CYMBAL,  "CHINESE_CYMBAL" );
-		set( PERCUSSION_RIDE_BELL,       "RIDE_BELL" );
-		set( PERCUSSION_TAMBOURINE,      "TAMBOURINE" );
-		set( PERCUSSION_SPLASH_CYMBAL,   "SPLASH_CYMBAL" );
-		set( PERCUSSION_COWBELL,         "COWBELL" );
-		set( PERCUSSION_CRASH_CYMBAL_2,  "CRASH_CYMBAL_2" );
-		set( PERCUSSION_VIBRA_SLAP,      "VIBRA_SLAP" );
-		set( PERCUSSION_RIDE_CYMBAL_2,   "RIDE_CYMBAL_2" );
-		set( PERCUSSION_BONGO_HIGH,      "BONGO_HIGH" );
-		set( PERCUSSION_BONGO_LOW,       "BONGO_LOW" );
-		set( PERCUSSION_CONGA_MUTE,      "CONGA_MUTE" );
-		set( PERCUSSION_CONGA_OPEN,      "CONGA_OPEN" );
-		set( PERCUSSION_CONGA_LOW,       "CONGA_LOW" );
-		set( PERCUSSION_TIMBALES_HIGH,   "TIMBALES_HIGH" );
-		set( PERCUSSION_TIMBALES_LOW,    "TIMBALES_LOW" );
-		set( PERCUSSION_AGOGO_HIGH,      "AGOGO_HIGH" );
-		set( PERCUSSION_AGOGO_LOW,       "AGOGO_LOW" );
-		set( PERCUSSION_CABASA,          "CABASA" );
-		set( PERCUSSION_MARACAS,         "MARACAS" );
-		set( PERCUSSION_WHISTLE_SHORT,   "WHISTLE_SHORT" );
-		set( PERCUSSION_WHISTLE_LONG,    "WHISTLE_LONG" );
-		set( PERCUSSION_GUIRO_SHORT,     "GUIRO_SHORT" );
-		set( PERCUSSION_GUIRO_LONG,      "GUIRO_LONG" );
-		set( PERCUSSION_CLAVE,           "CLAVE" );
+		set( PERCUSSION_HIGH_Q,          "HIGH_Q"          );
+		set( PERCUSSION_SLAP,            "SLAP"            );
+		set( PERCUSSION_SCRATCH_PUSH,    "SCRATCH_PUSH"    );
+		set( PERCUSSION_SCRATCH_PULL,    "SCRATCH_PULL"    );
+		set( PERCUSSION_STICKS,          "STICKS"          );
+		set( PERCUSSION_SQUARE_CLICK,    "SQUARE_CLICK"    );
+		set( PERCUSSION_METRONOME_CLICK, "METRONOME_CLICK" );
+		set( PERCUSSION_METRONOME_BELL,  "METRONOME_BELL"  );
+		set( PERCUSSION_BASS_DRUM_2,     "BASS_DRUM_2"     );
+		set( PERCUSSION_BASS_DRUM_1,     "BASS_DRUM_1"     );
+		set( PERCUSSION_RIM_SHOT,        "RIM_SHOT"        );
+		set( PERCUSSION_SNARE_DRUM_1,    "SNARE_DRUM_1"    );
+		set( PERCUSSION_HAND_CLAP,       "HAND_CLAP"       );
+		set( PERCUSSION_SNARE_DRUM_2,    "SNARE_DRUM_2"    );
+		set( PERCUSSION_TOM_1,           "TOM_1"           );
+		set( PERCUSSION_HI_HAT_CLOSED,   "HI_HAT_CLOSED"   );
+		set( PERCUSSION_TOM_2,           "TOM_2"           );
+		set( PERCUSSION_HI_HAT_PEDAL,    "HI_HAT_PEDAL"    );
+		set( PERCUSSION_TOM_3,           "TOM_3"           );
+		set( PERCUSSION_HI_HAT_OPEN,     "HI_HAT_OPEN"     );
+		set( PERCUSSION_TOM_4,           "TOM_4"           );
+		set( PERCUSSION_TOM_5,           "TOM_5"           );
+		set( PERCUSSION_CRASH_CYMBAL_1,  "CRASH_CYMBAL_1"  );
+		set( PERCUSSION_TOM_6,           "TOM_6"           );
+		set( PERCUSSION_RIDE_CYMBAL_1,   "RIDE_CYMBAL_1"   );
+		set( PERCUSSION_CHINESE_CYMBAL,  "CHINESE_CYMBAL"  );
+		set( PERCUSSION_RIDE_BELL,       "RIDE_BELL"       );
+		set( PERCUSSION_TAMBOURINE,      "TAMBOURINE"      );
+		set( PERCUSSION_SPLASH_CYMBAL,   "SPLASH_CYMBAL"   );
+		set( PERCUSSION_COWBELL,         "COWBELL"         );
+		set( PERCUSSION_CRASH_CYMBAL_2,  "CRASH_CYMBAL_2"  );
+		set( PERCUSSION_VIBRA_SLAP,      "VIBRA_SLAP"      );
+		set( PERCUSSION_RIDE_CYMBAL_2,   "RIDE_CYMBAL_2"   );
+		set( PERCUSSION_BONGO_HIGH,      "BONGO_HIGH"      );
+		set( PERCUSSION_BONGO_LOW,       "BONGO_LOW"       );
+		set( PERCUSSION_CONGA_MUTE,      "CONGA_MUTE"      );
+		set( PERCUSSION_CONGA_OPEN,      "CONGA_OPEN"      );
+		set( PERCUSSION_CONGA_LOW,       "CONGA_LOW"       );
+		set( PERCUSSION_TIMBALES_HIGH,   "TIMBALES_HIGH"   );
+		set( PERCUSSION_TIMBALES_LOW,    "TIMBALES_LOW"    );
+		set( PERCUSSION_AGOGO_HIGH,      "AGOGO_HIGH"      );
+		set( PERCUSSION_AGOGO_LOW,       "AGOGO_LOW"       );
+		set( PERCUSSION_CABASA,          "CABASA"          );
+		set( PERCUSSION_MARACAS,         "MARACAS"         );
+		set( PERCUSSION_WHISTLE_SHORT,   "WHISTLE_SHORT"   );
+		set( PERCUSSION_WHISTLE_LONG,    "WHISTLE_LONG"    );
+		set( PERCUSSION_GUIRO_SHORT,     "GUIRO_SHORT"     );
+		set( PERCUSSION_GUIRO_LONG,      "GUIRO_LONG"      );
+		set( PERCUSSION_CLAVE,           "CLAVE"           );
 		set( PERCUSSION_WOOD_BLOCK_HIGH, "WOOD_BLOCK_HIGH" );
-		set( PERCUSSION_WOOD_BLOCK_LOW,  "WOOD_BLOCK_LOW" );
-		set( PERCUSSION_CUICA_MUTE,      "CUICA_MUTE" );
-		set( PERCUSSION_CUICA_OPEN,      "CUICA_OPEN" );
-		set( PERCUSSION_TRIANGLE_MUTE,   "TRIANGLE_MUTE" );
-		set( PERCUSSION_TRIANGLE_OPEN,   "TRIANGLE_OPEN" );
+		set( PERCUSSION_WOOD_BLOCK_LOW,  "WOOD_BLOCK_LOW"  );
+		set( PERCUSSION_CUICA_MUTE,      "CUICA_MUTE"      );
+		set( PERCUSSION_CUICA_OPEN,      "CUICA_OPEN"      );
+		set( PERCUSSION_TRIANGLE_MUTE,   "TRIANGLE_MUTE"   );
+		set( PERCUSSION_TRIANGLE_OPEN,   "TRIANGLE_OPEN"   );
+		set( PERCUSSION_SHAKER,          "SHAKER"          );
+		set( PERCUSSION_JINGLE_BELL,     "JINGLE_BELL"     );
+		set( PERCUSSION_BELLTREE,        "BELLTREE"        );
+		set( PERCUSSION_CASTANETS,       "CASTANETS"       );
+		set( PERCUSSION_SURDO_MUTE,      "SURDO_MUTE"      );
+		set( PERCUSSION_SURDO_OPEN,      "SURDO_OPEN"      );
+		
+		// drumkits
+		set( DRUMKIT_STANDARD,   "STANDARD"   );
+		set( DRUMKIT_ROOM,       "ROOM"       );
+		set( DRUMKIT_POWER,      "POWER"      );
+		set( DRUMKIT_ELECTRONIC, "ELECTRONIC" );
+		set( DRUMKIT_TR808,      "TR808"      );
+		set( DRUMKIT_JAZZ,       "JAZZ"       );
+		set( DRUMKIT_BRUSH,      "BRUSH"      );
+		set( DRUMKIT_ORCHESTRA,  "ORCHESTRA"  );
+		set( DRUMKIT_SOUND_FX,   "SOUND_FX"   );
+		set( DRUMKIT_CM64_CM32,  "CM64_CM32"  );
 	}
 	
 	/**
-	 * Sets up german percussion instrument translation shortcuts.
+	 * Sets up german drumkit and percussion instrument translation shortcuts.
 	 */
 	private static void initPercussionSetGerman1() {
 		// percussion instruments
-		set( PERCUSSION_BASS_DRUM_2,     "BASSTROMMEL_2" );
-		set( PERCUSSION_BASS_DRUM_1,     "BASSTROMMEL_1" );
-		set( PERCUSSION_RIM_SHOT,        "RIMSHOT" );
-		set( PERCUSSION_SNARE_DRUM_1,    "KLEINE_TROMMEL_1" );
-		set( PERCUSSION_HAND_CLAP,       "KLATSCHEN" );
-		set( PERCUSSION_SNARE_DRUM_2,    "KLEINE_TROMMEL_2" );
-		set( PERCUSSION_TOM_1,           "TOMTOM_1" );
-		set( PERCUSSION_HI_HAT_CLOSED,   "HI_HAT_GESCHLOSSEN" );
-		set( PERCUSSION_TOM_2,           "TOMTOM_2" );
-		set( PERCUSSION_HI_HAT_PEDAL,    "HI_HAT_PEDAL" );
-		set( PERCUSSION_TOM_3,           "TOMTOM_3" );
-		set( PERCUSSION_HI_HAT_OPEN,     "HI_HAT_OFFEN" );
-		set( PERCUSSION_TOM_4,           "TOMTOM_4" );
-		set( PERCUSSION_TOM_5,           "TOMTOM_5" );
-		set( PERCUSSION_CRASH_CYMBAL_1,  "CRASH_BECKEN_1" );
-		set( PERCUSSION_TOM_6,           "TOMTOM_6" );
-		set( PERCUSSION_RIDE_CYMBAL_1,   "RIDE_BECKEN_1" );
+		set( PERCUSSION_HIGH_Q,          "HIGH_Q"              );
+		set( PERCUSSION_SLAP,            "SCHLAG"              );
+		set( PERCUSSION_SCRATCH_PUSH,    "SCRATCH_PUSH"        );
+		set( PERCUSSION_SCRATCH_PULL,    "SCRATCH_PULL"        );
+		set( PERCUSSION_STICKS,          "STÖCKE"              );
+		set( PERCUSSION_SQUARE_CLICK,    "SQUARE_CLICK"        );
+		set( PERCUSSION_METRONOME_CLICK, "METRONOM_KLICK"      );
+		set( PERCUSSION_METRONOME_BELL,  "METRONOM_KLINGEL"    );
+		set( PERCUSSION_BASS_DRUM_2,     "BASSTROMMEL_2"       );
+		set( PERCUSSION_BASS_DRUM_1,     "BASSTROMMEL_1"       );
+		set( PERCUSSION_RIM_SHOT,        "RIMSHOT"             );
+		set( PERCUSSION_SNARE_DRUM_1,    "KLEINE_TROMMEL_1"    );
+		set( PERCUSSION_HAND_CLAP,       "KLATSCHEN"           );
+		set( PERCUSSION_SNARE_DRUM_2,    "KLEINE_TROMMEL_2"    );
+		set( PERCUSSION_TOM_1,           "TOMTOM_1"            );
+		set( PERCUSSION_HI_HAT_CLOSED,   "HI_HAT_GESCHLOSSEN"  );
+		set( PERCUSSION_TOM_2,           "TOMTOM_2"            );
+		set( PERCUSSION_HI_HAT_PEDAL,    "HI_HAT_PEDAL"        );
+		set( PERCUSSION_TOM_3,           "TOMTOM_3"            );
+		set( PERCUSSION_HI_HAT_OPEN,     "HI_HAT_OFFEN"        );
+		set( PERCUSSION_TOM_4,           "TOMTOM_4"            );
+		set( PERCUSSION_TOM_5,           "TOMTOM_5"            );
+		set( PERCUSSION_CRASH_CYMBAL_1,  "CRASH_BECKEN_1"      );
+		set( PERCUSSION_TOM_6,           "TOMTOM_6"            );
+		set( PERCUSSION_RIDE_CYMBAL_1,   "RIDE_BECKEN_1"       );
 		set( PERCUSSION_CHINESE_CYMBAL,  "CHINESISCHES_BECKEN" );
-		set( PERCUSSION_RIDE_BELL,       "RIDE_BELL" );
-		set( PERCUSSION_TAMBOURINE,      "TAMBURIN" );
-		set( PERCUSSION_SPLASH_CYMBAL,   "SPLASH_BECKEN" );
-		set( PERCUSSION_COWBELL,         "KUHGLOCKE" );
-		set( PERCUSSION_CRASH_CYMBAL_2,  "CRASH_BECKEN_2" );
-		set( PERCUSSION_VIBRA_SLAP,      "VIBRASLAP" );
-		set( PERCUSSION_RIDE_CYMBAL_2,   "RIDE_BECKEN_2" );
-		set( PERCUSSION_BONGO_HIGH,      "BONGO_HOCH" );
-		set( PERCUSSION_BONGO_LOW,       "BONGO_TIEF" );
-		set( PERCUSSION_CONGA_MUTE,      "CONGA_GEDÄMPFT" );
-		set( PERCUSSION_CONGA_OPEN,      "CONGA_OFFEN" );
-		set( PERCUSSION_CONGA_LOW,       "CONGA_TIEF" );
-		set( PERCUSSION_TIMBALES_HIGH,   "TIMBALES_HOCH" );
-		set( PERCUSSION_TIMBALES_LOW,    "TIMBALES_TIEF" );
-		set( PERCUSSION_AGOGO_HIGH,      "AGOGO_HOCH" );
-		set( PERCUSSION_AGOGO_LOW,       "AGOGO_TIEF" );
-		set( PERCUSSION_CABASA,          "CABASA" );
-		set( PERCUSSION_MARACAS,         "MARACAS" );
-		set( PERCUSSION_WHISTLE_SHORT,   "PFEIFE_KURZ" );
-		set( PERCUSSION_WHISTLE_LONG,    "PFEIFE_LANG" );
-		set( PERCUSSION_GUIRO_SHORT,     "GUIRO_KURZ" );
-		set( PERCUSSION_GUIRO_LONG,      "GUIRO_LANG" );
-		set( PERCUSSION_CLAVE,           "CLAVE" );
-		set( PERCUSSION_WOOD_BLOCK_HIGH, "HOLZBLOCK_HOCH" );
-		set( PERCUSSION_WOOD_BLOCK_LOW,  "HOLZBLOCK_TIEF" );
-		set( PERCUSSION_CUICA_MUTE,      "CUICA_GEDÄMPFT" );
-		set( PERCUSSION_CUICA_OPEN,      "CUICA_OFFEN" );
-		set( PERCUSSION_TRIANGLE_MUTE,   "TRIANGEL_GEDÄMPFT" );
-		set( PERCUSSION_TRIANGLE_OPEN,   "TRIANGEL_OFFEN" );
+		set( PERCUSSION_RIDE_BELL,       "RIDE_BELL"           );
+		set( PERCUSSION_TAMBOURINE,      "TAMBURIN"            );
+		set( PERCUSSION_SPLASH_CYMBAL,   "SPLASH_BECKEN"       );
+		set( PERCUSSION_COWBELL,         "KUHGLOCKE"           );
+		set( PERCUSSION_CRASH_CYMBAL_2,  "CRASH_BECKEN_2"      );
+		set( PERCUSSION_VIBRA_SLAP,      "VIBRASLAP"           );
+		set( PERCUSSION_RIDE_CYMBAL_2,   "RIDE_BECKEN_2"       );
+		set( PERCUSSION_BONGO_HIGH,      "BONGO_HOCH"          );
+		set( PERCUSSION_BONGO_LOW,       "BONGO_TIEF"          );
+		set( PERCUSSION_CONGA_MUTE,      "CONGA_GEDÄMPFT"      );
+		set( PERCUSSION_CONGA_OPEN,      "CONGA_OFFEN"         );
+		set( PERCUSSION_CONGA_LOW,       "CONGA_TIEF"          );
+		set( PERCUSSION_TIMBALES_HIGH,   "TIMBALES_HOCH"       );
+		set( PERCUSSION_TIMBALES_LOW,    "TIMBALES_TIEF"       );
+		set( PERCUSSION_AGOGO_HIGH,      "AGOGO_HOCH"          );
+		set( PERCUSSION_AGOGO_LOW,       "AGOGO_TIEF"          );
+		set( PERCUSSION_CABASA,          "CABASA"              );
+		set( PERCUSSION_MARACAS,         "MARACAS"             );
+		set( PERCUSSION_WHISTLE_SHORT,   "PFEIFE_KURZ"         );
+		set( PERCUSSION_WHISTLE_LONG,    "PFEIFE_LANG"         );
+		set( PERCUSSION_GUIRO_SHORT,     "GUIRO_KURZ"          );
+		set( PERCUSSION_GUIRO_LONG,      "GUIRO_LANG"          );
+		set( PERCUSSION_CLAVE,           "CLAVE"               );
+		set( PERCUSSION_WOOD_BLOCK_HIGH, "HOLZBLOCK_HOCH"      );
+		set( PERCUSSION_WOOD_BLOCK_LOW,  "HOLZBLOCK_TIEF"      );
+		set( PERCUSSION_CUICA_MUTE,      "CUICA_GEDÄMPFT"      );
+		set( PERCUSSION_CUICA_OPEN,      "CUICA_OFFEN"         );
+		set( PERCUSSION_TRIANGLE_MUTE,   "TRIANGEL_GEDÄMPFT"   );
+		set( PERCUSSION_TRIANGLE_OPEN,   "TRIANGEL_OFFEN"      );
+		set( PERCUSSION_SHAKER,          "SCHÜTTLER"           );
+		set( PERCUSSION_JINGLE_BELL,     "SCHELLE"             );
+		set( PERCUSSION_BELLTREE,        "GLOCKENBAUM"         );
+		set( PERCUSSION_CASTANETS,       "KASTAGNETTEN"        );
+		set( PERCUSSION_SURDO_MUTE,      "SURDO_GEDÄMPFT"      );
+		set( PERCUSSION_SURDO_OPEN,      "SURDO_OFFEN"         );
+		
+		// drumkits
+		set( DRUMKIT_STANDARD,   "STANDARD"      );
+		set( DRUMKIT_ROOM,       "RAUM"          );
+		set( DRUMKIT_POWER,      "POWER"         );
+		set( DRUMKIT_ELECTRONIC, "ELEKTRO"       );
+		set( DRUMKIT_TR808,      "TR808"         );
+		set( DRUMKIT_JAZZ,       "JAZZ"          );
+		set( DRUMKIT_BRUSH,      "BÜRSTE"        );
+		set( DRUMKIT_ORCHESTRA,  "ORCHESTER"     );
+		set( DRUMKIT_SOUND_FX,   "SOUND_EFFEKTE" );
+		set( DRUMKIT_CM64_CM32,  "CM64_CM32"     );
 	}
 	
 	/**
@@ -1745,6 +1873,7 @@ public class Dict {
 		setSyntax( SYNTAX_BPM,             "bpm"            );
 		setSyntax( SYNTAX_OPT_SEPARATOR,   ","              );
 		setSyntax( SYNTAX_OPT_ASSIGNER,    ":"              );
+		setSyntax( SYNTAX_PROG_BANK_SEP,   "-"              );
 		setSyntax( SYNTAX_BANK_SEP,        "."              );
 		setSyntax( SYNTAX_VOLUME,          "volume"         );
 		setSyntax( SYNTAX_V,               "vol"            );
@@ -1790,6 +1919,7 @@ public class Dict {
 		setSyntax( SYNTAX_BPM,             "bpm"            );
 		setSyntax( SYNTAX_OPT_SEPARATOR,   ","              );
 		setSyntax( SYNTAX_OPT_ASSIGNER,    "="              );
+		setSyntax( SYNTAX_PROG_BANK_SEP,   ","              );
 		setSyntax( SYNTAX_BANK_SEP,        "/"              );
 		setSyntax( SYNTAX_VOLUME,          "volume"         );
 		setSyntax( SYNTAX_V,               "v"              );
@@ -1835,6 +1965,7 @@ public class Dict {
 		setSyntax( SYNTAX_BPM,             "bpm"          );
 		setSyntax( SYNTAX_OPT_SEPARATOR,   ","            );
 		setSyntax( SYNTAX_OPT_ASSIGNER,    "="            );
+		setSyntax( SYNTAX_PROG_BANK_SEP,   ","            );
 		setSyntax( SYNTAX_BANK_SEP,        ":"            );
 		setSyntax( SYNTAX_VOLUME,          "vol"          );
 		setSyntax( SYNTAX_V,               "v"            );
@@ -2418,6 +2549,19 @@ public class Dict {
 	}
 	
 	/**
+	 * Returns a drumkit shortcut by value.
+	 * 
+	 * @param i  drumkit value as defined by the General Standard specification
+	 * @return
+	 */
+	public static String getDrumkit( int i ) {
+		if ( drumkitIntToName.containsKey(i) )
+			return drumkitIntToName.get( i );
+		else
+			return get( UNKNOWN_DRUMKIT_NAME );
+	}
+	
+	/**
 	 * Indicates if the given name is a currently configured percussion shortcut.
 	 * 
 	 * @param name  percussion name to be checked
@@ -2494,6 +2638,15 @@ public class Dict {
 	 */
 	public static ArrayList<InstrumentElement> getInstrumentList() {
 		return instrumentList;
+	}
+	
+	/**
+	 * Returns all configured drumkit numbers.
+	 * 
+	 * @return all configured drumkit numbers
+	 */
+	public static Set<Integer> getDrumkitList() {
+		return drumkitIntToName.keySet();
 	}
 	
 	/**

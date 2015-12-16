@@ -310,20 +310,21 @@ public class SoundfontParser implements IParser {
 			Instrument midiInstr = instruments[ i ];
 			Patch      patch     = midiInstr.getPatch();
 			int        bank      = patch.getBank();
-			instrument.put( "name",     midiInstr.getName()                  );
-			instrument.put( "program",  Integer.toString(patch.getProgram()) );
-			instrument.put( "bank",     Integer.toString(bank)               );
-			instrument.put( "bank_msb", Integer.toString(bank >> 7)          );
-			instrument.put( "bank_lsb", Integer.toString(bank % 128)         );
+			instrument.put( "name",     midiInstr.getName()                          );
+			instrument.put( "program",  Integer.toString(patch.getProgram())         );
+			instrument.put( "bank",     Integer.toString(bank)                       );
+			instrument.put( "bank_msb", Integer.toString(bank >> 7)                  );
+			instrument.put( "bank_lsb", Integer.toString(bank & 0b00000000_01111111) );
 			
 			// add class specific instrument data
 			if ( ! (midiInstr instanceof SF2Instrument) ) {
 				
 				// unknown class
 				needCategoryUnknown = true;
-				instrument.put( "channels", "-" );
-				instrument.put( "keys",     "-" );
-				instrument.put( "type",     "-" );
+				instrument.put( "channels",      "-"  );
+				instrument.put( "channels_long", "-1" );
+				instrument.put( "keys",          "-"  );
+				instrument.put( "type",          "-"  );
 				
 				continue;
 			}
@@ -349,7 +350,15 @@ public class SoundfontParser implements IParser {
 				else
 					hasChromaticChannel = true;
 			}
-			instrument.put( "channels", makeNumberRangeString(channels) );
+			instrument.put( "channels", makeNumberRangeString(channels) ); // e.g. "0-9,10-15"
+			StringBuffer channelsStr = new StringBuffer();
+			for ( int channel : channels ) {
+				if ( 0 == channelsStr.length() )
+					channelsStr.append( channel );
+				else
+					channelsStr.append( "," + channel );
+			}
+			instrument.put( "channels_long", channelsStr.toString() ); // e.g. "0,1,2,3,4,5,6,7,8,10,11,12,13,14,15"
 			
 			// get keys
 			ArrayList<Integer> keys = new ArrayList<Integer>();
@@ -506,13 +515,13 @@ public class SoundfontParser implements IParser {
 			resource.put( "format",       "-" );
 			resource.put( "frame_length", 0   );
 			String  classDesc      = resources[i].toString();
-			Pattern pattern        = Pattern.compile( "^(.+):.*" );
+			Pattern pattern        = Pattern.compile( "^(.+?):.*" );
 			Matcher matcher        = pattern.matcher( classDesc );
 			String  identifiedType = null;
 			if ( matcher.matches() ) {
 				String type = matcher.group( 1 );
-				resource.put( "type", type );
 				if ( "Layer".equals(type) ) {
+					resource.put( "type", "Layer" );
 					needCategoryLayer = true;
 					identifiedType    = type;
 				}
@@ -542,6 +551,7 @@ public class SoundfontParser implements IParser {
 			// apply class-dependant information
 			if ( dataClass == AudioInputStream.class ) {
 				
+				resource.put( "type", "Sample" );
 				needCategorySample = true;
 				identifiedType     = "Sample";
 				
