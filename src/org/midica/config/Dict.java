@@ -574,6 +574,8 @@ public class Dict {
 	public static final String TIP_ACTIVITY                     = "tip_activity";
 	public static final String ABBR_PROG_NUM                    = "abbr_prog_num";
 	public static final String TIP_PROG_NUM                     = "tip_prog_num";
+	public static final String ABBR_BANK_NUM                    = "abbr_bank_num";
+	public static final String TIP_BANK_NUM                     = "tip_bank_num";
 	public static final String CH_HEAD_INSTRUMENT               = "ch_head_instrument";
 	public static final String CH_HEAD_COMMENT                  = "ch_head_comment";
 	public static final String CH_DETAILS_VOLUME                = "ch_details_volume";
@@ -972,6 +974,8 @@ public class Dict {
 		set( TIP_ACTIVITY,                        "activity"                   );
 		set( ABBR_PROG_NUM,                       "P"                          );
 		set( TIP_PROG_NUM,                        "program number"             );
+		set( ABBR_BANK_NUM,                       "B"                          );
+		set( TIP_BANK_NUM,                        "bank number"                );
 		set( CH_HEAD_INSTRUMENT,                  "Instrument"                 );
 		set( CH_HEAD_COMMENT,                     "Comment"                    );
 		set( ACTIVITY_ACTIVE,                     "active"                     );

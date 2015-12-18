@@ -796,16 +796,19 @@ public final class MidiDevices {
 			return;
 		}
 		
-		// bank number = MSB * 128 + LSB
-		int bankNum = bankMSB << 7 + bankLSB;
-		String bankNumStr = Integer.toString( bankNum );
-		
-		// bank description:
+		// bank number like it's used in the syntax
 		// if LSB is set: MSB, separator, LSB
 		// otherwise: MSB
-		String bankDesc = Byte.toString( bankMSB );
+		String bankNum = Byte.toString( bankMSB );
 		if ( bankLSB > 0 )
-			bankDesc += Dict.getSyntax( Dict.SYNTAX_BANK_SEP ) + Byte.toString( bankLSB );
+			bankNum += Dict.getSyntax( Dict.SYNTAX_BANK_SEP ) + Byte.toString( bankLSB );
+		
+		// full bank number = MSB * 128 + LSB
+		int fullBankNum = bankMSB << 7 + bankLSB;
+		String fullBankNumStr = Integer.toString( fullBankNum );
+		
+		// bank number tooltip
+		String bankTooltip = fullBankNumStr + " (MSB: " + bankMSB + ", LSB: " + bankLSB + ")";
 		
 		// program number
 		String progNumStr = Byte.toString( program );
@@ -823,7 +826,7 @@ public final class MidiDevices {
 			// nothing more to do
 		}
 		
-		playerControler.setChannelInfo( channel, bankNumStr, bankDesc, progNumStr, instrName, comment );
+		playerControler.setChannelInfo( channel, bankNum, bankTooltip, progNumStr, instrName, comment );
 	}
 	
 	/**

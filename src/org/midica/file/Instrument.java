@@ -29,7 +29,7 @@ import org.midica.config.Dict;
 public class Instrument implements Comparable<Instrument> {
 	
 	/** First tickstamp where any action can occur. */
-	private static final int MIN_CURRENT_TICKS =  0;
+	private static final int MIN_CURRENT_TICKS = 20;
 	/** Default relative volume for this channel unless defined differently. */
 	private static final int DEFAULT_VOLUME    = 64;
 	/** Default relative staccato value for this channel unless defined differently. */

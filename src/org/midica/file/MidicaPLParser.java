@@ -46,7 +46,7 @@ public class MidicaPLParser extends SequenceParser {
 	private static final int MODE_MACRO       = 1;
 	private static final int MODE_DEFAULT     = 2;
 	
-	private static final int TICK_BANK_BEFORE_PROGRAM = 1000; // how many ticks a bank select will be made before the program change
+	private static final int TICK_BANK_BEFORE_PROGRAM = 10; // how many ticks a bank select will be made before the program change
 	
 	private static final int  PAUSE_VALUE = -1;
 	
@@ -231,7 +231,7 @@ public class MidicaPLParser extends SequenceParser {
 		// cut away comments
 		String cleanedLine = line.split( Pattern.quote(COMMENT) + "|$", 2 )[ 0 ];
 		cleanedLine = clean( cleanedLine ); // eliminate leading and trailing whitespaces
-		System.out.println( cleanedLine ); // TODO: delete
+//		System.out.println( cleanedLine ); // TODO: delete
 		String[] tokens = getTokens( cleanedLine );
 		
 		if ( "".equals(tokens[0]) )
@@ -857,17 +857,19 @@ public class MidicaPLParser extends SequenceParser {
 			boolean[] isChanged = instr.setBank( bankMSB, bankLSB );
 			
 			try {
-				// bank select, if necessary
-				if ( isChanged[0] )
-					SequenceCreator.setBank( channel, tick, bankMSB, false );
-				if ( isChanged[1] )
-					SequenceCreator.setBank( channel, tick, bankLSB, true );
-				
-				// program change and instrument name
+				// calculate tick for bank select
 				long bankTick = tick - TICK_BANK_BEFORE_PROGRAM;
 				if ( bankTick < 0 )
 					bankTick = 0;
-				SequenceCreator.initChannel( channel, instrNum, instrName, bankTick );
+				
+				// bank select, if necessary
+				if ( isChanged[0] )
+					SequenceCreator.setBank( channel, bankTick, bankMSB, false );
+				if ( isChanged[1] )
+					SequenceCreator.setBank( channel, bankTick, bankLSB, true );
+				
+				// program change and instrument name
+				SequenceCreator.initChannel( channel, instrNum, instrName, tick );
 			}
 			catch ( InvalidMidiDataException e ) {
 				throw new ParseException( Dict.get(Dict.ERROR_MIDI_PROBLEM) + e.getMessage() );

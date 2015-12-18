@@ -128,7 +128,8 @@ public class PlayerView extends JDialog {
 	// text colors
 	public static final Color COLOR_TICKS             = new Color(  50, 100, 255 );
 	public static final Color COLOR_TIME              = new Color(   0,   0,   0 );
-	public static final Color COLOR_CH_PROGRAM_NUMBER = new Color(  50, 100, 255 );
+	public static final Color COLOR_CH_PROGRAM_NUMBER = new Color(   0,   0,   0 );
+	public static final Color COLOR_CH_BANK_NUMBER    = new Color(  50, 100, 255 );
 	public static final Color COLOR_CH_INSTRUMENT     = new Color(   0,   0,   0 );
 	public static final Color COLOR_CH_COMMENT        = new Color(  50, 100, 255 );
 	
@@ -178,6 +179,7 @@ public class PlayerView extends JDialog {
 	private ArrayList<JLabel>     channelActivityLEDs   = null;
 	private ArrayList<JLabel>     channelInstruments    = null;
 	private ArrayList<JLabel>     channelProgramNumbers = null;
+	private ArrayList<JLabel>     channelBankNumbers    = null;
 	private ArrayList<JLabel>     channelComments       = null;
 	private ArrayList<JSlider>    channelVolumeSliders  = null;
 	private ArrayList<JTextField> channelVolumeFields   = null;
@@ -757,6 +759,7 @@ public class PlayerView extends JDialog {
 		channelActivityLEDs   = new ArrayList<JLabel>();
 		channelInstruments    = new ArrayList<JLabel>();
 		channelProgramNumbers = new ArrayList<JLabel>();
+		channelBankNumbers    = new ArrayList<JLabel>();
 		channelComments       = new ArrayList<JLabel>();
 		channelDetails        = new ArrayList<Container>();
 		channelVolumeSliders  = new ArrayList<JSlider>();
@@ -800,6 +803,11 @@ public class PlayerView extends JDialog {
 		JLabel p = new JLabel( Dict.get(Dict.ABBR_PROG_NUM) );
 		p.setToolTipText( Dict.get(Dict.TIP_PROG_NUM) );
 		area.add( p, constraints );
+		
+		constraints.gridx++;
+		JLabel b = new JLabel( Dict.get(Dict.ABBR_BANK_NUM) );
+		b.setToolTipText( Dict.get(Dict.TIP_BANK_NUM) );
+		area.add( b, constraints );
 		
 		constraints.gridx++;
 		JLabel in = new JLabel( Dict.get(Dict.CH_HEAD_INSTRUMENT) );
@@ -867,6 +875,13 @@ public class PlayerView extends JDialog {
 			lblProgNum.setForeground( COLOR_CH_PROGRAM_NUMBER );
 			area.add( lblProgNum, constraints );
 			channelProgramNumbers.add( lblProgNum );
+			
+			// bank number
+			constraints.gridx++;
+			JLabel lblBankNum = new JLabel();
+			lblBankNum.setForeground( COLOR_CH_BANK_NUMBER );
+			area.add( lblBankNum, constraints );
+			channelBankNumbers.add( lblBankNum );
 			
 			// instrument label
 			constraints.gridx++;
@@ -1470,15 +1485,15 @@ public class PlayerView extends JDialog {
 	 * Sets the Channel information.
 	 * This consists of bank number, program number, instrument name and channel comment.
 	 * 
-	 * @param channel    MIDI channel number.
-	 * @param bankNum    bank number
-	 * @param bankDesc   bank description -- MSB, if LSB is null; otherwise: MSB and LSB,
-	 *                   separated by the currently configured separator
-	 * @param program    program (instrument) number
-	 * @param instrName  instrument name
-	 * @param comment    channel comment (META event INSTRUMENT NAME)
+	 * @param channel       MIDI channel number.
+	 * @param bankNumShort  bank number syntax -- MSB, if LSB is null; otherwise: MSB and LSB,
+	 *                      separated by the currently configured separator
+	 * @param bankNumLong   full bank number, MSB and LSB in a human-readable form
+	 * @param program       program (instrument) number
+	 * @param instrName     instrument name
+	 * @param comment       channel comment (META event INSTRUMENT NAME)
 	 */
-	public void setInstrumentInfo( int channel, String bankNum, String bankDesc, String program, String instrName, String comment ) {
+	public void setInstrumentInfo( int channel, String bankNumShort, String bankNumLong, String program, String instrName, String comment ) {
 		
 		// program number
 		channelProgramNumbers.get( channel ).setText( program );
@@ -1489,7 +1504,9 @@ public class PlayerView extends JDialog {
 		// comment
 		channelComments.get( channel ).setText( comment );
 		
-		// TODO: implement the rest
+		// bank number
+		channelBankNumbers.get( channel ).setText( bankNumShort );
+		channelBankNumbers.get( channel ).setToolTipText( bankNumLong );
 	}
 	
 	/**

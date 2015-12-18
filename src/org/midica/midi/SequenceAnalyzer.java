@@ -171,7 +171,7 @@ public class SequenceAnalyzer {
 			
 			// default config (same as the default in channelConfig)
 			Byte[] conf0 = { 0, 0, 0 }; // default values: bankMSB=0, bankLSB=0, program=0
-			channelHistory.put( DEFAULT_CHANNEL_CONFIG_TICK, conf0 ); // this must be configured even before SequenceCreator.NOW
+			channelHistory.put( DEFAULT_CHANNEL_CONFIG_TICK, conf0 ); // this must be configured before the sequence starts
 		}
 		commentHistory = new TreeMap<Byte, TreeMap<Long, String>>();
 		for ( byte channel = 0; channel < 16; channel++ ) {
@@ -258,7 +258,13 @@ public class SequenceAnalyzer {
 	}
 	
 	/**
-	 * Retrieves note-specific information from short messages.
+	 * Retrieves some channel-specific information from short messages.
+	 * 
+	 * This following information is parsed:
+	 * 
+	 * - note on/off
+	 * - bank select (MSB/LSB)
+	 * - program change
 	 * 
 	 * @param msg   Short message
 	 * @param tick  Tickstamp
@@ -309,8 +315,7 @@ public class SequenceAnalyzer {
 			channelConfig.get( channel )[ 2 ] = (byte) msg.getData1();
 			Byte[] confAtTick = channelConfig.get( channel ).clone();
 			instrumentHistory.get( channel ).put( tick, confAtTick );
-			if ( tick > -1 )
-				markerTicks.add( tick ); // prepare marker event
+			markerTicks.add( tick ); // prepare marker event
 		}
 	}
 	
@@ -797,13 +802,6 @@ public class SequenceAnalyzer {
 	 */
 	public static Byte[] getInstrument( byte channel, long tick ) {
 		Entry<Long, Byte[]> entry = instrumentHistory.get( channel ).floorEntry( tick );
-		
-		// config not available?
-		if ( null == entry ) {
-			Byte[] defaultConf = { 0, 0, 0 };
-			return defaultConf;
-		}
-		
 		return entry.getValue();
 	}
 	

@@ -32,7 +32,7 @@ import com.sun.media.sound.MidiUtils;
  */
 public class SequenceCreator {
 	
-	public  static final long NOW                =  -1; // MIDI tick for channel initializations
+	public  static final long NOW                =   0; // MIDI tick for channel initializations
 	public  static final int  DEFAULT_RESOLUTION = 480; // ticks per quarter note
 	
 	private static int      resolution = DEFAULT_RESOLUTION;
@@ -129,7 +129,7 @@ public class SequenceCreator {
 	 * @param channel     Channel number from 0 to 15.
 	 * @param instrNum    Instrument number - corresponds to the MIDI program number.
 	 * @param comment     Comment to be used as the track name.
-	 * @param tick        Tickstamp of the instrument change or -1 if the method is called
+	 * @param tick        Tickstamp of the instrument change or 0 if the method is called
 	 *                    during initialization.
 	 * @throws InvalidMidiDataException if invalid MIDI data is used to create a MIDI message.
 	 */

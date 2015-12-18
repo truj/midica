@@ -353,16 +353,16 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * - instrument name
 	 * - track comment
 	 * 
-	 * @param channel      Channel number (0-15).
-	 * @param bankNumber   bank number
-	 * @param bankDesc     bank description -- MSB, if LSB is null; otherwise: MSB and LSB,
-	 *                     separated by the currently configured separator
-	 * @param program      program number
-	 * @param instrName    instrument name
-	 * @param comment      channel comment
+	 * @param channel       Channel number (0-15).
+	 * @param bankNumShort  bank number syntax -- MSB, if LSB is null; otherwise: MSB and LSB,
+	 *                      separated by the currently configured separator
+	 * @param bankNumLong   full bank number, MSB and LSB in a human-readable form
+	 * @param program       program number
+	 * @param instrName     instrument name
+	 * @param comment       channel comment
 	 */
-	public void setChannelInfo( byte channel, String bankNumber, String bankDesc, String program, String instrName, String comment ) {
-		view.setInstrumentInfo( channel, bankNumber, bankDesc, program, instrName, comment );
+	public void setChannelInfo( byte channel, String bankNumShort, String bankNumLong, String program, String instrName, String comment ) {
+		view.setInstrumentInfo( channel, bankNumShort, bankNumLong, program, instrName, comment );
 	}
 	
 	/**
