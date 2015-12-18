@@ -73,4 +73,6 @@ qx { $cmd };
 # add Midica.java to the staging area
 `git add '$java_file'`;
 
+sleep 1;
+
 exit 0;
