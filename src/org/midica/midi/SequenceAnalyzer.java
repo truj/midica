@@ -615,7 +615,6 @@ public class SequenceAnalyzer {
 				TreeSet<Byte> channelsAtTick = markers.get( tick );
 				if ( null == channelsAtTick ) {
 					channelsAtTick = new TreeSet<Byte>();
-					markers.put( tick, channelsAtTick );
 				}
 				
 				// is there any channel activity at the current tick?
@@ -647,9 +646,11 @@ public class SequenceAnalyzer {
 				if (instrumentChanged)
 					channel |= MidiListener.MARKER_BITMASK_INSTRUMENT;
 				
-				// add the channel to the activity change marker
-				if ( activityChanged || historyChanged || instrumentChanged )
+				// add the channel to the marker
+				if ( activityChanged || historyChanged || instrumentChanged ) {
 					channelsAtTick.add( channel );
+					markers.put( tick, channelsAtTick );
+				}
 			}
 		}
 		try {

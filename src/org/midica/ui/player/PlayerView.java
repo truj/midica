@@ -900,7 +900,7 @@ public class PlayerView extends JDialog {
 			// channel detail area
 			constraints.gridy++;
 			constraints.gridx     = 0;
-			constraints.gridwidth = 7;
+			constraints.gridwidth = 8;
 			Container details = createChannelDetailArea( i, dimVolTxtFld );
 			area.add( details, constraints );
 			details.setVisible( false );
