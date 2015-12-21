@@ -260,7 +260,9 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void parseTokens( String[] tokens ) throws ParseException {
 		
-		replaceShortcuts( tokens );
+		// replace note, instrument, percussion and drumkit names
+		if ( tokens.length > 2  )
+			replaceShortcuts( tokens );
 		
 		// mode command (instruments, macro, end)
 		// or definition (define, chord)
@@ -336,29 +338,79 @@ public class MidicaPLParser extends SequenceParser {
 	}
 	
 	/**
-	 * Replaces the note name, instrument shortcut or percussion shortcuts
-	 * in a channel command token array.
+	 * Replaces shortcuts in normal channel commands.
+	 * 
+	 * The following shortcuts are replaced:
+	 * 
+	 * - percussion channel shortcut (this is also replaced for instrument commands)
+	 * - note names
+	 * - percussion shortcuts
 	 * 
 	 * @param tokens Channel command token array.
 	 */
 	private void replaceShortcuts( String[] tokens ) {
 		
-		// TODO: replace instrument shortcuts as well
-		
-		// percussion channel shortcuts
+		// percussion channel shortcut?
 		if ( P.equals(tokens[0]) ) {
-			tokens[0] = "9";
-		}
-		if ( "9".equals(tokens[0]) ) {
-			if ( Dict.UNKNOWN_CODE != Dict.getPercussion(tokens[1]) )
-				tokens[ 1 ] = Integer.toString( Dict.getPercussion(tokens[1]) );
+			tokens[ 0 ] = "9";
 		}
 		
-		// channel command shortcuts
-		else if ( tokens[0].matches("^\\d{1,2}$") ) {
-			if ( Dict.UNKNOWN_CODE != Dict.getNote(tokens[1]) )
-				tokens[ 1 ] = Integer.toString( Dict.getNote(tokens[1]) );
+		// ignore the instruments block - it will be handled
+		// separately by replaceInstrument()
+		if ( MODE_INSTRUMENTS == currentMode ) {
+			return;
 		}
+		
+		// only care about normal channel commands
+		if ( ! tokens[0].matches("^\\d{1,2}$") ) {
+			return;
+		}
+		
+		// percussion instrument name --> number
+		if ( Dict.UNKNOWN_CODE != Dict.getPercussion(tokens[1]) ) {
+			tokens[ 1 ] = Integer.toString( Dict.getPercussion(tokens[1]) );
+		}
+		
+		// note name --> number
+		else if ( ! "9".equals(tokens[0]) ) {
+			if ( Dict.UNKNOWN_CODE != Dict.getNote(tokens[1]) ) {
+				tokens[ 1 ] = Integer.toString( Dict.getNote(tokens[1]) );
+			}
+		}
+	}
+	
+	/**
+	 * Transforms an instrument or drumkit name or number string into the
+	 * corresponding MIDI number.
+	 * 
+	 * This is only called while a command inside an INSTRUMENTS block
+	 * is parsed.
+	 * 
+	 * @param shortcut String containing the instrument/drumkit name or number
+	 * @param channel  MIDI channel number
+	 * @throws ParseException if the given shortcut is neither a valid shortcut nor a valid number.
+	 */
+	private int replaceInstrument( String shortcut, int channel ) throws ParseException {
+		
+		// drumkit name --> number
+		if ( Dict.UNKNOWN_CODE != Dict.getDrumkit(shortcut) ) {
+			shortcut = Integer.toString( Dict.getDrumkit(shortcut) );
+		}
+		
+		// instrument name --> number
+		else if ( channel != 9 ) {
+			if ( Dict.UNKNOWN_CODE != Dict.getInstrument( shortcut) ) {
+				shortcut = Integer.toString( Dict.getInstrument(shortcut) );
+			}
+		}
+		
+		int number = toInt( shortcut );
+		
+		// check range
+		if ( number > 127 )
+			throw new ParseException( Dict.get(Dict.ERROR_INSTR_BANK) );
+		
+		return number;
 	}
 	
 	/**
@@ -803,11 +855,10 @@ public class MidicaPLParser extends SequenceParser {
 		String instrName = tokens[ 2 ];
 		int    bankMSB   = 0;
 		int    bankLSB   = 0;
-		int    instrNum;
 		
 		// program number and banks
 		String [] instrBank = instrStr.split( Dict.getSyntax(Dict.SYNTAX_PROG_BANK_SEP), 2 );
-		instrNum            = toInt( instrBank[0] );
+		int       instrNum  = replaceInstrument( instrBank[0], channel );
 		if ( 1 == instrBank.length ) {
 			// only program number, no bank defined - nothing more to do
 		}

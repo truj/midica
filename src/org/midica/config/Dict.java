@@ -2493,7 +2493,7 @@ public class Dict {
 	 * @param name  currently configured name for the instrument
 	 * @return      value for the instrument as defined by the MIDI specification
 	 */
-	private static int getInstrument( String name ) {
+	public static int getInstrument( String name ) {
 		if ( instrNameToInt.containsKey(name) )
 			return instrNameToInt.get( name );
 		else
@@ -2550,6 +2550,19 @@ public class Dict {
 			return percussionIntToName.get( i );
 		else
 			return get( UNKNOWN_PERCUSSION_NAME );
+	}
+	
+	/**
+	 * Returns a drumkit number by name.
+	 * 
+	 * @param name  drumkit shortcut
+	 * @return      drumkit number as defined by the General Standard specification
+	 */
+	public static int getDrumkit( String name ) {
+		if ( drumkitNameToInt.containsKey(name) )
+			return drumkitNameToInt.get( name );
+		else
+			return UNKNOWN_CODE;
 	}
 	
 	/**

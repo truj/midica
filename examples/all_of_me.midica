@@ -10,13 +10,18 @@
 
 # Definition of instruments
 # 1st column: MIDI channel number
-# 2nd column: program number (instrument number) like it's defined by General MIDI
+# 2nd column: program number (instrument number) like it's defined by General MIDI (or corresponding
+#             shortcut)
+#             Optional: bank number, separated by ',' - default: 0:0
+#             Bank number 
 # 3rd column: channel comment
 
 INSTRUMENTS
-	0       0       Piano (right hand)
-	1       0       Piano (left hand)
-	5       34      Bass
+	0  ACOUSTIC_GRAND_PIANO,0:0  Piano (right hand)  # bank MSB=0, bank LSB=0, program=0 (Acoustic Grand Piano)
+	1  0,0:0                     Piano (left hand)   # same as channel 0 but with the program number instead of the shortcut
+	5  E_BASS_PICK               Bass                # bank MSB=0, bank LSB=0, program=0 (E-Bass Pick)
+	P  STANDARD,0                Standard Percussion # bank MSB=0, bank LSB=0, program=0 (standard drumkit)
+	                                                 # channel 9 can also be defined with 'P' (for percussion)
 END
 
 
@@ -35,7 +40,7 @@ CHORD chord_4     dis   g      b
 # *:   necessary because a tempo definition is a global (channel-independent) command.
 #      The * is the symbol for "global"
 # bpm: Beats per Minute (tempo definition)
-# 128: From now on all channels run with 128 beats per minute.
+# 128: From now on the MIDI stream runs with 128 beats per minute.
 
 *    bpm    128
 
@@ -100,10 +105,10 @@ END
 # Macro definition for the percussion part
 
 MACRO bongo_1
-	9     60     4   vol=120
-	9     60     4
-	9     60     4
-	9     61     4
+	9     BONGO_HIGH     4   vol=120
+	9     BONGO_HIGH     4                    # program=60 (high bongo)
+	9     60             4                    # same as above but using the number
+	9     BONGO_LOW      4
 END
 
 

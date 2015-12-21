@@ -598,6 +598,10 @@ public class SequenceAnalyzer {
 		// markers
 		for ( long tick : markerTicks ) {
 			
+			// initiate structures for that tick
+			TreeSet<Byte> channelsAtTick  = new TreeSet<Byte>();
+			boolean       must_add_marker = false;
+			
 			// walk through all channels that have any activity IN ANY TICK
 			for ( byte channel : activityByChannel.keySet() ) {
 				
@@ -609,12 +613,6 @@ public class SequenceAnalyzer {
 				Byte[] instrChange = instrumentHistory.get( channel ).get( tick );
 				if ( instrChange != null ) {
 					instrumentChanged = true;
-				}
-				
-				// initiate the channel byte for that tick
-				TreeSet<Byte> channelsAtTick = markers.get( tick );
-				if ( null == channelsAtTick ) {
-					channelsAtTick = new TreeSet<Byte>();
 				}
 				
 				// is there any channel activity at the current tick?
@@ -649,8 +647,13 @@ public class SequenceAnalyzer {
 				// add the channel to the marker
 				if ( activityChanged || historyChanged || instrumentChanged ) {
 					channelsAtTick.add( channel );
-					markers.put( tick, channelsAtTick );
+					must_add_marker = true;
 				}
+			}
+			
+			// add the marker
+			if (must_add_marker) {
+				markers.put( tick, channelsAtTick );
 			}
 		}
 		try {
