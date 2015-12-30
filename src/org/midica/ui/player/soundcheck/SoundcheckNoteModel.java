@@ -10,36 +10,30 @@ package org.midica.ui.player.soundcheck;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
 
 import org.midica.config.Dict;
 import org.midica.file.NamedInteger;
 
 /**
- * This class provides the model for the note/percussion combobox in the
+ * This class provides the model for the note/percussion list in the
  * soundcheck window.
  * 
  * @author Jan Trukenmüller
  */
-public class SoundcheckNoteModel extends DefaultComboBoxModel<NamedInteger> {
+public class SoundcheckNoteModel extends DefaultListModel<NamedInteger> {
 	
 	private static final long serialVersionUID = 1L;
     
-	public static final int DEFAULT_NOTE       = 48;
-	public static final int DEFAULT_PERCUSSION = 38;
-	
 	/** determins if a note or percussion list has to be displayed */
-	private boolean percussion           = false;
-	private int     lastChosenNote       = DEFAULT_NOTE;
-	private int     lastChosenPercussion = DEFAULT_PERCUSSION;
+	private boolean percussion = false;
 	
 	private ArrayList<NamedInteger> list = null;
 	
 	/**
-	 * Creates a model for the note/percussion combobox.
+	 * Creates a model for the note/percussion list.
 	 */
 	public SoundcheckNoteModel() {
-		init();
 	}
 	
 	/**
@@ -51,20 +45,21 @@ public class SoundcheckNoteModel extends DefaultComboBoxModel<NamedInteger> {
 	 * @param newPercussion  **true** to display percussion instruments, **false** to display notes.
 	 */
 	public void setPercussion( boolean newPercussion ) {
-		
-		// remember the old selection depending on the old percussion flag
-		int oldValue = ( (NamedInteger) getSelectedItem() ).value;
-		if ( percussion )
-			lastChosenPercussion = oldValue;
-		else
-			lastChosenNote = oldValue;
-		
-		// set the new percussion value
 		percussion = newPercussion;
 	}
 	
 	/**
-	 * (Re)fills the note/percussion combobox with either notes or
+	 * Determines if the list is currently loaded with chromatic notes or
+	 * percussive instruments.
+	 * 
+	 * @return **true**, if the list contains percussion instruments; otherwise: **false**
+	 */
+	public boolean getPercussion() {
+		return percussion;
+	}
+	
+	/**
+	 * (Re)fills the note/percussion list with either notes or
 	 * percussion instruments - depending on the {@link #percussion} field.
 	 */
 	public void init() {
@@ -88,9 +83,6 @@ public class SoundcheckNoteModel extends DefaultComboBoxModel<NamedInteger> {
 				list.add( option );
 				addElement( option );
 			}
-			
-			NamedInteger chosenOption = NamedInteger.getElementByNumber( lastChosenPercussion, list );
-			super.setSelectedItem( chosenOption );
 		}
 		else {
 			// construct note options
@@ -100,9 +92,6 @@ public class SoundcheckNoteModel extends DefaultComboBoxModel<NamedInteger> {
 				list.add( option );
 				addElement( option );
 			}
-			
-			NamedInteger chosenOption = NamedInteger.getElementByNumber( lastChosenNote, list );
-			super.setSelectedItem( chosenOption );
 		}
 	}
 }

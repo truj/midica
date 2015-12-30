@@ -893,22 +893,26 @@ public final class MidiDevices {
 	 * After playing the note, the old instrument number (program number) and channel
 	 * volume are restored.
 	 * 
-	 * @param instrNum    Instrument number - corresponds to the MIDI program number.
 	 * @param channel     Channel number from 0 to 15.
+	 * @param instr       Instrument specification (program number, bank MSB, bank LSB)
 	 * @param note        Note or percussion instrument number.
 	 * @param volume      Used for the channel volume and also for the velocity of the note.
 	 * @param duration    Note length in milliseconds.
 	 */
-	public static void doSoundcheck( int instrNum, int channel, int note, int volume, int duration ) {
+	public static void doSoundcheck( int channel, int[] instr, int note, int volume, int duration ) {
 		if ( null == synthesizer )
 			return;
 		
-		// remember instrument
-		MidiChannel midiChannel = synthesizer.getChannels()[ channel ];
-		int oldInstrNum = midiChannel.getProgram();
+		// unpack instrument parts
+		int program = instr[ 0 ];
+		int bankMSB = instr[ 1 ];
+		int bankLSB = instr[ 2 ];
 		
-		// set instrument and volume
-		midiChannel.programChange( instrNum );
+		// set bank instrument and volume
+		MidiChannel midiChannel = synthesizer.getChannels()[ channel ];
+		midiChannel.controlChange( 0x00, bankMSB );
+		midiChannel.controlChange( 0x20, bankLSB );
+		midiChannel.programChange( program );
 		setChannelVolumeAbsolute( channel, volume );
 		
 		// note on
@@ -924,8 +928,14 @@ public final class MidiDevices {
 		// note off
 		midiChannel.noteOff( note );
 		
-		// restore instrument and volume
-		midiChannel.programChange( oldInstrNum );
+		// restore bank, instrument and volume
+		Byte[] instrumentInfo = SequenceAnalyzer.getInstrument( (byte) channel, getTickPosition() );
+		byte oldBankMSB = instrumentInfo[ 0 ];
+		byte oldBankLSB = instrumentInfo[ 1 ];
+		byte oldProgram = instrumentInfo[ 2 ];
+		midiChannel.controlChange( 0x00, oldBankMSB );
+		midiChannel.controlChange( 0x20, oldBankLSB );
+		midiChannel.programChange( oldProgram );
 		setChannelVolume( channel, channelVolume[channel] );
 	}
 }

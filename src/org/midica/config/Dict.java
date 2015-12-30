@@ -424,6 +424,9 @@ public class Dict {
 	public static final String INFO_COL_SF_RES_FRAMELENGTH = "info_col_sf_res_framelength";
 	public static final String INFO_COL_SF_RES_FORMAT      = "info_col_sf_res_format";
 	public static final String INFO_COL_SF_RES_CLASS       = "info_col_sf_res_class";
+	public static final String TOOLTIP_BANK_MSB            = "tooltip_bank_msb";
+	public static final String TOOLTIP_BANK_LSB            = "tooltip_bank_lsb";
+	public static final String TOOLTIP_BANK_FULL           = "tooltip_bank_full";
 	public static final String SYNTAX_CAT_DEFINITION       = "syntax_cat_definition";
 	public static final String SYNTAX_CAT_CALL             = "syntax_cat_call";
 	public static final String SYNTAX_CAT_OPTION           = "syntax_cat_option";
@@ -531,6 +534,7 @@ public class Dict {
 	public static final String DEFAULT_INSTRUMENT_NAME          = "default_instrument_name";
 	public static final String DEFAULT_PROGRAM_NUMBER           = "default_program_number";
 	public static final String PERCUSSION_CHANNEL               = "percussion_channel";
+	public static final String NORMAL_CHANNEL                   = "normal_channel";
 	public static final String ERROR_SOUNDFONT_NOT_SUPPORTED    = "error_soundfont_not_supported";
 	public static final String ERROR_SOUNDFONT_LOADING_FAILED   = "error_soundfont_loading_failed";
 	
@@ -593,6 +597,10 @@ public class Dict {
 	public static final String SNDCHK_VOLUME                    = "sndchk_volume";
 	public static final String SNDCHK_DURATION                  = "sndchk_duration";
 	public static final String SNDCHK_PLAY                      = "sndchk_play";
+	public static final String SNDCHK_COL_PROGRAM               = "sndchk_col_program";
+	public static final String SNDCHK_COL_BANK                  = "sndchk_col_bank";
+	public static final String SNDCHK_COL_NAME_SF               = "sndchk_col_name_sf";
+	public static final String SNDCHK_COL_NAME_SYNTAX           = "sndchk_col_name_syntax";
 	
 	/**
 	 * This class is only used statically so a public constructor is not needed.
@@ -781,6 +789,9 @@ public class Dict {
 		set( INFO_COL_SF_RES_FRAMELENGTH,            "Frames"                        );
 		set( INFO_COL_SF_RES_FORMAT,                 "Format"                        );
 		set( INFO_COL_SF_RES_CLASS,                  "Class"                         );
+		set( TOOLTIP_BANK_MSB,                       "MSB"                           );
+		set( TOOLTIP_BANK_LSB,                       "LSB"                           );
+		set( TOOLTIP_BANK_FULL,                      "Bank Number"                   );
 		set( SYNTAX_CAT_DEFINITION,                  "Definition Commands"           );
 		set( SYNTAX_CAT_CALL,                        "Execution Commands"            );
 		set( SYNTAX_CAT_OPTION,                      "Option Syntax"                 );
@@ -927,6 +938,7 @@ public class Dict {
 		
 		// MidiDevices
 		set( PERCUSSION_CHANNEL,                  "Percussion Channel"         );
+		set( NORMAL_CHANNEL,                      "Normal Channel"             );
 		set( DEFAULT_CHANNEL_COMMENT,             "undefined"                  );
 		set( DEFAULT_INSTRUMENT_NAME,             "Fake Instrument"            );
 		set( DEFAULT_PROGRAM_NUMBER,              "-"                          );
@@ -995,6 +1007,10 @@ public class Dict {
 		set( SNDCHK_VOLUME,                  "Volume"                     );
 		set( SNDCHK_DURATION,                "Duration (ms)"              );
 		set( SNDCHK_PLAY,                    "Play"                       );
+		set( SNDCHK_COL_PROGRAM,             "Prog"                       );
+		set( SNDCHK_COL_BANK,                "Bank"                       );
+		set( SNDCHK_COL_NAME_SF,             "Soundfont Name"             );
+		set( SNDCHK_COL_NAME_SYNTAX,         "Syntax"                     );
 	}
 	
 	/**

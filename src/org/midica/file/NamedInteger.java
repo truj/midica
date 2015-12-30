@@ -7,11 +7,9 @@
 
 package org.midica.file;
 
-import java.util.Collection;
-
 /**
  * This class is used to provide integers, associated with a name string.
- * This can be used for example for combobox entries.
+ * This can be used for combobox or list entries.
  * 
  * @author Jan Trukenmüller
  */
@@ -42,26 +40,10 @@ public class NamedInteger {
 	}
 	
 	/**
-	 * Returns the name.
-	 * This is needed if this class is used for combobox entries.
+	 * Returns a descriptive string containing number and name.
+	 * This is needed if this class is used for combobox or list entries.
 	 */
 	public String toString() {
 		return value + " : " + name;
-	}
-	
-	/**
-	 * Returns the {@link NamedInteger} element of the given list with the given value.
-	 * 
-	 * @param number    The value to be found.
-	 * @param list      The list of elements to be searched for the given value.
-	 * @return          The requested element from the given list.
-	 */
-	public static NamedInteger getElementByNumber( int number, Collection<NamedInteger> list ) {
-		for ( NamedInteger element : list ) {
-			if ( number == element.value ) {
-				return element;
-			}
-		}
-		return null;
 	}
 }

@@ -15,21 +15,28 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.KeyEventPostProcessor;
 import java.awt.KeyboardFocusManager;
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JScrollPane;
 import javax.swing.JSlider;
+import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 
+import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.NamedInteger;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.SliderHelper;
-import org.midica.ui.info.InstrumentElement;
 import org.midica.ui.player.PlayerView;
 
 /**
@@ -41,31 +48,40 @@ public class SoundcheckView extends JDialog {
 
 	private static final long serialVersionUID = 1L;
     
-	public static final Dimension DIM_TEXT_FIELD   = new Dimension( 60, 20 );
-	public static final int       VOL_LABEL        =    30;
-	public static final int       DEFAULT_DURATION =   300;
-	public static final int       MIN_DURATION     =     0;
-	public static final int       MAX_DURATION     = 10000;
+	public static final Dimension DIM_TEXT_FIELD        = new Dimension( 60, 20 );
+	public static final int       WIDTH_COL_PROG        =    35;
+	public static final int       WIDTH_COL_BANK        =    50;
+	public static final int       WIDTH_COL_NAME_SF     =   200;
+	public static final int       WIDTH_COL_NAME_SYNTAX =   200;
+	public static final int       HEIGHT_TABLE_INSTR    =   200;
+	public static final int       HEIGHT_LIST_NOTE      =   150;
+	public static final int       VOL_LABEL             =    30;
+	public static final int       DEFAULT_DURATION      =   300;
+	public static final int       MIN_DURATION          =     0;
+	public static final int       MAX_DURATION          = 10000;
 	
 	public static final String CMD_PLAY      = "cmd_play";
-	public static final String CMD_CHANNEL   = "cmd_channel";
-	public static final String CMD_INSTR     = "cmd_instr";
-	public static final String CMD_NOTE      = "cmd_note";
+	public static final String NAME_INSTR    = "name_instr";
+	public static final String NAME_NOTE     = "name_note";
 	public static final String NAME_VOLUME   = "name_volume";
 	public static final String NAME_DURATION = "name_duration";
 	
-	private JComboBox<NamedInteger>      cbxChannel    = null;
-	private JComboBox<InstrumentElement> cbxInstrument = null;
-	private JComboBox<NamedInteger>      cbxNote       = null;
-	private JTextField                   fldVolume     = null;
-	private JSlider                      sldVolume     = null;
-	private JTextField                   fldDuration   = null;
-	private JButton                      btnPlay       = null;
+	private Dimension dimTblInstr = null;
+	private Dimension dimListNote = null;
 	
-	private        KeyEventPostProcessor keyProcessor   = null;
-	private static SoundcheckView        soundcheckView = null;
-	private        Container             content        = null;
-	private        SoundcheckNoteModel   noteModel      = null;
+	private JComboBox<NamedInteger> cbxChannel = null;
+	private JTable              tblInstrument  = null;
+	private JList<NamedInteger> lstNote        = null;
+	private JTextField          fldVolume      = null;
+	private JSlider             sldVolume      = null;
+	private JTextField          fldDuration    = null;
+	private JButton             btnPlay        = null;
+	
+	private        KeyEventPostProcessor     keyProcessor   = null;
+	private static SoundcheckView            soundcheckView = null;
+	private        Container                 content        = null;
+	private        SoundcheckNoteModel       noteModel      = null;
+	private        SoundcheckInstrumentModel instrModel     = null;
 	
 	/**
 	 * Creates the soundcheck window.
@@ -77,7 +93,13 @@ public class SoundcheckView extends JDialog {
 	private SoundcheckView( JDialog owner ) {
 		super( owner );
 		setTitle( Dict.get(Dict.TITLE_SOUNDCHECK) );
-		noteModel = new SoundcheckNoteModel();
+		noteModel  = new SoundcheckNoteModel();
+		instrModel = new SoundcheckInstrumentModel();
+		
+		// size of instruments table and notes list
+		int widthInstr = WIDTH_COL_PROG + WIDTH_COL_BANK + WIDTH_COL_NAME_SF + WIDTH_COL_NAME_SYNTAX;
+		dimTblInstr    = new Dimension( widthInstr, HEIGHT_TABLE_INSTR );
+		dimListNote    = new Dimension( widthInstr, HEIGHT_LIST_NOTE   );
 		
 		init();
 		
@@ -92,7 +114,7 @@ public class SoundcheckView extends JDialog {
 	private void init() {
 		// content
 		content = getContentPane();
-		SoundcheckControler controller = SoundcheckControler.getControler( this, noteModel );
+		SoundcheckController controller = SoundcheckController.getController( this, noteModel, instrModel );
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
@@ -116,8 +138,7 @@ public class SoundcheckView extends JDialog {
 		constraints.gridwidth = 2;
 		cbxChannel = new JComboBox<NamedInteger>();
 		cbxChannel.setModel( new SoundcheckChannelModel() );
-		cbxChannel.setActionCommand( CMD_CHANNEL );
-		cbxChannel.addActionListener( controller );
+		cbxChannel.addItemListener( controller );
 		content.add( cbxChannel, constraints );
 		
 		// instrument label
@@ -127,16 +148,23 @@ public class SoundcheckView extends JDialog {
 		JLabel lblInstr = new JLabel( Dict.get(Dict.SNDCHK_INSTRUMENT) );
 		content.add( lblInstr, constraints );
 		
-		// instrument checkbox
+		// instrument list
 		constraints.gridx++;
 		constraints.gridwidth = 2;
-		cbxInstrument = new JComboBox<InstrumentElement>();
-		cbxInstrument.setModel( new SoundcheckInstrumentModel() );
-		cbxInstrument.setRenderer( new CategorizedComboboxRenderer() );
-		cbxInstrument.setActionCommand( CMD_INSTR );
-		cbxInstrument.addActionListener( new CategorizedComboboxListener(cbxInstrument) );
-		cbxInstrument.addActionListener( controller );
-		content.add( cbxInstrument, constraints );
+		SoundcheckInstrumentTableCellRenderer instrRenderer = new SoundcheckInstrumentTableCellRenderer( instrModel );
+		tblInstrument = new JTable( instrModel );
+		tblInstrument.setName( NAME_INSTR );
+		tblInstrument.setDefaultRenderer( Object.class, instrRenderer );
+		tblInstrument.getColumnModel().getColumn( 0 ).setPreferredWidth( WIDTH_COL_PROG        );
+		tblInstrument.getColumnModel().getColumn( 1 ).setPreferredWidth( WIDTH_COL_BANK        );
+		tblInstrument.getColumnModel().getColumn( 2 ).setPreferredWidth( WIDTH_COL_NAME_SF     );
+		tblInstrument.getColumnModel().getColumn( 3 ).setPreferredWidth( WIDTH_COL_NAME_SYNTAX );
+		tblInstrument.getTableHeader().setBackground( Config.TABLE_HEADER_COLOR );
+		tblInstrument.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
+		tblInstrument.getSelectionModel().addListSelectionListener( controller );
+		JScrollPane scrollInstr = new JScrollPane( tblInstrument );
+		scrollInstr.setPreferredSize( dimTblInstr );
+		content.add( scrollInstr, constraints );
 		
 		// note label
 		constraints.gridy++;
@@ -145,14 +173,16 @@ public class SoundcheckView extends JDialog {
 		JLabel lblNote = new JLabel( Dict.get(Dict.SNDCHK_NOTE) );
 		content.add( lblNote, constraints );
 		
-		// note checkbox
+		// note list
 		constraints.gridx++;
 		constraints.gridwidth = 2;
-		cbxNote = new JComboBox<NamedInteger>();
-		cbxNote.setModel( noteModel );
-		cbxNote.setActionCommand( CMD_NOTE );
-		cbxNote.addActionListener( controller );
-		content.add( cbxNote, constraints );
+		lstNote = new JList<NamedInteger>();
+		lstNote.setName( NAME_NOTE );
+		lstNote.setModel( noteModel );
+		lstNote.addListSelectionListener( controller );
+		JScrollPane scrollNote = new JScrollPane( lstNote );
+		scrollNote.setPreferredSize( dimListNote );
+		content.add( scrollNote, constraints );
 		
 		// volume label
 		constraints.gridy++;
@@ -203,7 +233,7 @@ public class SoundcheckView extends JDialog {
 		constraints.gridwidth = 3;
 		btnPlay = new JButton( Dict.get(Dict.SNDCHK_PLAY) );
 		btnPlay.setActionCommand( CMD_PLAY );
-		btnPlay.addActionListener( SoundcheckControler.getControler() );
+		btnPlay.addActionListener( SoundcheckController.getController() );
 		content.add( btnPlay, constraints );
 		
 		// make sure that the key bindings work
@@ -216,7 +246,7 @@ public class SoundcheckView extends JDialog {
 	 * @param controller The event listener object for the soundcheck.
 	 * @return the volume slider.
 	 */
-	private JSlider createVolumeSlider( SoundcheckControler controller ) {
+	private JSlider createVolumeSlider( SoundcheckController controller ) {
 		sldVolume = new JSlider( JSlider.HORIZONTAL );
 		sldVolume.setName( NAME_VOLUME );
 		sldVolume.addChangeListener( controller );
@@ -284,7 +314,7 @@ public class SoundcheckView extends JDialog {
 		sldVolume.setValue( volume );
 		
 		// set text field
-		SoundcheckControler controller = SoundcheckControler.getControler();
+		SoundcheckController controller = SoundcheckController.getController();
 		fldVolume.getDocument().removeDocumentListener( controller );
 		fldVolume.setText( Byte.toString(volume) );
 		fldVolume.getDocument().addDocumentListener( controller );
@@ -337,19 +367,6 @@ public class SoundcheckView extends JDialog {
 	}
 	
 	/**
-	 * Enables or disables the instruments combobox, depending on the given
-	 * value.
-	 * 
-	 * The combobox has to be disabled if the percussion channel is selected
-	 * and enabled if another channel is selected.
-	 * 
-	 * @param active  **true** to activate the instruments combobox, **false** to disable it.
-	 */
-	public void toggleInstruments( boolean active ) {
-		cbxInstrument.setEnabled( active );
-	}
-	
-	/**
 	 * Returns the currently selected channel from the channel combobox.
 	 * 
 	 * @return the selected MIDI channel number.
@@ -360,27 +377,164 @@ public class SoundcheckView extends JDialog {
 	}
 	
 	/**
-	 * Returns the currently selected instrument number from the instruments
+	 * Determines the currently selected row index of the instrument table.
+	 * 
+	 * @return selected row or **-1** if no row is selected.
+	 */
+	public int getSelectedInstrumentRow() {
+		int row = tblInstrument.getSelectedRow();
+		if ( row < 0 )
+			return -1;
+		return row;
+	}
+	
+	/**
+	 * Selects the given row of the instruments table.
+	 * 
+	 * @param i row index to be selected
+	 */
+	public void setSelectedInstrumentRow( int i ) {
+		
+		// handle edge cases
+		int rowCount = tblInstrument.getRowCount();
+		if ( i > rowCount - 1 )
+			i = rowCount - 1;
+		if ( i < 0 )
+			i = 0;
+		
+		// select the row
+		tblInstrument.setRowSelectionInterval( i, i );
+	}
+	
+	/**
+	 * Determines the currently selected index of the note list.
+	 * 
+	 * @return selected index or **-1** if nothing is selected.
+	 */
+	public int getSelectedNoteIndex() {
+		int index = lstNote.getSelectedIndex();
+		if ( index < 0 )
+			return -1;
+		return index;
+	}
+	
+	/**
+	 * Selects the given index of the note list.
+	 * 
+	 * @param i note index to be selected
+	 */
+	public void setSelectedNoteIndex( int i ) {
+		lstNote.setSelectedIndex( i );
+	}
+	
+	/**
+	 * Scrolls the instrument table so that the given (selected) row is visible.
+	 * 
+	 * @param row selected row to be made visible
+	 */
+	public void scrollInstrumentTable( int row ) {
+		Rectangle cell = tblInstrument.getCellRect( row, 0, true );
+		tblInstrument.scrollRectToVisible( cell );
+	}
+	
+	/**
+	 * Scrolls the note/percussion list so that the note with the given
+	 * (selected) index is visible.
+	 * 
+	 * @param i selected index to be made visible
+	 */
+	public void scrollNoteList( int i ) {
+		Rectangle cell = lstNote.getCellBounds( i, i );
+		lstNote.scrollRectToVisible( cell );
+	}
+	
+	/**
+	 * Returns the currently selected instrument coordinates from the instruments
 	 * combobox.
 	 * 
-	 * @return the selected instrument number.
+	 * The returned value consists of the following parts:
+	 * 
+	 * - program number
+	 * - bank MSB
+	 * - bank LSB
+	 * 
+	 * If no instrument is selected, all these values are **-1**.
+	 * 
+	 * @return program number, bank MSB and bank LSB of the selected instrument.
 	 */
-	public int getInstrument() {
-		InstrumentElement option = (InstrumentElement) cbxInstrument.getSelectedItem();
-		return option.instrNum;
+	public int[] getInstrument() {
+		
+		int[] result = { -1, -1, -1 };
+		
+		// get table row
+		int row = getSelectedInstrumentRow();
+		if ( -1 == row )
+			return result;
+		ArrayList<HashMap<String, String>> instruments = instrModel.getInstruments();
+		HashMap<String, String> instr = instruments.get( row );
+		
+		// real instrument/drumkit selected?
+		if ( instr.containsKey("program") ) {
+			result[ 0 ] = Integer.parseInt( instr.get("program")  );
+			result[ 1 ] = Integer.parseInt( instr.get("bank_msb") );
+			result[ 2 ] = Integer.parseInt( instr.get("bank_lsb") );
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Determins if the category or instrument currently selected in the instruments
+	 * table is a drumkit or not.
+	 * 
+	 * @return **true**, if a drumkit or drum category is selected. Otherwise: returns **false**
+	 */
+	public boolean isDrumSelected() {
+		
+		// get table row
+		int row = tblInstrument.getSelectedRow();
+		if ( row < 0 )
+			return false;
+		ArrayList<HashMap<String, String>> instruments = instrModel.getInstruments();
+		HashMap<String, String> instr = instruments.get( row );
+		
+		// main or sub category
+		if ( instr.containsKey("category") ) {
+			String cat = instr.get("category");
+			
+			// (chromatic) sub category
+			if ( "sub".equals(cat) ) {
+				return false;
+			}
+			
+			// main category
+			String type = instr.get("type");
+			if ( "category_chromatic".equals(type) )
+				return false;
+			else
+				return true;
+		}
+		
+		// not a category
+		String type = instr.get("type");
+		if ( "chromatic".equals(type) )
+			return false;
+		else
+			return true;
 	}
 	
 	/**
 	 * Returns the currently selected note (or percussion instrument) from
 	 * the note/percussion combobox.
 	 * 
-	 * If the percussion channel is selected, a percussion number is returned.
-	 * Otherwise it's a note number.
+	 * If no note or percussion instrument is selected, **-1** is returned.
 	 * 
-	 * @return the currently selected note or percussion number.
+	 * @return the currently selected note or percussion number or **-1** if nothing is selected.
 	 */
 	public int getNote() {
-		NamedInteger option = (NamedInteger) cbxNote.getSelectedItem();
+		NamedInteger option = lstNote.getSelectedValue();
+		if ( null == option )
+			return -1;
 		return option.value;
 	}
 	
@@ -394,11 +548,27 @@ public class SoundcheckView extends JDialog {
 	 * @param on  **true** to activate the listener, **false** to deactivate it.
 	 */
 	public void toggleNoteListener( boolean on ) {
-		SoundcheckControler controller = SoundcheckControler.getControler();
+		SoundcheckController controller = SoundcheckController.getController();
 		if (on)
-			cbxNote.addActionListener( controller );
+			lstNote.addListSelectionListener( controller );
 		else
-			cbxNote.removeActionListener( controller );
+			lstNote.removeListSelectionListener( controller );
+	}
+	
+	/**
+	 * Enables or disables the selection listener for the instruments table.
+	 * During channel selection the listener must be disabled temporarily
+	 * while the instruments table is refilled and the last selection is
+	 * restored.
+	 * 
+	 * @param on  **true** to activate the listener, **false** to deactivate it.
+	 */
+	public void toggleInstrumentSelectionListener( boolean on ) {
+		SoundcheckController controller = SoundcheckController.getController();
+		if (on)
+			tblInstrument.getSelectionModel().addListSelectionListener( controller );
+		else
+			tblInstrument.getSelectionModel().removeListSelectionListener( controller );
 	}
 	
 	/**

@@ -894,7 +894,7 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// TODO: delete
-		System.out.println( "instrNum: " + instrNum + ", MSB: " + bankMSB + ", LSB: " + bankLSB + ", full: " + ((bankMSB << 7) | bankLSB) );
+//		System.out.println( "instrNum: " + instrNum + ", MSB: " + bankMSB + ", LSB: " + bankLSB + ", full: " + ((bankMSB << 7) | bankLSB) );
 		
 		if (instrumentsParsed) {
 			// instruments are already parsed

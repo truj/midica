@@ -10,22 +10,28 @@ package org.midica.ui.player.soundcheck;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.util.TreeMap;
 
-import javax.swing.JComboBox;
+import javax.swing.DefaultListSelectionModel;
+import javax.swing.JList;
 import javax.swing.JSlider;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
-import org.midica.file.NamedInteger;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.player.PlayerView;
 
@@ -36,44 +42,86 @@ import org.midica.ui.player.PlayerView;
  * 
  * @author Jan Trukenmüller
  */
-public class SoundcheckControler implements ActionListener, ChangeListener, MouseWheelListener, DocumentListener, WindowListener {
+public class SoundcheckController implements ActionListener, ListSelectionListener, ItemListener, ChangeListener, MouseWheelListener, DocumentListener, WindowListener {
 	
-	private static SoundcheckControler controller = null;
-	private static SoundcheckView      view        = null;
-	private static SoundcheckNoteModel noteModel   = null;
+	public static final int DEFAULT_NOTE_INDEX       = 48; // MIDI num 48 (chromatic instrumends start at 0)
+	public static final int DEFAULT_PERCUSSION_INDEX = 11; // MIDI num 38 (percussion starts at 27)
+	
+	private static SoundcheckController      controller            = null;
+	private static SoundcheckView            view                  = null;
+	private static SoundcheckNoteModel       noteModel             = null;
+	private static SoundcheckInstrumentModel instrumentModel       = null;
+	private static TreeMap<Integer, Integer> selectedInstrumentRow = null;
+	private static TreeMap<Boolean, Integer> selectedNoteIndex     = null;
 	
 	/**
 	 * The actual constructor - private in order to enforce singleton behaviour.
 	 */
-	private SoundcheckControler() {
+	private SoundcheckController() {
 	}
 	
 	/**
-	 * Creates a {@link SoundcheckControler} object by calling the private
+	 * Creates a {@link SoundcheckController} object by calling the private
 	 * constructor, if not yet done. Returns the object.
 	 * 
 	 * This method is called from outside instead of the constructor itself
 	 * in order to ensure the singleton behaviour.
 	 * 
 	 * @param scView       Soundcheck window.
-	 * @param scNoteModel  Note model.
-	 * @return a singleton {@link SoundcheckControler} object.
+	 * @param scNoteModel  Note combobox model.
+	 * @param scInstrModel Instruments table model.
+	 * @return a singleton {@link SoundcheckController} object.
 	 */
-	public static SoundcheckControler getControler( SoundcheckView scView, SoundcheckNoteModel scNoteModel ) {
-		view      = scView;
-		noteModel = scNoteModel;
+	public static SoundcheckController getController( SoundcheckView scView, SoundcheckNoteModel scNoteModel, SoundcheckInstrumentModel scInstrModel ) {
+		view            = scView;
+		noteModel       = scNoteModel;
+		instrumentModel = scInstrModel;
+		
+		// initialize instrument row selection for each channel
+		selectedInstrumentRow = new TreeMap<Integer, Integer>();
+		for ( int channel = 0; channel < 16; channel++ )
+			selectedInstrumentRow.put( channel, -1 );
+		
+		// initialize note row selection for chromatic and percussive instruments
+		selectedNoteIndex = new TreeMap<Boolean, Integer>();
+		selectedNoteIndex.put( false, DEFAULT_NOTE_INDEX       );
+		selectedNoteIndex.put( true,  DEFAULT_PERCUSSION_INDEX );
+		
 		if ( null == controller )
-			controller = new SoundcheckControler();
+			controller = new SoundcheckController();
 		return controller;
 	}
 	
 	/**
-	 * Returns the singleton {@link SoundcheckControler} object.
+	 * Returns the singleton {@link SoundcheckController} object.
 	 * 
-	 * @return {@link SoundcheckControler} object.
+	 * @return {@link SoundcheckController} object.
 	 */
-	public static SoundcheckControler getControler() {
+	public static SoundcheckController getController() {
 		return controller;
+	}
+	
+	/**
+	 * Combobox selection listener for the channel combobox.
+	 * Refills the instruments table based on the new channel and pre-selects
+	 * the last selected row for this channel.
+	 * 
+	 * @param event selection change event
+	 */
+	@Override
+	public void itemStateChanged( ItemEvent event ) {
+		
+		// Only listen to selection events and ignore deselection events.
+		// Otherwise this would be evaluated twice for each selection.
+		if ( ItemEvent.DESELECTED == event.getStateChange() )
+			return;
+		
+		// refill instrument/drumkit table and note/percussion list
+		fillInstrumentsTable();
+		fillNoteList();
+		
+		// play the note
+		view.pressPlayButton();
 	}
 	
 	/**
@@ -82,7 +130,6 @@ public class SoundcheckControler implements ActionListener, ChangeListener, Mous
 	 * Handles:
 	 * 
 	 * - clicks on the play button
-	 * - selecting a checkbox item
 	 * - pressing **Enter** in one of the text fields
 	 * 
 	 * @param e The event to be handled.
@@ -95,39 +142,6 @@ public class SoundcheckControler implements ActionListener, ChangeListener, Mous
 		// button clicked
 		if ( SoundcheckView.CMD_PLAY.equals(cmd) ) {
 			play();
-		}
-		
-		// channel selected
-		else if ( SoundcheckView.CMD_CHANNEL.equals(cmd) ) {
-			NamedInteger option = (NamedInteger) ( (JComboBox<?>) component ).getSelectedItem();
-			int channel = option.value;
-			if ( 9 == channel ) {
-				noteModel.setPercussion( true );
-				view.toggleInstruments( false );
-			}
-			else {
-				noteModel.setPercussion( false );
-				view.toggleInstruments( true );
-			}
-			
-			// Remove the action listener from the note combobox.
-			view.toggleNoteListener( false );
-			// Rebuild the note combobox's options.
-			noteModel.init();
-			// Add the action listener again.
-			view.toggleNoteListener( true );
-			
-			view.pressPlayButton();
-		}
-		
-		// instrument selected
-		else if ( SoundcheckView.CMD_INSTR.equals(cmd) ) {
-			view.pressPlayButton();
-		}
-		
-		// note or percussion selected
-		else if ( SoundcheckView.CMD_NOTE.equals(cmd) ) {
-			view.pressPlayButton();
 		}
 		
 		// text field entered (volume or duration field)
@@ -145,13 +159,19 @@ public class SoundcheckControler implements ActionListener, ChangeListener, Mous
 			checkVolumeField();   // throws NumberFormatException
 			checkDurationField(); // throws NumberFormatException
 			
-			int channel  = view.getChannel();
-			int instrNum = view.getInstrument();
-			int note     = view.getNote();
-			int volume   = view.getVolume();
-			int duration = view.getDurationFromField(); // throws NumberFormatException
+			int   channel  = view.getChannel();
+			int   note     = view.getNote();
+			int   volume   = view.getVolume();
+			int   duration = view.getDurationFromField(); // throws NumberFormatException
+			int[] instr    = view.getInstrument();
+			int   instrNum = instr[ 0 ];
 			
-			MidiDevices.doSoundcheck( instrNum, channel, note, volume, duration );
+			// category selected or no note selected?
+			if ( instrNum < 0 || note < 0 )
+				return;
+			
+			// play the note
+			MidiDevices.doSoundcheck( channel, instr, note, volume, duration );
 		}
 		catch( NumberFormatException e ) {
 		}
@@ -309,6 +329,8 @@ public class SoundcheckControler implements ActionListener, ChangeListener, Mous
 	
 	/**
 	 * Adds key bindings to the soundcheck window.
+	 * 
+	 * @param e event
 	 */
 	@Override
 	public void windowActivated( WindowEvent e ) {
@@ -317,6 +339,8 @@ public class SoundcheckControler implements ActionListener, ChangeListener, Mous
 	
 	/**
 	 * Removes key bindings from the soundcheck window.
+	 * 
+	 * @param e event
 	 */
 	@Override
 	public void windowClosed( WindowEvent e ) {
@@ -325,6 +349,8 @@ public class SoundcheckControler implements ActionListener, ChangeListener, Mous
 	
 	/**
 	 * Removes key bindings from the soundcheck window.
+	 * 
+	 * @param e event
 	 */
 	@Override
 	public void windowClosing( WindowEvent e ) {
@@ -333,6 +359,8 @@ public class SoundcheckControler implements ActionListener, ChangeListener, Mous
 	
 	/**
 	 * Removes key bindings from the soundcheck window.
+	 * 
+	 * @param e event
 	 */
 	@Override
 	public void windowDeactivated( WindowEvent e ) {
@@ -347,7 +375,107 @@ public class SoundcheckControler implements ActionListener, ChangeListener, Mous
 	public void windowIconified( WindowEvent e ) {
 	}
 	
+	/**
+	 * Fills the instruments table and the notes list (in the right order)
+	 * and ensures that in both of them one element is selected.
+	 * 
+	 * @param e event
+	 */
 	@Override
 	public void windowOpened( WindowEvent e ) {
+		fillInstrumentsTable();
+		fillNoteList();
+	}
+	
+	/**
+	 * Handles selections of instruments or notes.
+	 * 
+	 * Instruments or drumkits are selected from a {@link JTable}.
+	 * Notes or percussion instruments are selected from a {@link JList}.
+	 * 
+	 * @param event Table row or list item selection event.
+	 */
+	@Override
+	public void valueChanged( ListSelectionEvent event ) {
+		
+		// prevent to play the note twice after a selection by mouse click
+		if ( event.getValueIsAdjusting() )
+			return;
+		
+		// instrument or drumkit selected?
+		Object source = event.getSource();
+		if ( source instanceof DefaultListSelectionModel ) {
+			
+			// remember the selected row for the current channel
+			int channel  = view.getChannel();
+			int instrRow = view.getSelectedInstrumentRow();
+			selectedInstrumentRow.put( channel, instrRow );
+			
+			// refill the note/percussion list
+			fillNoteList();
+		}
+		
+		// note or percussion instrument selected?
+		else if ( source instanceof JList ) {
+			
+			// remember selected note/percussion
+			boolean isPercussion = noteModel.getPercussion();
+			selectedNoteIndex.put( isPercussion, view.getSelectedNoteIndex() );
+		}
+		
+		// play the note
+		view.pressPlayButton();
+	}
+	
+	/**
+	 * Returns the currently selected channel.
+	 * 
+	 * @return the currently selected channel
+	 */
+	public static int getChannel() {
+		if ( null == view )
+			return 0;
+		return view.getChannel();
+	}
+	
+	/**
+	 * (Re)fills the instruments/drumkits table according to the
+	 * currently selected channel.
+	 */
+	private void fillInstrumentsTable() {
+		
+		// get last selected note/percussion of the channel
+		int lastSelectedRow = selectedInstrumentRow.get( view.getChannel() );
+		
+		// refill the table
+		view.toggleInstrumentSelectionListener( false );  // remove listener
+		instrumentModel.initList();                       // rebuild options
+		view.setSelectedInstrumentRow( lastSelectedRow ); // select row
+		view.toggleInstrumentSelectionListener( true );   // add listener
+		view.scrollInstrumentTable( lastSelectedRow );    // scroll to selection
+	}
+	
+	/**
+	 * (Re)fills the note/percussion list according to the currently
+	 * selected instrument type.
+	 */
+	private void fillNoteList() {
+		
+		// adjust mode (chromatic/percussive)
+		boolean isPercussion = view.isDrumSelected();
+		if (isPercussion)
+			noteModel.setPercussion( true );
+		else
+			noteModel.setPercussion( false );
+		
+		// get last selected note/percussion of the new mode
+		int lastSelNoteIdx = selectedNoteIndex.get( isPercussion );
+		
+		// refill note list
+		view.toggleNoteListener( false );            // remove listener
+		noteModel.init();                            // rebuild options
+		view.setSelectedNoteIndex( lastSelNoteIdx ); // restore note selection
+		view.toggleNoteListener( true );             // add listener
+		view.scrollNoteList( lastSelNoteIdx );       // scroll to selection
 	}
 }

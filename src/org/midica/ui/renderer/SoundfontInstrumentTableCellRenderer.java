@@ -15,6 +15,7 @@ import javax.swing.JComponent;
 import javax.swing.JTable;
 
 import org.midica.config.Config;
+import org.midica.config.Dict;
 import org.midica.file.SoundfontParser;
 
 /**
@@ -58,11 +59,12 @@ public class SoundfontInstrumentTableCellRenderer extends MidicaTableCellRendere
 			cell.setBackground( Config.TABLE_CELL_DEFAULT_COLOR );
 		}
 		
-		// change the format tooltip
+		// bank tooltip
 		if ( 1 == col && ! isCategory && cell instanceof JComponent ) {
 			JComponent jCell = (JComponent) cell;
-			String text = "MSB: " + instrument.get("bank_msb") + ", "
-			            + "LSB: " + instrument.get("bank_lsb");
+			String text = Dict.get(Dict.TOOLTIP_BANK_MSB)  + ": " + instrument.get("bank_msb") + ", "
+			            + Dict.get(Dict.TOOLTIP_BANK_LSB)  + ": " + instrument.get("bank_lsb") + ", "
+			            + Dict.get(Dict.TOOLTIP_BANK_FULL) + ": " + instrument.get("bank");
 			jCell.setToolTipText( text );
 		}
 		

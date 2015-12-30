@@ -15,7 +15,6 @@ import org.midica.file.NamedInteger;
 /**
  * This is the model for the channel combobox in the soundcheck window.
  * 
- * 
  * @author Jan Trukenmüller
  */
 public class SoundcheckChannelModel extends DefaultComboBoxModel<NamedInteger> {
@@ -31,13 +30,12 @@ public class SoundcheckChannelModel extends DefaultComboBoxModel<NamedInteger> {
 			NamedInteger entry = new NamedInteger();
 			entry.value = i;
 			if ( 9 == i ) {
-				entry.name = i + " : " + Dict.get( Dict.PERCUSSION_CHANNEL );
+				entry.name = Dict.get( Dict.PERCUSSION_CHANNEL );
 			}
 			else {
-				entry.name = Integer.toString( i );
+				entry.name = Dict.get( Dict.NORMAL_CHANNEL );
 			}
 			addElement( entry );
 		}
 	}
-	
 }

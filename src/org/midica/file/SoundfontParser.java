@@ -310,8 +310,9 @@ public class SoundfontParser implements IParser {
 			Instrument midiInstr = instruments[ i ];
 			Patch      patch     = midiInstr.getPatch();
 			int        bank      = patch.getBank();
+			int        program   = patch.getProgram();
 			instrument.put( "name",     midiInstr.getName()                          );
-			instrument.put( "program",  Integer.toString(patch.getProgram())         );
+			instrument.put( "program",  Integer.toString(program)                    );
 			instrument.put( "bank",     Integer.toString(bank)                       );
 			instrument.put( "bank_msb", Integer.toString(bank >> 7)                  );
 			instrument.put( "bank_lsb", Integer.toString(bank & 0b00000000_01111111) );
@@ -359,6 +360,20 @@ public class SoundfontParser implements IParser {
 					channelsStr.append( "," + channel );
 			}
 			instrument.put( "channels_long", channelsStr.toString() ); // e.g. "0,1,2,3,4,5,6,7,8,10,11,12,13,14,15"
+			
+			// add syntax name
+			String syntax;
+			if (hasDrumChannel) {
+				syntax = Dict.getDrumkit( program );
+				if ( Dict.get(Dict.UNKNOWN_INSTRUMENT).equals(syntax) )
+					syntax = instrument.get("program");
+			}
+			else {
+				syntax = Dict.getInstrument( program );
+				if ( Dict.get(Dict.UNKNOWN_DRUMKIT_NAME).equals(syntax) )
+					syntax = instrument.get("program");
+			}
+			instrument.put( "syntax", syntax );
 			
 			// get keys
 			ArrayList<Integer> keys = new ArrayList<Integer>();
