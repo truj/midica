@@ -66,15 +66,21 @@ public class SliderHelper {
 		return new MetalSliderUI() {
 			
 			protected void scrollDueToClickInTrack( int direction ) {
-		        int value = slider.getValue(); 
-		        if ( slider.getOrientation() == JSlider.HORIZONTAL ) {
-		            value = this.valueForXPosition( slider.getMousePosition().x );
-		        }
-		        else if ( slider.getOrientation() == JSlider.VERTICAL ) {
-		            value = this.valueForYPosition( slider.getMousePosition().y );
-		        }
-		        slider.setValue( value );
+				
+				// avoid null pointer exception when clicking e.g. the transpose
+				// slider on the left side
+				if ( null == slider.getMousePosition() )
+					return;
+				
+				int value = slider.getValue();
+				if ( slider.getOrientation() == JSlider.HORIZONTAL ) {
+					value = this.valueForXPosition( slider.getMousePosition().x );
+				}
+				else if ( slider.getOrientation() == JSlider.VERTICAL ) {
+					value = this.valueForYPosition( slider.getMousePosition().y );
+				}
+				slider.setValue( value );
 			}
-	    };
+		};
 	}
 }
