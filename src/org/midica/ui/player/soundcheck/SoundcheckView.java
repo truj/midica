@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.Hashtable;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -31,6 +32,7 @@ import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingConstants;
 
 import org.midica.config.Config;
 import org.midica.config.Dict;
@@ -61,10 +63,14 @@ public class SoundcheckView extends JDialog {
 	public static final int       MAX_DURATION          = 10000;
 	
 	public static final String CMD_PLAY      = "cmd_play";
+	public static final String CMD_KEEP      = "cmd_keep";
 	public static final String NAME_INSTR    = "name_instr";
 	public static final String NAME_NOTE     = "name_note";
 	public static final String NAME_VOLUME   = "name_volume";
+	public static final String NAME_VELOCITY = "name_velocity";
 	public static final String NAME_DURATION = "name_duration";
+	
+	public static final int DEFAULT_VELOCITY = 100;
 	
 	private Dimension dimTblInstr = null;
 	private Dimension dimListNote = null;
@@ -73,8 +79,11 @@ public class SoundcheckView extends JDialog {
 	private JTable              tblInstrument  = null;
 	private JList<NamedInteger> lstNote        = null;
 	private JTextField          fldVolume      = null;
+	private JTextField          fldVelocity    = null;
 	private JSlider             sldVolume      = null;
+	private JSlider             sldVelocity    = null;
 	private JTextField          fldDuration    = null;
+	private JCheckBox           cbxKeep        = null;
 	private JButton             btnPlay        = null;
 	
 	private        KeyEventPostProcessor     keyProcessor   = null;
@@ -186,13 +195,16 @@ public class SoundcheckView extends JDialog {
 		
 		// volume label
 		constraints.gridy++;
-		constraints.gridx     = 0;
-		constraints.gridwidth = 1;
+		constraints.gridx      = 0;
+		constraints.gridwidth  = 1;
+		constraints.gridheight = 2;
 		JLabel lblVolume = new JLabel( Dict.get(Dict.SNDCHK_VOLUME) );
+		lblVolume.setVerticalAlignment( SwingConstants.TOP );
 		content.add( lblVolume, constraints );
 		
 		// volume text field
 		constraints.gridx++;
+		constraints.gridheight = 1;
 		fldVolume = new JTextField( Integer.toString(MidiDevices.DEFAULT_VOLUME) );
 		fldVolume.setName( NAME_VOLUME );
 		fldVolume.getDocument().putProperty( "name", NAME_VOLUME );
@@ -205,8 +217,41 @@ public class SoundcheckView extends JDialog {
 		
 		// volume slider
 		constraints.gridy++;
+		constraints.gridwidth  = 2;
+		sldVolume = createVolumeSlider( controller );
+		sldVolume.setName( NAME_VOLUME );
+		sldVolume.setValue( MidiDevices.DEFAULT_VOLUME );
+		content.add( sldVolume, constraints );
+		
+		// velocity label
+		constraints.gridy++;
+		constraints.gridx      = 0;
+		constraints.gridwidth  = 1;
+		constraints.gridheight = 2;
+		JLabel lblVelocity = new JLabel( Dict.get(Dict.SNDCHK_VELOCITY) );
+		lblVelocity.setVerticalAlignment( SwingConstants.TOP );
+		content.add( lblVelocity, constraints );
+		
+		// velocity text field
+		constraints.gridx++;
+		constraints.gridheight = 1;
+		fldVelocity = new JTextField( Integer.toString(DEFAULT_VELOCITY) );
+		fldVelocity.setName( NAME_VELOCITY );
+		fldVelocity.getDocument().putProperty( "name", NAME_VELOCITY );
+		fldVelocity.getDocument().addDocumentListener( controller );
+		fldVelocity.addActionListener( controller );
+		fldVelocity.setPreferredSize( DIM_TEXT_FIELD );
+		fldVelocity.setMinimumSize( DIM_TEXT_FIELD );
+		fldVelocity.setMaximumSize( DIM_TEXT_FIELD );
+		content.add( fldVelocity, constraints );
+		
+		// velocity slider
+		constraints.gridy++;
 		constraints.gridwidth = 2;
-		content.add( createVolumeSlider(controller), constraints );
+		sldVelocity = createVolumeSlider( controller );
+		sldVelocity.setName( NAME_VELOCITY );
+		sldVelocity.setValue( DEFAULT_VELOCITY );
+		content.add( sldVelocity, constraints );
 		
 		// duration label
 		constraints.gridy++;
@@ -227,6 +272,19 @@ public class SoundcheckView extends JDialog {
 		fldDuration.setMaximumSize( DIM_TEXT_FIELD );
 		content.add( fldDuration, constraints );
 		
+		// keep settings label
+		constraints.gridy++;
+		constraints.gridx     = 0;
+		JLabel lblKeep = new JLabel( Dict.get(Dict.SNDCHK_KEEP_SETTINGS) );
+		content.add( lblKeep, constraints );
+		
+		// keep settings checkbox
+		constraints.gridx++;
+		cbxKeep = new JCheckBox();
+		cbxKeep.setActionCommand( CMD_KEEP );
+		cbxKeep.addActionListener( controller );
+		content.add( cbxKeep, constraints );
+		
 		// play button
 		constraints.gridy++;
 		constraints.gridx     = 0;
@@ -241,33 +299,31 @@ public class SoundcheckView extends JDialog {
 	}
 	
 	/**
-	 * Creates the volume slider for the soundcheck window.
+	 * Creates the volume and velocity slider for the soundcheck window.
 	 * 
 	 * @param controller The event listener object for the soundcheck.
 	 * @return the volume slider.
 	 */
 	private JSlider createVolumeSlider( SoundcheckController controller ) {
-		sldVolume = new JSlider( JSlider.HORIZONTAL );
-		sldVolume.setName( NAME_VOLUME );
-		sldVolume.addChangeListener( controller );
-		sldVolume.addMouseWheelListener( controller );
-		sldVolume.setUI( SliderHelper.createSliderUi() );
-		sldVolume.setValue( MidiDevices.DEFAULT_VOLUME );
-		sldVolume.setPaintTicks( true );
-		sldVolume.setPaintLabels( true );
-		sldVolume.setPaintTrack( true );
+		JSlider slider = new JSlider( JSlider.HORIZONTAL );
+		slider.addChangeListener( controller );
+		slider.addMouseWheelListener( controller );
+		slider.setUI( SliderHelper.createSliderUi() );
+		slider.setPaintTicks( true );
+		slider.setPaintLabels( true );
+		slider.setPaintTrack( true );
 		// labels
-		sldVolume.setMinimum( PlayerView.VOL_MIN );
-		sldVolume.setMaximum( PlayerView.VOL_MAX );
-		sldVolume.setMajorTickSpacing( PlayerView.VOL_MAJOR );
-		sldVolume.setMinorTickSpacing( PlayerView.VOL_MINOR );
+		slider.setMinimum( PlayerView.VOL_MIN );
+		slider.setMaximum( PlayerView.VOL_MAX );
+		slider.setMajorTickSpacing( PlayerView.VOL_MAJOR );
+		slider.setMinorTickSpacing( PlayerView.VOL_MINOR );
 		Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
 		for ( int i = PlayerView.VOL_MIN; i <= PlayerView.VOL_MAX; i += VOL_LABEL ) {
 			int display = i;
 			labelTable.put( i, new JLabel(Integer.toString(display)) );
 		}
-		sldVolume.setLabelTable( labelTable );
-		return sldVolume;
+		slider.setLabelTable( labelTable );
+		return slider;
 	}
 	
 	/**
@@ -322,6 +378,24 @@ public class SoundcheckView extends JDialog {
 	}
 	
 	/**
+	 * Sets the velocity slider and the velocity text field to the given value.
+	 * 
+	 * @param volume  The velocity value to set.
+	 */
+	public void setVelocity( byte volume ) {
+		
+		// set slider
+		sldVelocity.setValue( volume );
+		
+		// set text field
+		SoundcheckController controller = SoundcheckController.getController();
+		fldVelocity.getDocument().removeDocumentListener( controller );
+		fldVelocity.setText( Byte.toString(volume) );
+		fldVelocity.getDocument().addDocumentListener( controller );
+		setTextFieldColor( fldVelocity.getName(), PlayerView.COLOR_NORMAL );
+	}
+	
+	/**
 	 * Sets the given text field's background to the given color.
 	 * 
 	 * @param name   Text field name.
@@ -330,6 +404,8 @@ public class SoundcheckView extends JDialog {
 	public void setTextFieldColor( String name, Color color ) {
 		if ( NAME_VOLUME.equals(name) )
 			fldVolume.setBackground( color );
+		else if ( NAME_VELOCITY.equals(name) )
+			fldVelocity.setBackground( color );
 		else if ( NAME_DURATION.equals(name) )
 			fldDuration.setBackground( color );
 	}
@@ -347,6 +423,18 @@ public class SoundcheckView extends JDialog {
 	}
 	
 	/**
+	 * Shows if the velocity slider is being changed via mouse click in the moment.
+	 * 
+	 * Returns true, if a mouse click on the slider has been started (mouse down) but
+	 * is not yet finished (mouse up).
+	 * 
+	 * @return **true**, if the slider is being changed. Otherwise: **false**.
+	 */
+	public boolean isVelocitySliderAdjusting() {
+		return sldVelocity.getValueIsAdjusting();
+	}
+	
+	/**
 	 * Returns the content of the volume text field.
 	 * 
 	 * @return Volume from the text field.
@@ -354,6 +442,16 @@ public class SoundcheckView extends JDialog {
 	 */
 	public byte getVolumeFromField() throws NumberFormatException {
 		return Byte.parseByte( fldVolume.getText() );
+	}
+	
+	/**
+	 * Returns the content of the velocity text field.
+	 * 
+	 * @return Velocity from the text field.
+	 * @throws NumberFormatException if the text cannot be parsed to a byte value.
+	 */
+	public byte getVeloctiyFromField() throws NumberFormatException {
+		return Byte.parseByte( fldVelocity.getText() );
 	}
 	
 	/**
@@ -581,6 +679,15 @@ public class SoundcheckView extends JDialog {
 	}
 	
 	/**
+	 * Returns the current velocity from the velocity slider.
+	 * 
+	 * @return Velocity value from the slider.
+	 */
+	public int getVelocity() {
+		return sldVelocity.getValue();
+	}
+	
+	/**
 	 * Causes a click on the **play** button.
 	 * 
 	 * This is called if an item from one of the comboboxes has been selected
@@ -656,9 +763,18 @@ public class SoundcheckView extends JDialog {
 	 * @return **true** if a text field has the focus. Otherwise: returns **false**.
 	 */
 	private boolean isTextfieldFocussed() {
-		if ( fldDuration.hasFocus() || fldVolume.hasFocus() )
+		if ( fldDuration.hasFocus() || fldVolume.hasFocus() || fldVelocity.hasFocus() )
 			return true;
 		
 		return false;
+	}
+	
+	/**
+	 * Determins if the 'keep settings' checkbox is checked or not.
+	 * 
+	 * @return **true** if the checkbox is checked. Otherwise: returns **false**.
+	 */
+	public boolean mustKeepSettings() {
+		return cbxKeep.isSelected();
 	}
 }

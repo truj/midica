@@ -595,7 +595,9 @@ public class Dict {
 	public static final String SNDCHK_INSTRUMENT                = "sndchk_instrument";
 	public static final String SNDCHK_NOTE                      = "sndchk_note";
 	public static final String SNDCHK_VOLUME                    = "sndchk_volume";
+	public static final String SNDCHK_VELOCITY                  = "sndchk_velocity";
 	public static final String SNDCHK_DURATION                  = "sndchk_duration";
+	public static final String SNDCHK_KEEP_SETTINGS             = "sndchk_keep_settings";
 	public static final String SNDCHK_PLAY                      = "sndchk_play";
 	public static final String SNDCHK_COL_PROGRAM               = "sndchk_col_program";
 	public static final String SNDCHK_COL_BANK                  = "sndchk_col_bank";
@@ -1000,17 +1002,19 @@ public class Dict {
 		set( COLUMN_TICK,                         "Tick"                       );
 		
 		// SoundcheckView
-		set( TITLE_SOUNDCHECK,               "Midica Soundcheck"          );
-		set( SNDCHK_CHANNEL,                 "Channel"                    );
-		set( SNDCHK_INSTRUMENT,              "Instrument"                 );
-		set( SNDCHK_NOTE,                    "Note"                       );
-		set( SNDCHK_VOLUME,                  "Volume"                     );
-		set( SNDCHK_DURATION,                "Duration (ms)"              );
-		set( SNDCHK_PLAY,                    "Play"                       );
-		set( SNDCHK_COL_PROGRAM,             "Prog"                       );
-		set( SNDCHK_COL_BANK,                "Bank"                       );
-		set( SNDCHK_COL_NAME_SF,             "Soundfont Name"             );
-		set( SNDCHK_COL_NAME_SYNTAX,         "Syntax"                     );
+		set( TITLE_SOUNDCHECK,               "Midica Soundcheck"                      );
+		set( SNDCHK_CHANNEL,                 "Channel"                                );
+		set( SNDCHK_INSTRUMENT,              "Instrument"                             );
+		set( SNDCHK_NOTE,                    "Note"                                   );
+		set( SNDCHK_VOLUME,                  "<html>Channel<br>Volume"                );
+		set( SNDCHK_VELOCITY,                "<html>Note<br>Volume<br>(Velocity)<br>" );
+		set( SNDCHK_DURATION,                "Duration (ms)"                          );
+		set( SNDCHK_KEEP_SETTINGS,           "Keep Settings"                          );
+		set( SNDCHK_PLAY,                    "Play"                                   );
+		set( SNDCHK_COL_PROGRAM,             "Prog"                                   );
+		set( SNDCHK_COL_BANK,                "Bank"                                   );
+		set( SNDCHK_COL_NAME_SF,             "Soundfont Name"                         );
+		set( SNDCHK_COL_NAME_SYNTAX,         "Syntax"                                 );
 	}
 	
 	/**

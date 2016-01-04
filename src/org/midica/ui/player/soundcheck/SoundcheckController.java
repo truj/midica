@@ -130,6 +130,7 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 	 * Handles:
 	 * 
 	 * - clicks on the play button
+	 * - changes of the 'keep settings' checkbox
 	 * - pressing **Enter** in one of the text fields
 	 * 
 	 * @param e The event to be handled.
@@ -144,7 +145,16 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 			play();
 		}
 		
-		// text field entered (volume or duration field)
+		// keep checkbox changed
+		else if ( SoundcheckView.CMD_KEEP.equals(cmd) ) {
+			
+			// checkbox was un-checked
+			if ( ! view.mustKeepSettings() ) {
+				MidiDevices.restoreChannelAfterSoundcheck( view.getChannel() );
+			}
+		}
+		
+		// text field entered (volume/velocity/duration field)
 		else if ( component instanceof JTextField ) {
 			view.pressPlayButton();
 		}
@@ -155,41 +165,56 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 	 */
 	private void play() {
 		try {
-			// check volume and duration field, set field color, and set the volume slider
-			checkVolumeField();   // throws NumberFormatException
-			checkDurationField(); // throws NumberFormatException
+			// check volume/velocity/duration fields, set field color, and set the volume slider
+			checkVolumeField( "volume" );   // throws NumberFormatException
+			checkDurationField();           // throws NumberFormatException
+			checkVolumeField( "velocity" ); // throws NumberFormatException
 			
-			int   channel  = view.getChannel();
-			int   note     = view.getNote();
-			int   volume   = view.getVolume();
-			int   duration = view.getDurationFromField(); // throws NumberFormatException
-			int[] instr    = view.getInstrument();
-			int   instrNum = instr[ 0 ];
+			int     channel  = view.getChannel();
+			int     note     = view.getNote();
+			int     volume   = view.getVolume();
+			int     velocity = view.getVelocity();
+			int     duration = view.getDurationFromField(); // throws NumberFormatException
+			int[]   instr    = view.getInstrument();
+			int     instrNum = instr[ 0 ];
+			boolean mustKeep = view.mustKeepSettings();
 			
 			// category selected or no note selected?
 			if ( instrNum < 0 || note < 0 )
 				return;
 			
 			// play the note
-			MidiDevices.doSoundcheck( channel, instr, note, volume, duration );
+			MidiDevices.doSoundcheck( channel, instr, note, volume, velocity, duration, mustKeep );
 		}
 		catch( NumberFormatException e ) {
 		}
 	}
 	
 	/**
-	 * Checks if the volume textfield contains a usable string.
+	 * Checks if the volume or velocity textfield contains a usable string.
 	 * 
-	 * If the check succeeds: sets the volume slider according to the
-	 * volume from the text field.
+	 * If the check succeeds: sets the volume/velocity slider according to the
+	 * value from the text field.
 	 * 
+	 * @param  type  **volume** or **velocity**, depending on the field to be checked.
 	 * @throws NumberFormatException if the field cannot be used as a volume value.
 	 */
-	private void checkVolumeField() throws NumberFormatException {
-		byte volume = view.getVolumeFromField(); // throws NumberFormatException
-		if ( volume < PlayerView.VOL_MIN || volume > PlayerView.VOL_MAX )
+	private void checkVolumeField( String type ) throws NumberFormatException {
+		
+		// check field
+		byte value;
+		if ( "volume".equals(type) )
+			value = view.getVolumeFromField(); // throws NumberFormatException
+		else
+			value = view.getVeloctiyFromField(); // throws NumberFormatException
+		if ( value < PlayerView.VOL_MIN || value > PlayerView.VOL_MAX )
 			throw new NumberFormatException();
-		view.setVolume( volume );
+		
+		// set slider
+		if ( "volume".equals(type) )
+			view.setVolume( value );
+		else
+			view.setVelocity( value );
 	}
 	
 	/**
@@ -205,8 +230,8 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 	}
 	
 	/**
-	 * Handles volume slider changes via mouse clicks.
-	 * Sets the volume text field's content to the new value.
+	 * Handles volume or velocity slider changes via mouse clicks.
+	 * Sets the volume or velocity text field's content to the new value.
 	 * 
 	 * @param e The event to be handled.
 	 */
@@ -214,7 +239,7 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 	public void stateChanged( ChangeEvent e ) {
 		String name = ((Component) e.getSource()).getName();
 		
-		// handle volume slider changes
+		// volume slider?
 		if ( SoundcheckView.NAME_VOLUME.equals(name) ) {
 			
 			// only react if it's moved manually
@@ -223,11 +248,21 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 			byte volume = (byte) ( (JSlider) e.getSource() ).getValue();
 			view.setVolume( volume );
 		}
+		
+		// velocity slider
+		else if ( SoundcheckView.NAME_VELOCITY.equals(name) ) {
+			
+			// only react if it's moved manually
+			if ( ! view.isVelocitySliderAdjusting() )
+				return;
+			byte velocity = (byte) ( (JSlider) e.getSource() ).getValue();
+			view.setVelocity( velocity );
+		}
 	}
 	
 	/**
-	 * Handles volume slider scrolls with the mouse wheel.
-	 * Sets the volume text field's content to the new value.
+	 * Handles volume or velocity slider scrolls with the mouse wheel.
+	 * Sets the volume or velocity text field's content to the new value.
 	 * 
 	 * @param e The event to be handled.
 	 */
@@ -236,19 +271,19 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 		String name     = ( (Component) e.getSource() ).getName();
 		int amount      = e.getWheelRotation();
 		int sliderTicks = ( (JSlider) e.getSource() ).getValue();
+		sliderTicks    -= amount * PlayerView.VOL_SCROLL;
 		
-		// handle volume slider scrolls
-		if ( SoundcheckView.NAME_VOLUME.equals(name) ) {
-			// get and check new slider state
-			sliderTicks -= amount * PlayerView.VOL_SCROLL;
-			if ( sliderTicks < PlayerView.VOL_MIN )
-				sliderTicks = PlayerView.VOL_MIN;
-			else if ( sliderTicks > PlayerView.VOL_MAX )
-				sliderTicks = PlayerView.VOL_MAX;
-			
-			// set new slider state and update text field
+		// check new slider state
+		if ( sliderTicks < PlayerView.VOL_MIN )
+			sliderTicks = PlayerView.VOL_MIN;
+		else if ( sliderTicks > PlayerView.VOL_MAX )
+			sliderTicks = PlayerView.VOL_MAX;
+		
+		// set new slider state and update text field
+		if ( SoundcheckView.NAME_VOLUME.equals(name) )
 			view.setVolume( (byte) sliderTicks );
-		}
+		else if ( SoundcheckView.NAME_VELOCITY.equals(name) )
+			view.setVelocity( (byte) sliderTicks );
 	}
 	
 	/**
@@ -305,10 +340,10 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 		try {
 			String text = doc.getText( 0, doc.getLength() );
 			
-			// volume field changed
-			if ( SoundcheckView.NAME_VOLUME.equals(name) ) {
-				byte volume = Byte.parseByte( text );
-				if ( volume < PlayerView.VOL_MIN || volume > PlayerView.VOL_MAX )
+			// volume or velocity field changed
+			if ( SoundcheckView.NAME_VOLUME.equals(name) || SoundcheckView.NAME_VELOCITY.equals(name) ) {
+				byte value = Byte.parseByte( text );
+				if ( value < PlayerView.VOL_MIN || value > PlayerView.VOL_MAX )
 					throw new NumberFormatException();
 			}
 			else if ( SoundcheckView.NAME_DURATION.equals(name) ) {

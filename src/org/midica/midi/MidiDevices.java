@@ -896,10 +896,13 @@ public final class MidiDevices {
 	 * @param channel     Channel number from 0 to 15.
 	 * @param instr       Instrument specification (program number, bank MSB, bank LSB)
 	 * @param note        Note or percussion instrument number.
-	 * @param volume      Used for the channel volume and also for the velocity of the note.
+	 * @param volume      Channel volume for the note to be played.
+	 * @param velocity    Velocity (note volume) for the note to be played.
 	 * @param duration    Note length in milliseconds.
+	 * @param keep        **true** to keep the settings after playing the note, **false**
+	 *                    to restore the channel's state.
 	 */
-	public static void doSoundcheck( int channel, int[] instr, int note, int volume, int duration ) {
+	public static void doSoundcheck( int channel, int[] instr, int note, int volume, int velocity, int duration, boolean keep ) {
 		if ( null == synthesizer )
 			return;
 		
@@ -916,7 +919,7 @@ public final class MidiDevices {
 		setChannelVolumeAbsolute( channel, volume );
 		
 		// note on
-		midiChannel.noteOn( note, volume );
+		midiChannel.noteOn( note, velocity );
 		
 		// wait
 		try {
@@ -928,14 +931,37 @@ public final class MidiDevices {
 		// note off
 		midiChannel.noteOff( note );
 		
-		// restore bank, instrument and volume
+		// keep or restore bank, instrument and volume
+		if (keep)
+			return;
+		restoreChannelAfterSoundcheck( channel );
+	}
+	
+	/**
+	 * Restores the given channel's state after the channel has been changed
+	 * for a soundcheck.
+	 * 
+	 * This is called from the soundcheck method directly (if the keep
+	 * checkbox is unchecked) or after a soundcheck when the keep checkbox
+	 * is un-checked later.
+	 * 
+	 * @param channel Channel number.
+	 */
+	public static void restoreChannelAfterSoundcheck( int channel ) {
+		
+		// restore bank
+		MidiChannel midiChannel = synthesizer.getChannels()[ channel ];
 		Byte[] instrumentInfo = SequenceAnalyzer.getInstrument( (byte) channel, getTickPosition() );
 		byte oldBankMSB = instrumentInfo[ 0 ];
 		byte oldBankLSB = instrumentInfo[ 1 ];
 		byte oldProgram = instrumentInfo[ 2 ];
 		midiChannel.controlChange( 0x00, oldBankMSB );
 		midiChannel.controlChange( 0x20, oldBankLSB );
+		
+		// restore program (instrument)
 		midiChannel.programChange( oldProgram );
+		
+		// restore volume
 		setChannelVolume( channel, channelVolume[channel] );
 	}
 }
