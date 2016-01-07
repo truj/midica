@@ -504,6 +504,13 @@ public class Dict {
 	// SequenceParser
 	public static final String ERROR_ANALYZE_POSTPROCESS        = "error_analyze_postprocess";
 	
+	// WaitView
+	public static final String TITLE_WAIT                       = "title_wait";
+	public static final String WAIT_PARSE_MPL                   = "wait_parse_mpl";
+	public static final String WAIT_PARSE_MID                   = "wait_parse_mid";
+	public static final String WAIT_PARSE_SF2                   = "wait_parse_sf2";
+	
+	
 	// Exporter
 	public static final String ERROR_EXPORT                     = "error_export";
 	public static final String ERROR_FILE_NOT_WRITABLE          = "error_file_not_writable";
@@ -911,6 +918,15 @@ public class Dict {
 		set( ERROR_UNKNOWN_PERCUSSION,            "unknown percussion shortcut: "                                     );
 		set( ERROR_CHANNEL_UNDEFINED,             "channel %s has not been defined"                                   );
 		set( ERROR_INVALID_CHANNEL_NUMBER,        "Invalid channel number (must be between 0 and 15): "               );
+		
+		// SequenceParser
+		set( ERROR_ANALYZE_POSTPROCESS,           "Error while postprocessing the sequence"                           );
+		
+		// WaitView
+		set( TITLE_WAIT,                          "Please Wait"                                                       );
+		set( WAIT_PARSE_MPL,                      "Parsing the MidicaPL file..."                                      );
+		set( WAIT_PARSE_MID,                      "Parsing the MIDI file..."                                          );
+		set( WAIT_PARSE_SF2,                      "Parsing the Soundfont"                                             );
 		
 		// Exporter
 		set( ERROR_EXPORT,                        "Export Error in the file "                                         );

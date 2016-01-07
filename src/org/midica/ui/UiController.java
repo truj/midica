@@ -12,10 +12,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.SwingWorker;
 
 import org.midica.config.Config;
 import org.midica.config.Dict;
@@ -27,6 +29,7 @@ import org.midica.file.MidicaPLExporter;
 import org.midica.file.ParseException;
 import org.midica.file.IParser;
 import org.midica.file.MidicaPLParser;
+import org.midica.file.ParsingWorker;
 import org.midica.file.SequenceParser;
 import org.midica.file.SoundfontParser;
 import org.midica.midi.MidiDevices;
@@ -226,11 +229,17 @@ public class UiController implements ActionListener, WindowListener {
 	
 	/**
 	 * Parses the chosen file using the right parser for the right file type.
+	 * A wait dialog is shown during the parsing.
+	 * The parsing itself is executed by a {@link SwingWorker}.
 	 * 
 	 * @param e    Event caused by choosing a file.
 	 */
 	private void parseChosenFile( ActionEvent e ) {
-		String type = ((FileExtensionFilter)((JFileChooser)e.getSource()).getFileFilter()).getExtension();
+		
+		// initialize variables based on the file type to be parsed
+		String       type     = ((FileExtensionFilter)((JFileChooser)e.getSource()).getFileFilter()).getExtension();
+		WaitView     waitView = new WaitView( view );
+		String       waitMsg;
 		File         file;
 		IParser      parser;
 		FileSelector selector;
@@ -238,29 +247,50 @@ public class UiController implements ActionListener, WindowListener {
 			file     = mplSelector.getFile();
 			parser   = mplParser;
 			selector = mplSelector;
+			waitMsg  = Dict.get( Dict.WAIT_PARSE_MPL );
 		}
 		else if ( FileSelector.FILE_EXTENSION_MIDI.equals(type) ) {
 			file     = midiSelector.getFile();
 			parser   = midiParser;
 			selector = midiSelector;
+			waitMsg  = Dict.get( Dict.WAIT_PARSE_MID );
 		}
 		else if ( FileSelector.FILE_EXTENSION_SOUNDFONT.equals(type) ) {
 			file     = soundfontSelector.getFile();
 			parser   = soundfontParser;
 			selector = soundfontSelector;
+			waitMsg  = Dict.get( Dict.WAIT_PARSE_SF2 );
 		}
 		else {
 			return;
 		}
+		
+		// Reset the filename for the case that it cannot be parsed.
+		// But don't do that for soundfonts because the last successfully
+		// parsed soundfont file will stay valid.
+		if ( ! FileSelector.FILE_EXTENSION_SOUNDFONT.equals(type) )
+			displayFilename( type, Dict.get(Dict.UNCHOSEN_FILE) );
+		
+		// close file selector
 		selector.setVisible( false );
+		
+		// start file parsing in the background and show the wait window
+		ParsingWorker worker = new ParsingWorker( waitView, parser, file );
+		worker.execute();
+		waitView.init( waitMsg );
+		
+		// wait until the file is parsed and than evaluate the parsing result
 		try {
-			// Reset the filename for the case that it cannot be parsed.
-			// But don't do that for soundfonts because the last successfully
-			// parsed soundfont file will stay valid.
-			if ( ! FileSelector.FILE_EXTENSION_SOUNDFONT.equals(type) )
-				displayFilename( type, Dict.get(Dict.UNCHOSEN_FILE) );
+			try {
+				ParseException parseException = worker.get();
+				if ( parseException != null ) {
+					throw parseException;
+				}
+			}
+			catch ( InterruptedException | ExecutionException workerException ) {
+				throw new ParseException( workerException.getMessage() );
+			}
 			
-			parser.parse( file );
 			// show the filename of the successfully parsed file
 			displayFilename( type, file.getName() );
 			if ( FileSelector.FILE_EXTENSION_MPL.equals(type)
@@ -282,8 +312,12 @@ public class UiController implements ActionListener, WindowListener {
 				) + msg;
 			}
 			showErrorMessage( msg );
-			// reset sequence
-			MidiDevices.setSequence( null );
+			
+			// reset sequence (but not if a soundfont has been parsed)
+			if ( FileSelector.FILE_EXTENSION_MPL.equals(type)
+			  || FileSelector.FILE_EXTENSION_MIDI.equals(type) ) {
+				MidiDevices.setSequence( null );
+			}
 		}
 	}
 	
