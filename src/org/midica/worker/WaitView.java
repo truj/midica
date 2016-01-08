@@ -5,7 +5,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.midica.ui;
+package org.midica.worker;
 
 import java.awt.Container;
 import java.awt.Dimension;

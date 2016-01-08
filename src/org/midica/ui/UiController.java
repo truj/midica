@@ -29,13 +29,14 @@ import org.midica.file.MidicaPLExporter;
 import org.midica.file.ParseException;
 import org.midica.file.IParser;
 import org.midica.file.MidicaPLParser;
-import org.midica.file.ParsingWorker;
 import org.midica.file.SequenceParser;
 import org.midica.file.SoundfontParser;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.info.InfoView;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.player.PlayerView;
+import org.midica.worker.ParsingWorker;
+import org.midica.worker.WaitView;
 
 /**
  * This class provides the controller of the main window.
@@ -282,7 +283,7 @@ public class UiController implements ActionListener, WindowListener {
 		// wait until the file is parsed and than evaluate the parsing result
 		try {
 			try {
-				ParseException parseException = worker.get();
+				ParseException parseException = (ParseException) worker.get();
 				if ( parseException != null ) {
 					throw parseException;
 				}

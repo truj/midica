@@ -5,13 +5,13 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.midica.file;
+package org.midica.worker;
 
 import java.io.File;
 
-import javax.swing.SwingWorker;
+import org.midica.file.IParser;
+import org.midica.file.ParseException;
 
-import org.midica.ui.WaitView;
 
 /**
  * This class is used to parse a file in the background while a
@@ -21,16 +21,15 @@ import org.midica.ui.WaitView;
  * setVisible() method of the (modal) waiting dialog is called.
  * That causes the execution of {@link #doInBackground()} that parses the file.
  * 
- * After the parsing work is done, {@link #done()} is called and closes the
- * waiting dialog.
+ * After the parsing work is done, {@link MidicaWorker#done()} is called and
+ * closes then waiting dialog.
  * 
  * @author Jan Trukenmüller
  */
-public class ParsingWorker extends SwingWorker<ParseException, Void> {
+public class ParsingWorker extends MidicaWorker {
 	
-	private WaitView view   = null;
-	private IParser  parser = null;
-	private File     file   = null;
+	private IParser parser = null;
+	private File    file   = null;
 	
 	/**
 	 * Creates a parsing worker that parses a file in the background while
@@ -41,7 +40,7 @@ public class ParsingWorker extends SwingWorker<ParseException, Void> {
 	 * @param file    The file to be parsed.
 	 */
 	public ParsingWorker( WaitView view, IParser parser, File file ) {
-		this.view   = view;
+		super( view );
 		this.parser = parser;
 		this.file   = file;
 	}
@@ -50,8 +49,7 @@ public class ParsingWorker extends SwingWorker<ParseException, Void> {
 	 * Parses the file in the background.
 	 * This method is executed after calling {@link #execute()}.
 	 * 
-	 * @return the parse exception or **null** if no exception occurrs.
-	 * @throws ParseException if the file parsing fails.
+	 * @return the parse exception or **null** if no exception is caught.
 	 */
 	@Override
 	protected ParseException doInBackground() {
@@ -66,14 +64,4 @@ public class ParsingWorker extends SwingWorker<ParseException, Void> {
 		
 		return parseException;
 	}
-	
-	/**
-	 * Closes the waiting dialog.
-	 * This method is executed if the parsing is finished.
-	 */
-	@Override
-	protected void done() {
-		view.close();
-	}
-	
 }
