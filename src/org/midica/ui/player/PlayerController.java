@@ -15,7 +15,7 @@ import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
-import java.io.IOException;
+import java.util.concurrent.ExecutionException;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiUnavailableException;
@@ -37,6 +37,9 @@ import org.midica.midi.SequenceNotSetException;
 import org.midica.ui.ErrorMsgView;
 import org.midica.ui.info.InfoView;
 import org.midica.ui.player.soundcheck.SoundcheckView;
+import org.midica.worker.DeviceWorker;
+import org.midica.worker.ParsingWorker;
+import org.midica.worker.WaitView;
 
 
 /**
@@ -274,21 +277,15 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 */
 	@Override
 	public void windowOpened( WindowEvent e ) {
+		
+		// setup the midi devices while showing a wait dialog
 		try {
-			MidiDevices.setupDevices( this );
+			setupMidiDevices();
 		}
-		catch ( InvalidMidiDataException ex ) {
+		catch ( Exception ex ) {
 			showErrorMessage( ex );
 		}
-		catch ( MidiUnavailableException ex ) {
-			showErrorMessage( ex );
-		}
-		catch ( SequenceNotSetException ex ) {
-			showErrorMessage( ex );
-		}
-		catch ( IOException ex ) {
-			showErrorMessage( ex );
-		}
+		
 		// init tick labels and progress slider
 		view.setTickAndTimeLength( MidiDevices.getTickLength(), MidiDevices.getTimeLength() );
 		view.initProgressSlider();
@@ -730,11 +727,31 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 */
 	private void reparse() {
 		try {
-			long    currentTicks = MidiDevices.getTickPosition();
-			boolean isPlaying    = MidiDevices.isPlaying();
+			long     currentTicks = MidiDevices.getTickPosition();
+			boolean  isPlaying    = MidiDevices.isPlaying();
+			WaitView waitView     = new WaitView( view );
+			
+			// start file parsing in the background and show the wait window
+			ParsingWorker worker = new ParsingWorker( waitView, parser, currentFile );
 			MidiDevices.destroyDevices();
-			parser.parse( currentFile );
-			MidiDevices.setupDevices( this );
+			worker.execute();
+			waitView.init( Dict.get(Dict.WAIT_REPARSE) );
+			
+			// wait until the file is parsed and than evaluate the parsing result
+			try {
+				ParseException parseException = (ParseException) worker.get();
+				if ( parseException != null ) {
+					throw parseException;
+				}
+			}
+			catch( InterruptedException | ExecutionException workerException ) {
+				throw new ParseException( workerException.getMessage() );
+			}
+			
+			// setup the MIDI devices while showing another wait message
+			setupMidiDevices();
+			
+			// update player UI
 			MidiDevices.setTickPosition( currentTicks );
 			view.setTickAndTimeLength( MidiDevices.getTickLength(), MidiDevices.getTimeLength() );
 			view.initProgressSlider();
@@ -758,17 +775,8 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			}
 			showErrorMessage(msg);
 		}
-		catch ( InvalidMidiDataException ex ) {
-			showErrorMessage(ex);
-		}
-		catch ( MidiUnavailableException ex ) {
-			showErrorMessage(ex);
-		}
-		catch ( SequenceNotSetException ex ) {
-			showErrorMessage(ex);
-		}
-		catch ( IOException ex ) {
-			showErrorMessage(ex);
+		catch ( Exception ex ) {
+			showErrorMessage( ex );
 		}
 	}
 	
@@ -791,5 +799,28 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	public void showErrorMessage( String message ) {
 		errorMsg = new ErrorMsgView( view, this );
 		errorMsg.init( message );
+	}
+	
+	/**
+	 * Sets up sequencer, synthesizer and so on.
+	 * This operation may be time consuming if a large soundfont has to be
+	 * loaded. For this reason this operation is done by a worker in the
+	 * background while a 'please wait' message is displayed.
+	 * 
+	 * @throws Exception if something went wrong.
+	 */
+	private void setupMidiDevices() throws Exception {
+		
+		// start file parsing in the background and show the wait window
+		WaitView waitView   = new WaitView( view );
+		DeviceWorker worker = new DeviceWorker( waitView, this );
+		worker.execute();
+		waitView.init( Dict.get(Dict.WAIT_SETUP_DEVICES) );
+		
+		// wait for the worker and pass any exception to the calling method
+		Exception exception = worker.get();
+		if ( exception != null ) {
+			throw exception;
+		}
 	}
 }

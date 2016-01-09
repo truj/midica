@@ -509,6 +509,8 @@ public class Dict {
 	public static final String WAIT_PARSE_MPL                   = "wait_parse_mpl";
 	public static final String WAIT_PARSE_MID                   = "wait_parse_mid";
 	public static final String WAIT_PARSE_SF2                   = "wait_parse_sf2";
+	public static final String WAIT_REPARSE                     = "wait_reparse";
+	public static final String WAIT_SETUP_DEVICES               = "wait_setup_devices";
 	
 	
 	// Exporter
@@ -927,6 +929,8 @@ public class Dict {
 		set( WAIT_PARSE_MPL,                      "Parsing the MidicaPL file..."                                      );
 		set( WAIT_PARSE_MID,                      "Parsing the MIDI file..."                                          );
 		set( WAIT_PARSE_SF2,                      "Parsing the Soundfont"                                             );
+		set( WAIT_REPARSE,                        "Reloading the File"                                                );
+		set( WAIT_SETUP_DEVICES,                  "Setting up MIDI devices and loading Soundfont"                     );
 		
 		// Exporter
 		set( ERROR_EXPORT,                        "Export Error in the file "                                         );
