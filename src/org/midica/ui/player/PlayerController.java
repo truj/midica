@@ -33,7 +33,6 @@ import org.midica.config.Dict;
 import org.midica.file.ParseException;
 import org.midica.file.SequenceParser;
 import org.midica.midi.MidiDevices;
-import org.midica.midi.SequenceNotSetException;
 import org.midica.ui.ErrorMsgView;
 import org.midica.ui.info.InfoView;
 import org.midica.ui.player.soundcheck.SoundcheckView;

@@ -1058,8 +1058,9 @@ public class MidicaPLParser extends SequenceParser {
 			}
 		}
 		
-		if ( multiple )
+		if (multiple) {
 			instr.setCurrentTicks( absoluteStartTicks );
+		}
 	}
 	
 	/**

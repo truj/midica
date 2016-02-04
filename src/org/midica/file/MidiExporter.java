@@ -63,7 +63,6 @@ public class MidiExporter extends Exporter {
 			e.printStackTrace();
 		}
         catch ( InvalidMidiDataException e ) {
-	        // TODO Auto-generated catch block
 	        e.printStackTrace();
         }
 		
@@ -109,8 +108,6 @@ public class MidiExporter extends Exporter {
 				newTrack.add( event );
 			}
 		}
-		
-		// TODO: add signature containing Midica Version and creation date
 		
 		return newSeq;
 	}

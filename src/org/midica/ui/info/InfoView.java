@@ -18,6 +18,7 @@ import java.awt.event.KeyEvent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -57,7 +58,7 @@ import org.midica.ui.renderer.SyntaxTableCellRenderer;
  *     - General information
  *     - Drum kits and Instruments
  *     - Resources
- * - Information about the currently loaded MIDI stream. (NOT YET IMPLEMENTED)
+ * - Information about the currently loaded MIDI sequence. (NOT YET IMPLEMENTED)
  * 
  * @author Jan Trukenmüller
  */
@@ -169,10 +170,10 @@ public class InfoView extends JDialog {
 		addWindowListener( this.controller );
 		
 		// add tabs
-		content.addTab( Dict.get(Dict.TAB_CONFIG),      createConfigArea()     );
-		content.addTab( Dict.get(Dict.TAB_SOUNDFONT),   createSoundfontArea()  );
-		content.addTab( Dict.get(Dict.TAB_MIDI_STREAM), createMidiStreamArea() );
-		content.addTab( Dict.get(Dict.TAB_MIDICA),      createVersionArea()    );
+		content.addTab( Dict.get(Dict.TAB_CONFIG),        createConfigArea()       );
+		content.addTab( Dict.get(Dict.TAB_SOUNDFONT),     createSoundfontArea()    );
+		content.addTab( Dict.get(Dict.TAB_MIDI_SEQUENCE), createMidiSequenceArea() );
+		content.addTab( Dict.get(Dict.TAB_MIDICA),        createVersionArea()      );
 	}
 	
 	/**
@@ -222,22 +223,22 @@ public class InfoView extends JDialog {
 	}
 	
 	/**
-	 * Creates the midi stream tab.
+	 * Creates the midi sequence tab.
 	 * This contains the following sub tabs:
 	 * 
 	 * TODO: complete docu
-	 * - General stream info
+	 * - General sequence info
 	 * - Used banks
 	 * 
 	 * @return the created soundfont area.
 	 */
-	private Container createMidiStreamArea() {
+	private Container createMidiSequenceArea() {
 		// content
 		contentSoundfont = new JTabbedPane( JTabbedPane.TOP );
 		
 		// add tabs
-		contentSoundfont.addTab( Dict.get(Dict.MIDI_STREAM_INFO), createMidiStreamInfoArea() );
-//		contentSoundfont.addTab( Dict.get(Dict.USED_BANKS),       createUsedBanksArea()      );
+		contentSoundfont.addTab( Dict.get(Dict.MIDI_SEQUENCE_INFO), createMidiSequenceInfoArea() );
+//		contentSoundfont.addTab( Dict.get(Dict.USED_BANKS),         createUsedBanksArea()        );
 		
 		return contentSoundfont;
 	}
@@ -664,11 +665,11 @@ public class InfoView extends JDialog {
 	}
 	
 	/**
-	 * Creates the area for general MIDI stream information.
+	 * Creates the area for general MIDI sequence information.
 	 * 
-	 * @return the created MIDI stream info area.
+	 * @return the created MIDI sequence info area.
 	 */
-	private Container createMidiStreamInfoArea() {
+	private Container createMidiSequenceInfoArea() {
 		// content
 		JPanel area = new JPanel();
 		
@@ -685,8 +686,8 @@ public class InfoView extends JDialog {
 		constraints.weightx    = 0;
 		constraints.weighty    = 0;
 		
-		// get general stream info
-		HashMap<String, Object> streamInfo = SequenceAnalyzer.getStreamInfo();
+		// get general sequence info
+		HashMap<String, Object> sequenceInfo = SequenceAnalyzer.getSequenceInfo();
 		
 		// file translation
 		constraints.anchor = GridBagConstraints.NORTHEAST;
@@ -697,7 +698,7 @@ public class InfoView extends JDialog {
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		String filename    = "-";
-		String type        = (String) streamInfo.get( "parser_type" );
+		String type        = (String) sequenceInfo.get( "parser_type" );
 		if ( "midica".equals(type) )
 			filename = Midica.uiController.getView().getChosenMidicaPLFileLbl().getText();
 		else if ( "mid".equals(type) )
@@ -705,6 +706,51 @@ public class InfoView extends JDialog {
 		FlowLabel lblFileContent = new FlowLabel( filename );
 		lblFileContent.setPreferredSize( generalInfoDim );
 		area.add( lblFileContent, constraints );
+		
+		// copyright translation
+		constraints.gridy++;
+		constraints.gridx  = 0;
+		constraints.anchor = GridBagConstraints.NORTHEAST;
+		JLabel lblCopy     = new JLabel( Dict.get(Dict.COPYRIGHT) + ": " );
+		area.add( lblCopy, constraints );
+		
+		// copyright content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		String copyright                 = "-";
+		Object metaObj                   = sequenceInfo.get("meta_info");
+		HashMap<String, String> metaInfo = new HashMap<String, String>();
+		if ( metaObj != null )
+			metaInfo = (HashMap<String, String>) metaObj;
+		if ( metaInfo.containsKey("copyright") )
+			copyright = metaInfo.get( "copyright" );
+		FlowLabel lblCopyContent = new FlowLabel( copyright );
+		lblCopyContent.setPreferredSize( generalInfoDim );
+		area.add( lblCopyContent, constraints );
+		
+		// software translation
+		constraints.gridy++;
+		constraints.gridx  = 0;
+		constraints.anchor = GridBagConstraints.NORTHEAST;
+		JLabel lblSoftware = new JLabel( Dict.get(Dict.SOFTWARE_VERSION) + ": " );
+		area.add( lblSoftware, constraints );
+		
+		// software content
+		constraints.gridx++;
+		constraints.anchor  = GridBagConstraints.NORTHWEST;
+		String software     = "-";
+		if ( metaInfo.containsKey("software") ) {
+			software = metaInfo.get( "software" );
+		}
+		if ( metaInfo.containsKey("software_date") ) {
+			String softwareDate = metaInfo.get( "software_date" );
+			software = software + " - " + Dict.get( Dict.SOFTWARE_DATE ) + " " + softwareDate;
+		}
+		System.out.println(metaInfo);
+		System.out.println(software);
+		FlowLabel lblSoftwareContent = new FlowLabel( software );
+		lblSoftwareContent.setPreferredSize( generalInfoDim );
+		area.add( lblSoftwareContent, constraints );
 		
 		// ticks translation
 		constraints.gridy++;
@@ -717,7 +763,7 @@ public class InfoView extends JDialog {
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		String lenghStr = "-";
-		Object ticksObj = streamInfo.get("ticks");
+		Object ticksObj = sequenceInfo.get("ticks");
 		if ( ticksObj != null )
 			lenghStr = Long.toString( (Long) ticksObj );
 		FlowLabel lblTicksContent = new FlowLabel( lenghStr );
@@ -735,7 +781,7 @@ public class InfoView extends JDialog {
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		lenghStr = "-";
-		Object timeObj = streamInfo.get("time_length");
+		Object timeObj = sequenceInfo.get("time_length");
 		if ( timeObj != null )
 			lenghStr = (String) timeObj;
 		FlowLabel lblTimeContent = new FlowLabel( (String) lenghStr );
@@ -753,8 +799,8 @@ public class InfoView extends JDialog {
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		String resolution  = "-";
-		if ( null != streamInfo.get("resolution") )
-			resolution = streamInfo.get("resolution") + " " + Dict.get( Dict.RESOLUTION_UNIT );
+		if ( null != sequenceInfo.get("resolution") )
+			resolution = sequenceInfo.get("resolution") + " " + Dict.get( Dict.RESOLUTION_UNIT );
 		FlowLabel lblResolutionContent = new FlowLabel( resolution );
 		lblResolutionContent.setPreferredSize( generalInfoDim );
 		area.add( lblResolutionContent, constraints );
@@ -785,7 +831,7 @@ public class InfoView extends JDialog {
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		String tempoStr = "-";
-		Object tempoObj = streamInfo.get("tempo_bpm_avg");
+		Object tempoObj = sequenceInfo.get("tempo_bpm_avg");
 		if ( null != tempoObj )
 			tempoStr = (String) tempoObj;
 		FlowLabel lblBpmAvgContent = new FlowLabel( tempoStr );
@@ -802,7 +848,7 @@ public class InfoView extends JDialog {
 		// BPM min content
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		tempoObj           = streamInfo.get("tempo_bpm_min");
+		tempoObj           = sequenceInfo.get("tempo_bpm_min");
 		if ( null != tempoObj )
 			tempoStr = (String) tempoObj;
 		FlowLabel lblBpmMinContent = new FlowLabel( tempoStr );
@@ -819,7 +865,7 @@ public class InfoView extends JDialog {
 		// BPM max content
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		tempoObj           = streamInfo.get("tempo_bpm_max");
+		tempoObj           = sequenceInfo.get("tempo_bpm_max");
 		if ( null != tempoObj )
 			tempoStr = (String) tempoObj;
 		FlowLabel lblBpmMaxContent = new FlowLabel( tempoStr );
@@ -851,7 +897,7 @@ public class InfoView extends JDialog {
 		// MPQ average content
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		tempoObj           = streamInfo.get("tempo_mpq_avg");
+		tempoObj           = sequenceInfo.get("tempo_mpq_avg");
 		if ( null != tempoObj )
 			tempoStr = (String) tempoObj;
 		FlowLabel lblMpqAvgContent = new FlowLabel( tempoStr );
@@ -868,7 +914,7 @@ public class InfoView extends JDialog {
 		// MPQ min content
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		tempoObj           = streamInfo.get("tempo_mpq_min");
+		tempoObj           = sequenceInfo.get("tempo_mpq_min");
 		if ( null != tempoObj )
 			tempoStr = (String) tempoObj;
 		FlowLabel lblMpqMinContent = new FlowLabel( tempoStr );
@@ -885,7 +931,7 @@ public class InfoView extends JDialog {
 		// MPQ max content
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		tempoObj           = streamInfo.get("tempo_mpq_max");
+		tempoObj           = sequenceInfo.get("tempo_mpq_max");
 		if ( null != tempoObj )
 			tempoStr = (String) tempoObj;
 		FlowLabel lblMpqMaxContent = new FlowLabel( tempoStr );
@@ -903,7 +949,7 @@ public class InfoView extends JDialog {
 	}
 	
 	/**
-	 * Creates the area for banks used by the loaded MIDI stream.
+	 * Creates the area for banks used by the loaded MIDI sequence.
 	 * 
 	 * @return the created banks area.
 	 */
@@ -924,8 +970,9 @@ public class InfoView extends JDialog {
 		constraints.weightx    = 0;
 		constraints.weighty    = 0;
 		
-		// get general stream info
-		HashMap<String, String> streamInfo = null;
+		// get general sequence info
+		HashMap<String, Object> sequenceInfo = SequenceAnalyzer.getSequenceInfo();
+		
 //		HashMap<String, String> soundfontInfo = SoundfontParser.getSoundfontInfo();
 		
 		// file translation
@@ -936,7 +983,7 @@ public class InfoView extends JDialog {
 		// file name
 //		constraints.gridx++;
 //		constraints.anchor    = GridBagConstraints.NORTHWEST;
-//		FlowLabel lblFileContent = new FlowLabel( streamInfo.get("file") );
+//		FlowLabel lblFileContent = new FlowLabel( sequenceInfo.get("file") );
 //		lblFileContent.setPreferredSize( generalInfoDim );
 //		area.add( lblFileContent, constraints );
 		

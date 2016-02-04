@@ -7,10 +7,15 @@
 
 package org.midica.midi;
 
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
@@ -117,7 +122,7 @@ public class SequenceAnalyzer {
 	 * 
 	 * @return MIDI stream info.
 	 */
-	public static HashMap<String, Object> getStreamInfo() {
+	public static HashMap<String, Object> getSequenceInfo() {
 		if ( null == sequenceInfo )
 			return new HashMap<String, Object>();
 		return sequenceInfo;
@@ -131,16 +136,17 @@ public class SequenceAnalyzer {
 		
 		// initialize data structures for the sequence info
 		sequenceInfo = new HashMap<String, Object>();
-		sequenceInfo.put( "resolution",       sequence.getResolution()        );
-		sequenceInfo.put( "used_channels",    new TreeSet<Integer>()          );
-		sequenceInfo.put( "used_banks",       new TreeSet<String>()           );
-		sequenceInfo.put( "banks_by_channel", new TreeMap<Integer, String>()  );
-		sequenceInfo.put( "tempo_mpq",        new TreeMap<Long, Integer>()    );
-		sequenceInfo.put( "tempo_bpm",        new TreeMap<Long, Integer>()    );
-		sequenceInfo.put( "parser_type",      fileType                        );
-		sequenceInfo.put( "ticks",            sequence.getTickLength()        );
-		keysByChannel      = new TreeMap<Byte, TreeMap<Byte, Integer>>();
-		programsByChannel  = new TreeMap<Byte, TreeSet<Byte>>();
+		sequenceInfo.put( "resolution",       sequence.getResolution()       );
+		sequenceInfo.put( "meta_info",        new HashMap<String, String>()  );
+		sequenceInfo.put( "used_channels",    new TreeSet<Integer>()         );
+		sequenceInfo.put( "used_banks",       new TreeSet<String>()          );
+		sequenceInfo.put( "banks_by_channel", new TreeMap<Integer, String>() );
+		sequenceInfo.put( "tempo_mpq",        new TreeMap<Long, Integer>()   );
+		sequenceInfo.put( "tempo_bpm",        new TreeMap<Long, Integer>()   );
+		sequenceInfo.put( "parser_type",      fileType                       );
+		sequenceInfo.put( "ticks",            sequence.getTickLength()       );
+		keysByChannel     = new TreeMap<Byte, TreeMap<Byte, Integer>>();
+		programsByChannel = new TreeMap<Byte, TreeSet<Byte>>();
 		sequenceInfo.put( "keys_by_channel",     keysByChannel     );
 		sequenceInfo.put( "programs_by_channel", programsByChannel );
 		long microseconds = sequence.getMicrosecondLength();
@@ -329,6 +335,7 @@ public class SequenceAnalyzer {
 		int    type    = msg.getType();
 		int    length  = msg.getLength();
 		byte[] message = msg.getMessage();
+		byte[] content = msg.getData();
 		
 		// TEMPO
 		if ( MidiListener.META_SET_TEMPO == type ) {
@@ -338,6 +345,46 @@ public class SequenceAnalyzer {
 			tempoMpq.put( tick, mpq );
 			TreeMap<Long, Integer> tempoBpm = (TreeMap<Long, Integer>) sequenceInfo.get( "tempo_bpm" );
 			tempoBpm.put( tick, bpm );
+		}
+		
+		// TEXT
+		else if ( MidiListener.META_TEXT == type ) {
+			String text = new String( content );
+			
+			// software?
+			Pattern patternSW = Pattern.compile( "^" + Pattern.quote(SequenceCreator.GENERATED_BY) + "(.+)$" );
+			Matcher matcherSW = patternSW.matcher( text );
+			if ( matcherSW.matches() ) {
+				String                  software = matcherSW.group( 1 );
+				HashMap<String, String> metaInfo = (HashMap<String, String>) sequenceInfo.get( "meta_info" );
+				metaInfo.put( "software", software );
+				
+				// minor version?
+				Pattern patternMV = Pattern.compile( ".+\\.(\\d{10})$" );
+				Matcher matcherMV = patternMV.matcher( software );
+				if ( matcherMV.matches() ) {
+					int  minor     = Integer.parseInt( matcherMV.group(1) );
+					Date timestamp = new Date( minor * 1000L );
+					SimpleDateFormat formatter    = new SimpleDateFormat( Dict.get(Dict.TIMESTAMP_FORMAT) );
+					String           softwareDate = formatter.format( timestamp );
+					metaInfo.put( "software_date", softwareDate );
+				}
+			}
+		}
+		
+		// COPYRIGHT
+		else if ( MidiListener.META_COPYRIGHT == type ) {
+			String copyright;
+			try {
+				// according to the GM standard, the copyright notice should be
+				// encoded in ASCII
+				copyright = new String( content, "ISO-8859-1" );
+			}
+			catch ( UnsupportedEncodingException e ) {
+				copyright = new String( content );               // fallback: platform standard
+			}
+			HashMap<String, String> metaInfo = (HashMap<String, String>) sequenceInfo.get( "meta_info" );
+			metaInfo.put( "copyright", copyright );
 		}
 		
 		// TODO: collect event information

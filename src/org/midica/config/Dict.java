@@ -355,7 +355,7 @@ public class Dict {
 	public static final String TITLE_INFO_VIEW             = "title_info_view";
 	public static final String TAB_CONFIG                  = "tab_config";
 	public static final String TAB_SOUNDFONT               = "tab_soundfont";
-	public static final String TAB_MIDI_STREAM             = "tab_midi_stream";
+	public static final String TAB_MIDI_SEQUENCE           = "tab_midi_sequence";
 	public static final String TAB_MIDICA                  = "tab_midica";
 	public static final String NOTE_DETAILS                = "note_details";
 	public static final String PERCUSSION_DETAILS          = "percussion_details";
@@ -369,7 +369,7 @@ public class Dict {
 	public static final String SOUNDFONT_CREA_TOOLS        = "soundfont_crea_tools";
 	public static final String SOUNDFONT_PRODUCT           = "soundfont_product";
 	public static final String SOUNDFONT_TARGET_ENGINE     = "soundfont_target_engine";
-	public static final String MIDI_STREAM_INFO            = "midi_stream_info";
+	public static final String MIDI_SEQUENCE_INFO          = "midi_sequence_info";
 	public static final String USED_BANKS                  = "used_banks";
 	public static final String RESOLUTION                  = "resolution";
 	public static final String RESOLUTION_UNIT             = "resolution_unit";
@@ -378,6 +378,9 @@ public class Dict {
 	public static final String AVERAGE                     = "average";
 	public static final String MIN                         = "min";
 	public static final String MAX                         = "max";
+	public static final String COPYRIGHT                   = "copyright";
+	public static final String SOFTWARE_VERSION            = "software_version";
+	public static final String SOFTWARE_DATE               = "software_date";
 	public static final String TICK_LENGTH                 = "tick_length";
 	public static final String TIME_LENGTH                 = "time_length";
 	public static final String SAMPLES_TOTAL               = "samples_total";
@@ -511,7 +514,6 @@ public class Dict {
 	public static final String WAIT_PARSE_SF2                   = "wait_parse_sf2";
 	public static final String WAIT_REPARSE                     = "wait_reparse";
 	public static final String WAIT_SETUP_DEVICES               = "wait_setup_devices";
-	
 	
 	// Exporter
 	public static final String ERROR_EXPORT                     = "error_export";
@@ -731,7 +733,7 @@ public class Dict {
 		set( TITLE_INFO_VIEW,                        "Midica Info"                   );
 		set( TAB_CONFIG,                             "Configuration"                 );
 		set( TAB_SOUNDFONT,                          "Soundfont"                     );
-		set( TAB_MIDI_STREAM,                        "MIDI Stream"                   );
+		set( TAB_MIDI_SEQUENCE,                      "MIDI Sequence"                 );
 		set( TAB_MIDICA,                             "Midica"                        );
 		set( NOTE_DETAILS,                           "Note Table"                    );
 		set( PERCUSSION_DETAILS,                     "Percussion Shortcuts"          );
@@ -744,7 +746,7 @@ public class Dict {
 		set( SOUNDFONT_CREA_TOOLS,                   "Creation Tools"                );
 		set( SOUNDFONT_PRODUCT,                      "Product"                       );
 		set( SOUNDFONT_TARGET_ENGINE,                "Target Sound Engine"           );
-		set( MIDI_STREAM_INFO,                       "General Info"                  );
+		set( MIDI_SEQUENCE_INFO,                     "General Info"                  );
 		set( USED_BANKS,                             "Used Banks"                    );
 		set( RESOLUTION,                             "Resolution"                    );
 		set( RESOLUTION_UNIT,                        "Ticks / Quarter Note"          );
@@ -753,6 +755,9 @@ public class Dict {
 		set( AVERAGE,                                "Average"                       );
 		set( MIN,                                    "Minimum"                       );
 		set( MAX,                                    "Maximum"                       );
+		set( COPYRIGHT,                              "Copyright"                     );
+		set( SOFTWARE_VERSION,                       "Produced with"                 );
+		set( SOFTWARE_DATE,                          "released"                      );
 		set( TICK_LENGTH,                            "Length (Ticks)"                );
 		set( TIME_LENGTH,                            "Length (Time)"                 );
 		set( SAMPLES_TOTAL,                          "Samples (Total)"               );
