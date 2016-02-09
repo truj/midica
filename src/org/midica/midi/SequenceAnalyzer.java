@@ -32,6 +32,7 @@ import javax.sound.midi.Track;
 
 import org.midica.config.Dict;
 import org.midica.file.ParseException;
+import org.midica.ui.model.MidicaTreeModel;
 
 import com.sun.media.sound.MidiUtils;
 
@@ -55,6 +56,11 @@ public class SequenceAnalyzer {
 	private static String   fileType = null;
 	private static HashMap<String, Object> sequenceInfo = null;
 	
+	private static MidicaTreeModel banksAndInstrPerChannel = null;
+	private static MidicaTreeModel banksAndInstrTotal      = null;
+	
+	// TODO: remove unused variables and code
+	
 	/**                    channel   --  note -- usage count */
 	private static TreeMap<Byte, TreeMap<Byte, Integer>> keysByChannel = null;
 	
@@ -76,7 +82,7 @@ public class SequenceAnalyzer {
 	/**                    tick */
 	private static TreeSet<Long> markerTicks = null;
 	
-	/**                    channel   --  0=bankMSB, 1=bankLSB, 3=program  */
+	/**                    channel   --  0=bankMSB, 1=bankLSB, 2=program  */
 	private static TreeMap<Byte, Byte[]> channelConfig = null;
 	
 	/**                    channel   --  tick -- 0=bankMSB, 1=bankLSB, 3=program   */
@@ -136,19 +142,21 @@ public class SequenceAnalyzer {
 		
 		// initialize data structures for the sequence info
 		sequenceInfo = new HashMap<String, Object>();
-		sequenceInfo.put( "resolution",       sequence.getResolution()       );
-		sequenceInfo.put( "meta_info",        new HashMap<String, String>()  );
-		sequenceInfo.put( "used_channels",    new TreeSet<Integer>()         );
-		sequenceInfo.put( "used_banks",       new TreeSet<String>()          );
-		sequenceInfo.put( "banks_by_channel", new TreeMap<Integer, String>() );
-		sequenceInfo.put( "tempo_mpq",        new TreeMap<Long, Integer>()   );
-		sequenceInfo.put( "tempo_bpm",        new TreeMap<Long, Integer>()   );
-		sequenceInfo.put( "parser_type",      fileType                       );
-		sequenceInfo.put( "ticks",            sequence.getTickLength()       );
-		keysByChannel     = new TreeMap<Byte, TreeMap<Byte, Integer>>();
-		programsByChannel = new TreeMap<Byte, TreeSet<Byte>>();
+		sequenceInfo.put( "resolution",        sequence.getResolution()       );
+		sequenceInfo.put( "meta_info",         new HashMap<String, String>()  );
+		sequenceInfo.put( "used_channels",     new TreeSet<Integer>()         );
+		sequenceInfo.put( "tempo_mpq",         new TreeMap<Long, Integer>()   );
+		sequenceInfo.put( "tempo_bpm",         new TreeMap<Long, Integer>()   );
+		sequenceInfo.put( "parser_type",       fileType                       );
+		sequenceInfo.put( "ticks",             sequence.getTickLength()       );
+		keysByChannel           = new TreeMap<Byte, TreeMap<Byte, Integer>>();
+		programsByChannel       = new TreeMap<Byte, TreeSet<Byte>>();
+		banksAndInstrTotal      = new MidicaTreeModel( Dict.get(Dict.TOTAL)       );
+		banksAndInstrPerChannel = new MidicaTreeModel( Dict.get(Dict.PER_CHANNEL) );
 		sequenceInfo.put( "keys_by_channel",     keysByChannel     );
 		sequenceInfo.put( "programs_by_channel", programsByChannel );
+		sequenceInfo.put( "banks_total",         banksAndInstrTotal      );
+		sequenceInfo.put( "banks_per_channel",   banksAndInstrPerChannel );
 		long microseconds = sequence.getMicrosecondLength();
 		String time       = MidiDevices.microsecondsToTimeString( microseconds );
 		sequenceInfo.put( "time_length", time );
@@ -502,6 +510,47 @@ public class SequenceAnalyzer {
 		
 		// prepare marker event
 		markerTicks.add( tick );
+		
+		
+		// bank/instrument/note info for the tree
+		String channelTxt = Dict.get(Dict.CHANNEL) + " " + channel;
+		String channelID  = String.format( "%02X", channel );
+		Byte[] config     = channelConfig.get( channel );
+		int    bankNum    = ( config[0] << 7 ) | config[ 1 ]; // bankMSB * 2^7 + bankLSB
+		String bankSyntax = config[ 0 ] + ""; // MSB as a string
+		if ( config[1] > 0 )  // MSB/LSB
+			bankSyntax    = bankSyntax + Dict.getSyntax( Dict.SYNTAX_PROG_BANK_SEP ) + config[ 1 ];
+		String bankTxt    = Dict.get(Dict.BANK)             + " "  + bankNum     + ", "
+		                  + Dict.get(Dict.TOOLTIP_BANK_MSB) + ": " + config[ 0 ] + ", "
+				          + Dict.get(Dict.TOOLTIP_BANK_LSB) + ": " + config[ 1 ];
+		String bankID     = String.format( "%02X%02X", config[0], config[1] );
+		String programStr = config[ 2 ] + "";
+		String programID  = String.format( "%02X", config[2] );
+		String instrTxt   = 9 == channel ? Dict.getDrumkit( config[2] ) : Dict.getInstrument( config[2] );
+		String noteStr    = note + "";
+		String noteTxt    = 9 == channel ? Dict.getPercussion( note ) : Dict.getNote( note );
+		String noteID     = String.format( "%02X", note );
+		if ( 9 == channel )
+			noteID = "Z" + noteID; // give percussion notes have a different (higher) ID
+		
+		// per channel           id         name        number
+		String[] channelOpts = { channelID, channelTxt, null       };
+		String[] bankOpts    = { bankID,    bankTxt,    bankSyntax };
+		String[] programOpts = { programID, instrTxt,   programStr };
+		String[] noteOpts    = { noteID,    noteTxt,    noteStr    };
+		ArrayList<String[]> perChannel = new ArrayList<String[]>();
+		perChannel.add( channelOpts );
+		perChannel.add( bankOpts    );
+		perChannel.add( programOpts );
+		perChannel.add( noteOpts    );
+		banksAndInstrPerChannel.add( perChannel );
+		
+		// total
+		ArrayList<String[]> total = new ArrayList<String[]>();
+		total.add( bankOpts    );
+		total.add( programOpts );
+		total.add( noteOpts    );
+		banksAndInstrTotal.add( total );
 	}
 	
 	/**
@@ -882,7 +931,7 @@ public class SequenceAnalyzer {
 	 * @param array    The original array.
 	 * @return         The shifted array.
 	 */
-	private static byte[] shift( byte[] array ) {
+	private static final byte[] shift( byte[] array ) {
 		
 		int newLength = array.length - 1;
 		

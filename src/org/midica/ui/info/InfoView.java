@@ -18,14 +18,15 @@ import java.awt.event.KeyEvent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.TreeMap;
 
+import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTree;
 
 import org.midica.Midica;
 import org.midica.config.Config;
@@ -33,6 +34,7 @@ import org.midica.config.Dict;
 import org.midica.file.SoundfontParser;
 import org.midica.midi.SequenceAnalyzer;
 import org.midica.ui.model.InstrumentTableModel;
+import org.midica.ui.model.MidicaTreeModel;
 import org.midica.ui.model.NoteTableModel;
 import org.midica.ui.model.PercussionTableModel;
 import org.midica.ui.model.SoundfontInstrumentsTableModel;
@@ -91,6 +93,10 @@ public class InfoView extends JDialog {
 	private static final int GENERAL_INFO_VALUE_WIDTH    = 500;
 	private static final int GENERAL_INFO_VALUE_HEIGHT   =  16;
 	private static final int SOUNDFONT_DESC_HEIGHT       = 155;
+	private static final int BANK_TREE_WIDTH             = 300;
+	private static final int BANK_TREE_HEIGHT            = 400;
+	private static final int COLLAPSE_EXPAND_WIDTH       =  25;
+	private static final int COLLAPSE_EXPAND_HEIGHT      =  25;
 	
 	// dimensions
 	private static Dimension noteTableDim       = null;
@@ -101,6 +107,8 @@ public class InfoView extends JDialog {
 	private static Dimension sfResourceTableDim = null;
 	private static Dimension sfDescriptionDim   = null;
 	private static Dimension generalInfoDim     = null;
+	private static Dimension bankTreeDim        = null;
+	private static Dimension collapseExpandDim  = null;
 	
 	private static InfoView infoView = null;
 	
@@ -149,6 +157,10 @@ public class InfoView extends JDialog {
 		generalInfoDim   = new Dimension( GENERAL_INFO_VALUE_WIDTH, GENERAL_INFO_VALUE_HEIGHT );
 		sfDescriptionDim = new Dimension( GENERAL_INFO_VALUE_WIDTH, SOUNDFONT_DESC_HEIGHT );
 		
+		// initialize dimensions for the trees and the collapse-all/expand-all buttons
+		bankTreeDim       = new Dimension( BANK_TREE_WIDTH, BANK_TREE_HEIGHT );
+		collapseExpandDim = new Dimension( COLLAPSE_EXPAND_WIDTH, COLLAPSE_EXPAND_HEIGHT );
+		
 		// create content
 		init();
 		
@@ -192,10 +204,10 @@ public class InfoView extends JDialog {
 		contentConfig = new JTabbedPane( JTabbedPane.TOP );
 		
 		// add tabs
-		contentConfig.addTab( Dict.get(Dict.NOTE_DETAILS),       createNoteArea()       );
-		contentConfig.addTab( Dict.get(Dict.PERCUSSION_DETAILS), createPercussionArea() );
-		contentConfig.addTab( Dict.get(Dict.SYNTAX),             createSyntaxArea()     );
-		contentConfig.addTab( Dict.get(Dict.INSTRUMENT),         createInstrumentArea() );
+		contentConfig.addTab( Dict.get(Dict.TAB_NOTE_DETAILS),       createNoteArea()       );
+		contentConfig.addTab( Dict.get(Dict.TAB_PERCUSSION_DETAILS), createPercussionArea() );
+		contentConfig.addTab( Dict.get(Dict.SYNTAX),                 createSyntaxArea()     );
+		contentConfig.addTab( Dict.get(Dict.INSTRUMENT),             createInstrumentArea() );
 		
 		return contentConfig;
 	}
@@ -215,20 +227,20 @@ public class InfoView extends JDialog {
 		contentSoundfont = new JTabbedPane( JTabbedPane.TOP );
 		
 		// add tabs
-		contentSoundfont.addTab( Dict.get(Dict.SOUNDFONT_INFO),        createSoundfontInfoArea()       );
-		contentSoundfont.addTab( Dict.get(Dict.SOUNDFONT_INSTRUMENTS), createSoundfontInstrumentArea() );
-		contentSoundfont.addTab( Dict.get(Dict.SOUNDFONT_RESOURCES),   createSoundfontResourceArea()   );
+		contentSoundfont.addTab( Dict.get(Dict.TAB_SOUNDFONT_INFO),        createSoundfontInfoArea()       );
+		contentSoundfont.addTab( Dict.get(Dict.TAB_SOUNDFONT_INSTRUMENTS), createSoundfontInstrumentArea() );
+		contentSoundfont.addTab( Dict.get(Dict.TAB_SOUNDFONT_RESOURCES),   createSoundfontResourceArea()   );
 		
 		return contentSoundfont;
 	}
 	
 	/**
-	 * Creates the midi sequence tab.
+	 * Creates the MIDI sequence tab.
 	 * This contains the following sub tabs:
 	 * 
-	 * TODO: complete docu
 	 * - General sequence info
-	 * - Used banks
+	 * - Used banks, instruments and played notes
+	 * - MIDI Messages (TODO: implement)
 	 * 
 	 * @return the created soundfont area.
 	 */
@@ -237,8 +249,9 @@ public class InfoView extends JDialog {
 		contentSoundfont = new JTabbedPane( JTabbedPane.TOP );
 		
 		// add tabs
-		contentSoundfont.addTab( Dict.get(Dict.MIDI_SEQUENCE_INFO), createMidiSequenceInfoArea() );
-//		contentSoundfont.addTab( Dict.get(Dict.USED_BANKS),         createUsedBanksArea()        );
+		contentSoundfont.addTab( Dict.get(Dict.TAB_MIDI_SEQUENCE_INFO), createMidiSequenceInfoArea() );
+		contentSoundfont.addTab( Dict.get(Dict.TAB_BANK_INSTR_NOTE),    createBankInstrNoteArea()    );
+//		contentSoundfont.addTab( Dict.get(Dict.TAB_MESSAGES),           createMessagesArea()         );
 		
 		return contentSoundfont;
 	}
@@ -267,7 +280,7 @@ public class InfoView extends JDialog {
 		constraints.weighty    = 1;
 		
 		// label
-		JLabel label = new JLabel( Dict.get(Dict.NOTE_DETAILS) );
+		JLabel label = new JLabel( Dict.get(Dict.TAB_NOTE_DETAILS) );
 		area.add( label, constraints );
 		
 		// table
@@ -312,7 +325,7 @@ public class InfoView extends JDialog {
 		constraints.weighty    = 1;
 		
 		// label
-		JLabel label = new JLabel( Dict.get(Dict.PERCUSSION_DETAILS) );
+		JLabel label = new JLabel( Dict.get(Dict.TAB_PERCUSSION_DETAILS) );
 		area.add( label, constraints );
 		
 		// table
@@ -595,7 +608,7 @@ public class InfoView extends JDialog {
 		constraints.gridx = 0;
 		constraints.gridy++;
 		constraints.anchor = GridBagConstraints.NORTHEAST;
-		JLabel lblLayers  = new JLabel( Dict.get(Dict.SOUNDFONT_RESOURCES) + ": " );
+		JLabel lblLayers  = new JLabel( Dict.get(Dict.TAB_SOUNDFONT_RESOURCES) + ": " );
 		area.add( lblLayers, constraints );
 		
 		// resources content
@@ -746,8 +759,6 @@ public class InfoView extends JDialog {
 			String softwareDate = metaInfo.get( "software_date" );
 			software = software + " - " + Dict.get( Dict.SOFTWARE_DATE ) + " " + softwareDate;
 		}
-		System.out.println(metaInfo);
-		System.out.println(software);
 		FlowLabel lblSoftwareContent = new FlowLabel( software );
 		lblSoftwareContent.setPreferredSize( generalInfoDim );
 		area.add( lblSoftwareContent, constraints );
@@ -949,11 +960,12 @@ public class InfoView extends JDialog {
 	}
 	
 	/**
-	 * Creates the area for banks used by the loaded MIDI sequence.
+	 * Creates the area for banks, instruments and notes
+	 * used by the loaded MIDI sequence.
 	 * 
-	 * @return the created banks area.
+	 * @return the created area.
 	 */
-	private Container createUsedBanksArea() {
+	private Container createBankInstrNoteArea() {
 		// content
 		JPanel area = new JPanel();
 		
@@ -969,30 +981,127 @@ public class InfoView extends JDialog {
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 0;
 		constraints.weighty    = 0;
+		constraints.anchor     = GridBagConstraints.NORTH;
 		
-		// get general sequence info
+		// get tree models and inform the controller
 		HashMap<String, Object> sequenceInfo = SequenceAnalyzer.getSequenceInfo();
+		Object          totalObj      = sequenceInfo.get( "banks_total" );
+		Object          perChannelObj = sequenceInfo.get( "banks_per_channel" );
+		MidicaTreeModel totalModel;
+		MidicaTreeModel perChannelModel;
+		if ( totalObj      != null && totalObj      instanceof MidicaTreeModel
+		  && perChannelObj != null && perChannelObj instanceof MidicaTreeModel ) {
+			totalModel      = (MidicaTreeModel) totalObj;
+			perChannelModel = (MidicaTreeModel) perChannelObj;
+			totalModel.postprocess();
+			perChannelModel.postprocess();
+		}
+		else {
+			totalModel      = new MidicaTreeModel( Dict.get(Dict.TOTAL)       );
+			perChannelModel = new MidicaTreeModel( Dict.get(Dict.PER_CHANNEL) );
+		}
+		controller.setTreeModel( totalModel,      InfoController.NAME_TREE_BANKS_TOTAL       );
+		controller.setTreeModel( perChannelModel, InfoController.NAME_TREE_BANKS_PER_CHANNEL );
 		
-//		HashMap<String, String> soundfontInfo = SoundfontParser.getSoundfontInfo();
+		// total headline (translation, expand, collapse)
+		String headline     = Dict.get( Dict.TOTAL );
+		String btnName      = InfoController.NAME_TREE_BANKS_TOTAL;
+		Container totalHead = createTreeHeadline( headline, btnName );
+		area.add( totalHead, constraints );
 		
-		// file translation
-		constraints.anchor = GridBagConstraints.NORTHEAST;
-		JLabel lblFile     = new JLabel( Dict.get(Dict.FILE) + ": " );
-		area.add( lblFile, constraints );
+		// per channel translation
+		constraints.gridx++;
+		headline = Dict.get( Dict.PER_CHANNEL );
+		btnName  = InfoController.NAME_TREE_BANKS_PER_CHANNEL;
+		Container perChannelHead = createTreeHeadline( headline, btnName );
+		area.add( perChannelHead, constraints );
 		
-		// file name
-//		constraints.gridx++;
-//		constraints.anchor    = GridBagConstraints.NORTHWEST;
-//		FlowLabel lblFileContent = new FlowLabel( sequenceInfo.get("file") );
-//		lblFileContent.setPreferredSize( generalInfoDim );
-//		area.add( lblFileContent, constraints );
+		// total tree
+		constraints.gridx = 0;
+		constraints.gridy++;
+		JTree       totalTree   = new JTree( totalModel );
+		JScrollPane totalScroll = new JScrollPane( totalTree );
+		totalModel.setTree( totalTree );
+		totalScroll.setPreferredSize( bankTreeDim );
+		totalScroll.setMinimumSize( bankTreeDim );
+		area.add( totalScroll, constraints );
+		
+		// per channel tree
+		constraints.gridx++;
+		JTree       channelTree   = new JTree( perChannelModel );
+		JScrollPane channelScroll = new JScrollPane( channelTree );
+		perChannelModel.setTree( channelTree );
+		channelScroll.setPreferredSize( bankTreeDim );
+		channelScroll.setMinimumSize( bankTreeDim );
+		area.add( channelScroll, constraints );
+		
+		return area;
+	}
+	
+	/**
+	 * Creates the headline area for a JTree, containing a translation
+	 * and collapse-all / expand-all buttons.
+	 * 
+	 * @param headline  Text to be displayed above the tree.
+	 * @param btnName   Name for the buttons.
+	 * @return the created area.
+	 */
+	private Container createTreeHeadline( String headline, String btnName ) {
+		// content
+		JPanel area = new JPanel();
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout( layout );
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill       = GridBagConstraints.NONE;
+		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 0;
+		constraints.weighty    = 0;
+		constraints.anchor     = GridBagConstraints.CENTER;
+		
+		// headline translation
+		JLabel lblHeadline = new JLabel( headline );
+		area.add( lblHeadline, constraints );
 		
 		// spacer
-		constraints.gridy++;
-		constraints.gridx   = 0;
-		constraints.weighty = 1;
-		JLabel spacer = new JLabel( " " );
-		area.add( spacer, constraints );
+		constraints.gridx++;
+		JLabel spacer1 = new JLabel( "<html>&nbsp;" );
+		area.add( spacer1, constraints );
+		
+		// collapse button
+		constraints.gridx++;
+		Insets buttonInsets = new Insets( 0, 0, 0, 0 );
+		JButton btnCollapse = new JButton( Dict.get(Dict.COLLAPSE_BUTTON) );
+		btnCollapse.setToolTipText( Dict.get(Dict.COLLAPSE_TOOLTIP) );
+		btnCollapse.setPreferredSize( collapseExpandDim );
+		btnCollapse.setMaximumSize( collapseExpandDim );
+		btnCollapse.setMargin( buttonInsets );
+		btnCollapse.setName( btnName );
+		btnCollapse.setActionCommand( InfoController.CMD_COLLAPSE );
+		btnCollapse.addActionListener( controller );
+		area.add( btnCollapse, constraints );
+		
+		// spacer
+		constraints.gridx++;
+		JLabel spacer2 = new JLabel( "" );
+		area.add( spacer2, constraints );
+		
+		// expand button
+		constraints.gridx++;
+		JButton btnExpand = new JButton( Dict.get(Dict.EXPAND_BUTTON) );
+		btnExpand.setToolTipText( Dict.get(Dict.EXPAND_TOOLTIP) );
+		btnExpand.setPreferredSize( collapseExpandDim );
+		btnExpand.setMaximumSize( collapseExpandDim );
+		btnExpand.setMargin( buttonInsets );
+		btnExpand.setName( btnName );
+		btnExpand.setActionCommand( InfoController.CMD_EXPAND );
+		btnExpand.addActionListener( controller );
+		area.add( btnExpand, constraints );
 		
 		return area;
 	}
@@ -1020,7 +1129,7 @@ public class InfoView extends JDialog {
 		constraints.weighty    = 1;
 		
 		// label
-		JLabel label = new JLabel( Dict.get(Dict.SOUNDFONT_INSTRUMENTS) );
+		JLabel label = new JLabel( Dict.get(Dict.TAB_SOUNDFONT_INSTRUMENTS) );
 		area.add( label, constraints );
 
 		// table
@@ -1067,7 +1176,7 @@ public class InfoView extends JDialog {
 		constraints.weighty    = 1;
 		
 		// label
-		JLabel label = new JLabel( Dict.get(Dict.SOUNDFONT_RESOURCES) );
+		JLabel label = new JLabel( Dict.get(Dict.TAB_SOUNDFONT_RESOURCES) );
 		area.add( label, constraints );
 		
 		// table
