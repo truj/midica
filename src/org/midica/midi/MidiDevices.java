@@ -141,7 +141,7 @@ public final class MidiDevices {
 		// initialize or restore user changes in the player
 		sequencer.setTempoFactor( tempoFactor );
 		setVolume( volume );
-		for( int i = 0; i < NUMBER_OF_CHANNELS; i++ ) {
+		for ( int i = 0; i < NUMBER_OF_CHANNELS; i++ ) {
 			setMute( i, channelMute[i] );
 			setSolo( i, channelSolo[i] );
 		}

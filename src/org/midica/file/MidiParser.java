@@ -169,17 +169,17 @@ public class MidiParser extends SequenceParser {
 				comment = Dict.get( Dict.PERCUSSION_CHANNEL );
 			SequenceCreator.initChannel( channel, instrNum, comment, tick );
 		}
-		else if( ShortMessage.NOTE_ON == cmd && volume > 0 ) {
+		else if ( ShortMessage.NOTE_ON == cmd && volume > 0 ) {
 			
 			// note on
 			note = transpose( note, channel );
 			// TODO: delete (used to debug channel volume changes in "And then there was silence")
-//			if(9==channel&&tick>99000) {
+//			if (9==channel&&tick>99000) {
 //				System.out.println("channel: "+channel+", note: "+note+", tick:"+tick+", vol: "+volume);
 //			}
 			SequenceCreator.addMessageNoteON( channel, note, tick, volume );
 		}
-		else if( ShortMessage.NOTE_OFF == cmd || (ShortMessage.NOTE_ON == cmd && 0 == volume) ) {
+		else if ( ShortMessage.NOTE_OFF == cmd || (ShortMessage.NOTE_ON == cmd && 0 == volume) ) {
 			
 			// note off
 			note = transpose( note, channel );

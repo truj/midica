@@ -195,7 +195,7 @@ public class PlayerView extends JDialog {
 	public PlayerView( UiView view, SequenceParser parser, File currentFile ) {
 		super( view, Dict.get(Dict.TITLE_PLAYER), true );
 		
-		if( null != currentFile ) {
+		if ( null != currentFile ) {
 			setTitle( Dict.get(Dict.TITLE_PLAYER) + " - " + currentFile.getName() );
 		}
 		
