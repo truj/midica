@@ -43,6 +43,7 @@ import org.midica.ui.model.IMessageDetailProvider;
 import org.midica.ui.model.InstrumentTableModel;
 import org.midica.ui.model.MessageTableModel;
 import org.midica.ui.model.MessageDetail;
+import org.midica.ui.model.MessageTreeNode;
 import org.midica.ui.model.MidicaTreeModel;
 import org.midica.ui.model.NoteTableModel;
 import org.midica.ui.model.PercussionTableModel;
@@ -1200,13 +1201,18 @@ public class InfoView extends JDialog {
 		// get tree model and inform the controller
 		HashMap<String, Object> sequenceInfo = SequenceAnalyzer.getSequenceInfo();
 		Object          modelObj = sequenceInfo.get( "msg_tree_model" );
-		MidicaTreeModel model;
+		MidicaTreeModel model    = null;
 		if ( modelObj != null && modelObj instanceof MidicaTreeModel ) {
 			model = (MidicaTreeModel) modelObj;
 			model.postprocess();
 		}
 		else {
-			model = new MidicaTreeModel( Dict.get(Dict.TAB_MESSAGES) );
+			try {
+				model = new MidicaTreeModel( Dict.get(Dict.TAB_MESSAGES), MessageTreeNode.class );
+			}
+			catch ( ReflectiveOperationException e ) {
+				e.printStackTrace();
+			}
 		}
 		controller.setTreeModel( model, InfoController.NAME_TREE_MESSAGES );
 		

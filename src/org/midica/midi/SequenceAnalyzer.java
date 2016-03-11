@@ -34,8 +34,8 @@ import javax.sound.midi.Track;
 import org.midica.config.Dict;
 import org.midica.file.ParseException;
 import org.midica.ui.model.MessageDetail;
+import org.midica.ui.model.MessageTreeNode;
 import org.midica.ui.model.MidicaTreeModel;
-import org.midica.ui.model.MidicaTreeNode;
 
 import com.sun.media.sound.MidiUtils;
 
@@ -118,24 +118,27 @@ public class SequenceAnalyzer {
 	 * @param seq  The MIDI sequence to be analyzed.
 	 * @param type The file type where the stream originally comes from
 	 *             -- **mid** for MIDI or **midica** for MidicaPL.
-	 * @throws ParseException if a marker event cannot be created during the postprocessing
+	 * @throws ParseException if something went wrong.
 	 */
 	public static void analyze ( Sequence seq, String type ) throws ParseException {
 		sequence = seq;
 		fileType = type;
 		
-		// initialize data structures
-		init();
-		
-		// fill data structures
 		try {
+			// initialize data structures
+			init();
+			
+			// fill data structures
 			parse();
 		}
 		catch( Exception e ) {
 			if (DEBUG_MODE) {
 				e.printStackTrace();
 			}
-			throw e;
+			if ( e instanceof ParseException )
+				throw (ParseException) e;
+			else
+				throw new ParseException( e.getMessage() );
 		}
 		
 		// add statistic information to the data structures
@@ -159,8 +162,10 @@ public class SequenceAnalyzer {
 	/**
 	 * Initializes the internal data structures so that they are ready to
 	 * be filled with sequence information during the parsing process.
+	 * @throws ReflectiveOperationException if the root node of the message
+	 *         tree cannot be created.
 	 */
-	private static void init() {
+	private static void init() throws ReflectiveOperationException {
 		
 		// initialize data structures for the sequence info
 		sequenceInfo = new HashMap<String, Object>();
@@ -173,7 +178,7 @@ public class SequenceAnalyzer {
 		sequenceInfo.put( "ticks",             sequence.getTickLength()       );
 		banksAndInstrTotal      = new MidicaTreeModel( Dict.get(Dict.TOTAL)        );
 		banksAndInstrPerChannel = new MidicaTreeModel( Dict.get(Dict.PER_CHANNEL)  );
-		msgTreeModel            = new MidicaTreeModel( Dict.get(Dict.TAB_MESSAGES) );
+		msgTreeModel            = new MidicaTreeModel( Dict.get(Dict.TAB_MESSAGES), MessageTreeNode.class );
 		messages                = new ArrayList<MessageDetail>();
 		sequenceInfo.put( "banks_total",         banksAndInstrTotal      );
 		sequenceInfo.put( "banks_per_channel",   banksAndInstrPerChannel );
@@ -234,8 +239,9 @@ public class SequenceAnalyzer {
 	/**
 	 * Parses the MIDI sequence track by track and event by event and
 	 * collects information.
+	 * @throws ReflectiveOperationException if a tree node cannot be created.
 	 */
-	private static void parse() {
+	private static void parse() throws ReflectiveOperationException {
 		
 		// Analyze for channel activity, note history, banks and instruments.
 		// Therefore the CREATED sequence is used.
@@ -289,8 +295,10 @@ public class SequenceAnalyzer {
 	 * 
 	 * @param msg   Short message
 	 * @param tick  Tickstamp
+	 * @throws ReflectiveOperationException if the message cannot be added to
+	 *         the tree model.
 	 */
-	private static void processShortMessage( ShortMessage msg, long tick ) {
+	private static void processShortMessage( ShortMessage msg, long tick ) throws ReflectiveOperationException {
 		
 		// prepare data structures
 		ArrayList<String[]>     path            = new ArrayList<String[]>();
@@ -437,8 +445,8 @@ public class SequenceAnalyzer {
 		details.put( "tick",   tick      );
 		
 		// add message to the data structures
-		MidicaTreeNode leaf      = msgTreeModel.add( path );
-		MessageDetail  msgDetail = new MessageDetail();
+		MessageTreeNode leaf      = (MessageTreeNode) msgTreeModel.add( path );
+		MessageDetail   msgDetail = new MessageDetail();
 		messages.add( msgDetail );
 		
 		// add details to the leaf node and the message details
@@ -468,8 +476,10 @@ public class SequenceAnalyzer {
 	 * 
 	 * @param msg   Short message
 	 * @param tick  Tickstamp
+	 * @throws ReflectiveOperationException if the note-on event cannot be
+	 *         added to one of the tree models.
 	 */
-	private static void processShortMessageByChannel( ShortMessage msg, long tick ) {
+	private static void processShortMessageByChannel( ShortMessage msg, long tick ) throws ReflectiveOperationException {
 		int  cmd     = msg.getCommand();
 		byte channel = (byte) msg.getChannel();
 		
@@ -562,8 +572,10 @@ public class SequenceAnalyzer {
 	 * 
 	 * @param msg   Meta message
 	 * @param tick  Tickstamp
+	 * @throws ReflectiveOperationException if the message cannot be added to
+	 *         the tree model.
 	 */
-	private static void processMetaMessage( MetaMessage msg, long tick ) {
+	private static void processMetaMessage( MetaMessage msg, long tick ) throws ReflectiveOperationException {
 		
 		// prepare data structures for the message tree
 		ArrayList<String[]>     path            = new ArrayList<String[]>();
@@ -689,8 +701,8 @@ public class SequenceAnalyzer {
 		}
 		
 		// add message to the data structures
-		MidicaTreeNode leaf      = msgTreeModel.add( path );
-		MessageDetail  msgDetail = new MessageDetail();
+		MessageTreeNode leaf      = (MessageTreeNode) msgTreeModel.add( path );
+		MessageDetail   msgDetail = new MessageDetail();
 		messages.add( msgDetail );
 		
 		// add details to the leaf node and the message details
@@ -741,8 +753,10 @@ public class SequenceAnalyzer {
 	 * 
 	 * @param msg   SysEx message
 	 * @param tick  Tickstamp
+	 * @throws ReflectiveOperationException if the message cannot be added to
+	 *         the tree model.
 	 */
-	private static void processSysexMessage(SysexMessage msg, long tick) {
+	private static void processSysexMessage( SysexMessage msg, long tick ) throws ReflectiveOperationException {
 		
 		// prepare data structures
 		ArrayList<String[]>     path            = new ArrayList<String[]>();
@@ -907,8 +921,8 @@ public class SequenceAnalyzer {
 		details.put( "tick",        tick      );
 		
 		// add message to the data structures
-		MidicaTreeNode leaf      = msgTreeModel.add( path );
-		MessageDetail  msgDetail = new MessageDetail();
+		MessageTreeNode leaf      = (MessageTreeNode) msgTreeModel.add( path );
+		MessageDetail   msgDetail = new MessageDetail();
 		messages.add( msgDetail );
 		
 		// add details to the leaf node and the message details
@@ -936,8 +950,10 @@ public class SequenceAnalyzer {
 	 * @param channel  The MIDI channel number.
 	 * @param note     The note number.
 	 * @param volume   The note's velocity.
+	 * @throws ReflectiveOperationException if the note cannot be added to
+	 *         one of the tree models.
 	 */
-	private static void addNoteOn( long tick, byte channel, byte note, byte volume ) {
+	private static void addNoteOn( long tick, byte channel, byte note, byte volume ) throws ReflectiveOperationException {
 		
 		// note on/off tracking
 		TreeMap<Byte, TreeMap<Long, Boolean>> noteTickOnOff = noteOnOffByChannel.get( channel );

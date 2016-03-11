@@ -40,12 +40,29 @@ public class MidicaTreeModel extends DefaultTreeModel {
 	
 	/**
 	 * Creates a new tree model and initializes it with a new empty root node.
+	 * The root node will be a {@link MidicaTreeNode} object.
 	 * 
 	 * @param name   Name of the root node.
 	 */
 	public MidicaTreeModel( String name ) {
 		super( new MidicaTreeNode(name) );
 		rootNode = (MidicaTreeNode) getRoot();
+		rootNode.initChildren();
+	}
+	
+	/**
+	 * Creates a new tree model and initializes it with a new empty root node.
+	 * The root node can be a derived class of {@link MidicaTreeNode}.
+	 * 
+	 * @param name       Name of the root node.
+	 * @param nodeClass  Class of the nodes.
+	 * @throws IllegalAccessException if the node class or its nullary constructor is not accessible.
+	 * @throws InstantiationException if the root node creation fails.
+	 */
+	public MidicaTreeModel( String name, Class<?> nodeClass ) throws InstantiationException, IllegalAccessException {
+		super( (MidicaTreeNode) nodeClass.newInstance() );
+		rootNode = (MidicaTreeNode) getRoot();
+		rootNode.setName( name );
 		rootNode.initChildren();
 	}
 	
@@ -77,8 +94,9 @@ public class MidicaTreeModel extends DefaultTreeModel {
 	 * @param params  Two-dimensional list.
 	 *                1st dimension: node, 2nd dimension: id, name and number
 	 * @return the leaf node of the added path.
+	 * @throws ReflectiveOperationException if the new child node cannot be created.
 	 */
-	public MidicaTreeNode add( ArrayList<String[]> params ) {
+	public MidicaTreeNode add( ArrayList<String[]> params ) throws ReflectiveOperationException {
 		rootNode.increment();
 		return add( rootNode, params );
 	}
@@ -90,8 +108,9 @@ public class MidicaTreeModel extends DefaultTreeModel {
 	 * @param params  Two-dimensional list.
 	 *                1st dimension: node, 2nd dimension: id, name and number.
 	 * @return the leaf node of the added/incremented path.
+	 * @throws ReflectiveOperationException if the new child node cannot be created.
 	 */
-	private MidicaTreeNode add( MidicaTreeNode parent, ArrayList<String[]> params ) {
+	private MidicaTreeNode add( MidicaTreeNode parent, ArrayList<String[]> params ) throws ReflectiveOperationException {
 		
 		// get options of the first node to be added/incremented
 		boolean isLeaf  = 1 == params.size();

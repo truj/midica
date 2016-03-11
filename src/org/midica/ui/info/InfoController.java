@@ -45,8 +45,8 @@ import org.midica.config.Config;
 import org.midica.midi.SequenceAnalyzer;
 import org.midica.ui.model.MessageTableModel;
 import org.midica.ui.model.MessageDetail;
+import org.midica.ui.model.MessageTreeNode;
 import org.midica.ui.model.MidicaTreeModel;
-import org.midica.ui.model.MidicaTreeNode;
 import org.midica.ui.widget.MidicaTable;
 import org.midica.ui.widget.MidicaTree;
 
@@ -406,9 +406,10 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 	 * 
 	 * In the following cases this method has no effect:
 	 * 
+	 * - if no MIDI sequence has been loaded yet
 	 * - if the details from a tree node are to be shown but none or more
 	 *   than one nodes are currently selected
-	 * - if the detials from a tree node are to be shown but the selected node
+	 * - if the details from a tree node are to be shown but the selected node
 	 *   is not a leaf node
 	 * - if the details from a table row are to be shown but no row is selected
 	 * 
@@ -427,8 +428,12 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 				return;
 			
 			// selected node is not a leaf?
-			MidicaTreeNode node = (MidicaTreeNode) tree.getLastSelectedPathComponent();
+			MessageTreeNode node = (MessageTreeNode) tree.getLastSelectedPathComponent();
 			if ( node.getChildCount() > 0 )
+				return;
+			
+			// selected node is the root node (no sequence loaded)
+			if ( node.isRoot() )
 				return;
 			
 			// (re)fill the details area
@@ -663,12 +668,12 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 		}
 		
 		// create filter for tree nodes
-		ArrayList<MidicaTreeNode> filterNode = new ArrayList<MidicaTreeNode>();
-		MidicaTree                tree       = view.getMsgTree();
-		TreePath[]                paths      = tree.getSelectionPaths();
+		ArrayList<MessageTreeNode> filterNode = new ArrayList<MessageTreeNode>();
+		MidicaTree                 tree       = view.getMsgTree();
+		TreePath[]                 paths      = tree.getSelectionPaths();
 		if ( null != paths ) {
 			for ( TreePath path : paths ) {
-				MidicaTreeNode node = (MidicaTreeNode) path.getLastPathComponent();
+				MessageTreeNode node = (MessageTreeNode) path.getLastPathComponent();
 				filterNode.add( node );
 			}
 		}
@@ -726,7 +731,7 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 		MessageDetail msgDetail = getSelectedMessage();
 		if ( null == msgDetail )
 			return;
-		MidicaTreeNode leaf = (MidicaTreeNode) msgDetail.getOption( "leaf_node" );
+		MessageTreeNode leaf = (MessageTreeNode) msgDetail.getOption( "leaf_node" );
 		
 		// collapse the whole tree, than select a node and scroll to it
 		MidicaTree tree = tmMessages.getTree();

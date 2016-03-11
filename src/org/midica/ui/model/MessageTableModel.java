@@ -160,8 +160,8 @@ public class MessageTableModel extends MidicaTableModel {
 	 * @param filterFrom     Minimum tick number.
 	 * @param filterTo       Maximum tick number.
 	 */
-	public void filterMessages( HashMap<String, Boolean>  filterBoolean,
-	                            ArrayList<MidicaTreeNode> filterNodes,
+	public void filterMessages( HashMap<String, Boolean>   filterBoolean,
+	                            ArrayList<MessageTreeNode> filterNodes,
 	                            long filterFrom, long filterTo ) {
 		
 		// unpack filter elements
@@ -214,12 +214,12 @@ public class MessageTableModel extends MidicaTableModel {
 			if (mustFilterNodes) {
 				
 				// get the leaf node of the message
-				MidicaTreeNode leaf = (MidicaTreeNode) msg.getOption( "leaf_node" );
+				MessageTreeNode leaf = (MessageTreeNode) msg.getOption( "leaf_node" );
 				
 				// check if the leaf node is a descendant of one of the selected nodes
 				boolean matches = false;
 				SELECTED_NODE:
-				for ( MidicaTreeNode node : filterNodes ) {
+				for ( MessageTreeNode node : filterNodes ) {
 					matches = leaf.isNodeAncestor( node );
 					if (matches) {
 						break SELECTED_NODE;
