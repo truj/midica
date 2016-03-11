@@ -7,7 +7,6 @@
 
 package org.midica.ui;
 
-import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -19,11 +18,12 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
 
 import org.midica.config.Dict;
 import org.midica.file.ExportResult;
 import org.midica.ui.model.ExportResultTableModel;
+import org.midica.ui.renderer.MidicaTableCellRenderer;
+import org.midica.ui.widget.MidicaTable;
 
 
 /**
@@ -36,12 +36,11 @@ public class ExportResultView extends MessageView {
 	private static final long serialVersionUID = 1L;
 	
 	// table sizes and color
-	private static final int   COL_WIDTH_TICK     =  80;
-	private static final int   COL_WIDTH_CHANNEL  =  80;
-	private static final int   COL_WIDTH_NOTE     = 170;
-	private static final int   COL_WIDTH_MSG      = 500;
-	private static final int   TABLE_HEIGHT       = 400;
-	private static final Color TABLE_HEADER_COLOR = new Color( 200, 230, 255 );;
+	private static final int COL_WIDTH_TICK    =  80;
+	private static final int COL_WIDTH_CHANNEL =  80;
+	private static final int COL_WIDTH_NOTE    = 170;
+	private static final int COL_WIDTH_MSG     = 500;
+	private static final int TABLE_HEIGHT      = 400;
 	
 	private ActionListener controller = null;
 	private Container      content    = null;
@@ -81,7 +80,7 @@ public class ExportResultView extends MessageView {
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
-		constraints.weightx    = 0;
+		constraints.weightx    = 1;
 		constraints.weighty    = 0;
 		
 		// show success message
@@ -96,11 +95,12 @@ public class ExportResultView extends MessageView {
 		// scrollable warning table
 		if ( result.countWarnings() > 0 ) {
     		constraints.gridy++;
-    		JTable table = new JTable();
+    		constraints.weighty = 1;
+    		MidicaTable table = new MidicaTable();
     		table.setModel( new ExportResultTableModel(result) );
+    		table.setDefaultRenderer( Object.class, new MidicaTableCellRenderer() );
     		JScrollPane scroll = new JScrollPane( table );
     		scroll.setPreferredSize( tableDim );
-    		scroll.setMinimumSize( tableDim );
     		content.add( scroll, constraints );
     		
     		// set column sizes
@@ -108,7 +108,8 @@ public class ExportResultView extends MessageView {
     		table.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_CHANNEL );
     		table.getColumnModel().getColumn( 2 ).setPreferredWidth( COL_WIDTH_NOTE    );
     		table.getColumnModel().getColumn( 3 ).setPreferredWidth( COL_WIDTH_MSG     );
-    		table.getTableHeader().setBackground( TABLE_HEADER_COLOR );
+    		
+    		constraints.weighty = 0;
 		}
 		
 		// close button

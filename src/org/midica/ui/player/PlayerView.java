@@ -20,7 +20,6 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.EventListener;
-import java.util.HashMap;
 import java.util.Hashtable;
 
 import javax.swing.BorderFactory;
@@ -32,17 +31,15 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.table.JTableHeader;
-import javax.swing.table.TableColumn;
 
 import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.SequenceParser;
 import org.midica.ui.SliderHelper;
 import org.midica.ui.UiView;
+import org.midica.ui.widget.MidicaTable;
 
 
 /**
@@ -104,9 +101,6 @@ public class PlayerView extends JDialog {
 	public static final String NAME_CH_VOL    = "name_channel_volume_";
 	public static final String NAME_MUTE      = "name_mute_";
 	public static final String NAME_SOLO      = "name_solo_";
-	public static final Color  COLOR_NORMAL   = new Color( 255, 255, 255 );
-	public static final Color  COLOR_OK       = new Color( 200, 255, 200 );
-	public static final Color  COLOR_ERROR    = new Color( 255, 150, 150 );
 	
 	// action commands
 	public static final String CMD_REPARSE    = "cmd_reparse";
@@ -138,9 +132,12 @@ public class PlayerView extends JDialog {
 	public static final ImageIcon AC_ICON_ACTIVE    = new ImageIcon( ClassLoader.getSystemResource("org/midica/resources/active.png") );
 	
 	// for channel details
-	public static       int   NOTE_HISTORY_WIDTH   =   0; // will be set later
-	public static final int   NOTE_HISTORY_HEIGHT  = 150;
-	public static final HashMap<String, Integer> COLUMN_WIDTH = new HashMap<String, Integer>();
+	public static       int   NOTE_HISTORY_WIDTH            =   0; // will be set later
+	public static final int   NOTE_HISTORY_HEIGHT           = 150;
+	public static final int   NOTE_HISTORY_COL_WIDTH_NUMBER =  40;
+	public static final int   NOTE_HISTORY_COL_WIDTH_NAME   = 100;
+	public static final int   NOTE_HISTORY_COL_WIDTH_VOLUME =  40;
+	public static final int   NOTE_HISTORY_COL_WIDTH_TICK   =  70;
 	
 	private Container             content      = null;
 	private PlayerController      controller   = null;
@@ -201,15 +198,9 @@ public class PlayerView extends JDialog {
 		
 		controller = new PlayerController( this, parser, currentFile );
 		
-		// widths of the note history table columns
-		COLUMN_WIDTH.put( Dict.get(Dict.COLUMN_NUMBER),  40 );
-		COLUMN_WIDTH.put( Dict.get(Dict.COLUMN_NAME),   100 );
-		COLUMN_WIDTH.put( Dict.get(Dict.COLUMN_VOLUME),  40 );
-		COLUMN_WIDTH.put( Dict.get(Dict.COLUMN_TICK),    70 );
-		// set width
-		NOTE_HISTORY_WIDTH = 0;
-		for ( String note : COLUMN_WIDTH.keySet() )
-			NOTE_HISTORY_WIDTH += COLUMN_WIDTH.get( note );
+		// note history table width
+		NOTE_HISTORY_WIDTH = NOTE_HISTORY_COL_WIDTH_NAME + NOTE_HISTORY_COL_WIDTH_NUMBER
+		                   + NOTE_HISTORY_COL_WIDTH_TICK + NOTE_HISTORY_COL_WIDTH_VOLUME;
 		
 		// add listeners
 		addWindowListener( controller );
@@ -299,9 +290,8 @@ public class PlayerView extends JDialog {
 		fldJump.getDocument().putProperty( "name", NAME_JUMP );
 		fldJump.getDocument().addDocumentListener( controller );
 		fldJump.addActionListener( controller );
-		setTextFieldColor( fldJump.getName(), COLOR_NORMAL );
+		setTextFieldColor( fldJump.getName(), Config.COLOR_NORMAL );
 		Dimension minField = new Dimension( 70, 26 );
-		fldJump.setMinimumSize( minField );
 		fldJump.setPreferredSize( minField );
 		area.add( fldJump, constraints );
 		
@@ -338,10 +328,10 @@ public class PlayerView extends JDialog {
 		GridBagLayout layout = new GridBagLayout();
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.BOTH;
-		constraints.insets = new Insets( -1, 2, -1, 2 );
-		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.insets     = new Insets( -1, 2, -1, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 0;
@@ -502,7 +492,7 @@ public class PlayerView extends JDialog {
 		fldVol.getDocument().putProperty( "name", NAME_VOL );
 		fldVol.getDocument().addDocumentListener( controller );
 		fldVol.addActionListener( controller );
-		setTextFieldColor( fldVol.getName(), COLOR_NORMAL );
+		setTextFieldColor( fldVol.getName(), Config.COLOR_NORMAL );
 		area.add( fldVol, constraints );
 		
 		// tempo input field
@@ -512,7 +502,7 @@ public class PlayerView extends JDialog {
 		fldTempo.getDocument().putProperty( "name", NAME_TEMPO );
 		fldTempo.getDocument().addDocumentListener( controller );
 		fldTempo.addActionListener( controller );
-		setTextFieldColor( fldTempo.getName(), COLOR_NORMAL );
+		setTextFieldColor( fldTempo.getName(), Config.COLOR_NORMAL );
 		area.add( fldTempo, constraints );
 		
 		// transpose input field
@@ -522,7 +512,7 @@ public class PlayerView extends JDialog {
 		fldTranspose.getDocument().putProperty( "name", NAME_TRANSPOSE );
 		fldTranspose.getDocument().addDocumentListener( controller );
 		fldTranspose.addActionListener( controller );
-		setTextFieldColor( fldTranspose.getName(), COLOR_NORMAL );
+		setTextFieldColor( fldTranspose.getName(), Config.COLOR_NORMAL );
 		area.add( fldTranspose, constraints );
 		
 		return area;
@@ -546,7 +536,6 @@ public class PlayerView extends JDialog {
 		progressSlider.setPaintTrack( true );
 		// set minimum size
 		
-		progressSlider.setMinimumSize( MIN_PROGRESS_DIM );
 		progressSlider.setPreferredSize( MIN_PROGRESS_DIM );
 		return progressSlider;
 	}
@@ -771,10 +760,10 @@ public class PlayerView extends JDialog {
 		GridBagLayout layout = new GridBagLayout();
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.BOTH;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
-		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 0;
@@ -825,8 +814,7 @@ public class PlayerView extends JDialog {
 		Dimension activityDimension = new Dimension( 15, 15 );
 		
 		// size and insets for the button to show/hide channel details
-		Dimension showHideDimension = new Dimension( 25, 10 );
-		Insets    showHideInsets    = new Insets( 0, 0, 0, 0 );
+		Insets showHideInsets = new Insets( 0, 0, 0, 0 );
 		
 		// size for the channel detail volume text field
 		int defaultHeight = ( new JTextField() ).getHeight();
@@ -839,8 +827,6 @@ public class PlayerView extends JDialog {
 			JButton showHideButton = new JButton( Integer.toString(i) );
 			showHideButton.setActionCommand( CMD_SHOW_HIDE + i );
 			showHideButton.addActionListener( controller );
-			showHideButton.setPreferredSize( showHideDimension );
-			showHideButton.setMaximumSize( showHideDimension );
 			showHideButton.setMargin( showHideInsets );
 			area.add( showHideButton, constraints );
 			
@@ -884,6 +870,7 @@ public class PlayerView extends JDialog {
 			channelBankNumbers.add( lblBankNum );
 			
 			// instrument label
+			constraints.weightx = 1;
 			constraints.gridx++;
 			JLabel lblInstr = new JLabel();
 			lblInstr.setForeground( COLOR_CH_INSTRUMENT );
@@ -901,11 +888,14 @@ public class PlayerView extends JDialog {
 			constraints.gridy++;
 			constraints.gridx     = 0;
 			constraints.gridwidth = 8;
+			constraints.weighty   = 1;
 			Container details = createChannelDetailArea( i, dimVolTxtFld );
 			area.add( details, constraints );
 			details.setVisible( false );
 			channelDetails.add( details );
 			
+			constraints.weightx = 0;
+			constraints.weighty = 0;
 			constraints.gridy++;
 		}
 		
@@ -928,13 +918,14 @@ public class PlayerView extends JDialog {
 		GridBagLayout layout = new GridBagLayout();
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.BOTH;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
-		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 0;
+		constraints.weighty    = 0;
 		
 		// volume label
 		JLabel lblVol = new JLabel( Dict.get(Dict.CH_DETAILS_VOLUME) );
@@ -943,7 +934,6 @@ public class PlayerView extends JDialog {
 		// volume text field
 		constraints.gridx++;
 		JTextField fldChVol = new JTextField( "0" );
-		fldChVol.setMinimumSize( textFieldDimension );
 		fldChVol.setPreferredSize( textFieldDimension );
 		fldChVol.setName( NAME_CH_VOL + channel );
 		fldChVol.getDocument().putProperty( "name", NAME_CH_VOL + channel );
@@ -951,33 +941,35 @@ public class PlayerView extends JDialog {
 		fldChVol.addActionListener( controller );
 		area.add( fldChVol, constraints );
 		channelVolumeFields.add( fldChVol );
-		setTextFieldColor( fldChVol.getName(), COLOR_NORMAL );
+		setTextFieldColor( fldChVol.getName(), Config.COLOR_NORMAL );
 		
-		// place holder
+		// spacer
+		constraints.gridx++;
 		constraints.gridwidth = 2;
 		constraints.weightx   = 1;
-		constraints.gridx++;
 		area.add( new JLabel(""), constraints );
 		
 		// slider
-		constraints.gridx     = 1;
 		constraints.gridy++;
+		constraints.gridx     = 1;
 		constraints.gridwidth = 3;
 		JSlider volSlider = createChannelVolumeSlider( channel );
 		area.add( volSlider, constraints );
 		channelVolumeSliders.add( volSlider );
 		
-		// last notes label
-		constraints.weightx = 0;
-		constraints.gridx   = 0;
+		// note history label
 		constraints.gridy++;
+		constraints.gridx   = 0;
+		constraints.weightx = 0;
 		JLabel lblNotes = new JLabel( Dict.get(Dict.LBL_NOTE_HISTORY) );
 		area.add( lblNotes, constraints );
 		
 		// note table
 		constraints.gridx++;
 		constraints.gridwidth = 3;
-		Component table = createNoteHistoryTable( channel );
+		constraints.weightx   = 1;
+		constraints.weighty   = 1;
+		Component table       = createNoteHistoryTable( channel );
 		area.add( table, constraints );
 		
 		return area;
@@ -996,23 +988,17 @@ public class PlayerView extends JDialog {
 		NoteHistoryTableCellRenderer renderer = new NoteHistoryTableCellRenderer( model );
 		
 		// table
-		JTable table = new JTable( model );
+		MidicaTable table = new MidicaTable( model );
 		table.setDefaultRenderer( Object.class, renderer );
-		JTableHeader header = table.getTableHeader();
-		header.setBackground( Config.TABLE_HEADER_COLOR );
+		table.getColumnModel().getColumn( 0 ).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_NUMBER );
+		table.getColumnModel().getColumn( 1 ).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_NAME   );
+		table.getColumnModel().getColumn( 2 ).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_VOLUME );
+		table.getColumnModel().getColumn( 3 ).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_TICK   );
 		JScrollPane pane = new JScrollPane( table );
-		
-		// set width of columns
-		for ( byte i = 0; i < table.getColumnCount(); i++ ) {
-			TableColumn col  = table.getColumnModel().getColumn( i );
-			String      text = col.getHeaderValue().toString();
-			col.setPreferredWidth( COLUMN_WIDTH.get(text) );
-		}
 		
 		// size
 		Dimension dim = new Dimension( NOTE_HISTORY_WIDTH, NOTE_HISTORY_HEIGHT );
 		pane.setPreferredSize( dim );
-		pane.setMinimumSize( dim );
 		
 		return pane;
 	}
@@ -1157,7 +1143,7 @@ public class PlayerView extends JDialog {
 	 */
 	public void setMemory( long pos ) {
 		fldJump.setText( Long.toString(pos) );
-		setTextFieldColor( fldJump.getName(), COLOR_NORMAL );
+		setTextFieldColor( fldJump.getName(), Config.COLOR_NORMAL );
 	}
 	
 	/**
@@ -1182,7 +1168,7 @@ public class PlayerView extends JDialog {
 		fldVol.getDocument().removeDocumentListener( controller );
 		fldVol.setText( Byte.toString(volume) );
 		fldVol.getDocument().addDocumentListener( controller );
-		setTextFieldColor( fldVol.getName(), COLOR_NORMAL );
+		setTextFieldColor( fldVol.getName(), Config.COLOR_NORMAL );
 	}
 	
 	/**
@@ -1212,7 +1198,7 @@ public class PlayerView extends JDialog {
 		fldTempo.getDocument().removeDocumentListener( controller );
 		fldTempo.setText( Float.toString(tempoFactor) );
 		fldTempo.getDocument().addDocumentListener( controller );
-		setTextFieldColor( fldTempo.getName(), COLOR_NORMAL );
+		setTextFieldColor( fldTempo.getName(), Config.COLOR_NORMAL );
 	}
 	
 	/**
@@ -1236,7 +1222,7 @@ public class PlayerView extends JDialog {
 		fldTranspose.getDocument().removeDocumentListener( controller );
 		fldTranspose.setText( Byte.toString(level) );
 		fldTranspose.getDocument().addDocumentListener( controller );
-		setTextFieldColor( fldTranspose.getName(), COLOR_NORMAL );
+		setTextFieldColor( fldTranspose.getName(), Config.COLOR_NORMAL );
 	}
 	
 	/**
@@ -1272,7 +1258,7 @@ public class PlayerView extends JDialog {
 		fldVolume.getDocument().removeDocumentListener( controller );
 		fldVolume.setText( Integer.toString(volume) );
 		fldVolume.getDocument().addDocumentListener( controller );
-		setTextFieldColor( fldVolume.getName(), COLOR_NORMAL );
+		setTextFieldColor( fldVolume.getName(), Config.COLOR_NORMAL );
 	}
 	
 	/**

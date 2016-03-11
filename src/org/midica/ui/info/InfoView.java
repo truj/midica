@@ -7,6 +7,7 @@
 
 package org.midica.ui.info;
 
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
@@ -16,51 +17,67 @@ import java.awt.KeyEventPostProcessor;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTable;
-import javax.swing.JTree;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.tree.DefaultTreeCellRenderer;
 
 import org.midica.Midica;
 import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.SoundfontParser;
 import org.midica.midi.SequenceAnalyzer;
+import org.midica.ui.model.IMessageDetailProvider;
 import org.midica.ui.model.InstrumentTableModel;
+import org.midica.ui.model.MessageTableModel;
+import org.midica.ui.model.MessageDetail;
 import org.midica.ui.model.MidicaTreeModel;
 import org.midica.ui.model.NoteTableModel;
 import org.midica.ui.model.PercussionTableModel;
 import org.midica.ui.model.SoundfontInstrumentsTableModel;
 import org.midica.ui.model.SoundfontResourceTableModel;
 import org.midica.ui.model.SyntaxTableModel;
-import org.midica.ui.renderer.FlowLabel;
 import org.midica.ui.renderer.InstrumentTableCellRenderer;
+import org.midica.ui.renderer.MessageTableCellRenderer;
+import org.midica.ui.renderer.MidicaTableCellRenderer;
 import org.midica.ui.renderer.SoundfontInstrumentTableCellRenderer;
 import org.midica.ui.renderer.SoundfontResourceTableCellRenderer;
 import org.midica.ui.renderer.SyntaxTableCellRenderer;
+import org.midica.ui.widget.FlowLabel;
+import org.midica.ui.widget.MidicaSplitPane;
+import org.midica.ui.widget.MidicaTable;
+import org.midica.ui.widget.MidicaTree;
 
 /**
- * This class defines the GUI view for the informations about the current state
+ * This class defines the GUI view for the information about the current state
  * of the program instance. It contains the following types of information:
  * 
- * - General version and build information.
- * - Configuration (currently configured value4s for different configurable elements)
+ * - Configuration (currently configured values for different configurable elements)
  *     - Note names
  *     - Percussion instrument shortcuts
  *     - Syntax keywords for MidicaPL
  *     - Instrument shortcuts for non-percussion instruments
- * - Information about the currently loaded soundbank
+ * - Information about the currently loaded soundfont
  *     - General information
  *     - Drum kits and Instruments
  *     - Resources
- * - Information about the currently loaded MIDI sequence. (NOT YET IMPLEMENTED)
+ * - Information about the currently loaded MIDI sequence.
+ *     - General information
+ *     - Banks, Instruments and Notes
+ *     - MIDI Messages
+ * - General Midica version and build information.
  * 
  * @author Jan Trukenmüller
  */
@@ -70,18 +87,18 @@ public class InfoView extends JDialog {
 	
 	// widths and heights, used for dimensions
 	private static final int COL_WIDTH_NOTE_NUM          =  60;
-	private static final int COL_WIDTH_NOTE_NAME         = 140;
+	private static final int COL_WIDTH_NOTE_NAME         = 240;
 	private static final int COL_WIDTH_PERC_NUM          =  60;
-	private static final int COL_WIDTH_PERC_NAME         = 140;
+	private static final int COL_WIDTH_PERC_NAME         = 300;
 	private static final int COL_WIDTH_SYNTAX_NAME       = 180;
 	private static final int COL_WIDTH_SYNTAX_DESC       = 230;
 	private static final int COL_WIDTH_SYNTAX_KEYWORD    = 130;
 	private static final int COL_WIDTH_INSTR_NUM         =  60;
-	private static final int COL_WIDTH_INSTR_NAME        = 180;
+	private static final int COL_WIDTH_INSTR_NAME        = 300;
 	private static final int COL_WIDTH_SF_INSTR_PROGRAM  =  60;
-	private static final int COL_WIDTH_SF_INSTR_BANK     =  60;
-	private static final int COL_WIDTH_SF_INSTR_NAME     = 200;
-	private static final int COL_WIDTH_SF_INSTR_CHANNELS =  80;
+	private static final int COL_WIDTH_SF_INSTR_BANK     =  80;
+	private static final int COL_WIDTH_SF_INSTR_NAME     = 300;
+	private static final int COL_WIDTH_SF_INSTR_CHANNELS = 100;
 	private static final int COL_WIDTH_SF_INSTR_KEYS     = 120;
 	private static final int COL_WIDTH_SF_RES_INDEX      =  45;
 	private static final int COL_WIDTH_SF_RES_TYPE       =  55;
@@ -89,26 +106,60 @@ public class InfoView extends JDialog {
 	private static final int COL_WIDTH_SF_RES_FRAMES     =  60;
 	private static final int COL_WIDTH_SF_RES_FORMAT     = 260;
 	private static final int COL_WIDTH_SF_RES_CLASS      = 130;
+	private static final int COL_WIDTH_MSG_TICK          =  80;
+	private static final int COL_WIDTH_MSG_STATUS        =  40;
+	private static final int COL_WIDTH_MSG_CHANNEL       =  25;
+	private static final int COL_WIDTH_MSG_LENGTH        =  35;
+	private static final int COL_WIDTH_MSG_TYPE          = 500;
 	private static final int TABLE_HEIGHT                = 400;
-	private static final int GENERAL_INFO_VALUE_WIDTH    = 500;
-	private static final int GENERAL_INFO_VALUE_HEIGHT   =  16;
-	private static final int SOUNDFONT_DESC_HEIGHT       = 155;
-	private static final int BANK_TREE_WIDTH             = 300;
-	private static final int BANK_TREE_HEIGHT            = 400;
+	private static final int MSG_TABLE_PREF_HEIGHT       = 150;
 	private static final int COLLAPSE_EXPAND_WIDTH       =  25;
 	private static final int COLLAPSE_EXPAND_HEIGHT      =  25;
+	private static final int TICK_RANGE_FILTER           =  70; // text fields in the message filter
+	private static final int FILTER_BUTTON_HEIGHT        =  15;
 	
-	// dimensions
+	// Fake widths and heights, used for dimensions. The real sizes are
+	// determined by the layout manager. But for some reasons,
+	// setPreferredSize() is anyway necessary for correct display.
+	private static final int MSG_TREE_PREF_WIDTH         =   1;
+	private static final int MSG_TREE_PREF_HEIGHT        =   1;
+	private static final int MSG_DETAILS_PREF_WIDTH      =   1;
+	private static final int MSG_DETAILS_PREF_HEIGHT     =   1;
+	
+	// width/height constants for FlowLabels
+	private static final int CPL_MIDI_INFO             =  73; // CPL: characters per line
+	private static final int CPL_SOUNDFONT_INFO        =  73;
+	private static final int CPL_MSG_DETAILS           =  28;
+	private static final int PWIDTH_GENERAL_INFO_VALUE = 500; // PWIDTH: preferred width
+	private static final int PWIDTH_MSG_DETAIL_CONTENT = 170;
+	private static final int MAX_HEIGHT_SOUNDFONT_DESC = 155; // max height
+	
+	// filter widget names (used as hashmap key in filterWidgets and as name property)
+	public static final String FILTER_CBX_CHAN_INDEP  = "filter_cbx_chan_indep";
+	public static final String FILTER_CBX_CHAN_DEP    = "filter_cbx_chan_dep";
+	public static final String FILTER_CBX_CHAN_PREFIX = "filter_cbx_single_";
+	public static final String FILTER_CBX_NODE        = "filter_cbx_node";
+	public static final String FILTER_CBX_LIMIT_TICKS = "filter_cbx_limit_ticks";
+	public static final String FILTER_CBX_AUTO_SHOW   = "filter_cbx_auto_show";
+	public static final String FILTER_TXT_FROM_TICKS  = "filter_txt_from_ticks";
+	public static final String FILTER_TXT_TO_TICKS    = "filter_txt_to_ticks";
+	public static final String FILTER_BTN_SHOW_TREE   = "filter_btn_show_tree";
+	public static final String FILTER_LBL_VISIBLE     = "filter_lbl_visible";
+	public static final String FILTER_LBL_TOTAL       = "filter_lbl_total";
+	
+	// dimensions (defined later)
 	private static Dimension noteTableDim       = null;
 	private static Dimension percTableDim       = null;
 	private static Dimension syntaxTableDim     = null;
 	private static Dimension instrTableDim      = null;
 	private static Dimension sfInstrTableDim    = null;
 	private static Dimension sfResourceTableDim = null;
-	private static Dimension sfDescriptionDim   = null;
-	private static Dimension generalInfoDim     = null;
-	private static Dimension bankTreeDim        = null;
+	private static Dimension msgTreeDim         = null;
+	private static Dimension msgDetailsDim      = null;
+	private static Dimension msgTableDim        = null;
 	private static Dimension collapseExpandDim  = null;
+	
+	private static int collapseExpandHeadlineHeight = 0; // will be filled dynamically
 	
 	private static InfoView infoView = null;
 	
@@ -117,6 +168,12 @@ public class InfoView extends JDialog {
 	private JTabbedPane           content          = null;
 	private JTabbedPane           contentConfig    = null;
 	private JTabbedPane           contentSoundfont = null;
+	
+	// widgets
+	private MidicaTree                  msgTree       = null;
+	private JPanel                      msgDetails    = null;
+	private MidicaTable                 msgTable      = null;
+	private HashMap<String, JComponent> filterWidgets = null;
 	
 	/**
 	 * Creates a new info view window with owner = null.
@@ -146,20 +203,21 @@ public class InfoView extends JDialog {
 		int sfResourceWidth = COL_WIDTH_SF_RES_INDEX  + COL_WIDTH_SF_RES_TYPE
 		                    + COL_WIDTH_SF_RES_NAME   + COL_WIDTH_SF_RES_FRAMES
 		                    + COL_WIDTH_SF_RES_FORMAT + COL_WIDTH_SF_RES_CLASS;
-		noteTableDim       = new Dimension( noteWidth,       TABLE_HEIGHT );
-		percTableDim       = new Dimension( percWidth,       TABLE_HEIGHT );
-		syntaxTableDim     = new Dimension( syntaxWidth,     TABLE_HEIGHT );
-		instrTableDim      = new Dimension( instrWidth,      TABLE_HEIGHT );
-		sfInstrTableDim    = new Dimension( sfInstrWidth,    TABLE_HEIGHT );
-		sfResourceTableDim = new Dimension( sfResourceWidth, TABLE_HEIGHT );
+		int msgTableWidth   = COL_WIDTH_MSG_TICK   + COL_WIDTH_MSG_STATUS
+		                    + COL_WIDTH_MSG_LENGTH + COL_WIDTH_MSG_CHANNEL
+		                    + COL_WIDTH_MSG_TYPE;
+		noteTableDim       = new Dimension( noteWidth,       TABLE_HEIGHT          );
+		percTableDim       = new Dimension( percWidth,       TABLE_HEIGHT          );
+		syntaxTableDim     = new Dimension( syntaxWidth,     TABLE_HEIGHT          );
+		instrTableDim      = new Dimension( instrWidth,      TABLE_HEIGHT          );
+		sfInstrTableDim    = new Dimension( sfInstrWidth,    TABLE_HEIGHT          );
+		sfResourceTableDim = new Dimension( sfResourceWidth, TABLE_HEIGHT          );
+		msgTableDim        = new Dimension( msgTableWidth,   MSG_TABLE_PREF_HEIGHT );
 		
-		// initialize dimensions for info value labels
-		generalInfoDim   = new Dimension( GENERAL_INFO_VALUE_WIDTH, GENERAL_INFO_VALUE_HEIGHT );
-		sfDescriptionDim = new Dimension( GENERAL_INFO_VALUE_WIDTH, SOUNDFONT_DESC_HEIGHT );
-		
-		// initialize dimensions for the trees and the collapse-all/expand-all buttons
-		bankTreeDim       = new Dimension( BANK_TREE_WIDTH, BANK_TREE_HEIGHT );
-		collapseExpandDim = new Dimension( COLLAPSE_EXPAND_WIDTH, COLLAPSE_EXPAND_HEIGHT );
+		// initialize dimensions for trees, collapse-all/expand-all buttons and message details
+		msgTreeDim        = new Dimension( MSG_TREE_PREF_WIDTH,    MSG_TREE_PREF_HEIGHT    );
+		msgDetailsDim     = new Dimension( MSG_DETAILS_PREF_WIDTH, MSG_DETAILS_PREF_HEIGHT );
+		collapseExpandDim = new Dimension( COLLAPSE_EXPAND_WIDTH,  COLLAPSE_EXPAND_HEIGHT  );
 		
 		// create content
 		init();
@@ -240,7 +298,7 @@ public class InfoView extends JDialog {
 	 * 
 	 * - General sequence info
 	 * - Used banks, instruments and played notes
-	 * - MIDI Messages (TODO: implement)
+	 * - MIDI Messages (containing tree, details and table)
 	 * 
 	 * @return the created soundfont area.
 	 */
@@ -251,7 +309,7 @@ public class InfoView extends JDialog {
 		// add tabs
 		contentSoundfont.addTab( Dict.get(Dict.TAB_MIDI_SEQUENCE_INFO), createMidiSequenceInfoArea() );
 		contentSoundfont.addTab( Dict.get(Dict.TAB_BANK_INSTR_NOTE),    createBankInstrNoteArea()    );
-//		contentSoundfont.addTab( Dict.get(Dict.TAB_MESSAGES),           createMessagesArea()         );
+		contentSoundfont.addTab( Dict.get(Dict.TAB_MESSAGES),           createMsgArea()              );
 		
 		return contentSoundfont;
 	}
@@ -277,25 +335,26 @@ public class InfoView extends JDialog {
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 1;
-		constraints.weighty    = 1;
+		constraints.weighty    = 0;
 		
 		// label
 		JLabel label = new JLabel( Dict.get(Dict.TAB_NOTE_DETAILS) );
 		area.add( label, constraints );
 		
 		// table
+		constraints.fill    = GridBagConstraints.VERTICAL;
+		constraints.weighty = 1;
 		constraints.gridy++;
-		JTable table = new JTable();
+		MidicaTable table = new MidicaTable();
 		table.setModel( new NoteTableModel() );
+		table.setDefaultRenderer( Object.class, new MidicaTableCellRenderer() );
 		JScrollPane scroll = new JScrollPane( table );
 		scroll.setPreferredSize( noteTableDim );
-		scroll.setMinimumSize( noteTableDim );
 		area.add( scroll, constraints );
 		
 		// set column sizes and colors
 		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_NOTE_NUM  );
 		table.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_NOTE_NAME );
-		table.getTableHeader().setBackground( Config.TABLE_HEADER_COLOR );
 		
 		return area;
 	}
@@ -322,25 +381,26 @@ public class InfoView extends JDialog {
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 1;
-		constraints.weighty    = 1;
+		constraints.weighty    = 0;
 		
 		// label
 		JLabel label = new JLabel( Dict.get(Dict.TAB_PERCUSSION_DETAILS) );
 		area.add( label, constraints );
 		
 		// table
+		constraints.fill    = GridBagConstraints.VERTICAL;
+		constraints.weighty = 1;
 		constraints.gridy++;
-		JTable table = new JTable();
+		MidicaTable table = new MidicaTable();
 		table.setModel( new PercussionTableModel() );
+		table.setDefaultRenderer( Object.class, new MidicaTableCellRenderer() );
 		JScrollPane scroll = new JScrollPane( table );
 		scroll.setPreferredSize( percTableDim );
-		scroll.setMinimumSize( percTableDim );
 		area.add( scroll, constraints );
 		
 		// set column sizes
 		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_PERC_NUM  );
 		table.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_PERC_NAME );
-		table.getTableHeader().setBackground( Config.TABLE_HEADER_COLOR );
 		
 		return area;
 	}
@@ -365,27 +425,27 @@ public class InfoView extends JDialog {
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 1;
-		constraints.weighty    = 1;
+		constraints.weighty    = 0;
 		
 		// label
 		JLabel label = new JLabel( Dict.get(Dict.SYNTAX) );
 		area.add( label, constraints );
 		
 		// table
+		constraints.fill    = GridBagConstraints.BOTH;
+		constraints.weighty = 1;
 		constraints.gridy++;
-		JTable table = new JTable();
+		MidicaTable table = new MidicaTable();
 		table.setModel( new SyntaxTableModel() );
 		table.setDefaultRenderer( Object.class, new SyntaxTableCellRenderer() );
 		JScrollPane scroll = new JScrollPane( table );
 		scroll.setPreferredSize( syntaxTableDim );
-		scroll.setMinimumSize( syntaxTableDim );
 		area.add( scroll, constraints );
 		
 		// set column sizes
 		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_SYNTAX_NAME    );
 		table.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_SYNTAX_KEYWORD );
 		table.getColumnModel().getColumn( 2 ).setPreferredWidth( COL_WIDTH_SYNTAX_DESC    );
-		table.getTableHeader().setBackground( Config.TABLE_HEADER_COLOR );
 		
 		return area;
 	}
@@ -411,26 +471,26 @@ public class InfoView extends JDialog {
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 1;
-		constraints.weighty    = 1;
+		constraints.weighty    = 0;
 		
 		// label
 		JLabel label = new JLabel( Dict.get(Dict.INSTRUMENT) );
 		area.add( label, constraints );
 		
 		// table
+		constraints.fill    = GridBagConstraints.VERTICAL;
+		constraints.weighty = 1;
 		constraints.gridy++;
-		JTable table = new JTable();
+		MidicaTable table = new MidicaTable();
 		table.setModel( new InstrumentTableModel() );
 		table.setDefaultRenderer( Object.class, new InstrumentTableCellRenderer() );
 		JScrollPane scroll = new JScrollPane( table );
 		scroll.setPreferredSize( instrTableDim );
-		scroll.setMinimumSize( instrTableDim );
 		area.add( scroll, constraints );
 		
 		// set column sizes
 		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_INSTR_NUM  );
 		table.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_INSTR_NAME );
-		table.getTableHeader().setBackground( Config.TABLE_HEADER_COLOR );
 		
 		return area;
 	}
@@ -467,23 +527,23 @@ public class InfoView extends JDialog {
 		
 		// file name
 		constraints.gridx++;
-		constraints.anchor    = GridBagConstraints.NORTHWEST;
-		FlowLabel lblFileContent = new FlowLabel( soundfontInfo.get("file") );
-		lblFileContent.setPreferredSize( generalInfoDim );
+		constraints.anchor       = GridBagConstraints.NORTHWEST;
+		constraints.weightx      = 1;
+		FlowLabel lblFileContent = new FlowLabel( soundfontInfo.get("file"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblFileContent, constraints );
 		
 		// name translation
 		constraints.gridx = 0;
 		constraints.gridy++;
-		constraints.anchor = GridBagConstraints.NORTHEAST;
-		JLabel lblname     = new JLabel( Dict.get(Dict.NAME) + ": " );
+		constraints.weightx = 0;
+		constraints.anchor  = GridBagConstraints.NORTHEAST;
+		JLabel lblname      = new JLabel( Dict.get(Dict.NAME) + ": " );
 		area.add( lblname, constraints );
 		
 		// name content
 		constraints.gridx++;
 		constraints.anchor       = GridBagConstraints.NORTHWEST;
-		FlowLabel lblNameContent = new FlowLabel( soundfontInfo.get("name") );
-		lblNameContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblNameContent = new FlowLabel( soundfontInfo.get("name"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblNameContent, constraints );
 		
 		// version translation
@@ -496,8 +556,7 @@ public class InfoView extends JDialog {
 		// version content
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		FlowLabel lblVersionContent = new FlowLabel( soundfontInfo.get("version") );
-		lblVersionContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblVersionContent = new FlowLabel( soundfontInfo.get("version"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblVersionContent, constraints );
 		
 		// vendor translation
@@ -510,8 +569,7 @@ public class InfoView extends JDialog {
 		// vendor content
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		FlowLabel lblVendorContent = new FlowLabel( soundfontInfo.get("vendor") );
-		lblVendorContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblVendorContent = new FlowLabel( soundfontInfo.get("vendor"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblVendorContent, constraints );
 		
 		// creation date translation
@@ -524,8 +582,7 @@ public class InfoView extends JDialog {
 		// creation date content
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		FlowLabel lblCreationDateContent = new FlowLabel( soundfontInfo.get("creation_date") );
-		lblCreationDateContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblCreationDateContent = new FlowLabel( soundfontInfo.get("creation_date"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblCreationDateContent, constraints );
 		
 		// creation tools translation
@@ -538,8 +595,7 @@ public class InfoView extends JDialog {
 		// version content
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		FlowLabel lblToolsContent = new FlowLabel( soundfontInfo.get("tools") );
-		lblToolsContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblToolsContent = new FlowLabel( soundfontInfo.get("tools"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblToolsContent, constraints );
 		
 		// product translation
@@ -552,8 +608,7 @@ public class InfoView extends JDialog {
 		// version content
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		FlowLabel lblProductContent = new FlowLabel( soundfontInfo.get("product") );
-		lblProductContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblProductContent = new FlowLabel( soundfontInfo.get("product"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblProductContent, constraints );
 		
 		// target engine translation
@@ -566,8 +621,7 @@ public class InfoView extends JDialog {
 		// version content
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		FlowLabel lblTargetEngineContent = new FlowLabel( soundfontInfo.get("target_engine") );
-		lblTargetEngineContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblTargetEngineContent = new FlowLabel( soundfontInfo.get("target_engine"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblTargetEngineContent, constraints );
 		
 		// chromatic instruments translation
@@ -580,8 +634,7 @@ public class InfoView extends JDialog {
 		// chromatic instruments content
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		FlowLabel lblChromaticContent = new FlowLabel( soundfontInfo.get("chromatic_count") );
-		lblChromaticContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblChromaticContent = new FlowLabel( soundfontInfo.get("chromatic_count"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblChromaticContent, constraints );
 		
 		// drum kits translation
@@ -600,8 +653,7 @@ public class InfoView extends JDialog {
 		                       + drumMulti  + " " + Dict.get( Dict.MULTI_CHANNEL  ) + ")";
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		FlowLabel lblDrumkitsSingleContent = new FlowLabel( drumkitsContent );
-		lblDrumkitsSingleContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblDrumkitsSingleContent = new FlowLabel( drumkitsContent, CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblDrumkitsSingleContent, constraints );
 		
 		// resources translation
@@ -621,8 +673,7 @@ public class InfoView extends JDialog {
 		             + resSample  + " " + Dict.get( Dict.SF_RESOURCE_CAT_SAMPLE ) + ")";
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		FlowLabel lblLayersContent = new FlowLabel( resourcesContent );
-		lblLayersContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblLayersContent = new FlowLabel( resourcesContent, CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblLayersContent, constraints );
 		
 		// total length translation
@@ -638,8 +689,7 @@ public class InfoView extends JDialog {
 		String totalContent = soundfontInfo.get( "frames_count" )  + " " + Dict.get( Dict.FRAMES ) + ", "
 		                    + soundfontInfo.get( "seconds_count" ) + " " + Dict.get( Dict.SEC    ) + ", "
 		                    + soundfontInfo.get( "bytes_count" )   + " " + Dict.get( Dict.BYTES  );
-		FlowLabel lblTotalContent = new FlowLabel( totalContent );
-		lblTotalContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblTotalContent = new FlowLabel( totalContent, CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblTotalContent, constraints );
 		
 		// average length translation
@@ -655,8 +705,7 @@ public class InfoView extends JDialog {
 		String avgContent  = soundfontInfo.get( "frames_avg"  ) + " " + Dict.get( Dict.FRAMES ) + ", "
 		                   + soundfontInfo.get( "seconds_avg" ) + " " + Dict.get( Dict.SEC    ) + ", "
                            + soundfontInfo.get( "bytes_avg"   ) + " " + Dict.get( Dict.BYTES  );
-		FlowLabel lblAverageContent = new FlowLabel( avgContent );
-		lblAverageContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblAverageContent = new FlowLabel( avgContent, CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblAverageContent, constraints );
 		
 		// description translation
@@ -670,8 +719,8 @@ public class InfoView extends JDialog {
 		constraints.gridx++;
 		constraints.anchor  = GridBagConstraints.NORTHWEST;
 		constraints.weighty = 1;
-		FlowLabel lblDescriptionContent = new FlowLabel( soundfontInfo.get("description") );
-		lblDescriptionContent.setPreferredSize( sfDescriptionDim );
+		FlowLabel lblDescriptionContent = new FlowLabel( soundfontInfo.get("description"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
+		lblDescriptionContent.setHeightLimit( MAX_HEIGHT_SOUNDFONT_DESC );
 		area.add( lblDescriptionContent, constraints );
 		
 		return area;
@@ -716,8 +765,7 @@ public class InfoView extends JDialog {
 			filename = Midica.uiController.getView().getChosenMidicaPLFileLbl().getText();
 		else if ( "mid".equals(type) )
 			filename = Midica.uiController.getView().getChosenMidiFileLbl().getText();
-		FlowLabel lblFileContent = new FlowLabel( filename );
-		lblFileContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblFileContent = new FlowLabel( filename, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblFileContent, constraints );
 		
 		// copyright translation
@@ -737,8 +785,7 @@ public class InfoView extends JDialog {
 			metaInfo = (HashMap<String, String>) metaObj;
 		if ( metaInfo.containsKey("copyright") )
 			copyright = metaInfo.get( "copyright" );
-		FlowLabel lblCopyContent = new FlowLabel( copyright );
-		lblCopyContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblCopyContent = new FlowLabel( copyright, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblCopyContent, constraints );
 		
 		// software translation
@@ -759,8 +806,7 @@ public class InfoView extends JDialog {
 			String softwareDate = metaInfo.get( "software_date" );
 			software = software + " - " + Dict.get( Dict.SOFTWARE_DATE ) + " " + softwareDate;
 		}
-		FlowLabel lblSoftwareContent = new FlowLabel( software );
-		lblSoftwareContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblSoftwareContent = new FlowLabel( software, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblSoftwareContent, constraints );
 		
 		// ticks translation
@@ -777,8 +823,7 @@ public class InfoView extends JDialog {
 		Object ticksObj = sequenceInfo.get("ticks");
 		if ( ticksObj != null )
 			lenghStr = Long.toString( (Long) ticksObj );
-		FlowLabel lblTicksContent = new FlowLabel( lenghStr );
-		lblTicksContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblTicksContent = new FlowLabel( lenghStr, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblTicksContent, constraints );
 		
 		// time translation
@@ -795,8 +840,7 @@ public class InfoView extends JDialog {
 		Object timeObj = sequenceInfo.get("time_length");
 		if ( timeObj != null )
 			lenghStr = (String) timeObj;
-		FlowLabel lblTimeContent = new FlowLabel( (String) lenghStr );
-		lblTimeContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblTimeContent = new FlowLabel( (String) lenghStr, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblTimeContent, constraints );
 		
 		// resolution translation
@@ -812,13 +856,12 @@ public class InfoView extends JDialog {
 		String resolution  = "-";
 		if ( null != sequenceInfo.get("resolution") )
 			resolution = sequenceInfo.get("resolution") + " " + Dict.get( Dict.RESOLUTION_UNIT );
-		FlowLabel lblResolutionContent = new FlowLabel( resolution );
-		lblResolutionContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblResolutionContent = new FlowLabel( resolution, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblResolutionContent, constraints );
 		
 		// spacer
 		constraints.gridy++;
-		constraints.gridx   = 0;
+		constraints.gridx  = 0;
 		JLabel spacerLine1 = new JLabel( " " );
 		area.add( spacerLine1, constraints );
 		
@@ -845,8 +888,7 @@ public class InfoView extends JDialog {
 		Object tempoObj = sequenceInfo.get("tempo_bpm_avg");
 		if ( null != tempoObj )
 			tempoStr = (String) tempoObj;
-		FlowLabel lblBpmAvgContent = new FlowLabel( tempoStr );
-		lblBpmAvgContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblBpmAvgContent = new FlowLabel( tempoStr, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblBpmAvgContent, constraints );
 		
 		// BPM min translation
@@ -862,8 +904,7 @@ public class InfoView extends JDialog {
 		tempoObj           = sequenceInfo.get("tempo_bpm_min");
 		if ( null != tempoObj )
 			tempoStr = (String) tempoObj;
-		FlowLabel lblBpmMinContent = new FlowLabel( tempoStr );
-		lblBpmMinContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblBpmMinContent = new FlowLabel( tempoStr, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblBpmMinContent, constraints );
 		
 		// BPM max translation
@@ -879,13 +920,12 @@ public class InfoView extends JDialog {
 		tempoObj           = sequenceInfo.get("tempo_bpm_max");
 		if ( null != tempoObj )
 			tempoStr = (String) tempoObj;
-		FlowLabel lblBpmMaxContent = new FlowLabel( tempoStr );
-		lblBpmMaxContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblBpmMaxContent = new FlowLabel( tempoStr, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblBpmMaxContent, constraints );
 		
 		// spacer
 		constraints.gridy++;
-		constraints.gridx   = 0;
+		constraints.gridx  = 0;
 		JLabel spacerLine2 = new JLabel( " " );
 		area.add( spacerLine2, constraints );
 		
@@ -911,8 +951,7 @@ public class InfoView extends JDialog {
 		tempoObj           = sequenceInfo.get("tempo_mpq_avg");
 		if ( null != tempoObj )
 			tempoStr = (String) tempoObj;
-		FlowLabel lblMpqAvgContent = new FlowLabel( tempoStr );
-		lblMpqAvgContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblMpqAvgContent = new FlowLabel( tempoStr, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblMpqAvgContent, constraints );
 		
 		// MPQ min translation
@@ -928,8 +967,7 @@ public class InfoView extends JDialog {
 		tempoObj           = sequenceInfo.get("tempo_mpq_min");
 		if ( null != tempoObj )
 			tempoStr = (String) tempoObj;
-		FlowLabel lblMpqMinContent = new FlowLabel( tempoStr );
-		lblMpqMinContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblMpqMinContent = new FlowLabel( tempoStr, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblMpqMinContent, constraints );
 		
 		// MPQ max translation
@@ -945,8 +983,7 @@ public class InfoView extends JDialog {
 		tempoObj           = sequenceInfo.get("tempo_mpq_max");
 		if ( null != tempoObj )
 			tempoStr = (String) tempoObj;
-		FlowLabel lblMpqMaxContent = new FlowLabel( tempoStr );
-		lblMpqMaxContent.setPreferredSize( generalInfoDim );
+		FlowLabel lblMpqMaxContent = new FlowLabel( tempoStr, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblMpqMaxContent, constraints );
 		
 		// spacer
@@ -966,80 +1003,85 @@ public class InfoView extends JDialog {
 	 * @return the created area.
 	 */
 	private Container createBankInstrNoteArea() {
-		// content
-		JPanel area = new JPanel();
 		
-		// layout
-		GridBagLayout layout = new GridBagLayout();
-		area.setLayout( layout );
-		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill       = GridBagConstraints.NONE;
-		constraints.insets     = new Insets( 2, 2, 2, 2 );
-		constraints.gridx      = 0;
-		constraints.gridy      = 0;
-		constraints.gridheight = 1;
-		constraints.gridwidth  = 1;
-		constraints.weightx    = 0;
-		constraints.weighty    = 0;
-		constraints.anchor     = GridBagConstraints.NORTH;
+		// create split pane
+		MidicaSplitPane area = new MidicaSplitPane( JSplitPane.HORIZONTAL_SPLIT );
+		area.setResizeWeight( 0.5 );
+		area.setDividerLocation( 0.5 );
 		
-		// get tree models and inform the controller
-		HashMap<String, Object> sequenceInfo = SequenceAnalyzer.getSequenceInfo();
-		Object          totalObj      = sequenceInfo.get( "banks_total" );
-		Object          perChannelObj = sequenceInfo.get( "banks_per_channel" );
-		MidicaTreeModel totalModel;
-		MidicaTreeModel perChannelModel;
-		if ( totalObj      != null && totalObj      instanceof MidicaTreeModel
-		  && perChannelObj != null && perChannelObj instanceof MidicaTreeModel ) {
-			totalModel      = (MidicaTreeModel) totalObj;
-			perChannelModel = (MidicaTreeModel) perChannelObj;
-			totalModel.postprocess();
-			perChannelModel.postprocess();
-		}
-		else {
-			totalModel      = new MidicaTreeModel( Dict.get(Dict.TOTAL)       );
-			perChannelModel = new MidicaTreeModel( Dict.get(Dict.PER_CHANNEL) );
-		}
-		controller.setTreeModel( totalModel,      InfoController.NAME_TREE_BANKS_TOTAL       );
-		controller.setTreeModel( perChannelModel, InfoController.NAME_TREE_BANKS_PER_CHANNEL );
-		
-		// total headline (translation, expand, collapse)
-		String headline     = Dict.get( Dict.TOTAL );
-		String btnName      = InfoController.NAME_TREE_BANKS_TOTAL;
-		Container totalHead = createTreeHeadline( headline, btnName );
-		area.add( totalHead, constraints );
-		
-		// per channel translation
-		constraints.gridx++;
-		headline = Dict.get( Dict.PER_CHANNEL );
-		btnName  = InfoController.NAME_TREE_BANKS_PER_CHANNEL;
-		Container perChannelHead = createTreeHeadline( headline, btnName );
-		area.add( perChannelHead, constraints );
-		
-		// total tree
-		constraints.gridx = 0;
-		constraints.gridy++;
-		JTree       totalTree   = new JTree( totalModel );
-		JScrollPane totalScroll = new JScrollPane( totalTree );
-		totalModel.setTree( totalTree );
-		totalScroll.setPreferredSize( bankTreeDim );
-		totalScroll.setMinimumSize( bankTreeDim );
-		area.add( totalScroll, constraints );
-		
-		// per channel tree
-		constraints.gridx++;
-		JTree       channelTree   = new JTree( perChannelModel );
-		JScrollPane channelScroll = new JScrollPane( channelTree );
-		perChannelModel.setTree( channelTree );
-		channelScroll.setPreferredSize( bankTreeDim );
-		channelScroll.setMinimumSize( bankTreeDim );
-		area.add( channelScroll, constraints );
+		// fill the sub areas
+		area.add( createBankInstrNoteAreaHalf(true) );
+		area.add( createBankInstrNoteAreaHalf(false) );
 		
 		return area;
 	}
 	
 	/**
-	 * Creates the headline area for a JTree, containing a translation
+	 * Creates the area for banks, instruments and notes used by the loaded
+	 * MIDI sequence, either **in total** or **per channel**.
+	 * 
+	 * @param inTotal  **true** for creating the total usage tree area.
+	 *                 **false** for the per channel area.
+	 * @return the created area.
+	 */
+	private Container createBankInstrNoteAreaHalf( boolean inTotal ) {
+		// content
+		JPanel area = new JPanel();
+		
+		// initialize area-dependant constants
+		String keyName  = "banks_per_channel";
+		String headline = Dict.get( Dict.PER_CHANNEL );
+		String btnName  = InfoController.NAME_TREE_BANKS_PER_CHANNEL;
+		if (inTotal) {
+			keyName  = "banks_total";
+			headline = Dict.get( Dict.TOTAL );
+			btnName  = InfoController.NAME_TREE_BANKS_TOTAL;
+		}
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout( layout );
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 1;
+		constraints.weighty    = 0;
+		constraints.anchor     = GridBagConstraints.NORTH;
+		
+		// get tree model and inform the controller
+		HashMap<String, Object> sequenceInfo = SequenceAnalyzer.getSequenceInfo();
+		Object          contentObj = sequenceInfo.get( keyName );
+		MidicaTreeModel model;
+		if ( contentObj != null && contentObj instanceof MidicaTreeModel ) {
+			model = (MidicaTreeModel) contentObj;
+			model.postprocess();
+		}
+		else {
+			model = new MidicaTreeModel( Dict.get(Dict.TOTAL) );
+		}
+		controller.setTreeModel( model, btnName );
+		
+		// headline (translation, expand, collapse)
+		Container head = createTreeHeadline( headline, btnName );
+		area.add( head, constraints );
+		
+		// tree
+		constraints.gridy++;
+		constraints.weighty = 1;
+		MidicaTree  tree    = new MidicaTree( model );
+		JScrollPane scroll  = new JScrollPane( tree );
+		model.setTree( tree );
+		area.add( scroll, constraints );
+		
+		return area;
+	}
+	
+	/**
+	 * Creates the headline area for a {@link MidicaTree}, containing a translation
 	 * and collapse-all / expand-all buttons.
 	 * 
 	 * @param headline  Text to be displayed above the tree.
@@ -1079,7 +1121,6 @@ public class InfoView extends JDialog {
 		JButton btnCollapse = new JButton( Dict.get(Dict.COLLAPSE_BUTTON) );
 		btnCollapse.setToolTipText( Dict.get(Dict.COLLAPSE_TOOLTIP) );
 		btnCollapse.setPreferredSize( collapseExpandDim );
-		btnCollapse.setMaximumSize( collapseExpandDim );
 		btnCollapse.setMargin( buttonInsets );
 		btnCollapse.setName( btnName );
 		btnCollapse.setActionCommand( InfoController.CMD_COLLAPSE );
@@ -1096,12 +1137,488 @@ public class InfoView extends JDialog {
 		JButton btnExpand = new JButton( Dict.get(Dict.EXPAND_BUTTON) );
 		btnExpand.setToolTipText( Dict.get(Dict.EXPAND_TOOLTIP) );
 		btnExpand.setPreferredSize( collapseExpandDim );
-		btnExpand.setMaximumSize( collapseExpandDim );
 		btnExpand.setMargin( buttonInsets );
 		btnExpand.setName( btnName );
 		btnExpand.setActionCommand( InfoController.CMD_EXPAND );
 		btnExpand.addActionListener( controller );
 		area.add( btnExpand, constraints );
+		
+		return area;
+	}
+	
+	/**
+	 * Creates the MIDI message area for the message tree, details area and
+	 * message table.
+	 * 
+	 * @return the created area.
+	 */
+	private Container createMsgArea() {
+		
+		// total content
+		MidicaSplitPane area = new MidicaSplitPane( JSplitPane.VERTICAL_SPLIT );
+		area.setResizeWeight( 0.45 );
+		area.setDividerLocation( 0.45 );
+		
+		// tree and details
+		MidicaSplitPane topArea = new MidicaSplitPane( JSplitPane.HORIZONTAL_SPLIT );
+		topArea.add( createMsgTreeArea()    );
+		topArea.add( createMsgDetailsArea() );
+		topArea.setResizeWeight( 0.5 );
+		topArea.setDividerLocation( 0.5 );
+		area.add( topArea );
+		
+		// list
+		area.add( createMsgTableArea() );
+		
+		return area;
+	}
+	
+	/**
+	 * Creates the area for the message tree including the
+	 * collapse-all / expand-all buttons.
+	 * 
+	 * @return the created area.
+	 */
+	private Container createMsgTreeArea() {
+		// content
+		JPanel area = new JPanel();
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout( layout );
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 0;
+		constraints.weighty    = 0;
+		constraints.anchor     = GridBagConstraints.CENTER;
+		
+		// get tree model and inform the controller
+		HashMap<String, Object> sequenceInfo = SequenceAnalyzer.getSequenceInfo();
+		Object          modelObj = sequenceInfo.get( "msg_tree_model" );
+		MidicaTreeModel model;
+		if ( modelObj != null && modelObj instanceof MidicaTreeModel ) {
+			model = (MidicaTreeModel) modelObj;
+			model.postprocess();
+		}
+		else {
+			model = new MidicaTreeModel( Dict.get(Dict.TAB_MESSAGES) );
+		}
+		controller.setTreeModel( model, InfoController.NAME_TREE_MESSAGES );
+		
+		// tree headline (translation, expand, collapse)
+		String headline              = Dict.get( Dict.TAB_MESSAGES );
+		String btnName               = InfoController.NAME_TREE_MESSAGES;
+		Container head               = createTreeHeadline( headline, btnName );
+		collapseExpandHeadlineHeight = head.getPreferredSize().height;
+		area.add( head, constraints );
+		
+		// message tree
+		constraints.gridy++;
+		constraints.weightx = 1;
+		constraints.weighty = 1;
+		msgTree             = new MidicaTree( model );
+		msgTree.setName( InfoController.NAME_TREE_MESSAGES );
+		msgTree.addTreeSelectionListener( controller );
+		msgTree.addFocusListener( controller );
+		msgTree.setBackground( Config.MSG_TREE_COLOR );
+		DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) msgTree.getCellRenderer();
+		renderer.setBackgroundNonSelectionColor( null ); // use the tree's color also for the nodes
+		JScrollPane msgScroll = new JScrollPane( msgTree );
+		model.setTree( msgTree );
+		msgScroll.setPreferredSize( msgTreeDim );
+		area.add( msgScroll, constraints );
+		
+		return area;
+	}
+	
+	/**
+	 * Creates the MIDI message details area.
+	 * 
+	 * @return the created area.
+	 */
+	private Container createMsgDetailsArea() {
+		// content
+		JPanel area = new JPanel();
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout( layout );
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill       = GridBagConstraints.NONE;
+		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 0;
+		constraints.weighty    = 0;
+		constraints.anchor     = GridBagConstraints.CENTER;
+		
+		// details headline
+		JLabel lblDetails = new JLabel( Dict.get(Dict.DETAILS) );
+		area.add( lblDetails, constraints );
+		
+		// synchronize with the tree headline from the other
+		// half of the split pane
+		int       width       = lblDetails.getPreferredSize().width;
+		Dimension headlineDim = new Dimension( width, collapseExpandHeadlineHeight );
+		lblDetails.setPreferredSize( headlineDim );
+		
+		// details content
+		constraints.gridy++;
+		constraints.weightx = 1;
+		constraints.weighty = 1;
+		constraints.fill    = GridBagConstraints.BOTH;
+		msgDetails = new JPanel();
+		msgDetails.setLayout( layout );
+		msgDetails.setBackground( Config.MSG_DEFAULT_COLOR );
+		JScrollPane detailsScroll = new JScrollPane( msgDetails );
+		detailsScroll.setPreferredSize( msgDetailsDim );
+		area.add( detailsScroll, constraints );
+		
+		return area;
+	}
+	
+	/**
+	 * Creates the MIDI message table area.
+	 * 
+	 * @return the created area.
+	 */
+	private Container createMsgTableArea() {
+		// content
+		JPanel area = new JPanel();
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout( layout );
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.insets     = new Insets( 0, 0, 0, 0 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 0;
+		constraints.weighty    = 0;
+		constraints.anchor     = GridBagConstraints.NORTHWEST;
+		
+		// get messages
+		HashMap<String, Object>  sequenceInfo = SequenceAnalyzer.getSequenceInfo();
+		Object                   msgObj       = sequenceInfo.get( "messages" );
+		ArrayList<MessageDetail> messages     = (ArrayList<MessageDetail>) msgObj;
+		
+		// filter
+		long minTick = 0;
+		long maxTick = 0;
+		if ( null != messages ) {
+			int last = messages.size() - 1;
+			if ( last > 0 ) {
+				minTick = (long) messages.get( 0    ).getOption( "tick" );
+				maxTick = (long) messages.get( last ).getOption( "tick" );
+			}
+		}
+		Container filter = createMsgFilterArea( minTick, maxTick );
+		area.add( filter, constraints );
+		
+		// message table
+		constraints.gridy++;
+		constraints.weightx     = 1;
+		constraints.weighty     = 1;
+		constraints.fill        = GridBagConstraints.BOTH;
+		MessageTableModel model = new MessageTableModel( messages );
+		msgTable                = new MidicaTable( model );
+		msgTable.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
+		msgTable.getSelectionModel().addListSelectionListener( controller );
+		msgTable.addFocusListener( controller );
+		msgTable.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_MSG_TICK    );
+		msgTable.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_MSG_STATUS  );
+		msgTable.getColumnModel().getColumn( 2 ).setPreferredWidth( COL_WIDTH_MSG_CHANNEL );
+		msgTable.getColumnModel().getColumn( 3 ).setPreferredWidth( COL_WIDTH_MSG_LENGTH  );
+		msgTable.getColumnModel().getColumn( 4 ).setPreferredWidth( COL_WIDTH_MSG_TYPE    );
+		MessageTableCellRenderer renderer = new MessageTableCellRenderer( model, Config.MSG_TABLE_COLOR );
+		msgTable.setDefaultRenderer( Object.class, renderer );
+		
+		JScrollPane scroll = new JScrollPane( msgTable );
+		scroll.setPreferredSize( msgTableDim );
+		area.add( scroll, constraints );
+		
+		return area;
+	}
+	
+	/**
+	 * Creates the message filter area.
+	 * 
+	 * The given parameters are used to prefill the tick fields.
+	 * 
+	 * @param minTick  Lowest tick from the sequence or **0** if no sequence is loaded.
+	 * @param maxTick  Highest tick from the sequence or **0** if no sequence is loaded.
+	 * @return the created area.
+	 */
+	private Container createMsgFilterArea( long minTick, long maxTick ) {
+		// content
+		JPanel area = new JPanel();
+		
+		// prepare filter widget storing
+		filterWidgets = new HashMap<String, JComponent>();
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout( layout );
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.anchor     = GridBagConstraints.WEST;
+		constraints.fill       = GridBagConstraints.HORIZONTAL;
+		constraints.insets     = new Insets( 0, 0, 0, 0 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 0;
+		constraints.weighty    = 0;
+		
+		// line 1
+		
+		// checkbox to filter channel-independent messages
+		JCheckBox cbxChannelIndep = new JCheckBox( Dict.get(Dict.MSG_FILTER_CHANNEL_INDEP) );
+		cbxChannelIndep.setToolTipText( Dict.get(Dict.MSG_FLTR_TT_CHANNEL_INDEP) );
+		cbxChannelIndep.addItemListener( controller );
+		cbxChannelIndep.setSelected( true );
+		cbxChannelIndep.setName( FILTER_CBX_CHAN_INDEP );
+		area.add( cbxChannelIndep, constraints );
+		filterWidgets.put( FILTER_CBX_CHAN_INDEP, cbxChannelIndep );
+		
+		// checkbox to filter selected tree nodes
+		constraints.gridx++;
+		JCheckBox cbxFilterNodes = new JCheckBox( Dict.get(Dict.MSG_FILTER_SELECTED_NODES) );
+		cbxFilterNodes.setToolTipText( Dict.get(Dict.MSG_FLTR_TT_SELECTED_NODES) );
+		cbxFilterNodes.addItemListener( controller );
+		cbxFilterNodes.setName( FILTER_CBX_NODE );
+		area.add( cbxFilterNodes, constraints );
+		filterWidgets.put( FILTER_CBX_NODE, cbxFilterNodes );
+		
+		// checkbox to limit ticks
+		constraints.gridx++;
+		JCheckBox cbxLimitTicks = new JCheckBox( Dict.get(Dict.MSG_FILTER_LIMIT_TICKS) );
+		cbxLimitTicks.setToolTipText( Dict.get(Dict.MSG_FLTR_TT_LIMIT_TICKS) );
+		cbxLimitTicks.addItemListener( controller );
+		cbxLimitTicks.setName( FILTER_CBX_LIMIT_TICKS );
+		area.add( cbxLimitTicks, constraints );
+		filterWidgets.put( FILTER_CBX_LIMIT_TICKS, cbxLimitTicks );
+		
+		// spacer
+		constraints.gridx++;
+		constraints.weightx    = 1;
+		constraints.fill       = GridBagConstraints.BOTH;
+		JLabel spacerTickRange = new JLabel( "<html>&nbsp;&nbsp;&nbsp;" );
+		area.add( spacerTickRange, constraints );
+		
+		// ticks: "from" label
+		constraints.gridx++;
+		constraints.weightx = 0;
+		constraints.fill    = GridBagConstraints.NONE;
+		JLabel lblFromTicks = new JLabel( Dict.get(Dict.MSG_FILTER_TICK_FROM) + ": " );
+		area.add( lblFromTicks, constraints );
+		
+		// dimension for tick fields
+		int defaultHeight = ( new JTextField() ).getHeight();
+		Dimension dimVolTxtFld = new Dimension( TICK_RANGE_FILTER, defaultHeight );
+		
+		// ticks: "from" textfield
+		constraints.gridx++;
+		constraints.fill        = GridBagConstraints.VERTICAL;
+		JTextField txtFromTicks = new JTextField( minTick + "" );
+		txtFromTicks.setPreferredSize( dimVolTxtFld );
+		txtFromTicks.setName( FILTER_TXT_FROM_TICKS );
+		txtFromTicks.setEnabled( false );
+		txtFromTicks.getDocument().putProperty( "name", FILTER_TXT_FROM_TICKS );
+		txtFromTicks.getDocument().addDocumentListener( controller );
+		txtFromTicks.setBackground( Config.COLOR_NORMAL );
+		area.add( txtFromTicks, constraints );
+		filterWidgets.put( FILTER_TXT_FROM_TICKS, txtFromTicks );
+		
+		// spacer
+		constraints.gridx++;
+		JLabel spacerFromTo = new JLabel( " " );
+		area.add( spacerFromTo, constraints );
+		
+		// ticks: "to" label
+		constraints.gridx++;
+		constraints.fill  = GridBagConstraints.NONE;
+		JLabel lblToTicks = new JLabel( Dict.get(Dict.MSG_FILTER_TICK_TO) + ": " );
+		area.add( lblToTicks, constraints );
+		
+		// ticks: "to" textfield
+		constraints.gridx++;
+		constraints.fill      = GridBagConstraints.VERTICAL;
+		JTextField txtToTicks = new JTextField( maxTick + "" );
+		txtToTicks.setPreferredSize( dimVolTxtFld );
+		txtToTicks.setName( FILTER_TXT_TO_TICKS );
+		txtToTicks.setEnabled( false );
+		txtToTicks.getDocument().putProperty( "name", FILTER_TXT_TO_TICKS );
+		txtToTicks.getDocument().addDocumentListener( controller );
+		txtToTicks.setBackground( Config.COLOR_NORMAL );
+		area.add( txtToTicks, constraints );
+		filterWidgets.put( FILTER_TXT_TO_TICKS, txtToTicks );
+		
+		// line 2
+		
+		// checkbox to filter channel messages
+		constraints.gridy++;
+		constraints.gridx       = 0;
+		constraints.fill        = GridBagConstraints.NONE;
+		JCheckBox cbxChannelDep = new JCheckBox( Dict.get(Dict.MSG_FILTER_CHANNEL_DEP) );
+		cbxChannelDep.setToolTipText( Dict.get(Dict.MSG_FLTR_TT_CHANNEL_DEP) );
+		cbxChannelDep.addItemListener( controller );
+		cbxChannelDep.setName( FILTER_CBX_CHAN_DEP );
+		area.add( cbxChannelDep, constraints );
+		cbxChannelDep.setSelected( true );
+		filterWidgets.put( FILTER_CBX_CHAN_DEP, cbxChannelDep );
+		
+		// checkboxes for all channels
+		constraints.gridx++;
+		constraints.fill      = GridBagConstraints.HORIZONTAL;
+		constraints.weightx   = 1;
+		constraints.gridwidth = 8;
+		area.add( createMsgFilterChannelCheckboxes(), constraints );
+		
+		// line 3
+		
+		// button, auto-show checkbox, visible/total count
+		constraints.gridy++;
+		constraints.gridx     = 0;
+		constraints.fill      = GridBagConstraints.HORIZONTAL;
+		constraints.weightx   = 0;
+		constraints.gridwidth = 9;
+		area.add( createMsgFilterLine3(), constraints );
+		
+		return area;
+	}
+	
+	/**
+	 * Creates the channel checkboxes for the message filter area.
+	 * 
+	 * @return the created area.
+	 */
+	private Container createMsgFilterChannelCheckboxes() {
+		// content
+		JPanel area = new JPanel();
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout( layout );
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill       = GridBagConstraints.HORIZONTAL;
+		constraints.insets     = new Insets( 0, 0, 0, 0 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 0;
+		constraints.weighty    = 0;
+		constraints.anchor     = GridBagConstraints.WEST;
+		
+		// one checkbox for each channel
+		for ( byte channel = 0; channel < 16; channel++ ) {
+			constraints.gridx++;
+			JCheckBox cbxChannel = new JCheckBox( channel + "" );
+			cbxChannel.setToolTipText( Dict.get(Dict.MSG_FLTR_TT_CHANNEL_SINGLE) + " " + channel );
+			cbxChannel.addItemListener( controller );
+			cbxChannel.setName( FILTER_CBX_CHAN_PREFIX + channel );
+			cbxChannel.setSelected( true );
+			area.add( cbxChannel, constraints );
+			filterWidgets.put( FILTER_CBX_CHAN_PREFIX + channel, cbxChannel );
+		}
+		
+		// spacer
+		constraints.gridx++;
+		constraints.weightx    = 1;
+		constraints.fill       = GridBagConstraints.HORIZONTAL;
+		JLabel spacerTickRange = new JLabel( "" );
+		area.add( spacerTickRange, constraints );
+		
+		return area;
+	}
+	
+	/**
+	 * Creates third line of the message filter area.
+	 * 
+	 * This line contains the show-in-tree button, the auto-show checkbox
+	 * and the counts of visible and total messages.
+	 * 
+	 * @return the created area.
+	 */
+	private Container createMsgFilterLine3() {
+		// content
+		JPanel area = new JPanel();
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout( layout );
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.anchor     = GridBagConstraints.WEST;
+		constraints.fill       = GridBagConstraints.NONE;
+		constraints.insets     = new Insets( 0, 0, 0, 0 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 0;
+		constraints.weighty    = 0;
+		
+		// button: show in tree
+		JButton btnShowInTree = new JButton( Dict.get(Dict.MSG_FILTER_SHOW_IN_TREE) );
+		btnShowInTree.setToolTipText( Dict.get(Dict.MSG_FLTR_TT_SHOW_IN_TREE) );
+		btnShowInTree.setActionCommand( FILTER_BTN_SHOW_TREE );
+		btnShowInTree.setName( FILTER_BTN_SHOW_TREE );
+		btnShowInTree.addActionListener( controller );
+		btnShowInTree.setEnabled( false );
+		area.add( btnShowInTree, constraints );
+		filterWidgets.put( FILTER_BTN_SHOW_TREE, btnShowInTree );
+		// adjust dimension
+		int width = btnShowInTree.getPreferredSize().width;
+		btnShowInTree.setPreferredSize( new Dimension(width, FILTER_BUTTON_HEIGHT) );
+		
+		// checkbox: auto-show-in-tree
+		constraints.gridx++;
+		JCheckBox cbxAutoShow = new JCheckBox( Dict.get(Dict.MSG_FILTER_AUTO_SHOW) );
+		cbxAutoShow.setToolTipText( Dict.get(Dict.MSG_FLTR_TT_AUTO_SHOW) );
+		cbxAutoShow.addItemListener( controller );
+		cbxAutoShow.setName( FILTER_CBX_AUTO_SHOW );
+		area.add( cbxAutoShow, constraints );
+		cbxAutoShow.setSelected( false );
+		filterWidgets.put( FILTER_CBX_AUTO_SHOW, cbxAutoShow );
+		
+		// spacer
+		constraints.gridx++;
+		constraints.fill    = GridBagConstraints.HORIZONTAL;
+		constraints.weightx = 1;
+		JLabel spacerRight  = new JLabel( "" );
+		area.add( spacerRight, constraints );
+		
+		// label: visible messages
+		constraints.gridx++;
+		constraints.fill     = GridBagConstraints.NONE;
+		constraints.weightx  = 0;
+		JLabel lblVisibleMsg = new JLabel( "0" );
+		lblVisibleMsg.setToolTipText( Dict.get(Dict.MSG_FLTR_TT_VISIBLE) );
+		area.add( lblVisibleMsg, constraints );
+		filterWidgets.put( FILTER_LBL_VISIBLE, lblVisibleMsg );
+		
+		// label: /
+		constraints.gridx++;
+		JLabel lblSlash = new JLabel( "<html>&nbsp;&nbsp;/&nbsp;&nbsp;" );
+		area.add( lblSlash, constraints );
+		
+		// label: total messages
+		constraints.gridx++;
+		JLabel lblTotalMsg = new JLabel( "0" );
+		lblTotalMsg.setToolTipText( Dict.get(Dict.MSG_FLTR_TT_TOTAL) );
+		area.add( lblTotalMsg, constraints );
+		filterWidgets.put( FILTER_LBL_TOTAL, lblTotalMsg );
 		
 		return area;
 	}
@@ -1119,27 +1636,29 @@ public class InfoView extends JDialog {
 		GridBagLayout layout = new GridBagLayout();
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.NONE;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
-		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.fill       = GridBagConstraints.NONE;
+		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 1;
-		constraints.weighty    = 1;
+		constraints.weighty    = 0;
+		constraints.anchor     = GridBagConstraints.NORTH;
 		
 		// label
 		JLabel label = new JLabel( Dict.get(Dict.TAB_SOUNDFONT_INSTRUMENTS) );
 		area.add( label, constraints );
 
 		// table
+		constraints.fill    = GridBagConstraints.VERTICAL;
+		constraints.weighty = 1;
 		constraints.gridy++;
-		JTable table = new JTable();
+		MidicaTable table = new MidicaTable();
 		table.setModel( new SoundfontInstrumentsTableModel() );
 		table.setDefaultRenderer( Object.class, new SoundfontInstrumentTableCellRenderer() );
 		JScrollPane scroll = new JScrollPane( table );
 		scroll.setPreferredSize( sfInstrTableDim );
-		scroll.setMinimumSize( sfInstrTableDim );
 		area.add( scroll, constraints );
 		
 		// set column sizes and colors
@@ -1148,7 +1667,6 @@ public class InfoView extends JDialog {
 		table.getColumnModel().getColumn( 2 ).setPreferredWidth( COL_WIDTH_SF_INSTR_NAME     );
 		table.getColumnModel().getColumn( 3 ).setPreferredWidth( COL_WIDTH_SF_INSTR_CHANNELS );
 		table.getColumnModel().getColumn( 4 ).setPreferredWidth( COL_WIDTH_SF_INSTR_KEYS     );
-		table.getTableHeader().setBackground( Config.TABLE_HEADER_COLOR );
 		
 		return area;
 	}
@@ -1173,20 +1691,21 @@ public class InfoView extends JDialog {
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 1;
-		constraints.weighty    = 1;
+		constraints.weighty    = 0;
 		
 		// label
 		JLabel label = new JLabel( Dict.get(Dict.TAB_SOUNDFONT_RESOURCES) );
 		area.add( label, constraints );
 		
 		// table
+		constraints.fill    = GridBagConstraints.BOTH;
+		constraints.weighty = 1;
 		constraints.gridy++;
-		JTable table = new JTable();
+		MidicaTable table = new MidicaTable();
 		table.setModel( new SoundfontResourceTableModel() );
 		table.setDefaultRenderer( Object.class, new SoundfontResourceTableCellRenderer() );
 		JScrollPane scroll = new JScrollPane( table );
 		scroll.setPreferredSize( sfResourceTableDim );
-		scroll.setMinimumSize( sfResourceTableDim );
 		area.add( scroll, constraints );
 		
 		// set column sizes and colors
@@ -1196,7 +1715,6 @@ public class InfoView extends JDialog {
 		table.getColumnModel().getColumn( 3 ).setPreferredWidth( COL_WIDTH_SF_RES_FRAMES );
 		table.getColumnModel().getColumn( 4 ).setPreferredWidth( COL_WIDTH_SF_RES_FORMAT );
 		table.getColumnModel().getColumn( 5 ).setPreferredWidth( COL_WIDTH_SF_RES_CLASS  );
-		table.getTableHeader().setBackground( Config.TABLE_HEADER_COLOR );
 		
 		return area;
 	}
@@ -1224,7 +1742,7 @@ public class InfoView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// spacer
-		JLabel spacerTop   = new JLabel( "<html><br><br><br>" );
+		JLabel spacerTop = new JLabel( "<html><br><br><br>" );
 		area.add( spacerTop, constraints );
 		
 		// version translation
@@ -1305,6 +1823,33 @@ public class InfoView extends JDialog {
 	}
 	
 	/**
+	 * Returns the widgets for the message filter.
+	 * 
+	 * @return
+	 */
+	public HashMap<String, JComponent> getMsgFilterWidgets() {
+		return filterWidgets;
+	}
+	
+	/**
+	 * Returns the message table.
+	 * 
+	 * @return the message table.
+	 */
+	public MidicaTable getMsgTable() {
+		return msgTable;
+	}
+	
+	/**
+	 * Returns the message tree.
+	 * 
+	 * @return the message tree.
+	 */
+	public MidicaTree getMsgTree() {
+		return msgTree;
+	}
+	
+	/**
 	 * Creates and shows the info view passing **owner = null** to the constructor.
 	 * This is done by calling {@link #showInfoWindow(JDialog)} with parameter **null**.
 	 */
@@ -1331,6 +1876,342 @@ public class InfoView extends JDialog {
 		if ( null != infoView )
 			infoView.close();
 		infoView = new InfoView( owner );
+	}
+	
+	/**
+	 * Removes all contents from the message details area.
+	 */
+	public void cleanMsgDetails() {
+		msgDetails.removeAll();
+		msgDetails.setBackground( Config.MSG_DEFAULT_COLOR );
+		msgDetails.revalidate();
+		msgDetails.repaint();
+	}
+	
+	/**
+	 * Fills the details area with the given content.
+	 * Before calling this method, {@link #cleanMsgDetails()} should
+	 * be called first.
+	 * 
+	 * Adjusts the background color according to **fromTable**.
+	 * 
+	 * @param msgDetail  The selected leaf node or table row object.
+	 * @param fromTable  **true** to show a message from the message table;
+	 *                   **false** to show a category from the tree.
+	 */
+	public void fillMsgDetails( IMessageDetailProvider msgDetail ) {
+		
+		// single message from the table or multiple messages from a table node?
+		boolean fromTable = false;
+		if ( msgDetail instanceof MessageDetail ) {
+			fromTable = true;
+		}
+		
+		// adjust background color
+		Color bgColor = Config.MSG_TREE_COLOR;
+		if (fromTable) {
+			bgColor = Config.MSG_TABLE_COLOR;
+		}
+		msgDetails.setBackground( bgColor );
+		
+		// adjust translations (singular or plural)
+		String translTick     = Dict.get( Dict.MSG_DETAILS_TICK_PL      );
+		String translChannel  = Dict.get( Dict.MSG_DETAILS_CHANNEL_PL   );
+		String translDevId    = Dict.get( Dict.MSG_DETAILS_DEVICE_ID_PL );
+		String translRpnByte  = Dict.get( Dict.MSG_DETAILS_RPN_BYTE_PL  );
+		String translNrpnByte = Dict.get( Dict.MSG_DETAILS_NRPN_BYTE_PL );
+		String translText     = Dict.get( Dict.MSG_DETAILS_TEXT_PL      );
+		if (fromTable) {
+			translTick     = Dict.get( Dict.MSG_DETAILS_TICK_SG      );
+			translChannel  = Dict.get( Dict.MSG_DETAILS_CHANNEL_SG   );
+			translDevId    = Dict.get( Dict.MSG_DETAILS_DEVICE_ID_SG );
+			translRpnByte  = Dict.get( Dict.MSG_DETAILS_RPN_BYTE_SG  );
+			translNrpnByte = Dict.get( Dict.MSG_DETAILS_NRPN_BYTE_SG );
+			translText     = Dict.get( Dict.MSG_DETAILS_TEXT_SG      );
+		}
+		
+		// layout
+		GridBagConstraints constrLeft = new GridBagConstraints();
+		constrLeft.fill       = GridBagConstraints.NONE;
+		constrLeft.insets     = new Insets( 2, 2, 2, 2 );
+		constrLeft.gridx      = 0;
+		constrLeft.gridy      = 0;
+		constrLeft.gridheight = 1;
+		constrLeft.gridwidth  = 1;
+		constrLeft.weightx    = 0;
+		constrLeft.weighty    = 0;
+		constrLeft.anchor     = GridBagConstraints.NORTHEAST;
+		GridBagConstraints constrRight = (GridBagConstraints) constrLeft.clone();
+		constrRight.gridx++;
+		constrRight.weightx = 1;
+		constrRight.fill    = GridBagConstraints.HORIZONTAL;
+		constrRight.anchor  = GridBagConstraints.NORTHWEST;
+		
+		// tick range
+		String tickRange = msgDetail.getRange( "tick" );
+		if ( tickRange != null ) {
+			
+			// label
+			JLabel lblTicks = new JLabel( translTick );
+			msgDetails.add( lblTicks, constrLeft );
+			
+			// content
+			FlowLabel ticks = new FlowLabel( tickRange, CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
+			ticks.setBackground( bgColor );
+			msgDetails.add( ticks, constrRight );
+		}
+		
+		// message length
+		String lengthRange = msgDetail.getRange( "length" );
+		if ( lengthRange != null ) {
+			
+			// label
+			constrLeft.gridy++;
+			JLabel lblLength = new JLabel( Dict.get(Dict.MSG_DETAILS_LENGTH) );
+			msgDetails.add( lblLength, constrLeft );
+			
+			// content
+			constrRight.gridy++;
+			FlowLabel length = new FlowLabel( lengthRange, CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
+			length.setBackground( bgColor );
+			msgDetails.add( length, constrRight );
+		}
+		
+		// status byte
+		Object statusObj = msgDetail.getOption( "status_byte" );
+		if ( statusObj != null ) {
+			
+			// label
+			constrLeft.gridy++;
+			JLabel lblStatus = new JLabel( Dict.get(Dict.MSG_DETAILS_STATUS_BYTE) );
+			msgDetails.add( lblStatus, constrLeft );
+			
+			// content
+			constrRight.gridy++;
+			String statusStr = "";
+			if ( statusObj instanceof String ) {
+				statusStr = (String) statusObj;
+			}
+			else {
+				byte statusByte = (Byte) statusObj;
+				statusStr       = String.format( "%02X", statusByte );
+			}
+			FlowLabel status = new FlowLabel( "0x" + statusStr, CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
+			status.setBackground( bgColor );
+			msgDetails.add( status, constrRight );
+		}
+		
+		// channels
+		String channelsStr = msgDetail.getDistinctOptions( "channel" );
+		if ( channelsStr != null ) {
+			
+			// label
+			constrLeft.gridy++;
+			JLabel lblChannels = new JLabel( translChannel );
+			msgDetails.add( lblChannels, constrLeft );
+			
+			// content
+			constrRight.gridy++;
+			FlowLabel channels = new FlowLabel( channelsStr, CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
+			channels.setBackground( bgColor );
+			msgDetails.add( channels, constrRight );
+		}
+		
+		// meta type
+		Object metaTypeObj = msgDetail.getOption( "meta_type" );
+		if ( metaTypeObj instanceof Integer ) {
+			
+			// label
+			constrLeft.gridy++;
+			JLabel lblMetaType = new JLabel( Dict.get(Dict.MSG_DETAILS_META_TYPE) );
+			msgDetails.add( lblMetaType, constrLeft );
+			
+			// content
+			constrRight.gridy++;
+			int       metaTypeByte = (Integer) metaTypeObj;
+			String    metaTypeStr  = String.format( "%02X", metaTypeByte );
+			FlowLabel metaType     = new FlowLabel( "0x" + metaTypeStr, CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
+			metaType.setBackground( bgColor );
+			msgDetails.add( metaType, constrRight );
+		}
+		
+		// vendor - byte(s) and name
+		Object vendorObj     = msgDetail.getOption( "vendor_id" );
+		Object vendorNameObj = msgDetail.getOption( "vendor_name" );
+		if ( vendorObj instanceof String ) {
+			
+			// label
+			constrLeft.gridy++;
+			JLabel lblVendor = new JLabel( Dict.get(Dict.MSG_DETAILS_VENDOR) );
+			msgDetails.add( lblVendor, constrLeft );
+			
+			// constrct vendor string
+			String vendorStr = "0x" + (String) vendorObj; // ID
+			if ( vendorNameObj instanceof String ) {
+				vendorStr = vendorStr + " (" + ( (String) vendorNameObj ) + ")";
+			}
+			
+			// content
+			constrRight.gridy++;
+			FlowLabel vendor = new FlowLabel( vendorStr, CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
+			vendor.setBackground( bgColor );
+			msgDetails.add( vendor, constrRight );
+		}
+		
+		// sysex channel
+		Object sysexChannelObj = msgDetail.getDistinctOptions( "sysex_channel" );
+		if ( sysexChannelObj instanceof String ) {
+			
+			// label
+			constrLeft.gridy++;
+			JLabel lblSysExChannel = new JLabel( translDevId );
+			msgDetails.add( lblSysExChannel, constrLeft );
+			
+			// contentnode
+			constrRight.gridy++;
+			String sysexChannelStr = (String) sysexChannelObj;
+			FlowLabel sysExChannel = new FlowLabel( sysexChannelStr, CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
+			sysExChannel.setBackground( bgColor );
+			msgDetails.add( sysExChannel, constrRight );
+		}
+		
+		// sub ID 1 byte
+		Object subId1Obj = msgDetail.getOption( "sub_id_1" );
+		if ( subId1Obj instanceof String ) {
+			
+			// label
+			constrLeft.gridy++;
+			JLabel lblSubId = new JLabel( Dict.get(Dict.MSG_DETAILS_SUB_ID_1) );
+			msgDetails.add( lblSubId, constrLeft );
+			
+			// content
+			constrRight.gridy++;
+			String subIdStr = (String) subId1Obj;
+			FlowLabel subId = new FlowLabel( subIdStr, CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
+			subId.setBackground( bgColor );
+			msgDetails.add( subId, constrRight );
+		}
+		
+		// sub ID 2 byte
+		Object subId2Obj = msgDetail.getOption( "sub_id_2" );
+		if ( subId2Obj instanceof String ) {
+			
+			// label
+			constrLeft.gridy++;
+			JLabel lblSubId = new JLabel( Dict.get(Dict.MSG_DETAILS_SUB_ID_2) );
+			msgDetails.add( lblSubId, constrLeft );
+			
+			// content
+			constrRight.gridy++;
+			String subIdStr = (String) subId2Obj;
+			FlowLabel subId = new FlowLabel( subIdStr, CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
+			subId.setBackground( bgColor );
+			msgDetails.add( subId, constrRight );
+		}
+		
+		// controller byte
+		Object ctrlObj = msgDetail.getOption( "controller" );
+		if ( ctrlObj instanceof Byte ) {
+			
+			// label
+			constrLeft.gridy++;
+			JLabel lblCtrl = new JLabel( Dict.get(Dict.MSG_DETAILS_CTRL_BYTE) );
+			msgDetails.add( lblCtrl, constrLeft );
+			
+			// content
+			constrRight.gridy++;
+			byte   ctrlByte = (Byte) ctrlObj;
+			String ctrlStr  = String.format( "%02X", ctrlByte );
+			FlowLabel ctrl  = new FlowLabel( "0x" + ctrlStr, CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
+			ctrl.setBackground( bgColor );
+			msgDetails.add( ctrl, constrRight );
+		}
+		
+		// RPN - parameter number(s)
+		Object rpnObj = msgDetail.getDistinctOptions( "rpn" );
+		if ( rpnObj != null ) {
+			
+			// label
+			constrLeft.gridy++;
+			JLabel lblRpn = new JLabel( translRpnByte );
+			msgDetails.add( lblRpn, constrLeft );
+			
+			// content
+			constrRight.gridy++;
+			String rpnStr = (String) rpnObj;
+			FlowLabel rpn = new FlowLabel( "0x" + rpnStr, CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
+			rpn.setBackground( bgColor );
+			msgDetails.add( rpn, constrRight );
+		}
+		
+		// NRPN - parameter number(s)
+		Object nrpnObj = msgDetail.getDistinctOptions( "nrpn" );
+		if ( nrpnObj != null ) {
+			
+			// label
+			constrLeft.gridy++;
+			JLabel lblNrpn = new JLabel( translNrpnByte );
+			msgDetails.add( lblNrpn, constrLeft );
+			
+			// content
+			constrRight.gridy++;
+			String nrpnStr = (String) nrpnObj;
+			FlowLabel nrpn = new FlowLabel( "0x" + nrpnStr, CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
+			nrpn.setBackground( bgColor );
+			msgDetails.add( nrpn, constrRight );
+		}
+		
+		// text content
+		Object textObj = msgDetail.getDistinctOptions( "text", "\n============\n" );
+		if ( textObj instanceof String ) {
+			
+			// label
+			constrLeft.gridy++;
+			JLabel lblText = new JLabel( translText );
+			msgDetails.add( lblText, constrLeft );
+			
+			// content
+			constrRight.gridy++;
+			String textStr = (String) textObj;
+			FlowLabel text = new FlowLabel( textStr, CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
+			text.setBackground( bgColor );
+			msgDetails.add( text, constrRight );
+		}
+		
+		// complete message
+		Object msgObj = msgDetail.getOption( "message" );
+		if ( msgObj != null ) {
+
+			// label
+			constrLeft.gridy++;
+			JLabel lblMsg = new JLabel( Dict.get(Dict.MSG_DETAILS_MESSAGE) );
+			msgDetails.add( lblMsg, constrLeft );
+
+			// content
+			constrRight.gridy++;
+			byte[]       msgBytes = (byte[]) msgObj;
+			StringBuffer msgStr   = new StringBuffer( "" );
+			for ( int i = 0; i < msgBytes.length; i++ ) {
+				String hex = String.format( "%02X", msgBytes[i] );
+				if ( 0 == i )
+					msgStr.append( hex );
+				else
+					msgStr.append( " " + hex );
+			}
+			FlowLabel msg = new FlowLabel( msgStr.toString(), CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
+			msg.setBackground( bgColor );
+			msgDetails.add( msg, constrRight );
+		}
+		
+		// spacer
+		constrLeft.gridy++;
+		constrLeft.weighty = 1;
+		JLabel spacer = new JLabel( " " );
+		msgDetails.add( spacer, constrLeft );
+		
+		// make the changes visible
+		msgDetails.revalidate();
+		msgDetails.repaint();
 	}
 	
 	/**

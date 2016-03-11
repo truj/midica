@@ -29,6 +29,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
+import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.ParseException;
 import org.midica.file.SequenceParser;
@@ -106,7 +107,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			try {
 				long pos = Long.parseLong( memory );
 				MidiDevices.setTickPosition( pos );
-				view.setTextFieldColor( PlayerView.NAME_JUMP, PlayerView.COLOR_NORMAL );
+				view.setTextFieldColor( PlayerView.NAME_JUMP, Config.COLOR_NORMAL );
 			}
 			catch( NumberFormatException ex ) {
 			}
@@ -189,7 +190,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 				}
 				
 				// no exception yet, so the field has been set successfully
-				view.setTextFieldColor( name, PlayerView.COLOR_NORMAL );
+				view.setTextFieldColor( name, Config.COLOR_NORMAL );
 			}
 			catch ( NumberFormatException ex ) {
 			}
@@ -622,10 +623,10 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			}
 			
 			// no exception yet, so the field input is ok
-			view.setTextFieldColor( name, PlayerView.COLOR_OK );
+			view.setTextFieldColor( name, Config.COLOR_OK );
 		}
 		catch ( NumberFormatException ex ) {
-			view.setTextFieldColor( name, PlayerView.COLOR_ERROR );
+			view.setTextFieldColor( name, Config.COLOR_ERROR );
 		}
 		catch ( BadLocationException ex ) {
 		}

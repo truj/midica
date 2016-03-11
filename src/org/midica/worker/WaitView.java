@@ -43,7 +43,7 @@ public class WaitView extends JDialog {
 	 */
 	public WaitView( JDialog view ) {
 		super( view, Dict.get(Dict.TITLE_WAIT) );
-		setMinimumSize( new Dimension(MIN_WIDTH, MIN_HEIGHT) );
+		setPreferredSize( new Dimension(MIN_WIDTH, MIN_HEIGHT) );
 		
 		// don't let the user close this window
 		setDefaultCloseOperation( JDialog.DO_NOTHING_ON_CLOSE );

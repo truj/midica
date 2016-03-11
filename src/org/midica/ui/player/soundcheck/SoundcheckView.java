@@ -29,7 +29,6 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
@@ -40,6 +39,7 @@ import org.midica.file.NamedInteger;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.SliderHelper;
 import org.midica.ui.player.PlayerView;
+import org.midica.ui.widget.MidicaTable;
 
 /**
  * This class defines the UI for the soundcheck window.
@@ -75,16 +75,16 @@ public class SoundcheckView extends JDialog {
 	private Dimension dimTblInstr = null;
 	private Dimension dimListNote = null;
 	
-	private JComboBox<NamedInteger> cbxChannel = null;
-	private JTable              tblInstrument  = null;
-	private JList<NamedInteger> lstNote        = null;
-	private JTextField          fldVolume      = null;
-	private JTextField          fldVelocity    = null;
-	private JSlider             sldVolume      = null;
-	private JSlider             sldVelocity    = null;
-	private JTextField          fldDuration    = null;
-	private JCheckBox           cbxKeep        = null;
-	private JButton             btnPlay        = null;
+	private JComboBox<NamedInteger> cbxChannel    = null;
+	private MidicaTable             tblInstrument = null;
+	private JList<NamedInteger>     lstNote       = null;
+	private JTextField              fldVolume     = null;
+	private JTextField              fldVelocity   = null;
+	private JSlider                 sldVolume     = null;
+	private JSlider                 sldVelocity   = null;
+	private JTextField              fldDuration   = null;
+	private JCheckBox               cbxKeep       = null;
+	private JButton                 btnPlay       = null;
 	
 	private        KeyEventPostProcessor     keyProcessor   = null;
 	private static SoundcheckView            soundcheckView = null;
@@ -128,171 +128,169 @@ public class SoundcheckView extends JDialog {
 		// layout
 		GridBagLayout layout = new GridBagLayout();
 		content.setLayout( layout );
-		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.BOTH;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
-		constraints.gridx = 0;
-		constraints.gridy = 0;
-		constraints.gridheight = 1;
-		constraints.gridwidth  = 1;
-		constraints.weightx    = 0;
-		constraints.weighty    = 0;
+		GridBagConstraints constrLeft = new GridBagConstraints();
+		constrLeft.anchor     = GridBagConstraints.WEST;
+		constrLeft.fill       = GridBagConstraints.NONE;
+		constrLeft.insets     = new Insets( 2, 2, 2, 2 );
+		constrLeft.gridx      = 0;
+		constrLeft.gridy      = 0;
+		constrLeft.gridheight = 1;
+		constrLeft.gridwidth  = 1;
+		constrLeft.weightx    = 0;
+		constrLeft.weighty    = 0;
+		GridBagConstraints constrRight = (GridBagConstraints) constrLeft.clone();
+		constrRight.fill      = GridBagConstraints.HORIZONTAL;
+		constrRight.weightx   = 1;
+		constrRight.gridwidth = 2;
+		constrRight.gridx++;
 		
 		// channel label
 		JLabel lblChannel = new JLabel( Dict.get(Dict.SNDCHK_CHANNEL) );
-		content.add( lblChannel, constraints );
+		content.add( lblChannel, constrLeft );
 		
 		// channel checkbox
-		constraints.gridx++;
-		constraints.gridwidth = 2;
 		cbxChannel = new JComboBox<NamedInteger>();
 		cbxChannel.setModel( new SoundcheckChannelModel() );
 		cbxChannel.addItemListener( controller );
-		content.add( cbxChannel, constraints );
+		content.add( cbxChannel, constrRight );
 		
 		// instrument label
-		constraints.gridy++;
-		constraints.gridx     = 0;
-		constraints.gridwidth = 1;
+		constrLeft.gridy++;
 		JLabel lblInstr = new JLabel( Dict.get(Dict.SNDCHK_INSTRUMENT) );
-		content.add( lblInstr, constraints );
+		content.add( lblInstr, constrLeft );
 		
 		// instrument list
-		constraints.gridx++;
-		constraints.gridwidth = 2;
+		constrRight.gridy++;
+		constrRight.fill    = GridBagConstraints.BOTH;
+		constrRight.weighty = 1;
 		SoundcheckInstrumentTableCellRenderer instrRenderer = new SoundcheckInstrumentTableCellRenderer( instrModel );
-		tblInstrument = new JTable( instrModel );
+		tblInstrument = new MidicaTable( instrModel );
 		tblInstrument.setName( NAME_INSTR );
 		tblInstrument.setDefaultRenderer( Object.class, instrRenderer );
 		tblInstrument.getColumnModel().getColumn( 0 ).setPreferredWidth( WIDTH_COL_PROG        );
 		tblInstrument.getColumnModel().getColumn( 1 ).setPreferredWidth( WIDTH_COL_BANK        );
 		tblInstrument.getColumnModel().getColumn( 2 ).setPreferredWidth( WIDTH_COL_NAME_SF     );
 		tblInstrument.getColumnModel().getColumn( 3 ).setPreferredWidth( WIDTH_COL_NAME_SYNTAX );
-		tblInstrument.getTableHeader().setBackground( Config.TABLE_HEADER_COLOR );
 		tblInstrument.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
 		tblInstrument.getSelectionModel().addListSelectionListener( controller );
 		JScrollPane scrollInstr = new JScrollPane( tblInstrument );
 		scrollInstr.setPreferredSize( dimTblInstr );
-		content.add( scrollInstr, constraints );
+		content.add( scrollInstr, constrRight );
 		
 		// note label
-		constraints.gridy++;
-		constraints.gridx     = 0;
-		constraints.gridwidth = 1;
+		constrLeft.gridy++;
 		JLabel lblNote = new JLabel( Dict.get(Dict.SNDCHK_NOTE) );
-		content.add( lblNote, constraints );
+		content.add( lblNote, constrLeft );
 		
 		// note list
-		constraints.gridx++;
-		constraints.gridwidth = 2;
+		constrRight.gridy++;
 		lstNote = new JList<NamedInteger>();
 		lstNote.setName( NAME_NOTE );
 		lstNote.setModel( noteModel );
 		lstNote.addListSelectionListener( controller );
 		JScrollPane scrollNote = new JScrollPane( lstNote );
 		scrollNote.setPreferredSize( dimListNote );
-		content.add( scrollNote, constraints );
+		content.add( scrollNote, constrRight );
 		
 		// volume label
-		constraints.gridy++;
-		constraints.gridx      = 0;
-		constraints.gridwidth  = 1;
-		constraints.gridheight = 2;
+		constrLeft.gridy++;
+		constrLeft.gridheight = 2;
+		constrLeft.anchor     = GridBagConstraints.NORTHWEST;
 		JLabel lblVolume = new JLabel( Dict.get(Dict.SNDCHK_VOLUME) );
 		lblVolume.setVerticalAlignment( SwingConstants.TOP );
-		content.add( lblVolume, constraints );
+		content.add( lblVolume, constrLeft );
 		
 		// volume text field
-		constraints.gridx++;
-		constraints.gridheight = 1;
+		constrRight.gridy++;
+		constrRight.gridwidth = 1;
+		constrRight.fill      = GridBagConstraints.NONE;
+		constrRight.weighty   = 0;
 		fldVolume = new JTextField( Integer.toString(MidiDevices.DEFAULT_VOLUME) );
 		fldVolume.setName( NAME_VOLUME );
 		fldVolume.getDocument().putProperty( "name", NAME_VOLUME );
 		fldVolume.getDocument().addDocumentListener( controller );
 		fldVolume.addActionListener( controller );
 		fldVolume.setPreferredSize( DIM_TEXT_FIELD );
-		fldVolume.setMinimumSize( DIM_TEXT_FIELD );
-		fldVolume.setMaximumSize( DIM_TEXT_FIELD );
-		content.add( fldVolume, constraints );
+		content.add( fldVolume, constrRight );
 		
 		// volume slider
-		constraints.gridy++;
-		constraints.gridwidth  = 2;
+		constrRight.gridy++;
+		constrRight.gridwidth = 2;
+		constrRight.fill      = GridBagConstraints.HORIZONTAL;
 		sldVolume = createVolumeSlider( controller );
 		sldVolume.setName( NAME_VOLUME );
 		sldVolume.setValue( MidiDevices.DEFAULT_VOLUME );
-		content.add( sldVolume, constraints );
+		content.add( sldVolume, constrRight );
 		
 		// velocity label
-		constraints.gridy++;
-		constraints.gridx      = 0;
-		constraints.gridwidth  = 1;
-		constraints.gridheight = 2;
+		constrLeft.gridy  += 2;
 		JLabel lblVelocity = new JLabel( Dict.get(Dict.SNDCHK_VELOCITY) );
 		lblVelocity.setVerticalAlignment( SwingConstants.TOP );
-		content.add( lblVelocity, constraints );
+		content.add( lblVelocity, constrLeft );
 		
 		// velocity text field
-		constraints.gridx++;
-		constraints.gridheight = 1;
+		constrRight.gridy++;
+		constrRight.gridwidth = 1;
+		constrRight.weightx   = 0;
+		constrRight.fill      = GridBagConstraints.NONE;
 		fldVelocity = new JTextField( Integer.toString(DEFAULT_VELOCITY) );
 		fldVelocity.setName( NAME_VELOCITY );
 		fldVelocity.getDocument().putProperty( "name", NAME_VELOCITY );
 		fldVelocity.getDocument().addDocumentListener( controller );
 		fldVelocity.addActionListener( controller );
 		fldVelocity.setPreferredSize( DIM_TEXT_FIELD );
-		fldVelocity.setMinimumSize( DIM_TEXT_FIELD );
-		fldVelocity.setMaximumSize( DIM_TEXT_FIELD );
-		content.add( fldVelocity, constraints );
+		content.add( fldVelocity, constrRight );
 		
 		// velocity slider
-		constraints.gridy++;
-		constraints.gridwidth = 2;
+		constrRight.gridy++;
+		constrRight.gridwidth = 2;
+		constrRight.weightx   = 1;
+		constrRight.fill      = GridBagConstraints.HORIZONTAL;
 		sldVelocity = createVolumeSlider( controller );
 		sldVelocity.setName( NAME_VELOCITY );
 		sldVelocity.setValue( DEFAULT_VELOCITY );
-		content.add( sldVelocity, constraints );
+		content.add( sldVelocity, constrRight );
 		
 		// duration label
-		constraints.gridy++;
-		constraints.gridx     = 0;
-		constraints.gridwidth = 1;
-		JLabel lblDuration = new JLabel( Dict.get(Dict.SNDCHK_DURATION) );
-		content.add( lblDuration, constraints );
+		constrLeft.gridy     += 2;
+		constrLeft.anchor     = GridBagConstraints.WEST;
+		constrLeft.gridheight = 1;
+		JLabel lblDuration    = new JLabel( Dict.get(Dict.SNDCHK_DURATION) );
+		content.add( lblDuration, constrLeft );
 		
 		// duration text field
-		constraints.gridx++;
+		constrRight.gridy++;
+		constrRight.gridwidth = 1;
+		constrRight.weightx   = 0;
+		constrRight.fill      = GridBagConstraints.NONE;
 		fldDuration = new JTextField( Integer.toString(DEFAULT_DURATION) );
 		fldDuration.setName( NAME_DURATION );
 		fldDuration.getDocument().putProperty( "name", NAME_DURATION );
 		fldDuration.getDocument().addDocumentListener( controller );
 		fldDuration.addActionListener( controller );
 		fldDuration.setPreferredSize( DIM_TEXT_FIELD );
-		fldDuration.setMinimumSize( DIM_TEXT_FIELD );
-		fldDuration.setMaximumSize( DIM_TEXT_FIELD );
-		content.add( fldDuration, constraints );
+		content.add( fldDuration, constrRight );
 		
 		// keep settings label
-		constraints.gridy++;
-		constraints.gridx     = 0;
+		constrLeft.gridy++;
 		JLabel lblKeep = new JLabel( Dict.get(Dict.SNDCHK_KEEP_SETTINGS) );
-		content.add( lblKeep, constraints );
+		content.add( lblKeep, constrLeft );
 		
 		// keep settings checkbox
-		constraints.gridx++;
+		constrRight.gridy++;
 		cbxKeep = new JCheckBox();
 		cbxKeep.setActionCommand( CMD_KEEP );
 		cbxKeep.addActionListener( controller );
-		content.add( cbxKeep, constraints );
+		content.add( cbxKeep, constrRight );
 		
 		// play button
-		constraints.gridy++;
-		constraints.gridx     = 0;
-		constraints.gridwidth = 3;
+		constrLeft.gridy++;
+		constrLeft.gridwidth = 3;
+		constrLeft.fill      = GridBagConstraints.HORIZONTAL;
 		btnPlay = new JButton( Dict.get(Dict.SNDCHK_PLAY) );
 		btnPlay.setActionCommand( CMD_PLAY );
 		btnPlay.addActionListener( SoundcheckController.getController() );
-		content.add( btnPlay, constraints );
+		content.add( btnPlay, constrLeft );
 		
 		// make sure that the key bindings work
 		addWindowListener( controller );
@@ -374,7 +372,7 @@ public class SoundcheckView extends JDialog {
 		fldVolume.getDocument().removeDocumentListener( controller );
 		fldVolume.setText( Byte.toString(volume) );
 		fldVolume.getDocument().addDocumentListener( controller );
-		setTextFieldColor( fldVolume.getName(), PlayerView.COLOR_NORMAL );
+		setTextFieldColor( fldVolume.getName(), Config.COLOR_NORMAL );
 	}
 	
 	/**
@@ -392,7 +390,7 @@ public class SoundcheckView extends JDialog {
 		fldVelocity.getDocument().removeDocumentListener( controller );
 		fldVelocity.setText( Byte.toString(volume) );
 		fldVelocity.getDocument().addDocumentListener( controller );
-		setTextFieldColor( fldVelocity.getName(), PlayerView.COLOR_NORMAL );
+		setTextFieldColor( fldVelocity.getName(), Config.COLOR_NORMAL );
 	}
 	
 	/**

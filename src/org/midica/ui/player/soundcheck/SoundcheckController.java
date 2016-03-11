@@ -21,7 +21,6 @@ import java.util.TreeMap;
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JList;
 import javax.swing.JSlider;
-import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -32,9 +31,9 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
+import org.midica.config.Config;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.player.PlayerView;
-
 
 /**
  * This class provides the controller and event listener for the soundcheck
@@ -226,7 +225,7 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 		int duration = view.getDurationFromField(); // throws NumberFormatException
 		if ( duration < SoundcheckView.MIN_DURATION || duration > SoundcheckView.MAX_DURATION )
 			throw new NumberFormatException();
-		view.setTextFieldColor( SoundcheckView.NAME_DURATION, PlayerView.COLOR_NORMAL );
+		view.setTextFieldColor( SoundcheckView.NAME_DURATION, Config.COLOR_NORMAL );
 	}
 	
 	/**
@@ -353,10 +352,10 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 			}
 			
 			// no exception yet, so the field input is ok
-			view.setTextFieldColor( name, PlayerView.COLOR_OK );
+			view.setTextFieldColor( name, Config.COLOR_OK );
 		}
 		catch ( NumberFormatException ex ) {
-			view.setTextFieldColor( name, PlayerView.COLOR_ERROR );
+			view.setTextFieldColor( name, Config.COLOR_ERROR );
 		}
 		catch ( BadLocationException ex ) {
 		}
@@ -425,7 +424,7 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 	/**
 	 * Handles selections of instruments or notes.
 	 * 
-	 * Instruments or drumkits are selected from a {@link JTable}.
+	 * Instruments or drumkits are selected from a {@link MidicaTable}.
 	 * Notes or percussion instruments are selected from a {@link JList}.
 	 * 
 	 * @param event Table row or list item selection event.

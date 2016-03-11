@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
 
+import javax.swing.UIManager;
+
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
 
@@ -54,6 +56,14 @@ public class Config {
 	public static final Color  TABLE_CELL_CATEGORY_COLOR = new Color( 200, 255, 200 );
 	public static final Color  TABLE_CELL_FUTURE_COLOR   = new Color( 255, 255, 150 ); // future notes for the note history
 	public static final Color  TABLE_CELL_SELECTED_COLOR = new Color( 200, 200, 255 ); // table row is currently selected
+	public static final Color  MSG_TABLE_COLOR           = new Color( 255, 255, 200 );
+	public static final Color  MSG_TREE_COLOR            = new Color( 240, 220, 255 );
+	public static final Color  MSG_DEFAULT_COLOR         = UIManager.getColor( "Panel.background" );
+	
+	// text field background colors
+	public static final Color  COLOR_NORMAL = new Color( 255, 255, 255 );
+	public static final Color  COLOR_OK     = new Color( 200, 255, 200 );
+	public static final Color  COLOR_ERROR  = new Color( 255, 150, 150 );
 	
 	// language combobox
 	public static final String CBX_LANG_ENGLISH = "English";

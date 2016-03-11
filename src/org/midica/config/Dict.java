@@ -392,11 +392,14 @@ public class Dict {
 	public static final String COLLAPSE_TOOLTIP            = "collapse_tooltip";
 	public static final String EXPAND_BUTTON               = "expand_button";
 	public static final String EXPAND_TOOLTIP              = "expand_tooltip";
+	public static final String DETAILS                     = "details";
 	public static final String SAMPLES_TOTAL               = "samples_total";
 	public static final String SAMPLES_AVERAGE             = "samples_average";
 	public static final String FRAMES                      = "frames";
 	public static final String BYTES                       = "bytes";
 	public static final String SEC                         = "sec";
+	public static final String BROADCAST_MSG               = "broadcast_msg";
+	public static final String INVALID_MSG                 = "invalid_msg";
 	public static final String SF_INSTR_CAT_CHROMATIC      = "sf_instr_cat_chromatic";
 	public static final String SF_INSTR_CAT_DRUMKIT_SINGLE = "sf_instr_cat_drumkit_single";
 	public static final String SF_INSTR_CAT_DRUMKIT_MULTI  = "sf_instr_cat_drumkit_multi";
@@ -407,6 +410,7 @@ public class Dict {
 	public static final String SINGLE_CHANNEL              = "single_channel";
 	public static final String MULTI_CHANNEL               = "multi_channel";
 	public static final String UNKNOWN                     = "unknown";
+	public static final String UNSET                       = "unset";
 	public static final String DATE                        = "date";
 	public static final String AUTHOR                      = "author";
 	public static final String SOURCE_URL                  = "source_url";
@@ -436,6 +440,14 @@ public class Dict {
 	public static final String INFO_COL_SF_RES_FRAMELENGTH = "info_col_sf_res_framelength";
 	public static final String INFO_COL_SF_RES_FORMAT      = "info_col_sf_res_format";
 	public static final String INFO_COL_SF_RES_CLASS       = "info_col_sf_res_class";
+	public static final String INFO_COL_MSG_TICK           = "info_col_msg_tick";
+	public static final String INFO_COL_MSG_STATUS_BYTE    = "info_col_msg_status_byte";
+	public static final String INFO_COL_MSG_CHANNEL        = "info_col_msg_channel";
+	public static final String INFO_COL_MSG_LENGTH         = "info_col_msg_length";
+	public static final String INFO_COL_MSG_TYPE           = "info_col_msg_type";
+	public static final String INFO_COL_MSG_TT_STATUS      = "info_col_msg_tt_status";
+	public static final String INFO_COL_MSG_TT_CHANNEL     = "info_col_msg_tt_channel";
+	public static final String INFO_COL_MSG_TT_LENGTH      = "info_col_msg_tt_length";
 	public static final String TOOLTIP_BANK_MSB            = "tooltip_bank_msb";
 	public static final String TOOLTIP_BANK_LSB            = "tooltip_bank_lsb";
 	public static final String TOOLTIP_BANK_FULL           = "tooltip_bank_full";
@@ -460,6 +472,325 @@ public class Dict {
 	public static final String INSTR_CAT_ETHNIC            = "instr_cat_ethnic";
 	public static final String INSTR_CAT_PERCUSSIVE        = "instr_cat_percussive";
 	public static final String INSTR_CAT_SOUND_EFFECTS     = "instr_cat_sound_effects";
+	public static final String MSG_FILTER_CHANNEL_INDEP    = "msg_filter_channel_indep";
+	public static final String MSG_FILTER_CHANNEL_DEP      = "msg_filter_channel_dep";
+	public static final String MSG_FILTER_SELECTED_NODES   = "msg_filter_selected_nodes";
+	public static final String MSG_FILTER_LIMIT_TICKS      = "msg_filter_limit_ticks";
+	public static final String MSG_FILTER_TICK_FROM        = "msg_filter_tick_from";
+	public static final String MSG_FILTER_TICK_TO          = "msg_filter_tick_to";
+	public static final String MSG_FILTER_SHOW_IN_TREE     = "msg_filter_show_in_tree";
+	public static final String MSG_FILTER_AUTO_SHOW        = "msg_filter_auto_show";
+	public static final String MSG_FLTR_TT_CHANNEL_INDEP   = "msg_fltr_tt_channel_indep";
+	public static final String MSG_FLTR_TT_CHANNEL_DEP     = "msg_fltr_tt_channel_dep";
+	public static final String MSG_FLTR_TT_CHANNEL_SINGLE  = "msg_fltr_tt_channel_single";
+	public static final String MSG_FLTR_TT_SELECTED_NODES  = "msg_fltr_tt_selected_nodes";
+	public static final String MSG_FLTR_TT_LIMIT_TICKS     = "msg_fltr_tt_limit_ticks";
+	public static final String MSG_FLTR_TT_SHOW_IN_TREE    = "msg_fltr_tt_show_in_tree";
+	public static final String MSG_FLTR_TT_AUTO_SHOW       = "msg_fltr_tt_auto_show";
+	public static final String MSG_FLTR_TT_VISIBLE         = "msg_fltr_tt_visible";
+	public static final String MSG_FLTR_TT_TOTAL           = "msg_fltr_tt_total";
+	public static final String MSG_DETAILS_TICK_SG         = "msg_details_tick_sg";
+	public static final String MSG_DETAILS_TICK_PL         = "msg_details_tick_pl";
+	public static final String MSG_DETAILS_LENGTH          = "msg_details_length";
+	public static final String MSG_DETAILS_STATUS_BYTE     = "msg_details_status_byte";
+	public static final String MSG_DETAILS_CHANNEL_SG      = "msg_details_channel_sg";
+	public static final String MSG_DETAILS_CHANNEL_PL      = "msg_details_channel_pl";
+	public static final String MSG_DETAILS_META_TYPE       = "msg_details_meta_type";
+	public static final String MSG_DETAILS_VENDOR          = "msg_details_vendor";
+	public static final String MSG_DETAILS_DEVICE_ID_SG    = "msg_details_device_id_sg";
+	public static final String MSG_DETAILS_DEVICE_ID_PL    = "msg_details_device_id_pl";
+	public static final String MSG_DETAILS_SUB_ID_1        = "msg_details_sub_id_1";
+	public static final String MSG_DETAILS_SUB_ID_2        = "msg_details_sub_id_2";
+	public static final String MSG_DETAILS_CTRL_BYTE       = "msg_details_ctrl_byte";
+	public static final String MSG_DETAILS_RPN_BYTE_SG     = "msg_details_rpn_byte_sg";
+	public static final String MSG_DETAILS_RPN_BYTE_PL     = "msg_details_rpn_byte_pl";
+	public static final String MSG_DETAILS_NRPN_BYTE_SG    = "msg_details_nrpn_byte_sg";
+	public static final String MSG_DETAILS_NRPN_BYTE_PL    = "msg_details_nrpn_byte_pl";
+	public static final String MSG_DETAILS_TEXT_SG         = "msg_details_text_sg";
+	public static final String MSG_DETAILS_TEXT_PL         = "msg_details_text_pl";
+	public static final String MSG_DETAILS_MESSAGE         = "msg_details_";
+	
+	// MIDI messages for InfoView - level 1
+	public static final String MSG1_VOICE               = "msg1_voice";             // MSG2_V_*
+	public static final String MSG1_SYSTEM_COMMON       = "msg1_system_common";     // MSG2_SC_*
+	public static final String MSG1_SYSTEM_REALTIME     = "msg1_system_realtime";   // MSG2_SR_*
+	public static final String MSG1_META                = "msg1_meta";              // MSG2_M_*
+	// MIDI messages for InfoView - level 2
+	public static final String MSG2_V_NOTE_OFF          = "msg2_v_note_off";
+	public static final String MSG2_V_NOTE_ON           = "msg2_v_note_on";
+	public static final String MSG2_V_POLY_PRESSURE     = "msg2_v_poly_pressure";
+	public static final String MSG2_V_CONTROL_CHANGE    = "msg2_v_control_change";  // MSG3_C_*
+	public static final String MSG2_V_PROGRAM_CHANGE    = "msg2_v_program_change";
+	public static final String MSG2_V_CHANNEL_PRESSURE  = "msg2_v_channel_pressure";
+	public static final String MSG2_V_PITCH_BEND        = "msg2_v_pitch_band";
+	public static final String MSG2_SC_SYSEX            = "msg2_sc_sysex";          // MSG3_SX_*
+	public static final String MSG2_SC_MIDI_TIME_CODE   = "msg2_sc_midi_time_code";
+	public static final String MSG2_SC_SONG_POS_POINTER = "msg2_sc_song_pos_pointer";
+	public static final String MSG2_SC_SONG_SELECT      = "msg2_sc_song_select";
+	public static final String MSG2_SC_TUNE_REQUEST     = "msg2_sc_tune_request";
+	public static final String MSG2_SC_END_OF_SYSEX     = "msg2_sc_end_of_sysex";
+	public static final String MSG2_SR_TIMING_CLOCK     = "msg2_sr_timing_clock";
+	public static final String MSG2_SR_START            = "msg2_sr_start";
+	public static final String MSG2_SR_CONTINUE         = "msg2_sr_continue";
+	public static final String MSG2_SR_STOP             = "msg2_sr_stop";
+	public static final String MSG2_SR_ACTIVE_SENSING   = "msg2_sr_active_sensing";
+	public static final String MSG2_SR_SYSTEM_RESET     = "msg2_sr_system_reset";
+	public static final String MSG2_M_SEQUENCE_NUMBER   = "msg2_m_sequence_number";
+	public static final String MSG2_M_TEXT              = "msg2_m_text";
+	public static final String MSG2_M_COPYRIGHT         = "msg2_m_copyright";
+	public static final String MSG2_M_TRACK_NAME        = "msg2_m_track_name";
+	public static final String MSG2_M_INSTRUMENT_NAME   = "msg2_m_instrument_name";
+	public static final String MSG2_M_LYRICS            = "msg2_m_lyrics";
+	public static final String MSG2_M_MARKER            = "msg2_m_marker";
+	public static final String MSG2_M_CUE_POINT         = "msg2_m_cue_point";
+	public static final String MSG2_M_CHANNEL_PREFIX    = "msg2_m_channel_prefix";
+	public static final String MSG2_M_END_OF_SEQUENCE   = "msg2_m_end_of_sequence";
+	public static final String MSG2_M_SET_TEMPO         = "msg2_m_set_tempo";
+	public static final String MSG2_M_SMPTE_OFFSET      = "msg2_m_smpte_offset";
+	public static final String MSG2_M_TIME_SIGNATURE    = "msg2_m_time_signature";
+	public static final String MSG2_M_KEY_SIGNATURE     = "msg2_m_key_signature";
+	public static final String MSG2_M_SEQUENCER_SPEC    = "msg2_m_sequencer_spec";
+	// MIDI messages for InfoView - level 3
+	public static final String MSG3_C_BANK_SELECT        = "msg3_c_bank_select";      // ..._[MSB|LSB]
+	public static final String MSG3_C_MODULATION_WHEEL   = "msg3_c_modulation_wheel"; // ..._[MSB|LSB]
+	public static final String MSG3_C_BREATH_CTRL        = "msg3_c_breath_ctrl";      // ..._[MSB|LSB]
+	public static final String MSG3_C_FOOT_CTRL          = "msg3_c_foot_ctrl";        // ..._[MSB|LSB]
+	public static final String MSG3_C_PORTAMENTO_TIME    = "msg3_c_portamento_time";  // ..._[MSB|LSB]
+	public static final String MSG3_C_DATA_ENTRY         = "msg3_c_data_entry";       // MSG4_(N)RPN_*
+	public static final String MSG3_C_CHANNEL_VOL        = "msg3_c_channel_vol";      // ..._[MSB|LSB]
+	public static final String MSG3_C_BALANCE            = "msg3_c_balance";          // ..._[MSB|LSB]
+	public static final String MSG3_C_PAN                = "msg3_c_pan";              // ..._[MSB|LSB]
+	public static final String MSG3_C_EXPRESSION         = "msg3_c_expression";       // ..._[MSB|LSB]
+	public static final String MSG3_C_EFFECT_CTRL_1      = "msg3_c_effect_ctrl_1";    // ..._[MSB|LSB]
+	public static final String MSG3_C_EFFECT_CTRL_2      = "msg3_c_effect_ctrl_2";    // ..._[MSB|LSB]
+	public static final String MSG3_C_GEN_PURP_CTRL_1    = "msg3_c_gen_purp_ctrl_1";  // ..._[MSB|LSB]
+	public static final String MSG3_C_GEN_PURP_CTRL_2    = "msg3_c_gen_purp_ctrl_2";  // ..._[MSB|LSB]
+	public static final String MSG3_C_GEN_PURP_CTRL_3    = "msg3_c_gen_purp_ctrl_3";  // ..._[MSB|LSB]
+	public static final String MSG3_C_GEN_PURP_CTRL_4    = "msg3_c_gen_purp_ctrl_4";  // ..._[MSB|LSB]
+	public static final String MSG3_C_HOLD_PEDAL_1       = "msg3_c_hold_pedal_1";
+	public static final String MSG3_C_PORTAMENTO_PEDAL   = "msg3_c_portamento_pedal";
+	public static final String MSG3_C_SOSTENUTO_PEDAL    = "msg3_c_sostenuto_pedal";
+	public static final String MSG3_C_SOFT_PEDAL         = "msg3_c_soft_pedal";
+	public static final String MSG3_C_LEGATO_PEDAL       = "msg3_c_legato_pedal";
+	public static final String MSG3_C_HOLD_PEDAL_2       = "msg3_c_hold_pedal_2";
+	public static final String MSG3_C_SOUND_CTRL_1       = "msg3_c_sound_ctrl_1";
+	public static final String MSG3_C_SOUND_CTRL_2       = "msg3_c_sound_ctrl_2";
+	public static final String MSG3_C_SOUND_CTRL_3       = "msg3_c_sound_ctrl_3";
+	public static final String MSG3_C_SOUND_CTRL_4       = "msg3_c_sound_ctrl_4";
+	public static final String MSG3_C_SOUND_CTRL_5       = "msg3_c_sound_ctrl_5";
+	public static final String MSG3_C_SOUND_CTRL_6       = "msg3_c_sound_ctrl_6";
+	public static final String MSG3_C_SOUND_CTRL_7       = "msg3_c_sound_ctrl_7";
+	public static final String MSG3_C_SOUND_CTRL_8       = "msg3_c_sound_ctrl_8";
+	public static final String MSG3_C_SOUND_CTRL_9       = "msg3_c_sound_ctrl_9";
+	public static final String MSG3_C_SOUND_CTRL_10      = "msg3_c_sound_ctrl_10";
+	public static final String MSG3_C_GEN_PURP_CTRL_5    = "msg3_c_gen_purp_5";
+	public static final String MSG3_C_GEN_PURP_CTRL_6    = "msg3_c_gen_purp_6";
+	public static final String MSG3_C_GEN_PURP_CTRL_7    = "msg3_c_gen_purp_7";
+	public static final String MSG3_C_GEN_PURP_CTRL_8    = "msg3_c_gen_purp_8";
+	public static final String MSG3_C_PORTAMENTO_CTRL    = "msg3_c_portamento_ctrl";
+	public static final String MSG3_C_HI_RES_VELO_PRFX   = "msg3_c_hi_res_velo_prfx";
+	public static final String MSG3_C_EFFECT_1_DEPTH     = "msg3_c_effect_1_depth";
+	public static final String MSG3_C_EFFECT_2_DEPTH     = "msg3_c_effect_2_depth";
+	public static final String MSG3_C_EFFECT_3_DEPTH     = "msg3_c_effect_3_depth";
+	public static final String MSG3_C_EFFECT_4_DEPTH     = "msg3_c_effect_4_depth";
+	public static final String MSG3_C_EFFECT_5_DEPTH     = "msg3_c_effect_5_depth";
+	public static final String MSG3_C_DATA_BUTTON_INCR   = "msg3_c_data_button_incr"; // MSG4_(N)RPN_*
+	public static final String MSG3_C_DATA_BUTTON_DECR   = "msg3_c_data_button_decr"; // MSG4_(N)RPN_*
+	public static final String MSG3_C_NRPN               = "msg3_c_nrpn";             // ..._[MSB|LSB]
+	public static final String MSG3_C_RPN                = "msg3_c_rpn";              // ..._[MSB|LSB]
+	public static final String MSG3_C_ALL_SOUND_OFF      = "msg3_c_all_sound_off";
+	public static final String MSG3_C_ALL_CTRLS_OFF      = "msg3_c_all_ctrls_off";
+	public static final String MSG3_C_LOCAL_CTRL         = "msg3_c_local_ctrl";
+	public static final String MSG3_C_ALL_NOTES_OFF      = "msg3_c_all_notes_off";
+	public static final String MSG3_C_OMNI_MODE_OFF      = "msg3_c_omni_mode_on";
+	public static final String MSG3_C_OMNI_MODE_ON       = "msg3_c_omni_mode_off";
+	public static final String MSG3_C_MONO_NOTES_OFF     = "msg3_c_mono_notes_off";
+	public static final String MSG3_C_POLY_NOTES_OFF     = "msg3_c_poly_notes_off";
+	public static final String MSG3_SX_NON_RT_UNIVERSAL  = "msg3_sx_non_rt_universal"; // MSG4_SX_NU_*
+	public static final String MSG3_SX_RT_UNIVERSAL      = "msg3_sx_rt_universal";     // MSG4_SX_RU_*
+	public static final String MSG3_SX_EDUCATIONAL       = "msg3_sx_educational";
+	public static final String MSG3_SX_VENDOR            = "msg3_sx_vendor";           // MSG4_SX_V_*
+	// MIDI messages for InfoView - level 4
+	public static final String MSG4_C_BANK_SELECT_MSB      = "msg4_c_bank_select_msb";
+	public static final String MSG4_C_MODULATION_WHEEL_MSB = "msg4_c_modulation_wheel_msb";
+	public static final String MSG4_C_BREATH_CTRL_MSB      = "msg4_c_breath_ctrl_msb";
+	public static final String MSG4_C_FOOT_CTRL_MSB        = "msg4_c_foot_ctrl_msb";
+	public static final String MSG4_C_PORTAMENTO_TIME_MSB  = "msg4_c_portamento_time_msb";
+	public static final String MSG4_C_DATA_ENTRY_MSB       = "msg4_c_data_entry_msb"; // actually level 5
+	public static final String MSG4_C_CHANNEL_VOL_MSB      = "msg4_c_channel_vol_msb";
+	public static final String MSG4_C_BALANCE_MSB          = "msg4_c_balance_msb";
+	public static final String MSG4_C_PAN_MSB              = "msg4_c_pan_msb";
+	public static final String MSG4_C_EXPRESSION_MSB       = "msg4_c_expression_msb";
+	public static final String MSG4_C_EFFECT_CTRL_1_MSB    = "msg4_c_effect_ctrl_1_msb";
+	public static final String MSG4_C_EFFECT_CTRL_2_MSB    = "msg4_c_effect_ctrl_2_msb";
+	public static final String MSG4_C_GEN_PURP_CTRL_1_MSB  = "msg4_c_gen_purp_1_msb";
+	public static final String MSG4_C_GEN_PURP_CTRL_2_MSB  = "msg4_c_gen_purp_2_msb";
+	public static final String MSG4_C_GEN_PURP_CTRL_3_MSB  = "msg4_c_gen_purp_3_msb";
+	public static final String MSG4_C_GEN_PURP_CTRL_4_MSB  = "msg4_c_gen_purp_4_msb";
+	public static final String MSG4_C_BANK_SELECT_LSB      = "msg4_c_bank_select_lsb";
+	public static final String MSG4_C_MODULATION_WHEEL_LSB = "msg4_c_modulation_wheel_lsb";
+	public static final String MSG4_C_BREATH_CTRL_LSB      = "msg4_c_breath_ctrl_lsb";
+	public static final String MSG4_C_FOOT_CTRL_LSB        = "msg4_c_foot_ctrl_lsb";
+	public static final String MSG4_C_PORTAMENTO_TIME_LSB  = "msg4_c_portamento_time_lsb";
+	public static final String MSG4_C_DATA_ENTRY_LSB       = "msg4_c_data_entry_lsb";  // actually level 5
+	public static final String MSG4_C_CHANNEL_VOL_LSB      = "msg4_c_channel_vol_lsb";
+	public static final String MSG4_C_BALANCE_LSB          = "msg4_c_balance_lsb";
+	public static final String MSG4_C_PAN_LSB              = "msg4_c_pan_lsb";
+	public static final String MSG4_C_EXPRESSION_LSB       = "msg4_c_expression_lsb";
+	public static final String MSG4_C_EFFECT_CTRL_1_LSB    = "msg4_c_effect_ctrl_1_lsb";
+	public static final String MSG4_C_EFFECT_CTRL_2_LSB    = "msg4_c_effect_ctrl_2_lsb";
+	public static final String MSG4_C_GEN_PURP_CTRL_1_LSB  = "msg4_c_gen_purp_1_lsb";
+	public static final String MSG4_C_GEN_PURP_CTRL_2_LSB  = "msg4_c_gen_purp_2_lsb";
+	public static final String MSG4_C_GEN_PURP_CTRL_3_LSB  = "msg4_c_gen_purp_3_lsb";
+	public static final String MSG4_C_GEN_PURP_CTRL_4_LSB  = "msg4_c_gen_purp_4_lsb";
+	public static final String MSG4_RPN_PITCH_BEND_SENS    = "msg4_rpn_pitch_band_sens";       // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_RPN_MASTER_FINE_TUN    = "msg4_rpn_master_fine_tuning";    // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_RPN_MASTER_COARSE_TUN  = "msg4_rpn_master_coarse_tuning";  // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_RPN_TUN_PROG_CHANGE    = "msg4_rpn_tuning_program_change"; // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_RPN_TUN_BANK_SELECT    = "msg4_rpn_tuning_bank_select";    // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_RPN_MOD_DEPTH_RANGE    = "msg4_rpn_mod_depth_range";       // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_RPN_AZIMUTH_ANGLE      = "msg4_rpn_azimuth_angle";         // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_RPN_ELEVATION_ANGLE    = "msg4_rpn_elevation_angle";       // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_RPN_GAIN               = "msg4_rpn_gain";                  // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_RPN_DISTANCE_RATIO     = "msg4_rpn_distance_ratio";        // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_RPN_MAXIMUM_DISTANCE   = "msg4_rpn_maximum_distance";      // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_RPN_GAIN_AT_MAX_DIST   = "msg4_rpn_gain_at_max_dist";      // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_RPN_REF_DISTANCE_RATIO = "msg4_rpn_ref_distance_ratio";    // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_RPN_PAN_SPREAD_ANGLE   = "msg4_rpn_pan_spread_angle";      // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_RPN_ROLL_ANGLE         = "msg4_rpn_roll_angle";            // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_RPN_RPN_RESET          = "msg4_rpn_rpn_reset";             // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_RPN_END_OF_RPN         = "msg4_rpn_end_of_rpn";            // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_SX_NU_SMPL_DUMP_HDR    = "msg4_sx_nu_smpl_dump_hdr";
+	public static final String MSG4_SX_NU_SMPL_DATA_PKT    = "msg4_sx_nu_smpl_data_pkt";
+	public static final String MSG4_SX_NU_SMPL_DUMP_REQ    = "msg4_sx_nu_smpl_dump_req";
+	public static final String MSG4_SX_NU_MIDI_TIME_CODE   = "msg4_sx_nu_midi_time_code";      // MSG5_SXN4_*
+	public static final String MSG4_SX_NU_SAMPLE_DUMP_EXT  = "msg4_sx_nu_sample_dump_ext";     // MSG5_SXN5_*
+	public static final String MSG4_SX_NU_GENERAL_INFO     = "msg4_sx_nu_general_info";        // MSG5_SXN6_*
+	public static final String MSG4_SX_NU_FILE_DUMP        = "msg4_sx_nu_file_dump";           // MSG5_SXN7_*
+	public static final String MSG4_SX_NU_TUNING_STANDARD  = "msg4_sx_nu_tuning_standard";     // MSG5_SXN8_*
+	public static final String MSG4_SX_NU_GENERA_MIDI      = "msg4_sx_nu_general_midi";        // MSG5_SXN9_*
+	public static final String MSG4_SX_NU_DOWNLOADABLE_SND = "msg4_sx_nu_downloadable_snd";    // MSG5_SXNA_*
+	public static final String MSG4_SX_NU_FILE_REF_MSG     = "msg4_sx_nu_file_ref_msg";        // MSG5_SXNB_*
+	public static final String MSG4_SX_NU_MIDI_VISUAL_CTRL = "msg4_sx_nu_midi_visual_ctrl";    // MSG5_SXNC_*
+	public static final String MSG4_SX_NU_END_OF_FILE      = "msg4_sx_nu_end_of_file";
+	public static final String MSG4_SX_NU_WAIT             = "msg4_sx_nu_wait";
+	public static final String MSG4_SX_NU_CANCEL           = "msg4_sx_nu_cancel";
+	public static final String MSG4_SX_NU_NAK              = "msg4_sx_nu_nak";
+	public static final String MSG4_SX_NU_ACK              = "msg4_sx_nu_ack";
+	public static final String MSG4_SX_RU_MIDI_TIME_CODE   = "msg4_sx_ru_midi_time_code";      // MSG5_SXR1_*
+	public static final String MSG4_SX_RU_MIDI_SHOW_CTRL   = "msg4_sx_ru_midi_show_ctrl";      // MSG5_SXR2_*
+	public static final String MSG4_SX_RU_NOTATION_INFO    = "msg4_sx_ru_nonation_info";       // MSG5_SXR3_*
+	public static final String MSG4_SX_RU_DEVICE_CTRL      = "msg4_sx_ru_device_ctrl";         // MSG5_SXR4_*
+	public static final String MSG4_SX_RU_RT_MTC_CUEING    = "msg4_sx_ru_rt_mtc_cueing";       // MSG5_SXR5_*
+	public static final String MSG4_SX_RU_MACH_CTRL_CMD    = "msg4_sx_ru_mach_ctrl_cmd";       // MSG5_SXR6_*
+	public static final String MSG4_SX_RU_MACH_CTRL_RES    = "msg4_sx_ru_mach_ctrl_res";       // MSG5_SXR7_*
+	public static final String MSG4_SX_RU_TUNING_STANDARD  = "msg4_sx_ru_tuning_standard";     // MSG5_SXR8_*
+	public static final String MSG4_SX_RU_CTRL_DEST_SET    = "msg4_sx_ru_ctrl_dest_set";       // MSG5_SXR9_*
+	public static final String MSG4_SX_RU_KEY_B_INSTR_CTRL = "msg4_sx_ru_key_b_instr_ctrl";
+	public static final String MSG4_SX_RU_SCAL_POLY_MIP    = "msg4_sx_ru_scal_poly_mip";
+	public static final String MSG4_SX_RU_MOB_PHONE_CTRL   = "msg4_sx_ru_mob_phone_ctrl";
+	// MIDI messages for InfoView - level 5
+	public static final String MSG5_C_NRPN_LSB             = "msg5_c_nrpm_lsb";
+	public static final String MSG5_C_NRPN_MSB             = "msg5_c_nrpm_msb";
+	public static final String MSG5_C_RPN_LSB              = "msg5_c_rpm_lsb";
+	public static final String MSG5_C_RPN_MSB              = "msg5_c_rpm_msb";
+	
+	public static final String MSG5_SXN4_SPECIAL           = "msg5_sxn4_special";
+	public static final String MSG5_SXN4_PUNCH_IN_PTS      = "msg5_sxn4_punch_in_pts";
+	public static final String MSG5_SXN4_PUNCH_OUT_PTS     = "msg5_sxn4_punch_out_pts";
+	public static final String MSG5_SXN4_DEL_PUNCH_IN_PTS  = "msg5_sxn4_del_punch_in_pts";
+	public static final String MSG5_SXN4_DEL_PUNCH_OUT_PTS = "msg5_sxn4_del_punch_out_pts";
+	public static final String MSG5_SXN4_EVT_START_PT      = "msg5_sxn4_evt_start_pt";
+	public static final String MSG5_SXN4_EVT_STOP_PT       = "msg5_sxn4_evt_stop_pt";
+	public static final String MSG5_SXN4_EVT_START_PTS_ADD = "msg5_sxn4_evt_start_pts_add";
+	public static final String MSG5_SXN4_EVT_STOP_PTS_ADD  = "msg5_sxn4_evt_stop_pts_add";
+	public static final String MSG5_SXN4_DEL_EVT_START_PT  = "msg5_sxn4_del_ev_start_pt";
+	public static final String MSG5_SXN4_DEL_EVT_STOP_PT   = "msg5_sxn4_del_ev_stop_pt";
+	public static final String MSG5_SXN4_CUE_PTS           = "msg5_sxn4_cue_pts";
+	public static final String MSG5_SXN4_CUE_PTS_ADD       = "msg5_sxn4_cue_pts_add";
+	public static final String MSG5_SXN4_DEL_CUE_PT        = "msg5_sxn4_del_cue_pt";
+	public static final String MSG5_SXN4_EVT_NAME_IN_ADD   = "msg5_sxn4_evt_name_in_add";
+	public static final String MSG5_SXN5_LOOP_PTS_TRANSM   = "msg5_sxn5_loop_pts_transm";
+	public static final String MSG5_SXN5_LOOP_PTS_REQ      = "msg5_sxn5_loop_pts_req";
+	public static final String MSG5_SXN5_SMPL_NAME_TRANSM  = "msg5_sxn5_smpl_name_transm";
+	public static final String MSG5_SXN5_SMPL_NAME_REQ     = "msg5_sxn5_smpl_name_req";
+	public static final String MSG5_SXN5_EXT_DUMP_HDR      = "msg5_sxn5_ext_dump_hdr";
+	public static final String MSG5_SXN5_EXT_LOOP_PTS_TR   = "msg5_sxn5_ext_loop_pts_tr";
+	public static final String MSG5_SXN5_EXT_LOOP_PTS_REQ  = "msg5_sxn5_ext_loop_pts_req";
+	public static final String MSG5_SXN6_IDENTITY_REQ      = "msg5_sxn6_identity_req";
+	public static final String MSG5_SXN6_IDENTITY_REPL     = "msg5_sxn6_identity_repl";
+	public static final String MSG5_SXN7_HEADER            = "msg5_sxn7_header";
+	public static final String MSG5_SXN7_DATA_PACKET       = "msg5_sxn7_data_packet";
+	public static final String MSG5_SXN7_REQUEST           = "msg5_sxn7_request";
+	public static final String MSG5_SXN8_BLK_DUMP_REQ      = "msg5_sxn8_blk_dump_req";
+	public static final String MSG5_SXN8_BLK_DUMP_REPL     = "msg5_sxn8_blk_dump_repl";
+	public static final String MSG5_SXN8_TUNING_DUMP_REQ   = "msg5_sxn8_tunin_dump_req";
+	public static final String MSG5_SXN8_KEY_B_TUNING_DMP  = "msg5_sxn8_key_b_tuning_dmp";
+	public static final String MSG5_SXN8_SO_TUN_DMP_1      = "msg5_sxn8_so_tun_dmp_1";
+	public static final String MSG5_SXN8_SO_TUN_DMP_2      = "msg5_sxn8_so_tun_dmp_2";
+	public static final String MSG5_SXN8_SG_TUN_CH_BNK_SEL = "msg5_sxn8_sg_tun_ch_bnk_sel";
+	public static final String MSG5_SXN8_SO_TUN_1          = "msg5_sxn8_so_tun_1";
+	public static final String MSG5_SXN8_SO_TUN_2          = "msg5_sxn8_so_tun_2";
+	public static final String MSG5_SXN9_GM_DISABLE        = "msg5_sxn9_gm_disable";
+	public static final String MSG5_SXN9_GM_1_ON           = "msg5_sxn9_gm_1_on";
+	public static final String MSG5_SXN9_GM_OFF            = "msg5_sxn9_gm_off";
+	public static final String MSG5_SXN9_GM_2_ON           = "msg5_sxn9_gm_2_on";
+	public static final String MSG5_SXNA_DLS_ON            = "msg5_sxna_dls_on";
+	public static final String MSG5_SXNA_DLS_OFF           = "msg5_sxna_dls_off";
+	public static final String MSG5_SXNA_DLS_VA_OFF        = "msg5_sxna_dls_va_off";
+	public static final String MSG5_SXNA_DLS_VA_ON         = "msg5_sxna_dls_va_on";
+	public static final String MSG5_SXNB_OPEN_FILE         = "msg5_sxnb_open_file";
+	public static final String MSG5_SXNB_SEL_RESEL_CONT    = "msg5_sxnb_sel_resel_cont";
+	public static final String MSG5_SXNB_OPEN_SEL_CONT     = "msg5_sxnb_open_sel_cont";
+	public static final String MSG5_SXNB_CLOSE_FILE        = "msg5_sxnb_close_file";
+	public static final String MSG5_SXNC_MVC_CMD           = "msg5_sxnc_mvc_cmd";
+	
+	public static final String MSG5_SXR1_FULL_MSG          = "msg5_sxr1_full_msg";
+	public static final String MSG5_SXR1_USER_BITS         = "msg5_sxr1_user_bits";
+	public static final String MSG5_SXR2_MSC_EXT           = "msg5_sxr2_msc_ext";
+	public static final String MSG5_SXR2_MSC_CMD           = "msg5_sxr2_msc_cmd";
+	public static final String MSG5_SXR3_BAR_NUMBER        = "msg5_sxr3_bar_number";
+	public static final String MSG5_SXR3_TIME_SIG_IMMED    = "msg5_sxr3_time_sig_immed";
+	public static final String MSG5_SXR3_TIME_SIG_DELAYED  = "msg5_sxr3_time_sig_delayed";
+	public static final String MSG5_SXR4_MASTER_VOLUME     = "msg5_sxr4_master_volume";
+	public static final String MSG5_SXR4_MASTER_BALANCE    = "msg5_sxr4_master_balance";
+	public static final String MSG5_SXR4_MASTER_FINE_TUN   = "msg5_sxr4_master_fine_tun";
+	public static final String MSG5_SXR4_MASTER_COARSE_TUN = "msg5_sxr4_master_coarse_tun";
+	public static final String MSG5_SXR4_GLOBAL_PARAM_CTRL = "msg5_sxr4_global_param_ctrl";
+	public static final String MSG5_SXR5_SPECIAL           = "msg5_sxr5_special";
+	public static final String MSG5_SXR5_PUNCH_IN_PTS      = "msg5_sxr5_punch_in_pts";
+	public static final String MSG5_SXR5_PUNCH_OUT_PTS     = "msg5_sxr5_punch_out_pts";
+	public static final String MSG5_SXR5_EVT_START_PT      = "msg5_sxr5_evt_start_pt";
+	public static final String MSG5_SXR5_EVT_STOP_PT       = "msg5_sxr5_evt_stop_pt";
+	public static final String MSG5_SXR5_EVT_START_PTS_ADD = "msg5_sxr5_evt_start_pts_add";
+	public static final String MSG5_SXR5_EVT_STOP_PTS_ADD  = "msg5_sxr5_evt_stop_pts_add";
+	public static final String MSG5_SXR5_CUE_PTS           = "msg5_sxr5_cue_pts";
+	public static final String MSG5_SXR5_CUE_PTS_ADD       = "msg5_sxr5_cue_pts_add";
+	public static final String MSG5_SXR5_EVT_NAME_IN_ADD   = "msg5_sxr5_evt_name_in_add";
+	public static final String MSG5_SXR6_STOP              = "msg5_sxr6_stop";
+	public static final String MSG5_SXR6_PLAY              = "msg5_sxr6_play";
+	public static final String MSG5_SXR6_DEF_PLAY          = "msg5_sxr6_def_play";
+	public static final String MSG5_SXR6_FAST_FW           = "msg5_sxr6_fast_fw";
+	public static final String MSG5_SXR6_REWIND            = "msg5_sxr6_rewind";
+	public static final String MSG5_SXR6_REC_STROBE        = "msg5_sxr6_rec_strobe";
+	public static final String MSG5_SXR6_REC_EXIT          = "msg5_sxr6_rec_exit";
+	public static final String MSG5_SXR6_REC_PAUSE         = "msg5_sxr6_rec_pause";
+	public static final String MSG5_SXR6_PAUSE             = "msg5_sxr6_pause";
+	public static final String MSG5_SXR6_EJECT             = "msg5_sxr6_eject";
+	public static final String MSG5_SXR6_CHASE             = "msg5_sxr6_chase";
+	public static final String MSG5_SXR6_CMD_ERR_RESET     = "msg5_sxr6_cmd_err_reset";
+	public static final String MSG5_SXR6_MMC_RESET         = "msg5_sxr6_mmc_reset";
+	public static final String MSG5_SXR6_WRITE             = "msg5_sxr6_write";
+	public static final String MSG5_SXR6_GOTO              = "msg5_sxr6_goto";
+	public static final String MSG5_SXR6_SHUTTLE           = "msg5_sxr6_shuttle";
+	public static final String MSG5_SXR7_MMC_RES           = "msg5_sxr7_mmc_res";
+	public static final String MSG5_SXR8_SG_TUN_CH         = "msg5_sxr8_sg_tun_ch";
+	public static final String MSG5_SXR8_SG_TUN_CH_BNK_SEL = "msg5_sxr8_sg_tun_ch_bnk_sel";
+	public static final String MSG5_SXR8_SO_TUN_1          = "msg5_sxr8_so_tun_1";
+	public static final String MSG5_SXR8_SO_TUN_2          = "msg5_sxr8_so_tun_2";
+	public static final String MSG5_SXR9_CHANNEL_PRESSURE  = "msg5_sxr9_channel_pressure";
+	public static final String MSG5_SXR9_POLY_KEY_PRESSURE = "msg5_sxr9_poly_key_pressure";
+	public static final String MSG5_SXR9_CTRL              = "msg5_sxr9_ctrl";
 	
 	// UiControler + PlayerControler
 	public static final String ERROR_IN_LINE               = "parsing_error_in_line";
@@ -778,11 +1109,14 @@ public class Dict {
 		set( COLLAPSE_TOOLTIP,                       "Collapse"                      );
 		set( EXPAND_BUTTON,                          "+"                             );
 		set( EXPAND_TOOLTIP,                         "Expand"                        );
+		set( DETAILS,                                "Details"                       );
 		set( SAMPLES_TOTAL,                          "Samples (Total)"               );
 		set( SAMPLES_AVERAGE,                        "Samples (Average)"             );
 		set( FRAMES,                                 "Frames"                        );
 		set( BYTES,                                  "Bytes"                         );
 		set( SEC,                                    "Sec"                           );
+		set( BROADCAST_MSG,                          "Broadcast"                     );
+		set( INVALID_MSG,                            "Invalid Message"               );
 		set( SF_INSTR_CAT_CHROMATIC,                 "Chromatic Instruments"         );
 		set( SF_INSTR_CAT_DRUMKIT_SINGLE,            "Drum Kits (single channel)"    );
 		set( SF_INSTR_CAT_DRUMKIT_MULTI,             "Drum Kits (multi channel)"     );
@@ -794,6 +1128,7 @@ public class Dict {
 		set( SINGLE_CHANNEL,                         "Single Channel"                );
 		set( MULTI_CHANNEL,                          "Multi Channel"                 );
 		set( UNKNOWN,                                "Unknown"                       );
+		set( UNSET,                                  "Not Set"                       );
 		set( DATE,                                   "Date (UTC)"                    );
 		set( AUTHOR,                                 "Author"                        );
 		set( SOURCE_URL,                             "Source"                        );
@@ -823,6 +1158,14 @@ public class Dict {
 		set( INFO_COL_SF_RES_FRAMELENGTH,            "Frames"                        );
 		set( INFO_COL_SF_RES_FORMAT,                 "Format"                        );
 		set( INFO_COL_SF_RES_CLASS,                  "Class"                         );
+		set( INFO_COL_MSG_TICK,                      "Tick"                          );
+		set( INFO_COL_MSG_STATUS_BYTE,               "St"                            );
+		set( INFO_COL_MSG_CHANNEL,                   "Ch"                            );
+		set( INFO_COL_MSG_LENGTH,                    "Len"                           );
+		set( INFO_COL_MSG_TYPE,                      "Type"                          );
+		set( INFO_COL_MSG_TT_STATUS,                 "Message Length in Bytes"       );
+		set( INFO_COL_MSG_TT_CHANNEL,                "Status Byte"                   );
+		set( INFO_COL_MSG_TT_LENGTH,                 "Channel"                       );
 		set( TOOLTIP_BANK_MSB,                       "MSB"                           );
 		set( TOOLTIP_BANK_LSB,                       "LSB"                           );
 		set( TOOLTIP_BANK_FULL,                      "Bank Number"                   );
@@ -847,6 +1190,43 @@ public class Dict {
 		set( INSTR_CAT_ETHNIC,                       "Ethnic"                        );
 		set( INSTR_CAT_PERCUSSIVE,                   "Percussive"                    );
 		set( INSTR_CAT_SOUND_EFFECTS,                "Sound Effects"                 );
+		set( MSG_FILTER_CHANNEL_INDEP,               "Ch-Indep."                     );
+		set( MSG_FILTER_CHANNEL_DEP,                 "Ch-Dep."                       );
+		set( MSG_FILTER_SELECTED_NODES,              "Sel. Nodes"                    );
+		set( MSG_FILTER_LIMIT_TICKS,                 "Limit Ticks"                   );
+		set( MSG_FILTER_TICK_FROM,                   "From"                          );
+		set( MSG_FILTER_TICK_TO,                     "To"                            );
+		set( MSG_FILTER_SHOW_IN_TREE,                "Show in Tree"                  );
+		set( MSG_FILTER_AUTO_SHOW,                   "Automatically"                 );
+		set( MSG_FLTR_TT_CHANNEL_INDEP,              "Show Channel-Independent Messages"                  );
+		set( MSG_FLTR_TT_CHANNEL_DEP,                "Show Channel-Dependent Messages"                    );
+		set( MSG_FLTR_TT_CHANNEL_SINGLE,             "Show Messages of channel"                           );
+		set( MSG_FLTR_TT_SELECTED_NODES,             "Show ONLY message types under selected tree nodes." );
+		set( MSG_FLTR_TT_LIMIT_TICKS,                "Show only messages in a certain tick range."        );
+		set( MSG_FLTR_TT_SHOW_IN_TREE,               "Show selected messsage in Tree"                     );
+		set( MSG_FLTR_TT_AUTO_SHOW,                  "Show Selected Message in the tree automatically without pushing the button" );
+		set( MSG_FLTR_TT_VISIBLE,                    "Currently shown Messages (matching the filter)" );
+		set( MSG_FLTR_TT_TOTAL,                      "All messages"                                   );
+		set( MSG_DETAILS_TICK_SG,                    "Tick:"            );
+		set( MSG_DETAILS_TICK_PL,                    "Ticks:"           );
+		set( MSG_DETAILS_LENGTH,                     "Length:"          );
+		set( MSG_DETAILS_STATUS_BYTE,                "Status Byte:"     );
+		set( MSG_DETAILS_CHANNEL_SG,                 "Channel:"         );
+		set( MSG_DETAILS_CHANNEL_PL,                 "Channels:"        );
+		set( MSG_DETAILS_META_TYPE,                  "Meta Type:"       );
+		set( MSG_DETAILS_VENDOR,                     "Manufacturer:"    );
+		set( MSG_DETAILS_DEVICE_ID_SG,               "Device ID:"       );
+		set( MSG_DETAILS_DEVICE_ID_PL,               "Device IDs:"      );
+		set( MSG_DETAILS_SUB_ID_1,                   "Sub ID 1"         );
+		set( MSG_DETAILS_SUB_ID_2,                   "Sub ID 2"         );
+		set( MSG_DETAILS_CTRL_BYTE,                  "Controller Byte:" );
+		set( MSG_DETAILS_RPN_BYTE_SG,                "RPN Byte:"        );
+		set( MSG_DETAILS_RPN_BYTE_PL,                "RPN Bytes:"       );
+		set( MSG_DETAILS_NRPN_BYTE_SG,               "NRPN Byte:"       );
+		set( MSG_DETAILS_NRPN_BYTE_PL,               "NRPN Bytes:"      );
+		set( MSG_DETAILS_TEXT_SG,                    "Text:"           );
+		set( MSG_DETAILS_TEXT_PL,                    "Texts:"            );
+		set( MSG_DETAILS_MESSAGE,                    "Message (Hex):"   );
 		
 		// syntax for InfoView
 		set( SYNTAX_DEFINE,          "syntax element definition"                        );
@@ -889,6 +1269,282 @@ public class Dict {
 		set( SYNTAX_TRIPLET,         "triplet (note length devided by 1.5)"             );
 		set( SYNTAX_TUPLET,          "tuplet"                                           );
 		set( SYNTAX_TUPLET_FOR,      "tuplet definition separator"                      );
+		
+		// messages for InfoView
+		set( MSG1_VOICE,                  "Voice Messages"                                 );
+		set( MSG1_SYSTEM_COMMON,          "System Common Messages"                         );
+		set( MSG1_SYSTEM_REALTIME,        "System Realtime Messages"                       );
+		set( MSG1_META,                   "Meta Messages"                                  );
+		set( MSG2_V_NOTE_OFF,             "Note Off"                                       );
+		set( MSG2_V_NOTE_ON,              "Note On"                                        );
+		set( MSG2_V_POLY_PRESSURE,        "Polyphonic Key Pressure (Aftertouch)"           );
+		set( MSG2_V_CONTROL_CHANGE,       "Control Change"                                 );
+		set( MSG2_V_PROGRAM_CHANGE,       "Program Change"                                 );
+		set( MSG2_V_CHANNEL_PRESSURE,     "Channel Pressure (Aftertouch)"                  );
+		set( MSG2_V_PITCH_BEND,           "Pitch Bend"                                     );
+		set( MSG2_SC_SYSEX,               "SysEx (System Exclusive)"                       );
+		set( MSG2_SC_MIDI_TIME_CODE,      "MIDI Time Code (Quarter Frame)"                 );
+		set( MSG2_SC_SONG_POS_POINTER,    "Song Position Pointer"                          );
+		set( MSG2_SC_SONG_SELECT,         "Song Select"                                    );
+		set( MSG2_SC_TUNE_REQUEST,        "Tune Request"                                   );
+		set( MSG2_SC_END_OF_SYSEX,        "End of SysEx"                                   );
+		set( MSG2_SR_TIMING_CLOCK,        "Timing Clock"                                   );
+		set( MSG2_SR_START,               "Start"                                          );
+		set( MSG2_SR_CONTINUE,            "Continue"                                       );
+		set( MSG2_SR_STOP,                "Stop"                                           );
+		set( MSG2_SR_ACTIVE_SENSING,      "Active Sensing"                                 );
+		set( MSG2_SR_SYSTEM_RESET,        "System Reset"                                   );
+		set( MSG2_M_SEQUENCE_NUMBER,      "Sequence Number"                                );
+		set( MSG2_M_TEXT,                 "Text"                                           );
+		set( MSG2_M_COPYRIGHT,            "Copyright"                                      );
+		set( MSG2_M_TRACK_NAME,           "Track Name"                                     );
+		set( MSG2_M_INSTRUMENT_NAME,      "Instrument Name"                                );
+		set( MSG2_M_LYRICS,               "Lyrics"                                         );
+		set( MSG2_M_MARKER,               "Marker"                                         );
+		set( MSG2_M_CUE_POINT,            "Cue Point"                                      );
+		set( MSG2_M_CHANNEL_PREFIX,       "Channel Prefix"                                 );
+		set( MSG2_M_END_OF_SEQUENCE,      "End of Sequence"                                );
+		set( MSG2_M_SET_TEMPO,            "Set Tempo"                                      );
+		set( MSG2_M_SMPTE_OFFSET,         "SMPTE Offset"                                   );
+		set( MSG2_M_TIME_SIGNATURE,       "Time Signature"                                 );
+		set( MSG2_M_KEY_SIGNATURE,        "Key Signature"                                  );
+		set( MSG2_M_SEQUENCER_SPEC,       "Sequencer Specific"                             );
+		set( MSG3_C_BANK_SELECT,          "Bank Select"                                    );
+		set( MSG3_C_MODULATION_WHEEL,     "Modulation Wheel"                               );
+		set( MSG3_C_BREATH_CTRL,          "Breath Controller"                              );
+		set( MSG3_C_FOOT_CTRL,            "Foot Controller"                                );
+		set( MSG3_C_PORTAMENTO_TIME,      "Portamento Time"                                );
+		set( MSG3_C_DATA_ENTRY,           "Data Entry"                                     );
+		set( MSG3_C_CHANNEL_VOL,          "Channel Volume"                                 );
+		set( MSG3_C_BALANCE,              "Balance"                                        );
+		set( MSG3_C_PAN,                  "Pan"                                            );
+		set( MSG3_C_EXPRESSION,           "Expression"                                     );
+		set( MSG3_C_EFFECT_CTRL_1,        "Effect Controller 1"                            );
+		set( MSG3_C_EFFECT_CTRL_2,        "Effect Controller 2"                            );
+		set( MSG3_C_GEN_PURP_CTRL_1,      "General Purpose Controller 1"                   );
+		set( MSG3_C_GEN_PURP_CTRL_2,      "General Purpose Controller 2"                   );
+		set( MSG3_C_GEN_PURP_CTRL_3,      "General Purpose Controller 3"                   );
+		set( MSG3_C_GEN_PURP_CTRL_4,      "General Purpose Controller 4"                   );
+		set( MSG3_C_HOLD_PEDAL_1,         "Hold Pedal 1"                                   );
+		set( MSG3_C_PORTAMENTO_PEDAL,     "Portamento Pedal"                               );
+		set( MSG3_C_SOSTENUTO_PEDAL,      "Sostenuto Pedal"                                );
+		set( MSG3_C_SOFT_PEDAL,           "Soft Pedal"                                     );
+		set( MSG3_C_LEGATO_PEDAL,         "Legato Pedal"                                   );
+		set( MSG3_C_HOLD_PEDAL_2,         "Hold Pedal 2"                                   );
+		set( MSG3_C_SOUND_CTRL_1,         "Sound Controller 1 (Sound Variation)"           );
+		set( MSG3_C_SOUND_CTRL_2,         "Sound Controller 2 (Timbre/Harmonic/Filter)"    );
+		set( MSG3_C_SOUND_CTRL_3,         "Sound Controller 3 (Release Time)"              );
+		set( MSG3_C_SOUND_CTRL_4,         "Sound Controller 4 (Attack Time)"               );
+		set( MSG3_C_SOUND_CTRL_5,         "Sound Controller 5 (Brightness)"                );
+		set( MSG3_C_SOUND_CTRL_6,         "Sound Controller 6 (Decay Time)"                );
+		set( MSG3_C_SOUND_CTRL_7,         "Sound Controller 7 (Vibrato Rate)"              );
+		set( MSG3_C_SOUND_CTRL_8,         "Sound Controller 8 (Vibrato Depth)"             );
+		set( MSG3_C_SOUND_CTRL_9,         "Sound Controller 9 (Vibrato Delay)"             );
+		set( MSG3_C_SOUND_CTRL_10,        "Sound Controller 10"                            );
+		set( MSG3_C_GEN_PURP_CTRL_5,      "General Purpose Controller 5"                   );
+		set( MSG3_C_GEN_PURP_CTRL_6,      "General Purpose Controller 6"                   );
+		set( MSG3_C_GEN_PURP_CTRL_7,      "General Purpose Controller 7"                   );
+		set( MSG3_C_GEN_PURP_CTRL_8,      "General Purpose Controller 8"                   );
+		set( MSG3_C_PORTAMENTO_CTRL,      "Portamento Control"                             );
+		set( MSG3_C_HI_RES_VELO_PRFX,     "High Resolution Velocity Prefix"                );
+		set( MSG3_C_EFFECT_1_DEPTH,       "Effect 1 Depth (Reverb Send Level)"             );
+		set( MSG3_C_EFFECT_2_DEPTH,       "Effect 2 Depth (Tremolo Depth)"                 );
+		set( MSG3_C_EFFECT_3_DEPTH,       "Effect 3 Depth (Chorus Send Level)"             );
+		set( MSG3_C_EFFECT_4_DEPTH,       "Effect 4 Depth (Celeste Depth)"                 );
+		set( MSG3_C_EFFECT_5_DEPTH,       "Effect 5 Depth (Phaser Level)"                  );
+		set( MSG3_C_DATA_BUTTON_INCR,     "Data Button Increment"                          );
+		set( MSG3_C_DATA_BUTTON_DECR,     "Data Button Decrement"                          );
+		set( MSG3_C_NRPN,                 "NRPN (Non-Registered Parameter)"                );
+		set( MSG3_C_RPN,                  "RPN (Registered Parameter)"                     );
+		set( MSG3_C_ALL_SOUND_OFF,        "All Sound Off"                                  );
+		set( MSG3_C_ALL_CTRLS_OFF,        "All Controllers Off"                            );
+		set( MSG3_C_LOCAL_CTRL,           "Local Control"                                  );
+		set( MSG3_C_ALL_NOTES_OFF,        "All Notes Off"                                  );
+		set( MSG3_C_OMNI_MODE_OFF,        "Omni Mode Off"                                  );
+		set( MSG3_C_OMNI_MODE_ON,         "Omni Mode On"                                   );
+		set( MSG3_C_MONO_NOTES_OFF,       "Mono Operation & All Notes Off"                 );
+		set( MSG3_C_POLY_NOTES_OFF,       "Poly Operation & All Notes Off"                 );
+		set( MSG3_SX_NON_RT_UNIVERSAL,    "Universal, Non Real Time"                       );
+		set( MSG3_SX_RT_UNIVERSAL,        "Universal, Real Time"                           );
+		set( MSG3_SX_VENDOR,              "Manufacturer Specific"                          );
+		set( MSG3_SX_EDUCATIONAL,         "Educational"                                    );
+		set( MSG4_C_BANK_SELECT_MSB,      "MSB (Bank Select)"                              );
+		set( MSG4_C_MODULATION_WHEEL_MSB, "MSB (Modulation Wheel)"                         );
+		set( MSG4_C_BREATH_CTRL_MSB,      "MSB (Breath Controller)"                        );
+		set( MSG4_C_FOOT_CTRL_MSB,        "MSB (Foot Controller)"                          );
+		set( MSG4_C_PORTAMENTO_TIME_MSB,  "MSB (Portamento Time)"                          );
+		set( MSG4_C_DATA_ENTRY_MSB,       "MSB (Data Entry)"                               );
+		set( MSG4_C_CHANNEL_VOL_MSB,      "MSB (Channel Volume)"                           );
+		set( MSG4_C_BALANCE_MSB,          "MSB (Balance)"                                  );
+		set( MSG4_C_PAN_MSB,              "MSB (Pan)"                                      );
+		set( MSG4_C_EXPRESSION_MSB,       "MSB (Expression)"                               );
+		set( MSG4_C_EFFECT_CTRL_1_MSB,    "MSB (Effect Controller 1)"                      );
+		set( MSG4_C_EFFECT_CTRL_2_MSB,    "MSB (Effect Controller 2)"                      );
+		set( MSG4_C_GEN_PURP_CTRL_1_MSB,  "MSB (General Purpose Controller 1)"             );
+		set( MSG4_C_GEN_PURP_CTRL_2_MSB,  "MSB (General Purpose Controller 2)"             );
+		set( MSG4_C_GEN_PURP_CTRL_3_MSB,  "MSB (General Purpose Controller 3)"             );
+		set( MSG4_C_GEN_PURP_CTRL_4_MSB,  "MSB (General Purpose Controller 4)"             );
+		set( MSG4_C_BANK_SELECT_LSB,      "LSB (Bank Select)"                              );
+		set( MSG4_C_MODULATION_WHEEL_LSB, "LSB (Modulation Wheel)"                         );
+		set( MSG4_C_BREATH_CTRL_LSB,      "LSB (Breath Controller)"                        );
+		set( MSG4_C_FOOT_CTRL_LSB,        "LSB (Foot Controller)"                          );
+		set( MSG4_C_PORTAMENTO_TIME_LSB,  "LSB (Portamento Time)"                          );
+		set( MSG4_C_DATA_ENTRY_LSB,       "LSB (Data Entry)"                               );
+		set( MSG4_C_CHANNEL_VOL_LSB,      "LSB (Channel Volume)"                           );
+		set( MSG4_C_BALANCE_LSB,          "LSB (Balance)"                                  );
+		set( MSG4_C_PAN_LSB,              "LSB (Pan)"                                      );
+		set( MSG4_C_EXPRESSION_LSB,       "LSB (Expression)"                               );
+		set( MSG4_C_EFFECT_CTRL_1_LSB,    "LSB (Effect Controller 1)"                      );
+		set( MSG4_C_EFFECT_CTRL_2_LSB,    "LSB (Effect Controller 2)"                      );
+		set( MSG4_C_GEN_PURP_CTRL_1_LSB,  "LSB (General Purpose Controller 1)"             );
+		set( MSG4_C_GEN_PURP_CTRL_2_LSB,  "LSB (General Purpose Controller 2)"             );
+		set( MSG4_C_GEN_PURP_CTRL_3_LSB,  "LSB (General Purpose Controller 3)"             );
+		set( MSG4_C_GEN_PURP_CTRL_4_LSB,  "LSB (General Purpose Controller 4)"             );
+		set( MSG4_RPN_PITCH_BEND_SENS,    "Pitch Bend Sensitivity"                         );
+		set( MSG4_RPN_MASTER_FINE_TUN,    "Master Fine Tuning (in Cents)"                  );
+		set( MSG4_RPN_MASTER_COARSE_TUN,  "Master Coarse Tuning (in Half Steps)"           );
+		set( MSG4_RPN_TUN_PROG_CHANGE,    "Tuning Program Change"                          );
+		set( MSG4_RPN_TUN_BANK_SELECT,    "Tuning Bank Select"                             );
+		set( MSG4_RPN_MOD_DEPTH_RANGE,    "Modulation Depth Range"                         );
+		set( MSG4_RPN_AZIMUTH_ANGLE,      "Azimuth Angle"                                  );
+		set( MSG4_RPN_ELEVATION_ANGLE,    "Elevation Angle"                                );
+		set( MSG4_RPN_GAIN,               "Gain"                                           );
+		set( MSG4_RPN_DISTANCE_RATIO,     "Distance Ratio"                                 );
+		set( MSG4_RPN_MAXIMUM_DISTANCE,   "Maximum Distance"                               );
+		set( MSG4_RPN_GAIN_AT_MAX_DIST,   "Gain at Maximum Distance"                       );
+		set( MSG4_RPN_REF_DISTANCE_RATIO, "Reference Distance Ratio"                       );
+		set( MSG4_RPN_PAN_SPREAD_ANGLE,   "Pan Spread Angle"                               );
+		set( MSG4_RPN_ROLL_ANGLE,         "Roll Angle"                                     );
+		set( MSG4_RPN_RPN_RESET,          "RPN Reset"                                      );
+		set( MSG4_RPN_END_OF_RPN,         "Null Function Number for RPN/NRPN (End of RPN)" );
+		set( MSG5_C_NRPN_LSB,             "LSB (NRPN)"                                     );
+		set( MSG5_C_NRPN_MSB,             "MSB (NRPN)"                                     );
+		set( MSG5_C_RPN_LSB,              "LSB (RPN)"                                      );
+		set( MSG5_C_RPN_MSB,              "MSB (RPN)"                                      );
+		set( MSG4_SX_NU_SMPL_DUMP_HDR,    "Sample Dump Header"                             );
+		set( MSG4_SX_NU_SMPL_DATA_PKT,    "Sample Data Packet"                             );
+		set( MSG4_SX_NU_SMPL_DUMP_REQ,    "Sample Dump Request"                            );
+		set( MSG4_SX_NU_MIDI_TIME_CODE,   "MIDI Time Code"                                 );
+		set( MSG4_SX_NU_SAMPLE_DUMP_EXT,  "Sample Dump Extensions"                         );
+		set( MSG4_SX_NU_GENERAL_INFO,     "General Information"                            );
+		set( MSG4_SX_NU_FILE_DUMP,        "File Dump"                                      );
+		set( MSG4_SX_NU_TUNING_STANDARD,  "MIDI Tuning Standard (Non-Real Time)"           );
+		set( MSG4_SX_NU_GENERA_MIDI,      "General MIDI"                                   );
+		set( MSG4_SX_NU_DOWNLOADABLE_SND, "Downloadable Sounds"                            );
+		set( MSG4_SX_NU_FILE_REF_MSG,     "File Reference Message"                         );
+		set( MSG4_SX_NU_MIDI_VISUAL_CTRL, "MIDI Visual Control"                            );
+		set( MSG4_SX_NU_END_OF_FILE,      "End of File"                                    );
+		set( MSG4_SX_NU_WAIT,             "Wait"                                           );
+		set( MSG4_SX_NU_CANCEL,           "Cancel"                                         );
+		set( MSG4_SX_NU_NAK,              "NAK"                                            );
+		set( MSG4_SX_NU_ACK,              "ACK"                                            );
+		set( MSG4_SX_RU_MIDI_TIME_CODE,   "MIDI Time Code"                                 );
+		set( MSG4_SX_RU_MIDI_SHOW_CTRL,   "MIDI Show Control"                              );
+		set( MSG4_SX_RU_NOTATION_INFO,    "Notation Information"                           );
+		set( MSG4_SX_RU_DEVICE_CTRL,      "Device Control"                                 );
+		set( MSG4_SX_RU_RT_MTC_CUEING,    "Real Time MTC Cueing"                           );
+		set( MSG4_SX_RU_MACH_CTRL_CMD,    "MIDI Machine Control Commands"                  );
+		set( MSG4_SX_RU_MACH_CTRL_RES,    "MIDI Machine Control Responses"                 );
+		set( MSG4_SX_RU_TUNING_STANDARD,  "MIDI Tuning Standard (Real Time)"               );
+		set( MSG4_SX_RU_CTRL_DEST_SET,    "Controller Destination Setting"                 );
+		set( MSG4_SX_RU_KEY_B_INSTR_CTRL, "Key-based Instrument Control"                   );
+		set( MSG4_SX_RU_SCAL_POLY_MIP,    "Scalable Polyphony MIDI MIP Message"            );
+		set( MSG4_SX_RU_MOB_PHONE_CTRL,   "Mobile Phone Control Message"                   );
+		set( MSG5_SXN4_SPECIAL,           "Special"                                        );
+		set( MSG5_SXN4_PUNCH_IN_PTS,      "Punch In Points"                                );
+		set( MSG5_SXN4_PUNCH_OUT_PTS,     "Punch Out Points"                               );
+		set( MSG5_SXN4_DEL_PUNCH_IN_PTS,  "Delete Punch In Point"                          );
+		set( MSG5_SXN4_DEL_PUNCH_OUT_PTS, "Delete Punch Out Point"                         );
+		set( MSG5_SXN4_EVT_START_PT,      "Event Start Point"                              );
+		set( MSG5_SXN4_EVT_STOP_PT,       "Event Stop Point"                               );
+		set( MSG5_SXN4_EVT_START_PTS_ADD, "Event Start Points with additional info"        );
+		set( MSG5_SXN4_EVT_STOP_PTS_ADD,  "Event Stop Points with additional info"         );
+		set( MSG5_SXN4_DEL_EVT_START_PT,  "Delete Event Start Point"                       );
+		set( MSG5_SXN4_DEL_EVT_STOP_PT,   "Delete Event Stop Point"                        );
+		set( MSG5_SXN4_CUE_PTS,           "Cue Points"                                     );
+		set( MSG5_SXN4_CUE_PTS_ADD,       "Cue Points with additional info"                );
+		set( MSG5_SXN4_DEL_CUE_PT,        "Delete Cue Point"                               );
+		set( MSG5_SXN4_EVT_NAME_IN_ADD,   "Event Name in additional info"                  );
+		set( MSG5_SXN5_LOOP_PTS_TRANSM,   "Loop Points Transmission"                       );
+		set( MSG5_SXN5_LOOP_PTS_REQ,      "Loop Points Request"                            );
+		set( MSG5_SXN5_SMPL_NAME_TRANSM,  "Sample Name Transmission"                       );
+		set( MSG5_SXN5_SMPL_NAME_REQ,     "Sample Name Request"                            );
+		set( MSG5_SXN5_EXT_DUMP_HDR,      "Extended Dump Header"                           );
+		set( MSG5_SXN5_EXT_LOOP_PTS_TR,   "Extended Loop Points Transmission"              );
+		set( MSG5_SXN5_EXT_LOOP_PTS_REQ,  "Extended Loop Points Request"                   );
+		set( MSG5_SXN6_IDENTITY_REQ,      "Identity Request"                               );
+		set( MSG5_SXN6_IDENTITY_REPL,     "Identity Reply"                                 );
+		set( MSG5_SXN7_HEADER,            "Header"                                         );
+		set( MSG5_SXN7_DATA_PACKET,       "Data Packet"                                    );
+		set( MSG5_SXN7_REQUEST,           "Request"                                        );
+		set( MSG5_SXN8_BLK_DUMP_REQ,      "Bulk Dump Request"                              );
+		set( MSG5_SXN8_BLK_DUMP_REPL,     "Bulk Dump Reply"                                );
+		set( MSG5_SXN8_TUNING_DUMP_REQ,   "Tuning Dump Request"                            );
+		set( MSG5_SXN8_KEY_B_TUNING_DMP,  "Key-Based Tuning Dump"                          );
+		set( MSG5_SXN8_SO_TUN_DMP_1,      "Scale/Octave Tuning Dump, 1 byte format"        );
+		set( MSG5_SXN8_SO_TUN_DMP_2,      "Scale/Octave Tuning Dump, 2 byte format"        );
+		set( MSG5_SXN8_SG_TUN_CH_BNK_SEL, "Single Note Tuning Change with Bank Select"     );
+		set( MSG5_SXN8_SO_TUN_1,          "Scale/Octave Tuning, 1 byte format"             );
+		set( MSG5_SXN8_SO_TUN_2,          "Scale/Octave Tuning, 2 byte format"             );
+		set( MSG5_SXN9_GM_DISABLE,        "GM Disable"                                     );
+		set( MSG5_SXN9_GM_1_ON,           "General MIDI 1 System On"                       );
+		set( MSG5_SXN9_GM_OFF,            "General MIDI System Off"                        );
+		set( MSG5_SXN9_GM_2_ON,           "General MIDI 2 System On"                       );
+		set( MSG5_SXNA_DLS_ON,            "Turn DLS On"                                    );
+		set( MSG5_SXNA_DLS_OFF,           "Turn DLS Off"                                   );
+		set( MSG5_SXNA_DLS_VA_OFF,        "Turn DLS Voice Allocation Off"                  );
+		set( MSG5_SXNA_DLS_VA_ON,         "Turn DLS Voice Allocation On"                   );
+		set( MSG5_SXNB_OPEN_FILE,         "Open File"                                      );
+		set( MSG5_SXNB_SEL_RESEL_CONT,    "Select or Reselect Contents"                    );
+		set( MSG5_SXNB_OPEN_SEL_CONT,     "Open File and Select Contents"                  );
+		set( MSG5_SXNB_CLOSE_FILE,        "Close File"                                     );
+		set( MSG5_SXNC_MVC_CMD,           "MVC Command"                                    );
+		set( MSG5_SXR1_FULL_MSG,          "Full Message (Full Frame)"                      );
+		set( MSG5_SXR1_USER_BITS,         "User Bits"                                      );
+		set( MSG5_SXR2_MSC_EXT,           "MSC Extensions"                                 );
+		set( MSG5_SXR2_MSC_CMD,           "MSC Command"                                    );
+		set( MSG5_SXR3_BAR_NUMBER,        "Bar Number"                                     );
+		set( MSG5_SXR3_TIME_SIG_IMMED,    "Time Signature (Immediate)"                     );
+		set( MSG5_SXR3_TIME_SIG_DELAYED,  "Time Signature (Delayed)"                       );
+		set( MSG5_SXR4_MASTER_VOLUME,     "Master Volume"                                  );
+		set( MSG5_SXR4_MASTER_BALANCE,    "Master Balance"                                 );
+		set( MSG5_SXR4_MASTER_FINE_TUN,   "Master Fine Tuning"                             );
+		set( MSG5_SXR4_MASTER_COARSE_TUN, "Master Course Tuning"                           );
+		set( MSG5_SXR4_GLOBAL_PARAM_CTRL, "Global Parameter Control"                       );
+		set( MSG5_SXR5_SPECIAL,           "Special"                                        );
+		set( MSG5_SXR5_PUNCH_IN_PTS,      "Punch In Points"                                );
+		set( MSG5_SXR5_PUNCH_OUT_PTS,     "Punch Out Points"                               );
+		set( MSG5_SXR5_EVT_START_PT,      "Event Start points"                             );
+		set( MSG5_SXR5_EVT_STOP_PT,       "Event Stop points"                              );
+		set( MSG5_SXR5_EVT_START_PTS_ADD, "Event Start points with additional info"        );
+		set( MSG5_SXR5_EVT_STOP_PTS_ADD,  "Event Stop points with additional info"         );
+		set( MSG5_SXR5_CUE_PTS,           "Cue points"                                     );
+		set( MSG5_SXR5_CUE_PTS_ADD,       "Cue points with additional info"                );
+		set( MSG5_SXR5_EVT_NAME_IN_ADD,   "Event Name in additional info"                  );
+		set( MSG5_SXR6_STOP,              "Stop"                                           );
+		set( MSG5_SXR6_PLAY,              "Play"                                           );
+		set( MSG5_SXR6_DEF_PLAY,          "Deferred Play (play after no longer busy)"      );
+		set( MSG5_SXR6_FAST_FW,           "Fast Forward"                                   );
+		set( MSG5_SXR6_REWIND,            "Rewind"                                         );
+		set( MSG5_SXR6_REC_STROBE,        "Record Strobe (Punch In)"                       );
+		set( MSG5_SXR6_REC_EXIT,          "Record Exit (Punch out)"                        );
+		set( MSG5_SXR6_REC_PAUSE,         "Record Pause"                                   );
+		set( MSG5_SXR6_PAUSE,             "Pause (pause playback)"                         );
+		set( MSG5_SXR6_EJECT,             "Eject (disengage media container from MMC device)" );
+		set( MSG5_SXR6_CHASE,             "Chase"                                          );
+		set( MSG5_SXR6_CMD_ERR_RESET,     "Command Error Reset"                            );
+		set( MSG5_SXR6_MMC_RESET,         "MMC Reset (to default/startup state)"           );
+		set( MSG5_SXR6_WRITE,             "Write (Record Ready/Arm Tracks)"                );
+		set( MSG5_SXR6_GOTO,              "Goto (Locate)"                                  );
+		set( MSG5_SXR6_SHUTTLE,           "Shuttle"                                        );
+		set( MSG5_SXR7_MMC_RES,           "MMC Response"                                   );
+		set( MSG5_SXR8_SG_TUN_CH,         "Single Note Tuning Change"                      );
+		set( MSG5_SXR8_SG_TUN_CH_BNK_SEL, "Single Note Tuning Change with Bank Select"     );
+		set( MSG5_SXR8_SO_TUN_1,          "Scale/Octave Tuning, 1 byte format"             );
+		set( MSG5_SXR8_SO_TUN_2,          "Scale/Octave Tuning, 2 byte format"             );
+		set( MSG5_SXR9_CHANNEL_PRESSURE,  "Channel Pressure (Aftertouch)"                  );
+		set( MSG5_SXR9_POLY_KEY_PRESSURE, "Polyphonic Key Pressure (Aftertouch)"           );
+		set( MSG5_SXR9_CTRL,              "Controller (Control Change)"                    );
 		
 		// UiControler + PlayerControler
 		set( ERROR_IN_LINE,                       "<html>parsing error in file:<br>%s<br>line: %s<br>" );

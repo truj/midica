@@ -10,9 +10,10 @@ package org.midica.ui.model;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
-import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+
+import org.midica.ui.widget.MidicaTree;
 
 /**
  * This class defines a tree model for trees displaying MIDI sequence information.
@@ -26,7 +27,7 @@ import javax.swing.tree.TreePath;
  *   per node on the way to the leaf.
  * - After adding each leaf: call {@link #postprocess()}.
  * - Create the tree.
- * - Call {@link #setTree(JTree)}.
+ * - Call {@link #setTree(MidicaTree)}.
  * 
  * @author Jan Trukenmüller
  */
@@ -35,7 +36,7 @@ public class MidicaTreeModel extends DefaultTreeModel {
 	private static final long serialVersionUID = 1L;
 	
 	private MidicaTreeNode rootNode = null;
-	private JTree          tree     = null;
+	private MidicaTree     tree     = null;
 	
 	/**
 	 * Creates a new tree model and initializes it with a new empty root node.
@@ -53,8 +54,17 @@ public class MidicaTreeModel extends DefaultTreeModel {
 	 * 
 	 * @param tree  The tree showing the data of this model.
 	 */
-	public void setTree( JTree tree ) {
+	public void setTree( MidicaTree tree ) {
 		this.tree = tree;
+	}
+	
+	/**
+	 * Returns the tree or **null**, if the tree is not yet set.
+	 * 
+	 * @return the tree.
+	 */
+	public MidicaTree getTree() {
+		return tree;
 	}
 	
 	/**
@@ -65,11 +75,12 @@ public class MidicaTreeModel extends DefaultTreeModel {
 	 * and incremented by 1. That includes all branches and the leaf.
 	 * 
 	 * @param params  Two-dimensional list.
-	 *                1st dimension: node, 2nd dimension: id, name and number.
+	 *                1st dimension: node, 2nd dimension: id, name and number
+	 * @return the leaf node of the added path.
 	 */
-	public void add( ArrayList<String[]> params ) {
+	public MidicaTreeNode add( ArrayList<String[]> params ) {
 		rootNode.increment();
-		add( rootNode, params );
+		return add( rootNode, params );
 	}
 	
 	/**
@@ -78,8 +89,9 @@ public class MidicaTreeModel extends DefaultTreeModel {
 	 * @param parent  Data structure where the new node is to be added.
 	 * @param params  Two-dimensional list.
 	 *                1st dimension: node, 2nd dimension: id, name and number.
+	 * @return the leaf node of the added/incremented path.
 	 */
-	private void add( MidicaTreeNode parent, ArrayList<String[]> params ) {
+	private MidicaTreeNode add( MidicaTreeNode parent, ArrayList<String[]> params ) {
 		
 		// get options of the first node to be added/incremented
 		boolean isLeaf  = 1 == params.size();
@@ -91,10 +103,14 @@ public class MidicaTreeModel extends DefaultTreeModel {
 		// add/increment the first node
 		MidicaTreeNode incrementedChild = parent.addAndOrIncrement( id, name, number, isLeaf );
 		
-		// recursion: add/increment the other nodes
-		if ( ! isLeaf ) {
+		// recursion or return
+		if (isLeaf) {
+			return incrementedChild;
+		}
+		else {
+			// recursion: add/increment the other nodes
 			params.remove( 0 );
-			add( incrementedChild, params );
+			return add( incrementedChild, params );
 		}
 	}
 	

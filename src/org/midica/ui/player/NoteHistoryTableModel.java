@@ -9,11 +9,10 @@ package org.midica.ui.player;
 
 import java.util.ArrayList;
 
-import javax.swing.table.AbstractTableModel;
-
 import org.midica.config.Dict;
 import org.midica.midi.MidiDevices;
 import org.midica.midi.SequenceAnalyzer;
+import org.midica.ui.model.MidicaTableModel;
 
 
 /**
@@ -23,7 +22,7 @@ import org.midica.midi.SequenceAnalyzer;
  * 
  * @author Jan Trukenmüller
  */
-public class NoteHistoryTableModel extends AbstractTableModel {
+public class NoteHistoryTableModel extends MidicaTableModel {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -31,14 +30,6 @@ public class NoteHistoryTableModel extends AbstractTableModel {
 	
 	/** note number -- volume -- tick -- 0=past,1=future */
 	private ArrayList<Long[]> tableData = null;
-	
-	// table header
-	private String[] columnNames = {
-		Dict.COLUMN_NUMBER,
-		Dict.COLUMN_NAME,
-		Dict.COLUMN_VOLUME,
-		Dict.COLUMN_TICK,
-	};
 	
 	/**
 	 * Creates a new instance of a note history table data model.
@@ -52,6 +43,13 @@ public class NoteHistoryTableModel extends AbstractTableModel {
 		
 		// avoid null pointer exceptions
 		tableData = new ArrayList<Long[]>();
+		
+		// table header
+		columnNames = new String[ 4 ];
+		columnNames[ 0 ] = Dict.get( Dict.COLUMN_NUMBER );
+		columnNames[ 1 ] = Dict.get( Dict.COLUMN_NAME   );
+		columnNames[ 2 ] = Dict.get( Dict.COLUMN_VOLUME );
+		columnNames[ 3 ] = Dict.get( Dict.COLUMN_TICK   );
 		
 		// observe the midi channel
 		if ( 0 == channel )
@@ -67,7 +65,7 @@ public class NoteHistoryTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public String getColumnName( int index ) {
-		return Dict.get( columnNames[index] );
+		return columnNames[ index ];
 	}
 	
 	/**
@@ -89,6 +87,9 @@ public class NoteHistoryTableModel extends AbstractTableModel {
 	 */
 	@Override
 	public int getRowCount() {
+		if ( null == tableData )
+			return 0;
+		
 		return tableData.size();
 	}
 	

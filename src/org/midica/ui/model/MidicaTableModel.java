@@ -7,6 +7,8 @@
 
 package org.midica.ui.model;
 
+import java.util.TreeMap;
+
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -15,6 +17,11 @@ import javax.swing.table.DefaultTableModel;
  * It supports a headline for each column. However the number and content of
  * the columns and headlines has to be specified in the derived class.
  * 
+ * This class also supports tooltip texts for table headers. By default, the
+ * column name is also used as the tooltip text. However the tooltips
+ * can be customized by the derived class by calling
+ * {@link #setHeaderToolTip(int, String)}.
+ * 
  * @author Jan Trukenmüller
  */
 public abstract class MidicaTableModel extends DefaultTableModel {
@@ -22,7 +29,8 @@ public abstract class MidicaTableModel extends DefaultTableModel {
 	private static final long serialVersionUID = 1L;
     
 	// table header
-	protected String[] columnNames = new String[ 0 ];
+	protected String[]                 columnNames    = new String[ 0 ];
+	private   TreeMap<Integer, String> headerTooltips = new TreeMap<Integer, String>();
 	
 	/**
 	 * Creates a new table model.
@@ -40,6 +48,39 @@ public abstract class MidicaTableModel extends DefaultTableModel {
 	@Override
 	public String getColumnName( int index ) {
 		return columnNames[ index ];
+	}
+	
+	/**
+	 * Returns the tooltip text of the specified column index.
+	 * 
+	 * If there have not been set any custom tooltip using
+	 * {@link #setHeaderToolTip(int, String)}, the colum name is returned.
+	 * 
+	 * @param col  The column index, beginning with 0.
+	 * @return the tooltip text.
+	 */
+	public String getHeaderTooltip( int col ) {
+		
+		// custom tooltip available?
+		if ( headerTooltips.containsKey(col) )
+			return headerTooltips.get( col );
+		
+		// invalid index?
+		if ( col > columnNames.length - 1 )
+			return "";
+		
+		// fallback: return column name
+		return columnNames[ col ];
+	}
+	
+	/**
+	 * Sets the tooltip text of the given column index.
+	 * 
+	 * @param col      The column index, beginning with 0.
+	 * @param tooltip  The tooltip text to be set.
+	 */
+	protected void setHeaderToolTip( int col, String tooltip ) {
+		headerTooltips.put( col, tooltip );
 	}
 	
 	/**
