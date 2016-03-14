@@ -109,6 +109,7 @@ public class InfoView extends JDialog {
 	private static final int COL_WIDTH_SF_RES_CLASS      = 130;
 	private static final int COL_WIDTH_MSG_TICK          =  80;
 	private static final int COL_WIDTH_MSG_STATUS        =  40;
+	private static final int COL_WIDTH_MSG_TRACK         =  25;
 	private static final int COL_WIDTH_MSG_CHANNEL       =  25;
 	private static final int COL_WIDTH_MSG_LENGTH        =  35;
 	private static final int COL_WIDTH_MSG_TYPE          = 500;
@@ -204,9 +205,9 @@ public class InfoView extends JDialog {
 		int sfResourceWidth = COL_WIDTH_SF_RES_INDEX  + COL_WIDTH_SF_RES_TYPE
 		                    + COL_WIDTH_SF_RES_NAME   + COL_WIDTH_SF_RES_FRAMES
 		                    + COL_WIDTH_SF_RES_FORMAT + COL_WIDTH_SF_RES_CLASS;
-		int msgTableWidth   = COL_WIDTH_MSG_TICK   + COL_WIDTH_MSG_STATUS
-		                    + COL_WIDTH_MSG_LENGTH + COL_WIDTH_MSG_CHANNEL
-		                    + COL_WIDTH_MSG_TYPE;
+		int msgTableWidth   = COL_WIDTH_MSG_TICK    + COL_WIDTH_MSG_STATUS
+		                    + COL_WIDTH_MSG_LENGTH  + COL_WIDTH_MSG_TRACK
+		                    + COL_WIDTH_MSG_CHANNEL + COL_WIDTH_MSG_TYPE;
 		noteTableDim       = new Dimension( noteWidth,       TABLE_HEIGHT          );
 		percTableDim       = new Dimension( percWidth,       TABLE_HEIGHT          );
 		syntaxTableDim     = new Dimension( syntaxWidth,     TABLE_HEIGHT          );
@@ -860,6 +861,24 @@ public class InfoView extends JDialog {
 		FlowLabel lblResolutionContent = new FlowLabel( resolution, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblResolutionContent, constraints );
 		
+		// number of tracks translation
+		constraints.gridy++;
+		constraints.gridx    = 0;
+		constraints.anchor   = GridBagConstraints.NORTHEAST;
+		JLabel lblNumTracks  = new JLabel( Dict.get(Dict.NUMBER_OF_TRACKS) + ": " );
+		area.add( lblNumTracks, constraints );
+		
+		// number of tracks content
+		constraints.gridx++;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		String numTracks   = "-";
+		if ( null != sequenceInfo.get("num_tracks") ) {
+			Object tracksObj = sequenceInfo.get("num_tracks");
+			numTracks        = Integer.toString( (int) tracksObj );
+		}
+		FlowLabel lblNumTracksContent = new FlowLabel( numTracks, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
+		area.add( lblNumTracksContent, constraints );
+		
 		// spacer
 		constraints.gridy++;
 		constraints.gridx  = 0;
@@ -1343,9 +1362,10 @@ public class InfoView extends JDialog {
 		msgTable.addFocusListener( controller );
 		msgTable.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_MSG_TICK    );
 		msgTable.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_MSG_STATUS  );
-		msgTable.getColumnModel().getColumn( 2 ).setPreferredWidth( COL_WIDTH_MSG_CHANNEL );
-		msgTable.getColumnModel().getColumn( 3 ).setPreferredWidth( COL_WIDTH_MSG_LENGTH  );
-		msgTable.getColumnModel().getColumn( 4 ).setPreferredWidth( COL_WIDTH_MSG_TYPE    );
+		msgTable.getColumnModel().getColumn( 2 ).setPreferredWidth( COL_WIDTH_MSG_TRACK   );
+		msgTable.getColumnModel().getColumn( 3 ).setPreferredWidth( COL_WIDTH_MSG_CHANNEL );
+		msgTable.getColumnModel().getColumn( 4 ).setPreferredWidth( COL_WIDTH_MSG_LENGTH  );
+		msgTable.getColumnModel().getColumn( 5 ).setPreferredWidth( COL_WIDTH_MSG_TYPE    );
 		MessageTableCellRenderer renderer = new MessageTableCellRenderer( model, Config.MSG_TABLE_COLOR );
 		msgTable.setDefaultRenderer( Object.class, renderer );
 		
@@ -1922,6 +1942,7 @@ public class InfoView extends JDialog {
 		
 		// adjust translations (singular or plural)
 		String translTick     = Dict.get( Dict.MSG_DETAILS_TICK_PL      );
+		String translTrack    = Dict.get( Dict.MSG_DETAILS_TRACK_PL     );
 		String translChannel  = Dict.get( Dict.MSG_DETAILS_CHANNEL_PL   );
 		String translDevId    = Dict.get( Dict.MSG_DETAILS_DEVICE_ID_PL );
 		String translRpnByte  = Dict.get( Dict.MSG_DETAILS_RPN_BYTE_PL  );
@@ -1930,6 +1951,7 @@ public class InfoView extends JDialog {
 		if (fromTable) {
 			translTick     = Dict.get( Dict.MSG_DETAILS_TICK_SG      );
 			translChannel  = Dict.get( Dict.MSG_DETAILS_CHANNEL_SG   );
+			translTrack    = Dict.get( Dict.MSG_DETAILS_TRACK_SG     );
 			translDevId    = Dict.get( Dict.MSG_DETAILS_DEVICE_ID_SG );
 			translRpnByte  = Dict.get( Dict.MSG_DETAILS_RPN_BYTE_SG  );
 			translNrpnByte = Dict.get( Dict.MSG_DETAILS_NRPN_BYTE_SG );
@@ -2005,6 +2027,22 @@ public class InfoView extends JDialog {
 			FlowLabel status = new FlowLabel( "0x" + statusStr, CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
 			status.setBackground( bgColor );
 			msgDetails.add( status, constrRight );
+		}
+		
+		// tracks
+		String tracksStr = msgDetail.getDistinctOptions( "track" );
+		if ( tracksStr != null ) {
+			
+			// label
+			constrLeft.gridy++;
+			JLabel lblTracks = new JLabel( translTrack );
+			msgDetails.add( lblTracks, constrLeft );
+			
+			// content
+			constrRight.gridy++;
+			FlowLabel tracks = new FlowLabel( tracksStr, CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
+			tracks.setBackground( bgColor );
+			msgDetails.add( tracks, constrRight );
 		}
 		
 		// channels

@@ -58,17 +58,19 @@ public class MessageTableModel extends MidicaTableModel {
 		msgCountVisible = visibleMessages.size();
 		
 		// table header
-		columnNames = new String[ 5 ];
+		columnNames = new String[ 6 ];
 		columnNames[ 0 ] = Dict.get( Dict.INFO_COL_MSG_TICK        );
 		columnNames[ 1 ] = Dict.get( Dict.INFO_COL_MSG_STATUS_BYTE );
-		columnNames[ 2 ] = Dict.get( Dict.INFO_COL_MSG_CHANNEL     );
-		columnNames[ 3 ] = Dict.get( Dict.INFO_COL_MSG_LENGTH      );
-		columnNames[ 4 ] = Dict.get( Dict.INFO_COL_MSG_TYPE        );
+		columnNames[ 2 ] = Dict.get( Dict.INFO_COL_MSG_TRACK       );
+		columnNames[ 3 ] = Dict.get( Dict.INFO_COL_MSG_CHANNEL     );
+		columnNames[ 4 ] = Dict.get( Dict.INFO_COL_MSG_LENGTH      );
+		columnNames[ 5 ] = Dict.get( Dict.INFO_COL_MSG_TYPE        );
 		
 		// tooltips for the table header
 		setHeaderToolTip( 1, Dict.get(Dict.INFO_COL_MSG_TT_STATUS)  );
-		setHeaderToolTip( 2, Dict.get(Dict.INFO_COL_MSG_TT_CHANNEL) );
-		setHeaderToolTip( 3, Dict.get(Dict.INFO_COL_MSG_TT_LENGTH)  );
+		setHeaderToolTip( 2, Dict.get(Dict.INFO_COL_MSG_TT_TRACK)   );
+		setHeaderToolTip( 3, Dict.get(Dict.INFO_COL_MSG_TT_CHANNEL) );
+		setHeaderToolTip( 4, Dict.get(Dict.INFO_COL_MSG_TT_LENGTH)  );
 	}
 	
 	/**
@@ -114,8 +116,13 @@ public class MessageTableModel extends MidicaTableModel {
 			return "0x" + msgDetail.getOption( "status_byte" );
 		}
 		
-		// channel
+		// track
 		else if ( 2 == colIndex ) {
+			return msgDetail.getOption( "track" );
+		}
+		
+		// channel
+		else if ( 3 == colIndex ) {
 			Object channelObj = msgDetail.getOption( "channel" );
 			if ( null == channelObj ) {
 				return "-";
@@ -125,12 +132,12 @@ public class MessageTableModel extends MidicaTableModel {
 		}
 		
 		// length
-		else if ( 3 == colIndex ) {
+		else if ( 4 == colIndex ) {
 			return msgDetail.getOption( "length" );
 		}
 		
 		// type
-		else if ( 4 == colIndex ) {
+		else if ( 5 == colIndex ) {
 			return msgDetail.getType();
 		}
 		

@@ -379,6 +379,7 @@ public class Dict {
 	public static final String TIME_LENGTH                 = "time_length";
 	public static final String RESOLUTION                  = "resolution";
 	public static final String RESOLUTION_UNIT             = "resolution_unit";
+	public static final String NUMBER_OF_TRACKS            = "number_of_tracks";
 	public static final String TEMPO_BPM                   = "tempo_bpm";
 	public static final String TEMPO_MPQ                   = "tempo_mpq";
 	public static final String AVERAGE                     = "average";
@@ -442,10 +443,12 @@ public class Dict {
 	public static final String INFO_COL_SF_RES_CLASS       = "info_col_sf_res_class";
 	public static final String INFO_COL_MSG_TICK           = "info_col_msg_tick";
 	public static final String INFO_COL_MSG_STATUS_BYTE    = "info_col_msg_status_byte";
+	public static final String INFO_COL_MSG_TRACK          = "info_col_msg_track";
 	public static final String INFO_COL_MSG_CHANNEL        = "info_col_msg_channel";
 	public static final String INFO_COL_MSG_LENGTH         = "info_col_msg_length";
 	public static final String INFO_COL_MSG_TYPE           = "info_col_msg_type";
 	public static final String INFO_COL_MSG_TT_STATUS      = "info_col_msg_tt_status";
+	public static final String INFO_COL_MSG_TT_TRACK       = "info_col_msg_tt_track";
 	public static final String INFO_COL_MSG_TT_CHANNEL     = "info_col_msg_tt_channel";
 	public static final String INFO_COL_MSG_TT_LENGTH      = "info_col_msg_tt_length";
 	public static final String TOOLTIP_BANK_MSB            = "tooltip_bank_msb";
@@ -493,6 +496,8 @@ public class Dict {
 	public static final String MSG_DETAILS_TICK_PL         = "msg_details_tick_pl";
 	public static final String MSG_DETAILS_LENGTH          = "msg_details_length";
 	public static final String MSG_DETAILS_STATUS_BYTE     = "msg_details_status_byte";
+	public static final String MSG_DETAILS_TRACK_SG        = "msg_details_track_sg";
+	public static final String MSG_DETAILS_TRACK_PL        = "msg_details_track_pl";
 	public static final String MSG_DETAILS_CHANNEL_SG      = "msg_details_channel_sg";
 	public static final String MSG_DETAILS_CHANNEL_PL      = "msg_details_channel_pl";
 	public static final String MSG_DETAILS_META_TYPE       = "msg_details_meta_type";
@@ -1096,6 +1101,7 @@ public class Dict {
 		set( TIME_LENGTH,                            "Length (Time)"                 );
 		set( RESOLUTION,                             "Resolution"                    );
 		set( RESOLUTION_UNIT,                        "Ticks / Quarter Note"          );
+		set( NUMBER_OF_TRACKS,                       "Number of tracks"              );
 		set( TEMPO_BPM,                              "Tempo in BPM (Beats per Minute or Quarter Notes per Minute)" );
 		set( TEMPO_MPQ,                              "Tempo in MPQ (Microseconds per Quarter Note)"                );
 		set( AVERAGE,                                "Average"                       );
@@ -1160,12 +1166,14 @@ public class Dict {
 		set( INFO_COL_SF_RES_CLASS,                  "Class"                         );
 		set( INFO_COL_MSG_TICK,                      "Tick"                          );
 		set( INFO_COL_MSG_STATUS_BYTE,               "St"                            );
+		set( INFO_COL_MSG_TRACK,                     "Tr"                            );
 		set( INFO_COL_MSG_CHANNEL,                   "Ch"                            );
 		set( INFO_COL_MSG_LENGTH,                    "Len"                           );
 		set( INFO_COL_MSG_TYPE,                      "Type"                          );
-		set( INFO_COL_MSG_TT_STATUS,                 "Message Length in Bytes"       );
-		set( INFO_COL_MSG_TT_CHANNEL,                "Status Byte"                   );
-		set( INFO_COL_MSG_TT_LENGTH,                 "Channel"                       );
+		set( INFO_COL_MSG_TT_STATUS,                 "Status Byte"                   );
+		set( INFO_COL_MSG_TT_TRACK,                  "Track Number"                  );
+		set( INFO_COL_MSG_TT_CHANNEL,                "Channel"                       );
+		set( INFO_COL_MSG_TT_LENGTH,                 "Message Length in Bytes"       );
 		set( TOOLTIP_BANK_MSB,                       "MSB"                           );
 		set( TOOLTIP_BANK_LSB,                       "LSB"                           );
 		set( TOOLTIP_BANK_FULL,                      "Bank Number"                   );
@@ -1211,6 +1219,8 @@ public class Dict {
 		set( MSG_DETAILS_TICK_PL,                    "Ticks:"           );
 		set( MSG_DETAILS_LENGTH,                     "Length:"          );
 		set( MSG_DETAILS_STATUS_BYTE,                "Status Byte:"     );
+		set( MSG_DETAILS_TRACK_SG,                   "Track:"           );
+		set( MSG_DETAILS_TRACK_PL,                   "Tracks:"          );
 		set( MSG_DETAILS_CHANNEL_SG,                 "Channel:"         );
 		set( MSG_DETAILS_CHANNEL_PL,                 "Channels:"        );
 		set( MSG_DETAILS_META_TYPE,                  "Meta Type:"       );

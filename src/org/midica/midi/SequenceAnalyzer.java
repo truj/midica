@@ -264,6 +264,7 @@ public class SequenceAnalyzer {
 		
 		// Analyze for general statistics.
 		// Therefore the ORIGINAL sequence is used.
+		int trackNum = 0;
 		for ( Track t : sequence.getTracks() ) {
 			for ( int i=0; i < t.size(); i++ ) {
 				MidiEvent   event = t.get( i );
@@ -276,18 +277,21 @@ public class SequenceAnalyzer {
 				}
 				
 				if ( msg instanceof MetaMessage ) {
-					processMetaMessage( (MetaMessage) msg, tick );
+					processMetaMessage( (MetaMessage) msg, tick, trackNum );
 				}
 				else if ( msg instanceof ShortMessage ) {
-					processShortMessage( (ShortMessage) msg, tick );
+					processShortMessage( (ShortMessage) msg, tick, trackNum );
 				}
 				else if ( msg instanceof SysexMessage ) {
-					processSysexMessage( (SysexMessage) msg, tick );
+					processSysexMessage( (SysexMessage) msg, tick, trackNum );
 				}
 				else {
 				}
 			}
+			trackNum++;
 		}
+		
+		sequenceInfo.put( "num_tracks", trackNum );
 	}
 	
 	/**
@@ -295,10 +299,11 @@ public class SequenceAnalyzer {
 	 * 
 	 * @param msg   Short message
 	 * @param tick  Tickstamp
+	 * @param trackNum  Track number (beginning with 0).
 	 * @throws ReflectiveOperationException if the message cannot be added to
 	 *         the tree model.
 	 */
-	private static void processShortMessage( ShortMessage msg, long tick ) throws ReflectiveOperationException {
+	private static void processShortMessage( ShortMessage msg, long tick, int trackNum ) throws ReflectiveOperationException {
 		
 		// prepare data structures
 		ArrayList<String[]>     path            = new ArrayList<String[]>();
@@ -441,8 +446,9 @@ public class SequenceAnalyzer {
 			details.put( "status_byte", statusStr );
 			distinctDetails.put( "channel", channel );
 		}
-		details.put( "length", msgLength );
-		details.put( "tick",   tick      );
+		details.put( "length", msgLength       );
+		details.put( "tick",   tick            );
+		distinctDetails.put( "track", trackNum );
 		
 		// add message to the data structures
 		MessageTreeNode leaf      = (MessageTreeNode) msgTreeModel.add( path );
@@ -570,12 +576,13 @@ public class SequenceAnalyzer {
 	/**
 	 * Retrieves information from meta messages.
 	 * 
-	 * @param msg   Meta message
-	 * @param tick  Tickstamp
+	 * @param msg       Meta message
+	 * @param tick      Tickstamp
+	 * @param trackNum  Track number (beginning with 0).
 	 * @throws ReflectiveOperationException if the message cannot be added to
 	 *         the tree model.
 	 */
-	private static void processMetaMessage( MetaMessage msg, long tick ) throws ReflectiveOperationException {
+	private static void processMetaMessage( MetaMessage msg, long tick, int trackNum ) throws ReflectiveOperationException {
 		
 		// prepare data structures for the message tree
 		ArrayList<String[]>     path            = new ArrayList<String[]>();
@@ -684,10 +691,10 @@ public class SequenceAnalyzer {
 		}
 		
 		// get general details
-		details.put( "status_byte", "FF"      ); // status byte for META
-		details.put( "length",      msgLength );
-		details.put( "tick",        tick      );
-		details.put( "meta_type",   type      );
+		details.put( "status_byte", "FF"       ); // status byte for META
+		details.put( "length",      msgLength  );
+		details.put( "tick",        tick       );
+		details.put( "meta_type",   type       );
 		if ( isMetaMessageWithText(type) ) { // get texts from text-based messages
 			String text;
 			try {
@@ -699,6 +706,7 @@ public class SequenceAnalyzer {
 			}
 			distinctDetails.put( "text", text );
 		}
+		distinctDetails.put( "track", trackNum );
 		
 		// add message to the data structures
 		MessageTreeNode leaf      = (MessageTreeNode) msgTreeModel.add( path );
@@ -753,10 +761,11 @@ public class SequenceAnalyzer {
 	 * 
 	 * @param msg   SysEx message
 	 * @param tick  Tickstamp
+	 * @param trackNum  Track number (beginning with 0).
 	 * @throws ReflectiveOperationException if the message cannot be added to
 	 *         the tree model.
 	 */
-	private static void processSysexMessage( SysexMessage msg, long tick ) throws ReflectiveOperationException {
+	private static void processSysexMessage( SysexMessage msg, long tick, int trackNum ) throws ReflectiveOperationException {
 		
 		// prepare data structures
 		ArrayList<String[]>     path            = new ArrayList<String[]>();
@@ -916,9 +925,10 @@ public class SequenceAnalyzer {
 		}
 		
 		// get general details
-		details.put( "status_byte", "F0"      ); // status byte for SysEx
-		details.put( "length",      msgLength );
-		details.put( "tick",        tick      );
+		details.put( "status_byte", "F0"       ); // status byte for SysEx
+		details.put( "length",      msgLength  );
+		details.put( "tick",        tick       );
+		distinctDetails.put( "track", trackNum );
 		
 		// add message to the data structures
 		MessageTreeNode leaf      = (MessageTreeNode) msgTreeModel.add( path );
