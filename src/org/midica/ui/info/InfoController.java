@@ -19,6 +19,9 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JButton;
@@ -238,7 +241,12 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 	 * If the limit-ticks checkbox has been changed:
 	 * 
 	 * - activates/deactivates the from-ticks and to-ticks text fields
-	 * - changes the color of the text fields
+	 * - changes the color of the from/to text fields
+	 * 
+	 * If the limit-tracks checkbox has been changed:
+	 * 
+	 * - activates/deactivates the tracks text field
+	 * - changes the color of the tracks text field
 	 * 
 	 * If the channel-dependent-messages checkbox has been changed:
 	 * 
@@ -296,6 +304,25 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 				// neutralize text field colors
 				txtFrom.setBackground( Config.COLOR_NORMAL );
 				txtTo.setBackground( Config.COLOR_NORMAL );
+			}
+		}
+		
+		// limit-tracks checkbox - activate or deactivate the track text field
+		else if ( InfoView.FILTER_CBX_LIMIT_TRACKS.equals(name) ) {
+			JTextField txtTrack = (JTextField) widgets.get( InfoView.FILTER_TXT_TRACKS );
+			if (isChecked) {
+				// activate text field
+				txtTrack.setEnabled( true );
+				
+				// adjust text field colors
+				checkTextFields( createFakeTxtFieldChange() );
+			}
+			else {
+				// deactivate text field
+				txtTrack.setEnabled( false );
+				
+				// neutralize text field colors
+				txtTrack.setBackground( Config.COLOR_NORMAL );
 			}
 		}
 		
@@ -454,15 +481,23 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 	}
 	
 	/**
-	 * Checks if the content of the from-ticks and to/ticks text fields is ok.
+	 * Checks if the content of the text fields (from-ticks, to/ticks, tracks)
+	 * is ok. Checks the tick fields only if the limit-ticks checkbox is
+	 * checked. Checks the tracks text field only if the limit-tracks checkbox
+	 * is checked.
 	 * 
-	 * The text of both text fields is checked against the expected number format
-	 * and range. If the check fails, the background is colored red, otherwise
-	 * white.
+	 * The text of the from/to tick fields is checked against the expected
+	 * number format and range.
 	 * 
-	 * If both numbers are ok, but the "from" number is higher than the "to"
-	 * number, both fields are colored in red.
+	 * The track text field is checked against the expected comma- and/or
+	 * minus separated track number format and the ranges of all contained
+	 * edge values.
 	 * 
+	 * If the check fails for a text field, the background of that field is
+	 * colored in red, otherwise in white.
+	 * 
+	 * If the from-ticks and to-ticks numbers are both ok, but the "from"
+	 * number is higher than the "to" number, both fields are colored in red.
 	 * 
 	 * If the event comes from one of the text fields and it's content is ok,
 	 * the according field is colored in green.
@@ -471,17 +506,24 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 	 * @return **true**, if everything is ok. Otherwise: **false**.
 	 */
 	private boolean checkTextFields( DocumentEvent e ) {
-		Document doc  = e.getDocument();
-		String   name = doc.getProperty( "name" ).toString();
+		Document doc    = e.getDocument();
+		String   name   = doc.getProperty( "name" ).toString();
+		boolean  result = true;
 		
 		// prepare widgets
 		HashMap<String, JComponent> widgets = getMsgFilterWidgetsIfReady();
 		if ( null == widgets )
 			return false;
-		JTextField txtFrom = (JTextField) widgets.get( InfoView.FILTER_TXT_FROM_TICKS );
-		JTextField txtTo   = (JTextField) widgets.get( InfoView.FILTER_TXT_TO_TICKS   );
-		Document docFrom   = txtFrom.getDocument();
-		Document docTo     = txtTo.getDocument();
+		JTextField txtFrom     = (JTextField) widgets.get( InfoView.FILTER_TXT_FROM_TICKS );
+		JTextField txtTo       = (JTextField) widgets.get( InfoView.FILTER_TXT_TO_TICKS   );
+		JTextField txtTracks   = (JTextField) widgets.get( InfoView.FILTER_TXT_TRACKS     );
+		Document   docFrom     = txtFrom.getDocument();
+		Document   docTo       = txtTo.getDocument();
+		Document   docTracks   = txtTracks.getDocument();
+		JCheckBox  limitTicks  = (JCheckBox) widgets.get( InfoView.FILTER_CBX_LIMIT_TICKS  );
+		JCheckBox  limitTracks = (JCheckBox) widgets.get( InfoView.FILTER_CBX_LIMIT_TRACKS );
+		boolean    checkTicks  = limitTicks.isSelected();
+		boolean    checkTracks = limitTracks.isSelected();
 		
 		// get max ticks
 		long maxTicks = 0;
@@ -491,43 +533,70 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 			maxTicks = (long) ticksObj;
 		
 		// check "from"
-		long fromTicks = checkTextField( docFrom, maxTicks );
-		if ( fromTicks < 0 )
-			widgets.get( InfoView.FILTER_TXT_FROM_TICKS ).setBackground( Config.COLOR_ERROR );
-		else
-			widgets.get( InfoView.FILTER_TXT_FROM_TICKS ).setBackground( Config.COLOR_NORMAL );
-		
-		// check "to"
-		long toTicks = checkTextField( docTo, maxTicks );
-		if ( toTicks < 0 )
-			widgets.get( InfoView.FILTER_TXT_TO_TICKS ).setBackground( Config.COLOR_ERROR );
-		else
-			widgets.get( InfoView.FILTER_TXT_TO_TICKS ).setBackground( Config.COLOR_NORMAL );
-		
-		// currently changed text field is ok?
-		long changedTicks = checkTextField( doc, maxTicks );
-		if ( changedTicks > 0 )
-			widgets.get( name ).setBackground( Config.COLOR_OK );
-		
-		// from > to?
-		if ( fromTicks >= 0 && toTicks >= 0 ) {
-			if ( fromTicks > toTicks ) {
-				widgets.get( InfoView.FILTER_TXT_FROM_TICKS ).setBackground( Config.COLOR_ERROR );
-				widgets.get( InfoView.FILTER_TXT_TO_TICKS   ).setBackground( Config.COLOR_ERROR );
+		long fromTicks = 0;
+		if (checkTicks) {
+			fromTicks = checkTickTextField( docFrom, maxTicks );
+			if ( fromTicks < 0 ) {
+				txtFrom.setBackground( Config.COLOR_ERROR );
+				result = false;
+			}
+			else {
+				txtFrom.setBackground( Config.COLOR_NORMAL );
 			}
 		}
 		
-		// everything is ok?
-		if ( fromTicks >= 0 && toTicks >= 0 && fromTicks <= toTicks ) {
-			
-			// apply filter to the changes
-			filterMessages();
-			
-			return true;
+		// check "to"
+		long toTicks = maxTicks;
+		if (checkTicks) {
+			toTicks = checkTickTextField( docTo, maxTicks );
+			if ( toTicks < 0 ) {
+				txtTo.setBackground( Config.COLOR_ERROR );
+				result = false;
+			}
+			else {
+				txtTo.setBackground( Config.COLOR_NORMAL );
+			}
 		}
 		
-		// something is invalid
-		return false;
+		// check "tracks"
+		HashSet<Integer> tracks = null;
+		if (checkTracks) {
+			tracks = getTracksFromTextField( docTracks );
+			if ( null == tracks ) {
+				txtTracks.setBackground( Config.COLOR_ERROR );
+				result = false;
+			}
+			else {
+				txtTracks.setBackground( Config.COLOR_NORMAL );
+			}
+		}
+		
+		// currently changed text field is ok? - Than make it green.
+		boolean makeGreen = false;
+		if ( InfoView.FILTER_TXT_FROM_TICKS.equals(name) && fromTicks > 0 )
+			makeGreen = true;
+		else if ( InfoView.FILTER_TXT_TO_TICKS.equals(name) && toTicks > 0 )
+			makeGreen = true;
+		else if ( InfoView.FILTER_TXT_TRACKS.equals(name) && tracks != null )
+			makeGreen = true;
+		if (makeGreen)
+			widgets.get( name ).setBackground( Config.COLOR_OK );
+		
+		// from > to?
+		if ( checkTicks && fromTicks >= 0 && toTicks >= 0 ) {
+			if ( fromTicks > toTicks ) {
+				txtFrom.setBackground( Config.COLOR_ERROR );
+				txtTo.setBackground( Config.COLOR_ERROR );
+				result = false;
+			}
+		}
+		
+		// apply message filter only if the check succeeded
+		if (result) {
+			filterMessages();
+		}
+		
+		return result;
 	}
 	
 	/**
@@ -537,7 +606,7 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 	 * @param maxTicks   Number of ticks in the currently loaded MIDI sequence.
 	 * @return the textfield's value, if the value is ok, otherwise: **-1**.
 	 */
-	private long checkTextField( Document doc, long maxTicks ) {
+	private long checkTickTextField( Document doc, long maxTicks ) {
 		
 		// get the value from the text field
 		long ticks = -1;
@@ -553,6 +622,106 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 			return -1;
 		
 		return ticks;
+	}
+	
+	/**
+	 * Gets, checks and returns the tracks from the text field.
+	 * 
+	 * @param doc  Document of the text field to check.
+	 * @return the track numbers, if the field contains no errors.
+	 *         Returns **null** if there are errors.
+	 */
+	private HashSet<Integer> getTracksFromTextField( Document doc ) {
+		
+		HashSet<Integer> result = new HashSet<Integer>();
+		
+		// get track number
+		HashMap<String, Object> sequenceInfo = SequenceAnalyzer.getSequenceInfo();
+		Object tracksObj = sequenceInfo.get( "num_tracks" );
+		int  maxTrack = 0;
+		if ( tracksObj != null )
+			maxTrack = (int) tracksObj - 1;
+		
+		try {
+			String   text    = doc.getText( 0, doc.getLength() );
+			String[] parts   = text.split( ",", -1 );
+			Pattern  pSingle = Pattern.compile( "^(\\d+)$" );
+			Pattern  pRange  = Pattern.compile( "^(\\d+)\\-(\\d+)$" );
+			
+			// one part is either a track number or a range
+			PART:
+			for ( String part : parts ) {
+				
+				// single track number?
+				Matcher m = pSingle.matcher( part );
+				if ( m.find() ) {
+					int track = getTrackNum( part, maxTrack );
+					result.add( track );
+					
+					continue PART;
+				}
+				
+				// range?
+				m = pRange.matcher( part );
+				if ( m.find() ) {
+					String firstStr = m.group( 1 );
+					String lastStr  = m.group( 2 );
+					int    smallNum = getTrackNum( firstStr, maxTrack );
+					int    bigNum   = getTrackNum( lastStr,  maxTrack );
+					if ( smallNum > bigNum )
+						return null;
+					
+					// process each element of the range
+					while ( smallNum <= bigNum ) {
+						result.add( smallNum );
+						smallNum++;
+					}
+					
+					continue PART;
+				}
+				
+				// invalid element (neither single number nor range)
+				else {
+					return null;
+				}
+			}
+		}
+		catch( NumberFormatException | BadLocationException e ) {
+			return null;
+		}
+		
+		// empty field?
+		if ( result.isEmpty() )
+			return null;
+		
+		// ok
+		return result;
+	}
+	
+	/**
+	 * Converts the given string into a number and checks if it's a valid
+	 * track number.
+	 * 
+	 * @param str       String to convert.
+	 * @param maxTrack  Maximum track number.
+	 * @return the track number, beginning with **0**, or **-1** if
+	 *         the check fails.
+	 * @throws NumberFormatException if the string cannot be converted
+	 *         into an integer or the check fails.
+	 */
+	private int getTrackNum( String str, int maxTrack ) throws NumberFormatException {
+		
+		// convert string to int
+		int track = Integer.parseInt( str );
+		
+		// check range
+		if ( track < 0 )
+			throw new NumberFormatException();
+		if ( track > maxTrack )
+			throw new NumberFormatException();
+		
+		// ok
+		return track;
 	}
 	
 	/**
@@ -653,14 +822,16 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 		
 		// create filter for checkboxes
 		HashMap<String, Boolean> filterBoolean = new HashMap<String, Boolean>();
-		boolean chDep      = ( (JCheckBox) widgets.get(InfoView.FILTER_CBX_CHAN_DEP)    ).isSelected();
-		boolean chIndep    = ( (JCheckBox) widgets.get(InfoView.FILTER_CBX_CHAN_INDEP)  ).isSelected();
-		boolean useNodes   = ( (JCheckBox) widgets.get(InfoView.FILTER_CBX_NODE)        ).isSelected();
-		boolean limitTicks = ( (JCheckBox) widgets.get(InfoView.FILTER_CBX_LIMIT_TICKS) ).isSelected();
-		filterBoolean.put( InfoView.FILTER_CBX_CHAN_DEP,    chDep      );
-		filterBoolean.put( InfoView.FILTER_CBX_CHAN_INDEP,  chIndep    );
-		filterBoolean.put( InfoView.FILTER_CBX_NODE,        useNodes   );
-		filterBoolean.put( InfoView.FILTER_CBX_LIMIT_TICKS, limitTicks );
+		boolean chDep       = ( (JCheckBox) widgets.get(InfoView.FILTER_CBX_CHAN_DEP)     ).isSelected();
+		boolean chIndep     = ( (JCheckBox) widgets.get(InfoView.FILTER_CBX_CHAN_INDEP)   ).isSelected();
+		boolean useNodes    = ( (JCheckBox) widgets.get(InfoView.FILTER_CBX_NODE)         ).isSelected();
+		boolean limitTicks  = ( (JCheckBox) widgets.get(InfoView.FILTER_CBX_LIMIT_TICKS)  ).isSelected();
+		boolean limitTracks = ( (JCheckBox) widgets.get(InfoView.FILTER_CBX_LIMIT_TRACKS) ).isSelected();
+		filterBoolean.put( InfoView.FILTER_CBX_CHAN_DEP,     chDep       );
+		filterBoolean.put( InfoView.FILTER_CBX_CHAN_INDEP,   chIndep     );
+		filterBoolean.put( InfoView.FILTER_CBX_NODE,         useNodes    );
+		filterBoolean.put( InfoView.FILTER_CBX_LIMIT_TICKS,  limitTicks  );
+		filterBoolean.put( InfoView.FILTER_CBX_LIMIT_TRACKS, limitTracks );
 		for ( int channel = 0; channel < 16; channel++ ) {
 			String  name = InfoView.FILTER_CBX_CHAN_PREFIX + channel;
 			boolean chan = ((JCheckBox) widgets.get(name) ).isSelected();
@@ -691,13 +862,17 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 			return;
 		}
 		
+		// get filter for tracks
+		JTextField       txtTracks    = (JTextField) widgets.get( InfoView.FILTER_TXT_TRACKS );
+		HashSet<Integer> filterTracks = getTracksFromTextField( txtTracks.getDocument() );
+		
 		// remember the currently selected message
 		MessageDetail selectedMsg = getSelectedMessage();
 		
 		// apply filter
 		MidicaTable       table = view.getMsgTable();
 		MessageTableModel model = (MessageTableModel) table.getModel();
-		model.filterMessages( filterBoolean, filterNode, filterFrom, filterTo );
+		model.filterMessages( filterBoolean, filterNode, filterFrom, filterTo, filterTracks );
 		
 		// update UI
 		updateVisibleTotalLabels();

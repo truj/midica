@@ -117,7 +117,8 @@ public class InfoView extends JDialog {
 	private static final int MSG_TABLE_PREF_HEIGHT       = 150;
 	private static final int COLLAPSE_EXPAND_WIDTH       =  25;
 	private static final int COLLAPSE_EXPAND_HEIGHT      =  25;
-	private static final int TICK_RANGE_FILTER           =  70; // text fields in the message filter
+	private static final int TICK_RANGE_FILTER_WIDTH     =  70; // tick text fields in the message filter
+	private static final int TRACK_RANGE_FILTER_WIDTH    =  90; // track text fields in the message filter
 	private static final int FILTER_BUTTON_HEIGHT        =  15;
 	
 	// Fake widths and heights, used for dimensions. The real sizes are
@@ -137,17 +138,19 @@ public class InfoView extends JDialog {
 	private static final int MAX_HEIGHT_SOUNDFONT_DESC = 155; // max height
 	
 	// filter widget names (used as hashmap key in filterWidgets and as name property)
-	public static final String FILTER_CBX_CHAN_INDEP  = "filter_cbx_chan_indep";
-	public static final String FILTER_CBX_CHAN_DEP    = "filter_cbx_chan_dep";
-	public static final String FILTER_CBX_CHAN_PREFIX = "filter_cbx_single_";
-	public static final String FILTER_CBX_NODE        = "filter_cbx_node";
-	public static final String FILTER_CBX_LIMIT_TICKS = "filter_cbx_limit_ticks";
-	public static final String FILTER_CBX_AUTO_SHOW   = "filter_cbx_auto_show";
-	public static final String FILTER_TXT_FROM_TICKS  = "filter_txt_from_ticks";
-	public static final String FILTER_TXT_TO_TICKS    = "filter_txt_to_ticks";
-	public static final String FILTER_BTN_SHOW_TREE   = "filter_btn_show_tree";
-	public static final String FILTER_LBL_VISIBLE     = "filter_lbl_visible";
-	public static final String FILTER_LBL_TOTAL       = "filter_lbl_total";
+	public static final String FILTER_CBX_CHAN_INDEP   = "filter_cbx_chan_indep";
+	public static final String FILTER_CBX_CHAN_DEP     = "filter_cbx_chan_dep";
+	public static final String FILTER_CBX_CHAN_PREFIX  = "filter_cbx_single_";
+	public static final String FILTER_CBX_NODE         = "filter_cbx_node";
+	public static final String FILTER_CBX_LIMIT_TICKS  = "filter_cbx_limit_ticks";
+	public static final String FILTER_CBX_LIMIT_TRACKS = "filter_cbx_limit_tracks";
+	public static final String FILTER_CBX_AUTO_SHOW    = "filter_cbx_auto_show";
+	public static final String FILTER_TXT_FROM_TICKS   = "filter_txt_from_ticks";
+	public static final String FILTER_TXT_TO_TICKS     = "filter_txt_to_ticks";
+	public static final String FILTER_TXT_TRACKS       = "filter_txt_tracks";
+	public static final String FILTER_BTN_SHOW_TREE    = "filter_btn_show_tree";
+	public static final String FILTER_LBL_VISIBLE      = "filter_lbl_visible";
+	public static final String FILTER_LBL_TOTAL        = "filter_lbl_total";
 	
 	// dimensions (defined later)
 	private static Dimension noteTableDim       = null;
@@ -1397,7 +1400,7 @@ public class InfoView extends JDialog {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.anchor     = GridBagConstraints.WEST;
-		constraints.fill       = GridBagConstraints.HORIZONTAL;
+		constraints.fill       = GridBagConstraints.NONE;
 		constraints.insets     = new Insets( 0, 0, 0, 0 );
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
@@ -1437,27 +1440,28 @@ public class InfoView extends JDialog {
 		
 		// spacer
 		constraints.gridx++;
-		constraints.weightx    = 1;
 		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.weightx    = 1;
 		JLabel spacerTickRange = new JLabel( "<html>&nbsp;&nbsp;&nbsp;" );
 		area.add( spacerTickRange, constraints );
 		
 		// ticks: "from" label
 		constraints.gridx++;
-		constraints.weightx = 0;
 		constraints.fill    = GridBagConstraints.NONE;
+		constraints.weightx = 0;
 		JLabel lblFromTicks = new JLabel( Dict.get(Dict.MSG_FILTER_TICK_FROM) + ": " );
 		area.add( lblFromTicks, constraints );
 		
-		// dimension for tick fields
-		int defaultHeight = ( new JTextField() ).getHeight();
-		Dimension dimVolTxtFld = new Dimension( TICK_RANGE_FILTER, defaultHeight );
+		// dimension for text fields
+		int defaultHeight      = ( new JTextField() ).getHeight();
+		Dimension dimTicksFld  = new Dimension( TICK_RANGE_FILTER_WIDTH,  defaultHeight );
+		Dimension dimTracksFld = new Dimension( TRACK_RANGE_FILTER_WIDTH, defaultHeight );
 		
 		// ticks: "from" textfield
 		constraints.gridx++;
 		constraints.fill        = GridBagConstraints.VERTICAL;
 		JTextField txtFromTicks = new JTextField( minTick + "" );
-		txtFromTicks.setPreferredSize( dimVolTxtFld );
+		txtFromTicks.setPreferredSize( dimTicksFld );
 		txtFromTicks.setName( FILTER_TXT_FROM_TICKS );
 		txtFromTicks.setEnabled( false );
 		txtFromTicks.getDocument().putProperty( "name", FILTER_TXT_FROM_TICKS );
@@ -1468,12 +1472,12 @@ public class InfoView extends JDialog {
 		
 		// spacer
 		constraints.gridx++;
+		constraints.fill    = GridBagConstraints.NONE;
 		JLabel spacerFromTo = new JLabel( " " );
 		area.add( spacerFromTo, constraints );
 		
 		// ticks: "to" label
 		constraints.gridx++;
-		constraints.fill  = GridBagConstraints.NONE;
 		JLabel lblToTicks = new JLabel( Dict.get(Dict.MSG_FILTER_TICK_TO) + ": " );
 		area.add( lblToTicks, constraints );
 		
@@ -1481,7 +1485,7 @@ public class InfoView extends JDialog {
 		constraints.gridx++;
 		constraints.fill      = GridBagConstraints.VERTICAL;
 		JTextField txtToTicks = new JTextField( maxTick + "" );
-		txtToTicks.setPreferredSize( dimVolTxtFld );
+		txtToTicks.setPreferredSize( dimTicksFld );
 		txtToTicks.setName( FILTER_TXT_TO_TICKS );
 		txtToTicks.setEnabled( false );
 		txtToTicks.getDocument().putProperty( "name", FILTER_TXT_TO_TICKS );
@@ -1489,6 +1493,52 @@ public class InfoView extends JDialog {
 		txtToTicks.setBackground( Config.COLOR_NORMAL );
 		area.add( txtToTicks, constraints );
 		filterWidgets.put( FILTER_TXT_TO_TICKS, txtToTicks );
+		
+		// spacer
+		constraints.gridx++;
+		constraints.weightx    = 1;
+		constraints.fill       = GridBagConstraints.BOTH;
+		JLabel spacerTickTrack = new JLabel( "<html>&nbsp;&nbsp;&nbsp;" );
+		area.add( spacerTickTrack, constraints );
+		
+		// checkbox to limit tracks
+		constraints.gridx++;
+		constraints.weightx = 0;
+		constraints.fill    = GridBagConstraints.NONE;
+		JCheckBox cbxTracks = new JCheckBox( Dict.get(Dict.MSG_FILTER_LIMIT_TRACKS) );
+		cbxTracks.setToolTipText( Dict.get(Dict.MSG_FLTR_TT_LIMIT_TRACKS) );
+		cbxTracks.addItemListener( controller );
+		cbxTracks.setName( FILTER_CBX_LIMIT_TRACKS );
+		area.add( cbxTracks, constraints );
+		filterWidgets.put( FILTER_CBX_LIMIT_TRACKS, cbxTracks );
+		
+		// spacer
+		constraints.gridx++;
+		JLabel spacerTrack = new JLabel( "<html>&nbsp;" );
+		area.add( spacerTrack, constraints );
+		
+		// get max track number
+		int maxTrack = 0;
+		HashMap<String, Object> sequenceInfo = SequenceAnalyzer.getSequenceInfo();
+		Object trackNumObj                   = sequenceInfo.get( "num_tracks" );
+		if ( trackNumObj != null ) {
+			maxTrack = (int) trackNumObj;
+			maxTrack--; // track numbers start from 0
+		}
+		
+		// limit tracks text field
+		constraints.gridx++;
+		constraints.fill      = GridBagConstraints.VERTICAL;
+		JTextField txtTracks = new JTextField( "0-" + maxTrack );
+		txtTracks.setPreferredSize( dimTracksFld );
+		txtTracks.setName( FILTER_TXT_TRACKS );
+		txtTracks.setEnabled( false );
+		txtTracks.getDocument().putProperty( "name", FILTER_TXT_TRACKS );
+		txtTracks.getDocument().addDocumentListener( controller );
+		txtTracks.setBackground( Config.COLOR_NORMAL );
+		txtTracks.setToolTipText( Dict.get(Dict.MSG_FLTR_TT_TRACKS) );
+		area.add( txtTracks, constraints );
+		filterWidgets.put( FILTER_TXT_TRACKS, txtTracks );
 		
 		// line 2
 		
@@ -1508,7 +1558,7 @@ public class InfoView extends JDialog {
 		constraints.gridx++;
 		constraints.fill      = GridBagConstraints.HORIZONTAL;
 		constraints.weightx   = 1;
-		constraints.gridwidth = 8;
+		constraints.gridwidth = 12;
 		area.add( createMsgFilterChannelCheckboxes(), constraints );
 		
 		// line 3
@@ -1516,9 +1566,8 @@ public class InfoView extends JDialog {
 		// button, auto-show checkbox, visible/total count
 		constraints.gridy++;
 		constraints.gridx     = 0;
-		constraints.fill      = GridBagConstraints.HORIZONTAL;
 		constraints.weightx   = 0;
-		constraints.gridwidth = 9;
+		constraints.gridwidth = 13;
 		area.add( createMsgFilterLine3(), constraints );
 		
 		return area;

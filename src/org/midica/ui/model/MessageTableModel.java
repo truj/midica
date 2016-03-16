@@ -166,14 +166,16 @@ public class MessageTableModel extends MidicaTableModel {
 	 * @param filterNodes    The selected nodes from the message tree.
 	 * @param filterFrom     Minimum tick number.
 	 * @param filterTo       Maximum tick number.
+	 * @param filterTracks   The tracks to be shown.
 	 */
 	public void filterMessages( HashMap<String, Boolean>   filterBoolean,
 	                            ArrayList<MessageTreeNode> filterNodes,
-	                            long filterFrom, long filterTo ) {
+	                            long filterFrom, long filterTo, HashSet<Integer> filterTracks ) {
 		
 		// unpack filter elements
-		boolean          limitTicks      = filterBoolean.get( InfoView.FILTER_CBX_LIMIT_TICKS );
-		boolean          mustFilterNodes = filterBoolean.get( InfoView.FILTER_CBX_NODE        );
+		boolean          limitTicks      = filterBoolean.get( InfoView.FILTER_CBX_LIMIT_TICKS  );
+		boolean          limitTracks     = filterBoolean.get( InfoView.FILTER_CBX_LIMIT_TRACKS );
+		boolean          mustFilterNodes = filterBoolean.get( InfoView.FILTER_CBX_NODE         );
 		HashSet<Integer> fltrChannel     = new HashSet<Integer>();
 		for ( int channel = 0; channel < 16; channel++ ) {
 			String name             = InfoView.FILTER_CBX_CHAN_PREFIX + channel;
@@ -212,6 +214,17 @@ public class MessageTableModel extends MidicaTableModel {
 				if ( tickObj instanceof Long ) {
 					long tick = (long) tickObj;
 					if ( tick < filterFrom || tick > filterTo ) {
+						continue MESSAGE;
+					}
+				}
+			}
+			
+			// apply limit-tracks filter
+			if (limitTracks) {
+				Object trackObj = msg.getOption( "track" );
+				if ( trackObj instanceof Integer ) {
+					int track = (int) trackObj;
+					if ( ! filterTracks.contains(track) ) {
 						continue MESSAGE;
 					}
 				}

@@ -481,6 +481,7 @@ public class Dict {
 	public static final String MSG_FILTER_LIMIT_TICKS      = "msg_filter_limit_ticks";
 	public static final String MSG_FILTER_TICK_FROM        = "msg_filter_tick_from";
 	public static final String MSG_FILTER_TICK_TO          = "msg_filter_tick_to";
+	public static final String MSG_FILTER_LIMIT_TRACKS     = "msg_filter_limit_tracks";
 	public static final String MSG_FILTER_SHOW_IN_TREE     = "msg_filter_show_in_tree";
 	public static final String MSG_FILTER_AUTO_SHOW        = "msg_filter_auto_show";
 	public static final String MSG_FLTR_TT_CHANNEL_INDEP   = "msg_fltr_tt_channel_indep";
@@ -488,6 +489,8 @@ public class Dict {
 	public static final String MSG_FLTR_TT_CHANNEL_SINGLE  = "msg_fltr_tt_channel_single";
 	public static final String MSG_FLTR_TT_SELECTED_NODES  = "msg_fltr_tt_selected_nodes";
 	public static final String MSG_FLTR_TT_LIMIT_TICKS     = "msg_fltr_tt_limit_ticks";
+	public static final String MSG_FLTR_TT_LIMIT_TRACKS    = "msg_fltr_tt_limit_tracks";
+	public static final String MSG_FLTR_TT_TRACKS          = "msg_fltr_tt_tracks";
 	public static final String MSG_FLTR_TT_SHOW_IN_TREE    = "msg_fltr_tt_show_in_tree";
 	public static final String MSG_FLTR_TT_AUTO_SHOW       = "msg_fltr_tt_auto_show";
 	public static final String MSG_FLTR_TT_VISIBLE         = "msg_fltr_tt_visible";
@@ -1204,6 +1207,7 @@ public class Dict {
 		set( MSG_FILTER_LIMIT_TICKS,                 "Limit Ticks"                   );
 		set( MSG_FILTER_TICK_FROM,                   "From"                          );
 		set( MSG_FILTER_TICK_TO,                     "To"                            );
+		set( MSG_FILTER_LIMIT_TRACKS,                "Limit Tracks"                  );
 		set( MSG_FILTER_SHOW_IN_TREE,                "Show in Tree"                  );
 		set( MSG_FILTER_AUTO_SHOW,                   "Automatically"                 );
 		set( MSG_FLTR_TT_CHANNEL_INDEP,              "Show Channel-Independent Messages"                  );
@@ -1211,6 +1215,13 @@ public class Dict {
 		set( MSG_FLTR_TT_CHANNEL_SINGLE,             "Show Messages of channel"                           );
 		set( MSG_FLTR_TT_SELECTED_NODES,             "Show ONLY message types under selected tree nodes." );
 		set( MSG_FLTR_TT_LIMIT_TICKS,                "Show only messages in a certain tick range."        );
+		set( MSG_FLTR_TT_LIMIT_TRACKS,               "Show only messages from certain track numbers"      );
+		set( MSG_FLTR_TT_TRACKS,                     "<html>Track numbers begin with 0.<br>" +
+		                                             "Several track numbers can be separated by a comma or<br>" +
+		                                             "given as a range (separated by a minus).<br>" +
+		                                             "Several ranges can also be given, separated by a comma.<br>" +
+		                                             "Example:<br>" +
+		                                             "<b>0-3,6,8-11</b>" );
 		set( MSG_FLTR_TT_SHOW_IN_TREE,               "Show selected messsage in Tree"                     );
 		set( MSG_FLTR_TT_AUTO_SHOW,                  "Show Selected Message in the tree automatically without pushing the button" );
 		set( MSG_FLTR_TT_VISIBLE,                    "Currently shown Messages (matching the filter)" );

@@ -105,6 +105,7 @@ public class MessageDetail implements IMessageDetailProvider, Comparable<Message
 	 * 
 	 * # tickstamp
 	 * # channel
+	 * # track
 	 * # status byte
 	 * # length
 	 * 
@@ -147,6 +148,14 @@ public class MessageDetail implements IMessageDetailProvider, Comparable<Message
 			if ( result != 0 ) {
 				return result;
 			}
+		}
+		
+		// sort by track number
+		Integer track      = (Integer) getOption( "track" );
+		Integer otherTrack = (Integer) other.getOption( "track" );
+		result = track.compareTo( otherTrack );
+		if ( result != 0 ) {
+			return result;
 		}
 		
 		// sort by status byte
