@@ -72,7 +72,6 @@ public class MidiExporter extends Exporter {
 	/**
 	 * Creates a modified copy of the loaded sequence.
 	 * Removes meta events for key presses and key releases.
-	 * Adds a Midica signature as a meta event.
 	 * 
 	 * @return copied and modified MIDI Sequence.
 	 * @throws InvalidMidiDataException if the new MIDI (copied) sequence cannot be created.

@@ -86,6 +86,7 @@ public class MidiListener implements MetaEventListener {
 	 * It determines the exact event type and informs the {@link PlayerController} and
 	 * the {@link MidiDevices} about the changes.
 	 */
+	@Override
 	public void meta( MetaMessage msg ) {
 		
 		int    type   = msg.getType();

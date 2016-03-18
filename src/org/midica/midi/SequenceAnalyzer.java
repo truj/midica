@@ -745,11 +745,11 @@ public class SequenceAnalyzer {
 		
 		if ( MidiListener.META_INSTRUMENT_NAME == type ) {
 			
-			// get track number (== channel) - works only for Midica-produced MIDI streams
-			byte track = data[ 0 ];
+			// get channel number - works only for Midica-produced MIDI sequences
+			byte channel = data[ 0 ];
 			
 			// possibly produced by Midica?
-			if ( 0 <= track && track <= MidiDevices.NUMBER_OF_CHANNELS && data.length > 1 ) {
+			if ( 0 <= channel && channel <= MidiDevices.NUMBER_OF_CHANNELS && data.length > 1 ) {
 				data = shift( data );
 			}
 			else {
@@ -759,7 +759,7 @@ public class SequenceAnalyzer {
 			
 			// remember the channel comment
 			String text = new String( data );
-			commentHistory.get( track ).put( tick, text );
+			commentHistory.get( channel ).put( tick, text );
 		}
 	}
 	

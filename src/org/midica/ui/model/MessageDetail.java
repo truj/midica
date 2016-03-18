@@ -104,7 +104,6 @@ public class MessageDetail implements IMessageDetailProvider, Comparable<Message
 	 * Sorting criteria are:
 	 * 
 	 * # tickstamp
-	 * # channel
 	 * # track
 	 * # message number inside the track
 	 * 
@@ -124,29 +123,6 @@ public class MessageDetail implements IMessageDetailProvider, Comparable<Message
 		int  result    = tick.compareTo( otherTick );
 		if ( result != 0 ) {
 			return result;
-		}
-		
-		// sort by channel - messages without channel first
-		Object channel      = getOption( "channel" );
-		Object otherChannel = other.getOption( "channel" );
-		if ( null == channel ) {
-			if ( otherChannel != null ) {
-				return -1;
-			}
-		}
-		else if ( null == otherChannel ) {
-			if ( channel != null ) {
-				return 1;
-			}
-		}
-		else if ( channel != null ) {
-			// both have a channel
-			Integer channelInt = (Integer) channel;
-			Integer otherInt   = (Integer) otherChannel;
-			result             = channelInt.compareTo( otherInt );
-			if ( result != 0 ) {
-				return result;
-			}
 		}
 		
 		// sort by track number
