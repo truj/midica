@@ -266,6 +266,7 @@ public class SequenceAnalyzer {
 		// Therefore the ORIGINAL sequence is used.
 		int trackNum = 0;
 		for ( Track t : sequence.getTracks() ) {
+			int msgNum = 0;
 			for ( int i=0; i < t.size(); i++ ) {
 				MidiEvent   event = t.get( i );
 				long        tick  = event.getTick();
@@ -277,16 +278,17 @@ public class SequenceAnalyzer {
 				}
 				
 				if ( msg instanceof MetaMessage ) {
-					processMetaMessage( (MetaMessage) msg, tick, trackNum );
+					processMetaMessage( (MetaMessage) msg, tick, trackNum, msgNum );
 				}
 				else if ( msg instanceof ShortMessage ) {
-					processShortMessage( (ShortMessage) msg, tick, trackNum );
+					processShortMessage( (ShortMessage) msg, tick, trackNum, msgNum );
 				}
 				else if ( msg instanceof SysexMessage ) {
-					processSysexMessage( (SysexMessage) msg, tick, trackNum );
+					processSysexMessage( (SysexMessage) msg, tick, trackNum, msgNum );
 				}
 				else {
 				}
+				msgNum++;
 			}
 			trackNum++;
 		}
@@ -297,13 +299,14 @@ public class SequenceAnalyzer {
 	/**
 	 * Retrieves general information from short messages.
 	 * 
-	 * @param msg   Short message
-	 * @param tick  Tickstamp
+	 * @param msg       Short message
+	 * @param tick      Tickstamp
 	 * @param trackNum  Track number (beginning with 0).
+	 * @param msgNum    Number of the message inside the track.
 	 * @throws ReflectiveOperationException if the message cannot be added to
 	 *         the tree model.
 	 */
-	private static void processShortMessage( ShortMessage msg, long tick, int trackNum ) throws ReflectiveOperationException {
+	private static void processShortMessage( ShortMessage msg, long tick, int trackNum, int msgNum ) throws ReflectiveOperationException {
 		
 		// prepare data structures
 		ArrayList<String[]>     path            = new ArrayList<String[]>();
@@ -446,8 +449,9 @@ public class SequenceAnalyzer {
 			details.put( "status_byte", statusStr );
 			distinctDetails.put( "channel", channel );
 		}
-		details.put( "length", msgLength       );
-		details.put( "tick",   tick            );
+		details.put( "length",  msgLength );
+		details.put( "tick",    tick      );
+		details.put( "msg_num", msgNum    );
 		distinctDetails.put( "track", trackNum );
 		
 		// add message to the data structures
@@ -579,10 +583,11 @@ public class SequenceAnalyzer {
 	 * @param msg       Meta message
 	 * @param tick      Tickstamp
 	 * @param trackNum  Track number (beginning with 0).
+	 * @param msgNum    Number of the message inside the track.
 	 * @throws ReflectiveOperationException if the message cannot be added to
 	 *         the tree model.
 	 */
-	private static void processMetaMessage( MetaMessage msg, long tick, int trackNum ) throws ReflectiveOperationException {
+	private static void processMetaMessage( MetaMessage msg, long tick, int trackNum, int msgNum ) throws ReflectiveOperationException {
 		
 		// prepare data structures for the message tree
 		ArrayList<String[]>     path            = new ArrayList<String[]>();
@@ -706,6 +711,7 @@ public class SequenceAnalyzer {
 			}
 			distinctDetails.put( "text", text );
 		}
+		details.put( "msg_num", msgNum );
 		distinctDetails.put( "track", trackNum );
 		
 		// add message to the data structures
@@ -759,13 +765,14 @@ public class SequenceAnalyzer {
 	/**
 	 * Retrieves information from SysEx messages.
 	 * 
-	 * @param msg   SysEx message
-	 * @param tick  Tickstamp
+	 * @param msg       SysEx message
+	 * @param tick      Tickstamp
 	 * @param trackNum  Track number (beginning with 0).
+	 * @param msgNum    Number of the message inside the track.
 	 * @throws ReflectiveOperationException if the message cannot be added to
 	 *         the tree model.
 	 */
-	private static void processSysexMessage( SysexMessage msg, long tick, int trackNum ) throws ReflectiveOperationException {
+	private static void processSysexMessage( SysexMessage msg, long tick, int trackNum, int msgNum ) throws ReflectiveOperationException {
 		
 		// prepare data structures
 		ArrayList<String[]>     path            = new ArrayList<String[]>();
@@ -925,10 +932,11 @@ public class SequenceAnalyzer {
 		}
 		
 		// get general details
-		details.put( "status_byte", "F0"       ); // status byte for SysEx
-		details.put( "length",      msgLength  );
-		details.put( "tick",        tick       );
-		distinctDetails.put( "track", trackNum );
+		details.put( "status_byte",   "F0"      ); // status byte for SysEx
+		details.put( "length",        msgLength );
+		details.put( "tick",          tick      );
+		details.put( "msg_num",       msgNum    );
+		distinctDetails.put( "track", trackNum  );
 		
 		// add message to the data structures
 		MessageTreeNode leaf      = (MessageTreeNode) msgTreeModel.add( path );

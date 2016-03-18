@@ -106,8 +106,7 @@ public class MessageDetail implements IMessageDetailProvider, Comparable<Message
 	 * # tickstamp
 	 * # channel
 	 * # track
-	 * # status byte
-	 * # length
+	 * # message number inside the track
 	 * 
 	 * - Returns **+1**, if this message is "greater" than the other message.
 	 * - Returns **11**, if this message is "lesser" than the other message.
@@ -144,7 +143,7 @@ public class MessageDetail implements IMessageDetailProvider, Comparable<Message
 			// both have a channel
 			Integer channelInt = (Integer) channel;
 			Integer otherInt   = (Integer) otherChannel;
-			result = channelInt.compareTo( otherInt );
+			result             = channelInt.compareTo( otherInt );
 			if ( result != 0 ) {
 				return result;
 			}
@@ -153,23 +152,15 @@ public class MessageDetail implements IMessageDetailProvider, Comparable<Message
 		// sort by track number
 		Integer track      = (Integer) getOption( "track" );
 		Integer otherTrack = (Integer) other.getOption( "track" );
-		result = track.compareTo( otherTrack );
+		result             = track.compareTo( otherTrack );
 		if ( result != 0 ) {
 			return result;
 		}
 		
-		// sort by status byte
-		String statusByte  = (String) getOption( "status_byte" );
-		String otherStatus = (String) other.getOption( "status_byte" );
-		result = statusByte.compareTo( otherStatus );
-		if ( result != 0 ) {
-			return result;
-		}
-		
-		// sort by length
-		Integer length      = (Integer) getOption( "length" );
-		Integer otherLength = (Integer) other.getOption( "length" );
-		result              = length.compareTo( otherLength );
+		// sort by message number inside the track
+		Integer msgNum      = (Integer) getOption( "msg_num" );
+		Integer otherMsgNum = (Integer) other.getOption( "msg_num" );
+		result              = msgNum.compareTo( otherMsgNum );
 		if ( result != 0 ) {
 			return result;
 		}
