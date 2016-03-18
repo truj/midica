@@ -865,6 +865,9 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 		// get filter for tracks
 		JTextField       txtTracks    = (JTextField) widgets.get( InfoView.FILTER_TXT_TRACKS );
 		HashSet<Integer> filterTracks = getTracksFromTextField( txtTracks.getDocument() );
+		if ( null == filterTracks ) {
+			return;
+		}
 		
 		// remember the currently selected message
 		MessageDetail selectedMsg = getSelectedMessage();

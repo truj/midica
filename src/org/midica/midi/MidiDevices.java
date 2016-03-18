@@ -51,7 +51,7 @@ public final class MidiDevices {
 	
 	// constants
 	public static final int  WAITING_TIME_BEFORE_REMEMBER =        2; // milliseconds
-	public static final int  DEFAULT_VOLUME               =       64; // TODO: change to 100 ???
+	public static final int  DEFAULT_VOLUME               =      100; // default according to https://midi.org/articles/about-midi-part-4-midi-files
 	public static final int  DEFAULT_TEMPO_BPM            =      120; // beats per minute
 	public static final int  DEFAULT_TEMPO_MPQ            = 60000000; // microseconds per quarter note
 	public static final int  NUMBER_OF_CHANNELS           =       16;

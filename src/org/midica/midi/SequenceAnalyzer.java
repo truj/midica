@@ -700,7 +700,8 @@ public class SequenceAnalyzer {
 		details.put( "length",      msgLength  );
 		details.put( "tick",        tick       );
 		details.put( "meta_type",   type       );
-		if ( isMetaMessageWithText(type) ) { // get texts from text-based messages
+		boolean msgContainsText = type >= 0x01 && type <= 0x0F;
+		if (msgContainsText) { // get texts from text-based messages
 			String text;
 			try {
 				// try ASCII first
@@ -1562,43 +1563,6 @@ public class SequenceAnalyzer {
 		
 		// fallback
 		return Dict.get( Dict.UNKNOWN );
-	}
-	
-	/**
-	 * Determines if META messages of the given type contain text or not.
-	 * 
-	 * @param type  META message type (1st byte after the status byte)
-	 * @return
-	 */
-	private static final boolean isMetaMessageWithText( int type ) {
-		
-		// text base meta types
-		if ( MidiListener.META_TEXT            == type
-		  || MidiListener.META_COPYRIGHT       == type
-		  || MidiListener.META_TRACK_NAME      == type
-		  || MidiListener.META_INSTRUMENT_NAME == type
-		  || MidiListener.META_LYRICS          == type
-		  || MidiListener.META_MARKER          == type
-		  || MidiListener.META_CUE_POINT       == type ) {
-			return true;
-		}
-		
-		// not text based meta types
-		if ( MidiListener.META_SEQUENCE_NUMBER == type
-		  || MidiListener.META_CHANNEL_PREFIX  == type
-		  || MidiListener.META_END_OF_SEQUENCE == type
-		  || MidiListener.META_SET_TEMPO       == type
-		  || MidiListener.META_SMPTE_OFFSET    == type
-		  || MidiListener.META_TIME_SIGNATURE  == type
-		  || MidiListener.META_KEY_SIGNATURE   == type ) {
-			return false;
-		}
-		
-		// the rest is either sequencer specific or unknown
-		if (DEBUG_MODE)
-			return true;
-		else
-			return false;
 	}
 	
 	/**
