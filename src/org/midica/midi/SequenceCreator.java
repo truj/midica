@@ -263,6 +263,23 @@ public class SequenceCreator {
 	}
 	
 	/**
+	 * Adds a MIDI message to the given track.
+	 * 
+	 * This is needed for karaoke-related meta messages from foreign MIDI
+	 * files. These messages must be put into the right track.
+	 * That makes sure that they are later processed in the right order.
+	 * (Sorted by tick, not by original track number).
+	 * 
+	 * @param msg    Meta message.
+	 * @param track  Track number.
+	 * @param tick   Tickstamp of the event.
+	 */
+	public static void addMessageToTrack( MidiMessage msg, int track, long tick ) {
+		MidiEvent event = new MidiEvent( msg, tick );
+		tracks[ track ].add( event );
+	}
+	
+	/**
 	 * Returns the resolution of the MIDI sequence in ticks per quarter note.
 	 * 
 	 * @return Resolution in ticks per quarter note.
@@ -284,7 +301,7 @@ public class SequenceCreator {
 	 *                 that change their activity (and/or other properties) at this tick.
 	 * @throws InvalidMidiDataException if one of the marker messages cannot be created.
 	 */
-	public static void addMarkers ( TreeMap<Long, TreeSet<Byte>> markers ) throws InvalidMidiDataException {
+	public static void addMarkers( TreeMap<Long, TreeSet<Byte>> markers ) throws InvalidMidiDataException {
 		
 		for ( Entry<Long, TreeSet<Byte>> eventData : markers.entrySet() ) {
 			

@@ -332,7 +332,7 @@ public class MidicaPLExporter extends Exporter {
 	 * @return MidicaPL string to be written into the export file
 	 */
 	private String createMidicaPL() {
-		StringBuffer output = new StringBuffer();
+		StringBuilder output = new StringBuilder();
 		
 		output.append( createInstrInitBlock() );
 		
@@ -356,7 +356,7 @@ public class MidicaPLExporter extends Exporter {
 	private String createInstrInitBlock() {
 		
 		// open block
-		StringBuffer block = new StringBuffer( MidicaPLParser.INSTRUMENTS + newline );
+		StringBuilder block = new StringBuilder( MidicaPLParser.INSTRUMENTS + newline );
 		
 		// TODO: delete
 		System.out.println( "Number of tracks: " + MidiDevices.getSequence().getTracks().length );

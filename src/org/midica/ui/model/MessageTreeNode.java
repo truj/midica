@@ -217,8 +217,8 @@ public class MessageTreeNode extends MidicaTreeNode implements IMessageDetailPro
 			return null;
 		
 		// create a string
-		StringBuffer result   = new StringBuffer("");
-		boolean      firstOpt = true;
+		StringBuilder result   = new StringBuilder("");
+		boolean       firstOpt = true;
 		for ( Object obj : distinctOptions.get(name) ) {
 			if ( ! firstOpt )
 				result.append( separator );

@@ -21,6 +21,7 @@ import javax.sound.midi.SysexMessage;
 import javax.sound.midi.Track;
 
 import org.midica.config.Dict;
+import org.midica.midi.MidiListener;
 import org.midica.midi.SequenceCreator;
 
 /**
@@ -112,15 +113,50 @@ public class MidiParser extends SequenceParser {
 	}
 	
 	/**
-	 * Processes a meta message from the input sequence. Meta messages are just
-	 * forwarded into the target sequence without being changed.
+	 * Processes a meta message from the input sequence.
+	 * 
+	 * Meta messages are just forwarded into the target sequence without being
+	 * changed. Karaoke-related meta messages are written into track 1 or 2.
+	 * All others will be written into track 0.
 	 * 
 	 * @param msg   Meta message from the input sequence.
 	 * @param tick  Tickstamp of the message's occurrence.
 	 * @throws InvalidMidiDataException
 	 */
 	private void processMetaMessage( MetaMessage msg, long tick ) throws InvalidMidiDataException {
-		SequenceCreator.addMessageGeneric( msg, tick );
+		int track = 0; // default track for generic messages
+		int type  = msg.getType();
+		
+		// lyrics: track 2
+		if ( MidiListener.META_LYRICS == type ) {
+			track = 2;
+		}
+		
+		// text: further checks needed
+		else if ( MidiListener.META_TEXT == type ) {
+			String text = new String( msg.getData() );
+			
+			// software version (file probably created by Midica before)
+			if ( tick <= SequenceCreator.TICK_SOFTWARE
+			  && text.startsWith(SequenceCreator.GENERATED_BY) ) {
+				track = 0;
+			}
+			
+			// karaoke meta information for track 1
+			else if ( text.startsWith("@K")
+			       || text.startsWith("@V")
+			       || text.startsWith("@I") ) {
+				track = 1;
+			}
+			
+			// either lyrics or karaoke meta information for track 2 ("@L" or "@T")
+			else {
+				track = 2;
+			}
+		}
+		
+		// add the message to the right track
+		SequenceCreator.addMessageToTrack( msg, track, tick );
 	}
 	
 	/**
@@ -155,7 +191,6 @@ public class MidiParser extends SequenceParser {
 		int volume  = msg.getData2();
 		if ( channel < 0 || channel > 15 ) {
 			// not a channel command
-			System.out.println( "NOT A CHANNEL COMMAND - command: " + cmd + ", channel: " + channel );
 			SequenceCreator.addMessageGeneric( msg, tick );
 			return;
 		}

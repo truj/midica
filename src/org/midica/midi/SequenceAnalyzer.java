@@ -17,6 +17,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.NavigableMap;
 import java.util.Set;
 import java.util.TreeMap;
@@ -36,6 +37,7 @@ import org.midica.file.ParseException;
 import org.midica.ui.model.MessageDetail;
 import org.midica.ui.model.MessageTreeNode;
 import org.midica.ui.model.MidicaTreeModel;
+import org.midica.ui.player.PlayerView;
 
 import com.sun.media.sound.MidiUtils;
 
@@ -53,12 +55,19 @@ public class SequenceAnalyzer {
 	// message debugging
 	private static final boolean DEBUG_MODE = false;
 	
+	// karaoke-related constants
+	private static final int    KARAOKE_TEXT           =  1; // meta message type: text
+	private static final int    KARAOKE_LYRICS         =  2; // meta message type: lyrics
+	private static final float  KAR_PRE_ALERT_QUARTERS =  1; // pre-alert so many quarter notes before a lyric change
+	private static final float  KAR_MAX_SYL_SPACE_RATE =  8; // max syllables-per-whitespace - add spaces, if there are not enough
+	private static final String KAR_TYPE_MIDICA_SIMPLE = "MIDICA SIMPLE";
+	private static final String DEFAULT_CHARSET        = "ISO-8859-1"; // used for all text messages, not only lyrics
+	
 	// message sorting
 	public static final String MSG_LVL_1_SORT_VOICE   = "1";
 	public static final String MSG_LVL_1_SORT_SYS_COM = "2";
 	public static final String MSG_LVL_1_SORT_SYS_RT  = "3";
 	public static final String MSG_LVL_1_SORT_META    = "4";
-	
 	
 	public static final byte NOTE_HISTORY_BUFFER_SIZE_PAST   = 5;
 	public static final byte NOTE_HISTORY_BUFFER_SIZE_FUTURE = 3;
@@ -67,7 +76,15 @@ public class SequenceAnalyzer {
 	
 	private static Sequence sequence = null;
 	private static String   fileType = null;
+	
+	// karaoke-related fields
+	private static String midiFileCharset  = null;
+	private static String karaokeMode      = null;
+	private static long   karLineTick      = -1;
+	private static long   karPreAlertTicks = 0;
+	
 	private static HashMap<String, Object> sequenceInfo = null;
+	private static HashMap<String, Object> karaokeInfo  = null;
 	
 	private static MidicaTreeModel banksAndInstrPerChannel = null;
 	private static MidicaTreeModel banksAndInstrTotal      = null;
@@ -83,6 +100,9 @@ public class SequenceAnalyzer {
 	
 	/**                    channel  --   tick -- number of keys pressed at this time */
 	private static TreeMap<Byte, TreeMap<Long, Integer>> activityByChannel = null;
+	
+	/** ticks of either lyrics events or pre-alerts */
+	private static TreeSet<Long> lyricsEvent = null;
 	
 	/**                    tick     --   channel */
 	private static TreeMap<Long, TreeSet<Byte>> markers = null;
@@ -104,6 +124,9 @@ public class SequenceAnalyzer {
 	
 	/**                    channel   --  tick -- 0=RPN MSB, 1=RPN LSB, 2=NRPN MSB, 3=NRPN LSB, 4=1(RPN)|0(NRPN)|-1(unknown) */
 	private static TreeMap<Byte, TreeMap<Long, Byte[]>> channelParamHistory = null;
+	
+	/**        line begin tick -- syllable tick -- syllable */
+	private static TreeMap<Long, TreeMap<Long, String>> lyrics = null;
 	
 	/**
 	 * This class is only used statically so a public constructor is not needed.
@@ -168,8 +191,9 @@ public class SequenceAnalyzer {
 	private static void init() throws ReflectiveOperationException {
 		
 		// initialize data structures for the sequence info
-		sequenceInfo = new HashMap<String, Object>();
-		sequenceInfo.put( "resolution",        sequence.getResolution()       );
+		sequenceInfo   = new HashMap<String, Object>();
+		int resolution = sequence.getResolution();
+		sequenceInfo.put( "resolution",        resolution                     );
 		sequenceInfo.put( "meta_info",         new HashMap<String, String>()  );
 		sequenceInfo.put( "used_channels",     new TreeSet<Integer>()         );
 		sequenceInfo.put( "tempo_mpq",         new TreeMap<Long, Integer>()   );
@@ -202,6 +226,17 @@ public class SequenceAnalyzer {
 			Byte[] conf0 = { 127, 127, 127, 127, -1 }; // MSB=LSB=127 (no parameter set), -1: neither RPN nor NRPN is active
 			paramHistory.put( 0L, conf0 );
 		}
+		
+		// initialize data structures for karaoke
+		midiFileCharset  = null;
+		karPreAlertTicks = (long) (resolution / KAR_PRE_ALERT_QUARTERS);
+		karaokeMode      = null;
+		karLineTick      = -1;
+		karaokeInfo      = new HashMap<String, Object>();
+		lyrics           = new TreeMap<Long, TreeMap<Long, String>>();
+		lyricsEvent      = new TreeSet<Long>();
+		karaokeInfo.put( "lyrics", lyrics );
+		sequenceInfo.put( "karaoke", karaokeInfo );
 		
 		// init data structures for the channel activity
 		activityByChannel  = new TreeMap<Byte, TreeMap<Long, Integer>>();
@@ -613,7 +648,7 @@ public class SequenceAnalyzer {
 		
 		// TEXT
 		else if ( MidiListener.META_TEXT == type ) {
-			String text = new String( content );
+			String text = getTextFromBytes( content );
 			
 			// software?
 			Pattern patternSW = Pattern.compile( "^" + Pattern.quote(SequenceCreator.GENERATED_BY) + "(.+)$" );
@@ -638,16 +673,8 @@ public class SequenceAnalyzer {
 		
 		// COPYRIGHT
 		else if ( MidiListener.META_COPYRIGHT == type ) {
-			String copyright;
-			try {
-				// according to the GM standard, the copyright notice should be
-				// encoded in ASCII
-				copyright = new String( content, "ISO-8859-1" );
-			}
-			catch ( UnsupportedEncodingException e ) {
-				copyright = new String( content );     // fallback: platform standard
-			}
-			HashMap<String, String> metaInfo = (HashMap<String, String>) sequenceInfo.get( "meta_info" );
+			String                  copyright = getTextFromBytes( content );
+			HashMap<String, String> metaInfo  = (HashMap<String, String>) sequenceInfo.get( "meta_info" );
 			metaInfo.put( "copyright", copyright );
 		}
 		
@@ -702,14 +729,7 @@ public class SequenceAnalyzer {
 		details.put( "meta_type",   type       );
 		boolean msgContainsText = type >= 0x01 && type <= 0x0F;
 		if (msgContainsText) { // get texts from text-based messages
-			String text;
-			try {
-				// try ASCII first
-				text = new String( content, "ISO-8859-1" );
-			}
-			catch ( UnsupportedEncodingException e ) {
-				text = new String( content ); // fallback: platform standard
-			}
+			String text = getTextFromBytes( content );
 			distinctDetails.put( "text", text );
 		}
 		details.put( "msg_num", msgNum );
@@ -734,15 +754,16 @@ public class SequenceAnalyzer {
 	}
 	
 	/**
-	 * Retrieves instrument specific information from meta messages.
+	 * Retrieves instrument or karaoke specific information from meta messages.
 	 * 
-	 * @param msg   Meta message
-	 * @param tick  Tickstamp
+	 * @param msg   Meta message.
+	 * @param tick  Tickstamp.
 	 */
 	private static void processMetaMessageByChannel( MetaMessage msg, long tick ) {
 		int    type = msg.getType();
 		byte[] data = msg.getData();
 		
+		// INSTRUMENT NAME
 		if ( MidiListener.META_INSTRUMENT_NAME == type ) {
 			
 			// get channel number - works only for Midica-produced MIDI sequences
@@ -758,8 +779,46 @@ public class SequenceAnalyzer {
 			}
 			
 			// remember the channel comment
-			String text = new String( data );
+			String text = getTextFromBytes( data );
 			commentHistory.get( channel ).put( tick, text );
+		}
+		
+		// LYRICS
+		else if ( MidiListener.META_LYRICS == type ) {
+			String text = getTextFromBytes( data );
+			processKaraoke( text, KARAOKE_LYRICS, tick );
+		}
+		
+		// TEXT
+		else if ( MidiListener.META_TEXT == type ) {
+			String text = getTextFromBytes( data );
+			
+			// charset definition?
+			if ( text.startsWith("@C") ) {
+				midiFileCharset = text.substring( 2 );
+			}
+			
+			// karaoke type definition?
+			else if ( text.startsWith("@K") ) {
+				karaokeMode = text.substring( 2 );
+				karaokeInfo.put( "type", karaokeMode );
+			}
+			
+			// software version (probably created by Midica)
+			else if ( tick <= SequenceCreator.TICK_SOFTWARE
+			  && text.startsWith(SequenceCreator.GENERATED_BY) ) {
+				// not karaoke-related - nothing more to do
+			}
+			
+			// Normal text, maybe lyrics.
+			// Unfortunately some MIDI files contain lyrics as type TEXT
+			// instead of LYRICS without providing an @K header. So we must
+			// consider all text as possibly lyrics.
+			else if ( ! KAR_TYPE_MIDICA_SIMPLE.equals(karaokeMode) ) {
+				processKaraoke( text, KARAOKE_TEXT, tick );
+			}
+			
+			// TODO: handle KAR_TYPE_MIDICA_SIMPLE
 		}
 	}
 	
@@ -1126,6 +1185,147 @@ public class SequenceAnalyzer {
 	}
 	
 	/**
+	 * Processes the given text as a karaoke meta or lyrics command.
+	 * 
+	 * @param text  The text from the text or lyrics message.
+	 * @param type  The message type (1: text, 2: lyrics).
+	 * @param tick  Tickstamp of the event.
+	 */
+	private static void processKaraoke( String text, int type, long tick ) {
+		
+		boolean mustAddLyricsMarker = false;
+		
+		// karaoke meta message?
+		if ( KARAOKE_TEXT == type && text.startsWith("@") && text.length() > 1 ) {
+			String prefix = text.substring( 0, 2 );
+			text          = text.substring( 2 );
+			
+			// version
+			if ( "@V".equals(prefix) ) {
+				if ( null == karaokeInfo.get("version") ) {
+					karaokeInfo.put( "version", text );
+				}
+			}
+			
+			// language
+			if ( "@L".equals(prefix) ) {
+				if ( null == karaokeInfo.get("language") ) {
+					karaokeInfo.put( "language", text );
+				}
+			}
+			
+			// title, author or copyright
+			else if ( "@T".equals(prefix) ) {
+				if ( null == karaokeInfo.get("title") ) {
+					karaokeInfo.put( "title", text );
+				}
+				else if ( null == karaokeInfo.get("author") ) {
+					karaokeInfo.put( "author", text );
+				}
+				else if ( null == karaokeInfo.get("copyright") ) {
+					karaokeInfo.put( "copyright", text );
+				}
+			}
+			
+			// further information
+			else if ( "@I".equals(prefix) ) {
+				ArrayList<String> infos = (ArrayList<String>) karaokeInfo.get( "infos" );
+				if ( null == infos ) {
+					infos = new ArrayList<String>();
+					karaokeInfo.put( "infos", infos );
+				}
+				infos.add( text );
+			}
+			
+			// ignore all other messages beginning with "@"
+			return;
+		}
+		
+		// process simple lyrics (not syllable-based)
+		else if ( KAR_TYPE_MIDICA_SIMPLE.equals(karaokeMode) && KARAOKE_LYRICS == type ) {
+			
+			// TODO: implement
+			mustAddLyricsMarker = true;
+		}
+		
+		// process possibly syllable-based lyrics
+		else if ( ! KAR_TYPE_MIDICA_SIMPLE.equals(karaokeMode) ) {
+			
+			// get current line
+			TreeMap<Long, String> line = lyrics.get( karLineTick );
+			
+			// Did we already find another lyrics/text event at this tick?
+			if ( line != null && line.containsKey(tick) ) {
+				// Assume that the first one was the right one and ignore the rest.
+				// At least in "Cats in the cradle" that gives the best result.
+				// The tune-1000-formatted text events come first, followed by
+				// several alternative lyrics events with worse formatting but at
+				// the same tick.
+				return;
+			}
+			
+			// do we need a new line?
+			boolean needNewLine      = false;
+			boolean needNewParagraph = false;
+			if ( -1 == karLineTick || text.startsWith("/") ) {
+				needNewLine = true;
+			}
+			if ( text.startsWith("\\") ) {
+				needNewLine      = true;
+				needNewParagraph = true;
+			}
+			
+			// add line break(s) to the last syllable
+			if ( needNewLine && line != null ) {
+				Entry<Long, String> lastSylEntry = line.lastEntry();
+				long lastSylTick    = lastSylEntry.getKey();
+				String lastSyllable = lastSylEntry.getValue();
+				
+				// add 1st line break (for the new line)
+				lastSyllable = lastSyllable + "\n";
+				
+				// add 2nd line break (for the new paragraph)
+				if (needNewParagraph) {
+					lastSyllable = lastSyllable + "\n";
+				}
+				
+				// commit the changes
+				line.put( lastSylTick, lastSyllable );
+			}
+			
+			// create new line data structure
+			if (needNewLine) {
+				karLineTick = tick;
+				line        = new TreeMap<Long, String>();
+				lyrics.put( tick, line );
+			}
+			
+			// remove special character, if necessary
+			if ( text.startsWith("\\") || text.startsWith("/") ) {
+				text = text.substring( 1 );
+			}
+			
+			// add the syllable
+			line.put( tick, text );
+			mustAddLyricsMarker = true;
+		}
+		
+		// prepare marker events
+		if (mustAddLyricsMarker) {
+			// the lyrics event itself
+			lyricsEvent.add( tick );
+			markerTicks.add( tick );
+			
+			// pre-alert before the lyrics event
+			tick -= karPreAlertTicks;
+			if ( tick < 0 )
+				tick = 0;
+			lyricsEvent.add( tick );
+			markerTicks.add( tick );
+		}
+	}
+	
+	/**
 	 * Adds last information to the info data structure about the MIDI stream.
 	 * Adds marker events to the stream.
 	 * 
@@ -1211,6 +1411,24 @@ public class SequenceAnalyzer {
 			}
 		}
 		
+		// Decide which channel to use for the channel part of the lyrics marker bytes.
+		Set<Byte> activeChannels = activityByChannel.keySet();
+		byte      lyricsChannel  = -1; // channel part for the lyrics marker events
+		if ( lyrics.size() > 0 ) {
+			Iterator<Byte> it = activeChannels.iterator();
+			if ( it.hasNext() ) {
+				// use one of the active channels for the lyrics
+				lyricsChannel = it.next();
+			}
+			else {
+				// No channel activity at all, only lyrics.
+				// Use channel 0 for lyrics and avoid a later null pointer exception.
+				lyricsChannel = 0;
+				activeChannels.add( lyricsChannel );
+				activityByChannel.put( lyricsChannel, new TreeMap<Long, Integer>() );
+			}
+		}
+		
 		// markers
 		for ( long tick : markerTicks ) {
 			
@@ -1218,12 +1436,18 @@ public class SequenceAnalyzer {
 			TreeSet<Byte> channelsAtTick  = new TreeSet<Byte>();
 			boolean       must_add_marker = false;
 			
-			// walk through all channels that have any activity IN ANY TICK
-			for ( byte channel : activityByChannel.keySet() ) {
+			// walk through all channels that have any activity IN ANY TICK (or lyrics)
+			for ( byte channel : activeChannels ) {
 				
+				boolean lyricsChanged     = false;
 				boolean activityChanged   = false;
 				boolean historyChanged    = false;
 				boolean instrumentChanged = false;
+				
+				// is there a lyrics event at the current tick?
+				if ( lyricsChannel == channel && lyricsEvent.contains(tick) ) {
+					lyricsChanged = true;
+				}
 				
 				// is there an instrument change at the current tick?
 				Byte[] instrChange = instrumentHistory.get( channel ).get( tick );
@@ -1253,6 +1477,8 @@ public class SequenceAnalyzer {
 				}
 				
 				// apply bitmasks to the channel byte
+				if (lyricsChanged)
+					channel |= MidiListener.MARKER_BITMASK_LYRICS;
 				if (activityChanged)
 					channel |= MidiListener.MARKER_BITMASK_ACTIVITY;
 				if (historyChanged)
@@ -1261,7 +1487,7 @@ public class SequenceAnalyzer {
 					channel |= MidiListener.MARKER_BITMASK_INSTRUMENT;
 				
 				// add the channel to the marker
-				if ( activityChanged || historyChanged || instrumentChanged ) {
+				if ( lyricsChanged || activityChanged || historyChanged || instrumentChanged ) {
 					channelsAtTick.add( channel );
 					must_add_marker = true;
 				}
@@ -1277,6 +1503,249 @@ public class SequenceAnalyzer {
 		}
 		catch ( InvalidMidiDataException e ) {
 			throw new ParseException( Dict.get(Dict.ERROR_ANALYZE_POSTPROCESS) + e.getMessage() );
+		}
+		
+		// postprocess the lyrics for karaoke
+		postprocessKaraoke();
+	}
+	
+	/**
+	 * Postprocesses data structures for karaoke.
+	 * 
+	 * - Joins all info headers (beginning with "@I") to a single string.
+	 * - Deletes non printable characters.
+	 * - Adds spaces if necessary.
+	 * - Creates a full lyrics string for the info view.
+	 * - Re-organizes lines, if necessary.
+	 * - Replacements for the HTML view.
+	 * - HTML formatting for the second voice.
+	 */
+	private static void postprocessKaraoke() {
+		
+		// join all info headers (@I)
+		ArrayList<String> infoObj = (ArrayList<String>) karaokeInfo.get( "infos" );
+		if ( infoObj != null ) {
+			StringBuilder infoBuf = new StringBuilder( infoObj.get(0) );
+			for ( int i = 1; i < infoObj.size(); i++ ) {
+				infoBuf.append( "\n" + infoObj.get(i) );
+			}
+			karaokeInfo.put( "info", infoBuf.toString() );
+		}
+		
+		// delete non-printable characters
+		for ( TreeMap<Long, String> line : lyrics.values() ) {
+			for ( Entry<Long, String> sylEntry : line.entrySet() ) {
+				long   tick     = sylEntry.getKey();
+				String syllable = sylEntry.getValue();
+				syllable        = syllable.replaceAll( "\\r", "" );
+				line.put( tick, syllable );
+			}
+		}
+		
+		// Check if there are enough spaces between the syllables.
+		int     totalSyllables = 0;
+		int     totalSpaces    = 0;
+		Pattern pattEnd        = Pattern.compile( ".*\\s$", Pattern.MULTILINE ); // ends with whitespace
+		Pattern pattBegin      = Pattern.compile( "^\\s",   Pattern.MULTILINE ); // begins with whitespace
+		for ( TreeMap<Long, String> line : lyrics.values() ) {
+			
+			// put all syllables into an array with indexes instead of ticks
+			ArrayList<String> sylsInLine = new ArrayList<String>();
+			for ( String syllable : line.values() ) {
+				sylsInLine.add( syllable );
+			}
+			
+			// count syllables and spaces
+			for ( int i = 0; i < sylsInLine.size(); i++ ) {
+				totalSyllables++;
+				// space at the end of THIS line?
+				boolean hasSpace = pattEnd.matcher( sylsInLine.get(i) ).lookingAt();
+				if ( ! hasSpace && i < sylsInLine.size() - 1 )
+					// space at the beginning of the NEXT line?
+					hasSpace = pattBegin.matcher( sylsInLine.get(i+1) ).lookingAt();
+				if (hasSpace)
+					totalSpaces++;
+			}
+		}
+		boolean needMoreSpaces = true;
+		if ( totalSpaces != 0 ) {
+			needMoreSpaces = (float) totalSyllables / (float) totalSpaces > KAR_MAX_SYL_SPACE_RATE;
+		}
+		
+		// add spaces if necessary
+		if (needMoreSpaces) {
+			for ( TreeMap<Long, String> line : lyrics.values() ) {
+				for ( Entry<Long, String> sylEntry : line.entrySet() ) {
+					long   tick     = sylEntry.getKey();
+					String syllable = sylEntry.getValue();
+					
+					// word ends with "-". That usually means: The word is not yet over.
+					if ( syllable.endsWith("-") ) {
+						// just delete the trailing "-" but don't add a space
+						syllable = syllable.replaceFirst( "\\-$", "" );
+					}
+					else if ( ! syllable.endsWith("\n") ) {
+						// add a space
+						syllable += " ";
+					}
+					line.put( tick, syllable );
+				}
+			}
+		}
+		
+		// create full lyrics string (for the info view)
+		StringBuilder lyricsFull = new StringBuilder( "" );
+		for ( TreeMap<Long, String> line : lyrics.values() ) {
+			for ( String syllable : line.values() ) {
+				lyricsFull.append( syllable );
+			}
+		}
+		karaokeInfo.put( "lyrics_full", lyricsFull.toString() );
+		
+		// get all ticks where a word ends
+		// (needed for syllable hyphenation later)
+		Pattern pattEndPunct = Pattern.compile( ".*[.,?!\"'\\]\\[;]$", Pattern.MULTILINE ); // ends with punctuation character
+		TreeSet<Long> wordEndTicks = new TreeSet<Long>();
+		for ( TreeMap<Long, String> line : lyrics.values() ) {
+			long lastSylTick = -1;
+			for ( Entry<Long, String> sylEntry : line.entrySet() ) {
+				long   tick     = sylEntry.getKey();
+				String syllable = sylEntry.getValue();
+				
+				// Word ends AFTER this syllable?
+				if ( pattEnd.matcher(syllable).lookingAt() || pattEndPunct.matcher(syllable).lookingAt() ) {
+					wordEndTicks.add( tick );
+				}
+				
+				// Word ends BEFORE this syllable?
+				if ( pattBegin.matcher(syllable).lookingAt() ) {
+					wordEndTicks.add( lastSylTick );
+				}
+				lastSylTick = tick;
+			}
+		}
+		
+		// reorganize lines if necessary
+		TreeMap<Long, TreeMap<Long, String>> newLyrics = new TreeMap<Long, TreeMap<Long, String>>();
+		for ( Entry<Long, TreeMap<Long, String>> lineEntry : lyrics.entrySet() ) {
+			long                  lineTick = lineEntry.getKey();
+			TreeMap<Long, String> line     = lineEntry.getValue();
+			
+			int lineLength = 0; // number of characters in the line, INCLUDING the current syllable
+			int lastLength = 0; // number of characters in the line, WITHOUT the current syllable
+			
+			// create one or more new line(s) from one original line
+			TreeMap<Long, String> newLine = new TreeMap<Long, String>();
+			for ( Entry<Long, String> sylEntry : line.entrySet() ) {
+				long    sylTick  = sylEntry.getKey();
+				String  syllable = sylEntry.getValue();
+				lineLength      += syllable.length();
+				
+				// line too long?
+				if ( lineLength >= PlayerView.KAR_MAX_CHARS_PER_LINE && lastLength > 0 ) {
+					
+					// add linebreak to the LAST syllable
+					Entry<Long, String> lastSylEntry = newLine.lastEntry();
+					long                lastSylTick  = lastSylEntry.getKey();
+					String              lastSyllable = lastSylEntry.getValue();
+					if ( ! wordEndTicks.contains(lastSylTick) ) {
+						lastSyllable += "-";
+					}
+					lastSyllable += "\n";
+					newLine.put( lastSylTick, lastSyllable );
+					
+					// close the line and open a new one
+					newLyrics.put( lineTick, newLine );
+					newLine    = new TreeMap<Long, String>();
+					lineTick   = sylTick;
+					lineLength = syllable.length();
+				}
+				
+				// add current syllable and prepare the next one
+				newLine.put( sylTick, syllable );
+				lastLength = lineLength;
+			}
+			
+			// record the rest of the original line and prepare the next one
+			newLyrics.put( lineTick, newLine );
+		}
+		lyrics = newLyrics;
+		
+		// HTML replacements and entities
+		for ( TreeMap<Long, String> line : lyrics.values() ) {
+			for ( Entry<Long, String> sylEntry : line.entrySet() ) {
+				long   tick     = sylEntry.getKey();
+				String syllable = sylEntry.getValue();
+				syllable        = syllable.replaceAll( "&",   "&amp;"  );
+				syllable        = syllable.replaceAll( "<",   "&lt;"   );
+				syllable        = syllable.replaceAll( ">",   "&gt;"   );
+				syllable        = syllable.replaceAll( "\\n", "<br>\n" );
+				line.put( tick, syllable );
+			}
+		}
+		
+		// HTML formatting for the second voice:
+		// - Replace [ and ] inside of syllables by HTML tags.
+		// - Replace begin/end of syllables starting/ending in
+		//   second-voice-mode by HTML tags. (Necessary if the [ or ] is in a
+		//   former/later syllable or line)
+		String  htmlStart     = "<span class='second'>";
+		String  htmlStop      = "</span>";
+		Pattern pattBracket   = Pattern.compile( "(\\]|\\[)", Pattern.MULTILINE ); // '[' or ']'
+		boolean isSecondVoice = false;
+		for ( TreeMap<Long, String> line : lyrics.values() ) {
+			
+			for ( Entry<Long, String> sylEntry : line.entrySet() ) {
+				long         tick        = sylEntry.getKey();
+				String       syllable    = sylEntry.getValue();
+				boolean      mustModify  = false;
+				StringBuffer modifiedSyl = new StringBuffer();
+				
+				// '[' is in a former syllable? - start in second voice mode
+				if (isSecondVoice) {
+					mustModify = true;
+					modifiedSyl.append( htmlStart );
+				}
+				
+				// replace [ and ] - but ignore nested structures
+				Matcher matcher = pattBracket.matcher( syllable );
+				while ( matcher.find() ) {
+					String bracket     = matcher.group();
+					String htmlReplStr = null;
+					if ( "[".equals(bracket) && ! isSecondVoice ) {
+						isSecondVoice = true;
+						htmlReplStr   = htmlStart;
+					}
+					else if ( "]".equals(bracket) && isSecondVoice ) {
+						isSecondVoice = false;
+						htmlReplStr   = htmlStop;
+					}
+					
+					// replacement necessary?
+					if ( htmlReplStr != null ) {
+						mustModify = true;
+						
+						// append everything until (including) the replacement
+						// to the modified syllable
+						matcher.appendReplacement( modifiedSyl, Matcher.quoteReplacement(htmlReplStr) );
+					}
+				}
+				
+				// save the modified syllable
+				if (mustModify) {
+					
+					// append the rest of the syllable
+					matcher.appendTail( modifiedSyl );
+					
+					// ']' is in a later syllable? - close second voice wrapping
+					if (isSecondVoice) {
+						modifiedSyl.append( htmlStop );
+					}
+					
+					// replace the syllable
+					line.put( tick, modifiedSyl.toString() );
+				}
+			}
 		}
 	}
 	
@@ -1405,6 +1874,94 @@ public class SequenceAnalyzer {
 		}
 		
 		return result;
+	}
+	
+	/**
+	 * Returns the lyrics including formatting to be displayed
+	 * at the given tick.
+	 * 
+	 * @param tick  Tickstamp in the MIDI sequence.
+	 * @return  the lyrics to be displayed.
+	 */
+	public static String getLyrics( long tick ) {
+		
+		if ( null == lyrics )
+			return "";
+		
+		// prepare text
+		StringBuilder text = new StringBuilder(
+			  "<html><head><style>"
+			+ "body {"
+			+     "width: "     + PlayerView.KAR_WIDTH        + "; " // "width: 100%" doesn't work
+			+     "font-size: " + PlayerView.KAR_FONT_SIZE    + "; "
+			+     "color: #"    + PlayerView.KAR_COLOR_1_PAST + "; "
+			+ "}"
+			+ ".future { color: #"        + PlayerView.KAR_COLOR_1_FUTURE + "; } "
+			+ ".second { color: #"        + PlayerView.KAR_COLOR_2_PAST   + "; } "
+			+ ".future_second { color: #" + PlayerView.KAR_COLOR_2_FUTURE + "; } "
+			+ "</style></head><body>"
+		);
+		
+		// collect past lines to be shown
+		TreeSet<Long> lineTicks = new TreeSet<Long>();
+		long          loopTick  = tick;
+		PAST_LINE:
+		for ( int i = 0; i < PlayerView.KAR_PAST_LINES; i++ ) {
+			Long pastTick = lyrics.floorKey( loopTick );
+			if ( null == pastTick )
+				break PAST_LINE;
+			lineTicks.add( pastTick );
+			loopTick = pastTick - 1;
+		}
+		
+		// collect future lines to be shown
+		loopTick = tick;
+		FUTURE_LINE:
+		while ( lineTicks.size() < PlayerView.KAR_TOTAL_LINES ) {
+			Long futureTick = lyrics.ceilingKey( loopTick );
+			if ( null == futureTick )
+				break FUTURE_LINE;
+			lineTicks.add( futureTick );
+			loopTick = futureTick + 1;
+		}
+		
+		// process lines
+		boolean isPast = true;
+		for ( long lineTick : lineTicks ) {
+			TreeMap<Long, String> line = lyrics.get( lineTick );
+			
+			// process syllables
+			for ( Entry<Long, String> sylEntry : line.entrySet() ) {
+				long   sylTick  = sylEntry.getKey();
+				String syllable = sylEntry.getValue();
+				
+				// switch from past to future?
+				if ( isPast && sylTick > tick ) {
+					isPast = false;
+					text.append( "<span class='future'>" );
+				}
+				
+				// Adjust second voice CSS class for future syllables. That's
+				// needed because CSS class nesting doesn't work in swing.
+				// So this is not supported:
+				// '<style>.future .second { color: ...; }</style>'
+				if ( ! isPast ) {
+					// necessary because nesting CSS classes doesn't work in swing
+					syllable = syllable.replaceAll( "<span class='second'>", "<span class='future_second'>" );
+				}
+				
+				// must alert?
+				if ( ! isPast && sylTick - tick <= karPreAlertTicks ) {
+					text.append( "<i>" + syllable + "</i>" );
+				}
+				else {
+					text.append( syllable );
+				}
+			}
+		}
+		text.append( "</span></body></html>" );
+		
+		return text.toString();
 	}
 	
 	/**
@@ -2790,6 +3347,43 @@ public class SequenceAnalyzer {
 		
 		// fill the resulting array
 		System.arraycopy( array, 1, result, 0, newLength );
+		
+		return result;
+	}
+	
+	/**
+	 * Converts a byte array from a MIDI message into a string.
+	 * 
+	 * @return the converted string.
+	 */
+	private static final String getTextFromBytes( byte[] bytes ) {
+		
+		String result = null;
+		try {
+			
+			// If we found a charset definition in the MIDI file itself, try
+			// that first.
+			if ( midiFileCharset != null ) {
+				try {
+					result = new String( bytes, midiFileCharset );
+				}
+				catch ( UnsupportedEncodingException e ) {
+				}
+			}
+			
+			// The file-provided charset failed? - Try the Midica default.
+			// (According to the GM standard, text messages should be
+			// encoded in ASCII. So ISO-8859-1 should fit.)
+			if ( null == result ) {
+				result = new String( bytes, DEFAULT_CHARSET );
+			}
+		}
+		catch ( UnsupportedEncodingException e ) {
+			
+			// Neither the file-provided nor the default charset worked.
+			// Fall back to the platform standard.
+			result = new String( bytes );
+		}
 		
 		return result;
 	}

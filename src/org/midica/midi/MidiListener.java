@@ -48,10 +48,11 @@ public class MidiListener implements MetaEventListener {
 	public static final int META_SEQUENCER_SPECIFIC = 127;
 	
 	// marker bitmasks
-	public static final byte MARKER_BITMASK_ACTIVITY   = 0b0100_0000;
-	public static final byte MARKER_BITMASK_HISTORY    = 0b0010_0000;
-	public static final byte MARKER_BITMASK_INSTRUMENT = 0b0001_0000;
-	public static final byte MARKER_BITMASK_CHANNEL    = 0b0000_1111;
+	public static final byte MARKER_BITMASK_LYRICS     = (byte) 0b1000_0000;
+	public static final byte MARKER_BITMASK_ACTIVITY   = (byte) 0b0100_0000;
+	public static final byte MARKER_BITMASK_HISTORY    = (byte) 0b0010_0000;
+	public static final byte MARKER_BITMASK_INSTRUMENT = (byte) 0b0001_0000;
+	public static final byte MARKER_BITMASK_CHANNEL    = (byte) 0b0000_1111;
 	
 	
 	private static final HashMap<Integer, String> metaEventTypeName = new HashMap<Integer, String>();
@@ -89,10 +90,8 @@ public class MidiListener implements MetaEventListener {
 	@Override
 	public void meta( MetaMessage msg ) {
 		
-		int    type   = msg.getType();
-		int    status = msg.getStatus();
-		int    length = msg.getLength();
-		byte[] data   = msg.getData();
+		int    type = msg.getType();
+		byte[] data = msg.getData();
 		
 		if ( META_END_OF_SEQUENCE == type ) {
 			try {
@@ -106,6 +105,7 @@ public class MidiListener implements MetaEventListener {
 		else if ( META_MARKER == type ) {
 			for ( byte bitmaskedChannel : data ) {
 				byte    channel            = (byte) ( bitmaskedChannel & MARKER_BITMASK_CHANNEL    );
+				boolean isLyricsChange     =   0 != ( bitmaskedChannel & MARKER_BITMASK_LYRICS     );
 				boolean isActivityChange   =   0 != ( bitmaskedChannel & MARKER_BITMASK_ACTIVITY   );
 				boolean isHistoryChange    =   0 != ( bitmaskedChannel & MARKER_BITMASK_HISTORY    );
 				boolean isInstrumentChange =   0 != ( bitmaskedChannel & MARKER_BITMASK_INSTRUMENT );
@@ -115,6 +115,8 @@ public class MidiListener implements MetaEventListener {
 					MidiDevices.refreshNoteHistory( channel );
 				if (isInstrumentChange)
 					MidiDevices.refreshInstrument( channel );
+				if (isLyricsChange)
+					MidiDevices.refreshLyrics();
 			}
 		}
 		

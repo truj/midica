@@ -53,6 +53,17 @@ public class PlayerView extends JDialog {
 	
 	private static final long serialVersionUID = 1L;
 	
+	// karaoke constants
+	public static final int    KAR_WIDTH              =      460; // width for the karaoke field
+	public static final int    KAR_PAST_LINES         =        3; // show so many lines that begin in the past
+	public static final int    KAR_TOTAL_LINES        =        7; // show so many lines in total
+	public static final int    KAR_MAX_CHARS_PER_LINE =       28; // max characters per line - split line, if it's longer
+	public static final String KAR_FONT_SIZE          =   "20px"; // css-format
+	public static final String KAR_COLOR_1_PAST       = "ff0000"; // 1st voice
+	public static final String KAR_COLOR_1_FUTURE     = "000000"; // 1st voice
+	public static final String KAR_COLOR_2_PAST       = "00aa00"; // 2nd voice
+	public static final String KAR_COLOR_2_FUTURE     = "0000ff"; // 2nd voice
+	
 	// Constants for sliders
 	// progress slider
 	public static final String    NAME_PROGRESS     = "name_progress";
@@ -94,13 +105,14 @@ public class PlayerView extends JDialog {
 	public static final int    CH_VOL_SCROLL     =     1; // scroll factor for the channel volume slider
 	
 	// Constants for text fields
-	public static final String NAME_JUMP      = "name_jump";
-	public static final String NAME_VOL       = "name_volume";
-	public static final String NAME_TEMPO     = "name_tempo";
-	public static final String NAME_TRANSPOSE = "name_transpose";
-	public static final String NAME_CH_VOL    = "name_channel_volume_";
-	public static final String NAME_MUTE      = "name_mute_";
-	public static final String NAME_SOLO      = "name_solo_";
+	public static final String NAME_JUMP        = "name_jump";
+	public static final String NAME_SHOW_LYRICS = "name_show_lyrics";
+	public static final String NAME_VOL         = "name_volume";
+	public static final String NAME_TEMPO       = "name_tempo";
+	public static final String NAME_TRANSPOSE   = "name_transpose";
+	public static final String NAME_CH_VOL      = "name_channel_volume_";
+	public static final String NAME_MUTE        = "name_mute_";
+	public static final String NAME_SOLO        = "name_solo_";
 	
 	// action commands
 	public static final String CMD_REPARSE    = "cmd_reparse";
@@ -139,11 +151,17 @@ public class PlayerView extends JDialog {
 	public static final int   NOTE_HISTORY_COL_WIDTH_VOLUME =  40;
 	public static final int   NOTE_HISTORY_COL_WIDTH_TICK   =  70;
 	
-	private Container             content      = null;
-	private PlayerController      controller   = null;
-	private KeyEventPostProcessor keyProcessor = null;
+	private PlayerController      controller        = null;
+	private KeyEventPostProcessor keyProcessor      = null;
+	private Container             content           = null;
+	private Container             channelLyricsArea = null;
+	private Container             channelArea       = null;
+	private Container             lyricsArea        = null;
 	
 	// UI
+	private JCheckBox       cbxLyrics       = null;
+	private JLabel          lblLyrics       = null;
+	
 	private JSlider         progressSlider  = null;
 	private JSlider         volumeSlider    = null;
 	private JSlider         tempoSlider     = null;
@@ -222,10 +240,11 @@ public class PlayerView extends JDialog {
 		GridBagLayout layout = new GridBagLayout();
 		content.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.BOTH;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
-		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.anchor     = GridBagConstraints.NORTHWEST;
+		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 2;
 		constraints.weightx    = 1;
@@ -243,13 +262,19 @@ public class PlayerView extends JDialog {
 		constraints.gridwidth = 1;
 		content.add( createControlArea(), constraints );
 		
-		// channels
+		// channels or lyrics
 		constraints.gridy++;
 		constraints.gridx   = 0;
 		constraints.weighty = 1;
-		content.add( createChannelArea(), constraints );
+		constraints.fill    = GridBagConstraints.VERTICAL;
+		channelArea         = createChannelArea();
+		lyricsArea          = createLyricsArea();
+		channelLyricsArea   = new JPanel();
+		channelLyricsArea.add( channelArea );
+		content.add( channelLyricsArea, constraints );
 		
 		// volume, tempo and transpose sliders
+		constraints.fill       = GridBagConstraints.BOTH;
 		constraints.gridheight = 2;
 		constraints.weightx    = 0;
 		constraints.gridx++;
@@ -258,7 +283,8 @@ public class PlayerView extends JDialog {
 	}
 	
 	/**
-	 * Creates the top area containing the buttons for memorize and jump and the time display.
+	 * Creates the top area containing the buttons for memorize and jump,
+	 * the show-lyrics checkbox and the tick/time display.
 	 * 
 	 * @return The created area.
 	 */
@@ -304,9 +330,21 @@ public class PlayerView extends JDialog {
 		
 		// spacer
 		constraints.gridx++;
-		constraints.weightx = 1;
 		JLabel spacer = new JLabel( " " );
 		area.add( spacer, constraints );
+		
+		// lyrics checkbox
+		constraints.gridx++;
+		cbxLyrics = new JCheckBox( Dict.get(Dict.SHOW_LYRICS) );
+		cbxLyrics.setName( NAME_SHOW_LYRICS );
+		cbxLyrics.addItemListener( controller );
+		area.add( cbxLyrics, constraints );
+		
+		// spacer
+		constraints.gridx++;
+		constraints.weightx = 1;
+		JLabel spacer2 = new JLabel( " " );
+		area.add( spacer2, constraints );
 		
 		// time and tick area
 		constraints.gridx++;
@@ -767,6 +805,7 @@ public class PlayerView extends JDialog {
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 0;
+		constraints.weighty    = 0;
 		
 		// headlines
 		JLabel c = new JLabel( Dict.get(Dict.ABBR_CH_NUM) );
@@ -807,9 +846,6 @@ public class PlayerView extends JDialog {
 		JLabel com = new JLabel( Dict.get(Dict.CH_HEAD_COMMENT) );
 		area.add( com, constraints );
 		
-		constraints.weightx = 0;
-		constraints.gridy++;
-		
 		// size for the channel activity labels
 		Dimension activityDimension = new Dimension( 15, 15 );
 		
@@ -822,8 +858,10 @@ public class PlayerView extends JDialog {
 		
 		for ( byte i=0; i<16; i++ ) {
 			// number label
+			constraints.gridy++;
 			constraints.gridx     = 0;
 			constraints.gridwidth = 1;
+			constraints.weightx   = 0;
 			JButton showHideButton = new JButton( Integer.toString(i) );
 			showHideButton.setActionCommand( CMD_SHOW_HIDE + i );
 			showHideButton.addActionListener( controller );
@@ -834,7 +872,7 @@ public class PlayerView extends JDialog {
 			constraints.gridx++;
 			JCheckBox cbx = new JCheckBox();
 			cbx.setName( NAME_MUTE + i );
-			cbx.addChangeListener( controller );
+			cbx.addItemListener( controller );
 			area.add( cbx, constraints );
 			muteCbx.add( cbx );
 			
@@ -842,7 +880,7 @@ public class PlayerView extends JDialog {
 			constraints.gridx++;
 			JCheckBox sCbx = new JCheckBox();
 			sCbx.setName( NAME_SOLO + i );
-			sCbx.addChangeListener( controller );
+			sCbx.addItemListener( controller );
 			area.add( sCbx, constraints );
 			soloCbx.add( sCbx );
 			
@@ -870,7 +908,6 @@ public class PlayerView extends JDialog {
 			channelBankNumbers.add( lblBankNum );
 			
 			// instrument label
-			constraints.weightx = 1;
 			constraints.gridx++;
 			JLabel lblInstr = new JLabel();
 			lblInstr.setForeground( COLOR_CH_INSTRUMENT );
@@ -879,7 +916,8 @@ public class PlayerView extends JDialog {
 			
 			// comment label
 			constraints.gridx++;
-			JLabel lblDesc = new JLabel();
+			constraints.weightx = 1;
+			JLabel lblDesc      = new JLabel();
 			lblDesc.setForeground( COLOR_CH_COMMENT );
 			area.add( lblDesc, constraints );
 			channelComments.add( lblDesc );
@@ -888,16 +926,25 @@ public class PlayerView extends JDialog {
 			constraints.gridy++;
 			constraints.gridx     = 0;
 			constraints.gridwidth = 8;
-			constraints.weighty   = 1;
-			Container details = createChannelDetailArea( i, dimVolTxtFld );
+			Container details     = createChannelDetailArea( i, dimVolTxtFld );
 			area.add( details, constraints );
 			details.setVisible( false );
 			channelDetails.add( details );
-			
-			constraints.weightx = 0;
-			constraints.weighty = 0;
-			constraints.gridy++;
 		}
+		
+		return area;
+	}
+	
+	/**
+	 * Creates the lyrics area (not visible by default).
+	 * 
+	 * @return The created area.
+	 */
+	private Container createLyricsArea() {
+		JPanel area = new JPanel();
+		
+		lblLyrics = new JLabel();
+		area.add( lblLyrics );
 		
 		return area;
 	}
@@ -1468,6 +1515,15 @@ public class PlayerView extends JDialog {
 	}
 	
 	/**
+	 * Writes the given lyrics string into the lyrics area.
+	 * 
+	 * @param text  HTML-formatted lyrics text.
+	 */
+	public void setLyrics( String text ) {
+		lblLyrics.setText( text );
+	}
+	
+	/**
 	 * Sets the Channel information.
 	 * This consists of bank number, program number, instrument name and channel comment.
 	 * 
@@ -1551,6 +1607,29 @@ public class PlayerView extends JDialog {
 				return true;
 		
 		return false;
+	}
+	
+	/**
+	 * Shows or hides the channel or lyrics area according to the show-lyrics
+	 * checkbox.
+	 * 
+	 * If the checkbox is checked: shows the lyrics area and hides the channel area.
+	 * Otherwise: shows the channel area and hides the lyrics area.
+	 */
+	public void toggleLyrics() {
+		
+		// choose the right content
+		channelLyricsArea.removeAll();
+		if ( cbxLyrics.isSelected() ) {
+			channelLyricsArea.add( lyricsArea );
+		}
+		else {
+			channelLyricsArea.add( channelArea );
+		}
+		
+		// make the changes visible
+		channelLyricsArea.revalidate();
+		channelLyricsArea.repaint();
 	}
 	
 	/**

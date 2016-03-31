@@ -68,7 +68,7 @@ public class ExportException extends Exception {
 			return this.msg;
 		
 		// more complicated exception
-		StringBuffer composedMsg = new StringBuffer( "<html>" + msg + "<br>" );
+		StringBuilder composedMsg = new StringBuilder( "<html>" + msg + "<br>" );
 		
 		// channel or global event?
 		String channelStr = -1 == channel ? "global event"     : Integer.toString( channel );

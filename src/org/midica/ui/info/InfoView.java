@@ -124,10 +124,11 @@ public class InfoView extends JDialog {
 	// Fake widths and heights, used for dimensions. The real sizes are
 	// determined by the layout manager. But for some reasons,
 	// setPreferredSize() is anyway necessary for correct display.
-	private static final int MSG_TREE_PREF_WIDTH         =   1;
-	private static final int MSG_TREE_PREF_HEIGHT        =   1;
-	private static final int MSG_DETAILS_PREF_WIDTH      =   1;
-	private static final int MSG_DETAILS_PREF_HEIGHT     =   1;
+	private static final int MSG_TREE_PREF_WIDTH     = 1;
+	private static final int MSG_TREE_PREF_HEIGHT    = 1;
+	private static final int MSG_DETAILS_PREF_WIDTH  = 1;
+	private static final int MSG_DETAILS_PREF_HEIGHT = 1;
+	private static final int MAX_HEIGHT_LYRICS       = 1; // max height
 	
 	// width/height constants for FlowLabels
 	private static final int CPL_MIDI_INFO             =  73; // CPL: characters per line
@@ -136,6 +137,7 @@ public class InfoView extends JDialog {
 	private static final int PWIDTH_GENERAL_INFO_VALUE = 500; // PWIDTH: preferred width
 	private static final int PWIDTH_MSG_DETAIL_CONTENT = 170;
 	private static final int MAX_HEIGHT_SOUNDFONT_DESC = 155; // max height
+	private static final int MAX_HEIGHT_KARAOKE_INFO   =  45; // max height
 	
 	// filter widget names (used as hashmap key in filterWidgets and as name property)
 	public static final String FILTER_CBX_CHAN_INDEP   = "filter_cbx_chan_indep";
@@ -313,6 +315,7 @@ public class InfoView extends JDialog {
 		
 		// add tabs
 		contentSoundfont.addTab( Dict.get(Dict.TAB_MIDI_SEQUENCE_INFO), createMidiSequenceInfoArea() );
+		contentSoundfont.addTab( Dict.get(Dict.TAB_MIDI_KARAOKE),       createKaraokeArea()          );
 		contentSoundfont.addTab( Dict.get(Dict.TAB_BANK_INSTR_NOTE),    createBankInstrNoteArea()    );
 		contentSoundfont.addTab( Dict.get(Dict.TAB_MESSAGES),           createMsgArea()              );
 		
@@ -1015,6 +1018,150 @@ public class InfoView extends JDialog {
 		constraints.weighty = 1;
 		JLabel spacer = new JLabel( " " );
 		area.add( spacer, constraints );
+		
+		return area;
+	}
+	
+	/**
+	 * Creates the area for karaoke and lyrics information from the
+	 * loaded MIDI sequence.
+	 * 
+	 * @return the created area.
+	 */
+	private Container createKaraokeArea() {
+		// content
+		JPanel area = new JPanel();
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout( layout );
+		GridBagConstraints constrLeft = new GridBagConstraints();
+		constrLeft.fill       = GridBagConstraints.NONE;
+		constrLeft.insets     = new Insets( 2, 2, 2, 2 );
+		constrLeft.gridx      = 0;
+		constrLeft.gridy      = 0;
+		constrLeft.gridheight = 1;
+		constrLeft.gridwidth  = 1;
+		constrLeft.weightx    = 0;
+		constrLeft.weighty    = 0;
+		constrLeft.anchor     = GridBagConstraints.NORTHEAST;
+		GridBagConstraints constrRight = (GridBagConstraints) constrLeft.clone();
+		constrRight.gridx++;
+		constrRight.weightx = 1;
+		constrRight.fill    = GridBagConstraints.HORIZONTAL;
+		constrRight.anchor  = GridBagConstraints.NORTHWEST;
+		
+		// get karaoke info
+		HashMap<String, Object> sequenceInfo = SequenceAnalyzer.getSequenceInfo();
+		HashMap<String, Object> karaokeInfo  = (HashMap<String, Object>) sequenceInfo.get( "karaoke" );
+		if ( null == karaokeInfo )
+			karaokeInfo = new HashMap<String, Object>();
+		
+		// karaoke type
+		JLabel lblKarType = new JLabel( Dict.get(Dict.KARAOKE_TYPE) + ": " );
+		area.add( lblKarType, constrLeft );
+		
+		// karaoke type content
+		String karType = "-";
+		if ( null != karaokeInfo.get("type") )
+			karType = (String) karaokeInfo.get("type");
+		FlowLabel lblKarTypeContent = new FlowLabel( karType, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
+		area.add( lblKarTypeContent, constrRight );
+		
+		// version
+		constrLeft.gridy++;
+		JLabel lblVersion  = new JLabel( Dict.get(Dict.VERSION) + ": " );
+		area.add( lblVersion, constrLeft );
+		
+		// version content
+		constrRight.gridy++;
+		String version = "-";
+		if ( null != karaokeInfo.get("version") )
+			version = (String) karaokeInfo.get("version");
+		FlowLabel lblVersionContent = new FlowLabel( version, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
+		area.add( lblVersionContent, constrRight );
+		
+		// title
+		constrLeft.gridy++;
+		JLabel lblTitle = new JLabel( Dict.get(Dict.SONG_TITLE) + ": " );
+		area.add( lblTitle, constrLeft );
+		
+		// title content
+		constrRight.gridy++;
+		String title = "-";
+		if ( null != karaokeInfo.get("title") )
+			title = (String) karaokeInfo.get("title");
+		FlowLabel lblTitleContent = new FlowLabel( title, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
+		area.add( lblTitleContent, constrRight );
+		
+		// author
+		constrLeft.gridy++;
+		JLabel lblAuthor = new JLabel( Dict.get(Dict.AUTHOR) + ": " );
+		area.add( lblAuthor, constrLeft );
+		
+		// author content
+		constrRight.gridy++;
+		String author = "-";
+		if ( null != karaokeInfo.get("author") )
+			author = (String) karaokeInfo.get("author");
+		FlowLabel lblAuthorContent = new FlowLabel( author, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
+		area.add( lblAuthorContent, constrRight );
+		
+		// copyright
+		constrLeft.gridy++;
+		JLabel lblCopyright = new JLabel( Dict.get(Dict.KARAOKE_COPYRIGHT) + ": " );
+		area.add( lblCopyright, constrLeft );
+		
+		// copyright content
+		constrRight.gridy++;
+		String copyright = "-";
+		if ( null != karaokeInfo.get("copyright") )
+			copyright = (String) karaokeInfo.get("copyright");
+		FlowLabel lblCopyrightContent = new FlowLabel( copyright, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
+		area.add( lblCopyrightContent, constrRight );
+		
+		// language
+		constrLeft.gridy++;
+		JLabel lblLanguage = new JLabel( Dict.get(Dict.LANGUAGE) + ": " );
+		area.add( lblLanguage, constrLeft );
+		
+		// language content
+		constrRight.gridy++;
+		String language = "-";
+		if ( null != karaokeInfo.get("language") )
+			language = (String) karaokeInfo.get("language");
+		FlowLabel lblLanguageContent = new FlowLabel( language, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
+		area.add( lblLanguageContent, constrRight );
+		
+		// info
+		constrLeft.gridy++;
+		JLabel lblInfo = new JLabel( Dict.get(Dict.KARAOKE_INFO) + ": " );
+		area.add( lblInfo, constrLeft );
+		
+		// info content
+		constrRight.gridy++;
+		String info = "-";
+		if ( null != karaokeInfo.get("info") )
+			info = (String) karaokeInfo.get("info");
+		FlowLabel lblInfoContent = new FlowLabel( info, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
+		lblInfoContent.setHeightLimit( MAX_HEIGHT_KARAOKE_INFO );
+		area.add( lblInfoContent, constrRight );
+		
+		// lyrics translation
+		constrLeft.gridy++;
+		JLabel lblLyrics = new JLabel( Dict.get(Dict.LYRICS) + ": " );
+		area.add( lblLyrics, constrLeft );
+		
+		// lyrics content
+		constrRight.gridy++;
+		constrRight.weighty = 1;
+		constrRight.fill    = GridBagConstraints.BOTH;
+		String lyrics       = "";
+		if ( null != karaokeInfo.get("lyrics_full") )
+			lyrics = (String) karaokeInfo.get( "lyrics_full"  );
+		FlowLabel lblLyricsContent = new FlowLabel( lyrics, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
+		lblLyricsContent.setHeightLimit( MAX_HEIGHT_LYRICS );
+		area.add( lblLyricsContent, constrRight );
 		
 		return area;
 	}
@@ -2282,8 +2429,8 @@ public class InfoView extends JDialog {
 
 			// content
 			constrRight.gridy++;
-			byte[]       msgBytes = (byte[]) msgObj;
-			StringBuffer msgStr   = new StringBuffer( "" );
+			byte[]        msgBytes = (byte[]) msgObj;
+			StringBuilder msgStr   = new StringBuilder( "" );
 			for ( int i = 0; i < msgBytes.length; i++ ) {
 				String hex = String.format( "%02X", msgBytes[i] );
 				if ( 0 == i )

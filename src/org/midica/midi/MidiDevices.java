@@ -56,9 +56,9 @@ public final class MidiDevices {
 	public static final int  DEFAULT_TEMPO_MPQ            = 60000000; // microseconds per quarter note
 	public static final int  NUMBER_OF_CHANNELS           =       16;
 	
-	private static PlayerController playerControler = null;
-	private static float            tempoFactor     =   1;
-	private static byte             volume          = DEFAULT_VOLUME;
+	private static PlayerController playerController = null;
+	private static float            tempoFactor      =   1;
+	private static byte             volume           = DEFAULT_VOLUME;
 	private static Sequence         seq;
 	private static Sequencer        sequencer;
 	private static Synthesizer      synthesizer;
@@ -127,7 +127,7 @@ public final class MidiDevices {
 	 */
 	public static void setupDevices( PlayerController controller ) throws InvalidMidiDataException, MidiUnavailableException, SequenceNotSetException, IOException {
 		
-		playerControler = controller;
+		playerController = controller;
 		
 		// initialize sequencer and get transmitter
 		Transmitter trans = setupSequencer();
@@ -148,7 +148,7 @@ public final class MidiDevices {
 		
 		// initialize channel activity state
 		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
-			playerControler.setChannelActivity( channel, false );
+			playerController.setChannelActivity( channel, false );
 		
 		// initialize note history
 		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
@@ -157,6 +157,9 @@ public final class MidiDevices {
 		// initialize channel and instrument info
 		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
 			refreshInstrument( channel );
+		
+		// initialize lyrics
+		refreshLyrics();
 	}
 	
 	/**
@@ -175,7 +178,7 @@ public final class MidiDevices {
 		sequencer = MidiSystem.getSequencer( false );
 		
 		// initialize listeners
-		MidiListener listener = new MidiListener( playerControler );
+		MidiListener listener = new MidiListener( playerController );
 		sequencer.addMetaEventListener( listener );
 		
 		sequencer.open();
@@ -217,11 +220,11 @@ public final class MidiDevices {
 					
 					// soundbank not loaded
 					else
-						playerControler.showErrorMessage( Dict.get(Dict.ERROR_SOUNDFONT_LOADING_FAILED) );
+						playerController.showErrorMessage( Dict.get(Dict.ERROR_SOUNDFONT_LOADING_FAILED) );
 				}
 				else {
 					// soundfont not supported
-					playerControler.showErrorMessage( Dict.get(Dict.ERROR_SOUNDFONT_NOT_SUPPORTED) );
+					playerController.showErrorMessage( Dict.get(Dict.ERROR_SOUNDFONT_NOT_SUPPORTED) );
 				}
 			}
 			
@@ -342,7 +345,17 @@ public final class MidiDevices {
 	 */
 	public static void refreshChannelActivity( byte channel ) {
 		boolean active = SequenceAnalyzer.getChannelActivity( channel, getTickPosition() );
-		playerControler.setChannelActivity( channel, active );
+		playerController.setChannelActivity( channel, active );
+	}
+	
+	/**
+	 * Is queried if the displayed lyrics must change.
+	 * Gets the new lyrics from the {@link SequenceAnalyzer} and
+	 * changes the UI accordingly.
+	 */
+	public static void refreshLyrics() {
+		String lyrics = SequenceAnalyzer.getLyrics( getTickPosition() );
+		playerController.setLyrics( lyrics );
 	}
 	
 	/**
@@ -566,6 +579,9 @@ public final class MidiDevices {
 		// refresh instrument name, bank number and channel comment
 		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
 			refreshInstrument( channel );
+		
+		// refresh the lyrics
+		refreshLyrics();
 		
 		rememberVolume();
 	}
@@ -791,7 +807,7 @@ public final class MidiDevices {
 		// channel not used at all?
 		if ( -1 == bankMSB ) {
 			// return default config
-			playerControler.setChannelInfo( channel, "", "", "", "", "" );
+			playerController.setChannelInfo( channel, "", "", "", "", "" );
 			
 			return;
 		}
@@ -826,7 +842,7 @@ public final class MidiDevices {
 			// nothing more to do
 		}
 		
-		playerControler.setChannelInfo( channel, bankNum, bankTooltip, progNumStr, instrName, comment );
+		playerController.setChannelInfo( channel, bankNum, bankTooltip, progNumStr, instrName, comment );
 	}
 	
 	/**

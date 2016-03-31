@@ -364,6 +364,7 @@ public class Dict {
 	public static final String TAB_SOUNDFONT_INSTRUMENTS   = "tab_soundfont_instruments";
 	public static final String TAB_SOUNDFONT_RESOURCES     = "tab_soundfont_resources";
 	public static final String TAB_MIDI_SEQUENCE_INFO      = "tab_midi_sequence_info";
+	public static final String TAB_MIDI_KARAOKE            = "tab_midi_karaoke";
 	public static final String TAB_BANK_INSTR_NOTE         = "tab_bank_instr_note";
 	public static final String TAB_MESSAGES                = "tab_messages";
 	public static final String SOUNDFONT_DRUMKITS          = "soundfont_drumkits";
@@ -386,6 +387,11 @@ public class Dict {
 	public static final String MIN                         = "min";
 	public static final String MAX                         = "max";
 	public static final String CHANNEL                     = "channel";
+	public static final String KARAOKE_TYPE                = "karaoke_type";
+	public static final String SONG_TITLE                  = "song_title";
+	public static final String KARAOKE_COPYRIGHT           = "karaoke_copyright";
+	public static final String KARAOKE_INFO                = "karaoke_info";
+	public static final String LYRICS                      = "lyrics";
 	public static final String TOTAL                       = "total";
 	public static final String PER_CHANNEL                 = "per_channel";
 	public static final String BANK                        = "bank";
@@ -914,6 +920,7 @@ public class Dict {
 	public static final String SOUNDCHECK                       = "soundcheck";
 	public static final String MEMORIZE                         = "memorize";
 	public static final String JUMP                             = "jump";
+	public static final String SHOW_LYRICS                      = "show_lyrics";
 	public static final String TIME_INFO_UNAVAILABLE            = "time_info_unavailable";
 	public static final String SLIDER_VOL                       = "slider_vol";
 	public static final String SLIDER_TEMPO                     = "slider_tempo";
@@ -1090,6 +1097,7 @@ public class Dict {
 		set( TAB_SOUNDFONT_INSTRUMENTS,              "Instruments & Drum Kits"       );
 		set( TAB_SOUNDFONT_RESOURCES,                "Resources"                     );
 		set( TAB_MIDI_SEQUENCE_INFO,                 "General Info"                  );
+		set( TAB_MIDI_KARAOKE,                       "Karaoke Info"                  );
 		set( TAB_BANK_INSTR_NOTE,                    "Banks, Instruments, Notes"     );
 		set( TAB_MESSAGES,                           "MIDI Messages"                 );
 		set( SOUNDFONT_VENDOR,                       "Vendor"                        );
@@ -1111,6 +1119,11 @@ public class Dict {
 		set( MIN,                                    "Minimum"                       );
 		set( MAX,                                    "Maximum"                       );
 		set( CHANNEL,                                "Channel"                       );
+		set( KARAOKE_TYPE,                           "Type"                          );
+		set( SONG_TITLE,                             "Title"                         );
+		set( KARAOKE_COPYRIGHT,                      "Copyright, etc."               );
+		set( KARAOKE_INFO,                           "Other Info"                    );
+		set( LYRICS,                                 "Lyrics"                        );
 		set( TOTAL,                                  "Total"                         );
 		set( PER_CHANNEL,                            "Per Channel"                   );
 		set( BANK,                                   "Bank"                          );
@@ -1687,6 +1700,7 @@ public class Dict {
 		set( SOUNDCHECK,                          "Soundcheck"                 );
 		set( MEMORIZE,                            "Memorize"                   );
 		set( JUMP,                                "Go"                         );
+		set( SHOW_LYRICS,                         "Show Lyrics"                );
 		set( TIME_INFO_UNAVAILABLE,               "-"                          );
 		set( SLIDER_VOL,                          "Vol"                        );
 		set( SLIDER_TEMPO,                        "Tempo"                      );
@@ -2349,7 +2363,7 @@ public class Dict {
 		}
 		
 		// initialize unmodified and higher notes
-		StringBuffer postfix = new StringBuffer( "" );
+		StringBuilder postfix = new StringBuilder( "" );
 		OCTAVE:
 		for ( int octave = 0; ; octave++ ) {
 			if ( octave > 0 )
@@ -2372,7 +2386,7 @@ public class Dict {
 			          ;
 		}
 		Collections.reverse( noteNames );
-		postfix = new StringBuffer( "" );
+		postfix = new StringBuilder( "" );
 		
 		// initialize lower notes
 		OCTAVE:
@@ -2408,7 +2422,7 @@ public class Dict {
 		}
 		
 		// initialize unmodified and higher notes
-		StringBuffer postfix = new StringBuffer( "" );
+		StringBuilder postfix = new StringBuilder( "" );
 		OCTAVE:
 		for ( int octave = 0; ; octave++ ) {
 			if ( octave > 0 )
@@ -2426,7 +2440,7 @@ public class Dict {
 		
 		// initialize lower notes
 		Collections.reverse( noteNames );
-		postfix = new StringBuffer( "" );
+		postfix = new StringBuilder( "" );
 		OCTAVE:
 		for ( int octave = 1; ; octave++ ) {
 			postfix.append( "-" );

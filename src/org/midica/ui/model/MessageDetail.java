@@ -167,23 +167,23 @@ public class MessageDetail implements IMessageDetailProvider, Comparable<Message
 		Collections.reverse( nodes );
 		
 		// construct type string
-		StringBuffer textBuf = new StringBuffer( "" );
+		StringBuilder text = new StringBuilder( "" );
 		for ( TreeNode bareNode : nodes ) {
 			MidicaTreeNode node = (MidicaTreeNode) bareNode;
 			String         name = node.getName();
 			
 			// leaf node
-			if ( 0 == textBuf.length() ) {
-				textBuf.append( "<html>" + name );
+			if ( 0 == text.length() ) {
+				text.append( "<html>" + name );
 			}
 			
 			// another node
 			else {
-				textBuf.append( " <span style=\"color: #dd0000; font-size: 105%; font-weight: bold; \"> &larr; </span> " + name );
+				text.append( " <span style=\"color: #dd0000; font-size: 105%; font-weight: bold; \"> &larr; </span> " + name );
 			}
 		}
 		
-		return textBuf.toString();
+		return text.toString();
 	}
 	
 	/**
@@ -202,22 +202,22 @@ public class MessageDetail implements IMessageDetailProvider, Comparable<Message
 		TreeNode[]     paths = leaf.getPath();
 		
 		// construct tooltip text
-		StringBuffer textBuf = new StringBuffer( "<html>" );
+		StringBuilder text = new StringBuilder( "<html>" );
 		int i = 0;
 		for ( TreeNode path : paths ) {
 			MidicaTreeNode node = (MidicaTreeNode) path;
 			
 			// add indentation
-			textBuf.append( "<tt>" );
+			text.append( "<tt>" );
 			for ( int j = 0; j < i; j++ ) {
-				textBuf.append( "&nbsp; &nbsp;" );
+				text.append( "&nbsp; &nbsp;" );
 			}
 			i++;
 			
 			// add the node
-			textBuf.append( "</tt>" + node.getName() + "<br>" );
+			text.append( "</tt>" + node.getName() + "<br>" );
 		}
 		
-		return textBuf.toString();
+		return text.toString();
 	}
 }

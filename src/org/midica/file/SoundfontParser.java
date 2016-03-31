@@ -352,7 +352,7 @@ public class SoundfontParser implements IParser {
 					hasChromaticChannel = true;
 			}
 			instrument.put( "channels", makeNumberRangeString(channels) ); // e.g. "0-9,10-15"
-			StringBuffer channelsStr = new StringBuffer();
+			StringBuilder channelsStr = new StringBuilder();
 			for ( int channel : channels ) {
 				if ( 0 == channelsStr.length() )
 					channelsStr.append( channel );

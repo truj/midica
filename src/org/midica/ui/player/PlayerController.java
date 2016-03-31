@@ -10,6 +10,8 @@ package org.midica.ui.player;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
@@ -50,7 +52,7 @@ import org.midica.worker.WaitView;
  * @author Jan Trukenmüller
  */
 public class PlayerController implements ActionListener, WindowListener, ChangeListener,
-	DocumentListener, MouseWheelListener {
+	DocumentListener, MouseWheelListener, ItemListener {
 	
 	private PlayerView      view        = null;
 	private ErrorMsgView    errorMsg    = null;
@@ -363,7 +365,58 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	}
 	
 	/**
-	 * Handles slider and checkbox events.
+	 * Writes the given lyrics string into the karaoke area.
+	 * 
+	 * @param text  HTML-formatted lyrics text.
+	 */
+	public void setLyrics( String text ) {
+		view.setLyrics( text );
+	}
+	
+	/**
+	 * Handles checkbox changes.
+	 * 
+	 * Channel-independent actions:
+	 * 
+	 * - Shows or hides the channel area or lyrics area according to the show-lyrics checkbox.
+	 * 
+	 * Channel-dependent actions:
+	 * 
+	 * - Adjusts the channel mute state according to the mute checkbox.
+	 * - Adjusts the channel solo state according to the solo checkbox.
+	 * 
+	 * @param e    Event object.
+	 */
+	@Override
+	public void itemStateChanged( ItemEvent e ) {
+		
+		// get name, component and checked/unchecked
+		String    name      = ((Component) e.getSource()).getName();
+		JCheckBox cbx       = (JCheckBox) e.getSource();
+		boolean   isChecked = cbx.isSelected();
+		
+		// show/hide channels/lyrics
+		if ( name.startsWith(PlayerView.NAME_SHOW_LYRICS) ) {
+			view.toggleLyrics();
+		}
+		
+		// mute a channel
+		else if ( name.startsWith(PlayerView.NAME_MUTE) ) {
+			name        = name.replaceFirst( PlayerView.NAME_MUTE, "" );
+			int channel = Integer.parseInt( name );
+			MidiDevices.setMute( channel, isChecked );
+		}
+		
+		// solo a channel
+		else if ( name.startsWith(PlayerView.NAME_SOLO) ) {
+			name        = name.replaceFirst( PlayerView.NAME_SOLO, "" );
+			int channel = Integer.parseInt( name );
+			MidiDevices.setSolo( channel, isChecked );
+		}
+	}
+	
+	/**
+	 * Handles slider events.
 	 * 
 	 * Channel-independent actions:
 	 * 
@@ -375,8 +428,6 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * Channel-dependent actions:
 	 * 
 	 * - Adjusts the synthesizer state according to the mannually changed channel volume slider state.
-	 * - Adjusts the channel mute state according to the manually changed checkbox.
-	 * - Adjusts the channel solo state according to the manually changed checkbox.
 	 * 
 	 * @param e    Event object.
 	 */
@@ -437,24 +488,6 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			byte volume = (byte) ( (JSlider) e.getSource() ).getValue();
 			view.setChannelVolumeField( channel, volume );
 			MidiDevices.setChannelVolume( channel, (byte) volume );
-		}
-		
-		// mute a channel
-		else if ( name.startsWith(PlayerView.NAME_MUTE) ) {
-			JCheckBox cbx = (JCheckBox) e.getSource();
-			name = name.replaceFirst( PlayerView.NAME_MUTE, "" );
-			int channel = Integer.parseInt( name );
-			boolean mute = cbx.isSelected();
-			MidiDevices.setMute( channel, mute );
-		}
-		
-		// solo a channel
-		else if ( name.startsWith(PlayerView.NAME_SOLO) ) {
-			JCheckBox cbx = (JCheckBox) e.getSource();
-			name = name.replaceFirst( PlayerView.NAME_SOLO, "" );
-			int channel = Integer.parseInt( name );
-			boolean solo = cbx.isSelected();
-			MidiDevices.setSolo( channel, solo );
 		}
 	}
 	
