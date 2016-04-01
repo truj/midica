@@ -17,7 +17,8 @@ import org.midica.config.Config;
 import org.midica.config.Dict;
 
 /**
- * Provides a file selector window for choosing files with a certain extension.
+ * Provides a file selector window for choosing files with a certain
+ * set of extensions.
  * 
  * @author Jan Trukenmüller
  */
@@ -25,14 +26,14 @@ public class FileSelector extends JDialog {
 
 	private static final long serialVersionUID = 1L;
 	
-	// file extensions
-	public static final String FILE_EXTENSION_MPL       = "midica";
-	public static final String FILE_EXTENSION_MIDI      = "mid";
-	public static final String FILE_EXTENSION_SOUNDFONT = "sf2";
-	public static final byte   READ                     = 1;
-	public static final byte   WRITE                    = 2;
+	// file types (NOT the same as file extensions)
+	public static final String FILE_TYPE_MPL       = "mpl";
+	public static final String FILE_TYPE_MIDI      = "midi";
+	public static final String FILE_TYPE_SOUNDFONT = "sf2";
+	public static final byte   READ                = 1;
+	public static final byte   WRITE               = 2;
 	
-	private String suffix;
+	private String fileType;
 	private byte   filePurpose;
 	
 	JFileChooser fileChooser = null;
@@ -51,32 +52,32 @@ public class FileSelector extends JDialog {
 	
 	/**
 	 * Initializes and shows the file selector window including the {@link JFileChooser}.
-	 * Sets a {@link FileExtensionFilter} for selecting the files by extension.
+	 * Sets a {@link FileExtensionFilter} for selecting the files by type.
 	 * 
-	 * @param suffix         File extension by which the files are filtered.
+	 * @param type           File type by which the files are filtered.
 	 * @param filePurpose    Purpose for which the file is going to be opened.
 	 *                       Possible values are **READ** or **WRITE**.
 	 */
-	public void init( String suffix, byte filePurpose ) {
-		this.suffix      = suffix;
+	public void init( String type, byte filePurpose ) {
+		this.fileType    = type;
 		this.filePurpose = filePurpose;
 		
 		if ( READ == this.filePurpose ) {
-    		if ( suffix.equals(FILE_EXTENSION_MIDI) )
+    		if ( type.equals(FILE_TYPE_MIDI) )
     			fileChooser = new JFileChooser( Config.get(Config.DIRECTORY_MID) );
-    		else if ( suffix.equals(FILE_EXTENSION_SOUNDFONT) )
+    		else if ( type.equals(FILE_TYPE_SOUNDFONT) )
     			fileChooser = new JFileChooser( Config.get(Config.DIRECTORY_SF2) );
     		else
     			fileChooser = new JFileChooser( Config.get(Config.DIRECTORY_MPL) );
     		}
 		else {
-			if ( suffix.equals(FILE_EXTENSION_MIDI) )
+			if ( type.equals(FILE_TYPE_MIDI) )
     			fileChooser = new JFileChooser( Config.get(Config.DIRECTORY_EXPORT_MID) );
     		else
     			fileChooser = new JFileChooser( Config.get(Config.DIRECTORY_EXPORT_MPL) );
 		}
 		
-		fileChooser.setFileFilter( new FileExtensionFilter(suffix) );
+		fileChooser.setFileFilter( new FileExtensionFilter(type) );
 		fileChooser.setAcceptAllFileFilterUsed( false );
 		fileChooser.addActionListener( controller );
 		add( fileChooser );
@@ -98,15 +99,15 @@ public class FileSelector extends JDialog {
 		try {
 			String directory = file.getParentFile().getCanonicalPath();
 			if ( READ == this.filePurpose ) {
-				if ( FILE_EXTENSION_MIDI.equals(suffix) )
+				if ( FILE_TYPE_MIDI.equals(fileType) )
 					Config.set( Config.DIRECTORY_MID, directory );
-    			else if ( FILE_EXTENSION_SOUNDFONT.equals(suffix) )
+    			else if ( FILE_TYPE_SOUNDFONT.equals(fileType) )
     				Config.set( Config.DIRECTORY_SF2, directory );
     			else
     				Config.set( Config.DIRECTORY_MPL, directory );
     		}
 			else {
-				if ( FILE_EXTENSION_MIDI.equals(suffix) )
+				if ( FILE_TYPE_MIDI.equals(fileType) )
 					Config.set( Config.DIRECTORY_EXPORT_MID, directory );
 				else
     				Config.set( Config.DIRECTORY_EXPORT_MPL, directory );

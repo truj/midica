@@ -90,15 +90,15 @@ public class UiController implements ActionListener, WindowListener {
 	private void initView() {
 		view = new UiView( this );
 		mplSelector = new FileSelector( view, this );
-		mplSelector.init( FileSelector.FILE_EXTENSION_MPL, FileSelector.READ );
+		mplSelector.init( FileSelector.FILE_TYPE_MPL, FileSelector.READ );
 		midiSelector = new FileSelector( view, this );
-		midiSelector.init( FileSelector.FILE_EXTENSION_MIDI, FileSelector.READ );
+		midiSelector.init( FileSelector.FILE_TYPE_MIDI, FileSelector.READ );
 		soundfontSelector = new FileSelector( view, this );
-		soundfontSelector.init( FileSelector.FILE_EXTENSION_SOUNDFONT, FileSelector.READ );
+		soundfontSelector.init( FileSelector.FILE_TYPE_SOUNDFONT, FileSelector.READ );
 		midiExportSelector = new FileSelector( view, this );
-		midiExportSelector.init( FileSelector.FILE_EXTENSION_MIDI, FileSelector.WRITE );
+		midiExportSelector.init( FileSelector.FILE_TYPE_MIDI, FileSelector.WRITE );
 		mplExportSelector = new FileSelector( view, this );
-		mplExportSelector.init( FileSelector.FILE_EXTENSION_MPL, FileSelector.WRITE );
+		mplExportSelector.init( FileSelector.FILE_TYPE_MPL, FileSelector.WRITE );
 	}
 	
 	/**
@@ -185,7 +185,7 @@ public class UiController implements ActionListener, WindowListener {
 		// button pressed: start player
 		else if ( UiView.CMD_START_PLAYER.equals(cmd) ) {
 			if ( MidiDevices.isSequenceSet() ) {
-				if ( FileSelector.FILE_EXTENSION_MIDI.equals(currentFileType) )
+				if ( FileSelector.FILE_TYPE_MIDI.equals(currentFileType) )
 					player = new PlayerView( view, midiParser, currentFile );
 				else
 					player = new PlayerView( view, mplParser, currentFile );
@@ -238,25 +238,25 @@ public class UiController implements ActionListener, WindowListener {
 	private void parseChosenFile( ActionEvent e ) {
 		
 		// initialize variables based on the file type to be parsed
-		String       type     = ((FileExtensionFilter)((JFileChooser)e.getSource()).getFileFilter()).getExtension();
+		String       type     = ((FileExtensionFilter)((JFileChooser)e.getSource()).getFileFilter()).getType();
 		WaitView     waitView = new WaitView( view );
 		String       waitMsg;
 		File         file;
 		IParser      parser;
 		FileSelector selector;
-		if ( FileSelector.FILE_EXTENSION_MPL.equals(type) ) {
+		if ( FileSelector.FILE_TYPE_MPL.equals(type) ) {
 			file     = mplSelector.getFile();
 			parser   = mplParser;
 			selector = mplSelector;
 			waitMsg  = Dict.get( Dict.WAIT_PARSE_MPL );
 		}
-		else if ( FileSelector.FILE_EXTENSION_MIDI.equals(type) ) {
+		else if ( FileSelector.FILE_TYPE_MIDI.equals(type) ) {
 			file     = midiSelector.getFile();
 			parser   = midiParser;
 			selector = midiSelector;
 			waitMsg  = Dict.get( Dict.WAIT_PARSE_MID );
 		}
-		else if ( FileSelector.FILE_EXTENSION_SOUNDFONT.equals(type) ) {
+		else if ( FileSelector.FILE_TYPE_SOUNDFONT.equals(type) ) {
 			file     = soundfontSelector.getFile();
 			parser   = soundfontParser;
 			selector = soundfontSelector;
@@ -269,7 +269,7 @@ public class UiController implements ActionListener, WindowListener {
 		// Reset the filename for the case that it cannot be parsed.
 		// But don't do that for soundfonts because the last successfully
 		// parsed soundfont file will stay valid.
-		if ( ! FileSelector.FILE_EXTENSION_SOUNDFONT.equals(type) )
+		if ( ! FileSelector.FILE_TYPE_SOUNDFONT.equals(type) )
 			displayFilename( type, Dict.get(Dict.UNCHOSEN_FILE) );
 		
 		// close file selector
@@ -294,8 +294,8 @@ public class UiController implements ActionListener, WindowListener {
 			
 			// show the filename of the successfully parsed file
 			displayFilename( type, file.getName() );
-			if ( FileSelector.FILE_EXTENSION_MPL.equals(type)
-			  || FileSelector.FILE_EXTENSION_MIDI.equals(type) ) {
+			if ( FileSelector.FILE_TYPE_MPL.equals(type)
+			  || FileSelector.FILE_TYPE_MIDI.equals(type) ) {
 				// store the file for later reparsing
 				currentFile     = file;
 				currentFileType = type;
@@ -304,7 +304,7 @@ public class UiController implements ActionListener, WindowListener {
 		catch ( ParseException ex ) {
 			int    lineNumber = ex.getLineNumber();
 			String fileName   = ex.getFileName();
-			String msg = ex.getMessage();
+			String msg        = ex.getMessage();
 			if ( lineNumber > 0 && null != fileName ) {
 				msg = String.format(
 					Dict.get( Dict.ERROR_IN_LINE ),
@@ -315,8 +315,8 @@ public class UiController implements ActionListener, WindowListener {
 			showErrorMessage( msg );
 			
 			// reset sequence (but not if a soundfont has been parsed)
-			if ( FileSelector.FILE_EXTENSION_MPL.equals(type)
-			  || FileSelector.FILE_EXTENSION_MIDI.equals(type) ) {
+			if ( FileSelector.FILE_TYPE_MPL.equals(type)
+			  || FileSelector.FILE_TYPE_MIDI.equals(type) ) {
 				MidiDevices.setSequence( null );
 			}
 		}
@@ -328,16 +328,16 @@ public class UiController implements ActionListener, WindowListener {
 	 * @param e    Event caused by choosing a file.
 	 */
 	private void exportChosenFile( ActionEvent e ) {
-		String type = ((FileExtensionFilter)((JFileChooser)e.getSource()).getFileFilter()).getExtension();
+		String type = ((FileExtensionFilter)((JFileChooser)e.getSource()).getFileFilter()).getType();
 		File         file;
 		FileSelector selector;
 		boolean      mustExportMidi;
-		if ( FileSelector.FILE_EXTENSION_MPL.equals(type) ) {
+		if ( FileSelector.FILE_TYPE_MPL.equals(type) ) {
 			file           = mplExportSelector.getFile();
 			selector       = mplExportSelector;
 			mustExportMidi = false;
 		}
-		else if ( FileSelector.FILE_EXTENSION_MIDI.equals(type) ) {
+		else if ( FileSelector.FILE_TYPE_MIDI.equals(type) ) {
 			file           = midiExportSelector.getFile();
 			selector       = midiExportSelector;
 			mustExportMidi = true;
@@ -395,23 +395,23 @@ public class UiController implements ActionListener, WindowListener {
 	/**
 	 * Displays the imported file name in the right field (according to the file type).
 	 * 
-	 * @param type        File extension.
+	 * @param type        File type.
 	 * @param filename    File name.
 	 */
 	private void displayFilename( String type, String filename ) {
-		if ( FileSelector.FILE_EXTENSION_MPL.equals(type) ) {
+		if ( FileSelector.FILE_TYPE_MPL.equals(type) ) {
 			// show MidicaPL file
 			view.getChosenMidicaPLFileLbl().setText( filename );
 			// hide Midi file
 			view.getChosenMidiFileLbl().setText( Dict.get(Dict.UNCHOSEN_FILE) );
 		}
-		else if ( FileSelector.FILE_EXTENSION_MIDI.equals(type) ) {
+		else if ( FileSelector.FILE_TYPE_MIDI.equals(type) ) {
 			// show Midi file
 			view.getChosenMidiFileLbl().setText( filename );
 			// hide MidicaPL file
 			view.getChosenMidicaPLFileLbl().setText( Dict.get(Dict.UNCHOSEN_FILE) );
 		}
-		else if ( FileSelector.FILE_EXTENSION_SOUNDFONT.equals(type) )
+		else if ( FileSelector.FILE_TYPE_SOUNDFONT.equals(type) )
 			// show soundfont file
 			view.getChosenSoundfontFileLbl().setText( filename );
 	}
