@@ -15,6 +15,7 @@ import javax.swing.JFileChooser;
 
 import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.ui.widget.MidicaFileChooser;
 
 /**
  * Provides a file selector window for choosing files with a certain
@@ -36,8 +37,8 @@ public class FileSelector extends JDialog {
 	private String fileType;
 	private byte   filePurpose;
 	
-	JFileChooser fileChooser = null;
-	UiController controller  = null;
+	MidicaFileChooser fileChooser = null;
+	UiController      controller  = null;
 	
 	/**
 	 * Creates a new file selector window.
@@ -62,20 +63,33 @@ public class FileSelector extends JDialog {
 		this.fileType    = type;
 		this.filePurpose = filePurpose;
 		
+		String  directory     = "";
+		boolean charSetSelect = false;
 		if ( READ == this.filePurpose ) {
-    		if ( type.equals(FILE_TYPE_MIDI) )
-    			fileChooser = new JFileChooser( Config.get(Config.DIRECTORY_MID) );
-    		else if ( type.equals(FILE_TYPE_SOUNDFONT) )
-    			fileChooser = new JFileChooser( Config.get(Config.DIRECTORY_SF2) );
-    		else
-    			fileChooser = new JFileChooser( Config.get(Config.DIRECTORY_MPL) );
+    		if ( type.equals(FILE_TYPE_MIDI) ) {
+    			directory     = Config.get( Config.DIRECTORY_MID );
+    			charSetSelect = true;
     		}
+    		else if ( type.equals(FILE_TYPE_SOUNDFONT) ) {
+    			directory     = Config.get( Config.DIRECTORY_SF2 );
+    			charSetSelect = false;
+    		}
+    		else {
+    			directory     = Config.get( Config.DIRECTORY_MPL );
+    			charSetSelect = true;
+    		}
+    	}
 		else {
-			if ( type.equals(FILE_TYPE_MIDI) )
-    			fileChooser = new JFileChooser( Config.get(Config.DIRECTORY_EXPORT_MID) );
-    		else
-    			fileChooser = new JFileChooser( Config.get(Config.DIRECTORY_EXPORT_MPL) );
+			if ( type.equals(FILE_TYPE_MIDI) ) {
+    			directory     = Config.get( Config.DIRECTORY_EXPORT_MID );
+    			charSetSelect = true;
+			}
+    		else {
+    			directory     = Config.get( Config.DIRECTORY_EXPORT_MPL );
+    			charSetSelect = true;
+    		}
 		}
+		fileChooser = new MidicaFileChooser( type, filePurpose, directory, charSetSelect );
 		
 		fileChooser.setFileFilter( new FileExtensionFilter(type) );
 		fileChooser.setAcceptAllFileFilterUsed( false );

@@ -10,8 +10,9 @@ package org.midica.file;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
@@ -23,9 +24,13 @@ import javax.sound.midi.Sequence;
 import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Track;
 
+import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.midi.MidiDevices;
 import org.midica.midi.MidiListener;
+import org.midica.midi.SequenceCreator;
+import org.midica.ui.model.ComboboxStringOption;
+import org.midica.ui.model.ConfigComboboxModel;
 
 import com.sun.media.sound.MidiUtils;
 
@@ -78,61 +83,64 @@ public class MidicaPLExporter extends Exporter {
 	 * @return                   Warnings that occured during the export.
 	 * @throws  ExportException  If the file can not be exported correctly.
 	 */
-    public ExportResult export( File file ) throws ExportException {
+	public ExportResult export( File file ) throws ExportException {
 		
-    	exportResult = new ExportResult( true );
-    	
-    	try {
+		exportResult         = new ExportResult( true );
+		String targetCharset = ((ComboboxStringOption) ConfigComboboxModel.getModel( Config.CHARSET_EXPORT_MPL ).getSelectedItem() ).getIdentifier();
+		
+		try {
 			
 			// create file writer and store it in this.writer
 			if ( ! createFile(file) )
 				return new ExportResult( false );
 			
 			// open file for writing
-    		BufferedWriter writer = new BufferedWriter( new FileWriter( file ) );
+			FileOutputStream   fos    = new FileOutputStream( file );
+			OutputStreamWriter osw    = new OutputStreamWriter( fos, targetCharset );
+			BufferedWriter     writer = new BufferedWriter( osw );
+		
+			// initialize data structures
+			instruments      = new HashMap<Integer, Instrument>();
+			instrumentChange = new ArrayList<ArrayList<Long>>();
+			globalEvents     = new TreeMap<Long, HashMap<String,String>>();
+			globalActivity   = new TreeMap<Long, Integer>();
+			isChannelUsed    = new boolean[ 16 ];
+			channelEvents    = new TreeMap[ 16 ];
+			channelActivity  = new TreeMap[ 16 ];
+			noteEvent        = new TreeMap[ 16 ][ 128 ];
+			for ( byte channel = 0; channel < 16; channel++ ) {
+				isChannelUsed[ channel ]   = false;
+				channelEvents[ channel ]   = new TreeMap<Long, ArrayList<HashMap<String,String>>>();
+				channelActivity[ channel ] = new TreeMap<Long, Integer>();
+				
+				TreeMap<Long, HashMap<String, String>>[] channelNoteActivity = new TreeMap[ 128 ];
+				for ( int note = 0; note < 128; note++ ) {
+					channelNoteActivity[ note ] = new TreeMap<Long, HashMap<String, String>>();
+				}
+				noteEvent[ channel ] = channelNoteActivity;
+			}
+				
 			
-    		// initialize data structures
-    		instruments      = new HashMap<Integer, Instrument>();
-    		instrumentChange = new ArrayList<ArrayList<Long>>();
-    		globalEvents     = new TreeMap<Long, HashMap<String,String>>();
-    		globalActivity   = new TreeMap<Long, Integer>();
-    		isChannelUsed    = new boolean[ 16 ];
-    		channelEvents    = new TreeMap[ 16 ];
-    		channelActivity  = new TreeMap[ 16 ];
-    		noteEvent        = new TreeMap[ 16 ][ 128 ];
-    		for ( byte channel = 0; channel < 16; channel++ ) {
-    			isChannelUsed[ channel ]   = false;
-    			channelEvents[ channel ]   = new TreeMap<Long, ArrayList<HashMap<String,String>>>();
-    			channelActivity[ channel ] = new TreeMap<Long, Integer>();
-    			
-    			TreeMap<Long, HashMap<String, String>>[] channelNoteActivity = new TreeMap[ 128 ];
-    			for ( int note = 0; note < 128; note++ ) {
-    				channelNoteActivity[ note ] = new TreeMap<Long, HashMap<String, String>>();
-    			}
-    			noteEvent[ channel ] = channelNoteActivity;
-    		}
-    			
-    		
-    		// make sure that the syntax configuration is up to date
-    		MidicaPLParser.refreshSyntax();
-    		
-    		
-    		
-    		
-    		
-    		// fill data structures
-    		resolution = readSequence();
-    		
-    		// calculate what tick length corresponds to what note length
-        	noteLength = initNoteLengths();
-    		
-        	
-    		preprocessEvents();
-    		
-    		// create MidicaPL string from the data structures and write it into the file
-    		writer.write( createMidicaPL() );
+			// make sure that the syntax configuration is up to date
+			MidicaPLParser.refreshSyntax();
 			
-    		
+			
+			
+			
+			
+			// fill data structures
+			resolution = readSequence();
+			
+			// calculate what tick length corresponds to what note length
+			noteLength = initNoteLengths();
+			
+			
+			preprocessEvents();
+			
+			// create MidicaPL string from the data structures and write it into the file
+			writer.write( createMidicaPL() );
+			
+			
 			// parse line by line
 //			while ( null != (line = bw.readLine()) ) {
 //				lineNumber++;
@@ -185,6 +193,7 @@ public class MidicaPLExporter extends Exporter {
 		// parse the midi sequence
 		Sequence seq = MidiDevices.getSequence();
 		
+		int trackNum = 0;
 		TRACK:
 		for ( Track track : seq.getTracks() ) {
 			
@@ -226,7 +235,7 @@ public class MidicaPLExporter extends Exporter {
 						}
 						else {
 							// later instrument change
-							instrumentChange.get( channel ).add( tick ); // TODO: reicht noch nicht
+							instrumentChange.get( channel ).add( tick ); // TODO: initialize before
 						}
 					}
 					
@@ -243,7 +252,7 @@ public class MidicaPLExporter extends Exporter {
 					// something else?
 					else {
 						String warning = String.format( Dict.get(Dict.WARNING_IGNORED_SHORT_MESSAGE), cmd, note, volume );
-						exportResult.addWarning( tick, channel, -1, warning );
+						exportResult.addWarning( trackNum, tick, channel, -1, warning );
 					}
 				}
 				
@@ -265,6 +274,7 @@ public class MidicaPLExporter extends Exporter {
 					
 				}
 			}
+			trackNum++;
 		}
 		
 		return seq.getResolution();
@@ -307,14 +317,16 @@ public class MidicaPLExporter extends Exporter {
 							}
 							else {
 								String warning = String.format( Dict.get(Dict.WARNING_UNPRESSED_NOTE_RELEASED), previousTick );
-								exportResult.addWarning( tick, channel, note, warning );
+								int    track   = channel + SequenceCreator.NUM_META_TRACKS;
+								exportResult.addWarning( track, tick, channel, note, warning );
 							}
 							previousActivity = false;
 						}
 						else {
 							if (previousActivity) {
 								String warning = String.format( Dict.get(Dict.WARNING_UNRELEASED_NOTE_PRESSED), previousTick );
-								exportResult.addWarning( tick, channel, note, warning );
+								int    track   = channel + SequenceCreator.NUM_META_TRACKS;
+								exportResult.addWarning( track, tick, channel, note, warning );
 							}
 							previousActivity = true;
 							previousTick     = tick;
@@ -435,7 +447,8 @@ public class MidicaPLExporter extends Exporter {
 		if (hasOtherEvent) {
 			int otherVol = Integer.parseInt( noteEvent[channel][note].get(tick).get("volume") );
 			String warning = String.format( Dict.get(Dict.WARNING_SAME_NOTE_IN_SAME_TICK), volume, otherVol );
-			exportResult.addWarning( tick, channel, note, warning );
+			int    track   = channel + SequenceCreator.NUM_META_TRACKS;
+			exportResult.addWarning( track, tick, channel, note, warning );
 			
 			// keep the louder note
 			if ( volume <= otherVol )

@@ -17,7 +17,7 @@ import javax.swing.filechooser.FileFilter;
 /**
  * Provides a filter for a {@link JFileChooser} to filter files by file extensions.
  * This class is used together with the {@link JFileChooser} by the class
- * {@link FileExtensionFilter}.
+ * {@link FileSelector}.
  * 
  * @author Jan Trukenmüller
  */

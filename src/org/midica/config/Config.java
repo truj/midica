@@ -15,6 +15,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
@@ -34,6 +35,11 @@ import org.midica.ui.model.ConfigComboboxModel;
  */
 public class Config {
 	
+	public static final String DEFAULT_CHARSET_MPL        = Charset.defaultCharset().name();
+	public static final String DEFAULT_CHARSET_MID        = "ISO-8859-1";
+	public static final String DEFAULT_CHARSET_EXPORT_MPL = Charset.defaultCharset().name();
+	public static final String DEFAULT_CHARSET_EXPORT_MID = "ISO-8859-1";
+	
 	// keys for the config dropdown boxes
 	public static final String LANGUAGE   = "language";
 	public static final String HALF_TONE  = "half_tone";
@@ -49,6 +55,13 @@ public class Config {
 	public static final String DIRECTORY_SF2        = "directory_sf2";
 	public static final String DIRECTORY_EXPORT_MPL = "directory_export_mpl";
 	public static final String DIRECTORY_EXPORT_MID = "directory_export_mid";
+	
+	// charsets
+	public static final String CHARSET_MPL        = "charset_mpl";
+	public static final String CHARSET_MID        = "charset_mid";
+	public static final String CHARSET_EXPORT_MPL = "charset_export_mpl";
+	public static final String CHARSET_EXPORT_MID = "charset_export_mid";
+	
 	
 	// table header and column colors
 	public static final Color  TABLE_HEADER_COLOR        = new Color( 200, 230, 255 );
@@ -200,6 +213,11 @@ public class Config {
 		defaults.put( DIRECTORY_EXPORT_MPL, homeDir );
 		defaults.put( DIRECTORY_EXPORT_MID, homeDir );
 		defaults.put( DIRECTORY_SF2,        homeDir );
+		
+		defaults.put( CHARSET_MPL,        DEFAULT_CHARSET_MPL        );
+		defaults.put( CHARSET_MID,        DEFAULT_CHARSET_MID        );
+		defaults.put( CHARSET_EXPORT_MPL, DEFAULT_CHARSET_EXPORT_MPL );
+		defaults.put( CHARSET_EXPORT_MID, DEFAULT_CHARSET_EXPORT_MID );
 		
 		// init config with defaults
 		config = new HashMap<String, String>();

@@ -44,11 +44,12 @@ public class ExportResultTableModel extends MidicaTableModel {
 		this.warnings = result.getWarnings();
 		
 		// table header
-		columnNames = new String[ 4 ];
-		columnNames[ 0 ] = Dict.get( Dict.WARNING_COL_TICK    );
-		columnNames[ 1 ] = Dict.get( Dict.WARNING_COL_CHANNEL );
-		columnNames[ 2 ] = Dict.get( Dict.WARNING_COL_NOTE    );
-		columnNames[ 3 ] = Dict.get( Dict.WARNING_COL_MESSAGE );
+		columnNames = new String[ 5 ];
+		columnNames[ 0 ] = Dict.get( Dict.WARNING_COL_TRACK   );
+		columnNames[ 1 ] = Dict.get( Dict.WARNING_COL_TICK    );
+		columnNames[ 2 ] = Dict.get( Dict.WARNING_COL_CHANNEL );
+		columnNames[ 3 ] = Dict.get( Dict.WARNING_COL_NOTE    );
+		columnNames[ 4 ] = Dict.get( Dict.WARNING_COL_MESSAGE );
 	}
 	
 	
@@ -76,19 +77,31 @@ public class ExportResultTableModel extends MidicaTableModel {
 	@Override
 	public Object getValueAt( int rowIndex, int colIndex ) {
 		
-		// tick
+		// track
 		if ( 0 == colIndex ) {
+			return warnings.get( rowIndex ).get( "track" );
+		}
+		
+		// tick
+		else if ( 1 == colIndex ) {
 			return warnings.get( rowIndex ).get( "tick" );
 		}
 		
 		// channel
-		else if ( 1 == colIndex ) {
-			return warnings.get( rowIndex ).get( "channel" );
+		else if ( 2 == colIndex ) {
+			String channel = warnings.get( rowIndex ).get( "channel" );
+			if ( "-1".equals(channel) ) {
+				return "-";
+			}
+			return channel;
 		}
 		
 		// note
-		else if ( 2 == colIndex ) {
+		else if ( 3 == colIndex ) {
 			String noteNum = warnings.get( rowIndex ).get( "note" );
+			if ( "-1".equals(noteNum) ) {
+				return "-";
+			}
 			String channel = warnings.get( rowIndex ).get( "channel" );
 			String noteName;
 			if ( "9".equals(channel) )
@@ -99,7 +112,7 @@ public class ExportResultTableModel extends MidicaTableModel {
 		}
 		
 		// message
-		else if ( 3 == colIndex ) {
+		else if ( 4 == colIndex ) {
 			return warnings.get( rowIndex ).get( "msg" );
 		}
 		

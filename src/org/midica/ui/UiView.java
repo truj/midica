@@ -30,6 +30,7 @@ import javax.swing.border.TitledBorder;
 
 import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
 
 
@@ -67,28 +68,28 @@ public class UiView extends JDialog {
 	public static final Color  COLOR_TRANSPOSE_DEFAULT = new Color(  50, 100, 255 );
 	public static final Color  COLOR_TRANSPOSE_CHANGED = new Color( 255,   0,   0 );
 	
-	private KeyEventPostProcessor keyProcessor           = null;
-	private Container             content                = null;
-	private UiController          controller             = null;
-	private JLabel                lblChosenMidicaPLFile  = null;
-	private JLabel                lblChosenMidiFile      = null;
-	private JLabel                lblChosenSoundfontFile = null;
-	private JComboBox             cbxGuiLang             = null;
-	private JComboBox             cbxNoteSys             = null;
-	private JComboBox             cbxHalfTone            = null;
-	private JComboBox             cbxOctave              = null;
-	private JComboBox             cbxSyntax              = null;
-	private JComboBox             cbxPercussion          = null;
-	private JComboBox             cbxInstrument          = null;
-	private JLabel                configFeedbackLabel    = null;
-	private JLabel                lblTranspose           = null;
-	private JButton               btnInfo                = null;
-	private JButton               btnPlayer              = null;
-	private JButton               btnSelectMidicaPL      = null;
-	private JButton               btnSelectMidi          = null;
-	private JButton               btnSelectSoundfont     = null;
-	private JButton               btnExportMidi          = null;
-	private JButton               btnExportMidicaPL      = null;
+	private KeyEventPostProcessor           keyProcessor           = null;
+	private Container                       content                = null;
+	private UiController                    controller             = null;
+	private JLabel                          lblChosenMidicaPLFile  = null;
+	private JLabel                          lblChosenMidiFile      = null;
+	private JLabel                          lblChosenSoundfontFile = null;
+	private JComboBox<ComboboxStringOption> cbxGuiLang             = null;
+	private JComboBox<ComboboxStringOption> cbxNoteSys             = null;
+	private JComboBox<ComboboxStringOption> cbxHalfTone            = null;
+	private JComboBox<ComboboxStringOption> cbxOctave              = null;
+	private JComboBox<ComboboxStringOption> cbxSyntax              = null;
+	private JComboBox<ComboboxStringOption> cbxPercussion          = null;
+	private JComboBox<ComboboxStringOption> cbxInstrument          = null;
+	private JLabel                          configFeedbackLabel    = null;
+	private JLabel                          lblTranspose           = null;
+	private JButton                         btnInfo                = null;
+	private JButton                         btnPlayer              = null;
+	private JButton                         btnSelectMidicaPL      = null;
+	private JButton                         btnSelectMidi          = null;
+	private JButton                         btnSelectSoundfont     = null;
+	private JButton                         btnExportMidi          = null;
+	private JButton                         btnExportMidicaPL      = null;
 	
 	/**
 	 * Creates the main window of the program.
@@ -120,10 +121,10 @@ public class UiView extends JDialog {
 		GridBagLayout layout = new GridBagLayout();
 		content.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.NONE;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
-		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.fill       = GridBagConstraints.NONE;
+		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 0.5;
@@ -152,10 +153,10 @@ public class UiView extends JDialog {
 		GridBagLayout layout = new GridBagLayout();
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.BOTH;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
-		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 1;
@@ -184,10 +185,10 @@ public class UiView extends JDialog {
 		GridBagLayout layout = new GridBagLayout();
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.BOTH;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
-		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 1;
@@ -217,10 +218,10 @@ public class UiView extends JDialog {
 		GridBagLayout layout = new GridBagLayout();
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.BOTH;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
-		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 1;
@@ -232,7 +233,7 @@ public class UiView extends JDialog {
 		
 		// gui language selection
 		constraints.gridx++;
-		cbxGuiLang = new JComboBox();
+		cbxGuiLang = new JComboBox<ComboboxStringOption>();
 		cbxGuiLang.setName( NAME_SELECT_LANGUAGE );
 		cbxGuiLang.setModel( ConfigComboboxModel.getModel(Config.LANGUAGE) );
 		cbxGuiLang.addActionListener( controller );
@@ -246,7 +247,7 @@ public class UiView extends JDialog {
 		
 		// note system selection
 		constraints.gridx++;
-		cbxNoteSys = new JComboBox();
+		cbxNoteSys = new JComboBox<ComboboxStringOption> ();
 		cbxNoteSys.setName( NAME_SELECT_SYSTEM );
 		cbxNoteSys.setModel( ConfigComboboxModel.getModel(Config.NOTE) );
 		cbxNoteSys.addActionListener( controller );
@@ -261,7 +262,7 @@ public class UiView extends JDialog {
 		
 		// half tone selection
 		constraints.gridx++;
-		cbxHalfTone = new JComboBox();
+		cbxHalfTone = new JComboBox<ComboboxStringOption>();
 		cbxHalfTone.setName( NAME_SELECT_HALF_TONE );
 		cbxHalfTone.setModel( ConfigComboboxModel.getModel(Config.HALF_TONE) );
 		cbxHalfTone.addActionListener( controller );
@@ -276,7 +277,7 @@ public class UiView extends JDialog {
 		
 		// octave selection
 		constraints.gridx++;
-		cbxOctave = new JComboBox();
+		cbxOctave = new JComboBox<ComboboxStringOption>();
 		cbxOctave.setName( NAME_SELECT_OCTAVE );
 		cbxOctave.setModel( ConfigComboboxModel.getModel(Config.OCTAVE) );
 		cbxOctave.addActionListener( controller );
@@ -291,7 +292,7 @@ public class UiView extends JDialog {
 		
 		// syntax selection
 		constraints.gridx++;
-		cbxSyntax = new JComboBox();
+		cbxSyntax = new JComboBox<ComboboxStringOption>();
 		cbxSyntax.setName( NAME_SELECT_SYNTAX );
 		cbxSyntax.setModel( ConfigComboboxModel.getModel(Config.SYNTAX) );
 		cbxSyntax.addActionListener( controller );
@@ -306,7 +307,7 @@ public class UiView extends JDialog {
 		
 		// percussion selection
 		constraints.gridx++;
-		cbxPercussion = new JComboBox();
+		cbxPercussion = new JComboBox<ComboboxStringOption>();
 		cbxPercussion.setName( NAME_SELECT_PERCUSSION );
 		cbxPercussion.setModel( ConfigComboboxModel.getModel(Config.PERCUSSION) );
 		cbxPercussion.addActionListener( controller );
@@ -321,7 +322,7 @@ public class UiView extends JDialog {
 		
 		// instrument naming selection
 		constraints.gridx++;
-		cbxInstrument = new JComboBox();
+		cbxInstrument = new JComboBox<ComboboxStringOption>();
 		cbxInstrument.setName( NAME_SELECT_INSTRUMENT );
 		cbxInstrument.setModel( ConfigComboboxModel.getModel(Config.INSTRUMENT) );
 		cbxInstrument.addActionListener( controller );
@@ -363,10 +364,10 @@ public class UiView extends JDialog {
 		GridBagLayout layout = new GridBagLayout();
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.BOTH;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
-		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 1;
@@ -402,10 +403,10 @@ public class UiView extends JDialog {
 		GridBagLayout layout = new GridBagLayout();
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.BOTH;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
-		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 1;
@@ -495,10 +496,10 @@ public class UiView extends JDialog {
 		GridBagLayout layout = new GridBagLayout();
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.BOTH;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
-		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 1;

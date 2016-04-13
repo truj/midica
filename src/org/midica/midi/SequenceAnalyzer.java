@@ -33,6 +33,7 @@ import javax.sound.midi.SysexMessage;
 import javax.sound.midi.Track;
 
 import org.midica.config.Dict;
+import org.midica.file.CharsetUtils;
 import org.midica.file.ParseException;
 import org.midica.ui.model.MessageDetail;
 import org.midica.ui.model.MessageTreeNode;
@@ -61,7 +62,6 @@ public class SequenceAnalyzer {
 	private static final float  KAR_PRE_ALERT_QUARTERS =  1; // pre-alert so many quarter notes before a lyric change
 	private static final float  KAR_MAX_SYL_SPACE_RATE =  8; // max syllables-per-whitespace - add spaces, if there are not enough
 	private static final String KAR_TYPE_MIDICA_SIMPLE = "MIDICA SIMPLE";
-	private static final String DEFAULT_CHARSET        = "ISO-8859-1"; // used for all text messages, not only lyrics
 	
 	// message sorting
 	public static final String MSG_LVL_1_SORT_VOICE   = "1";
@@ -74,8 +74,9 @@ public class SequenceAnalyzer {
 	
 	private static final long DEFAULT_CHANNEL_CONFIG_TICK = -100;
 	
-	private static Sequence sequence = null;
-	private static String   fileType = null;
+	private static Sequence sequence      = null;
+	private static String   fileType      = null;
+	private static String   chosenCharset = null;
 	
 	// karaoke-related fields
 	private static String midiFileCharset  = null;
@@ -138,14 +139,16 @@ public class SequenceAnalyzer {
 	 * Analyzes the given MIDI stream and collects information about it.
 	 * Adds marker events for channel activity changes.
 	 * 
-	 * @param seq  The MIDI sequence to be analyzed.
-	 * @param type The file type where the stream originally comes from
-	 *             -- **mid** for MIDI or **midica** for MidicaPL.
+	 * @param seq      The MIDI sequence to be analyzed.
+	 * @param type     The file type where the stream originally comes from
+	 *                 -- **mid** for MIDI or **midica** for MidicaPL.
+	 * @param charset  The charset that has been chosen in the file chooser.
 	 * @throws ParseException if something went wrong.
 	 */
-	public static void analyze ( Sequence seq, String type ) throws ParseException {
-		sequence = seq;
-		fileType = type;
+	public static void analyze( Sequence seq, String type, String charset ) throws ParseException {
+		sequence      = seq;
+		fileType      = type;
+		chosenCharset = charset;
 		
 		try {
 			// initialize data structures
@@ -228,7 +231,6 @@ public class SequenceAnalyzer {
 		}
 		
 		// initialize data structures for karaoke
-		midiFileCharset  = null;
 		karPreAlertTicks = (long) (resolution / KAR_PRE_ALERT_QUARTERS);
 		karaokeMode      = null;
 		karLineTick      = -1;
@@ -282,6 +284,8 @@ public class SequenceAnalyzer {
 		// Therefore the CREATED sequence is used.
 		// In this sequence tracks match channels. So we know that we will
 		// process the note-related events in the right order.
+		midiFileCharset = null;
+		int trackNum    = 0;
 		for ( Track t : SequenceCreator.getSequence().getTracks() ) {
 			for ( int i=0; i < t.size(); i++ ) {
 				MidiEvent   event = t.get( i );
@@ -292,14 +296,16 @@ public class SequenceAnalyzer {
 					processShortMessageByChannel( (ShortMessage) msg, tick );
 				}
 				else if ( msg instanceof MetaMessage ) {
-					processMetaMessageByChannel( (MetaMessage) msg, tick );
+					processMetaMessageByChannel( (MetaMessage) msg, tick, trackNum );
 				}
 			}
+			trackNum++;
 		}
 		
 		// Analyze for general statistics.
 		// Therefore the ORIGINAL sequence is used.
-		int trackNum = 0;
+		midiFileCharset = null;
+		trackNum        = 0;
 		for ( Track t : sequence.getTracks() ) {
 			int msgNum = 0;
 			for ( int i=0; i < t.size(); i++ ) {
@@ -309,7 +315,7 @@ public class SequenceAnalyzer {
 				
 				// replace some messages
 				if (DEBUG_MODE) {
-					msg = replace_message( msg, tick );
+					msg = replaceMessage( msg, tick );
 				}
 				
 				if ( msg instanceof MetaMessage ) {
@@ -632,6 +638,7 @@ public class SequenceAnalyzer {
 		int    msgLength = msg.getLength();
 		byte[] message   = msg.getMessage();
 		byte[] content   = msg.getData();
+		String text      = null;
 		
 		// TEMPO
 		if ( MidiListener.META_SET_TEMPO == type ) {
@@ -648,7 +655,7 @@ public class SequenceAnalyzer {
 		
 		// TEXT
 		else if ( MidiListener.META_TEXT == type ) {
-			String text = getTextFromBytes( content );
+			text = CharsetUtils.getTextFromBytes( content, chosenCharset, midiFileCharset );
 			
 			// software?
 			Pattern patternSW = Pattern.compile( "^" + Pattern.quote(SequenceCreator.GENERATED_BY) + "(.+)$" );
@@ -673,13 +680,13 @@ public class SequenceAnalyzer {
 		
 		// COPYRIGHT
 		else if ( MidiListener.META_COPYRIGHT == type ) {
-			String                  copyright = getTextFromBytes( content );
+			String                  copyright = CharsetUtils.getTextFromBytes( content, chosenCharset, midiFileCharset );
 			HashMap<String, String> metaInfo  = (HashMap<String, String>) sequenceInfo.get( "meta_info" );
 			metaInfo.put( "copyright", copyright );
 		}
 		
 		// level 1 node
-		String[] msgLvl1   = { MSG_LVL_1_SORT_META, Dict.get(Dict.MSG1_META), null };
+		String[] msgLvl1 = { MSG_LVL_1_SORT_META, Dict.get(Dict.MSG1_META), null };
 		path.add( msgLvl1 );
 		
 		// level 2 node
@@ -729,7 +736,9 @@ public class SequenceAnalyzer {
 		details.put( "meta_type",   type       );
 		boolean msgContainsText = type >= 0x01 && type <= 0x0F;
 		if (msgContainsText) { // get texts from text-based messages
-			String text = getTextFromBytes( content );
+			if ( null == text ) {
+				text = CharsetUtils.getTextFromBytes( content, chosenCharset, midiFileCharset );
+			}
 			distinctDetails.put( "text", text );
 		}
 		details.put( "msg_num", msgNum );
@@ -751,55 +760,56 @@ public class SequenceAnalyzer {
 		}
 		msgDetail.setOption( "leaf_node", leaf );
 		msgDetail.setOption( "message", message );
+		
+		// charset switch in a TEXT or LYRICS event?
+		if ( MidiListener.META_LYRICS == type || MidiListener.META_TEXT == type ) {
+			String newCharset = CharsetUtils.findCharsetSwitch( text );
+			if ( newCharset != null ) {
+				midiFileCharset = newCharset;
+			}
+		}
 	}
 	
 	/**
 	 * Retrieves instrument or karaoke specific information from meta messages.
 	 * 
-	 * @param msg   Meta message.
-	 * @param tick  Tickstamp.
+	 * @param msg       Meta message.
+	 * @param tick      Tickstamp.
+	 * @param trackNum  Track number of the created string.
 	 */
-	private static void processMetaMessageByChannel( MetaMessage msg, long tick ) {
+	private static void processMetaMessageByChannel( MetaMessage msg, long tick, int trackNum ) {
 		int    type = msg.getType();
 		byte[] data = msg.getData();
+		String text = null;
 		
 		// INSTRUMENT NAME
 		if ( MidiListener.META_INSTRUMENT_NAME == type ) {
 			
-			// get channel number - works only for Midica-produced MIDI sequences
-			byte channel = data[ 0 ];
+			// get channel number
+			byte channel = (byte) ( trackNum - SequenceCreator.NUM_META_TRACKS );
 			
-			// possibly produced by Midica?
-			if ( 0 <= channel && channel <= MidiDevices.NUMBER_OF_CHANNELS && data.length > 1 ) {
-				data = shift( data );
-			}
-			else {
-				// it's probably from a third-party MIDI file
+			// invalid channel - not produced by Midica?
+			if ( channel < 0 || channel >= MidiDevices.NUMBER_OF_CHANNELS ) {
 				return;
 			}
 			
 			// remember the channel comment
-			String text = getTextFromBytes( data );
+			text = CharsetUtils.getTextFromBytes( data, chosenCharset, midiFileCharset );
 			commentHistory.get( channel ).put( tick, text );
 		}
 		
 		// LYRICS
 		else if ( MidiListener.META_LYRICS == type ) {
-			String text = getTextFromBytes( data );
+			text = CharsetUtils.getTextFromBytes( data, chosenCharset, midiFileCharset );
 			processKaraoke( text, KARAOKE_LYRICS, tick );
 		}
 		
 		// TEXT
 		else if ( MidiListener.META_TEXT == type ) {
-			String text = getTextFromBytes( data );
-			
-			// charset definition?
-			if ( text.startsWith("@C") ) {
-				midiFileCharset = text.substring( 2 );
-			}
+			text = CharsetUtils.getTextFromBytes( data, chosenCharset, midiFileCharset );
 			
 			// karaoke type definition?
-			else if ( text.startsWith("@K") ) {
+			if ( text.startsWith("@K") ) {
 				karaokeMode = text.substring( 2 );
 				karaokeInfo.put( "type", karaokeMode );
 			}
@@ -819,6 +829,14 @@ public class SequenceAnalyzer {
 			}
 			
 			// TODO: handle KAR_TYPE_MIDICA_SIMPLE
+		}
+		
+		// charset switch in a TEXT or LYRICS event?
+		if ( MidiListener.META_LYRICS == type || MidiListener.META_TEXT == type ) {
+			String newCharset = CharsetUtils.findCharsetSwitch( text );
+			if ( newCharset != null ) {
+				midiFileCharset = newCharset;
+			}
 		}
 	}
 	
@@ -3352,43 +3370,6 @@ public class SequenceAnalyzer {
 	}
 	
 	/**
-	 * Converts a byte array from a MIDI message into a string.
-	 * 
-	 * @return the converted string.
-	 */
-	private static final String getTextFromBytes( byte[] bytes ) {
-		
-		String result = null;
-		try {
-			
-			// If we found a charset definition in the MIDI file itself, try
-			// that first.
-			if ( midiFileCharset != null ) {
-				try {
-					result = new String( bytes, midiFileCharset );
-				}
-				catch ( UnsupportedEncodingException e ) {
-				}
-			}
-			
-			// The file-provided charset failed? - Try the Midica default.
-			// (According to the GM standard, text messages should be
-			// encoded in ASCII. So ISO-8859-1 should fit.)
-			if ( null == result ) {
-				result = new String( bytes, DEFAULT_CHARSET );
-			}
-		}
-		catch ( UnsupportedEncodingException e ) {
-			
-			// Neither the file-provided nor the default charset worked.
-			// Fall back to the platform standard.
-			result = new String( bytes );
-		}
-		
-		return result;
-	}
-	
-	/**
 	 * Can be used for replacing MIDI messages for debugging reasons.
 	 * 
 	 * This method is only used if {@link #DEBUG_MODE} is **true**.
@@ -3397,7 +3378,7 @@ public class SequenceAnalyzer {
 	 * @param tick   The tickstamp when the message occurs.
 	 * @return the replaced message.
 	 */
-	private static final MidiMessage replace_message( MidiMessage msg, long tick ) {
+	private static final MidiMessage replaceMessage( MidiMessage msg, long tick ) {
 		
 		// only replace messages in a certain tick range
 		try {

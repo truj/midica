@@ -33,6 +33,7 @@ public class ExportException extends Exception {
 	 */
 	public ExportException( String msg ) {
 		super( msg );
+		this.msg = msg;
 	}
 	
 	/**

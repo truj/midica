@@ -351,6 +351,13 @@ public class Dict {
 	public static final String CONF_ERROR_HALFTONE_SYNTAX  = "conf_Error_halftone_syntax";
 	public static final String ERROR_NOT_YET_IMPLEMENTED   = "error_not_yet_implemented";
 	
+	// MidicaFileChooser
+	public static final String CHARSET                     = "charset";
+	public static final String CHARSET_DESC_MPL_READ       = "charset_desc_mpl_read";
+	public static final String CHARSET_DESC_MID_READ       = "charset_desc_mid_read";
+	public static final String CHARSET_DESC_MPL_WRITE      = "charset_desc_mpl_write";
+	public static final String CHARSET_DESC_MID_WRITE      = "charset_desc_mid_write";
+	
 	// InfoView
 	public static final String TITLE_INFO_VIEW             = "title_info_view";
 	public static final String TAB_CONFIG                  = "tab_config";
@@ -878,6 +885,7 @@ public class Dict {
 	public static final String TITLE_EXPORT_RESULT              = "title_export_result";
 	public static final String EXPORT_SUCCESS                   = "export_success";
 	public static final String NUMBER_OF_WARNINGS               = "number_of_warnings";
+	public static final String WARNING_COL_TRACK                = "warning_col_track";
 	public static final String WARNING_COL_TICK                 = "warning_col_tick";
 	public static final String WARNING_COL_CHANNEL              = "warning_col_channel";
 	public static final String WARNING_COL_NOTE                 = "warning_col_note";
@@ -1083,6 +1091,12 @@ public class Dict {
 		set( CONF_ERROR_HALFTONE_SYNTAX,   "Chosen half tone symbol incompatible with chosen syntax" );
 		set( ERROR_NOT_YET_IMPLEMENTED,    "This functionality is not yet implemented" );
 		
+		// MidicaFileChooser
+		set( CHARSET,                  "Charset"                                              );
+		set( CHARSET_DESC_MPL_READ,    "Encoding of the source file."                         );
+		set( CHARSET_DESC_MID_READ,    "Default encoding of text-based messages in the source file. Used if neither a BOM nor a {@...} tag is found." );
+		set( CHARSET_DESC_MPL_WRITE,   "Encoding of the file to be saved."                    );
+		set( CHARSET_DESC_MID_WRITE,   "Encoding for text-based messages in the target file." );
 		
 		// InfoView
 		set( TITLE_INFO_VIEW,                        "Midica Info"                   );
@@ -1654,6 +1668,7 @@ public class Dict {
 		set( TITLE_EXPORT_RESULT,                 "Export Result"                                                     );
 		set( EXPORT_SUCCESS,                      "The file has been exported!"                                       );
 		set( NUMBER_OF_WARNINGS,                  "Number of warnings:"                                               );
+		set( WARNING_COL_TRACK,                   "Track"                                                             );
 		set( WARNING_COL_TICK,                    "Tick"                                                              );
 		set( WARNING_COL_CHANNEL,                 "Channel"                                                           );
 		set( WARNING_COL_NOTE,                    "Note"                                                              );

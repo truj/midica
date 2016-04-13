@@ -9,9 +9,11 @@ package org.midica.file;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -21,9 +23,12 @@ import java.util.regex.Pattern;
 
 import javax.sound.midi.InvalidMidiDataException;
 
+import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.midi.MidiDevices;
 import org.midica.midi.SequenceCreator;
+import org.midica.ui.model.ComboboxStringOption;
+import org.midica.ui.model.ConfigComboboxModel;
 
 /**
  * This class is used to parse a MidicaPL source file.
@@ -97,6 +102,7 @@ public class MidicaPLParser extends SequenceParser {
 	private static HashMap<String, ArrayList<String[]>> macros            = null;
 	private static HashMap<String, HashSet<Integer>>    chords            = null;
 	private static boolean                              instrumentsParsed = false;
+	private static String                               chosenCharset     = null;
 	
 	/* *******************
 	 * instance fields
@@ -178,15 +184,21 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	public void parse( File file ) throws ParseException {
 		this.file = file;
+		
 		// clean up and make parser ready for parsing
 		reset();
 		
+		// get charset
+		chosenCharset   = ((ComboboxStringOption) ConfigComboboxModel.getModel( Config.CHARSET_MPL ).getSelectedItem() ).getIdentifier();
+		Charset charset = Charset.forName( chosenCharset );
+		
 		try {
 			// open file for reading
-			FileReader     fr         = new FileReader( file );
-			BufferedReader br         = new BufferedReader( fr );
-			int            lineNumber = 0;
-			String         line;
+			FileInputStream   fis        = new FileInputStream( file );
+			InputStreamReader ir         = new InputStreamReader( fis, charset );
+			BufferedReader    br         = new BufferedReader( ir );
+			int               lineNumber = 0;
+			String            line;
 			
 			// parse line by line
 			while ( null != (line = br.readLine()) ) {
@@ -217,7 +229,7 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// EOF has been reached
-		postprocessSequence( SequenceCreator.getSequence(), "midica" );
+		postprocessSequence( SequenceCreator.getSequence(), "midica", chosenCharset );
 	}
 	
 	/**
@@ -230,9 +242,8 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// cut away comments
 		String cleanedLine = line.split( Pattern.quote(COMMENT) + "|$", 2 )[ 0 ];
-		cleanedLine = clean( cleanedLine ); // eliminate leading and trailing whitespaces
-//		System.out.println( cleanedLine ); // TODO: delete
-		String[] tokens = getTokens( cleanedLine );
+		cleanedLine        = clean( cleanedLine ); // eliminate leading and trailing whitespaces
+		String[] tokens    = getTokens( cleanedLine );
 		
 		if ( "".equals(tokens[0]) )
 			// empty line or only comments
@@ -893,9 +904,6 @@ public class MidicaPLParser extends SequenceParser {
 			throw new ParseException( Dict.get(Dict.ERROR_INSTR_BANK) );
 		}
 		
-		// TODO: delete
-//		System.out.println( "instrNum: " + instrNum + ", MSB: " + bankMSB + ", LSB: " + bankLSB + ", full: " + ((bankMSB << 7) | bankLSB) );
-		
 		if (instrumentsParsed) {
 			// instruments are already parsed
 			// this is an instrument change command for the channel
@@ -966,8 +974,9 @@ public class MidicaPLParser extends SequenceParser {
 				int bpm = toInt( value, true );
 				SequenceCreator.addMessageBpm( bpm, currentTicks );
 			}
-			else
+			else {
 				throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_GLOBAL_CMD) + cmd );
+			}
 		}
 		catch ( InvalidMidiDataException e ) {
 			throw new ParseException( Dict.get(Dict.ERROR_MIDI_PROBLEM) + e.getMessage() );
@@ -1241,7 +1250,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// initialize sequence
 		try {
-			SequenceCreator.reset();
+			SequenceCreator.reset( chosenCharset );
 			for ( Instrument instr : instruments  ) {
 				int    channel      = instr.channel;
 				int    instrNum     = instr.instrumentNumber;

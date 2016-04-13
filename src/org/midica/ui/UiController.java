@@ -34,6 +34,7 @@ import org.midica.file.SoundfontParser;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.info.InfoView;
 import org.midica.ui.model.ComboboxStringOption;
+import org.midica.ui.model.ConfigComboboxModel;
 import org.midica.ui.player.PlayerView;
 import org.midica.worker.ParsingWorker;
 import org.midica.worker.WaitView;
@@ -244,17 +245,20 @@ public class UiController implements ActionListener, WindowListener {
 		File         file;
 		IParser      parser;
 		FileSelector selector;
+		String       charsetKey = null;
 		if ( FileSelector.FILE_TYPE_MPL.equals(type) ) {
-			file     = mplSelector.getFile();
-			parser   = mplParser;
-			selector = mplSelector;
-			waitMsg  = Dict.get( Dict.WAIT_PARSE_MPL );
+			file       = mplSelector.getFile();
+			parser     = mplParser;
+			selector   = mplSelector;
+			waitMsg    = Dict.get( Dict.WAIT_PARSE_MPL );
+			charsetKey = Config.CHARSET_MPL;
 		}
 		else if ( FileSelector.FILE_TYPE_MIDI.equals(type) ) {
-			file     = midiSelector.getFile();
-			parser   = midiParser;
-			selector = midiSelector;
-			waitMsg  = Dict.get( Dict.WAIT_PARSE_MID );
+			file       = midiSelector.getFile();
+			parser     = midiParser;
+			selector   = midiSelector;
+			waitMsg    = Dict.get( Dict.WAIT_PARSE_MID );
+			charsetKey = Config.CHARSET_MID;
 		}
 		else if ( FileSelector.FILE_TYPE_SOUNDFONT.equals(type) ) {
 			file     = soundfontSelector.getFile();
@@ -299,6 +303,12 @@ public class UiController implements ActionListener, WindowListener {
 				// store the file for later reparsing
 				currentFile     = file;
 				currentFileType = type;
+				
+				// set chosen charset in the config
+				if ( charsetKey != null ) {
+					ComboboxStringOption o = (ComboboxStringOption) ConfigComboboxModel.getModel( charsetKey ).getSelectedItem();
+					Config.set( charsetKey, o.getIdentifier() );
+				}
 			}
 		}
 		catch ( ParseException ex ) {
@@ -332,15 +342,18 @@ public class UiController implements ActionListener, WindowListener {
 		File         file;
 		FileSelector selector;
 		boolean      mustExportMidi;
+		String       charsetKey;
 		if ( FileSelector.FILE_TYPE_MPL.equals(type) ) {
 			file           = mplExportSelector.getFile();
 			selector       = mplExportSelector;
 			mustExportMidi = false;
+			charsetKey     = Config.CHARSET_EXPORT_MPL;
 		}
 		else if ( FileSelector.FILE_TYPE_MIDI.equals(type) ) {
 			file           = midiExportSelector.getFile();
 			selector       = midiExportSelector;
 			mustExportMidi = true;
+			charsetKey     = Config.CHARSET_EXPORT_MID;
 		}
 		else {
 			return;
@@ -356,8 +369,13 @@ public class UiController implements ActionListener, WindowListener {
 				MidicaPLExporter exporter = new MidicaPLExporter();
 				result = exporter.export( file );
 			}
-			if ( result.isSuccessful() )
+			if ( result.isSuccessful() ) {
 				showExportResult( result );
+				
+				// set chosen charset in the config
+				ComboboxStringOption o = (ComboboxStringOption) ConfigComboboxModel.getModel( charsetKey ).getSelectedItem();
+				Config.set( charsetKey, o.getIdentifier() );
+			}
 		}
 		catch ( ExportException ex ) {
 			showErrorMessage( ex.getErrorMessage() );

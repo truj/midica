@@ -39,12 +39,13 @@ public class ExportResult {
 	/**
 	 * Adds a new warning message.
 	 * 
+	 * @param track    Track number of the event that caused the warning.
 	 * @param tick     Tickstamp of the event that caused the warning.
 	 * @param channel  Channel where the warning occured -- or -1 if it wasn't a channel based event.
 	 * @param note     Note number of the event -- or -1 if no note was involved.
 	 * @param msg      Warning message
 	 */
-	public void addWarning( Long tick, int channel, int note, String msg ) {
+	public void addWarning( int track, long tick, int channel, int note, String msg ) {
 		
 		numberOfWarnings++;
 		
@@ -60,10 +61,11 @@ public class ExportResult {
 		
 		// create new warning
 		HashMap<String, String> warning = new HashMap<String, String>();
-		warning.put( "tick",    Long.toString(tick)       );
-		warning.put( "channel", Integer.toString(channel) );
-		warning.put( "note",    Integer.toString(note)    );
-		warning.put( "msg",     msg                       );
+		warning.put( "track",   track   + "" );
+		warning.put( "tick",    tick    + "" );
+		warning.put( "channel", channel + "" );
+		warning.put( "note",    note    + "" );
+		warning.put( "msg",     msg          );
 		
 		// add the new warning
 		warningsAtTick.add( warning );
@@ -109,4 +111,6 @@ public class ExportResult {
 	public boolean isSuccessful() {
 		return success;
 	}
+	
+	
 }

@@ -13,6 +13,7 @@ import java.awt.Dimension;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 
 /**
@@ -80,6 +81,13 @@ public class FlowLabel extends JScrollPane {
 	}
 	
 	/**
+	 * Makes the font look like in a JLabel.
+	 */
+	public void makeFontLookLikeLabel() {
+		label.setFont( UIManager.getFont("Label.font") );
+	}
+	
+	/**
 	 * Calculates and remembers the preferred height of this component.
 	 * This calculation is based on the number of line breaks in the text,
 	 * and also on the lines that are longer than the {@link #charsPerLine}
@@ -110,7 +118,6 @@ public class FlowLabel extends JScrollPane {
 		// adjust the resulting height
 		preferredHeight = neededHeight;
 	}
-	
 	
 	/**
 	 * Overrides the parent's method in order to adjust the dimension

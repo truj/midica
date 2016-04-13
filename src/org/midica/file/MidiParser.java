@@ -20,9 +20,12 @@ import javax.sound.midi.ShortMessage;
 import javax.sound.midi.SysexMessage;
 import javax.sound.midi.Track;
 
+import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.midi.MidiListener;
 import org.midica.midi.SequenceCreator;
+import org.midica.ui.model.ComboboxStringOption;
+import org.midica.ui.model.ConfigComboboxModel;
 
 /**
  * An object of this class can be used in order to parse a MIDI file.
@@ -44,16 +47,28 @@ public class MidiParser extends SequenceParser {
 	public static final int CTRL_CHANGE_BALANCE          =  8;
 	public static final int CTRL_CHANGE_PAN              = 10;
 	
+	private boolean isProducedByMidica = false;
+	private String  midiFileCharset    = null;
+	
+	private String chosenCharset = null;
+	
 	/**
 	 * Parses a MIDI file.
 	 * 
 	 * @param file  MIDI file to be parsed.
 	 */
 	public void parse( File file ) throws ParseException {
+		
+		isProducedByMidica = false;
+		midiFileCharset    = null;
+		
+		// get chosen charset
+		chosenCharset = ((ComboboxStringOption) ConfigComboboxModel.getModel( Config.CHARSET_MID ).getSelectedItem() ).getIdentifier();
+		
 		try {
 			Sequence sequence = MidiSystem.getSequence( file );
 			createSequence( sequence );
-			postprocessSequence( sequence, "mid" ); // we want to analyze the loaded sequence - not the created one
+			postprocessSequence( sequence, "mid", chosenCharset ); // we want to analyze the loaded sequence - not the created one
 		}
 		catch ( InvalidMidiDataException e ) {
 			throw new ParseException( e.getMessage() );
@@ -80,15 +95,15 @@ public class MidiParser extends SequenceParser {
 			throw new ParseException( Dict.get(Dict.ERROR_ONLY_PPQ_SUPPORTED) );
 		int resolution = sequence.getResolution();
 		try {
-			SequenceCreator.reset( resolution );
+			SequenceCreator.reset( resolution, chosenCharset );
 			// init percussion channel comment
 			SequenceCreator.initChannel( 9, 0, Dict.get(Dict.PERCUSSION_CHANNEL), SequenceCreator.NOW );
 		}
 		catch ( InvalidMidiDataException e ) {
 			throw new ParseException( e.getMessage() );
 		}
-
 		
+		int trackNum = 0;
 		TRACK:
 		for ( Track t : sequence.getTracks() ) {
 			EVENT:
@@ -98,7 +113,7 @@ public class MidiParser extends SequenceParser {
 				MidiMessage msg   = event.getMessage();
 				
 				if ( msg instanceof MetaMessage ) {
-					processMetaMessage( (MetaMessage) msg, tick );
+					processMetaMessage( (MetaMessage) msg, tick, trackNum );
 				}
 				else if ( msg instanceof ShortMessage ) {
 					processShortMessage( (ShortMessage) msg, tick );
@@ -109,6 +124,7 @@ public class MidiParser extends SequenceParser {
 				else {
 				}
 			}
+			trackNum++;
 		}
 	}
 	
@@ -119,11 +135,12 @@ public class MidiParser extends SequenceParser {
 	 * changed. Karaoke-related meta messages are written into track 1 or 2.
 	 * All others will be written into track 0.
 	 * 
-	 * @param msg   Meta message from the input sequence.
-	 * @param tick  Tickstamp of the message's occurrence.
+	 * @param msg        Meta message from the input sequence.
+	 * @param tick       Tickstamp of the message's occurrence.
+	 * @param origTrack  Original track number.
 	 * @throws InvalidMidiDataException
 	 */
-	private void processMetaMessage( MetaMessage msg, long tick ) throws InvalidMidiDataException {
+	private void processMetaMessage( MetaMessage msg, long tick, int origTrack ) throws InvalidMidiDataException {
 		int track = 0; // default track for generic messages
 		int type  = msg.getType();
 		
@@ -134,12 +151,13 @@ public class MidiParser extends SequenceParser {
 		
 		// text: further checks needed
 		else if ( MidiListener.META_TEXT == type ) {
-			String text = new String( msg.getData() );
+			String text = CharsetUtils.getTextFromBytes( msg.getData(), chosenCharset, midiFileCharset );
 			
 			// software version (file probably created by Midica before)
 			if ( tick <= SequenceCreator.TICK_SOFTWARE
-			  && text.startsWith(SequenceCreator.GENERATED_BY) ) {
-				track = 0;
+			  && text.startsWith( SequenceCreator.GENERATED_BY + "Midica ") ) {
+				track              = 0;
+				isProducedByMidica = true;
 			}
 			
 			// karaoke meta information for track 1
@@ -155,8 +173,25 @@ public class MidiParser extends SequenceParser {
 			}
 		}
 		
+		// instrument comment - keep original track number because that
+		// determins the channel number
+		else if ( MidiListener.META_INSTRUMENT_NAME == type && isProducedByMidica ) {
+			track = origTrack;
+		}
+		
 		// add the message to the right track
 		SequenceCreator.addMessageToTrack( msg, track, tick );
+		
+		// charset switch in a TEXT or LYRICS event?
+		if ( MidiListener.META_LYRICS == type || MidiListener.META_TEXT == type ) {
+
+			// charset definition?
+			String text       = CharsetUtils.getTextFromBytes( msg.getData(), chosenCharset, midiFileCharset );
+			String newCharset = CharsetUtils.findCharsetSwitch( text );
+			if ( newCharset != null ) {
+				midiFileCharset = newCharset;
+			}
+		}
 	}
 	
 	/**
@@ -195,16 +230,7 @@ public class MidiParser extends SequenceParser {
 			return;
 		}
 		
-		if ( ShortMessage.PROGRAM_CHANGE == cmd ) {
-			
-			// PROGRAM CHANGE: initialize the channel
-			int    instrNum = msg.getData1();
-			String comment  = "";
-			if ( 9 == channel )
-				comment = Dict.get( Dict.PERCUSSION_CHANNEL );
-			SequenceCreator.initChannel( channel, instrNum, comment, tick );
-		}
-		else if ( ShortMessage.NOTE_ON == cmd && volume > 0 ) {
+		if ( ShortMessage.NOTE_ON == cmd && volume > 0 ) {
 			
 			// note on
 			note = transpose( note, channel );

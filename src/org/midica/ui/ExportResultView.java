@@ -36,6 +36,7 @@ public class ExportResultView extends MessageView {
 	private static final long serialVersionUID = 1L;
 	
 	// table sizes and color
+	private static final int COL_WIDTH_TRACK   =  50;
 	private static final int COL_WIDTH_TICK    =  80;
 	private static final int COL_WIDTH_CHANNEL =  80;
 	private static final int COL_WIDTH_NOTE    = 170;
@@ -57,7 +58,7 @@ public class ExportResultView extends MessageView {
 	public ExportResultView( JDialog view, ActionListener controller ) {
 		super( view, Dict.get(Dict.TITLE_EXPORT_RESULT) );
 		this.controller = controller;
-		int tableWidth  = COL_WIDTH_TICK + COL_WIDTH_CHANNEL + COL_WIDTH_NOTE + COL_WIDTH_MSG;
+		int tableWidth  = COL_WIDTH_TRACK + COL_WIDTH_TICK + COL_WIDTH_CHANNEL + COL_WIDTH_NOTE + COL_WIDTH_MSG;
 		this.tableDim   = new Dimension( tableWidth, TABLE_HEIGHT );
 	}
 	
@@ -96,7 +97,7 @@ public class ExportResultView extends MessageView {
 		if ( result.countWarnings() > 0 ) {
     		constraints.gridy++;
     		constraints.weighty = 1;
-    		MidicaTable table = new MidicaTable();
+    		MidicaTable table   = new MidicaTable();
     		table.setModel( new ExportResultTableModel(result) );
     		table.setDefaultRenderer( Object.class, new MidicaTableCellRenderer() );
     		JScrollPane scroll = new JScrollPane( table );
@@ -104,10 +105,11 @@ public class ExportResultView extends MessageView {
     		content.add( scroll, constraints );
     		
     		// set column sizes
-    		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_TICK    );
-    		table.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_CHANNEL );
-    		table.getColumnModel().getColumn( 2 ).setPreferredWidth( COL_WIDTH_NOTE    );
-    		table.getColumnModel().getColumn( 3 ).setPreferredWidth( COL_WIDTH_MSG     );
+    		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_TRACK   );
+    		table.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_TICK    );
+    		table.getColumnModel().getColumn( 2 ).setPreferredWidth( COL_WIDTH_CHANNEL );
+    		table.getColumnModel().getColumn( 3 ).setPreferredWidth( COL_WIDTH_NOTE    );
+    		table.getColumnModel().getColumn( 4 ).setPreferredWidth( COL_WIDTH_MSG     );
     		
     		constraints.weighty = 0;
 		}
