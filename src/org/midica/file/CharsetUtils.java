@@ -14,7 +14,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * This class provides charset-dependant methods.
+ * This class provides charset-dependent methods.
  * 
  * @author Jan Trukenmüller
  */
@@ -136,7 +136,6 @@ public final class CharsetUtils {
 	 * Checks the given string for a new charset marker.
 	 * If one or more such markers are found, returns the charset from the
 	 * last tag. Otherwise: returns **null*.
-	 * 
 	 * 
 	 * @param text  The text to be examinated.
 	 * @return The new charset, if a charset change is found. Otherwise: **null**.

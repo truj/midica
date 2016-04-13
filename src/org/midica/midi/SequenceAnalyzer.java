@@ -79,10 +79,11 @@ public class SequenceAnalyzer {
 	private static String   chosenCharset = null;
 	
 	// karaoke-related fields
-	private static String midiFileCharset  = null;
-	private static String karaokeMode      = null;
-	private static long   karLineTick      = -1;
-	private static long   karPreAlertTicks = 0;
+	private static final Pattern pattSongInfo = Pattern.compile( "\\{#\\s*(.+?)\\s*=\\s*(.+?)\\s*\\}" );
+	private static String midiFileCharset     = null;
+	private static String karaokeMode         = null;
+	private static long   karLineTick         = -1;
+	private static long   karPreAlertTicks    = 0;
 	
 	private static HashMap<String, Object> sequenceInfo = null;
 	private static HashMap<String, Object> karaokeInfo  = null;
@@ -674,6 +675,33 @@ public class SequenceAnalyzer {
 					SimpleDateFormat formatter    = new SimpleDateFormat( Dict.get(Dict.TIMESTAMP_FORMAT) );
 					String           softwareDate = formatter.format( timestamp );
 					metaInfo.put( "software_date", softwareDate );
+				}
+			}
+		}
+		
+		// {#...=...} song info according to recommended practice RP-026
+		else if ( MidiListener.META_LYRICS == type ) {
+			text = CharsetUtils.getTextFromBytes( content, chosenCharset, midiFileCharset );
+			if ( text.contains("{#") ) {
+				Matcher m = pattSongInfo.matcher( text );
+				while ( m.find() ) {
+					String key   = m.group( 1 ).toLowerCase();
+					String value = m.group( 2 );
+					if ( "lyrics".equals(key) ) {
+						key = "lyricist";
+					}
+					if ( "title".equals(key)
+					  || "composer".equals(key)
+					  || "lyricist".equals(key)
+					  || "artist".equals(key)) {
+						if ( karaokeInfo.containsKey(key) ) {
+							String oldValue = (String) karaokeInfo.get( key );
+							karaokeInfo.put( key, oldValue + "\n" + value );
+						}
+						else {
+							karaokeInfo.put( key, value );
+						}
+					}
 				}
 			}
 		}

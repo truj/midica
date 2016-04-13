@@ -396,6 +396,9 @@ public class Dict {
 	public static final String CHANNEL                     = "channel";
 	public static final String KARAOKE_TYPE                = "karaoke_type";
 	public static final String SONG_TITLE                  = "song_title";
+	public static final String COMPOSER                    = "composer";
+	public static final String LYRICIST                    = "lyricist";
+	public static final String ARTIST                      = "artist";
 	public static final String KARAOKE_COPYRIGHT           = "karaoke_copyright";
 	public static final String KARAOKE_INFO                = "karaoke_info";
 	public static final String LYRICS                      = "lyrics";
@@ -1135,6 +1138,9 @@ public class Dict {
 		set( CHANNEL,                                "Channel"                       );
 		set( KARAOKE_TYPE,                           "Type"                          );
 		set( SONG_TITLE,                             "Title"                         );
+		set( COMPOSER,                               "Composer"                      );
+		set( LYRICIST,                               "Lyricist"                      );
+		set( ARTIST,                                 "Artist"                        );
 		set( KARAOKE_COPYRIGHT,                      "Copyright, etc."               );
 		set( KARAOKE_INFO,                           "Other Info"                    );
 		set( LYRICS,                                 "Lyrics"                        );

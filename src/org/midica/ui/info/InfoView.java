@@ -1107,6 +1107,45 @@ public class InfoView extends JDialog {
 		FlowLabel lblAuthorContent = new FlowLabel( author, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblAuthorContent, constrRight );
 		
+		// composer
+		constrLeft.gridy++;
+		JLabel lblComposer = new JLabel( Dict.get(Dict.COMPOSER) + ": " );
+		area.add( lblComposer, constrLeft );
+		
+		// composer content
+		constrRight.gridy++;
+		String composer = "-";
+		if ( null != karaokeInfo.get("composer") )
+			composer = (String) karaokeInfo.get("composer");
+		FlowLabel lblComposerContent = new FlowLabel( composer, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
+		area.add( lblComposerContent, constrRight );
+		
+		// lyricist
+		constrLeft.gridy++;
+		JLabel lblLyricist = new JLabel( Dict.get(Dict.LYRICIST) + ": " );
+		area.add( lblLyricist, constrLeft );
+		
+		// lyricist content
+		constrRight.gridy++;
+		String lyricist = "-";
+		if ( null != karaokeInfo.get("lyricist") )
+			lyricist = (String) karaokeInfo.get("lyricist");
+		FlowLabel lblLyricistContent = new FlowLabel( lyricist, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
+		area.add( lblLyricistContent, constrRight );
+		
+		// artist
+		constrLeft.gridy++;
+		JLabel lblArtist = new JLabel( Dict.get(Dict.ARTIST) + ": " );
+		area.add( lblArtist, constrLeft );
+		
+		// artist content
+		constrRight.gridy++;
+		String artist = "-";
+		if ( null != karaokeInfo.get("artist") )
+			artist = (String) karaokeInfo.get("artist");
+		FlowLabel lblArtistContent = new FlowLabel( artist, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
+		area.add( lblArtistContent, constrRight );
+		
 		// copyright
 		constrLeft.gridy++;
 		JLabel lblCopyright = new JLabel( Dict.get(Dict.KARAOKE_COPYRIGHT) + ": " );
