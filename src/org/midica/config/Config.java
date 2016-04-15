@@ -49,12 +49,14 @@ public class Config {
 	public static final String PERCUSSION = "percussion";
 	public static final String INSTRUMENT = "instruments";
 	
-	// directories
+	// keys for directories and paths
 	public static final String DIRECTORY_MPL        = "directory_mpl";
 	public static final String DIRECTORY_MID        = "directory_mid";
 	public static final String DIRECTORY_SF2        = "directory_sf2";
 	public static final String DIRECTORY_EXPORT_MPL = "directory_export_mpl";
 	public static final String DIRECTORY_EXPORT_MID = "directory_export_mid";
+	public static final String PATH_SF2             = "path_sf2";
+	public static final String REMEMBER_SF2         = "remember_sf2";
 	
 	// charsets
 	public static final String CHARSET_MPL        = "charset_mpl";
@@ -213,6 +215,8 @@ public class Config {
 		defaults.put( DIRECTORY_EXPORT_MPL, homeDir );
 		defaults.put( DIRECTORY_EXPORT_MID, homeDir );
 		defaults.put( DIRECTORY_SF2,        homeDir );
+		defaults.put( PATH_SF2,             ""      );
+		defaults.put( REMEMBER_SF2,         "false" );
 		
 		defaults.put( CHARSET_MPL,        DEFAULT_CHARSET_MPL        );
 		defaults.put( CHARSET_MID,        DEFAULT_CHARSET_MID        );

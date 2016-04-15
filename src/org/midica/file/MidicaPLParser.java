@@ -186,6 +186,7 @@ public class MidicaPLParser extends SequenceParser {
 		this.file = file;
 		
 		// clean up and make parser ready for parsing
+		preprocess( file );
 		reset();
 		
 		// get charset

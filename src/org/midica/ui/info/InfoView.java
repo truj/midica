@@ -37,6 +37,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 import org.midica.Midica;
 import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.file.SequenceParser;
 import org.midica.file.SoundfontParser;
 import org.midica.midi.SequenceAnalyzer;
 import org.midica.ui.model.IMessageDetailProvider;
@@ -535,9 +536,16 @@ public class InfoView extends JDialog {
 		
 		// file name
 		constraints.gridx++;
-		constraints.anchor       = GridBagConstraints.NORTHWEST;
-		constraints.weightx      = 1;
-		FlowLabel lblFileContent = new FlowLabel( soundfontInfo.get("file"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
+		constraints.anchor  = GridBagConstraints.NORTHWEST;
+		constraints.weightx = 1;
+		String fileName     = SoundfontParser.getFileName();
+		String filePath     = SoundfontParser.getFilePath();
+		if ( null == fileName || null == filePath ) {
+			fileName = Dict.get( Dict.UNCHOSEN_FILE );
+			filePath = Dict.get( Dict.UNCHOSEN_FILE );
+		}
+		FlowLabel lblFileContent = new FlowLabel( fileName, CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
+		lblFileContent.setToolTipText( filePath );
 		area.add( lblFileContent, constraints );
 		
 		// name translation
@@ -767,12 +775,10 @@ public class InfoView extends JDialog {
 		// file name
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		String filename    = "-";
-		String type        = (String) sequenceInfo.get( "parser_type" );
-		if ( "midica".equals(type) )
-			filename = Midica.uiController.getView().getChosenMidicaPLFileLbl().getText();
-		else if ( "mid".equals(type) )
-			filename = Midica.uiController.getView().getChosenMidiFileLbl().getText();
+		String filename    = SequenceParser.getFileName();
+		if ( null == filename ) {
+			filename = "-";
+		}
 		FlowLabel lblFileContent = new FlowLabel( filename, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblFileContent, constraints );
 		

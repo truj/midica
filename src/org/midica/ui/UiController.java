@@ -7,14 +7,18 @@
 
 package org.midica.ui;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.SwingWorker;
@@ -46,7 +50,7 @@ import org.midica.worker.WaitView;
  * 
  * @author Jan Trukenmüller
  */
-public class UiController implements ActionListener, WindowListener {
+public class UiController implements ActionListener, WindowListener, ItemListener {
 	
 	public static final String CMD_COMBOBOX_CHANGED = "comboBoxChanged";
 	public static final String CMD_FILE_CHOSEN      = "ApproveSelection";
@@ -89,7 +93,6 @@ public class UiController implements ActionListener, WindowListener {
 	 * This method is also called after changing the language in order to re-draw everything.
 	 */
 	private void initView() {
-		view = new UiView( this );
 		mplSelector = new FileSelector( view, this );
 		mplSelector.init( FileSelector.FILE_TYPE_MPL, FileSelector.READ );
 		midiSelector = new FileSelector( view, this );
@@ -100,6 +103,8 @@ public class UiController implements ActionListener, WindowListener {
 		midiExportSelector.init( FileSelector.FILE_TYPE_MIDI, FileSelector.WRITE );
 		mplExportSelector = new FileSelector( view, this );
 		mplExportSelector.init( FileSelector.FILE_TYPE_MPL, FileSelector.WRITE );
+		
+		view = new UiView( this );
 	}
 	
 	/**
@@ -113,7 +118,10 @@ public class UiController implements ActionListener, WindowListener {
 	
 	/**
 	 * This method processes all action events in the {@link UiView}.
+	 * 
+	 * @param e The event to be handled.
 	 */
+	@Override
 	public void actionPerformed( ActionEvent e ) {
 		String cmd = e.getActionCommand();
 		
@@ -159,10 +167,14 @@ public class UiController implements ActionListener, WindowListener {
 		
 		// file chosen with the file selector
 		else if ( CMD_FILE_CHOSEN.equals(cmd) ) {
+			
+			JFileChooser chooser = (JFileChooser) e.getSource();
+			String       type    = ((FileExtensionFilter)( chooser ).getFileFilter()).getType();
+			
 			if ( currentFilePurpose.equals(FILE_PURPOSE_EXPORT) )
-				exportChosenFile( e );
+				exportChosenFile( type, chooser.getSelectedFile() );
 			else
-				parseChosenFile( e );
+				parseChosenFile( type, chooser.getSelectedFile() );
 		}
 		
 		// cancel or ESC in FileChooser pressed
@@ -208,6 +220,42 @@ public class UiController implements ActionListener, WindowListener {
 	}
 	
 	/**
+	 * Handles selecting/deselecting of the remember-soundfont checkbox.
+	 * 
+	 * @param e The event to be handled.
+	 */
+	@Override
+	public void itemStateChanged( ItemEvent e ) {
+		
+		// get name, component and checked/unchecked
+		String    name      = ((Component) e.getSource()).getName();
+		JCheckBox cbx       = (JCheckBox) e.getSource();
+		boolean   isChecked = cbx.isSelected();
+		
+		if ( null == name ) {
+			return;
+		}
+		
+		// remember-soundfont checkbox changed
+		if ( UiView.NAME_REMEMBER_SF.equals(name) ) {
+			if (isChecked) {
+				// remember checkbox state in the config
+				Config.set( Config.REMEMBER_SF2, "true" );
+				
+				// remember soundfont file path, if a soundfont is loaded!
+				String path = SoundfontParser.getFilePath();
+				if ( path != null ) {
+					Config.set( Config.PATH_SF2, path );
+				}
+			}
+			else {
+				Config.set( Config.REMEMBER_SF2, "false" );
+				Config.set( Config.PATH_SF2,     ""      );
+			}
+		}
+	}
+	
+	/**
 	 * Checks if a MIDI sequence is set and opens the file selector to choose
 	 * the file to be exported.
 	 * 
@@ -215,7 +263,7 @@ public class UiController implements ActionListener, WindowListener {
 	 * 
 	 * @param cmd The action command of the pressed button.
 	 */
-	private void openExportFileSelector ( String cmd ) {
+	private void openExportFileSelector( String cmd ) {
 		
 		if ( ! MidiDevices.isSequenceSet() ) {
 			showErrorMessage( Dict.get(Dict.ERROR_SEQUENCE_NOT_SET) );
@@ -234,34 +282,30 @@ public class UiController implements ActionListener, WindowListener {
 	 * A wait dialog is shown during the parsing.
 	 * The parsing itself is executed by a {@link SwingWorker}.
 	 * 
-	 * @param e    Event caused by choosing a file.
+	 * @param type  File type.
+	 * @param file  Selected file.
 	 */
-	private void parseChosenFile( ActionEvent e ) {
+	private void parseChosenFile( String type, File file ) {
 		
 		// initialize variables based on the file type to be parsed
-		String       type     = ((FileExtensionFilter)((JFileChooser)e.getSource()).getFileFilter()).getType();
 		WaitView     waitView = new WaitView( view );
 		String       waitMsg;
-		File         file;
 		IParser      parser;
 		FileSelector selector;
 		String       charsetKey = null;
 		if ( FileSelector.FILE_TYPE_MPL.equals(type) ) {
-			file       = mplSelector.getFile();
 			parser     = mplParser;
 			selector   = mplSelector;
 			waitMsg    = Dict.get( Dict.WAIT_PARSE_MPL );
 			charsetKey = Config.CHARSET_MPL;
 		}
 		else if ( FileSelector.FILE_TYPE_MIDI.equals(type) ) {
-			file       = midiSelector.getFile();
 			parser     = midiParser;
 			selector   = midiSelector;
 			waitMsg    = Dict.get( Dict.WAIT_PARSE_MID );
 			charsetKey = Config.CHARSET_MID;
 		}
 		else if ( FileSelector.FILE_TYPE_SOUNDFONT.equals(type) ) {
-			file     = soundfontSelector.getFile();
 			parser   = soundfontParser;
 			selector = soundfontSelector;
 			waitMsg  = Dict.get( Dict.WAIT_PARSE_SF2 );
@@ -310,6 +354,12 @@ public class UiController implements ActionListener, WindowListener {
 					Config.set( charsetKey, o.getIdentifier() );
 				}
 			}
+			else if ( FileSelector.FILE_TYPE_SOUNDFONT.equals(type) ) {
+				String remember = Config.get( Config.REMEMBER_SF2 );
+				if ( "true".equals(remember) ) {
+					Config.set( Config.PATH_SF2, file.getAbsolutePath() );
+				}
+			}
 		}
 		catch ( ParseException ex ) {
 			int    lineNumber = ex.getLineNumber();
@@ -335,22 +385,20 @@ public class UiController implements ActionListener, WindowListener {
 	/**
 	 * Exports to the chosen file using the right exporter for this file type.
 	 * 
-	 * @param e    Event caused by choosing a file.
+	 * @param type  File type.
+	 * @param file  Selected file.
 	 */
-	private void exportChosenFile( ActionEvent e ) {
-		String type = ((FileExtensionFilter)((JFileChooser)e.getSource()).getFileFilter()).getType();
-		File         file;
+	private void exportChosenFile( String type, File file ) {
+		
 		FileSelector selector;
 		boolean      mustExportMidi;
 		String       charsetKey;
 		if ( FileSelector.FILE_TYPE_MPL.equals(type) ) {
-			file           = mplExportSelector.getFile();
 			selector       = mplExportSelector;
 			mustExportMidi = false;
 			charsetKey     = Config.CHARSET_EXPORT_MPL;
 		}
 		else if ( FileSelector.FILE_TYPE_MIDI.equals(type) ) {
-			file           = midiExportSelector.getFile();
 			selector       = midiExportSelector;
 			mustExportMidi = true;
 			charsetKey     = Config.CHARSET_EXPORT_MID;
@@ -491,11 +539,29 @@ public class UiController implements ActionListener, WindowListener {
 	}
 	
 	/**
-	 * Does nothing.
+	 * Checks if a soundfont must be loaded automatically, and loads it, if
+	 * the check succeeds.
 	 * 
 	 * @param e    Window closed event.
 	 */
 	public void windowOpened( WindowEvent e ) {
+		
+		// file already parsed?
+		if ( SoundfontParser.getFileName() != null ) {
+			
+			// Don't parse it again. This method has only been called because
+			// of a language change.
+			return;
+		}
+		
+		// check config
+		String remember      = Config.get( Config.REMEMBER_SF2 );
+		String soundfontPath = Config.get( Config.PATH_SF2 );
+		if ( "true".equals(remember) && ! soundfontPath.equals("") ) {
+			
+			// load the soundfont
+			parseChosenFile( FileSelector.FILE_TYPE_SOUNDFONT, new File(soundfontPath) );
+		}
 	}
 	
 	/**

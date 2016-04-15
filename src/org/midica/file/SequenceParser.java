@@ -7,6 +7,7 @@
 
 package org.midica.file;
 
+import java.io.File;
 import java.util.HashMap;
 
 import javax.sound.midi.Sequence;
@@ -47,6 +48,15 @@ public abstract class SequenceParser implements IParser {
 	 * A negative level transposes into lower pitches.
 	 */
 	protected static byte transposeLevel = 0;
+	
+	/** Type of the last successfully parsed file. Either "midica" or "mid". */
+	private static String fileType = null;
+	
+	/** Last successfully parsed file. */
+	private static File sequenceFile = null;
+	
+	/** The file to be parsed. */
+	private static File currentFile = null;
 	
 	/**
 	 * Returns the transpose level. This is the value which defines how much the
@@ -99,6 +109,22 @@ public abstract class SequenceParser implements IParser {
 	}
 	
 	/**
+	 * Resets the file name and type.
+	 * Remembers the file to be parsed so that it can be marked as successful
+	 * later.
+	 * 
+	 * This method is called before parsing.
+	 * 
+	 * @param file  The file to be parsed.
+	 */
+	protected void preprocess( File file ) {
+		fileType     = null;
+		sequenceFile = null;
+		currentFile  = file;
+		SequenceAnalyzer.reset();
+	}
+	
+	/**
 	 * Postprocesses the loaded MIDI sequence.
 	 * 
 	 * Retrieves information from the given sequence and makes them available
@@ -121,9 +147,46 @@ public abstract class SequenceParser implements IParser {
 	protected void postprocessSequence( Sequence seq, String type, String charset ) throws ParseException {
 		
 		// analyze sequence and add marker events
-		SequenceAnalyzer.analyze( seq, type, charset );
+		SequenceAnalyzer.analyze( seq, charset );
+		
+		// mark the current file as successfully parsed
+		sequenceFile = currentFile;
+		fileType     = type;
 		
 		// publish
 		MidiDevices.setSequence( SequenceCreator.getSequence() );
+	}
+	
+	/**
+	 * Returns the type of the successfully parsed file.
+	 * 
+	 * @return the file type.
+	 */
+	public static String getFileType() {
+		return fileType;
+	}
+	
+	/**
+	 * Returns the absolute path of the successfully parsed file.
+	 * 
+	 * @return the parsed file path if available, or **null** otherwise.
+	 */
+	public static String getFilePath() {
+		if ( null == sequenceFile ) {
+			return null;
+		}
+		return sequenceFile.getAbsolutePath();
+	}
+	
+	/**
+	 * Returns the base name of the successfully parsed file.
+	 * 
+	 * @return the parsed file name if available, or **null** otherwise.
+	 */
+	public static String getFileName() {
+		if ( null == sequenceFile ) {
+			return null;
+		}
+		return sequenceFile.getName();
 	}
 }

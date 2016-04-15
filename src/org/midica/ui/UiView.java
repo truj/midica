@@ -20,6 +20,7 @@ import java.awt.event.WindowListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -30,6 +31,8 @@ import javax.swing.border.TitledBorder;
 
 import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.file.SequenceParser;
+import org.midica.file.SoundfontParser;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
 
@@ -52,6 +55,7 @@ public class UiView extends JDialog {
 	public static final String NAME_SELECT_SYNTAX     = "name_select_syntax";
 	public static final String NAME_SELECT_PERCUSSION = "name_select_percussion";
 	public static final String NAME_SELECT_INSTRUMENT = "name_select_instrument";
+	public static final String NAME_REMEMBER_SF       = "name_remember_sf";
 	
 	public static final String CMD_SELECT_LANGUAGE     = "select_language";
 	public static final String CMD_START_PLAYER        = "start_player";
@@ -90,6 +94,7 @@ public class UiView extends JDialog {
 	private JButton                         btnSelectSoundfont     = null;
 	private JButton                         btnExportMidi          = null;
 	private JButton                         btnExportMidicaPL      = null;
+	private JCheckBox                       cbxRememberSf          = null;
 	
 	/**
 	 * Creates the main window of the program.
@@ -416,7 +421,7 @@ public class UiView extends JDialog {
 		JLabel lblMidicaPL = new JLabel( Dict.get(Dict.MIDICAPL_FILE) );
 		area.add( lblMidicaPL, constraints );
 		
-		// file selector
+		// file selector button
 		constraints.gridx++;
 		btnSelectMidicaPL = new JButton( Dict.get(Dict.CHOOSE_FILE) );
 		btnSelectMidicaPL.setActionCommand( CMD_OPEN_MIDICAPL_FILE );
@@ -429,6 +434,11 @@ public class UiView extends JDialog {
 		constraints.gridwidth = 2;
 		lblChosenMidicaPLFile = new JLabel( Dict.get(Dict.UNCHOSEN_FILE) );
 		area.add( lblChosenMidicaPLFile, constraints );
+		String fileType = SequenceParser.getFileType();
+		String fileName = SequenceParser.getFileName();
+		if ( "midica".equals(fileType) ) {
+			lblChosenMidicaPLFile.setText( fileName );
+		}
 		
 		// line
 		constraints.gridy++;
@@ -441,7 +451,7 @@ public class UiView extends JDialog {
 		JLabel lblMidi = new JLabel( Dict.get(Dict.MIDI_FILE) );
 		area.add( lblMidi, constraints );
 		
-		// file selector
+		// file selector button
 		constraints.gridx++;
 		btnSelectMidi = new JButton( Dict.get(Dict.CHOOSE_FILE) );
 		btnSelectMidi.setActionCommand( CMD_OPEN_MIDI_FILE );
@@ -454,6 +464,9 @@ public class UiView extends JDialog {
 		constraints.gridwidth = 2;
 		lblChosenMidiFile = new JLabel( Dict.get(Dict.UNCHOSEN_FILE) );
 		area.add( lblChosenMidiFile, constraints );
+		if ( "mid".equals(fileType) ) {
+			lblChosenMidiFile.setText( fileName );
+		}
 		
 		// line
 		constraints.gridy++;
@@ -466,7 +479,7 @@ public class UiView extends JDialog {
 		JLabel lblSndBnk = new JLabel( Dict.get(Dict.SOUNDFONT) );
 		area.add( lblSndBnk, constraints );
 		
-		// file selector
+		// file selector button
 		constraints.gridx++;
 		btnSelectSoundfont = new JButton( Dict.get(Dict.CHOOSE_FILE) );
 		btnSelectSoundfont.setActionCommand( CMD_OPEN_SNDFNT_FILE );
@@ -479,6 +492,22 @@ public class UiView extends JDialog {
 		constraints.gridwidth = 2;
 		lblChosenSoundfontFile = new JLabel( Dict.get(Dict.UNCHOSEN_FILE) );
 		area.add( lblChosenSoundfontFile, constraints );
+		String soundfontFileName = SoundfontParser.getFileName();
+		if ( soundfontFileName != null ) {
+			lblChosenSoundfontFile.setText( soundfontFileName );
+		}
+		
+		// remember soundfont checkbox
+		constraints.gridy++;
+		cbxRememberSf = new JCheckBox( Dict.get(Dict.REMEMBER_SF) );
+		cbxRememberSf.setToolTipText( Dict.get(Dict.REMEMBER_SF_TT) );
+		cbxRememberSf.addItemListener( controller );
+		String remember = Config.get( Config.REMEMBER_SF2 );
+		if ( "true".equals(remember) ) {
+			cbxRememberSf.setSelected( true );
+		}
+		cbxRememberSf.setName( NAME_REMEMBER_SF );
+		area.add( cbxRememberSf, constraints );
 		
 		return area;
 	}
@@ -526,7 +555,7 @@ public class UiView extends JDialog {
 		JLabel lblMidi = new JLabel( Dict.get(Dict.MIDI_EXPORT) );
 		area.add( lblMidi, constraints );
 		
-		// file selector
+		// file selector button
 		constraints.gridx++;
 		btnExportMidi = new JButton( Dict.get(Dict.CHOOSE_FILE_EXPORT) );
 		btnExportMidi.setActionCommand( CMD_EXPORT_MIDI );
@@ -545,21 +574,13 @@ public class UiView extends JDialog {
 		JLabel lblMidicaPL = new JLabel( Dict.get(Dict.MIDICAPL_EXPORT) );
 		area.add( lblMidicaPL, constraints );
 		
-		// file selector
+		// file selector button
 		constraints.gridx++;
 		btnExportMidicaPL = new JButton( Dict.get(Dict.CHOOSE_FILE_EXPORT) );
 		btnExportMidicaPL.setActionCommand( CMD_EXPORT_MIDICAPL );
 		btnExportMidicaPL.setActionCommand( CMD_OPEN_FCT_NOT_READY ); // TODO: delete when implemented
 		btnExportMidicaPL.addActionListener( controller );
 		area.add( btnExportMidicaPL, constraints );
-		
-		// TODO: implement
-//		constraints.gridx = 0;
-//		constraints.gridy++;
-//		JLabel lblTodo = new JLabel( "<html>" +
-//				"TODO: Synthesizerauswahl: Hardware/Software<br>" +
-//				"TODO: Slider: Links/Rechts/Mittel-Click<br>" );
-//		area.add( lblTodo, constraints );
 		
 		return area;
 	}

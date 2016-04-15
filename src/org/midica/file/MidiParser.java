@@ -59,6 +59,9 @@ public class MidiParser extends SequenceParser {
 	 */
 	public void parse( File file ) throws ParseException {
 		
+		// reset file name and file type
+		preprocess( file );
+		
 		isProducedByMidica = false;
 		midiFileCharset    = null;
 		

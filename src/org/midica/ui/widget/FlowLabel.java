@@ -171,4 +171,14 @@ public class FlowLabel extends JScrollPane {
 	public void setBorder( Border border ) {
 		// nothing to do
 	}
+	
+	/**
+	 * Sets the given tooltip text in the label.
+	 * 
+	 * @param text The tool tip text to be set.
+	 */
+	@Override
+	public void setToolTipText( String text ) {
+		label.setToolTipText( text );
+	}
 }

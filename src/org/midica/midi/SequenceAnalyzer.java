@@ -75,7 +75,6 @@ public class SequenceAnalyzer {
 	private static final long DEFAULT_CHANNEL_CONFIG_TICK = -100;
 	
 	private static Sequence sequence      = null;
-	private static String   fileType      = null;
 	private static String   chosenCharset = null;
 	
 	// karaoke-related fields
@@ -137,18 +136,27 @@ public class SequenceAnalyzer {
 	}
 	
 	/**
+	 * Resets all information that can be queried in public getter methods.
+	 * This is called before a MIDI or MidicaPL file is parsed so that the
+	 * getters don't return the information of a former parsing after a later
+	 * parsing failed.
+	 */
+	public static void reset() {
+		sequenceInfo = null;
+		lyrics       = null;
+		noteHistory  = null;
+	}
+	
+	/**
 	 * Analyzes the given MIDI stream and collects information about it.
 	 * Adds marker events for channel activity changes.
 	 * 
 	 * @param seq      The MIDI sequence to be analyzed.
-	 * @param type     The file type where the stream originally comes from
-	 *                 -- **mid** for MIDI or **midica** for MidicaPL.
 	 * @param charset  The charset that has been chosen in the file chooser.
 	 * @throws ParseException if something went wrong.
 	 */
-	public static void analyze( Sequence seq, String type, String charset ) throws ParseException {
+	public static void analyze( Sequence seq, String charset ) throws ParseException {
 		sequence      = seq;
-		fileType      = type;
 		chosenCharset = charset;
 		
 		try {
@@ -197,13 +205,12 @@ public class SequenceAnalyzer {
 		// initialize data structures for the sequence info
 		sequenceInfo   = new HashMap<String, Object>();
 		int resolution = sequence.getResolution();
-		sequenceInfo.put( "resolution",        resolution                     );
-		sequenceInfo.put( "meta_info",         new HashMap<String, String>()  );
-		sequenceInfo.put( "used_channels",     new TreeSet<Integer>()         );
-		sequenceInfo.put( "tempo_mpq",         new TreeMap<Long, Integer>()   );
-		sequenceInfo.put( "tempo_bpm",         new TreeMap<Long, Integer>()   );
-		sequenceInfo.put( "parser_type",       fileType                       );
-		sequenceInfo.put( "ticks",             sequence.getTickLength()       );
+		sequenceInfo.put( "resolution",    resolution                     );
+		sequenceInfo.put( "meta_info",     new HashMap<String, String>()  );
+		sequenceInfo.put( "used_channels", new TreeSet<Integer>()         );
+		sequenceInfo.put( "tempo_mpq",     new TreeMap<Long, Integer>()   );
+		sequenceInfo.put( "tempo_bpm",     new TreeMap<Long, Integer>()   );
+		sequenceInfo.put( "ticks",         sequence.getTickLength()       );
 		banksAndInstrTotal      = new MidicaTreeModel( Dict.get(Dict.TOTAL)        );
 		banksAndInstrPerChannel = new MidicaTreeModel( Dict.get(Dict.PER_CHANNEL)  );
 		msgTreeModel            = new MidicaTreeModel( Dict.get(Dict.TAB_MESSAGES), MessageTreeNode.class );

@@ -42,7 +42,10 @@ import com.sun.media.sound.SF2Soundbank;
 public class SoundfontParser implements IParser {
 	
 	/** The currently loaded user-defined soundfont. */
-	private Soundbank soundfont = null;
+	private static Soundbank soundfont = null;
+	
+	/** The successfully loaded soundfont file. */
+	private static File soundfontFile = null;
 	
 	/** Data structure for general information of the currently loaded soundfont. */
 	private static HashMap<String, String> generalInfo = null;
@@ -53,7 +56,6 @@ public class SoundfontParser implements IParser {
 	/** Data structure for resources of the currently loaded soundfont. */
 	private static ArrayList<HashMap<String, Object>> soundfontResources = null;
 	
-	
 	/**
 	 * Parses a soundfont file.
 	 * 
@@ -61,6 +63,10 @@ public class SoundfontParser implements IParser {
 	 * @throws ParseException  If the file can not be loaded correctly.
 	 */
 	public void parse( File file ) throws ParseException {
+		
+		// reset file - in case the parsing fails
+		soundfontFile = null;
+		
 		try {
 			// load the soundfont
 			soundfont = MidiSystem.getSoundbank( file );
@@ -70,6 +76,9 @@ public class SoundfontParser implements IParser {
 			parseSoundfontInstruments();
 			parseSoundfontResources();
 			parseSoundfontInfo();
+			
+			// parsing successful - save the file info
+			soundfontFile = file;
 		}
 		catch ( InvalidMidiDataException e ) {
 			throw new ParseException( e.getMessage() );
@@ -77,6 +86,34 @@ public class SoundfontParser implements IParser {
 		catch ( IOException e ) {
 			throw new ParseException( e.getMessage() );
 		}
+	}
+	
+	/**
+	 * Returns the base name of the successfully loaded custom soundfont
+	 * file.
+	 * If no custom soundfont is loaded successfully, **null** is returned.
+	 * 
+	 * @return the soundfont file name or **null**.
+	 */
+	public static String getFileName() {
+		if ( null == soundfontFile ) {
+			return null;
+		}
+		return soundfontFile.getName();
+	}
+	
+	/**
+	 * Returns the absolute path of the successfully loaded custom soundfont
+	 * file.
+	 * If no custom soundfont is loaded successfully, **null** is returned.
+	 * 
+	 * @return the soundfont file path or **null**.
+	 */
+	public static String getFilePath() {
+		if ( null == soundfontFile ) {
+			return null;
+		}
+		return soundfontFile.getAbsolutePath();
 	}
 	
 	/**
@@ -138,9 +175,6 @@ public class SoundfontParser implements IParser {
 		
 		generalInfo = new HashMap<String, String>();
 		Soundbank soundfont = MidiDevices.getSoundfont();
-		
-		// get file name from the UI
-		generalInfo.put( "file", Midica.uiController.getView().getChosenSoundfontFileLbl().getText() );
 		
 		// no soundfont loaded?
 		if ( null == soundfont ) {
@@ -751,7 +785,7 @@ public class SoundfontParser implements IParser {
 			return result;
 		
 		// The last range had more than one number.
-		result      = result + "-" + Integer.toString( lastSeen );
+		result = result + "-" + Integer.toString( lastSeen );
 		
 		return result;
 	}
