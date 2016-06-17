@@ -316,6 +316,9 @@ public class Dict {
 	public static final String INSTR_APPLAUSE              = "instr_126";
 	public static final String INSTR_GUNSHOT               = "instr_127";
 	
+	// translation keys used by many classes
+	public static final String TICK                        = "tick";
+	
 	// UiView
 	public static final String TITLE_MAIN_WINDOW           = "title_main";
 	public static final String UNKNOWN_NOTE_NAME           = "unknown_note_name";
@@ -1061,6 +1064,9 @@ public class Dict {
 		
 		set( Config.CBX_INSTR_EN_1,                  "English"                               );
 		set( Config.CBX_INSTR_DE_1,                  "German"                                );
+		
+		// translation keys used by many classes
+		set( TICK,                         "Tick"                          );
 		
 		// UiView
 		set( CONFIGURATION,                "Configuration"                 );
@@ -3264,6 +3270,18 @@ public class Dict {
 			return noteIntToName.get( i );
 		else
 			return get( UNKNOWN_NOTE_NAME );
+	}
+	
+	/**
+	 * Returns the base note name for the given note number.
+	 * This name contains half tone steps but no octave information.
+	 * 
+	 * @param noteNum  The note number.
+	 * @return  The note's base name.
+	 */
+	public static String getBaseNoteName( int noteNum ) {
+		int noteIndex = noteNum % 12;
+		return notes[ noteIndex ];
 	}
 	
 	/**

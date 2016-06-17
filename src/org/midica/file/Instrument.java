@@ -15,7 +15,7 @@ import org.midica.config.Dict;
  * Objects of this class represent a specific MIDI channel.
  * They adjust their state according to the commands of the {@link MidicaPLParser}
  * while parsing source files - or according to the commands of the
- * {@link MidicaPLParser} while exporting source files.
+ * {@link MidicaPLExporter} while exporting source files.
  * 
  * The following elements of a channel's state need further explication:
  * 
@@ -77,14 +77,20 @@ public class Instrument implements Comparable<Instrument> {
 		this.bankLSB          = 0;
 		this.instrumentNumber = instrumentNumber;
 		this.instrumentName   = instrumentName;
-		if ( automatic )
+		if (automatic)
 			autoChannel = true;
 		else
 			autoChannel = false;
 		
 		// export?
-		if ( null == instrumentName )
-			this.instrumentName = Dict.getInstrument( instrumentNumber );
+		if ( null == instrumentName ) {
+			if ( 9 == channel ) {
+				this.instrumentName = Dict.getDrumkit( instrumentNumber );
+			}
+			else {
+				this.instrumentName = Dict.getInstrument( instrumentNumber );
+			}
+		}
 	}
 	
 	@Override

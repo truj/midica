@@ -34,6 +34,7 @@ import javax.sound.midi.Track;
 
 import org.midica.config.Dict;
 import org.midica.file.CharsetUtils;
+import org.midica.file.MidicaPLExporter;
 import org.midica.file.ParseException;
 import org.midica.ui.model.MessageDetail;
 import org.midica.ui.model.MessageTreeNode;
@@ -192,6 +193,48 @@ public class SequenceAnalyzer {
 		if ( null == sequenceInfo )
 			return new HashMap<String, Object>();
 		return sequenceInfo;
+	}
+	
+	/**
+	 * Returns internal data structures from the parsed sequence.
+	 * This is needed for the {@link MidicaPLExporter}.
+	 * 
+	 * The following structures are returned:
+	 * 
+	 * - **instrument_history**: TreeMap<Byte, TreeMap<Long, Byte[]>>
+	 *   - channel
+	 *   - tick
+	 *   - 0=bankMSB, 1=bankLSB, 3=program
+	 * - **comment_history**: TreeMap<Byte, TreeMap<Long, String>>
+	 *   - channel
+	 *   - tick
+	 *   - comment
+	 * - **note_history**: TreeMap<Byte, TreeMap<Long, TreeMap<Byte, Byte>>>
+	 *   - channel
+	 *   - tick
+	 *   - note
+	 *   - volume
+	 * - **note_on_off**: TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>>
+	 *   - channel
+	 *   - note
+	 *   - tick
+	 *   - on/off
+	 * - **lyrics**: TreeMap<Long, TreeMap<Long, String>>
+	 *   - line begin tick
+	 *   - syllable tick
+	 *   - syllable
+	 * 
+	 * @return internal data structures as described above.
+	 */
+	public static HashMap<String, Object> getHistories() {
+		HashMap<String, Object> histories = new HashMap<String, Object>();
+		histories.put( "instrument_history", instrumentHistory  );
+		histories.put( "comment_history",    commentHistory     );
+		histories.put( "note_history",       noteHistory        );
+		histories.put( "note_on_off",        noteOnOffByChannel );
+		histories.put( "lyrics",             lyrics             );
+		
+		return histories;
 	}
 	
 	/**
@@ -3379,29 +3422,6 @@ public class SequenceAnalyzer {
 		
 		// fallback
 		return Dict.get( Dict.UNKNOWN );
-	}
-	
-	/**
-	 * Returns an array that is one element smaller than the given array.
-	 * The first element is thrown away. All other elements are moved one index down.
-	 * 
-	 * Something more or less similar to Perl's shift function that is not available
-	 * in Java. However the shifted element is not returned.
-	 * 
-	 * @param array    The original array.
-	 * @return         The shifted array.
-	 */
-	private static final byte[] shift( byte[] array ) {
-		
-		int newLength = array.length - 1;
-		
-		// create a new array which is on element smaller
-		byte[] result = new byte[ newLength ];
-		
-		// fill the resulting array
-		System.arraycopy( array, 1, result, 0, newLength );
-		
-		return result;
 	}
 	
 	/**
