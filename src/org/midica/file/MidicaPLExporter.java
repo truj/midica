@@ -65,8 +65,7 @@ public class MidicaPLExporter extends Exporter {
 	private static ExportResult exportResult     = null;
 	
 	/** stores the current state of each channel */
-	private static TreeMap<Long, ArrayList<HashMap<String, String>>>[] channelEvents = null;
-	private static TreeMap<Long, HashMap<String, String>>[][]          noteEvent     = null;
+	private static TreeMap<Byte, Instrument> instruments = null;
 	
 	/**
 	 * tick -- priority (-5: instr; -3: global; channel) -- key (cmd, end_tick, ...) -- value
@@ -80,7 +79,7 @@ public class MidicaPLExporter extends Exporter {
 	 */
 	private static TreeMap<Long, TreeMap<Integer, HashMap<String, Object>>> timeline = null;
 	
-	private static TreeMap<Integer, String> noteLength = null;
+	private static TreeMap<Long, String> noteLength = null;
 	
 	/** comma-separated note bytes  --  chord name */
 	private static TreeMap<String, String> chords = null;
@@ -143,22 +142,19 @@ public class MidicaPLExporter extends Exporter {
 			chordCount       = new TreeMap<String, Integer>();
 			chordsByBaseNote = new TreeMap<String, ArrayList<String>>();
 			
-			// TODO: delete
-			System.out.println( "comment history: " + commentHistory.get((byte)0).keySet() );
-			
-			// initialize data structures
-			channelEvents = new TreeMap[ 16 ];
-			noteEvent     = new TreeMap[ 16 ][ 128 ];
+			// initialize instruments (to track the channel configuration)
+			instruments = new TreeMap<Byte, Instrument>();
+			CHANNEL:
 			for ( byte channel = 0; channel < 16; channel++ ) {
-				channelEvents[ channel ] = new TreeMap<Long, ArrayList<HashMap<String,String>>>();
-				
-				TreeMap<Long, HashMap<String, String>>[] channelNoteActivity = new TreeMap[ 128 ];
-				for ( int note = 0; note < 128; note++ ) {
-					channelNoteActivity[ note ] = new TreeMap<Long, HashMap<String, String>>();
+				// regard only the lowest tick >= 0
+				Entry<Long, Byte[]> entry = instrumentHistory.get( channel ).ceilingEntry( 0L );
+				if ( null == entry ) {
+					continue CHANNEL;
 				}
-				noteEvent[ channel ] = channelNoteActivity;
+				Byte[] channelConfig = entry.getValue();
+				Instrument instr     = new Instrument( channel, channelConfig[2], null, true );
+				instruments.put( channel, instr );
 			}
-			
 			
 			// make sure that the syntax configuration is up to date
 			MidicaPLParser.refreshSyntax();
@@ -166,15 +162,15 @@ public class MidicaPLExporter extends Exporter {
 			// fill the timeline with instrument changes and note events
 			timeline = new TreeMap<Long, TreeMap<Integer, HashMap<String, Object>>>();
 			
-			// fill data structures
-			sourceResolution = readSequence();
+			// read tempo changes and resolution
+			sourceResolution = readGlobalsFromSequence();
 			
 			// calculate what tick length corresponds to what note length
 			noteLength = initNoteLengths();
-			prefillTimeline();
 			
-			
-//			preprocessEvents();
+			// fill timeline
+			addInstrumentsToTimeline();
+			addNotesToTimeline();
 			
 			// create MidicaPL string from the data structures and write it into the file
 			writer.write( createMidicaPL() );
@@ -191,12 +187,9 @@ public class MidicaPLExporter extends Exporter {
 	}
 	
 	/**
-	 * Fills the timeline structure with the following information:
-	 * 
-	 * - instrument changes
-	 * - note-on events
+	 * Adds all ticks to the timeline with at least one instrument change.
 	 */
-	private void prefillTimeline() {
+	private void addInstrumentsToTimeline() {
 		
 		// add instrument change ticks to the timeline
 		for ( byte channel = 0; channel < 16; channel++ ) {
@@ -206,12 +199,17 @@ public class MidicaPLExporter extends Exporter {
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Fills the timeline structure with note-on events regarding
+	 * chords and single notes.
+	 */
+	private void addNotesToTimeline() {
 		
-		// collect notes by channel
-		// channel tick note/velo/length/...
-		TreeMap<Byte, TreeMap<Long, HashMap<String, String>>> notesByChannel;
+		// process notes
 		for ( Entry<Byte, TreeMap<Long, TreeMap<Byte, Byte>>> channelSet : noteHistory.entrySet() ) {
-			byte channel                                     = channelSet.getKey();
+			byte                               channel       = channelSet.getKey();
 			TreeMap<Long, TreeMap<Byte, Byte>> channelStruct = channelSet.getValue();
 			for ( Entry<Long, TreeMap<Byte, Byte>> tickSet : channelStruct.entrySet() ) {
 				long tick                      = tickSet.getKey();
@@ -224,6 +222,19 @@ public class MidicaPLExporter extends Exporter {
 					byte   velocity = noteSet.getValue();
 					Long   endTick  = noteOnOff.get( channel ).get( note ).ceilingKey( tick + 1 );
 					
+					// TODO: delete
+					if (channel==0 && tick <= 960) {
+						String[] sar = convertLength(endTick - tick);
+						System.out.println( "tick: " + tick + ", oldEnd: " + endTick + " / " + sar[0] + "/" + sar[1] );
+					}
+					
+					// TODO: fix null pointer exception on endTick.
+					// reproduce:
+					// - convert And then there was silence to MidicaPL
+					// - load the resulting file
+					// - convert to MidicaPL again
+					// tick 131520, channel 6, note 45
+					
 					// create structure for this note
 					TreeMap<String, String> noteStruct = new TreeMap<String, String>();
 					String[] cmdLength = convertLength( endTick - tick );
@@ -232,33 +243,21 @@ public class MidicaPLExporter extends Exporter {
 					noteStruct.put( "length",   cmdLength[0]  );
 					noteStruct.put( "staccato", cmdLength[1]  );
 					
-					// TODO: delete
-					if ( 0 == channel ) {
-						System.out.println( "note: " + note + ", channel: " + channel + ", velo: " + velocity + ", tick: " + tick + "-" + endTick + ", length: " + cmdLength[0] + ", staccato: " + cmdLength[1] );
-					}
-					
 					// add to the tick notes
 					String noteName = Dict.getNote( (int) note );
 					if ( 9 == channel ) {
 						noteName = Dict.getPercussion( (int) note );
+						if ( noteName.equals(Dict.get(Dict.UNKNOWN_PERCUSSION_NAME)) ) {
+							noteName = note + ""; // name unknown - use number instead
+						}
 					}
 					notesStruct.put( noteName + "", noteStruct );
-					
-					// TODO: delete
-//					TreeMap<Long, HashMap<String, String>> tickNoteOpt = notesByChannel.get( channel );
-//					if ( null == tickNoteOpt ) {
-//						tickNoteOpt = new TreeMap<Long, HashMap<String,String>>();
-//						notesByChannel.put( channel, tickNoteOpt );
-//					}
-//					notesByChannel.put( , value)
 				}
 				
 				// transform notes into chords, if possible
 				if ( channel != 9 ) {
 					organizeChords( notesStruct );
 				}
-				
-				System.out.println( notesStruct ); // TODO: delete
 				
 				// add all notes/chords of this tick to the timeline
 				addToTimeline( tick, channel, "notes", notesStruct );
@@ -419,22 +418,19 @@ public class MidicaPLExporter extends Exporter {
 	}
 	
 	/**
-	 * Reads the currently loaded MIDI sequence and stores the contained events into
-	 * several data structures.
-	 * The resulting data structures are:
+	 * Reads global information from the currently loaded MIDI sequence.
 	 * 
-	 * TODO: fix documentation
+	 * The following information is read:
 	 * 
+	 * - tempo changes (they are added to the timeline directly)
+	 * - resolution (ticks per quarter note)
 	 * 
-	 * The resulting data structure is ordered using the following priority:
-	 * 1. tickstamp
-	 * 1. command (global commands first)
-	 * 1. channel number
+	 * Creates warnings for ignored short messages.
 	 * 
 	 * @return resolution of the loaded MIDI sequence (ticks per quarter note)
 	 * @throws ExportException 
 	 */
-	private int readSequence() throws ExportException {
+	private int readGlobalsFromSequence() throws ExportException {
 		
 		// parse the midi sequence
 		Sequence seq = MidiDevices.getSequence();
@@ -462,20 +458,11 @@ public class MidicaPLExporter extends Exporter {
 					int note    = shortMsg.getData1();
 					int volume  = shortMsg.getData2();
 					
-					// TODO: delete
-					// instrument selection?
-					if ( ShortMessage.PROGRAM_CHANGE == cmd ) {
+					// ignore events that are handled otherwise
+					if ( ShortMessage.PROGRAM_CHANGE == cmd
+					  || ShortMessage.NOTE_ON        == cmd
+					  || ShortMessage.NOTE_OFF       == cmd ) {
 						// ignore
-					}
-					
-					// note on?
-					else if ( ShortMessage.NOTE_ON == cmd && volume > 0 ) {
-						addNoteEvent( tick, channel, note, true, volume );
-					}
-					
-					// note off?
-					else if ( ShortMessage.NOTE_OFF == cmd || (ShortMessage.NOTE_ON == cmd && 0 == volume) ) {
-						addNoteEvent( tick, channel, note, false, 0 );
 					}
 					
 					// something else?
@@ -507,64 +494,6 @@ public class MidicaPLExporter extends Exporter {
 		}
 		
 		return seq.getResolution();
-	}
-	
-	/**
-	 * Checks the sequence's events for consistency and adds some more information.
-	 * This method is called after the events of the sequence have been read into the
-	 * data structures.
-	 * 
-	 * TODO: fix documentation
-	 * 
-	 */
-	private void preprocessEvents() {
-		
-		// check noteEvent[][] for integrity
-		for ( byte channel = 0; channel < 16; channel++ ) {
-			for ( int note = 0; note < 128; note++ ) {
-				if ( ! noteEvent[channel][note].isEmpty() ) {
-					boolean previousActivity = false;
-					long    previousTick     = -1;
-					
-					for ( long tick : noteEvent[channel][note].keySet() ) {
-						
-						HashMap<String, String> event = noteEvent[ channel ][ note ].get( tick );
-						int volume = Integer.parseInt( event.get("volume") );
-						
-						// KEY_OFF
-						if ( 0 == volume ) {
-							if (previousActivity) {
-								// Add length information to the corresponding NOTE_ON event.
-								HashMap<String, String> previousEvent = noteEvent[channel][note].get( previousTick );
-								String length = Long.toString( tick - previousTick );
-								previousEvent.put( "tick_length", length );
-								String[] cmdLength = convertLength( tick - previousTick );
-								previousEvent.put( "cmd_length", cmdLength[0] );
-								previousEvent.put( "staccato",   cmdLength[1] );
-								
-								previousTick = tick;
-							}
-							else {
-								String warning = String.format( Dict.get(Dict.WARNING_UNPRESSED_NOTE_RELEASED), previousTick );
-								int    track   = channel + SequenceCreator.NUM_META_TRACKS;
-								exportResult.addWarning( track, tick, channel, note, warning );
-							}
-							previousActivity = false;
-						}
-						else {
-							if (previousActivity) {
-								String warning = String.format( Dict.get(Dict.WARNING_UNRELEASED_NOTE_PRESSED), previousTick );
-								int    track   = channel + SequenceCreator.NUM_META_TRACKS;
-								exportResult.addWarning( track, tick, channel, note, warning );
-							}
-							previousActivity = true;
-							previousTick     = tick;
-						}
-					}
-				}
-			}
-		}
-		
 	}
 	
 	/**
@@ -601,7 +530,7 @@ public class MidicaPLExporter extends Exporter {
 				
 				// notes
 				else if ( contentStruct.containsKey("notes") ) {
-					System.out.println( prio ); // TODO: delete
+//					System.out.println( prio ); // TODO: delete
 					output.append( createNoteLines(prio, contentStruct) );
 				}
 			}
@@ -824,7 +753,7 @@ public class MidicaPLExporter extends Exporter {
 	}
 	
 	/**
-	 * Crates lines for all notes or chords that are played in a certain
+	 * Creates lines for all notes or chords that are played in a certain
 	 * channel at a certain tick.
 	 * 
 	 * @param channel  MIDI channel.
@@ -839,12 +768,47 @@ public class MidicaPLExporter extends Exporter {
 		for ( Object notesObj : content.values() ) {
 			TreeMap<String, TreeMap<String, String>> notes = (TreeMap<String, TreeMap<String, String>>) notesObj;
 			
+			// add one line (note or chord)
 			for ( Entry<String, TreeMap<String, String>> noteSet : notes.entrySet() ) {
 				String                  noteName = noteSet.getKey();
 				TreeMap<String, String> options  = noteSet.getValue();
 				lines.append( channel + "\t" + noteName + "\t" + options.get("length") );
-				// TODO: add staccato
-				// TODO: add multi
+				
+				// TODO: Use the Instrument class to track the channel state.
+				// TODO: Replace if(true) according to the channel state.
+				
+				// staccato
+				Instrument instr        = instruments.get( (byte) channel );
+				boolean    hasOtherOpts = false;
+				int        staccato     = Integer.parseInt( options.get("staccato") );
+				boolean    needOption   = staccato != instr.getStaccato();
+				if (needOption) {
+					hasOtherOpts = appendCommaIfNecessaryAndReturnTrue( hasOtherOpts, lines );
+					lines.append( " " + MidicaPLParser.STACCATO + MidicaPLParser.OPT_ASSIGNER + staccato );
+					instr.setStaccato( staccato );
+				}
+				
+				// velocity
+				int velocity = Integer.parseInt( options.get("velocity") );
+				needOption   = velocity != instr.getVolume();
+				if (needOption) {
+					hasOtherOpts = appendCommaIfNecessaryAndReturnTrue( hasOtherOpts, lines );
+					lines.append( " " + MidicaPLParser.VOLUME + MidicaPLParser.OPT_ASSIGNER + velocity );
+					instr.setVolume( velocity );
+				}
+				
+				// multiple (doesn't increment the channel tick)
+				boolean isMultiple = options.containsKey( "multiple" );
+				if (isMultiple) {
+					hasOtherOpts = appendCommaIfNecessaryAndReturnTrue( hasOtherOpts, lines );
+					lines.append( " " + MidicaPLParser.MULTIPLE );
+				}
+				else {
+					// update channel tick
+					long endTick = Long.parseLong( options.get("end_tick") );
+					instr.setCurrentTicks( endTick + staccato );
+				}
+				
 				lines.append("\n");
 			}
 		}
@@ -854,69 +818,40 @@ public class MidicaPLExporter extends Exporter {
 	}
 	
 	/**
-	 * Adds a NOTE_ON or NOTE_OFF event to the channel's event data structure.
+	 * Appends an option separator to the given string,
+	 * if the given **isNecessary** parameter is **true**.
 	 * 
-	 * TODO: add documentation for ExportException
+	 * Otherwise, does nothing.
 	 * 
-	 * @param tick     Tickstamp of the event
-	 * @param channel  Channel number
-	 * @param note     Note number
-	 * @param onOff    true: NOTE_ON, false: NOTE_OFF
-	 * @param volume   velocity of the note event in case of NOTE_ON (or 0 in case of NOTE_OFF)
-	 * @throws ExportException
+	 * Always returns **true**, so we can make the calling code one line
+	 * shorter.
+	 * 
+	 * @param isNecessary  Determins, if the append is needed or not.
+	 * @param str          String to append.
+	 * @return **true**.
 	 */
-	private void addNoteEvent( long tick, int channel, int note, boolean onOff, int volume ) throws ExportException {
-		
-		if ( false == onOff )
-			volume = 0;
-		
-		// has the note (already) been pressed or released in the same tick and channel?
-		boolean hasOtherEvent = noteEvent[ channel ][ note ].containsKey( tick );
-		if (hasOtherEvent) {
-			int otherVol = Integer.parseInt( noteEvent[channel][note].get(tick).get("volume") );
-			String warning = String.format( Dict.get(Dict.WARNING_SAME_NOTE_IN_SAME_TICK), volume, otherVol );
-			int    track   = channel + SequenceCreator.NUM_META_TRACKS;
-			exportResult.addWarning( track, tick, channel, note, warning );
-			
-			// keep the louder note
-			if ( volume <= otherVol )
-				return;
+	private boolean appendCommaIfNecessaryAndReturnTrue( boolean isNecessary, StringBuilder str ) {
+		if (isNecessary) {
+			str.append( MidicaPLParser.OPT_SEPARATOR );
 		}
 		
-		// add the note event
-		HashMap<String, String> event = new HashMap<String, String>();
-		event.put( "volume", Integer.toString(volume) );
-		noteEvent[ channel ][ note ].put( tick, event );
-		
-		
-		
-//		ArrayList<HashMap<String, String>> events;
-//		
-//		// are there already other events at this channel and tickstamp?
-//		if ( channelEvents[channel].containsKey(tick) )
-//			events = channelEvents[ channel ].get( tick );
-//		
-//		// it's the first event at this channel/tickstamp
-//		else {
-//			events = new ArrayList<HashMap<String, String>>();
-//			channelEvents[ channel ].put( tick, events );
-//		}
-		
-		// add the command
-		// TODO: ...
-//		HashMap<String, String> options;
-//		events.put( cmd, options );
+		return true;
 	}
 	
 	/**
-	 * Converts the given number of ticks into the MidicaPL note length information.
+	 * Converts the given number of ticks into the MidicaPL note length
+	 * information.
 	 * 
-	 * @param ticks note length in ticks
+	 * @param ticks note length in ticks from the source resolution
 	 * @return array containing 2 elements:
 	 *         - note length information in MidicaPL format
 	 *         - staccato value
 	 */
+	// TODO: add unit test
 	private String[] convertLength( long ticks ) {
+		
+		// convert the ticks to the new resolution (rounded mathematically)
+		ticks = ( ticks * targetResolution * 10 + 5 ) / ( sourceResolution * 10 );
 		
 		// note too long?
 		if ( ticks > noteLength.lastKey() ) {
@@ -925,13 +860,13 @@ public class MidicaPLExporter extends Exporter {
 		}
 		
 		// calculate
-		int fullTicks = noteLength.ceilingKey( (int)ticks );
-		String cmd    = noteLength.get( fullTicks );
+		long   fullTicks = noteLength.ceilingKey( ticks );
+		String cmd       = noteLength.get( fullTicks );
 		
 		// pack the result
 		String[] result = new String[ 2 ];
 		result[ 0 ] = cmd;
-		result[ 1 ] = Integer.toString( fullTicks - (int)ticks );
+		result[ 1 ] = Long.toString( fullTicks - ticks );
 		
 		return result;
 	}
@@ -942,102 +877,107 @@ public class MidicaPLExporter extends Exporter {
 	 * 
 	 * @return Mapping between tick length and note length for the syntax.
 	 */
-	private TreeMap<Integer, String> initNoteLengths() {
+	private TreeMap<Long, String> initNoteLengths() {
 		
 		String triplet = Dict.getSyntax( Dict.SYNTAX_TRIPLET );
 		String dot     = Dict.getSyntax( Dict.SYNTAX_DOT     );
+		String d2      = Dict.getSyntax( Dict.SYNTAX_2       );
+		String d4      = Dict.getSyntax( Dict.SYNTAX_4       );
+		String d8      = Dict.getSyntax( Dict.SYNTAX_8       );
+		String d16     = Dict.getSyntax( Dict.SYNTAX_16      );
+		String d32     = Dict.getSyntax( Dict.SYNTAX_32      );
 		String m2      = Dict.getSyntax( Dict.SYNTAX_M2      );
 		String m4      = Dict.getSyntax( Dict.SYNTAX_M4      );
 		String m8      = Dict.getSyntax( Dict.SYNTAX_M8      );
 		String m16     = Dict.getSyntax( Dict.SYNTAX_M16     );
 		String m32     = Dict.getSyntax( Dict.SYNTAX_M32     );
 		
-		TreeMap<Integer, String> noteLength = new TreeMap<Integer, String>();
+		TreeMap<Long, String> noteLength = new TreeMap<Long, String>();
 		
 		// 32th
-		int length32t = calculateTicks( 2, 8 * 3 ); // inside a triplet
-		int length32  = calculateTicks( 1, 8     ); // normal length
-		int length32d = calculateTicks( 3, 8 * 2 ); // dotted length
-		noteLength.put( length32t, Integer.toString(32) + triplet ); // triplet
-		noteLength.put( length32,  Integer.toString(32)           ); // normal
-		noteLength.put( length32d, Integer.toString(32) + dot     ); // dotted
+		long length32t = calculateTicks( 2, 8 * 3 ); // inside a triplet
+		long length32  = calculateTicks( 1, 8     ); // normal length
+		long length32d = calculateTicks( 3, 8 * 2 ); // dotted length
+		noteLength.put( length32t, d32 + triplet ); // triplet
+		noteLength.put( length32,  d32 + ""      ); // normal
+		noteLength.put( length32d, d32 + dot     ); // dotted
 		
 		// 16th
-		int length16t = calculateTicks( 2, 4 * 3 );
-		int length16  = calculateTicks( 1, 4     );
-		int length16d = calculateTicks( 3, 4 * 2 );
-		noteLength.put( length16t, Integer.toString(16) + triplet );
-		noteLength.put( length16,  Integer.toString(16)           );
-		noteLength.put( length16d, Integer.toString(16) + dot     );
+		long length16t = calculateTicks( 2, 4 * 3 );
+		long length16  = calculateTicks( 1, 4     );
+		long length16d = calculateTicks( 3, 4 * 2 );
+		noteLength.put( length16t, d16 + triplet );
+		noteLength.put( length16,  d16 + ""      );
+		noteLength.put( length16d, d16 + dot     );
 		
 		// 8th
-		int length8t = calculateTicks( 2, 2 * 3 );
-		int length8  = calculateTicks( 1, 2     );
-		int length8d = calculateTicks( 3, 2 * 2 );
-		noteLength.put( length8t, Integer.toString(8) + triplet );
-		noteLength.put( length8,  Integer.toString(8)           );
-		noteLength.put( length8d, Integer.toString(8) + dot     );
+		long length8t = calculateTicks( 2, 2 * 3 );
+		long length8  = calculateTicks( 1, 2     );
+		long length8d = calculateTicks( 3, 2 * 2 );
+		noteLength.put( length8t, d8 + triplet );
+		noteLength.put( length8,  d8 + ""      );
+		noteLength.put( length8d, d8 + dot     );
 		
 		// quarter
-		int length4t = calculateTicks( 2, 3 );
-		int length4  = calculateTicks( 1, 1 );
-		int length4d = calculateTicks( 3, 2 );
-		noteLength.put( length4t, Integer.toString(4) + triplet );
-		noteLength.put( length4,  Integer.toString(4)           );
-		noteLength.put( length4d, Integer.toString(4) + dot     );
+		long length4t = calculateTicks( 2, 3 );
+		long length4  = calculateTicks( 1, 1 );
+		long length4d = calculateTicks( 3, 2 );
+		noteLength.put( length4t, d4 + triplet );
+		noteLength.put( length4,  d4 + ""      );
+		noteLength.put( length4d, d4 + dot     );
 		
 		// half
-		int length2t = calculateTicks( 2 * 2, 3 );
-		int length2  = calculateTicks( 2,     1 );
-		int length2d = calculateTicks( 2 * 3, 2 );
-		noteLength.put( length2t, Integer.toString(2) + triplet );
-		noteLength.put( length2,  Integer.toString(2)           );
-		noteLength.put( length2d, Integer.toString(2) + dot     );
+		long length2t = calculateTicks( 2 * 2, 3 );
+		long length2  = calculateTicks( 2,     1 );
+		long length2d = calculateTicks( 2 * 3, 2 );
+		noteLength.put( length2t, d2 + triplet );
+		noteLength.put( length2,  d2 + ""      );
+		noteLength.put( length2d, d2 + dot     );
 		
 		// full
-		int length1t = calculateTicks( 4 * 2, 3 );
-		int length1  = calculateTicks( 4,     1 );
-		int length1d = calculateTicks( 4 * 3, 2 );
-		noteLength.put( length1t, Integer.toString(1) + triplet );
-		noteLength.put( length1,  Integer.toString(1)           );
-		noteLength.put( length1d, Integer.toString(1) + dot     );
+		long length1t = calculateTicks( 4 * 2, 3 );
+		long length1  = calculateTicks( 4,     1 );
+		long length1d = calculateTicks( 4 * 3, 2 );
+		noteLength.put( length1t, 1 + triplet );
+		noteLength.put( length1,  1 + ""      );
+		noteLength.put( length1d, 1 + dot     );
 		
 		// 2 full notes
-		int length_m2t = calculateTicks( 8 * 2, 3 );
-		int length_m2  = calculateTicks( 8,     1 );
-		int length_m2d = calculateTicks( 8 * 3, 2 );
+		long length_m2t = calculateTicks( 8 * 2, 3 );
+		long length_m2  = calculateTicks( 8,     1 );
+		long length_m2d = calculateTicks( 8 * 3, 2 );
 		noteLength.put( length_m2t, m2 + triplet );
 		noteLength.put( length_m2,  m2           );
 		noteLength.put( length_m2d, m2  + dot    );
 		
 		// 4 full notes
-		int length_m4t = calculateTicks( 16 * 2, 3 );
-		int length_m4  = calculateTicks( 16,     1 );
-		int length_m4d = calculateTicks( 16 * 3, 2 );
+		long length_m4t = calculateTicks( 16 * 2, 3 );
+		long length_m4  = calculateTicks( 16,     1 );
+		long length_m4d = calculateTicks( 16 * 3, 2 );
 		noteLength.put( length_m4t, m4 + triplet );
 		noteLength.put( length_m4,  m4           );
 		noteLength.put( length_m4d, m4  + dot    );
 		
 		// 8 full notes
-		int length_m8t = calculateTicks( 32 * 2, 3 );
-		int length_m8  = calculateTicks( 32,     1 );
-		int length_m8d = calculateTicks( 32 * 3, 2 );
+		long length_m8t = calculateTicks( 32 * 2, 3 );
+		long length_m8  = calculateTicks( 32,     1 );
+		long length_m8d = calculateTicks( 32 * 3, 2 );
 		noteLength.put( length_m8t, m8 + triplet );
 		noteLength.put( length_m8,  m8           );
 		noteLength.put( length_m8d, m8  + dot    );
 		
 		// 16 full notes
-		int length_m16t = calculateTicks( 64 * 2, 3 );
-		int length_m16  = calculateTicks( 64,     1 );
-		int length_m16d = calculateTicks( 64 * 3, 2 );
+		long length_m16t = calculateTicks( 64 * 2, 3 );
+		long length_m16  = calculateTicks( 64,     1 );
+		long length_m16d = calculateTicks( 64 * 3, 2 );
 		noteLength.put( length_m16t, m16 + triplet );
 		noteLength.put( length_m16,  m16           );
 		noteLength.put( length_m16d, m16  + dot    );
 		
 		// 32 full notes
-		int length_m32t = calculateTicks( 128 * 2, 3 );
-		int length_m32  = calculateTicks( 128,     1 );
-		int length_m32d = calculateTicks( 128 * 3, 2 );
+		long length_m32t = calculateTicks( 128 * 2, 3 );
+		long length_m32  = calculateTicks( 128,     1 );
+		long length_m32d = calculateTicks( 128 * 3, 2 );
 		noteLength.put( length_m32t, m32 + triplet );
 		noteLength.put( length_m32,  m32           );
 		noteLength.put( length_m32d, m32  + dot    );

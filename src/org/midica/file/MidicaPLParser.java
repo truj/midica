@@ -689,7 +689,22 @@ public class MidicaPLParser extends SequenceParser {
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
 	private void parseINCLUDE( String[] tokens ) throws ParseException {
-		if ( 2 == tokens.length ) {
+		
+		// handle QUANTITY
+		int quantity = 1;
+		if ( 3 == tokens.length ) {
+			HashMap<String, Integer> options = parseOptions( tokens[2] );
+			for (String key : options.keySet()) {
+				if (OPT_QUANTITY.equals(key)) {
+					quantity = options.get(key);
+				}
+				else {
+					throw new ParseException( Dict.get(Dict.ERROR_INCLUDE_UNKNOWN_ARG) );
+				}
+			}
+		}
+		
+		if ( tokens.length > 1 ) {
 			String includeName = tokens[1];
 			if ( includeName.equals(currentMacroName) )
 				throw new ParseException( Dict.get(Dict.ERROR_MACRO_RECURSION) );
@@ -698,13 +713,16 @@ public class MidicaPLParser extends SequenceParser {
 			// fetch the right macro
 			ArrayList<String[]> macro = macros.get( includeName );
 			// apply all commands of the called macro
-			for ( int i=0; i<macro.size(); i++ ) {
-				String[] macroTokens = macro.get( i );
-				parseTokens( macroTokens );
+			for (int m=0; m<quantity; m++) {
+				for ( int i=0; i<macro.size(); i++ ) {
+					String[] macroTokens = macro.get( i );
+					parseTokens( macroTokens );
+				}
 			}
 		}
-		else
+		else {
 			throw new ParseException( Dict.get(Dict.ERROR_INCLUDE_NUM_OF_ARGS) );
+		}
 	}
 	
 	/**
@@ -1032,7 +1050,7 @@ public class MidicaPLParser extends SequenceParser {
 		for ( int i = 0; i < quantity; i++ ) {
 			if ( PAUSE_VALUE == note ) {
 				instr.incrementTicks( duration );
-				return;
+				continue;
 			}
 			
 			// calculate beginning and end ticks of the current note
@@ -1233,7 +1251,7 @@ public class MidicaPLParser extends SequenceParser {
 		// initialize sequence
 		try {
 			SequenceCreator.reset( chosenCharset );
-			for ( Instrument instr : instruments  ) {
+			for ( Instrument instr : instruments ) {
 				int    channel      = instr.channel;
 				int    instrNum     = instr.instrumentNumber;
 				String instrComment = instr.instrumentName;

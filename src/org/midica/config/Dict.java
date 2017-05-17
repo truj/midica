@@ -854,6 +854,7 @@ public class Dict {
 	public static final String ERROR_MACRO_RECURSION            = "error_macro_recursion";
 	public static final String ERROR_MACRO_UNDEFINED            = "error_macro_undefined";
 	public static final String ERROR_INCLUDE_NUM_OF_ARGS        = "error_include_num_of_args";
+	public static final String ERROR_INCLUDE_UNKNOWN_ARG        = "error_include_unknown_arg";
 	public static final String ERROR_MODE_INSTR_NUM_OF_ARGS     = "error_mode_instr_num_of_args";
 	public static final String ERROR_NOTE_TOO_BIG               = "error_note_too_big";
 	public static final String ERROR_NOTE_TOO_SMALL             = "error_note_too_small";
@@ -906,8 +907,6 @@ public class Dict {
 	
 	// MidicaPLExporter
 	public static final String WARNING_SAME_NOTE_IN_SAME_TICK   = "warning_same_note_in_same_tick";
-	public static final String WARNING_UNPRESSED_NOTE_RELEASED  = "warning_unpressed_note_released";
-	public static final String WARNING_UNRELEASED_NOTE_PRESSED  = "warning_unreleased_note_pressed";
 	public static final String WARNING_IGNORED_SHORT_MESSAGE    = "warning_ignored_short_message";
 	
 	// MidiDevices
@@ -1645,6 +1644,7 @@ public class Dict {
 		set( ERROR_MACRO_ALREADY_DEFINED,         "macro name has been already defined: "                             );
 		set( ERROR_MACRO_NOT_ALLOWED_HERE,        "a macro definition is not allowed inside a block<br>maybe you forgot to close the block." );
 		set( ERROR_INCLUDE_NUM_OF_ARGS,           "wrong number of arguments in macro command 'INCLUDE'"              );
+		set( ERROR_INCLUDE_UNKNOWN_ARG,           "unknown argument for 'INCLUDE'"                                    );
 		set( ERROR_MODE_INSTR_NUM_OF_ARGS,        "wrong number of arguments in mode command 'INSTRUMENTS'"           );
 		set( ERROR_NOTE_TOO_BIG,                  "note number too big: "                                             );
 		set( ERROR_NOTE_TOO_SMALL,                "note number too small: "                                           );
@@ -1698,8 +1698,6 @@ public class Dict {
 		// MidicaPLExporter
 		set( WARNING_SAME_NOTE_IN_SAME_TICK,      "The same note has been addressed more than once"
 		                                        + " at the same time and channel (current/old volume: %s/%s)"         );
-		set( WARNING_UNPRESSED_NOTE_RELEASED,     "Note released without having been pressed since tick %s"           );
-		set( WARNING_UNRELEASED_NOTE_PRESSED,     "Note pressed without having been released since tick %s"           );
 		set( WARNING_IGNORED_SHORT_MESSAGE,       "Ignored ShortMessage - command: %s, data1: %s, data2: %s"          );
 		
 		// MidiDevices

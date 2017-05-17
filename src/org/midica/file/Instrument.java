@@ -19,7 +19,7 @@ import org.midica.config.Dict;
  * 
  * The following elements of a channel's state need further explication:
  * 
- * - **tickstamp** - This is the current position of the parsed/exoirted file, counted in MIDI ticks.
+ * - **tickstamp** - This is the current position of the parsed/exported file, counted in MIDI ticks.
  * - **relative volume** - Velocity of the key stroke. (This is relative to the channel volume)
  * - **staccato value** - That is the number of ticks that the key is released before
  *                        the theoretical end of the note.
@@ -29,7 +29,7 @@ import org.midica.config.Dict;
 public class Instrument implements Comparable<Instrument> {
 	
 	/** First tickstamp where any action can occur. */
-	private static final int MIN_CURRENT_TICKS = 20;
+	private static final int MIN_CURRENT_TICKS = 0;
 	/** Default relative volume for this channel unless defined differently. */
 	private static final int DEFAULT_VOLUME    = 64;
 	/** Default relative staccato value for this channel unless defined differently. */
@@ -41,7 +41,7 @@ public class Instrument implements Comparable<Instrument> {
 	public int instrumentNumber;
 	/** Instrument name like it is read from the MidicaPL source file. */
 	public String instrumentName;
-	/** Indicates if this channel has been automatically (true) or explicitely (false) defined. */
+	/** Indicates if this channel has been automatically (true) or explicitly (false) defined. */
 	public boolean autoChannel;
 	/** MSB of the bank number (0-127) */
 	private int bankMSB;
@@ -58,7 +58,7 @@ public class Instrument implements Comparable<Instrument> {
 	/**
 	 * Creates a new Instrument object representing a channel during the parsing or export
 	 * procedure of a MidicaPL source file.
-	 * While parsing this can be done explicitely inside the first INSTRUMENTS block or (if
+	 * While parsing this can be done explicitly inside the first INSTRUMENTS block or (if
 	 * not defined in this block) when the first INSTRUMENTS block is left.
 	 * 
 	 * @param channel           Channel number as defined by the MIDI specification (0-15)
