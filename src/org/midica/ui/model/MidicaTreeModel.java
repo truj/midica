@@ -23,7 +23,7 @@ import org.midica.ui.widget.MidicaTree;
  * In order to use this tree model, the following steps are necessary:
  * 
  * - Call the constructor with the text to be displayed by the root node.
- * - For each leaf: call {@link #add(ArrayList))} providing one string array
+ * - For each leaf: call {@link #add(ArrayList)} providing one string array
  *   per node on the way to the leaf.
  * - After adding each leaf: call {@link #postprocess()}.
  * - Create the tree.

@@ -45,7 +45,7 @@ import com.sun.media.sound.MidiUtils;
 
 /**
  * This class analyzes a MIDI sequence and collects information from it.
- * This information can be displayed later by the {@link InfoView}
+ * This information can be displayed later by the {@link org.midica.ui.info.InfoView}
  * 
  * It also adds marker events to the sequence at each tick where the
  * channel activity changes for at least one channel.
@@ -1425,7 +1425,6 @@ public class SequenceAnalyzer {
 	 * Adds last information to the info data structure about the MIDI stream.
 	 * Adds marker events to the stream.
 	 * 
-	 * @param type "mid" or "midica", depending on the parser class.
 	 * @throws ParseException if the marker events cannot be added to the MIDI sequence.
 	 */
 	private static void postprocess() throws ParseException {

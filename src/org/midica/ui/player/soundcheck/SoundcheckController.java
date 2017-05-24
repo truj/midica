@@ -424,7 +424,7 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 	/**
 	 * Handles selections of instruments or notes.
 	 * 
-	 * Instruments or drumkits are selected from a {@link MidicaTable}.
+	 * Instruments or drumkits are selected from a {@link org.midica.ui.widget.MidicaTable}.
 	 * Notes or percussion instruments are selected from a {@link JList}.
 	 * 
 	 * @param event Table row or list item selection event.

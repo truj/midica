@@ -2092,7 +2092,7 @@ public class InfoView extends JDialog {
 	/**
 	 * Returns the widgets for the message filter.
 	 * 
-	 * @return
+	 * @return widgets for the filter.
 	 */
 	public HashMap<String, JComponent> getMsgFilterWidgets() {
 		return filterWidgets;
@@ -2160,11 +2160,10 @@ public class InfoView extends JDialog {
 	 * Before calling this method, {@link #cleanMsgDetails()} should
 	 * be called first.
 	 * 
-	 * Adjusts the background color according to **fromTable**.
-	 * 
+	 * Adjusts the background color according to the click source
+	 * (message table or message tree)
+	 *
 	 * @param msgDetail  The selected leaf node or table row object.
-	 * @param fromTable  **true** to show a message from the message table;
-	 *                   **false** to show a category from the tree.
 	 */
 	public void fillMsgDetails( IMessageDetailProvider msgDetail ) {
 		

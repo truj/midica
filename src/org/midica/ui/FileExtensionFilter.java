@@ -31,7 +31,7 @@ public class FileExtensionFilter extends FileFilter {
 	 * Creates a new file extension filter for a file chooser filtering files
 	 * by the given file type.
 	 * 
-	 * @param extension    File type to be filtered.
+	 * @param type    File type to be filtered.
 	 */
 	public FileExtensionFilter( String type ) {
 		this.type = type;

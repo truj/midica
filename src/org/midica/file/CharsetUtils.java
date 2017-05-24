@@ -119,7 +119,7 @@ public final class CharsetUtils {
 	 * 
 	 * @param text     The text to be converted.
 	 * @param charset  The charset to be used for converting.
-	 * @return
+	 * @return the converted text.
 	 */
 	public static final byte[] getBytesFromText( String text, String charset ) {
 		

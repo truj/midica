@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.TreeSet;
 
 /**
- * This class represents a node for a {@link MidicaTree} containing
+ * This class represents a node for a {@link org.midica.ui.widget.MidicaTree} containing
  * MIDI message types.
  * 
  * It implements {@link IMessageDetailProvider} so that it's content
@@ -74,8 +74,7 @@ public class MessageTreeNode extends MidicaTreeNode implements IMessageDetailPro
 	 * If the option value is comparable, remembers the minimum and maximum
 	 * of all calls to this method with the same **name**.
 	 * 
-	 * These values can be retrieved later with {@link #getMinOption(String)} and
-	 * {@link #getMaxOption(String)}.
+	 * These values can be retrieved later with {@link #getOption(String)}.
 	 * 
 	 * @param name   The option name.
 	 * @param value  The option value.
@@ -154,14 +153,14 @@ public class MessageTreeNode extends MidicaTreeNode implements IMessageDetailPro
 	 * If this method is called several times with the same name, the according
 	 * value is only stored if not yet done.
 	 * 
-	 * The values can be retrieved later with {@link #getDistinctOption(String)}
+	 * The values can be retrieved later with {@link #getDistinctOptions(String)}
 	 * 
 	 * The following data types are allowed for the value:
 	 * 
-	 * - {@link String}
-	 * - {@link Byte}
-	 * - {@link Integer}
-	 * - {@link Long}
+	 * - {@link java.lang.String}
+	 * - {@link java.lang.Byte}
+	 * - {@link java.lang.Integer}
+	 * - {@link java.lang.Long}
 	 * 
 	 * @param name   The option name.
 	 * @param value  The option value (must be a string or a number object).

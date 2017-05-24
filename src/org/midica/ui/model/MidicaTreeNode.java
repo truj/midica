@@ -13,7 +13,7 @@ import java.util.TreeMap;
 import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
- * This class represents a node for a {@link MidicaTree}.
+ * This class represents a node for a {@link org.midica.ui.widget.MidicaTree}.
  * 
  * It contains a name, a descendant counter and a number
  * representing a MIDI byte, double byte or byte range.
@@ -91,7 +91,7 @@ public class MidicaTreeNode extends DefaultMutableTreeNode {
 	/**
 	 * Sets the number representation of the node.
 	 * 
-	 * @param MIDI number.
+	 * @param number MIDI number.
 	 */
 	public void setNumber( String number ) {
 		this.number = number;
@@ -109,7 +109,7 @@ public class MidicaTreeNode extends DefaultMutableTreeNode {
 	/**
 	 * Sets the base text of the node.
 	 * 
-	 * @return base text of the node
+	 * @param name base text of the node
 	 */
 	public void setName( String name ) {
 		this.name = name;

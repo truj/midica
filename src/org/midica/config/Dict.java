@@ -3364,7 +3364,7 @@ public class Dict {
 	 * Returns a drumkit shortcut by value.
 	 * 
 	 * @param i  drumkit value as defined by the General Standard specification
-	 * @return
+	 * @return drumkit shortcut.
 	 */
 	public static String getDrumkit( int i ) {
 		if ( drumkitIntToName.containsKey(i) )
