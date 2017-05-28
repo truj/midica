@@ -171,10 +171,12 @@ public class SequenceAnalyzer {
 			if (DEBUG_MODE) {
 				e.printStackTrace();
 			}
-			if ( e instanceof ParseException )
+			if (e instanceof ParseException) {
 				throw (ParseException) e;
-			else
+			}
+			else {
 				throw new ParseException( e.getMessage() );
+			}
 		}
 		
 		// add statistic information to the data structures
@@ -190,8 +192,10 @@ public class SequenceAnalyzer {
 	 * @return MIDI stream info.
 	 */
 	public static HashMap<String, Object> getSequenceInfo() {
-		if ( null == sequenceInfo )
+		if (null == sequenceInfo) {
 			return new HashMap<String, Object>();
+		}
+		
 		return sequenceInfo;
 	}
 	
@@ -266,13 +270,13 @@ public class SequenceAnalyzer {
 		String time         = MidiDevices.microsecondsToTimeString( microseconds );
 		sequenceInfo.put( "time_length", time );
 		channelParamConfig = new TreeMap<Byte, Byte[]>();
-		for ( byte channel = 0; channel < 16; channel++ ) {
+		for (byte channel = 0; channel < 16; channel++) {
 			// default (N)RPN config: MSB=LSB=127 (no parameter set), -1: neither RPN nor NRPN is active
 			Byte[] conf = { 127, 127, 127, 127, -1 };
 			channelParamConfig.put( channel, conf );
 		}
 		channelParamHistory = new TreeMap<Byte, TreeMap<Long, Byte[]>>();
-		for ( byte channel = 0; channel < 16; channel++ ) {
+		for (byte channel = 0; channel < 16; channel++) {
 			TreeMap<Long, Byte[]> paramHistory = new TreeMap<Long, Byte[]>();
 			channelParamHistory.put( channel, paramHistory );
 			
@@ -299,17 +303,18 @@ public class SequenceAnalyzer {
 		
 		// init data structures for the note history
 		noteHistory = new TreeMap<Byte, TreeMap<Long, TreeMap<Byte, Byte>>>();
-		for ( byte channel = 0; channel < 16; channel++ )
+		for (byte channel = 0; channel < 16; channel++) {
 			noteHistory.put( channel, new TreeMap<Long, TreeMap<Byte, Byte>>() );
+		}
 		
 		// init data structures for the bank and instrument history
 		channelConfig = new TreeMap<Byte, Byte[]>();
-		for ( byte channel = 0; channel < 16; channel++ ) {
+		for (byte channel = 0; channel < 16; channel++) {
 			Byte[] conf = { 0, 0, 0 }; // default values: bankMSB=0, bankLSB=0, program=0
 			channelConfig.put( channel, conf );
 		}
 		instrumentHistory = new TreeMap<Byte, TreeMap<Long, Byte[]>>();
-		for ( byte channel = 0; channel < 16; channel++ ) {
+		for (byte channel = 0; channel < 16; channel++) {
 			TreeMap<Long, Byte[]> channelHistory = new TreeMap<Long, Byte[]>();
 			instrumentHistory.put( channel, channelHistory );
 			
@@ -318,7 +323,7 @@ public class SequenceAnalyzer {
 			channelHistory.put( DEFAULT_CHANNEL_CONFIG_TICK, conf0 ); // this must be configured before the sequence starts
 		}
 		commentHistory = new TreeMap<Byte, TreeMap<Long, String>>();
-		for ( byte channel = 0; channel < 16; channel++ ) {
+		for (byte channel = 0; channel < 16; channel++) {
 			TreeMap<Long, String> channelCommentHistory = new TreeMap<Long, String>();
 			commentHistory.put( channel, channelCommentHistory );
 		}
@@ -337,16 +342,16 @@ public class SequenceAnalyzer {
 		// process the note-related events in the right order.
 		midiFileCharset = null;
 		int trackNum    = 0;
-		for ( Track t : SequenceCreator.getSequence().getTracks() ) {
-			for ( int i=0; i < t.size(); i++ ) {
+		for (Track t : SequenceCreator.getSequence().getTracks()) {
+			for (int i=0; i < t.size(); i++) {
 				MidiEvent   event = t.get( i );
 				long        tick  = event.getTick();
 				MidiMessage msg   = event.getMessage();
 				
-				if ( msg instanceof ShortMessage ) {
+				if (msg instanceof ShortMessage) {
 					processShortMessageByChannel( (ShortMessage) msg, tick );
 				}
-				else if ( msg instanceof MetaMessage ) {
+				else if (msg instanceof MetaMessage) {
 					processMetaMessageByChannel( (MetaMessage) msg, tick, trackNum );
 				}
 			}
@@ -357,9 +362,9 @@ public class SequenceAnalyzer {
 		// Therefore the ORIGINAL sequence is used.
 		midiFileCharset = null;
 		trackNum        = 0;
-		for ( Track t : sequence.getTracks() ) {
+		for (Track t : sequence.getTracks()) {
 			int msgNum = 0;
-			for ( int i=0; i < t.size(); i++ ) {
+			for (int i=0; i < t.size(); i++) {
 				MidiEvent   event = t.get( i );
 				long        tick  = event.getTick();
 				MidiMessage msg   = event.getMessage();
@@ -369,13 +374,13 @@ public class SequenceAnalyzer {
 					msg = replaceMessage( msg, tick );
 				}
 				
-				if ( msg instanceof MetaMessage ) {
+				if (msg instanceof MetaMessage) {
 					processMetaMessage( (MetaMessage) msg, tick, trackNum, msgNum );
 				}
-				else if ( msg instanceof ShortMessage ) {
+				else if (msg instanceof ShortMessage) {
 					processShortMessage( (ShortMessage) msg, tick, trackNum, msgNum );
 				}
-				else if ( msg instanceof SysexMessage ) {
+				else if (msg instanceof SysexMessage) {
 					processSysexMessage( (SysexMessage) msg, tick, trackNum, msgNum );
 				}
 				else {
@@ -416,14 +421,14 @@ public class SequenceAnalyzer {
 		byte    statusByte    = (byte) statusInt;
 		byte    statusBitmask = (byte) 0b1111_1000;
 		boolean isSystemMsg   = false;
-		if ( ((byte) 0b1111_1000) == (statusByte & statusBitmask) ) {
+		if (((byte) 0b1111_1000) == (statusByte & statusBitmask)) {
 			
 			// system realtime: 1111_1XXX
 			isSystemMsg      = true;
 			String[] msgLvl1 = { MSG_LVL_1_SORT_SYS_RT, Dict.get(Dict.MSG1_SYSTEM_REALTIME), null };
 			path.add( msgLvl1 );
 		}
-		else if ( ((byte) 0b1111_0000) == (statusByte & statusBitmask) ) {
+		else if (((byte) 0b1111_0000) == (statusByte & statusBitmask)) {
 			
 			// system common: 1111_0XXX
 			isSystemMsg      = true;
@@ -454,11 +459,11 @@ public class SequenceAnalyzer {
 			path.add( msgLvl2 );
 			
 			// level 3 and 4 nodes (controllers)
-			if ( 0xB0 == cmd ) { // control change
+			if (0xB0 == cmd) { // control change
 				
 				// There must be at least one data byte after the status byte.
 				// Otherwise: unknown controller.
-				if ( msgLength > 1 ) {
+				if (msgLength > 1) {
 					details.put( "controller", (byte) data1 );
 				}
 				else {
@@ -470,11 +475,11 @@ public class SequenceAnalyzer {
 				byte    data1Byte    = (byte) data1;
 				byte    ctrlBitmask  = (byte) 0b1101_1111; // 3rd bit: MSB or LSB
 				boolean isDataChange = false;
-				if ( data1 >= 0x62 && data1 <= 0x65 ) {
+				if (data1 >= 0x62 && data1 <= 0x65) {
 					// RPN or NRPN
 					ctrlBitmask        = (byte) 0b1111_1110; // last bit: MSB or LSB
 					String paramNumStr = String.format( "%02X", data2 );
-					if ( data1 >= 0x64 ) {
+					if (data1 >= 0x64) {
 						distinctDetails.put( "rpn", paramNumStr );
 					}
 					else {
@@ -491,7 +496,7 @@ public class SequenceAnalyzer {
 				String   ctrlID   = String.format( "%02X", ctrlPart );
 				String[] ctrlTxt  = getLvl34ControllerMsgTxtByData1( data1 );
 				String   ctrlNum  = null;
-				if ( null == ctrlTxt[1] ) {
+				if (null == ctrlTxt[1]) {
 					// no MSB/LSB or unknown
 					ctrlID  = String.format( "%02X", data1 );
 					ctrlNum = data1 + "";
@@ -500,7 +505,7 @@ public class SequenceAnalyzer {
 				path.add( msgLvl3 );
 				
 				// level 4 (MSB or LSB)
-				if ( ctrlTxt[1] != null ) {
+				if (ctrlTxt[1] != null) {
 					String   data1ID   = String.format( "%02X", data1 );
 					String   msbLsbStr = data1 + "";
 					String[] msgLvl4   = { data1ID, ctrlTxt[1], msbLsbStr };
@@ -552,11 +557,11 @@ public class SequenceAnalyzer {
 		messages.add( msgDetail );
 		
 		// add details to the leaf node and the message details
-		for ( Entry<String, Object> detailEntry : details.entrySet() ) {
+		for (Entry<String, Object> detailEntry : details.entrySet()) {
 			leaf.setOption(      detailEntry.getKey(), detailEntry.getValue() );
 			msgDetail.setOption( detailEntry.getKey(), detailEntry.getValue() );
 		}
-		for ( Entry<String, Object> detailEntry : distinctDetails.entrySet() ) {
+		for (Entry<String, Object> detailEntry : distinctDetails.entrySet()) {
 			leaf.setDistinctOption( detailEntry.getKey(), (Comparable<?>) detailEntry.getValue() );
 			msgDetail.setOption(    detailEntry.getKey(), detailEntry.getValue() );
 		}
@@ -586,42 +591,44 @@ public class SequenceAnalyzer {
 		byte channel = (byte) msg.getChannel();
 		
 		// NOTE ON or OFF
-		if ( ShortMessage.NOTE_ON == cmd ) {
+		if (ShortMessage.NOTE_ON == cmd) {
 			byte note    = (byte) msg.getData1();
 			byte volume  = (byte) msg.getData2();
 			
 			// on or off?
-			if ( volume > 0 )
+			if (volume > 0) {
 				addNoteOn( tick, channel, note, volume );
-			else
+			}
+			else {
 				addNoteOff( tick, channel, note );
+			}
 		}
 		
 		// NOTE OFF
-		else if ( ShortMessage.NOTE_OFF == cmd ) {
+		else if (ShortMessage.NOTE_OFF == cmd) {
 			byte note = (byte) msg.getData1();
 			addNoteOff( tick, channel, note );
 		}
 		
 		// CONTROL CHANGE
-		else if ( ShortMessage.CONTROL_CHANGE == cmd ) {
+		else if (ShortMessage.CONTROL_CHANGE == cmd) {
 			int controller = msg.getData1();
 			int value      = msg.getData2();
 			
 			// BANK MSB
-			if ( 0x00 == controller ) {
+			if (0x00 == controller) {
 				// MSB index = 0
 				channelConfig.get( channel )[ 0 ] = (byte) value;
 			}
 			
 			// BANK LSB
-			else if ( 0x20 == controller ) {
+			else if (0x20 == controller) {
 				// LSB index = 1
 				channelConfig.get( channel )[ 1 ] = (byte) value;
 			}
 			
 			// (N)RPN MSB/LSB
-			else if ( controller >= 0x62 && controller <= 0x65 ) {
+			else if (controller >= 0x62 && controller <= 0x65) {
 				
 				// adjust current channel param config
 				int index = 0x62 == controller ? 3  // NRPN LSB
@@ -629,15 +636,16 @@ public class SequenceAnalyzer {
 				          : 0x64 == controller ? 1  // RPN LSB
 				          : 0x65 == controller ? 0  // RPN MSB
 				          : -1;
-				if ( -1 == index ) // should never happen
+				if (-1 == index) { // should never happen
 					return;
+				}
 				channelParamConfig.get( channel )[ index ] = (byte) value;
 				
 				// calculate and adjust active parameter type: RPN(1), NRPN(0) or none(-1)?
 				byte rpnNrpnReset;
 				byte currentMsb;
 				byte currentLsb;
-				if ( controller >= 0x64 ) {
+				if (controller >= 0x64) {
 					rpnNrpnReset = 1;  // RPN
 					currentMsb   = channelParamConfig.get( channel )[ 0 ];
 					currentLsb   = channelParamConfig.get( channel )[ 1 ];
@@ -647,7 +655,7 @@ public class SequenceAnalyzer {
 					currentMsb   = channelParamConfig.get( channel )[ 2 ];
 					currentLsb   = channelParamConfig.get( channel )[ 3 ];
 				}
-				if ( ((byte) 0x7F) == currentMsb && ((byte) 0x7F) == currentLsb ) {
+				if (((byte) 0x7F) == currentMsb && ((byte) 0x7F) == currentLsb) {
 					// reset
 					rpnNrpnReset = -1;
 				}
@@ -660,7 +668,7 @@ public class SequenceAnalyzer {
 		}
 		
 		// Instrument Change
-		else if ( ShortMessage.PROGRAM_CHANGE == cmd ) {
+		else if (ShortMessage.PROGRAM_CHANGE == cmd) {
 			// PROGRAM index = 2
 			channelConfig.get( channel )[ 2 ] = (byte) msg.getData1();
 			Byte[] confAtTick = channelConfig.get( channel ).clone();
@@ -692,7 +700,7 @@ public class SequenceAnalyzer {
 		String text      = null;
 		
 		// TEMPO
-		if ( MidiListener.META_SET_TEMPO == type ) {
+		if (MidiListener.META_SET_TEMPO == type) {
 			int mpq = MidiUtils.getTempoMPQ( msg );
 			int bpm = (int) MidiUtils.convertTempo( mpq );
 			TreeMap<Long, Integer> tempoMpq = (TreeMap<Long, Integer>) sequenceInfo.get( "tempo_mpq" );
@@ -705,13 +713,13 @@ public class SequenceAnalyzer {
 		}
 		
 		// TEXT
-		else if ( MidiListener.META_TEXT == type ) {
+		else if (MidiListener.META_TEXT == type) {
 			text = CharsetUtils.getTextFromBytes( content, chosenCharset, midiFileCharset );
 			
 			// software?
 			Pattern patternSW = Pattern.compile( "^" + Pattern.quote(SequenceCreator.GENERATED_BY) + "(.+)$" );
 			Matcher matcherSW = patternSW.matcher( text );
-			if ( matcherSW.matches() ) {
+			if (matcherSW.matches()) {
 				String                  software = matcherSW.group( 1 );
 				HashMap<String, String> metaInfo = (HashMap<String, String>) sequenceInfo.get( "meta_info" );
 				metaInfo.put( "software", software );
@@ -719,7 +727,7 @@ public class SequenceAnalyzer {
 				// minor version?
 				Pattern patternMV = Pattern.compile( ".+\\.(\\d{10})$" );
 				Matcher matcherMV = patternMV.matcher( software );
-				if ( matcherMV.matches() ) {
+				if (matcherMV.matches()) {
 					int  minor     = Integer.parseInt( matcherMV.group(1) );
 					Date timestamp = new Date( minor * 1000L );
 					SimpleDateFormat formatter    = new SimpleDateFormat( Dict.get(Dict.TIMESTAMP_FORMAT) );
@@ -730,21 +738,21 @@ public class SequenceAnalyzer {
 		}
 		
 		// {#...=...} song info according to recommended practice RP-026
-		else if ( MidiListener.META_LYRICS == type ) {
+		else if (MidiListener.META_LYRICS == type) {
 			text = CharsetUtils.getTextFromBytes( content, chosenCharset, midiFileCharset );
-			if ( text.contains("{#") ) {
+			if (text.contains("{#")) {
 				Matcher m = pattSongInfo.matcher( text );
-				while ( m.find() ) {
+				while (m.find()) {
 					String key   = m.group( 1 ).toLowerCase();
 					String value = m.group( 2 );
-					if ( "lyrics".equals(key) ) {
+					if ("lyrics".equals(key)) {
 						key = "lyricist";
 					}
 					if ( "title".equals(key)
 					  || "composer".equals(key)
 					  || "lyricist".equals(key)
-					  || "artist".equals(key)) {
-						if ( karaokeInfo.containsKey(key) ) {
+					  || "artist".equals(key) ) {
+						if (karaokeInfo.containsKey(key)) {
 							String oldValue = (String) karaokeInfo.get( key );
 							karaokeInfo.put( key, oldValue + "\n" + value );
 						}
@@ -757,7 +765,7 @@ public class SequenceAnalyzer {
 		}
 		
 		// COPYRIGHT
-		else if ( MidiListener.META_COPYRIGHT == type ) {
+		else if (MidiListener.META_COPYRIGHT == type) {
 			String                  copyright = CharsetUtils.getTextFromBytes( content, chosenCharset, midiFileCharset );
 			HashMap<String, String> metaInfo  = (HashMap<String, String>) sequenceInfo.get( "meta_info" );
 			metaInfo.put( "copyright", copyright );
@@ -775,18 +783,18 @@ public class SequenceAnalyzer {
 		path.add( msgLvl2 );
 		
 		// level 3 node - vendor for sequencer specific messages
-		if ( MidiListener.META_SEQUENCER_SPECIFIC == type ) {
+		if (MidiListener.META_SEQUENCER_SPECIFIC == type) {
 			String vendorID  = "FF"; // sort invalid vendor IDs to the end
 			String vendorHex = "-";
 			String vendorStr = "-";
 			
 			// vendor byte: 1st 1 or 3 bytes after: [status byte, type byte, length byte]
-			if ( msgLength >= 4 ) {
+			if (msgLength >= 4) {
 				int vendorByte = (byte) content[ 0 ];
 				
 				// 3-byte vendor ID
-				if ( 0x00 == vendorByte ) {
-					if ( msgLength >= 6 ) {
+				if (0x00 == vendorByte) {
+					if (msgLength >= 6) {
 						vendorID  = String.format( "3-%02X%02X%02X", vendorByte, content[1], content[2] );
 						vendorHex = String.format( "%02X %02X %02X", vendorByte, content[1], content[2] );
 						vendorStr = String.format(   "%02X%02X%02X", vendorByte, content[1], content[2] );
@@ -814,7 +822,7 @@ public class SequenceAnalyzer {
 		details.put( "meta_type",   type       );
 		boolean msgContainsText = type >= 0x01 && type <= 0x0F;
 		if (msgContainsText) { // get texts from text-based messages
-			if ( null == text ) {
+			if (null == text) {
 				text = CharsetUtils.getTextFromBytes( content, chosenCharset, midiFileCharset );
 			}
 			distinctDetails.put( "text", text );
@@ -828,11 +836,11 @@ public class SequenceAnalyzer {
 		messages.add( msgDetail );
 		
 		// add details to the leaf node and the message details
-		for ( Entry<String, Object> detailEntry : details.entrySet() ) {
+		for (Entry<String, Object> detailEntry : details.entrySet()) {
 			leaf.setOption(      detailEntry.getKey(), detailEntry.getValue() );
 			msgDetail.setOption( detailEntry.getKey(), detailEntry.getValue() );
 		}
-		for ( Entry<String, Object> detailEntry : distinctDetails.entrySet() ) {
+		for (Entry<String, Object> detailEntry : distinctDetails.entrySet()) {
 			leaf.setDistinctOption( detailEntry.getKey(), (Comparable<?>) detailEntry.getValue() );
 			msgDetail.setOption(    detailEntry.getKey(), detailEntry.getValue() );
 		}
@@ -840,9 +848,9 @@ public class SequenceAnalyzer {
 		msgDetail.setOption( "message", message );
 		
 		// charset switch in a TEXT or LYRICS event?
-		if ( MidiListener.META_LYRICS == type || MidiListener.META_TEXT == type ) {
+		if (MidiListener.META_LYRICS == type || MidiListener.META_TEXT == type) {
 			String newCharset = CharsetUtils.findCharsetSwitch( text );
-			if ( newCharset != null ) {
+			if (newCharset != null) {
 				midiFileCharset = newCharset;
 			}
 		}
@@ -861,13 +869,13 @@ public class SequenceAnalyzer {
 		String text = null;
 		
 		// INSTRUMENT NAME
-		if ( MidiListener.META_INSTRUMENT_NAME == type ) {
+		if (MidiListener.META_INSTRUMENT_NAME == type) {
 			
 			// get channel number
 			byte channel = (byte) ( trackNum - SequenceCreator.NUM_META_TRACKS );
 			
 			// invalid channel - not produced by Midica?
-			if ( channel < 0 || channel >= MidiDevices.NUMBER_OF_CHANNELS ) {
+			if (channel < 0 || channel >= MidiDevices.NUMBER_OF_CHANNELS) {
 				return;
 			}
 			
@@ -877,24 +885,24 @@ public class SequenceAnalyzer {
 		}
 		
 		// LYRICS
-		else if ( MidiListener.META_LYRICS == type ) {
+		else if (MidiListener.META_LYRICS == type) {
 			text = CharsetUtils.getTextFromBytes( data, chosenCharset, midiFileCharset );
 			processKaraoke( text, KARAOKE_LYRICS, tick );
 		}
 		
 		// TEXT
-		else if ( MidiListener.META_TEXT == type ) {
+		else if (MidiListener.META_TEXT == type) {
 			text = CharsetUtils.getTextFromBytes( data, chosenCharset, midiFileCharset );
 			
 			// karaoke type definition?
-			if ( text.startsWith("@K") ) {
+			if (text.startsWith("@K")) {
 				karaokeMode = text.substring( 2 );
 				karaokeInfo.put( "type", karaokeMode );
 			}
 			
 			// software version (probably created by Midica)
-			else if ( tick <= SequenceCreator.TICK_SOFTWARE
-			  && text.startsWith(SequenceCreator.GENERATED_BY) ) {
+			else if (tick <= SequenceCreator.TICK_SOFTWARE
+			  && text.startsWith(SequenceCreator.GENERATED_BY)) {
 				// not karaoke-related - nothing more to do
 			}
 			
@@ -902,7 +910,7 @@ public class SequenceAnalyzer {
 			// Unfortunately some MIDI files contain lyrics as type TEXT
 			// instead of LYRICS without providing an @K header. So we must
 			// consider all text as possibly lyrics.
-			else if ( ! KAR_TYPE_MIDICA_SIMPLE.equals(karaokeMode) ) {
+			else if (! KAR_TYPE_MIDICA_SIMPLE.equals(karaokeMode)) {
 				processKaraoke( text, KARAOKE_TEXT, tick );
 			}
 			
@@ -910,9 +918,9 @@ public class SequenceAnalyzer {
 		}
 		
 		// charset switch in a TEXT or LYRICS event?
-		if ( MidiListener.META_LYRICS == type || MidiListener.META_TEXT == type ) {
+		if (MidiListener.META_LYRICS == type || MidiListener.META_TEXT == type) {
 			String newCharset = CharsetUtils.findCharsetSwitch( text );
-			if ( newCharset != null ) {
+			if (newCharset != null) {
 				midiFileCharset = newCharset;
 			}
 		}
@@ -954,11 +962,11 @@ public class SequenceAnalyzer {
 		boolean isUniversal   = false;
 		boolean isRealTime    = false;
 		boolean isEducational = false;
-		if ( msgLength > 1 ) {
+		if (msgLength > 1) {
 			vendorByte = content[ 0 ];
 			
 			// universal, non real time
-			if ( 0x7E == vendorByte ) {
+			if (0x7E == vendorByte) {
 				isUniversal        = true;
 				String   vendorID  = "7E";
 				String   vendorTxt = Dict.get( Dict.MSG3_SX_NON_RT_UNIVERSAL );
@@ -970,7 +978,7 @@ public class SequenceAnalyzer {
 			}
 			
 			// universal, real time
-			else if ( 0x7F == vendorByte ) {
+			else if (0x7F == vendorByte) {
 				isUniversal        = true;
 				isRealTime         = true;
 				String   vendorID  = "7F";
@@ -983,7 +991,7 @@ public class SequenceAnalyzer {
 			}
 			
 			// educational
-			else if ( 0x7D == vendorByte ) {
+			else if (0x7D == vendorByte) {
 				isEducational      = true;
 				String   vendorID  = "FE";  // sort educational after universal
 				String   vendorTxt = Dict.get( Dict.MSG3_SX_EDUCATIONAL );
@@ -1004,14 +1012,14 @@ public class SequenceAnalyzer {
 		}
 		
 		// level 4 node for normal vendors (vendor name)
-		if ( ! isUniversal && ! isEducational ) {
+		if (! isUniversal && ! isEducational) {
 			String vendorID  = null;
 			String vendorHex = null;
 			String vendorStr = null;
 			
 			// 3-byte vendor ID
-			if ( 0x00 == vendorByte ) {
-				if ( msgLength >= 4 ) {
+			if (0x00 == vendorByte) {
+				if (msgLength >= 4) {
 					vendorID  = String.format( "3-%02X%02X%02X", vendorByte, content[1], content[2] );
 					vendorHex = String.format( "%02X %02X %02X", vendorByte, content[1], content[2] );
 					vendorStr = String.format(   "%02X%02X%02X", vendorByte, content[1], content[2] );
@@ -1026,7 +1034,7 @@ public class SequenceAnalyzer {
 			}
 			
 			// invalid (no vendor ID found)
-			if ( null == vendorID || null == vendorHex || null == vendorStr ) {
+			if (null == vendorID || null == vendorHex || null == vendorStr) {
 				vendorID  = "9-000000"; // sort invalid messages to the end
 				vendorHex = "-";
 				vendorStr = "-";
@@ -1046,12 +1054,15 @@ public class SequenceAnalyzer {
 			byte sysExChannel = (byte) 0xFF; // invalid
 			byte subId1       = (byte) 0xFF; // invalid
 			byte subId2       = (byte) 0xFF; // invalid
-			if ( restLength >= 1 )
+			if (restLength >= 1) {
 				sysExChannel = content[ 1 ];
-			if ( restLength >= 2 )
+			}
+			if (restLength >= 2) {
 				subId1 = content[ 2 ];
-			if ( restLength >= 3 )
+			}
+			if (restLength >= 3) {
 				subId2 = content[ 3 ];
+			}
 			
 			// level 4 node
 			String   mainTypeID  = String.format( "%02X", subId1 );
@@ -1061,28 +1072,32 @@ public class SequenceAnalyzer {
 			path.add( msgLvl4 );
 			
 			// level 5 node
-			if ( texts.length >= 3 ) {
+			if (texts.length >= 3) {
 				String   subTypeID  = String.format( "%02X", subId2 );
 				String   subTypeStr = texts[ 2 ];
-				if ( ! "-".equals(subTypeStr) )  // real number?
+				if (! "-".equals(subTypeStr)) {  // real number?
 					subTypeStr = subId2 + "";    // decimal instead of hex
+				}
 				String[] msgLvl5    = { subTypeID, texts[1], subTypeStr };
 				path.add( msgLvl5 );
 			}
 			
 			// add channel to details
 			String sysExChannelID = "0x" + String.format( "%02X", sysExChannel );
-			if ( 0x7F == sysExChannel )
+			if (0x7F == sysExChannel) {
 				sysExChannelID += " (" + Dict.get( Dict.BROADCAST_MSG ) + ")";
-			else if ( ((byte) 0xFF) == sysExChannel )
+			}
+			else if (((byte) 0xFF) == sysExChannel) {
 				sysExChannelID = "-";
+			}
 			distinctDetails.put( "sysex_channel", sysExChannelID );
 			
 			// add Sub-IDs to details
 			String sub1Str = ((byte) 0xFF) == subId1 ? "-" : String.format( "0x%02X", subId1 );
 			String sub2Str = "-";
-			if ( texts.length > 2 && ! "-".equals(texts[2]) )
+			if (texts.length > 2 && ! "-".equals(texts[2])) {
 				sub2Str = "0x" + texts[ 2 ];
+			}
 			details.put( "sub_id_1", sub1Str );
 			details.put( "sub_id_2", sub2Str );
 		}
@@ -1100,11 +1115,11 @@ public class SequenceAnalyzer {
 		messages.add( msgDetail );
 		
 		// add details to the leaf node and the message details
-		for ( Entry<String, Object> detailEntry : details.entrySet() ) {
+		for (Entry<String, Object> detailEntry : details.entrySet()) {
 			leaf.setOption(      detailEntry.getKey(), detailEntry.getValue() );
 			msgDetail.setOption( detailEntry.getKey(), detailEntry.getValue() );
 		}
-		for ( Entry<String, Object> detailEntry : distinctDetails.entrySet() ) {
+		for (Entry<String, Object> detailEntry : distinctDetails.entrySet()) {
 			leaf.setDistinctOption( detailEntry.getKey(), (Comparable<?>) detailEntry.getValue() );
 			msgDetail.setOption(    detailEntry.getKey(), detailEntry.getValue() );
 		}
@@ -1131,12 +1146,12 @@ public class SequenceAnalyzer {
 		
 		// note on/off tracking
 		TreeMap<Byte, TreeMap<Long, Boolean>> noteTickOnOff = noteOnOffByChannel.get( channel );
-		if ( null == noteTickOnOff ) {
+		if (null == noteTickOnOff) {
 			noteTickOnOff = new TreeMap<Byte, TreeMap<Long, Boolean>>();
 			noteOnOffByChannel.put( channel, noteTickOnOff );
 		}
 		TreeMap<Long, Boolean> pressedAtTick = noteTickOnOff.get( note );
-		if ( null == pressedAtTick ) {
+		if (null == pressedAtTick) {
 			pressedAtTick = new TreeMap<Long, Boolean>();
 			noteTickOnOff.put( note, pressedAtTick );
 		}
@@ -1156,21 +1171,22 @@ public class SequenceAnalyzer {
 		// get last channel activity
 		int lastChannelActivity = 0;
 		TreeMap<Long, Integer> activityAtTick = activityByChannel.get( channel );
-		if ( null == activityAtTick ) {
+		if (null == activityAtTick) {
 			activityAtTick = new TreeMap<Long, Integer>();
 			activityByChannel.put( channel, activityAtTick );
 		}
 		else {
 			Entry<Long, Integer> lastActivity = activityAtTick.floorEntry( tick );
-			if ( lastActivity != null )
+			if (lastActivity != null) {
 				lastChannelActivity = lastActivity.getValue();
+			}
 		}
 		activityAtTick.put( tick, lastChannelActivity + 1 );
 		
 		// note history by channel
 		TreeMap<Long, TreeMap<Byte, Byte>> noteHistoryForChannel = noteHistory.get( channel );
 		TreeMap<Byte, Byte> noteHistoryAtTick = noteHistoryForChannel.get( tick );
-		if ( null == noteHistoryAtTick ) {
+		if (null == noteHistoryAtTick) {
 			noteHistoryAtTick = new TreeMap<Byte, Byte>();
 			noteHistoryForChannel.put( tick, noteHistoryAtTick );
 		}
@@ -1186,8 +1202,9 @@ public class SequenceAnalyzer {
 		Byte[] config     = channelConfig.get( channel );
 		int    bankNum    = ( config[0] << 7 ) | config[ 1 ]; // bankMSB * 2^7 + bankLSB
 		String bankSyntax = config[ 0 ] + ""; // MSB as a string
-		if ( config[1] > 0 )  // MSB/LSB
+		if (config[1] > 0) {  // MSB/LSB
 			bankSyntax    = bankSyntax + Dict.getSyntax( Dict.SYNTAX_PROG_BANK_SEP ) + config[ 1 ];
+		}
 		String bankTxt    = Dict.get(Dict.BANK)             + " "  + bankNum     + ", "
 		                  + Dict.get(Dict.TOOLTIP_BANK_MSB) + ": " + config[ 0 ] + ", "
 				          + Dict.get(Dict.TOOLTIP_BANK_LSB) + ": " + config[ 1 ];
@@ -1198,8 +1215,9 @@ public class SequenceAnalyzer {
 		String noteStr    = note + "";
 		String noteTxt    = 9 == channel ? Dict.getPercussion( note ) : Dict.getNote( note );
 		String noteID     = String.format( "%02X", note );
-		if ( 9 == channel )
+		if (9 == channel) {
 			noteID = "Z" + noteID; // give percussion notes have a different (higher) ID
+		}
 		
 		// per channel           id         name        number
 		String[] channelOpts = { channelID, channelTxt, null       };
@@ -1236,41 +1254,42 @@ public class SequenceAnalyzer {
 		
 		// check if the released key has been pressed before
 		TreeMap<Byte, TreeMap<Long, Boolean>> noteTickOnOff = noteOnOffByChannel.get( channel );
-		if ( null == noteTickOnOff ) {
+		if (null == noteTickOnOff) {
 			noteTickOnOff = new TreeMap<Byte, TreeMap<Long, Boolean>>();
 			noteOnOffByChannel.put( channel, noteTickOnOff );
 		}
 		TreeMap<Long, Boolean> pressedAtTick = noteTickOnOff.get( note );
-		if ( null == pressedAtTick ) {
+		if (null == pressedAtTick) {
 			pressedAtTick = new TreeMap<Long, Boolean>();
 			noteTickOnOff.put( note, pressedAtTick );
 		}
 		boolean wasPressedBefore = false;
 		Entry<Long, Boolean> wasPressed = pressedAtTick.floorEntry( tick );
-		if ( null != wasPressed ) {
+		if (null != wasPressed) {
 			wasPressedBefore = wasPressed.getValue();
 		}
-		if ( ! wasPressedBefore )
+		if (!wasPressedBefore) {
 			return;
+		}
 		
 		// mark as released
 		pressedAtTick.put( tick, false );
 		
 		// channel activity
 		TreeMap<Long, Integer> activityAtTick = activityByChannel.get( channel );
-		if ( null == activityAtTick ) {
+		if (null == activityAtTick) {
 			activityAtTick = new TreeMap<Long, Integer>();
 			activityByChannel.put( channel, activityAtTick );
 		}
 		Entry<Long, Integer> lastActivity = activityAtTick.floorEntry( tick );
-		if ( null == lastActivity ) {
+		if (null == lastActivity) {
 			// A key was released before it has been pressed for the very first time.
 			return;
 		}
 		
 		// decrement activity
 		Integer lastActivityCount = lastActivity.getValue();
-		if ( lastActivityCount < 1 ) {
+		if (lastActivityCount < 1) {
 			// should never happen
 			return;
 		}
@@ -1292,41 +1311,41 @@ public class SequenceAnalyzer {
 		boolean mustAddLyricsMarker = false;
 		
 		// karaoke meta message?
-		if ( KARAOKE_TEXT == type && text.startsWith("@") && text.length() > 1 ) {
+		if (KARAOKE_TEXT == type && text.startsWith("@") && text.length() > 1) {
 			String prefix = text.substring( 0, 2 );
 			text          = text.substring( 2 );
 			
 			// version
-			if ( "@V".equals(prefix) ) {
-				if ( null == karaokeInfo.get("version") ) {
+			if ("@V".equals(prefix)) {
+				if (null == karaokeInfo.get("version")) {
 					karaokeInfo.put( "version", text );
 				}
 			}
 			
 			// language
-			if ( "@L".equals(prefix) ) {
-				if ( null == karaokeInfo.get("language") ) {
+			if ("@L".equals(prefix)) {
+				if (null == karaokeInfo.get("language")) {
 					karaokeInfo.put( "language", text );
 				}
 			}
 			
 			// title, author or copyright
-			else if ( "@T".equals(prefix) ) {
-				if ( null == karaokeInfo.get("title") ) {
+			else if ("@T".equals(prefix)) {
+				if (null == karaokeInfo.get("title")) {
 					karaokeInfo.put( "title", text );
 				}
-				else if ( null == karaokeInfo.get("author") ) {
+				else if (null == karaokeInfo.get("author")) {
 					karaokeInfo.put( "author", text );
 				}
-				else if ( null == karaokeInfo.get("copyright") ) {
+				else if (null == karaokeInfo.get("copyright")) {
 					karaokeInfo.put( "copyright", text );
 				}
 			}
 			
 			// further information
-			else if ( "@I".equals(prefix) ) {
+			else if ("@I".equals(prefix)) {
 				ArrayList<String> infos = (ArrayList<String>) karaokeInfo.get( "infos" );
-				if ( null == infos ) {
+				if (null == infos) {
 					infos = new ArrayList<String>();
 					karaokeInfo.put( "infos", infos );
 				}
@@ -1338,20 +1357,20 @@ public class SequenceAnalyzer {
 		}
 		
 		// process simple lyrics (not syllable-based)
-		else if ( KAR_TYPE_MIDICA_SIMPLE.equals(karaokeMode) && KARAOKE_LYRICS == type ) {
+		else if (KAR_TYPE_MIDICA_SIMPLE.equals(karaokeMode) && KARAOKE_LYRICS == type) {
 			
 			// TODO: implement
 			mustAddLyricsMarker = true;
 		}
 		
 		// process possibly syllable-based lyrics
-		else if ( ! KAR_TYPE_MIDICA_SIMPLE.equals(karaokeMode) ) {
+		else if (!KAR_TYPE_MIDICA_SIMPLE.equals(karaokeMode)) {
 			
 			// get current line
 			TreeMap<Long, String> line = lyrics.get( karLineTick );
 			
 			// Did we already find another lyrics/text event at this tick?
-			if ( line != null && line.containsKey(tick) ) {
+			if (line != null && line.containsKey(tick)) {
 				// Assume that the first one was the right one and ignore the rest.
 				// At least in "Cats in the cradle" that gives the best result.
 				// The tune-1000-formatted text events come first, followed by
@@ -1363,16 +1382,16 @@ public class SequenceAnalyzer {
 			// do we need a new line?
 			boolean needNewLine      = false;
 			boolean needNewParagraph = false;
-			if ( -1 == karLineTick || text.startsWith("/") ) {
+			if (-1 == karLineTick || text.startsWith("/")) {
 				needNewLine = true;
 			}
-			if ( text.startsWith("\\") ) {
+			if (text.startsWith("\\")) {
 				needNewLine      = true;
 				needNewParagraph = true;
 			}
 			
 			// add line break(s) to the last syllable
-			if ( needNewLine && line != null ) {
+			if (needNewLine && line != null) {
 				Entry<Long, String> lastSylEntry = line.lastEntry();
 				long lastSylTick    = lastSylEntry.getKey();
 				String lastSyllable = lastSylEntry.getValue();
@@ -1397,7 +1416,7 @@ public class SequenceAnalyzer {
 			}
 			
 			// remove special character, if necessary
-			if ( text.startsWith("\\") || text.startsWith("/") ) {
+			if (text.startsWith("\\") || text.startsWith("/")) {
 				text = text.substring( 1 );
 			}
 			
@@ -1414,8 +1433,9 @@ public class SequenceAnalyzer {
 			
 			// pre-alert before the lyrics event
 			tick -= karPreAlertTicks;
-			if ( tick < 0 )
+			if (tick < 0) {
 				tick = 0;
+			}
 			lyricsEvent.add( tick );
 			markerTicks.add( tick );
 		}
@@ -1444,7 +1464,7 @@ public class SequenceAnalyzer {
 		int  maxMpq     = 0;
 		long bpmProduct = 0;
 		long mpqProduct = 0;
-		for ( long tick : tempoBpm.keySet() ) {
+		for (long tick : tempoBpm.keySet()) {
 			
 			// average
 			int  newBpm   = tempoBpm.get( tick );
@@ -1457,33 +1477,41 @@ public class SequenceAnalyzer {
 			lastTick      = tick;
 			
 			// min, max
-			if ( tick > 0 && 0 == minBpm && 0 == maxBpm ) {
+			if (tick > 0 && 0 == minBpm && 0 == maxBpm) {
 				minBpm = MidiDevices.DEFAULT_TEMPO_BPM;
 				maxBpm = MidiDevices.DEFAULT_TEMPO_BPM;
 				minMpq = MidiDevices.DEFAULT_TEMPO_MPQ;
 				maxMpq = MidiDevices.DEFAULT_TEMPO_MPQ;
 			}
-			if ( 0 == minBpm || minBpm > newBpm )
+			if (0 == minBpm || minBpm > newBpm) {
 				minBpm = newBpm;
-			if ( 0 == maxBpm || maxBpm < newBpm )
+			}
+			if (0 == maxBpm || maxBpm < newBpm) {
 				maxBpm = newBpm;
-			if ( 0 == minMpq || minMpq > newMpq )
+			}
+			if (0 == minMpq || minMpq > newMpq) {
 				minMpq = newMpq;
-			if ( 0 == maxMpq || maxMpq < newMpq )
+			}
+			if (0 == maxMpq || maxMpq < newMpq) {
 				maxMpq = newMpq;
+			}
 		}
 		long tickLength = (Long) sequenceInfo.get( "ticks" );
 		long tickDiff = tickLength - lastTick;
 		bpmProduct   += tickDiff * lastBpm;
 		mpqProduct   += tickDiff * lastMpq;
-		if ( 0 == minBpm )
+		if (0 == minBpm ) {
 			minBpm = lastBpm;
-		if ( 0 == maxBpm )
+		}
+		if (0 == maxBpm ) {
 			maxBpm = lastBpm;
-		if ( 0 == minMpq )
+		}
+		if (0 == minMpq ) {
 			minMpq = lastMpq;
-		if ( 0 == maxMpq )
+		}
+		if (0 == maxMpq ) {
 			maxMpq = lastMpq;
+		}
 		double avgBpm = (double) bpmProduct / tickLength;
 		double avgMpq = (double) mpqProduct / tickLength;
 		sequenceInfo.put( "tempo_bpm_avg", String.format("%.2f", avgBpm) );
@@ -1494,11 +1522,11 @@ public class SequenceAnalyzer {
 		sequenceInfo.put( "tempo_mpq_max", Integer.toString(maxMpq) );
 		
 		// reset default channel config for unused channels (to avoid confusion in the player UI)
-		for ( byte channel = 0; channel < 16; channel++ ) {
+		for (byte channel = 0; channel < 16; channel++) {
 			
 			// channel unused?
 			TreeMap<Long, TreeMap<Byte, Byte>> channelNoteHistory = noteHistory.get( channel );
-			if ( channelNoteHistory.isEmpty() ) {
+			if (channelNoteHistory.isEmpty()) {
 				TreeMap<Long, Byte[]> channelInstrumentHistory = instrumentHistory.get( channel );
 				
 				Byte[] conf0 = { -1, -1, -1 };
@@ -1509,9 +1537,9 @@ public class SequenceAnalyzer {
 		// Decide which channel to use for the channel part of the lyrics marker bytes.
 		Set<Byte> activeChannels = activityByChannel.keySet();
 		byte      lyricsChannel  = -1; // channel part for the lyrics marker events
-		if ( lyrics.size() > 0 ) {
+		if (lyrics.size() > 0) {
 			Iterator<Byte> it = activeChannels.iterator();
-			if ( it.hasNext() ) {
+			if (it.hasNext()) {
 				// use one of the active channels for the lyrics
 				lyricsChannel = it.next();
 			}
@@ -1525,14 +1553,14 @@ public class SequenceAnalyzer {
 		}
 		
 		// markers
-		for ( long tick : markerTicks ) {
+		for (long tick : markerTicks) {
 			
 			// initiate structures for that tick
 			TreeSet<Byte> channelsAtTick  = new TreeSet<Byte>();
 			boolean       must_add_marker = false;
 			
 			// walk through all channels that have any activity IN ANY TICK (or lyrics)
-			for ( byte channel : activeChannels ) {
+			for (byte channel : activeChannels) {
 				
 				boolean lyricsChanged     = false;
 				boolean activityChanged   = false;
@@ -1540,30 +1568,32 @@ public class SequenceAnalyzer {
 				boolean instrumentChanged = false;
 				
 				// is there a lyrics event at the current tick?
-				if ( lyricsChannel == channel && lyricsEvent.contains(tick) ) {
+				if (lyricsChannel == channel && lyricsEvent.contains(tick)) {
 					lyricsChanged = true;
 				}
 				
 				// is there an instrument change at the current tick?
 				Byte[] instrChange = instrumentHistory.get( channel ).get( tick );
-				if ( instrChange != null ) {
+				if (instrChange != null) {
 					instrumentChanged = true;
 				}
 				
 				// is there any channel activity at the current tick?
-				if ( activityByChannel.get(channel).containsKey(tick) ) {
+				if (activityByChannel.get(channel).containsKey(tick)) {
 					activityChanged = true;
 					
 					// is at least one of the channel events a NOTE-ON?
 					TreeMap<Byte, TreeMap<Long, Boolean>>    noteTickOnOff    = noteOnOffByChannel.get( channel );
 					Set<Entry<Byte, TreeMap<Long, Boolean>>> noteTickOnOffSet = noteTickOnOff.entrySet();
-					for ( Entry<Byte, TreeMap<Long, Boolean>> noteTickOnOffEntry : noteTickOnOffSet ) {
+					for (Entry<Byte, TreeMap<Long, Boolean>> noteTickOnOffEntry : noteTickOnOffSet) {
 						TreeMap<Long, Boolean> tickOnOff = noteTickOnOffEntry.getValue();
-						if ( null == tickOnOff )
+						if (null == tickOnOff) {
 							continue;
+						}
 						Boolean onOff = tickOnOff.get( tick );
-						if ( null == onOff )
+						if (null == onOff) {
 							continue;
+						}
 						if (onOff) {
 							historyChanged = true;
 							break;
@@ -1582,7 +1612,7 @@ public class SequenceAnalyzer {
 					channel |= MidiListener.MARKER_BITMASK_INSTRUMENT;
 				
 				// add the channel to the marker
-				if ( lyricsChanged || activityChanged || historyChanged || instrumentChanged ) {
+				if (lyricsChanged || activityChanged || historyChanged || instrumentChanged) {
 					channelsAtTick.add( channel );
 					must_add_marker = true;
 				}
@@ -1619,17 +1649,17 @@ public class SequenceAnalyzer {
 		
 		// join all info headers (@I)
 		ArrayList<String> infoObj = (ArrayList<String>) karaokeInfo.get( "infos" );
-		if ( infoObj != null ) {
+		if (infoObj != null) {
 			StringBuilder infoBuf = new StringBuilder( infoObj.get(0) );
-			for ( int i = 1; i < infoObj.size(); i++ ) {
+			for (int i = 1; i < infoObj.size(); i++) {
 				infoBuf.append( "\n" + infoObj.get(i) );
 			}
 			karaokeInfo.put( "info", infoBuf.toString() );
 		}
 		
 		// delete non-printable characters
-		for ( TreeMap<Long, String> line : lyrics.values() ) {
-			for ( Entry<Long, String> sylEntry : line.entrySet() ) {
+		for (TreeMap<Long, String> line : lyrics.values()) {
+			for (Entry<Long, String> sylEntry : line.entrySet()) {
 				long   tick     = sylEntry.getKey();
 				String syllable = sylEntry.getValue();
 				syllable        = syllable.replaceAll( "\\r", "" );
@@ -1642,44 +1672,46 @@ public class SequenceAnalyzer {
 		int     totalSpaces    = 0;
 		Pattern pattEnd        = Pattern.compile( ".*\\s$", Pattern.MULTILINE ); // ends with whitespace
 		Pattern pattBegin      = Pattern.compile( "^\\s",   Pattern.MULTILINE ); // begins with whitespace
-		for ( TreeMap<Long, String> line : lyrics.values() ) {
+		for (TreeMap<Long, String> line : lyrics.values()) {
 			
 			// put all syllables into an array with indexes instead of ticks
 			ArrayList<String> sylsInLine = new ArrayList<String>();
-			for ( String syllable : line.values() ) {
+			for (String syllable : line.values()) {
 				sylsInLine.add( syllable );
 			}
 			
 			// count syllables and spaces
-			for ( int i = 0; i < sylsInLine.size(); i++ ) {
+			for (int i = 0; i < sylsInLine.size(); i++) {
 				totalSyllables++;
 				// space at the end of THIS line?
 				boolean hasSpace = pattEnd.matcher( sylsInLine.get(i) ).lookingAt();
-				if ( ! hasSpace && i < sylsInLine.size() - 1 )
+				if (! hasSpace && i < sylsInLine.size() - 1) {
 					// space at the beginning of the NEXT line?
 					hasSpace = pattBegin.matcher( sylsInLine.get(i+1) ).lookingAt();
-				if (hasSpace)
+				}
+				if (hasSpace) {
 					totalSpaces++;
+				}
 			}
 		}
 		boolean needMoreSpaces = true;
-		if ( totalSpaces != 0 ) {
+		if (totalSpaces != 0) {
 			needMoreSpaces = (float) totalSyllables / (float) totalSpaces > KAR_MAX_SYL_SPACE_RATE;
 		}
 		
 		// add spaces if necessary
 		if (needMoreSpaces) {
-			for ( TreeMap<Long, String> line : lyrics.values() ) {
-				for ( Entry<Long, String> sylEntry : line.entrySet() ) {
+			for (TreeMap<Long, String> line : lyrics.values()) {
+				for (Entry<Long, String> sylEntry : line.entrySet()) {
 					long   tick     = sylEntry.getKey();
 					String syllable = sylEntry.getValue();
 					
 					// word ends with "-". That usually means: The word is not yet over.
-					if ( syllable.endsWith("-") ) {
+					if (syllable.endsWith("-")) {
 						// just delete the trailing "-" but don't add a space
 						syllable = syllable.replaceFirst( "\\-$", "" );
 					}
-					else if ( ! syllable.endsWith("\n") ) {
+					else if (! syllable.endsWith("\n")) {
 						// add a space
 						syllable += " ";
 					}
@@ -1690,8 +1722,8 @@ public class SequenceAnalyzer {
 		
 		// create full lyrics string (for the info view)
 		StringBuilder lyricsFull = new StringBuilder( "" );
-		for ( TreeMap<Long, String> line : lyrics.values() ) {
-			for ( String syllable : line.values() ) {
+		for (TreeMap<Long, String> line : lyrics.values()) {
+			for (String syllable : line.values()) {
 				lyricsFull.append( syllable );
 			}
 		}
@@ -1701,20 +1733,20 @@ public class SequenceAnalyzer {
 		// (needed for syllable hyphenation later)
 		Pattern pattEndPunct = Pattern.compile( ".*[.,?!\"'\\]\\[;]$", Pattern.MULTILINE ); // ends with punctuation character
 		TreeSet<Long> wordEndTicks = new TreeSet<Long>();
-		for ( TreeMap<Long, String> line : lyrics.values() ) {
+		for (TreeMap<Long, String> line : lyrics.values()) {
 			long lastSylTick = -1;
-			for ( Entry<Long, String> sylEntry : line.entrySet() ) {
+			for (Entry<Long, String> sylEntry : line.entrySet()) {
 				long   tick     = sylEntry.getKey();
 				String syllable = sylEntry.getValue();
 				
 				// Word ends AFTER this syllable?
-				if ( pattEnd.matcher(syllable).lookingAt() || pattEndPunct.matcher(syllable).lookingAt() ) {
-					wordEndTicks.add( tick );
+				if (pattEnd.matcher(syllable).lookingAt() || pattEndPunct.matcher(syllable).lookingAt()) {
+					wordEndTicks.add(tick);
 				}
 				
 				// Word ends BEFORE this syllable?
-				if ( pattBegin.matcher(syllable).lookingAt() ) {
-					wordEndTicks.add( lastSylTick );
+				if (pattBegin.matcher(syllable).lookingAt()) {
+					wordEndTicks.add(lastSylTick);
 				}
 				lastSylTick = tick;
 			}
@@ -1722,7 +1754,7 @@ public class SequenceAnalyzer {
 		
 		// reorganize lines if necessary
 		TreeMap<Long, TreeMap<Long, String>> newLyrics = new TreeMap<Long, TreeMap<Long, String>>();
-		for ( Entry<Long, TreeMap<Long, String>> lineEntry : lyrics.entrySet() ) {
+		for (Entry<Long, TreeMap<Long, String>> lineEntry : lyrics.entrySet()) {
 			long                  lineTick = lineEntry.getKey();
 			TreeMap<Long, String> line     = lineEntry.getValue();
 			
@@ -1731,19 +1763,19 @@ public class SequenceAnalyzer {
 			
 			// create one or more new line(s) from one original line
 			TreeMap<Long, String> newLine = new TreeMap<Long, String>();
-			for ( Entry<Long, String> sylEntry : line.entrySet() ) {
+			for (Entry<Long, String> sylEntry : line.entrySet()) {
 				long    sylTick  = sylEntry.getKey();
 				String  syllable = sylEntry.getValue();
 				lineLength      += syllable.length();
 				
 				// line too long?
-				if ( lineLength >= PlayerView.KAR_MAX_CHARS_PER_LINE && lastLength > 0 ) {
+				if (lineLength >= PlayerView.KAR_MAX_CHARS_PER_LINE && lastLength > 0) {
 					
 					// add linebreak to the LAST syllable
 					Entry<Long, String> lastSylEntry = newLine.lastEntry();
 					long                lastSylTick  = lastSylEntry.getKey();
 					String              lastSyllable = lastSylEntry.getValue();
-					if ( ! wordEndTicks.contains(lastSylTick) ) {
+					if (! wordEndTicks.contains(lastSylTick)) {
 						lastSyllable += "-";
 					}
 					lastSyllable += "\n";
@@ -1767,8 +1799,8 @@ public class SequenceAnalyzer {
 		lyrics = newLyrics;
 		
 		// HTML replacements and entities
-		for ( TreeMap<Long, String> line : lyrics.values() ) {
-			for ( Entry<Long, String> sylEntry : line.entrySet() ) {
+		for (TreeMap<Long, String> line : lyrics.values()) {
+			for (Entry<Long, String> sylEntry : line.entrySet()) {
 				long   tick     = sylEntry.getKey();
 				String syllable = sylEntry.getValue();
 				syllable        = syllable.replaceAll( "&",   "&amp;"  );
@@ -1788,9 +1820,9 @@ public class SequenceAnalyzer {
 		String  htmlStop      = "</span>";
 		Pattern pattBracket   = Pattern.compile( "(\\]|\\[)", Pattern.MULTILINE ); // '[' or ']'
 		boolean isSecondVoice = false;
-		for ( TreeMap<Long, String> line : lyrics.values() ) {
+		for (TreeMap<Long, String> line : lyrics.values()) {
 			
-			for ( Entry<Long, String> sylEntry : line.entrySet() ) {
+			for (Entry<Long, String> sylEntry : line.entrySet()) {
 				long         tick        = sylEntry.getKey();
 				String       syllable    = sylEntry.getValue();
 				boolean      mustModify  = false;
@@ -1804,20 +1836,20 @@ public class SequenceAnalyzer {
 				
 				// replace [ and ] - but ignore nested structures
 				Matcher matcher = pattBracket.matcher( syllable );
-				while ( matcher.find() ) {
+				while (matcher.find()) {
 					String bracket     = matcher.group();
 					String htmlReplStr = null;
-					if ( "[".equals(bracket) && ! isSecondVoice ) {
+					if ("[".equals(bracket) && ! isSecondVoice) {
 						isSecondVoice = true;
 						htmlReplStr   = htmlStart;
 					}
-					else if ( "]".equals(bracket) && isSecondVoice ) {
+					else if ("]".equals(bracket) && isSecondVoice) {
 						isSecondVoice = false;
 						htmlReplStr   = htmlStop;
 					}
 					
 					// replacement necessary?
-					if ( htmlReplStr != null ) {
+					if (htmlReplStr != null) {
 						mustModify = true;
 						
 						// append everything until (including) the replacement
@@ -1855,19 +1887,22 @@ public class SequenceAnalyzer {
 		
 		// get ticks of this channel
 		TreeMap<Long, Integer> ticksInChannel = activityByChannel.get( channel );
-		if ( null == ticksInChannel )
+		if (null == ticksInChannel) {
 			// channel not used at all
 			return false;
+		}
 		
 		// get the last activity
 		Entry<Long, Integer> activityState = ticksInChannel.floorEntry( tick );
-		if ( null == activityState )
+		if (null == activityState) {
 			// nothing happened in the channel so far
 			return false;
+		}
 		
 		// inactive?
-		if ( 0 == activityState.getValue() )
+		if (0 == activityState.getValue()) {
 			return false;
+		}
 		
 		// active
 		return true;
@@ -1891,24 +1926,28 @@ public class SequenceAnalyzer {
 	public static ArrayList<Long[]> getNoteHistory( byte channel, long tick ) {
 		
 		ArrayList<Long[]> result = new ArrayList<Long[]>();
+		if (null == noteHistory) {
+			return result;
+		}
 		TreeMap<Long, TreeMap<Byte, Byte>> channelHistory = noteHistory.get( channel );
 		
 		// get past notes
 		long lastTick = tick;
 		int i = 0;
 		PAST:
-		while ( i < NOTE_HISTORY_BUFFER_SIZE_PAST ) {
+		while (i < NOTE_HISTORY_BUFFER_SIZE_PAST) {
 			
 			// get all notes from the last tick
 			Entry<Long, TreeMap<Byte, Byte>> notesAtTickEntry = channelHistory.floorEntry( lastTick );
-			if ( null == notesAtTickEntry )
+			if (null == notesAtTickEntry) {
 				break PAST;
+			}
 			lastTick = notesAtTickEntry.getKey();
 			NavigableMap<Byte, Byte> notesAtTick = notesAtTickEntry.getValue().descendingMap(); // reverse order
 			
 			// each note at lastTick
 			Set<Entry<Byte, Byte>> noteEntrySet = notesAtTick.entrySet();
-			for ( Entry<Byte, Byte> noteEntry : noteEntrySet ) {
+			for (Entry<Byte, Byte> noteEntry : noteEntrySet) {
 				byte note   = noteEntry.getKey();
 				byte volume = noteEntry.getValue();
 				
@@ -1921,8 +1960,9 @@ public class SequenceAnalyzer {
 				result.add( row );
 				
 				i++;
-				if ( i >= NOTE_HISTORY_BUFFER_SIZE_PAST )
+				if (i >= NOTE_HISTORY_BUFFER_SIZE_PAST) {
 					break PAST;
+				}
 			}
 			
 			// go further into the past
@@ -1936,18 +1976,19 @@ public class SequenceAnalyzer {
 		long nextTick = tick + 1;
 		i = 0;
 		FUTURE:
-		while ( i < NOTE_HISTORY_BUFFER_SIZE_FUTURE ) {
+		while (i < NOTE_HISTORY_BUFFER_SIZE_FUTURE) {
 			
 			// get all notes from the next tick
 			Entry<Long, TreeMap<Byte, Byte>> notesAtTickEntry = channelHistory.ceilingEntry( nextTick );
-			if ( null == notesAtTickEntry )
+			if (null == notesAtTickEntry) {
 				break FUTURE;
+			}
 			nextTick = notesAtTickEntry.getKey();
 			TreeMap<Byte, Byte> notesAtTick = notesAtTickEntry.getValue();
 			
 			// each note at nextTick
 			Set<Entry<Byte, Byte>> noteEntrySet = notesAtTick.entrySet();
-			for ( Entry<Byte, Byte> noteEntry : noteEntrySet ) {
+			for (Entry<Byte, Byte> noteEntry : noteEntrySet) {
 				byte note   = noteEntry.getKey();
 				byte volume = noteEntry.getValue();
 				
@@ -1960,8 +2001,9 @@ public class SequenceAnalyzer {
 				result.add( row );
 				
 				i++;
-				if ( i >= NOTE_HISTORY_BUFFER_SIZE_FUTURE )
+				if (i >= NOTE_HISTORY_BUFFER_SIZE_FUTURE) {
 					break FUTURE;
+				}
 			}
 			
 			// go further into the future
@@ -1980,8 +2022,9 @@ public class SequenceAnalyzer {
 	 */
 	public static String getLyrics( long tick ) {
 		
-		if ( null == lyrics )
+		if (null == lyrics) {
 			return "";
+		}
 		
 		// prepare text
 		StringBuilder text = new StringBuilder(
@@ -2001,10 +2044,11 @@ public class SequenceAnalyzer {
 		TreeSet<Long> lineTicks = new TreeSet<Long>();
 		long          loopTick  = tick;
 		PAST_LINE:
-		for ( int i = 0; i < PlayerView.KAR_PAST_LINES; i++ ) {
+		for (int i = 0; i < PlayerView.KAR_PAST_LINES; i++) {
 			Long pastTick = lyrics.floorKey( loopTick );
-			if ( null == pastTick )
+			if (null == pastTick) {
 				break PAST_LINE;
+			}
 			lineTicks.add( pastTick );
 			loopTick = pastTick - 1;
 		}
@@ -2012,26 +2056,27 @@ public class SequenceAnalyzer {
 		// collect future lines to be shown
 		loopTick = tick;
 		FUTURE_LINE:
-		while ( lineTicks.size() < PlayerView.KAR_TOTAL_LINES ) {
+		while (lineTicks.size() < PlayerView.KAR_TOTAL_LINES) {
 			Long futureTick = lyrics.ceilingKey( loopTick );
-			if ( null == futureTick )
+			if (null == futureTick) {
 				break FUTURE_LINE;
+			}
 			lineTicks.add( futureTick );
 			loopTick = futureTick + 1;
 		}
 		
 		// process lines
 		boolean isPast = true;
-		for ( long lineTick : lineTicks ) {
+		for (long lineTick : lineTicks) {
 			TreeMap<Long, String> line = lyrics.get( lineTick );
 			
 			// process syllables
-			for ( Entry<Long, String> sylEntry : line.entrySet() ) {
+			for (Entry<Long, String> sylEntry : line.entrySet()) {
 				long   sylTick  = sylEntry.getKey();
 				String syllable = sylEntry.getValue();
 				
 				// switch from past to future?
-				if ( isPast && sylTick > tick ) {
+				if (isPast && sylTick > tick) {
 					isPast = false;
 					text.append( "<span class='future'>" );
 				}
@@ -2040,13 +2085,13 @@ public class SequenceAnalyzer {
 				// needed because CSS class nesting doesn't work in swing.
 				// So this is not supported:
 				// '<style>.future .second { color: ...; }</style>'
-				if ( ! isPast ) {
+				if (! isPast) {
 					// necessary because nesting CSS classes doesn't work in swing
 					syllable = syllable.replaceAll( "<span class='second'>", "<span class='future_second'>" );
 				}
 				
 				// must alert?
-				if ( ! isPast && sylTick - tick <= karPreAlertTicks ) {
+				if (! isPast && sylTick - tick <= karPreAlertTicks) {
 					text.append( "<i>" + syllable + "</i>" );
 				}
 				else {
@@ -2087,8 +2132,9 @@ public class SequenceAnalyzer {
 	public static String getChannelComment ( byte channel, long tick ) {
 		Entry<Long, String> entry = commentHistory.get( channel ).floorEntry( tick );
 		
-		if ( null == entry )
+		if (null == entry) {
 			return "";
+		}
 		
 		return entry.getValue();
 	}
@@ -2118,12 +2164,12 @@ public class SequenceAnalyzer {
 		byte msb  = 127; // none
 		byte lsb  = 127; // none
 		// get MSB and LSB
-		if ( 1 == type ) {
+		if (1 == type) {
 			// RPN
 			msb = confAtTick[ 0 ];
 			lsb = confAtTick[ 1 ];
 		}
-		else if ( 0 == type ) {
+		else if (0 == type) {
 			// NRPN
 			msb = confAtTick[ 2 ];
 			lsb = confAtTick[ 3 ];
@@ -2144,29 +2190,29 @@ public class SequenceAnalyzer {
 	private static final String getLvl2SystemMsgTxtByStatusByte( int status ) {
 		
 		// system common
-		if ( 0xF1 == status )
+		if (0xF1 == status)
 			return Dict.get( Dict.MSG2_SC_MIDI_TIME_CODE );
-		else if ( 0xF2 == status )
+		else if (0xF2 == status)
 			return Dict.get( Dict.MSG2_SC_SONG_POS_POINTER );
-		else if ( 0xF3 == status )
+		else if (0xF3 == status)
 			return Dict.get( Dict.MSG2_SC_SONG_SELECT );
-		else if ( 0xF6 == status )
+		else if (0xF6 == status)
 			return Dict.get( Dict.MSG2_SC_TUNE_REQUEST );
-		else if ( 0xF7 == status )
+		else if (0xF7 == status)
 			return Dict.get( Dict.MSG2_SC_END_OF_SYSEX );
 		
 		// system realtime
-		else if ( 0xF8 == status )
+		else if (0xF8 == status)
 			return Dict.get( Dict.MSG2_SR_TIMING_CLOCK );
-		else if ( 0xFA == status )
+		else if (0xFA == status)
 			return Dict.get( Dict.MSG2_SR_START );
-		else if ( 0xFB == status )
+		else if (0xFB == status)
 			return Dict.get( Dict.MSG2_SR_CONTINUE );
-		else if ( 0xFC == status )
+		else if (0xFC == status)
 			return Dict.get( Dict.MSG2_SR_STOP );
-		else if ( 0xFE == status )
+		else if (0xFE == status)
 			return Dict.get( Dict.MSG2_SR_ACTIVE_SENSING );
-		else if ( 0xFF == status )
+		else if (0xFF == status)
 			return Dict.get( Dict.MSG2_SR_SYSTEM_RESET );
 		
 		// fallback
@@ -2182,35 +2228,35 @@ public class SequenceAnalyzer {
 	 */
 	private static final String getLvl2MetaText( int type ) {
 		
-		if ( 0x00 == type )
+		if (0x00 == type)
 			return Dict.get( Dict.MSG2_M_SEQUENCE_NUMBER );
-		if ( 0x01 == type )
+		if (0x01 == type)
 			return Dict.get( Dict.MSG2_M_TEXT );
-		if ( 0x02 == type )
+		if (0x02 == type)
 			return Dict.get( Dict.MSG2_M_COPYRIGHT );
-		if ( 0x03 == type )
+		if (0x03 == type)
 			return Dict.get( Dict.MSG2_M_TRACK_NAME );
-		if ( 0x04 == type )
+		if (0x04 == type)
 			return Dict.get( Dict.MSG2_M_INSTRUMENT_NAME );
-		if ( 0x05 == type )
+		if (0x05 == type)
 			return Dict.get( Dict.MSG2_M_LYRICS );
-		if ( 0x06 == type )
+		if (0x06 == type)
 			return Dict.get( Dict.MSG2_M_MARKER );
-		if ( 0x07 == type )
+		if (0x07 == type)
 			return Dict.get( Dict.MSG2_M_CUE_POINT );
-		if ( 0x20 == type )
+		if (0x20 == type)
 			return Dict.get( Dict.MSG2_M_CHANNEL_PREFIX );
-		if ( 0x2F == type )
+		if (0x2F == type)
 			return Dict.get( Dict.MSG2_M_END_OF_SEQUENCE );
-		if ( 0x51 == type )
+		if (0x51 == type)
 			return Dict.get( Dict.MSG2_M_SET_TEMPO );
-		if ( 0x54 == type )
+		if (0x54 == type)
 			return Dict.get( Dict.MSG2_M_SMPTE_OFFSET );
-		if ( 0x58 == type )
+		if (0x58 == type)
 			return Dict.get( Dict.MSG2_M_TIME_SIGNATURE );
-		if ( 0x59 == type )
+		if (0x59 == type)
 			return Dict.get( Dict.MSG2_M_KEY_SIGNATURE );
-		if ( 0x7F == type )
+		if (0x7F == type)
 			return Dict.get( Dict.MSG2_M_SEQUENCER_SPEC );
 		
 		// fallback
@@ -2226,21 +2272,21 @@ public class SequenceAnalyzer {
 	 * @param cmd  Command of the voice message.
 	 * @return Level 2 Message type.
 	 */
-	private static final String getLvl2VoiceMsgTxtByCommand ( int cmd ) {
+	private static final String getLvl2VoiceMsgTxtByCommand (int cmd) {
 		
-		if ( 0x80 == cmd )
+		if (0x80 == cmd)
 			return Dict.get( Dict.MSG2_V_NOTE_OFF );
-		else if ( 0x90 == cmd )
+		else if (0x90 == cmd)
 			return Dict.get( Dict.MSG2_V_NOTE_ON );
-		else if ( 0xA0 == cmd )
+		else if (0xA0 == cmd)
 			return Dict.get( Dict.MSG2_V_POLY_PRESSURE );
-		else if ( 0xB0 == cmd )
+		else if (0xB0 == cmd)
 			return Dict.get( Dict.MSG2_V_CONTROL_CHANGE );
-		else if ( 0xC0 == cmd )
+		else if (0xC0 == cmd)
 			return Dict.get( Dict.MSG2_V_PROGRAM_CHANGE );
-		else if ( 0xD0 == cmd )
+		else if (0xD0 == cmd)
 			return Dict.get( Dict.MSG2_V_CHANNEL_PRESSURE );
-		else if ( 0xE0 == cmd )
+		else if (0xE0 == cmd)
 			return Dict.get( Dict.MSG2_V_PITCH_BEND );
 		
 		// fallback
@@ -2263,271 +2309,271 @@ public class SequenceAnalyzer {
 	 * @param val First data byte of the message.
 	 * @return level 3 and 4 texts
 	 */
-	private static final String[] getLvl34ControllerMsgTxtByData1( int val ) {
+	private static final String[] getLvl34ControllerMsgTxtByData1(int val) {
 		String[] result = { null, null };
 		
 		// controller + MSB
-		if ( 0x00 == val ) {
+		if (0x00 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_BANK_SELECT );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_BANK_SELECT_MSB );
 		}
-		else if ( 0x01 == val ) {
+		else if (0x01 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_MODULATION_WHEEL );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_MODULATION_WHEEL_MSB );
 		}
-		else if ( 0x02 == val ) {
+		else if (0x02 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_BREATH_CTRL );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_BREATH_CTRL_MSB );
 		}
-		else if ( 0x04 == val ) {
+		else if (0x04 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_FOOT_CTRL );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_FOOT_CTRL_MSB );
 		}
-		else if ( 0x05 == val ) {
+		else if (0x05 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_PORTAMENTO_TIME );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_PORTAMENTO_TIME_MSB );
 		}
-		else if ( 0x06 == val ) {
+		else if (0x06 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_DATA_ENTRY );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_DATA_ENTRY_MSB );
 		}
-		else if ( 0x07 == val ) {
+		else if (0x07 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_CHANNEL_VOL );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_CHANNEL_VOL_MSB );
 		}
-		else if ( 0x08 == val ) {
+		else if (0x08 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_BALANCE );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_BALANCE_MSB );
 		}
-		else if ( 0x0A == val ) {
+		else if (0x0A == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_PAN );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_PAN_MSB );
 		}
-		else if ( 0x0B == val ) {
+		else if (0x0B == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_EXPRESSION );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_EXPRESSION_MSB );
 		}
-		else if ( 0x0C == val ) {
+		else if (0x0C == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_EFFECT_CTRL_1 );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_EFFECT_CTRL_1_MSB );
 		}
-		else if ( 0x0D == val ) {
+		else if (0x0D == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_EFFECT_CTRL_2 );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_EFFECT_CTRL_2_MSB );
 		}
-		else if ( 0x10 == val ) {
+		else if (0x10 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_1 );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_GEN_PURP_CTRL_1_MSB );
 		}
-		else if ( 0x11 == val ) {
+		else if (0x11 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_2 );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_GEN_PURP_CTRL_2_MSB );
 		}
-		else if ( 0x12 == val ) {
+		else if (0x12 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_3 );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_GEN_PURP_CTRL_3_MSB );
 		}
-		else if ( 0x13 == val ) {
+		else if (0x13 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_4 );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_GEN_PURP_CTRL_4_MSB );
 		}
 		
 		// controller + LSB
-		else if ( 0x20 == val ) {
+		else if (0x20 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_BANK_SELECT );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_BANK_SELECT_LSB );
 		}
-		else if ( 0x21 == val ) {
+		else if (0x21 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_MODULATION_WHEEL );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_MODULATION_WHEEL_LSB );
 		}
-		else if ( 0x22 == val ) {
+		else if (0x22 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_BREATH_CTRL );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_BREATH_CTRL_LSB );
 		}
-		else if ( 0x24 == val ) {
+		else if (0x24 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_FOOT_CTRL );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_FOOT_CTRL_LSB );
 		}
-		else if ( 0x25 == val ) {
+		else if (0x25 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_PORTAMENTO_TIME );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_PORTAMENTO_TIME_LSB );
 		}
-		else if ( 0x26 == val ) {
+		else if (0x26 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_DATA_ENTRY );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_DATA_ENTRY_LSB );
 		}
-		else if ( 0x27 == val ) {
+		else if (0x27 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_CHANNEL_VOL );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_CHANNEL_VOL_LSB );
 		}
-		else if ( 0x28 == val ) {
+		else if (0x28 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_BALANCE );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_BALANCE_LSB );
 		}
-		else if ( 0x2A == val ) {
+		else if (0x2A == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_PAN );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_PAN_LSB );
 		}
-		else if ( 0x2B == val ) {
+		else if (0x2B == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_EXPRESSION );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_EXPRESSION_LSB );
 		}
-		else if ( 0x2C == val ) {
+		else if (0x2C == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_EFFECT_CTRL_1 );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_EFFECT_CTRL_1_LSB );
 		}
-		else if ( 0x2D == val ) {
+		else if (0x2D == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_EFFECT_CTRL_2 );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_EFFECT_CTRL_2_LSB );
 		}
-		else if ( 0x30 == val ) {
+		else if (0x30 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_1 );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_GEN_PURP_CTRL_1_LSB );
 		}
-		else if ( 0x31 == val ) {
+		else if (0x31 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_2 );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_GEN_PURP_CTRL_2_LSB );
 		}
-		else if ( 0x32 == val ) {
+		else if (0x32 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_3 );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_GEN_PURP_CTRL_3_LSB );
 		}
-		else if ( 0x33 == val ) {
+		else if (0x33 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_4 );
 			result[ 1 ] = Dict.get( Dict.MSG4_C_GEN_PURP_CTRL_4_LSB );
 		}
 		
 		// controllers without MSB / LSB
-		else if ( 0x40 == val ) {
+		else if (0x40 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_HOLD_PEDAL_1 );
 		}
-		else if ( 0x41 == val ) {
+		else if (0x41 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_PORTAMENTO_PEDAL );
 		}
-		else if ( 0x42 == val ) {
+		else if (0x42 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_SOSTENUTO_PEDAL );
 		}
-		else if ( 0x43 == val ) {
+		else if (0x43 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_SOFT_PEDAL );
 		}
-		else if ( 0x44 == val ) {
+		else if (0x44 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_LEGATO_PEDAL );
 		}
-		else if ( 0x45 == val ) {
+		else if (0x45 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_HOLD_PEDAL_2 );
 		}
-		else if ( 0x46 == val ) {
+		else if (0x46 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_1 );
 		}
-		else if ( 0x47 == val ) {
+		else if (0x47 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_2 );
 		}
-		else if ( 0x48 == val ) {
+		else if (0x48 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_3 );
 		}
-		else if ( 0x49 == val ) {
+		else if (0x49 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_4 );
 		}
-		else if ( 0x4A == val ) {
+		else if (0x4A == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_5 );
 		}
-		else if ( 0x4B == val ) {
+		else if (0x4B == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_6 );
 		}
-		else if ( 0x4C == val ) {
+		else if (0x4C == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_7 );
 		}
-		else if ( 0x4D == val ) {
+		else if (0x4D == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_8 );
 		}
-		else if ( 0x4E == val ) {
+		else if (0x4E == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_9 );
 		}
-		else if ( 0x4F == val ) {
+		else if (0x4F == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_10 );
 		}
-		else if ( 0x50 == val ) {
+		else if (0x50 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_5 );
 		}
-		else if ( 0x51 == val ) {
+		else if (0x51 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_6 );
 		}
-		else if ( 0x52 == val ) {
+		else if (0x52 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_7 );
 		}
-		else if ( 0x53 == val ) {
+		else if (0x53 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_8 );
 		}
-		else if ( 0x54 == val ) {
+		else if (0x54 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_PORTAMENTO_CTRL );
 		}
-		else if ( 0x58 == val ) {
+		else if (0x58 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_HI_RES_VELO_PRFX );
 		}
-		else if ( 0x5B == val ) {
+		else if (0x5B == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_EFFECT_1_DEPTH );
 		}
-		else if ( 0x5C == val ) {
+		else if (0x5C == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_EFFECT_2_DEPTH );
 		}
-		else if ( 0x5D == val ) {
+		else if (0x5D == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_EFFECT_3_DEPTH );
 		}
-		else if ( 0x5E == val ) {
+		else if (0x5E == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_EFFECT_4_DEPTH );
 		}
-		else if ( 0x5F == val ) {
+		else if (0x5F == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_EFFECT_5_DEPTH );
 		}
-		else if ( 0x60 == val ) {
+		else if (0x60 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_DATA_BUTTON_INCR );
 		}
-		else if ( 0x61 == val ) {
+		else if (0x61 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_DATA_BUTTON_DECR );
 		}
 		
 		// RPN / NRPN (with MSB/LSB)
-		else if ( 0x62 == val ) {
+		else if (0x62 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_NRPN );
 			result[ 1 ] = Dict.get( Dict.MSG5_C_NRPN_LSB );
 		}
-		else if ( 0x63 == val ) {
+		else if (0x63 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_NRPN );
 			result[ 1 ] = Dict.get( Dict.MSG5_C_NRPN_MSB );
 		}
-		else if ( 0x64 == val ) {
+		else if (0x64 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_RPN );
 			result[ 1 ] = Dict.get( Dict.MSG5_C_RPN_LSB );
 		}
-		else if ( 0x65 == val ) {
+		else if (0x65 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_RPN );
 			result[ 1 ] = Dict.get( Dict.MSG5_C_RPN_MSB );
 		}
 		
 		// more controllers without MSB / LSB
-		else if ( 0x78 == val ) {
+		else if (0x78 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_ALL_SOUND_OFF );
 		}
-		else if ( 0x79 == val ) {
+		else if (0x79 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_ALL_CTRLS_OFF );
 		}
-		else if ( 0x7A == val ) {
+		else if (0x7A == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_LOCAL_CTRL );
 		}
-		else if ( 0x7B == val ) {
+		else if (0x7B == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_ALL_NOTES_OFF );
 		}
-		else if ( 0x7C == val ) {
+		else if (0x7C == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_OMNI_MODE_OFF );
 		}
-		else if ( 0x7D == val ) {
+		else if (0x7D == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_OMNI_MODE_ON );
 		}
-		else if ( 0x7E == val ) {
+		else if (0x7E == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_MONO_NOTES_OFF );
 		}
-		else if ( 0x7F == val ) {
+		else if (0x7F == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_POLY_NOTES_OFF );
 		}
 		
@@ -2555,57 +2601,57 @@ public class SequenceAnalyzer {
 	 * @param type   **1** for RPN, **0** for NRPN, **-1** for none
 	 * @return  the strings needed for the tree node as described above.
 	 */
-	private static final String[] getLvl4RpnNrpnDataTxt( byte msb, byte lsb, byte type ) {
+	private static final String[] getLvl4RpnNrpnDataTxt(byte msb, byte lsb, byte type) {
 		
 		// set general values
 		String paramTxt = Dict.get( Dict.UNKNOWN );
 		String paramStr = String.format( msb + "," + lsb );
 		
 		// none
-		if ( -1 == type ) {
+		if (-1 == type) {
 			paramTxt = Dict.get( Dict.UNSET );
 		}
 		
 		// RPN
-		if ( 1 == type) {
-			if ( 0x00 == msb ) {
-				if ( 0x00 == lsb )
+		if (1 == type) {
+			if (0x00 == msb) {
+				if (0x00 == lsb)
 					paramTxt = Dict.get( Dict.MSG4_RPN_PITCH_BEND_SENS );
-				else if ( 0x01 == lsb )
+				else if (0x01 == lsb)
 					paramTxt = Dict.get( Dict.MSG4_RPN_MASTER_FINE_TUN );
-				else if ( 0x02 == lsb )
+				else if (0x02 == lsb)
 					paramTxt = Dict.get( Dict.MSG4_RPN_MASTER_COARSE_TUN );
-				else if ( 0x03 == lsb )
+				else if (0x03 == lsb)
 					paramTxt = Dict.get( Dict.MSG4_RPN_TUN_PROG_CHANGE );
-				else if ( 0x04 == lsb )
+				else if (0x04 == lsb)
 					paramTxt = Dict.get( Dict.MSG4_RPN_TUN_BANK_SELECT );
-				else if ( 0x05 == lsb )
+				else if (0x05 == lsb)
 					paramTxt = Dict.get( Dict.MSG4_RPN_MOD_DEPTH_RANGE );
 			}
-			else if ( 0x3D == msb ) {
-				if ( 0x00 == lsb )
+			else if (0x3D == msb) {
+				if (0x00 == lsb)
 					paramTxt = Dict.get( Dict.MSG4_RPN_AZIMUTH_ANGLE );
-				else if ( 0x01 == lsb )
+				else if (0x01 == lsb)
 					paramTxt = Dict.get( Dict.MSG4_RPN_ELEVATION_ANGLE );
-				else if ( 0x02 == lsb )
+				else if (0x02 == lsb)
 					paramTxt = Dict.get( Dict.MSG4_RPN_GAIN );
-				else if ( 0x03 == lsb )
+				else if (0x03 == lsb)
 					paramTxt = Dict.get( Dict.MSG4_RPN_DISTANCE_RATIO );
-				else if ( 0x04 == lsb )
+				else if (0x04 == lsb)
 					paramTxt = Dict.get( Dict.MSG4_RPN_MAXIMUM_DISTANCE );
-				else if ( 0x05 == lsb )
+				else if (0x05 == lsb)
 					paramTxt = Dict.get( Dict.MSG4_RPN_GAIN_AT_MAX_DIST );
-				else if ( 0x06 == lsb )
+				else if (0x06 == lsb)
 					paramTxt = Dict.get( Dict.MSG4_RPN_REF_DISTANCE_RATIO );
-				else if ( 0x07 == lsb )
+				else if (0x07 == lsb)
 					paramTxt = Dict.get( Dict.MSG4_RPN_PAN_SPREAD_ANGLE );
-				else if ( 0x08 == lsb )
+				else if (0x08 == lsb)
 					paramTxt = Dict.get( Dict.MSG4_RPN_ROLL_ANGLE );
 			}
-			else if ( 0x3F == msb && ((byte) 0xFF) == lsb ) {
+			else if (0x3F == msb && ((byte) 0xFF) == lsb) {
 				paramTxt = Dict.get( Dict.MSG4_RPN_RPN_RESET );
 			}
-			else if ( 0x7F == msb && 0x7F == lsb ) {
+			else if (0x7F == msb && 0x7F == lsb) {
 				paramTxt = Dict.get( Dict.MSG4_RPN_END_OF_RPN );
 			}
 		}
@@ -2645,214 +2691,214 @@ public class SequenceAnalyzer {
 		String  l5Txt   = l4Txt;
 		
 		// invalid sub ID 1 (message too short)
-		if ( ((byte) 0xFF) == sub1 ) {
+		if (((byte) 0xFF) == sub1) {
 			l4Txt = Dict.get( Dict.INVALID_MSG );
 		}
 		
 		// real time
 		if (isRealTime) {
-			if ( 0x01 == sub1 ) {
+			if (0x01 == sub1) {
 				hasLvl5 = true;
 				l4Txt   = Dict.get( Dict.MSG4_SX_RU_MIDI_TIME_CODE );
-				if      ( 0x01 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR1_FULL_MSG  );
-				else if ( 0x02 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR1_USER_BITS );
+				if      (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR1_FULL_MSG  );
+				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR1_USER_BITS );
 			}
-			else if ( 0x02 == sub1 ) {
+			else if (0x02 == sub1) {
 				hasLvl5 = true;
 				l4Txt   = Dict.get( Dict.MSG4_SX_RU_MIDI_SHOW_CTRL );
-				if      ( 0x00 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR2_MSC_EXT );
-				else if ( sub2 <= 0x7F ) l5Txt = Dict.get( Dict.MSG5_SXR2_MSC_CMD );
+				if      (0x00 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR2_MSC_EXT );
+				else if (sub2 <= 0x7F) l5Txt = Dict.get( Dict.MSG5_SXR2_MSC_CMD );
 			}
-			else if ( 0x03 == sub1 ) {
+			else if (0x03 == sub1) {
 				hasLvl5 = true;
 				l4Txt   = Dict.get( Dict.MSG4_SX_RU_NOTATION_INFO );
-				if      ( 0x01 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR3_BAR_NUMBER       );
-				else if ( 0x02 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR3_TIME_SIG_IMMED   );
-				else if ( 0x42 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR3_TIME_SIG_DELAYED );
+				if      (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR3_BAR_NUMBER       );
+				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR3_TIME_SIG_IMMED   );
+				else if (0x42 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR3_TIME_SIG_DELAYED );
 			}
-			else if ( 0x04 == sub1 ) {
+			else if (0x04 == sub1) {
 				hasLvl5 = true;
 				l4Txt   = Dict.get( Dict.MSG4_SX_RU_DEVICE_CTRL );
-				if      ( 0x01 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR4_MASTER_VOLUME     );
-				else if ( 0x02 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR4_MASTER_BALANCE    );
-				else if ( 0x03 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR4_MASTER_FINE_TUN   );
-				else if ( 0x04 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR4_MASTER_COARSE_TUN );
-				else if ( 0x05 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR4_GLOBAL_PARAM_CTRL );
+				if      (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR4_MASTER_VOLUME     );
+				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR4_MASTER_BALANCE    );
+				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR4_MASTER_FINE_TUN   );
+				else if (0x04 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR4_MASTER_COARSE_TUN );
+				else if (0x05 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR4_GLOBAL_PARAM_CTRL );
 			}
-			else if ( 0x05 == sub1 ) {
+			else if (0x05 == sub1) {
 				hasLvl5 = true;
 				l4Txt   = Dict.get( Dict.MSG4_SX_RU_RT_MTC_CUEING );
-				if      ( 0x00 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR5_SPECIAL           );
-				else if ( 0x01 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR5_PUNCH_IN_PTS      );
-				else if ( 0x02 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR5_PUNCH_OUT_PTS     );
-				else if ( 0x05 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR5_EVT_START_PT      );
-				else if ( 0x06 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR5_EVT_STOP_PT       );
-				else if ( 0x07 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR5_EVT_START_PTS_ADD );
-				else if ( 0x08 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR5_EVT_STOP_PTS_ADD  );
-				else if ( 0x0B == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR5_CUE_PTS           );
-				else if ( 0x0C == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR5_CUE_PTS_ADD       );
-				else if ( 0x0E == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR5_EVT_NAME_IN_ADD   );
+				if      (0x00 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_SPECIAL           );
+				else if (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_PUNCH_IN_PTS      );
+				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_PUNCH_OUT_PTS     );
+				else if (0x05 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_EVT_START_PT      );
+				else if (0x06 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_EVT_STOP_PT       );
+				else if (0x07 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_EVT_START_PTS_ADD );
+				else if (0x08 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_EVT_STOP_PTS_ADD  );
+				else if (0x0B == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_CUE_PTS           );
+				else if (0x0C == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_CUE_PTS_ADD       );
+				else if (0x0E == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_EVT_NAME_IN_ADD   );
 			}
-			else if ( 0x06 == sub1 ) {
+			else if (0x06 == sub1) {
 				hasLvl5 = true;
 				l4Txt   = Dict.get( Dict.MSG4_SX_RU_MACH_CTRL_CMD );
-				if      ( 0x01 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR6_STOP          );
-				else if ( 0x02 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR6_PLAY          );
-				else if ( 0x03 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR6_DEF_PLAY      );
-				else if ( 0x04 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR6_FAST_FW       );
-				else if ( 0x05 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR6_REWIND        );
-				else if ( 0x06 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR6_REC_STROBE    );
-				else if ( 0x07 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR6_REC_EXIT      );
-				else if ( 0x08 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR6_REC_PAUSE     );
-				else if ( 0x09 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR6_PAUSE         );
-				else if ( 0x0A == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR6_EJECT         );
-				else if ( 0x0B == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR6_CHASE         );
-				else if ( 0x0C == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR6_CMD_ERR_RESET );
-				else if ( 0x0D == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR6_MMC_RESET     );
-				else if ( 0x40 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR6_WRITE         );
-				else if ( 0x44 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR6_GOTO          );
-				else if ( 0x47 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR6_SHUTTLE       );
+				if      (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_STOP          );
+				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_PLAY          );
+				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_DEF_PLAY      );
+				else if (0x04 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_FAST_FW       );
+				else if (0x05 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_REWIND        );
+				else if (0x06 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_REC_STROBE    );
+				else if (0x07 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_REC_EXIT      );
+				else if (0x08 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_REC_PAUSE     );
+				else if (0x09 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_PAUSE         );
+				else if (0x0A == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_EJECT         );
+				else if (0x0B == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_CHASE         );
+				else if (0x0C == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_CMD_ERR_RESET );
+				else if (0x0D == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_MMC_RESET     );
+				else if (0x40 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_WRITE         );
+				else if (0x44 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_GOTO          );
+				else if (0x47 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_SHUTTLE       );
 			}
-			else if ( 0x07 == sub1 ) {
+			else if (0x07 == sub1) {
 				hasLvl5 = true;
 				l4Txt   = Dict.get( Dict.MSG4_SX_RU_MACH_CTRL_RES );
 				l5Txt   = Dict.get( Dict.MSG5_SXR7_MMC_RES        );
 			}
-			else if ( 0x08 == sub1 ) {
+			else if (0x08 == sub1) {
 				hasLvl5 = true;
 				l4Txt   = Dict.get( Dict.MSG4_SX_RU_TUNING_STANDARD );
-				if      ( 0x02 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR8_SG_TUN_CH         );
-				else if ( 0x07 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR8_SG_TUN_CH_BNK_SEL );
-				else if ( 0x08 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR8_SO_TUN_1          );
-				else if ( 0x09 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR8_SO_TUN_2          );
+				if      (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR8_SG_TUN_CH         );
+				else if (0x07 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR8_SG_TUN_CH_BNK_SEL );
+				else if (0x08 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR8_SO_TUN_1          );
+				else if (0x09 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR8_SO_TUN_2          );
 			}
-			else if ( 0x09 == sub1 ) {
+			else if (0x09 == sub1) {
 				hasLvl5 = true;
 				l4Txt   = Dict.get( Dict.MSG4_SX_RU_CTRL_DEST_SET );
-				if      ( 0x01 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR9_CHANNEL_PRESSURE  );
-				else if ( 0x02 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR9_POLY_KEY_PRESSURE );
-				else if ( 0x03 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXR9_CTRL              );
+				if      (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR9_CHANNEL_PRESSURE  );
+				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR9_POLY_KEY_PRESSURE );
+				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR9_CTRL              );
 			}
-			else if ( 0x0A == sub1 && 0x01 == sub2 ) {
+			else if (0x0A == sub1 && 0x01 == sub2) {
 				l4Txt = Dict.get( Dict.MSG4_SX_RU_KEY_B_INSTR_CTRL );
 			}
-			else if ( 0x0B == sub1 && 0x01 == sub2 ) {
+			else if (0x0B == sub1 && 0x01 == sub2) {
 				l4Txt = Dict.get( Dict.MSG4_SX_RU_SCAL_POLY_MIP );
 			}
-			else if ( 0x0C == sub1 && 0x00 == sub2 ) {
+			else if (0x0C == sub1 && 0x00 == sub2) {
 				l4Txt = Dict.get( Dict.MSG4_SX_RU_MOB_PHONE_CTRL );
 			}
 		}
 		
 		// non real time
 		else {
-			if ( 0x01 == sub1 ) {
+			if (0x01 == sub1) {
 				l4Txt = Dict.get( Dict.MSG4_SX_NU_SMPL_DUMP_HDR );
 			}
-			else if ( 0x02 == sub1 ) {
+			else if (0x02 == sub1) {
 				l4Txt = Dict.get( Dict.MSG4_SX_NU_SMPL_DATA_PKT );
 			}
-			else if ( 0x03 == sub1 ) {
+			else if (0x03 == sub1) {
 				l4Txt = Dict.get( Dict.MSG4_SX_NU_SMPL_DUMP_REQ );
 			}
-			else if ( 0x04 == sub1 ) {
+			else if (0x04 == sub1) {
 				hasLvl5 = true;
 				l4Txt   = Dict.get( Dict.MSG4_SX_NU_MIDI_TIME_CODE );
-				if      ( 0x00 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN4_SPECIAL           );
-				else if ( 0x01 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN4_PUNCH_IN_PTS      );
-				else if ( 0x02 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN4_PUNCH_OUT_PTS     );
-				else if ( 0x03 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN4_DEL_PUNCH_IN_PTS  );
-				else if ( 0x04 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN4_DEL_PUNCH_OUT_PTS );
-				else if ( 0x05 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN4_EVT_START_PT      );
-				else if ( 0x06 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN4_EVT_STOP_PT       );
-				else if ( 0x07 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN4_EVT_START_PTS_ADD );
-				else if ( 0x08 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN4_EVT_STOP_PTS_ADD  );
-				else if ( 0x09 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN4_DEL_EVT_START_PT  );
-				else if ( 0x0A == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN4_DEL_EVT_STOP_PT   );
-				else if ( 0x0B == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN4_CUE_PTS           );
-				else if ( 0x0C == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN4_CUE_PTS_ADD       );
-				else if ( 0x0D == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN4_DEL_CUE_PT        );
-				else if ( 0x0E == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN4_EVT_NAME_IN_ADD   );
+				if      (0x00 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_SPECIAL           );
+				else if (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_PUNCH_IN_PTS      );
+				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_PUNCH_OUT_PTS     );
+				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_DEL_PUNCH_IN_PTS  );
+				else if (0x04 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_DEL_PUNCH_OUT_PTS );
+				else if (0x05 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_EVT_START_PT      );
+				else if (0x06 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_EVT_STOP_PT       );
+				else if (0x07 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_EVT_START_PTS_ADD );
+				else if (0x08 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_EVT_STOP_PTS_ADD  );
+				else if (0x09 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_DEL_EVT_START_PT  );
+				else if (0x0A == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_DEL_EVT_STOP_PT   );
+				else if (0x0B == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_CUE_PTS           );
+				else if (0x0C == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_CUE_PTS_ADD       );
+				else if (0x0D == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_DEL_CUE_PT        );
+				else if (0x0E == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_EVT_NAME_IN_ADD   );
 			}
-			else if ( 0x05 == sub1 ) {
+			else if (0x05 == sub1) {
 				hasLvl5 = true;
 				l4Txt   = Dict.get( Dict.MSG4_SX_NU_SAMPLE_DUMP_EXT );
-				if      ( 0x01 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN5_LOOP_PTS_TRANSM  );
-				else if ( 0x02 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN5_LOOP_PTS_REQ     );
-				else if ( 0x03 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN5_SMPL_NAME_TRANSM );
-				else if ( 0x04 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN5_SMPL_NAME_REQ    );
-				else if ( 0x05 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN5_EXT_DUMP_HDR     );
-				else if ( 0x06 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN5_EXT_LOOP_PTS_TR  );
-				else if ( 0x07 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN5_EXT_LOOP_PTS_REQ );
+				if      (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN5_LOOP_PTS_TRANSM  );
+				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN5_LOOP_PTS_REQ     );
+				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN5_SMPL_NAME_TRANSM );
+				else if (0x04 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN5_SMPL_NAME_REQ    );
+				else if (0x05 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN5_EXT_DUMP_HDR     );
+				else if (0x06 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN5_EXT_LOOP_PTS_TR  );
+				else if (0x07 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN5_EXT_LOOP_PTS_REQ );
 			}
-			else if ( 0x06 == sub1 ) {
+			else if (0x06 == sub1) {
 				hasLvl5 = true;
 				l4Txt   = Dict.get( Dict.MSG4_SX_NU_GENERAL_INFO );
-				if      ( 0x01 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN6_IDENTITY_REQ  );
-				else if ( 0x02 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN6_IDENTITY_REPL );
+				if      (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN6_IDENTITY_REQ  );
+				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN6_IDENTITY_REPL );
 			}
-			else if ( 0x07 == sub1 ) {
+			else if (0x07 == sub1) {
 				hasLvl5 = true;
 				l4Txt   = Dict.get( Dict.MSG4_SX_NU_FILE_DUMP );
-				if      ( 0x01 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN7_HEADER      );
-				else if ( 0x02 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN7_DATA_PACKET );
-				else if ( 0x03 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN7_REQUEST     );
+				if      (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN7_HEADER      );
+				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN7_DATA_PACKET );
+				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN7_REQUEST     );
 			}
-			else if ( 0x08 == sub1 ) {
+			else if (0x08 == sub1) {
 				hasLvl5 = true;
 				l4Txt   = Dict.get( Dict.MSG4_SX_NU_TUNING_STANDARD );
-				if      ( 0x00 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN8_BLK_DUMP_REQ      );
-				else if ( 0x01 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN8_BLK_DUMP_REPL     );
-				else if ( 0x03 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN8_TUNING_DUMP_REQ   );
-				else if ( 0x04 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN8_KEY_B_TUNING_DMP  );
-				else if ( 0x05 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN8_SO_TUN_DMP_1      );
-				else if ( 0x06 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN8_SO_TUN_DMP_2      );
-				else if ( 0x07 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN8_SG_TUN_CH_BNK_SEL );
-				else if ( 0x08 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN8_SO_TUN_1          );
-				else if ( 0x09 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN8_SO_TUN_2          );
+				if      (0x00 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN8_BLK_DUMP_REQ      );
+				else if (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN8_BLK_DUMP_REPL     );
+				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN8_TUNING_DUMP_REQ   );
+				else if (0x04 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN8_KEY_B_TUNING_DMP  );
+				else if (0x05 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN8_SO_TUN_DMP_1      );
+				else if (0x06 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN8_SO_TUN_DMP_2      );
+				else if (0x07 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN8_SG_TUN_CH_BNK_SEL );
+				else if (0x08 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN8_SO_TUN_1          );
+				else if (0x09 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN8_SO_TUN_2          );
 			}
-			else if ( 0x09 == sub1 ) {
+			else if (0x09 == sub1) {
 				hasLvl5 = true;
 				l4Txt   = Dict.get( Dict.MSG4_SX_NU_GENERA_MIDI );
-				if      ( 0x00 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN9_GM_DISABLE );
-				else if ( 0x01 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN9_GM_1_ON    );
-				else if ( 0x02 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN9_GM_OFF     );
-				else if ( 0x03 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXN9_GM_2_ON    );
+				if      (0x00 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN9_GM_DISABLE );
+				else if (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN9_GM_1_ON    );
+				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN9_GM_OFF     );
+				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN9_GM_2_ON    );
 			}
-			else if ( 0x0A == sub1 ) {
+			else if (0x0A == sub1) {
 				hasLvl5 = true;
 				l4Txt   = Dict.get( Dict.MSG4_SX_NU_DOWNLOADABLE_SND );
-				if      ( 0x00 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXNA_DLS_ON     );
-				else if ( 0x01 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXNA_DLS_OFF    );
-				else if ( 0x02 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXNA_DLS_VA_OFF );
-				else if ( 0x03 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXNA_DLS_VA_ON  );
+				if      (0x00 == sub2) l5Txt = Dict.get( Dict.MSG5_SXNA_DLS_ON     );
+				else if (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXNA_DLS_OFF    );
+				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXNA_DLS_VA_OFF );
+				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXNA_DLS_VA_ON  );
 			}
-			else if ( 0x0B == sub1 ) {
+			else if (0x0B == sub1) {
 				hasLvl5 = true;
 				l4Txt   = Dict.get( Dict.MSG4_SX_NU_FILE_REF_MSG );
-				if      ( 0x01 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXNB_OPEN_FILE      );
-				else if ( 0x02 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXNB_SEL_RESEL_CONT );
-				else if ( 0x03 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXNB_OPEN_SEL_CONT  );
-				else if ( 0x04 == sub2 ) l5Txt = Dict.get( Dict.MSG5_SXNB_CLOSE_FILE     );
+				if      (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXNB_OPEN_FILE      );
+				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXNB_SEL_RESEL_CONT );
+				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXNB_OPEN_SEL_CONT  );
+				else if (0x04 == sub2) l5Txt = Dict.get( Dict.MSG5_SXNB_CLOSE_FILE     );
 			}
-			else if ( 0x0C == sub1 ) {
+			else if (0x0C == sub1) {
 				hasLvl5 = true;
 				l4Txt   = Dict.get( Dict.MSG4_SX_NU_MIDI_VISUAL_CTRL );
 				l5Txt   = Dict.get( Dict.MSG5_SXNC_MVC_CMD           );
 			}
-			else if ( 0x7B == sub1 ) {
+			else if (0x7B == sub1) {
 				l4Txt = Dict.get( Dict.MSG4_SX_NU_END_OF_FILE );
 			}
-			else if ( 0x7C == sub1 ) {
+			else if (0x7C == sub1) {
 				l4Txt = Dict.get( Dict.MSG4_SX_NU_WAIT );
 			}
-			else if ( 0x7D == sub1 ) {
+			else if (0x7D == sub1) {
 				l4Txt = Dict.get( Dict.MSG4_SX_NU_CANCEL );
 			}
-			else if ( 0x7E == sub1 ) {
+			else if (0x7E == sub1) {
 				l4Txt = Dict.get( Dict.MSG4_SX_NU_NAK );
 			}
-			else if ( 0x7F == sub1 ) {
+			else if (0x7F == sub1) {
 				l4Txt = Dict.get( Dict.MSG4_SX_NU_ACK );
 			}
 		}
@@ -2860,7 +2906,7 @@ public class SequenceAnalyzer {
 		// node 4 and 5 - pack and return the result
 		if (hasLvl5) {
 			String[] result = { l4Txt, l5Txt, String.format("%02X", sub2) };
-			if ( ((byte) 0xFF) == sub2 ) {
+			if (((byte) 0xFF) == sub2) {
 				// invalid sub ID 2 (message too short)
 				result[ 1 ] = Dict.get( Dict.INVALID_MSG );
 				result[ 2 ] = "-";
@@ -2890,8 +2936,9 @@ public class SequenceAnalyzer {
 	private static String getVendorName( String vendorNum ) {
 		
 		// invalid (vendor number not found, message too short)
-		if ( "-".equals(vendorNum) )
+		if ("-".equals(vendorNum)) {
 			return Dict.get( Dict.INVALID_MSG );
+		}
 		
 		// north american group
 		if (     "01".equals(vendorNum) ) return "Sequential";
@@ -3438,21 +3485,21 @@ public class SequenceAnalyzer {
 		try {
 			
 			// fake short messages
-			if ( tick > 10000 && tick < 20000 ) {
-				if ( tick < 12000 )
+			if (tick > 10000 && tick < 20000) {
+				if (tick < 12000)
 					msg = new ShortMessage( ShortMessage.ACTIVE_SENSING );
-				else if ( tick < 14000 )
+				else if (tick < 14000)
 					msg = new ShortMessage( 0xFB ); // system realtime: continue
-				else if ( tick < 16000 )
+				else if (tick < 16000)
 					msg = new ShortMessage( 0xF7 ); // system common: end of sysex
-				else if ( tick < 18000 )
+				else if (tick < 18000)
 					msg = new ShortMessage( 0xB0, 0x65, 0x00 ); // rpn MSB
 				else
 					msg = new ShortMessage( 0xB1, 0x65, 0x01 ); // rpn MSB
 			}
 			
 			// fake sysex messages
-			if ( tick > 20000 && tick < 30000 ) {
+			if (tick > 20000 && tick < 30000) {
 				byte[] content = {
 					(byte) 0xF0,	// status
 					0x41,			// vendor
@@ -3462,29 +3509,32 @@ public class SequenceAnalyzer {
 					0x66,			// data
 					(byte) 0xF7,	// end of sysex
 				};
-				if ( tick < 22000 ) {
+				if (tick < 22000) {
 					// nothing more to do
 				}
-				else if ( tick < 24000 )
+				else if (tick < 24000) {
 					content[ 1 ] = 0x7E;
-				else if ( tick < 26000 )
+				}
+				else if (tick < 26000) {
 					content[ 1 ] = 0x7F;
-				else
+				}
+				else {
 					content[ 1 ] = 0x7D;
+				}
 				
 				msg = new SysexMessage( content, content.length );
 			}
 			
 			// fake meta messages
-			if ( tick > 30000 && tick < 40000 ) {
+			if (tick > 30000 && tick < 40000) {
 				int    type = 0x05; // lyrics
 				byte[] content;
 				try {
-					if ( tick < 32000 ) {
+					if (tick < 32000) {
 						String text = "faked DEFAULT lyrics for testing äöü ÄÖÜ § 中中中中";
 						content     = text.getBytes();
 					}
-					else if ( tick < 34000 ) {
+					else if (tick < 34000) {
 						String text = "faked ISO-8859-1 lyrics for testing äöü ÄÖÜ § 中中中中";
 						content     = text.getBytes( "ISO-8859-1" );
 					}
@@ -3497,15 +3547,15 @@ public class SequenceAnalyzer {
 					String text = "faked DEFAULT lyrics after UnsupportedEncodingException for testing äöü ÄÖÜ § 中中中中";
 					content     = text.getBytes();
 				}
-				if ( tick > 36000 ) {
+				if (tick > 36000) {
 					type = 0x7F;     // sequencer specific
 					content = new byte[ 3 ];
-					if ( tick < 38000 ) {
+					if (tick < 38000) {
 						content[ 0 ] = 0x41; // roland
 						content[ 1 ] = 0x01;
 						content[ 2 ] = 0x02;
 					}
-					else if ( tick < 39000 ) {
+					else if (tick < 39000) {
 						content[ 0 ] = 0x42; // korg
 						content[ 1 ] = 0x03;
 						content[ 2 ] = 0x04;

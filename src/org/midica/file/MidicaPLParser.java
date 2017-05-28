@@ -209,7 +209,7 @@ public class MidicaPLParser extends SequenceParser {
 			String            line;
 			
 			// parse line by line
-			while ( null != (line = br.readLine()) ) {
+			while (null != (line = br.readLine())) {
 				lineNumber++;
 				try {
 					parseLine( line );
@@ -219,10 +219,12 @@ public class MidicaPLParser extends SequenceParser {
 					// but only if this is not yet done.
 					// If this information is already available than it comes from
 					// another parser instance. In this case we must not overwrite it.
-					if ( 0 == e.getLineNumber() )
+					if (0 == e.getLineNumber()) {
 						e.setLineNumber( lineNumber );
-					if ( null == e.getFileName() )
+					}
+					if (null == e.getFileName()) {
 						e.setFileName( file.getCanonicalPath() );
+					}
 					br.close();
 					throw e;
 				}
@@ -253,9 +255,10 @@ public class MidicaPLParser extends SequenceParser {
 		cleanedLine        = clean( cleanedLine ); // eliminate leading and trailing whitespaces
 		String[] tokens    = getTokens( cleanedLine );
 		
-		if ( "".equals(tokens[0]) )
+		if ("".equals(tokens[0])) {
 			// empty line or only comments
 			return;
+		}
 		
 		parseTokens( tokens );
 	}
@@ -280,56 +283,64 @@ public class MidicaPLParser extends SequenceParser {
 	private void parseTokens( String[] tokens ) throws ParseException {
 		
 		// replace note, instrument, percussion and drumkit names
-		if ( tokens.length > 2  )
-			replaceShortcuts( tokens );
+		if (tokens.length > 2) {
+			replaceShortcuts(tokens);
+		}
 		
 		// mode command (instruments, macro, end)
 		// or definition (define, chord)
 		// or call (include, include_file)
-		if ( tokens[0].matches("^[A-Za-z_]\\w*$") ) {
-			parseModeCmd( tokens );
+		if (tokens[0].matches("^[A-Za-z_]\\w*$")) {
+			parseModeCmd(tokens);
 			return;
 		}
 		
 		// instruments have been parsed already?
-		else if ( 0 == instruments.size() && MODE_INSTRUMENTS != currentMode ) {
+		else if (0 == instruments.size() && MODE_INSTRUMENTS != currentMode) {
 			throw new ParseException( Dict.get(Dict.ERROR_INSTRUMENTS_NOT_DEFINED) );
 		}
 		
 		// global command?
-		if ( tokens[0].matches("^" + Pattern.quote(GLOBAL) + "$") ) {
-			if ( MODE_INSTRUMENTS == currentMode )
+		if (tokens[0].matches("^" + Pattern.quote(GLOBAL) + "$")) {
+			if (MODE_INSTRUMENTS == currentMode) {
 				// we are inside an instruments definition
 				throw new ParseException( Dict.get(Dict.ERROR_GLOBALS_IN_INSTR_DEF) );
-			else if ( MODE_MACRO == currentMode )
+			}
+			else if (MODE_MACRO == currentMode) {
 				// we are inside a macro definition
 				currentMacro.add( tokens );
-			else
+				
+				// fake a global command (so that in case of an error
+				// the exception is thrown with the right line number)
+				parseGlobalCmd(tokens, true);
+			}
+			else {
 				// we are outside of any special block
-				parseGlobalCmd( tokens );
+				parseGlobalCmd(tokens, false);
+			}
 		}
 		
 		// channel or instruments command
-		else if ( tokens[0].matches("^\\d+$") ) {
+		else if (tokens[0].matches("^\\d+$")) {
 			
 			// instruments command
-			if ( MODE_INSTRUMENTS == currentMode ) {
+			if (MODE_INSTRUMENTS == currentMode) {
 				// we are inside an instruments definition
 				parseInstrumentCmd( tokens );
 				return;
 			}
 			
 			// channel command with a chord
-			if ( chords.containsKey(tokens[1]) ) {
+			if (chords.containsKey(tokens[1])) {
 				HashSet<Integer> chordElements = chords.get( tokens[1] );
 				int i = 1;
 				CHORD_ELEMENT:
-				for ( int note : chordElements ) {
+					for (int note : chordElements) {
 					// create and process a new token array for each note of the chord
 					String[] subTokens = new String[ 3 ];
 					subTokens[ 0 ] = tokens[ 0 ]; // same channel
 					subTokens[ 1 ] = Integer.toString( note );
-					if ( chordElements.size() == i ) {
+					if (chordElements.size() == i) {
 						// last note of the chord: prevent volume
 						subTokens[ 2 ] = tokens[ 2 ];
 					}
@@ -345,11 +356,17 @@ public class MidicaPLParser extends SequenceParser {
 			}
 			
 			// channel command with a single note
-			if ( MODE_MACRO == currentMode )
+			if (MODE_MACRO == currentMode) {
 				// we are inside a macro definition
 				currentMacro.add( tokens );
-			else
-				parseChannelCmd( tokens );
+				
+				// fake a channel command (so that in case of an error
+				// the exception is thrown with the right line number)
+				parseChannelCmd(tokens, true);
+			}
+			else {
+				parseChannelCmd(tokens, false);
+			}
 		}
 		
 		else
@@ -370,29 +387,29 @@ public class MidicaPLParser extends SequenceParser {
 	private void replaceShortcuts( String[] tokens ) {
 		
 		// percussion channel shortcut?
-		if ( P.equals(tokens[0]) ) {
+		if (P.equals(tokens[0])) {
 			tokens[ 0 ] = "9";
 		}
 		
 		// ignore the instruments block - it will be handled
 		// separately by replaceInstrument()
-		if ( MODE_INSTRUMENTS == currentMode ) {
+		if (MODE_INSTRUMENTS == currentMode) {
 			return;
 		}
 		
 		// only care about normal channel commands
-		if ( ! tokens[0].matches("^\\d{1,2}$") ) {
+		if (! tokens[0].matches("^\\d{1,2}$")) {
 			return;
 		}
 		
 		// percussion instrument name --> number
-		if ( Dict.UNKNOWN_CODE != Dict.getPercussion(tokens[1]) ) {
+		if (Dict.UNKNOWN_CODE != Dict.getPercussion(tokens[1])) {
 			tokens[ 1 ] = Integer.toString( Dict.getPercussion(tokens[1]) );
 		}
 		
 		// note name --> number
-		else if ( ! "9".equals(tokens[0]) ) {
-			if ( Dict.UNKNOWN_CODE != Dict.getNote(tokens[1]) ) {
+		else if (! "9".equals(tokens[0])) {
+			if (Dict.UNKNOWN_CODE != Dict.getNote(tokens[1])) {
 				tokens[ 1 ] = Integer.toString( Dict.getNote(tokens[1]) );
 			}
 		}
@@ -412,13 +429,13 @@ public class MidicaPLParser extends SequenceParser {
 	private int replaceInstrument( String shortcut, int channel ) throws ParseException {
 		
 		// drumkit name --> number
-		if ( Dict.UNKNOWN_CODE != Dict.getDrumkit(shortcut) ) {
+		if (Dict.UNKNOWN_CODE != Dict.getDrumkit(shortcut)) {
 			shortcut = Integer.toString( Dict.getDrumkit(shortcut) );
 		}
 		
 		// instrument name --> number
-		else if ( channel != 9 ) {
-			if ( Dict.UNKNOWN_CODE != Dict.getInstrument( shortcut) ) {
+		else if (channel != 9) {
+			if (Dict.UNKNOWN_CODE != Dict.getInstrument(shortcut)) {
 				shortcut = Integer.toString( Dict.getInstrument(shortcut) );
 			}
 		}
@@ -426,8 +443,9 @@ public class MidicaPLParser extends SequenceParser {
 		int number = toInt( shortcut );
 		
 		// check range
-		if ( number > 127 )
+		if (number > 127) {
 			throw new ParseException( Dict.get(Dict.ERROR_INSTR_BANK) );
+		}
 		
 		return number;
 	}
@@ -454,38 +472,38 @@ public class MidicaPLParser extends SequenceParser {
 			+ "$"
 		);
 		Matcher matcher = pattern.matcher( s );
-		if ( matcher.matches() ) {
+		if (matcher.matches()) {
 			String prefix  = matcher.group( 1 );
 			String postfix = matcher.group( 2 );
 			int    factor  = 4; // the resolution is for a quarter note but we are based on a full note
 			int    divisor = 1;
 			
 			// parse unmodified note length
-			if ( prefix.matches("^\\d+$") )
+			if (prefix.matches("^\\d+$"))
 				divisor = toInt( prefix );
-			else if ( LENGTH_32.equals(prefix) )
+			else if (LENGTH_32.equals(prefix))
 				divisor = 32;
-			else if ( LENGTH_16.equals(prefix) )
+			else if (LENGTH_16.equals(prefix))
 				divisor = 16;
-			else if ( LENGTH_8.equals(prefix) )
+			else if (LENGTH_8.equals(prefix))
 				divisor = 8;
-			else if ( LENGTH_4.equals(prefix) )
+			else if (LENGTH_4.equals(prefix))
 				divisor = 4;
-			else if ( LENGTH_2.equals(prefix) )
+			else if (LENGTH_2.equals(prefix))
 				divisor = 2;
-			else if ( LENGTH_1.equals(prefix) )
+			else if (LENGTH_1.equals(prefix))
 				divisor = 1;
-			else if ( LENGTH_M1.equals(prefix) )
+			else if (LENGTH_M1.equals(prefix))
 				factor = 1;
-			else if ( LENGTH_M2.equals(prefix) )
+			else if (LENGTH_M2.equals(prefix))
 				factor = 2;
-			else if ( LENGTH_M4.equals(prefix) )
+			else if (LENGTH_M4.equals(prefix))
 				factor = 4;
-			else if ( LENGTH_M8.equals(prefix) )
+			else if (LENGTH_M8.equals(prefix))
 				factor = 8;
-			else if ( LENGTH_M16.equals(prefix) )
+			else if (LENGTH_M16.equals(prefix))
 				factor = 16;
-			else if ( LENGTH_M32.equals(prefix) )
+			else if (LENGTH_M32.equals(prefix))
 				factor = 32;
 			else
 				throw new ParseException( Dict.get(Dict.ERROR_NOTE_LENGTH_INVALID) + s );
@@ -493,11 +511,11 @@ public class MidicaPLParser extends SequenceParser {
 			// parse modifications by dots
 			int dot_count = 0;
 			DOT:
-			while ( postfix.matches(".*" + Pattern.quote(DOT) + ".*") ) {
+			while (postfix.matches(".*" + Pattern.quote(DOT) + ".*")) {
 				dot_count++;
 				postfix = postfix.replaceFirst( Pattern.quote(DOT), "" );
 			}
-			if ( dot_count > 0 ) {
+			if (dot_count > 0) {
 				// dots modify the note length like this:
 				// .: 3/2; ..: 7/4; ...: 15/8, ....: 31/16 and so on
 				// in other words: length = 2 * length - ( length / 2 ^ dot_count )
@@ -513,9 +531,9 @@ public class MidicaPLParser extends SequenceParser {
 				".*" + Pattern.quote(TUPLET) + "(\\d+)" + Pattern.quote(TUPLET_FOR) + "(\\d+)" + ".*"
 			);
 			TUPLET:
-			while ( postfix.matches(tupletPattern.toString()) ) {
+			while (postfix.matches(tupletPattern.toString())) {
 				Matcher tupletMatcher = tupletPattern.matcher( postfix );
-				if ( tupletMatcher.matches() ) {
+				if (tupletMatcher.matches()) {
 					int count    = toInt( tupletMatcher.group(1), true );
 					int countFor = toInt( tupletMatcher.group(2), true );
 					// cut away the matched tuplet
@@ -528,7 +546,7 @@ public class MidicaPLParser extends SequenceParser {
 			
 			// parse modifications by (nested) triplets
 			TRIPLET:
-			while ( postfix.matches(".*" + Pattern.quote(TRIPLET) + ".*") ) {
+			while (postfix.matches(".*" + Pattern.quote(TRIPLET) + ".*")) {
 				// cut away the matched triplet
 				postfix = postfix.replaceFirst( Pattern.quote(TRIPLET), "" );
 				// nested triplets modify the note length by 2/3 for each nesting
@@ -560,33 +578,37 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void parseModeCmd( String[] tokens ) throws ParseException {
 		
-		if ( END.equals(tokens[0]) )
+		if (END.equals(tokens[0])) {
 			parseEND( tokens );
-		
-		else if ( MACRO.equals(tokens[0]) )
+		}
+		else if (MACRO.equals(tokens[0])) {
 			parseMACRO( tokens );
-		
-		else if ( CHORD.equals(tokens[0]) )
+		}
+		else if (CHORD.equals(tokens[0])) {
 			parseCHORD( tokens );
-		
-		else if ( INCLUDE.equals(tokens[0]) )
+		}
+		else if (INCLUDE.equals(tokens[0])) {
 			parseINCLUDE( tokens );
-		
-		else if ( INCLUDE_FILE.equals(tokens[0]) )
+		}
+		else if (INCLUDE_FILE.equals(tokens[0])) {
 			parseINCLUDE_FILE( tokens );
-		
-		else if ( DEFINE.equals(tokens[0]) )
+		}
+		else if (DEFINE.equals(tokens[0])) {
 			parseDEFINE( tokens );
-		
-		else if ( INSTRUMENTS.equals( tokens[0] ) )
-			if ( 1 == tokens.length )
+		}
+		else if (INSTRUMENTS.equals(tokens[0])) {
+			if (1 == tokens.length ) {
 				currentMode = MODE_INSTRUMENTS;
-			else
+			}
+			else {
 				throw new ParseException( Dict.get(Dict.ERROR_MODE_INSTR_NUM_OF_ARGS) );
+			}
+		}
 		
 		// other
-		else
+		else {
 			throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_CMD) + tokens[0] );
+		}
 	}
 	
 	/**
@@ -597,14 +619,17 @@ public class MidicaPLParser extends SequenceParser {
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
 	private void parseEND( String[] tokens ) throws ParseException {
-		if ( 1 == tokens.length ) {
-			if ( MODE_DEFAULT == currentMode )
+		if (1 == tokens.length) {
+			if (MODE_DEFAULT == currentMode) {
 				throw new ParseException( Dict.get(Dict.ERROR_CMD_END_WITHOUT_BEGIN) );
-			if ( MODE_INSTRUMENTS == currentMode )
+			}
+			if (MODE_INSTRUMENTS == currentMode) {
 				// create defined and undefined instruments for all channels
 				// but only if not yet done
-				if ( ! instrumentsParsed )
+				if (! instrumentsParsed) {
 					postprocessInstruments();
+				}
+			}
 			currentMode      = MODE_DEFAULT;
 			currentMacroName = null;
 		}
@@ -620,14 +645,16 @@ public class MidicaPLParser extends SequenceParser {
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
 	private void parseMACRO( String[] tokens ) throws ParseException {
-		if ( MODE_DEFAULT != currentMode )
+		if (MODE_DEFAULT != currentMode) {
 			throw new ParseException( Dict.get(Dict.ERROR_MACRO_NOT_ALLOWED_HERE) );
-		if ( 2 == tokens.length ) {
+		}
+		if (2 == tokens.length) {
 			currentMode      = MODE_MACRO;
 			currentMacroName = tokens[1];
 			currentMacro     = new ArrayList<String[]>();
-			if ( macros.containsKey(currentMacroName) )
+			if (macros.containsKey(currentMacroName)) {
 				throw new ParseException( Dict.get(Dict.ERROR_MACRO_ALREADY_DEFINED) + currentMacroName );
+			}
 			macros.put( currentMacroName, currentMacro );
 		}
 		else
@@ -642,40 +669,48 @@ public class MidicaPLParser extends SequenceParser {
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
 	private void parseCHORD( String[] tokens ) throws ParseException {
-		if ( MODE_DEFAULT != currentMode )
+		if (MODE_DEFAULT != currentMode) {
 			throw new ParseException( Dict.get(Dict.ERROR_CHORD_DEF_NOT_ALLOWED_HERE) );
+		}
 		String chordDef;
-		if ( 2 == tokens.length )
+		if (2 == tokens.length) {
 			// e.g. CHORD crd=c,d,e
 			chordDef = tokens[ 1 ];
-		else if ( 3 == tokens.length )
+		}
+		else if (3 == tokens.length) {
 			// e.g. CHORD crd = c, d, e
 			// or   CHORD crd c d e
 			chordDef = tokens[ 1 ] + " " + tokens[ 2 ];
+		}
 		else
 			throw new ParseException( Dict.get(Dict.ERROR_CHORD_NUM_OF_ARGS) );
 		
 		// get and process chord name
 		String[] chordParts = chordDef.split( "[" + Pattern.quote(OPT_ASSIGNER) + "\\s]+", 2 ); // chord name and chords can be separated by OPT_ASSIGNER (e,g, "=") and/or whitespace(s)
-		if ( chordParts.length < 2 )
+		if (chordParts.length < 2) {
 			throw new ParseException( Dict.get(Dict.ERROR_CHORD_NUM_OF_ARGS) );
+		}
 		String chordName  = chordParts[ 0 ];
 		String chordValue = chordParts[ 1 ];
-		if ( chords.containsKey(chordName) )
+		if (chords.containsKey(chordName)) {
 			throw new ParseException( Dict.get(Dict.ERROR_CHORD_ALREADY_DEFINED) + chordName );
-		else if ( Dict.noteExists(chordName) )
+		}
+		else if (Dict.noteExists(chordName)) {
 			throw new ParseException( Dict.get(Dict.ERROR_CHORD_EQUALS_NOTE) + chordName );
-		else if ( Dict.percussionExists(chordName) )
+		}
+		else if (Dict.percussionExists(chordName)) {
 			throw new ParseException( Dict.get(Dict.ERROR_CHORD_EQUALS_PERCUSSION) + chordName );
+		}
 		
 		// get and process chord elements
 		HashSet<Integer> chord = new HashSet<Integer>();
 		String[] notes = chordValue.split( "[" + OPT_SEPARATOR + "\\s]+" ); // notes of the chord can be separated by OPT_ASSIGNER (e,g, "=") and/or whitespace(s)
 		
-		for ( String note : notes ) {
+		for (String note : notes) {
 			int noteVal = parseNote( note );
-			if ( chord.contains(noteVal) )
+			if (chord.contains(noteVal)) {
 				throw new ParseException( Dict.get(Dict.ERROR_CHORD_CONTAINS_ALREADY) + note );
+			}
 			chord.add( noteVal );
 		}
 		chords.put( chordName, chord );
@@ -692,7 +727,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// handle QUANTITY
 		int quantity = 1;
-		if ( 3 == tokens.length ) {
+		if (3 == tokens.length) {
 			HashMap<String, Integer> options = parseOptions( tokens[2] );
 			for (String key : options.keySet()) {
 				if (OPT_QUANTITY.equals(key)) {
@@ -704,17 +739,19 @@ public class MidicaPLParser extends SequenceParser {
 			}
 		}
 		
-		if ( tokens.length > 1 ) {
+		if (tokens.length > 1) {
 			String includeName = tokens[1];
-			if ( includeName.equals(currentMacroName) )
+			if (includeName.equals(currentMacroName)) {
 				throw new ParseException( Dict.get(Dict.ERROR_MACRO_RECURSION) );
-			if ( ! macros.containsKey(includeName) )
+			}
+			if (! macros.containsKey(includeName)) {
 				throw new ParseException( Dict.get(Dict.ERROR_MACRO_UNDEFINED) );
+			}
 			// fetch the right macro
 			ArrayList<String[]> macro = macros.get( includeName );
 			// apply all commands of the called macro
 			for (int m=0; m<quantity; m++) {
-				for ( int i=0; i<macro.size(); i++ ) {
+				for (int i=0; i<macro.size(); i++) {
 					String[] macroTokens = macro.get( i );
 					parseTokens( macroTokens );
 				}
@@ -734,12 +771,12 @@ public class MidicaPLParser extends SequenceParser {
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
 	private void parseINCLUDE_FILE( String[] tokens ) throws ParseException {
-		if ( 2 == tokens.length ) {
+		if (2 == tokens.length) {
 			try {
 				// create File object with absolute path for include file
 				String inclPath = tokens[ 1 ];
 				File inclFile   = new File( inclPath );
-				if ( ! inclFile.isAbsolute() ) {
+				if (! inclFile.isAbsolute()) {
 					File currentDir = file.getParentFile();
 					inclFile = new File(
 						currentDir.getCanonicalPath(), // parent
@@ -748,11 +785,11 @@ public class MidicaPLParser extends SequenceParser {
 				}
 				
 				// check if the file can be parsed
-				if ( ! inclFile.exists() )
+				if (! inclFile.exists())
 					throw new ParseException( Dict.get(Dict.ERROR_FILE_EXISTS) + inclFile.getCanonicalPath() );
-				if ( ! inclFile.isFile() )
+				if (! inclFile.isFile())
 					throw new ParseException( Dict.get(Dict.ERROR_FILE_NORMAL) + inclFile.getCanonicalPath() );
-				if ( ! inclFile.canRead() )
+				if (! inclFile.canRead())
 					throw new ParseException( Dict.get(Dict.ERROR_FILE_READABLE) + inclFile.getCanonicalPath() );
 				
 				// parse it
@@ -776,26 +813,29 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void parseDEFINE( String[] tokens ) throws ParseException {
 		String def;
-		if ( 2 == tokens.length )
+		if (2 == tokens.length) {
 			// e.g. DEFINE DEFINE=def
 			def = tokens[ 1 ];
-		else if ( 3 == tokens.length )
+		}
+		else if (3 == tokens.length) {
 			// e.g. DEFINE DEFINE = def
 			// or   DEFINE DEFINE def
 			def = tokens[ 1 ] + " " + tokens[ 2 ];
-		else
+		}
+		else {
 			throw new ParseException( Dict.get(Dict.ERROR_DEFINE_NUM_OF_ARGS) );
+		}
 		
 		// split definition string by OPT_ASSIGNER (e,g, "=") and/or whitespace(s)
 		String[] defParts = def.split( "[" + Pattern.quote(OPT_ASSIGNER) + "\\s]+", 2 );
-		if ( defParts.length < 2 )
+		if (defParts.length < 2)
 			throw new ParseException( Dict.get(Dict.ERROR_DEFINE_NUM_OF_ARGS) );
 		String cmdId      = clean( defParts[0] );
 		String cmdName    = clean( defParts[1] );
-		if ( cmdName.matches("\\s") )
+		if (cmdName.matches("\\s"))
 			throw new ParseException( Dict.get(Dict.ERROR_DEFINE_NUM_OF_ARGS) );
 		
-		if ( BANK_SEP.equals(cmdId) )           BANK_SEP      = cmdName;
+		if (      BANK_SEP.equals(cmdId) )      BANK_SEP      = cmdName;
 		else if ( BPM.equals(cmdId) )           BPM           = cmdName;
 		else if ( CHORD.equals(cmdId) )         CHORD         = cmdName;
 		else if ( COMMENT.equals(cmdId) )       COMMENT       = cmdName;
@@ -848,8 +888,9 @@ public class MidicaPLParser extends SequenceParser {
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
 	private void parseInstrumentCmd( String[] tokens ) throws ParseException{
-		if ( 3 != tokens.length )
+		if (3 != tokens.length) {
 			throw new ParseException( Dict.get(Dict.ERROR_INSTR_NUM_OF_ARGS) );
+		}
 		
 		int    channel   = toChannel( tokens[0] );
 		String instrStr  = tokens[ 1 ];
@@ -860,21 +901,21 @@ public class MidicaPLParser extends SequenceParser {
 		// program number and banks
 		String [] instrBank = instrStr.split( PROG_BANK_SEP, 2 );
 		int       instrNum  = replaceInstrument( instrBank[0], channel );
-		if ( 1 == instrBank.length ) {
+		if (1 == instrBank.length) {
 			// only program number, no bank defined - nothing more to do
 		}
-		else if ( 2 == instrBank.length ) {
+		else if (2 == instrBank.length) {
 			// program number and bank are both defined
 			
 			// bank MSB / LSB / full number
 			String[] msbLsb = instrBank[ 1 ].split( BANK_SEP, 2 );
 			bankMSB         = toInt( msbLsb[0] );
-			if ( 1 == msbLsb.length ) {
-				if ( bankMSB > 127 * 127 ) {
+			if (1 == msbLsb.length) {
+				if (bankMSB > 127 * 127) {
 					// too big
 					throw new ParseException( Dict.get(Dict.ERROR_INSTR_BANK) );
 				}
-				else if ( bankMSB > 127 ) {
+				else if (bankMSB > 127) {
 					// full number
 					bankLSB   = bankMSB &  0b00000000_01111111;
 					bankMSB >>= 7;
@@ -890,7 +931,7 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// wrong syntax?
-		if ( bankMSB > 127 || bankLSB > 127 ) {
+		if (bankMSB > 127 || bankLSB > 127) {
 			throw new ParseException( Dict.get(Dict.ERROR_INSTR_BANK) );
 		}
 		
@@ -908,13 +949,13 @@ public class MidicaPLParser extends SequenceParser {
 			try {
 				// calculate tick for bank select
 				long bankTick = tick - TICK_BANK_BEFORE_PROGRAM;
-				if ( bankTick < 0 )
+				if (bankTick < 0)
 					bankTick = 0;
 				
 				// bank select, if necessary
-				if ( isChanged[0] )
+				if (isChanged[0])
 					SequenceCreator.setBank( channel, bankTick, bankMSB, false );
-				if ( isChanged[1] )
+				if (isChanged[1])
 					SequenceCreator.setBank( channel, bankTick, bankLSB, true );
 				
 				// program change and instrument name
@@ -943,16 +984,17 @@ public class MidicaPLParser extends SequenceParser {
 	 * of the current ticks of each channel.
 	 * 
 	 * @param tokens             Token array.
+	 * @param isFake             **true**, if this is called inside a macro definition
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
-	private void parseGlobalCmd( String[] tokens ) throws ParseException {
+	private void parseGlobalCmd(String[] tokens, boolean isFake) throws ParseException {
 		synchronize();
 		long currentTicks = instruments.get( 0 ).getCurrentTicks();
 		
 		int tokenCount = tokens.length;
-		if ( 1 == tokenCount )
+		if (1 == tokenCount)
 			return;
-		else if ( 3 != tokenCount )
+		else if (3 != tokenCount)
 			throw new ParseException( Dict.get(Dict.ERROR_GLOBAL_NUM_OF_ARGS) );
 		
 		String cmd   = tokens[1];
@@ -960,18 +1002,22 @@ public class MidicaPLParser extends SequenceParser {
 		
 		try {
 			// set
-			if ( cmd.equals(BPM) ) {
+			if (cmd.equals(BPM)) {
 				int bpm = toInt( value, true );
-				SequenceCreator.addMessageBpm( bpm, currentTicks );
+				if (! isFake) {
+					SequenceCreator.addMessageBpm( bpm, currentTicks );
+				}
 			}
 			
 			// TODO: delete
-			else if ( cmd.equals("lyrics") ) { // TODO: use Dict
+			else if (cmd.equals("lyrics")) { // TODO: use Dict
 				MetaMessage msg = new MetaMessage();
 				value = value.replaceAll( "//", "#" );
 				byte[] content = CharsetUtils.getBytesFromText( value, chosenCharset );
 				msg.setMessage( MidiListener.META_LYRICS, content, content.length );
-				SequenceCreator.addMessageToTrack( msg, 2, currentTicks );
+				if (! isFake) {
+					SequenceCreator.addMessageToTrack( msg, 2, currentTicks );
+				}
 			}
 			
 			else {
@@ -988,12 +1034,13 @@ public class MidicaPLParser extends SequenceParser {
 	 * A channel command is a channel-based command like a note or a pause.
 	 * 
 	 * @param tokens             Token array.
+	 * @param isFake             **true**, if this is called inside a macro definition
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
-	private void parseChannelCmd( String[] tokens ) throws ParseException {
+	private void parseChannelCmd(String[] tokens, boolean isFake) throws ParseException {
 		
 		int tokenCount = tokens.length;
-		if ( tokenCount < 3 )
+		if (tokenCount < 3)
 			throw new ParseException( Dict.get(Dict.ERROR_CH_CMD_NUM_OF_ARGS) );
 		
 		int channel  = toInt( tokens[0] );
@@ -1001,7 +1048,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// separate the duration from further arguments
 		String[] subTokens = tokens[ 2 ].split( "\\s+", 2 );
-		if ( 0 == subTokens.length )
+		if (0 == subTokens.length)
 			throw new ParseException( Dict.get(Dict.ERROR_CH_CMD_NUM_OF_ARGS) );
 		
 		// process duration
@@ -1010,34 +1057,38 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// process options
 		HashMap<String, Integer> options = new HashMap<String, Integer>();
-		if ( 2 == subTokens.length )
+		if (2 == subTokens.length)
 			options = parseOptions( subTokens[1] );
 		
 		// apply volume option
-		if ( options.containsKey(OPT_VOLUME) ) {
+		if (options.containsKey(OPT_VOLUME)) {
 			int volume = options.get( OPT_VOLUME );
-			instruments.get( channel ).setVolume( volume );
+			if (! isFake)
+				instruments.get( channel ).setVolume( volume );
 		}
 		// apply staccato option
-		if ( options.containsKey(OPT_STACCATO) ) {
+		if (options.containsKey(OPT_STACCATO)) {
 			int staccato = options.get( OPT_STACCATO );
-			instruments.get( channel ).setStaccato( staccato );
+			if (! isFake)
+				instruments.get( channel ).setStaccato( staccato );
 		}
 		
 		// determine if more notes for this channel are expected at the same time
 		boolean multiple = false;
-		if ( options.containsKey(OPT_MULTIPLE) )
+		if (options.containsKey(OPT_MULTIPLE)) {
 			multiple = true;
+		}
 		
 		// determine how often to play the note(s)
 		int quantity = 1;
-		if ( options.containsKey(OPT_QUANTITY) )
+		if (options.containsKey(OPT_QUANTITY)) {
 			quantity = options.get( OPT_QUANTITY );
+		}
 		
 		// get instrument
 		Instrument instr = instruments.get( channel );
 		
-		if ( instr.autoChannel )
+		if (instr.autoChannel)
 			throw new ParseException(
 				String.format( Dict.get(Dict.ERROR_CHANNEL_UNDEFINED), channel )
 			);
@@ -1047,27 +1098,33 @@ public class MidicaPLParser extends SequenceParser {
 		int  volume             = instr.getVolume();
 		
 		NOTE_QUANTITY:
-		for ( int i = 0; i < quantity; i++ ) {
-			if ( PAUSE_VALUE == note ) {
-				instr.incrementTicks( duration );
+		for (int i = 0; i < quantity; i++) {
+			if (PAUSE_VALUE == note) {
+				if (! isFake)
+					instr.incrementTicks( duration );
 				continue;
 			}
 			
-			// calculate beginning and end ticks of the current note
-			long startTicks = instr.getCurrentTicks();
-			long endTicks   = instr.addNote( duration );
-			
-			// create and add messages
-			try {
-				int newNote = transpose( note, channel );
-				SequenceCreator.addMessageKeystroke( channel, newNote, startTicks, endTicks, volume );
+			if (isFake) {
+				transpose( note, channel );
 			}
-			catch ( InvalidMidiDataException e ) {
-				throw new ParseException( Dict.get(Dict.ERROR_MIDI_PROBLEM) + e.getMessage() );
+			else {
+				// calculate beginning and end ticks of the current note
+				long startTicks = instr.getCurrentTicks();
+				long endTicks   = instr.addNote( duration );
+				
+				// create and add messages
+				try {
+					int newNote = transpose( note, channel );
+					SequenceCreator.addMessageKeystroke( channel, newNote, startTicks, endTicks, volume );
+				}
+				catch ( InvalidMidiDataException e ) {
+					throw new ParseException( Dict.get(Dict.ERROR_MIDI_PROBLEM) + e.getMessage() );
+				}
 			}
 		}
 		
-		if (multiple) {
+		if (multiple && ! isFake) {
 			instr.setCurrentTicks( absoluteStartTicks );
 		}
 	}
@@ -1084,29 +1141,29 @@ public class MidicaPLParser extends SequenceParser {
 		HashMap<String, Integer> options = new HashMap<String, Integer>();
 		
 		String[] optTokens = optString.split( OPT_SEPARATOR );
-		for ( String opt : optTokens ) {
+		for (String opt : optTokens) {
 			opt = clean( opt );
 			String[] optParts = opt.split( "[" + Pattern.quote(OPT_ASSIGNER) + "\\s]+" ); // name and value can be separated by OPT_ASSIGNER (e,g, "=") and/or whitespace(s)
-			if ( optParts.length > 2 )
+			if (optParts.length > 2)
 				throw new ParseException( Dict.get(Dict.ERROR_CANT_PARSE_OPTIONS) );
 			// construct name and value
 			String optName  = optParts[ 0 ];
 			int    optValue = 0;
-			if ( V.equals(optName) || VOLUME.equals(optName) ) {
+			if (V.equals(optName) || VOLUME.equals(optName)) {
 				optName = OPT_VOLUME;
 				optValue = toInt( optParts[1] );
-				if ( optValue > 127 )
+				if (optValue > 127)
 					throw new ParseException( Dict.get(Dict.ERROR_VOL_NOT_MORE_THAN_127) );
 			}
-			else if ( S.equals(optName) || STACCATO.equals(optName) ) {
+			else if (S.equals(optName) || STACCATO.equals(optName)) {
 				optName = OPT_STACCATO;
 				optValue = toInt( optParts[1], false );
 			}
-			else if ( Q.equals(optName) || QUANTITY.equals(optName) ) {
+			else if (Q.equals(optName) || QUANTITY.equals(optName)) {
 				optName = OPT_QUANTITY;
 				optValue = toInt( optParts[1], false );
 			}
-			else if ( M.equals(optName) || MULTIPLE.equals(optName) ) {
+			else if (M.equals(optName) || MULTIPLE.equals(optName)) {
 				optName = OPT_MULTIPLE;
 			}
 			else {
@@ -1135,12 +1192,12 @@ public class MidicaPLParser extends SequenceParser {
 	 * @throws ParseExceptionif the note or percussion name is unknown or the note value is out of the legal range for MIDI notes
 	 */
 	private int parseNote( String note, int channel ) throws ParseException {
-		if ( note.equals(PAUSE) )
+		if (note.equals(PAUSE))
 			return PAUSE_VALUE;
-		else if ( note.matches("^\\d+$") )
+		else if (note.matches("^\\d+$"))
 			return toInt( note );
 		else {
-			if ( 9 == channel )
+			if (9 == channel)
 				throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_PERCUSSION) + note );
 			throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_NOTE) + note );
 		}
@@ -1161,15 +1218,18 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private int parseNote( String noteName ) throws ParseException {
 		int noteVal;
-		if ( noteName.matches("^\\d+$") )
+		if (noteName.matches("^\\d+$")) {
 			noteVal = toInt( noteName );
+		}
 		else {
 			noteVal = Dict.getNote( noteName );
-			if ( Dict.UNKNOWN_CODE == noteVal )
+			if (Dict.UNKNOWN_CODE == noteVal) {
 				throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_NOTE) + noteName );
+			}
 		}
-		if ( noteVal > 127 )
+		if (noteVal > 127) {
 			throw new ParseException( Dict.get(Dict.ERROR_NOTE_TOO_BIG) + noteName );
+		}
 		
 		return noteVal;
 	}
@@ -1186,10 +1246,12 @@ public class MidicaPLParser extends SequenceParser {
 		
 		String[] subTokens = original.split( "\\s+", 2 );
 		String optStr;
-		if ( subTokens.length > 1 )
+		if (subTokens.length > 1) {
 			optStr = subTokens[ 1 ];
-		else
+		}
+		else {
 			return subTokens[ 0 ] + " " + MULTIPLE;
+		}
 		
 		// cut away trailing whitespaces and option separators (e.g. ',')
 		String cleanedOptString = optStr.replaceFirst( "[" + Pattern.quote(OPT_SEPARATOR) + "\\s]+$", "" );
@@ -1207,7 +1269,7 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void synchronize() {
 		long maxTicks = Instrument.getMaxCurrentTicks( instruments );
-		for ( int i=0; i<instruments.size(); i++ ) {
+		for (int i=0; i<instruments.size(); i++) {
 			instruments.get( i ).setCurrentTicks( maxTicks );
 		}
 	}
@@ -1222,7 +1284,7 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void postprocessInstruments() throws ParseException {
 		
-		if ( 0 == instruments.size() )
+		if (0 == instruments.size())
 			throw new ParseException( Dict.get(Dict.ERROR_INSTRUMENTS_NOT_DEFINED) );
 		
 		// sort instruments ascending
@@ -1230,18 +1292,22 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// find out which channels are missing
 		HashSet<Integer> missing = new HashSet<Integer>();
-		for ( int i=0; i<MidiDevices.NUMBER_OF_CHANNELS; i++ )
+		for (int i=0; i<MidiDevices.NUMBER_OF_CHANNELS; i++) {
 			missing.add( i );
-		for ( Instrument instr : instruments )
+		}
+		for (Instrument instr : instruments) {
 			missing.remove( instr.channel );
+		}
 		
 		// add the missing channels
-		for ( int i : missing ) {
+		for (int i : missing) {
 			Instrument fakeInstr;
-			if ( 9 == i )
+			if (9 == i) {
 				fakeInstr = new Instrument( i, 0, Dict.get(Dict.PERCUSSION_CHANNEL), false );
-			else
+			}
+			else {
 				fakeInstr = new Instrument( i, 0, Dict.get(Dict.DEFAULT_CHANNEL_COMMENT), true );
+			}
 			instruments.add( fakeInstr );
 		}
 		
@@ -1251,7 +1317,7 @@ public class MidicaPLParser extends SequenceParser {
 		// initialize sequence
 		try {
 			SequenceCreator.reset( chosenCharset );
-			for ( Instrument instr : instruments ) {
+			for (Instrument instr : instruments) {
 				int    channel      = instr.channel;
 				int    instrNum     = instr.instrumentNumber;
 				String instrComment = instr.instrumentName;
@@ -1259,11 +1325,13 @@ public class MidicaPLParser extends SequenceParser {
 				int    bankLSB      = instr.getBankLSB();
 				// reset instrument
 				instr.resetCurrentTicks();
-				if ( ! instr.autoChannel ) {
-					if ( bankMSB != 0 )
+				if (! instr.autoChannel) {
+					if (bankMSB != 0) {
 						SequenceCreator.setBank( channel, 0L, bankMSB, false );
-					if ( bankLSB != 0 )
+					}
+					if (bankLSB != 0) {
 						SequenceCreator.setBank( channel, 0L, bankLSB, true );
+					}
 					SequenceCreator.initChannel( channel, instrNum, instrComment, SequenceCreator.NOW );
 				}
 			}
@@ -1289,9 +1357,9 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private int toInt( String s, boolean greaterZero ) throws ParseException {
 		int i;
-		if ( greaterZero ) {
+		if (greaterZero) {
 			i = toInt( s );
-			if ( 0 == i )
+			if (0 == i)
 				throw new ParseException( Dict.get(Dict.ERROR_0_NOT_ALLOWED) );
 		}
 		else {
@@ -1310,7 +1378,7 @@ public class MidicaPLParser extends SequenceParser {
 	private int toInt( String s ) throws ParseException {
 		try {
 			int i = Integer.parseInt( s );
-			if ( i < 0 ) {
+			if (i < 0) {
 				throw new ParseException( Dict.get(Dict.ERROR_NEGATIVE_NOT_ALLOWED) + s );
 			}
 			return i;
@@ -1329,7 +1397,7 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private int toChannel( String s ) throws ParseException {
 		int channel = toInt( s );
-		if ( channel > 15 )
+		if (channel > 15)
 			throw new ParseException( Dict.get(Dict.ERROR_INVALID_CHANNEL_NUMBER) + s );
 		return channel;
 	}
