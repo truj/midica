@@ -22,7 +22,7 @@ import org.midica.file.ParseException;
  * That causes the execution of {@link #doInBackground()} that parses the file.
  * 
  * After the parsing work is done, {@link MidicaWorker#done()} is called and
- * closes then waiting dialog.
+ * closes the waiting dialog.
  * 
  * @author Jan Trukenmüller
  */

@@ -22,21 +22,21 @@ public class Midica {
 	public static final int VERSION_MAJOR = 0;
 	
 	/** Minor version number. This is intended to be incremented automatically by precommit.pl. */
-	public static final int VERSION_MINOR = 1495972877;
+	public static final int VERSION_MINOR = 1496214441;
 	
 	/** Full version string. */
 	public static final String VERSION = VERSION_MAJOR + "." + VERSION_MINOR;
 	
-	/** Author name. */
+	/** Author name */
 	public static final String AUTHOR = "Jan Trukenmüller";
 	
-	/** Author name. */
+	/** Repository URL */
 	public static final String SOURCE_URL = "https://github.com/truj/midica";
 	
-	/** Author name. */
+	/** Website URL */
 	public static final String URL = "http://midica.org/";
 	
-	/** Controller of the main window. */
+	/** Controller of the main window */
 	public static UiController uiController;
 	
 	/**

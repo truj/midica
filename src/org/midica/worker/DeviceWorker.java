@@ -24,7 +24,7 @@ import org.midica.ui.player.PlayerController;
  * devices.
  * 
  * After the work is done, {@link MidicaWorker#done()} is called and
- * closes then waiting dialog.
+ * closes the waiting dialog.
  * 
  * @author Jan Trukenmüller
  */
