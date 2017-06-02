@@ -56,6 +56,8 @@ public class UiView extends JDialog {
 	public static final String NAME_SELECT_PERCUSSION = "name_select_percussion";
 	public static final String NAME_SELECT_INSTRUMENT = "name_select_instrument";
 	public static final String NAME_REMEMBER_SF       = "name_remember_sf";
+	public static final String NAME_REMEMBER_MIDI     = "name_remember_midi";
+	public static final String NAME_REMEMBER_MIDICAPL = "name_remember_midicapl";
 	
 	public static final String CMD_SELECT_LANGUAGE     = "select_language";
 	public static final String CMD_START_PLAYER        = "start_player";
@@ -95,6 +97,8 @@ public class UiView extends JDialog {
 	private JButton                         btnExportMidi          = null;
 	private JButton                         btnExportMidicaPL      = null;
 	private JCheckBox                       cbxRememberSf          = null;
+	private JCheckBox                       cbxRememberMidicapl    = null;
+	private JCheckBox                       cbxRememberMidi        = null;
 	
 	/**
 	 * Creates the main window of the program.
@@ -418,18 +422,36 @@ public class UiView extends JDialog {
 		constraints.weighty    = 1;
 		
 		// MidicaPL label
+		constraints.insets = new Insets( 0, 2, 0, 2 );
 		JLabel lblMidicaPL = new JLabel( Dict.get(Dict.MIDICAPL_FILE) );
 		area.add( lblMidicaPL, constraints );
+		constraints.insets = new Insets( 2, 2, 2, 2 );
 		
 		// file selector button
 		constraints.gridx++;
+		constraints.gridheight = 2;
 		btnSelectMidicaPL = new JButton( Dict.get(Dict.CHOOSE_FILE) );
 		btnSelectMidicaPL.setActionCommand( CMD_OPEN_MIDICAPL_FILE );
 		btnSelectMidicaPL.addActionListener( controller );
 		area.add( btnSelectMidicaPL, constraints );
 		
-		// chosen MidicaPL file name
+		// remember midicapl checkbox
+		constraints.insets = new Insets( 0, 2, 0, 2 );
 		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.gridheight = 1;
+		cbxRememberMidicapl = new JCheckBox( Dict.get(Dict.REMEMBER_MPL) );
+		cbxRememberMidicapl.setToolTipText( Dict.get(Dict.REMEMBER_MPL_TT) );
+		cbxRememberMidicapl.addItemListener( controller );
+		String remember = Config.get( Config.REMEMBER_MIDICAPL );
+		if ( "true".equals(remember) ) {
+			cbxRememberMidicapl.setSelected( true );
+		}
+		cbxRememberMidicapl.setName( NAME_REMEMBER_MIDICAPL );
+		area.add( cbxRememberMidicapl, constraints );
+		constraints.insets = new Insets( 2, 2, 2, 2 );
+		
+		// chosen MidicaPL file name
 		constraints.gridy++;
 		constraints.gridwidth = 2;
 		lblChosenMidicaPLFile = new JLabel( Dict.get(Dict.UNCHOSEN_FILE) );
@@ -446,17 +468,36 @@ public class UiView extends JDialog {
 		
 		
 		// midi label
+		constraints.insets = new Insets( 0, 2, 0, 2 );
 		constraints.gridy++;
 		constraints.gridwidth = 1;
 		JLabel lblMidi = new JLabel( Dict.get(Dict.MIDI_FILE) );
 		area.add( lblMidi, constraints );
+		constraints.insets = new Insets( 2, 2, 2, 2 );
 		
 		// file selector button
 		constraints.gridx++;
+		constraints.gridheight = 2;
 		btnSelectMidi = new JButton( Dict.get(Dict.CHOOSE_FILE) );
 		btnSelectMidi.setActionCommand( CMD_OPEN_MIDI_FILE );
 		btnSelectMidi.addActionListener( controller );
 		area.add( btnSelectMidi, constraints );
+		
+		// remember midicapl checkbox
+		constraints.insets = new Insets( 0, 2, 0, 2 );
+		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.gridheight = 1;
+		cbxRememberMidi = new JCheckBox( Dict.get(Dict.REMEMBER_MID) );
+		cbxRememberMidi.setToolTipText( Dict.get(Dict.REMEMBER_MID_TT) );
+		cbxRememberMidi.addItemListener( controller );
+		remember = Config.get( Config.REMEMBER_MIDI );
+		if ( "true".equals(remember) ) {
+			cbxRememberMidi.setSelected( true );
+		}
+		cbxRememberMidi.setName( NAME_REMEMBER_MIDI );
+		area.add( cbxRememberMidi, constraints );
+		constraints.insets = new Insets( 2, 2, 2, 2 );
 		
 		// chosen midi file name
 		constraints.gridx = 0;
@@ -474,20 +515,38 @@ public class UiView extends JDialog {
 		
 		
 		// soundfont label
+		constraints.insets = new Insets( 0, 2, 0, 2 );
 		constraints.gridy++;
 		constraints.gridwidth = 1;
 		JLabel lblSndBnk = new JLabel( Dict.get(Dict.SOUNDFONT) );
 		area.add( lblSndBnk, constraints );
+		constraints.insets = new Insets( 2, 2, 2, 2 );
 		
 		// file selector button
 		constraints.gridx++;
+		constraints.gridheight = 2;
 		btnSelectSoundfont = new JButton( Dict.get(Dict.CHOOSE_FILE) );
 		btnSelectSoundfont.setActionCommand( CMD_OPEN_SNDFNT_FILE );
 		btnSelectSoundfont.addActionListener( controller );
 		area.add( btnSelectSoundfont, constraints );
 		
-		// chosen soundfont file name
+		// remember soundfont checkbox
+		constraints.insets = new Insets( 0, 2, 0, 2 );
 		constraints.gridx = 0;
+		constraints.gridy++;
+		constraints.gridheight = 1;
+		cbxRememberSf = new JCheckBox( Dict.get(Dict.REMEMBER_SF) );
+		cbxRememberSf.setToolTipText( Dict.get(Dict.REMEMBER_SF_TT) );
+		cbxRememberSf.addItemListener( controller );
+		remember = Config.get( Config.REMEMBER_SF2 );
+		if ( "true".equals(remember) ) {
+			cbxRememberSf.setSelected( true );
+		}
+		cbxRememberSf.setName( NAME_REMEMBER_SF );
+		area.add( cbxRememberSf, constraints );
+		constraints.insets = new Insets( 2, 2, 2, 2 );
+		
+		// chosen soundfont file name
 		constraints.gridy++;
 		constraints.gridwidth = 2;
 		lblChosenSoundfontFile = new JLabel( Dict.get(Dict.UNCHOSEN_FILE) );
@@ -496,18 +555,6 @@ public class UiView extends JDialog {
 		if ( soundfontFileName != null ) {
 			lblChosenSoundfontFile.setText( soundfontFileName );
 		}
-		
-		// remember soundfont checkbox
-		constraints.gridy++;
-		cbxRememberSf = new JCheckBox( Dict.get(Dict.REMEMBER_SF) );
-		cbxRememberSf.setToolTipText( Dict.get(Dict.REMEMBER_SF_TT) );
-		cbxRememberSf.addItemListener( controller );
-		String remember = Config.get( Config.REMEMBER_SF2 );
-		if ( "true".equals(remember) ) {
-			cbxRememberSf.setSelected( true );
-		}
-		cbxRememberSf.setName( NAME_REMEMBER_SF );
-		area.add( cbxRememberSf, constraints );
 		
 		return area;
 	}
@@ -659,6 +706,23 @@ public class UiView extends JDialog {
 	public void close() {
 		dispose();
 		setVisible( false );
+	}
+	
+	/**
+	 * Called if a remember-file checkbox has been checked.
+	 * Makes sure that the checkboxes remember-midi and remember-midicapl
+	 * are never checked both at the same time.
+	 * 
+	 * @param cbxName name of the checked checkbox
+	 */
+	public void rememberCheckboxChecked(String cbxName) {
+		System.out.println(cbxName);
+		if (UiView.NAME_REMEMBER_MIDICAPL.equals(cbxName)) {
+			cbxRememberMidi.setSelected(false);
+		}
+		else if (UiView.NAME_REMEMBER_MIDI.equals(cbxName)) {
+			cbxRememberMidicapl.setSelected(false);
+		}
 	}
 	
 	/**

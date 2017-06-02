@@ -220,7 +220,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	}
 	
 	/**
-	 * Handles selecting/deselecting of the remember-soundfont checkbox.
+	 * Handles selecting/deselecting of one of the remember checkboxes.
 	 * 
 	 * @param e The event to be handled.
 	 */
@@ -236,22 +236,45 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			return;
 		}
 		
-		// remember-soundfont checkbox changed
+		// find out the config variables to change
+		String rememberConfigKey = "";
+		String pathConfigKey     = "";
+		String path              = "";
+		
+		// find out which checkbox has been changed
 		if ( UiView.NAME_REMEMBER_SF.equals(name) ) {
-			if (isChecked) {
-				// remember checkbox state in the config
-				Config.set( Config.REMEMBER_SF2, "true" );
-				
-				// remember soundfont file path, if a soundfont is loaded!
-				String path = SoundfontParser.getFilePath();
-				if ( path != null ) {
-					Config.set( Config.PATH_SF2, path );
-				}
+			rememberConfigKey = Config.REMEMBER_SF2;
+			pathConfigKey     = Config.PATH_SF2;
+			path              = SoundfontParser.getFilePath();
+		}
+		else if ( UiView.NAME_REMEMBER_MIDICAPL.equals(name) ) {
+			rememberConfigKey = Config.REMEMBER_MIDICAPL;
+			pathConfigKey     = Config.PATH_MIDICAPL;
+			path              = MidicaPLParser.getFilePath();
+		}
+		else if ( UiView.NAME_REMEMBER_MIDI.equals(name) ) {
+			rememberConfigKey = Config.REMEMBER_MIDI;
+			pathConfigKey     = Config.PATH_MIDI;
+			path              = MidiParser.getFilePath();
+		}
+		
+		// save in config
+		if (isChecked) {
+			// remember checkbox state in the config
+			Config.set( rememberConfigKey, "true" );
+			
+			// remember file path, if a file is loaded!
+			if (path != null) {
+				Config.set( pathConfigKey, path );
 			}
-			else {
-				Config.set( Config.REMEMBER_SF2, "false" );
-				Config.set( Config.PATH_SF2,     ""      );
-			}
+			
+			// make sure that the checkboxes remember-midi and remember-midicapl
+			// are never checked both at the same time
+			view.rememberCheckboxChecked(name);
+		}
+		else {
+			Config.set( rememberConfigKey, "false" );
+			Config.set( pathConfigKey,     ""      );
 		}
 	}
 	
@@ -352,6 +375,17 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 				if ( charsetKey != null ) {
 					ComboboxStringOption o = (ComboboxStringOption) ConfigComboboxModel.getModel( charsetKey ).getSelectedItem();
 					Config.set( charsetKey, o.getIdentifier() );
+				}
+				
+				// remember file path in the config, if necessary
+				String mustRemember = Config.get( Config.REMEMBER_MIDICAPL );
+				String pathKey      = Config.PATH_MIDICAPL;
+				if (FileSelector.FILE_TYPE_MIDI.equals(type)) {
+					mustRemember = Config.get( Config.REMEMBER_MIDI );
+					pathKey      = Config.PATH_MIDICAPL;
+				}
+				if (mustRemember.equals("true")) {
+					Config.set( pathKey, file.getAbsolutePath() );
 				}
 			}
 			else if ( FileSelector.FILE_TYPE_SOUNDFONT.equals(type) ) {
@@ -486,7 +520,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	 * Initializes key bindings and refreshes the current transpose level that has been set
 	 * in the player (or 0, if the transpose level has not yet been changed).
 	 * 
-	 * @param e    Window activation event.
+	 * @param e    Window event.
 	 */
 	public void windowActivated( WindowEvent e ) {
 		view.setTransposeLevel( SequenceParser.getTransposeLevel() );
@@ -496,7 +530,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	/**
 	 * Removes all key bindings.
 	 * 
-	 * @param e    Window closed event.
+	 * @param e    Window event.
 	 */
 	public void windowClosed( WindowEvent e ) {
 		view.removeKeyBindings();
@@ -505,7 +539,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	/**
 	 * Removes all key bindings, writes the current config to the config file, and exits.
 	 * 
-	 * @param e    Window closing event.
+	 * @param e    Window event.
 	 */
 	public void windowClosing( WindowEvent e ) {
 		view.removeKeyBindings();
@@ -516,7 +550,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	/**
 	 * Removes all key bindings.
 	 * 
-	 * @param e    Window closed event.
+	 * @param e    Window event.
 	 */
 	public void windowDeactivated( WindowEvent e ) {
 		view.removeKeyBindings();
@@ -533,34 +567,50 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	/**
 	 * Does nothing.
 	 * 
-	 * @param e    Window closed event.
+	 * @param e    Window event.
 	 */
 	public void windowIconified( WindowEvent e ) {
 	}
 	
 	/**
-	 * Checks if a soundfont must be loaded automatically, and loads it, if
+	 * Checks if files must be loaded automatically, and loads them, if
 	 * the check succeeds.
 	 * 
-	 * @param e    Window closed event.
+	 * @param e    Window event.
 	 */
 	public void windowOpened( WindowEvent e ) {
 		
-		// file already parsed?
-		if ( SoundfontParser.getFileName() != null ) {
+		// files already parsed?
+		if ( SoundfontParser.getFileName()  != null
+			|| MidicaPLParser.getFileName() != null
+			|| MidiParser.getFileName()     != null ) {
 			
-			// Don't parse it again. This method has only been called because
+			// Don't parse them again. This method has only been called because
 			// of a language change.
 			return;
 		}
 		
 		// check config
-		String remember      = Config.get( Config.REMEMBER_SF2 );
-		String soundfontPath = Config.get( Config.PATH_SF2 );
-		if ( "true".equals(remember) && ! soundfontPath.equals("") ) {
-			
-			// load the soundfont
+		String rememberSf       = Config.get( Config.REMEMBER_SF2 );
+		String soundfontPath    = Config.get( Config.PATH_SF2 );
+		String rememberMidicapl = Config.get( Config.REMEMBER_MIDICAPL );
+		String midicaplPath     = Config.get( Config.PATH_MIDICAPL );
+		String rememberMidi     = Config.get( Config.REMEMBER_MIDI );
+		String midiPath         = Config.get( Config.PATH_MIDI );
+		
+		// load soundfont, if needed
+		if ( "true".equals(rememberSf) && ! soundfontPath.equals("") ) {
 			parseChosenFile( FileSelector.FILE_TYPE_SOUNDFONT, new File(soundfontPath) );
+		}
+		
+		// load MidicaPL, if needed
+		if ( "true".equals(rememberMidicapl) && ! midicaplPath.equals("") ) {
+			parseChosenFile( FileSelector.FILE_TYPE_MPL, new File(midicaplPath) );
+		}
+		
+		// load MIDI, if needed
+		if ( "true".equals(rememberMidi) && ! midiPath.equals("") ) {
+			parseChosenFile( FileSelector.FILE_TYPE_MIDI, new File(midiPath) );
 		}
 	}
 	

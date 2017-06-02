@@ -345,6 +345,10 @@ public class Dict {
 	public static final String SOUNDFONT                   = "soundfont";
 	public static final String REMEMBER_SF                 = "remember_sf";
 	public static final String REMEMBER_SF_TT              = "remember_sf_tt";
+	public static final String REMEMBER_MPL                = "remember_mpl";
+	public static final String REMEMBER_MPL_TT             = "remember_mpl_tt";
+	public static final String REMEMBER_MID                = "remember_mid";
+	public static final String REMEMBER_MID_TT             = "remember_mid_tt";
 	public static final String PLAYER_BUTTON               = "player_button";
 	public static final String UNCHOSEN_FILE               = "unchosen_file";
 	public static final String CHOOSE_FILE                 = "choose_file";
@@ -1091,8 +1095,12 @@ public class Dict {
 		set( UNKNOWN_INSTRUMENT,           "unknown"                       );
 		set( MIDI_FILE,                    "Midi file"                     );
 		set( SOUNDFONT,                    "Soundfont"                     );
-		set( REMEMBER_SF,                  "Remember Soundfont"            );
+		set( REMEMBER_SF,                  "Remember"                      );
 		set( REMEMBER_SF_TT,               "Load the chosen soundfont automatically at the next startup" );
+		set( REMEMBER_MPL,                 "Remember"                      );
+		set( REMEMBER_MPL_TT,              "Load the chosen MidicaPL file automatically at the next startup" );
+		set( REMEMBER_MID,                 "Remember"                      );
+		set( REMEMBER_MID_TT,              "Load the chosen MIDI file automatically at the next startup" );
 		set( PLAYER_BUTTON,                "Start Player"                  );
 		set( UNCHOSEN_FILE,                "no file loaded"                );
 		set( CHOOSE_FILE,                  "select file"                   );
