@@ -79,11 +79,15 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	 * and the parser classes.
 	 */
 	public UiController() {
-		initView();
-		
 		mplParser       = new MidicaPLParser( true );
 		midiParser      = new MidiParser();
 		soundfontParser = new SoundfontParser();
+		
+		// initView() must be called after the parsers are created.
+		// Otherwise a null parser may be passed to the ParsingWorker's
+		// constructor. This error would appear on startup with remembered
+		// soundfont files in about 1 of 5 cases.
+		initView();
 	}
 	
 	/**
@@ -407,6 +411,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 				) + msg;
 			}
 			showErrorMessage( msg );
+			ex.printStackTrace();
 			
 			// reset sequence (but not if a soundfont has been parsed)
 			if ( FileSelector.FILE_TYPE_MPL.equals(type)
