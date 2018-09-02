@@ -1,19 +1,23 @@
-### Introduction
+# Introduction
 Midica is a MIDI composing assistant with a focus on music programming.  
-It features it's own programming language for music.
+It features it's own programming language for music: MidicaPL.
 
-So you can use the same techniques that "real" programmers use, including:
+So you can use the same techniques that "real" programmers use, like:
 - Copy & Paste
 - Macros
-- Subroutines
-- Modules
+- Modules for code re-use
 - Code Comments
 
 You write your songs in plain text files using the text editor of your choice. Midica transforms these files into MIDI.
 
-### Features of the Midica Application itself
-- **Loading and playing** MIDI streams from:
-    - Source code files (written in Midica's own programming language)
+# Usage
+- Install Java Runtume Environment (JRE) version 1.7 or higher.
+- Download the file `midica-VERSION.jar`.
+- Start Midica using the command: `java -jar midica-VERSION.jar`
+
+# Features of the Midica Application itself
+- **Loading and playing** MIDI sequences from:
+    - MidicaPL files
     - MIDI files
 - **Integrated MIDI player** featuring:
     - Regulation of volume, tempo and pitch transposition
@@ -21,8 +25,14 @@ You write your songs in plain text files using the text editor of your choice. M
     - Channel Overview (showing current instrument and channel activity)
     - Channel Detail viewer (Note name and number, volume and tick, channel by channel)
     - Channel configuration (Volume, Mute and Solo configurable channel by channel)
-    - Quick reloading and reparsing of a loaded source file script
-- **Soundcheck View** for testing how different instruments sound with the requested note, volume and length
+    - Quick reloading and reparsing of a loaded MidicaPL script
+- **Soundfonts**
+    - Loading Soundfonts and using them for playback
+    - Analyzing Soundfont contents
+    - Test Soundfonts with the Soundcheck window
+- **Exporting MIDI sequences**
+    - As MIDI files
+    - As MidicaPL files (not yet implemented)
 - **Configuration** of
     - GUI language (currently English or German)
     - Note System - International (C,D,E,F,G,A,B), German (C,D,E,F,G,A,H), Italian (Do,Re,Mi,Fa,Sol,La,Si)
@@ -32,7 +42,7 @@ You write your songs in plain text files using the text editor of your choice. M
     - Percussion shortcuts (English or German)
     - Instrument shortcuts (English or German)
 
+# Features of Midica's MIDI programming language
 
-### Features of Midica's MIDI programming language
+Not yet documented.
 
-to be continued...

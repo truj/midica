@@ -21,7 +21,7 @@ import javax.swing.border.Border;
  * word wrapping of long texts and scrollbars when needed.
  * 
  * It's actually a {@link JScrollPane} containing a {@link JTextArea} that's
- * changed modified in order to look more or less like a {@link JLabel}.
+ * modified in order to look more or less like a {@link JLabel}.
  * 
  * The height of the label is automatically adjusted to the containing text.
  * However it can still be limited to a certain value by calling
@@ -43,7 +43,7 @@ public class FlowLabel extends JScrollPane {
 	private JTextArea label           = null;
 
 	/**
-	 * Creates a new, empty {@link FlowLabel}.
+	 * Creates a new {@link FlowLabel}.
 	 * 
 	 * @param content         The text to be displayed.
 	 * @param charsPerLine    The estimated number of characters fitting in one line.
@@ -140,7 +140,7 @@ public class FlowLabel extends JScrollPane {
 	/**
 	 * Sets the maximum height of the label. Calling this method with a
 	 * positive height makes sure that {@link #getPreferredSize()} will never
-	 * return a dimension with a height greater than **height**.
+	 * return a dimension with a height higher than **height**.
 	 * 
 	 * This should be used if the text can be so large that the layout is
 	 * in danger.

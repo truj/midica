@@ -18,11 +18,11 @@ import org.midica.config.Config;
 import org.midica.file.SoundfontParser;
 
 /**
- * Cell renderer for the soundfont resource table in the
- * configuration overview of the info window.
+ * Cell renderer for the resources table in the
+ * **Soundfont** > **Resources** tab of the info window.
  * 
- * The categories are displayed in another color than the plain syntax
- * elements.
+ * The categories (samples, layers) are displayed in another color than the
+ * normal data rows.
  * 
  * For the format and class columns the tooltips have to show more information
  * than the cell content.
@@ -37,8 +37,7 @@ public class SoundfontResourceTableCellRenderer extends MidicaTableCellRenderer 
 	private ArrayList<HashMap<String, Object>> resources;
 	
 	/**
-	 * Creates a cell renderer for the soundfont resource table
-	 * in the configuration overview of the info window.
+	 * Creates a cell renderer for the soundfont resources table.
 	 */
 	public SoundfontResourceTableCellRenderer() {
 		this.resources = SoundfontParser.getSoundfontResources();

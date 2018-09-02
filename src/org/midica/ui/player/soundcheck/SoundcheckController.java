@@ -43,8 +43,8 @@ import org.midica.ui.player.PlayerView;
  */
 public class SoundcheckController implements ActionListener, ListSelectionListener, ItemListener, ChangeListener, MouseWheelListener, DocumentListener, WindowListener {
 	
-	public static final int DEFAULT_NOTE_INDEX       = 48; // MIDI num 48 (chromatic instrumends start at 0)
-	public static final int DEFAULT_PERCUSSION_INDEX = 11; // MIDI num 38 (percussion starts at 27)
+	private static final int DEFAULT_NOTE_INDEX       = 48; // MIDI num 48 (chromatic instrumends start at 0)
+	private static final int DEFAULT_PERCUSSION_INDEX = 11; // MIDI num 38 (percussion starts at 27)
 	
 	private static SoundcheckController      controller            = null;
 	private static SoundcheckView            view                  = null;

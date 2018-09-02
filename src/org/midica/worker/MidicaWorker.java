@@ -15,11 +15,11 @@ import javax.swing.SwingWorker;
  * 
  * The derived worker is executed in the background before the (blocking)
  * setVisible() method of the (modal) waiting dialog is called.
- * That causes the execution of {@link #doInBackground()} that does the actual
+ * That causes the execution of {@link #doInBackground()} which does the actual
  * work.
  * 
- * After the background work is done, {@link #done()} is called and closes the
- * waiting dialog.
+ * After the background work is finished, {@link #done()} is called and closes
+ * the waiting dialog.
  * 
  * @author Jan Trukenmüller
  */
@@ -31,7 +31,7 @@ public abstract class MidicaWorker extends SwingWorker<Exception, Void> {
 	 * Creates a worker for time-consuming background work while
 	 * a waiting dialog is shown.
 	 * 
-	 * @param view The waiting dialog.
+	 * @param view  The waiting dialog
 	 */
 	public MidicaWorker( WaitView view ) {
 		this.view = view;
@@ -41,14 +41,14 @@ public abstract class MidicaWorker extends SwingWorker<Exception, Void> {
 	 * Does the background work.
 	 * 
 	 * @return the exception caught during the work or **null** if no exception
-	 *         is caught.
+	 *         is caught
 	 */
 	@Override
 	protected abstract Exception doInBackground();
 	
 	/**
 	 * Closes the waiting dialog.
-	 * This method is executed if the parsing is finished.
+	 * This method is executed if the background work is finished.
 	 */
 	@Override
 	protected void done() {

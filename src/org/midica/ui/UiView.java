@@ -689,7 +689,7 @@ public class UiView extends JDialog {
 	public void refreshConfigFeedback() {
 		String[] feedback = Dict.getConfigFeedback();
 		boolean ok = true;
-		if ( Dict.CONF_ERROR_ERROR.equals( feedback[0]) ) {
+		if ( Dict.CONF_ERROR_ERROR.equals(feedback[0]) ) {
 			ok = false;
 		}
 		if ( ok )

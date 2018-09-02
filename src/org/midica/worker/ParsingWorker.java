@@ -21,7 +21,7 @@ import org.midica.file.ParseException;
  * setVisible() method of the (modal) waiting dialog is called.
  * That causes the execution of {@link #doInBackground()} that parses the file.
  * 
- * After the parsing work is done, {@link MidicaWorker#done()} is called and
+ * After the parsing work is finished, {@link MidicaWorker#done()} is called and
  * closes the waiting dialog.
  * 
  * @author Jan Trukenmüller

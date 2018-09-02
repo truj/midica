@@ -17,7 +17,7 @@ import org.midica.ui.model.MessageDetail;
 import org.midica.ui.model.MessageTableModel;
 
 /**
- * Cell renderer for the message table in the MIDI Sequence > MIDI Message
+ * Cell renderer for the message table in the **MIDI Sequence** > **MIDI Message**
  * tab of the info window.
  * 
  * The background color can be defined in the constructor.
@@ -34,8 +34,7 @@ public class MessageTableCellRenderer extends MidicaTableCellRenderer {
 	private MessageTableModel model = null;
 	
 	/**
-	 * Creates a cell renderer for the soundfont instruments and drum kits table
-	 * in the configuration overview of the info window.
+	 * Creates a cell renderer for the MIDI messages table.
 	 */
 	public MessageTableCellRenderer( MessageTableModel model, Color bgColor ) {
 		this.model = model;

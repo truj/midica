@@ -42,18 +42,16 @@ public class MidicaTable extends JTable {
 	/**
 	 * Sets the given model as table model.
 	 * 
-	 * This is implemented as a separate method instead of using the constructor
-	 * 
-	 * @param model
+	 * @param model  The table model
 	 */
 	public void setModel( MidicaTableModel model ) {
 		super.setModel( model );
 	}
 	
 	/**
-	 * Creates a {@link MidicaTableHeader} header supporting tooltips.
+	 * Creates a {@link MidicaTableHeader} supporting tooltips.
 	 * 
-	 * Enables that header to synchronize the column header sizes to the
+	 * Enables that header to synchronize the column header sizes with the
 	 * column sizes.
 	 * 
 	 * @return the created table header.

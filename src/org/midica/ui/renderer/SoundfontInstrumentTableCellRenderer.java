@@ -19,8 +19,8 @@ import org.midica.config.Dict;
 import org.midica.file.SoundfontParser;
 
 /**
- * Cell renderer for the soundfont instrument and drum kit table in the
- * configuration overview of the info window.
+ * Cell renderer for the instruments and drum kits table in the
+ * **Soundfont** > **Instruments & Drum Kits** tab of the info window.
  * 
  * The categories are displayed in another color than the plain syntax
  * elements.
@@ -38,8 +38,8 @@ public class SoundfontInstrumentTableCellRenderer extends MidicaTableCellRendere
 	private ArrayList<HashMap<String, String>> instruments;
 	
 	/**
-	 * Creates a cell renderer for the soundfont instruments and drum kits table
-	 * in the configuration overview of the info window.
+	 * Creates a cell renderer for the soundfont-based instruments and drum kits
+	 * table.
 	 */
 	public SoundfontInstrumentTableCellRenderer() {
 		this.instruments = SoundfontParser.getSoundfontInstruments();

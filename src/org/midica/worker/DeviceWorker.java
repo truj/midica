@@ -12,7 +12,7 @@ import org.midica.ui.player.PlayerController;
 
 
 /**
- * This class is used to setup the midi devices in the background while a
+ * This class is used to setup the MIDI devices in the background while a
  * {@link WaitView} is shown.
  * 
  * Setting up the MIDI devices may be time consuming because it includes
@@ -23,7 +23,7 @@ import org.midica.ui.player.PlayerController;
  * That causes the execution of {@link #doInBackground()} that sets up the
  * devices.
  * 
- * After the work is done, {@link MidicaWorker#done()} is called and
+ * After the work is finished, {@link MidicaWorker#done()} is called and
  * closes the waiting dialog.
  * 
  * @author Jan Trukenmüller
@@ -33,7 +33,7 @@ public class DeviceWorker extends MidicaWorker {
 	private PlayerController playerController = null;
 	
 	/**
-	 * Creates a parsing worker that parses a file in the background while
+	 * Creates a worker that sets up MIDI devices in the background while
 	 * a waiting dialog is shown.
 	 * 
 	 * @param view              The waiting dialog.

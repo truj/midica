@@ -27,8 +27,11 @@ import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
 
 /**
- * This class provides a file chooser that allows to choose the charset
- * with a combobox.
+ * This class provides a file chooser that allows to choose a file together with
+ * a charset.
+ * 
+ * It can add a charset combobox and a description to the inherited
+ * {@link JFileChooser}.
  * 
  * @author Jan Trukenmüller
  */
@@ -177,8 +180,9 @@ public class MidicaFileChooser extends JFileChooser {
 	 * Creates the charset-related widgets and inserts them into the right
 	 * places inside the parent file chooser.
 	 * 
-	 * This code is really ugly but necessary because {@link JFileChooser}
-	 * doesn't provide any other possibility to select a charset.
+	 * The code in this method is really ugly but necessary because
+	 * {@link JFileChooser} doesn't provide any other possibility to
+	 * select a charset.
 	 */
 	private void insertCharsetSelectionWidgets() {
 		

@@ -17,8 +17,8 @@ import org.midica.config.Dict;
 import org.midica.ui.info.InstrumentElement;
 
 /**
- * Cell renderer for the instrument table in the configuration overview of
- * the info window.
+ * Cell renderer for the instruments table in the **Configuration** >
+ * **Instrument Shortcuts** tab of the info window.
  * 
  * The categories are displayed in another color than the plain instruments.
  * 
@@ -32,8 +32,7 @@ public class InstrumentTableCellRenderer extends MidicaTableCellRenderer {
 	private ArrayList<InstrumentElement> instrumentList;
 	
 	/**
-	 * Creates a cell renderer for the instruments table in the configuration
-	 * overview of the info window.
+	 * Creates a cell renderer for the instruments table.
 	 */
 	public InstrumentTableCellRenderer() {
 		instrumentList = Dict.getInstrumentList();

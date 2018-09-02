@@ -19,7 +19,7 @@ import org.midica.ui.model.MidicaTreeNode;
 /**
  * Class for Midica trees.
  * 
- * These trees support tooltips for their nodes.
+ * These trees support tooltips in their nodes.
  * 
  * @author Jan Trukenmüller
  */
@@ -28,7 +28,7 @@ public class MidicaTree extends JTree {
 	private static final long serialVersionUID = 1L;
 	
 	/**
-	 * Creates a new tree supporting tooltips for the nodes.
+	 * Creates a new tree supporting tooltips in the nodes.
 	 */
 	public MidicaTree() {
 		super();
@@ -36,9 +36,9 @@ public class MidicaTree extends JTree {
 	}
 	
 	/**
-	 * Creates a new tree supporting tooltips for the nodes.
+	 * Creates a new tree supporting tooltips in the nodes.
 	 * 
-	 * @param model  The tree model.
+	 * @param model  The tree model
 	 */
 	public MidicaTree( MidicaTreeModel model ) {
 		super( model );
@@ -48,7 +48,7 @@ public class MidicaTree extends JTree {
 	/**
 	 * Sets the given model as tree model.
 	 * 
-	 * @param model
+	 * @param model  The tree model
 	 */
 	public void setModel( MidicaTreeModel model ) {
 		super.setModel( model );
@@ -65,8 +65,8 @@ public class MidicaTree extends JTree {
 	 * Returns the tooltip text according to the tree node hovered
 	 * by the mouse pointer.
 	 * 
-	 * @param e  The mouseover event.
-	 * @return   The tooltip text for the node hovered by the mouse pointer.
+	 * @param e  the mouseover event
+	 * @return   the tooltip text for the node hovered by the mouse pointer
 	 */
 	@Override
 	public String getToolTipText( MouseEvent e ) {

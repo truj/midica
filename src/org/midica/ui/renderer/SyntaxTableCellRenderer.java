@@ -17,7 +17,8 @@ import org.midica.config.Dict;
 import org.midica.ui.info.SyntaxElement;
 
 /**
- * Cell renderer for the syntax table in the configuration overview of the info window.
+ * Cell renderer for the syntax table in the **Configuration** >
+ * **Syntax** tab of the info window.
  * 
  * The categories are displayed in another color than the plain syntax elements.
  * 
@@ -31,8 +32,7 @@ public class SyntaxTableCellRenderer extends MidicaTableCellRenderer {
 	private ArrayList<SyntaxElement> syntaxList;
 	
 	/**
-	 * Creates a cell renderer for the syntax table in the configuration overview
-	 * of the info window.
+	 * Creates a cell renderer for the syntax table.
 	 */
 	public SyntaxTableCellRenderer() {
 		this.syntaxList = Dict.getSyntaxList();

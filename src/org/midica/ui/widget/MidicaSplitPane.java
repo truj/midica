@@ -25,7 +25,7 @@ public class MidicaSplitPane extends JSplitPane {
 	private boolean firstValidateDone = false;
 	
 	/**
-	 * Creates a new table supporting tooltips in the table header.
+	 * Creates a new split pane.
 	 */
 	public MidicaSplitPane( int orientation ) {
 		super( orientation );
@@ -35,8 +35,8 @@ public class MidicaSplitPane extends JSplitPane {
 	 * Sets the divider location (if possible) and remembers the value
 	 * in order to try this again after the first validation.
 	 * 
-	 * @param dividerLocation  Divider location from 0.0 (top/left)
-	 *                         to 1.0 (bottom/right)
+	 * @param dividerLocation  Divider location from **0.0** (top or left)
+	 *                         to **1.0** (bottom of right)
 	 */
 	@Override
 	public void setDividerLocation( double dividerLocation ) {
