@@ -187,26 +187,26 @@ public class SequenceCreator {
 	 * @param note         Note number.
 	 * @param startTick    Tickstamp of the note-ON event.
 	 * @param endTick      Tickstamp of the note-OFF event.
-	 * @param volume       Velocity of the key stroke.
+	 * @param velocity     Velocity of the key stroke.
 	 * @throws InvalidMidiDataException if invalid MIDI data is used to create a MIDI message.
 	 */
-	public static void addMessageKeystroke( int channel, int note, long startTick, long endTick, int volume ) throws InvalidMidiDataException {
-		addMessageNoteON( channel, note, startTick, volume );
+	public static void addMessageKeystroke( int channel, int note, long startTick, long endTick, int velocity ) throws InvalidMidiDataException {
+		addMessageNoteON( channel, note, startTick, velocity );
 		addMessageNoteOFF( channel, note, endTick );
 	}
 	
 	/**
 	 * Adds a note-ON event.
 	 * 
-	 * @param channel    Channel number from 0 to 15.
-	 * @param note       Note number.
-	 * @param tick       Tickstamp of the event.
-	 * @param volume     Velocity of the key stroke.
+	 * @param channel     Channel number from 0 to 15.
+	 * @param note        Note number.
+	 * @param tick        Tickstamp of the event.
+	 * @param velocity    Velocity of the key stroke.
 	 * @throws InvalidMidiDataException if invalid MIDI data is used to create a MIDI message.
 	 */
-	public static void addMessageNoteON( int channel, int note, long tick, int volume ) throws InvalidMidiDataException {
+	public static void addMessageNoteON( int channel, int note, long tick, int velocity ) throws InvalidMidiDataException {
 		ShortMessage msg = new ShortMessage();
-		msg.setMessage( ShortMessage.NOTE_ON, channel, note, volume );
+		msg.setMessage( ShortMessage.NOTE_ON, channel, note, velocity );
 		MidiEvent event = new MidiEvent( msg, tick );
 		tracks[ channel + NUM_META_TRACKS ].add( event );
 	}

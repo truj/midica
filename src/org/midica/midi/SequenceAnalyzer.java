@@ -97,7 +97,7 @@ public class SequenceAnalyzer {
 	/**                   channel    --     note      --     tick -- on/off */
 	private static TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>> noteOnOffByChannel = null;
 	
-	/**                    channel  --   tick    --    note -- volume */
+	/**                    channel  --   tick    --    note -- velocity */
 	private static TreeMap<Byte, TreeMap<Long, TreeMap<Byte, Byte>>> noteHistory = null;
 	
 	/**                    channel  --   tick -- number of keys pressed at this time */
@@ -217,7 +217,7 @@ public class SequenceAnalyzer {
 	 *   - channel
 	 *   - tick
 	 *   - note
-	 *   - volume
+	 *   - velocity
 	 * - **note_on_off**: TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>>
 	 *   - channel
 	 *   - note
@@ -592,12 +592,12 @@ public class SequenceAnalyzer {
 		
 		// NOTE ON or OFF
 		if (ShortMessage.NOTE_ON == cmd) {
-			byte note    = (byte) msg.getData1();
-			byte volume  = (byte) msg.getData2();
+			byte note     = (byte) msg.getData1();
+			byte velocity = (byte) msg.getData2();
 			
 			// on or off?
-			if (volume > 0) {
-				addNoteOn( tick, channel, note, volume );
+			if (velocity > 0) {
+				addNoteOn( tick, channel, note, velocity );
 			}
 			else {
 				addNoteOff( tick, channel, note );
@@ -1135,14 +1135,14 @@ public class SequenceAnalyzer {
 	 * - prepares markers
 	 * - builds up the tree model for the bank/instrument/note trees
 	 * 
-	 * @param tick     The tickstamp when this event occurred.
-	 * @param channel  The MIDI channel number.
-	 * @param note     The note number.
-	 * @param volume   The note's velocity.
+	 * @param tick      The tickstamp when this event occurred.
+	 * @param channel   The MIDI channel number.
+	 * @param note      The note number.
+	 * @param velocity  The note's velocity.
 	 * @throws ReflectiveOperationException if the note cannot be added to
 	 *         one of the tree models.
 	 */
-	private static void addNoteOn( long tick, byte channel, byte note, byte volume ) throws ReflectiveOperationException {
+	private static void addNoteOn( long tick, byte channel, byte note, byte velocity ) throws ReflectiveOperationException {
 		
 		// note on/off tracking
 		TreeMap<Byte, TreeMap<Long, Boolean>> noteTickOnOff = noteOnOffByChannel.get( channel );
@@ -1190,7 +1190,7 @@ public class SequenceAnalyzer {
 			noteHistoryAtTick = new TreeMap<Byte, Byte>();
 			noteHistoryForChannel.put( tick, noteHistoryAtTick );
 		}
-		noteHistoryAtTick.put( note, volume );
+		noteHistoryAtTick.put( note, velocity );
 		
 		// prepare marker event
 		markerTicks.add( tick );
@@ -1915,7 +1915,7 @@ public class SequenceAnalyzer {
 	 * of their occurrence. Each entry contains the following parts:
 	 * 
 	 * - **index 0**: note number
-	 * - **index 1**: volume (more correct: velocity)
+	 * - **index 1**: velocity
 	 * - **index 2**: tickstamp
 	 * - **index 3**: past/future marker (**0** = presence or past, **1** = future)
 	 * 
@@ -1948,14 +1948,14 @@ public class SequenceAnalyzer {
 			// each note at lastTick
 			Set<Entry<Byte, Byte>> noteEntrySet = notesAtTick.entrySet();
 			for (Entry<Byte, Byte> noteEntry : noteEntrySet) {
-				byte note   = noteEntry.getKey();
-				byte volume = noteEntry.getValue();
+				byte note     = noteEntry.getKey();
+				byte velocity = noteEntry.getValue();
 				
 				Long[] row = {
-					(long) note,    // note number
-					(long) volume,  // velocity
-					lastTick,       // tick
-					0L,             // 0 = past; 1 = future
+					(long) note,     // note number
+					(long) velocity, // 0 - 127
+					lastTick,        // tick
+					0L,              // 0 = past; 1 = future
 				};
 				result.add( row );
 				
@@ -1989,14 +1989,14 @@ public class SequenceAnalyzer {
 			// each note at nextTick
 			Set<Entry<Byte, Byte>> noteEntrySet = notesAtTick.entrySet();
 			for (Entry<Byte, Byte> noteEntry : noteEntrySet) {
-				byte note   = noteEntry.getKey();
-				byte volume = noteEntry.getValue();
+				byte note     = noteEntry.getKey();
+				byte velocity = noteEntry.getValue();
 				
 				Long[] row = {
-					(long) note,    // note number
-					(long) volume,  // velocity
-					nextTick,       // tick
-					1L,             // 0 = past; 1 = future
+					(long) note,     // note number
+					(long) velocity, // 0 - 127
+					nextTick,        // tick
+					1L,              // 0 = past; 1 = future
 				};
 				result.add( row );
 				

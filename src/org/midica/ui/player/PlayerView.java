@@ -144,12 +144,12 @@ public class PlayerView extends JDialog {
 	public static final ImageIcon AC_ICON_ACTIVE    = new ImageIcon( ClassLoader.getSystemResource("org/midica/resources/active.png") );
 	
 	// for channel details
-	public static       int   NOTE_HISTORY_WIDTH            =   0; // will be set later
-	public static final int   NOTE_HISTORY_HEIGHT           = 150;
-	public static final int   NOTE_HISTORY_COL_WIDTH_NUMBER =  40;
-	public static final int   NOTE_HISTORY_COL_WIDTH_NAME   = 100;
-	public static final int   NOTE_HISTORY_COL_WIDTH_VOLUME =  40;
-	public static final int   NOTE_HISTORY_COL_WIDTH_TICK   =  70;
+	public static       int   NOTE_HISTORY_WIDTH              =   0; // will be set later
+	public static final int   NOTE_HISTORY_HEIGHT             = 150;
+	public static final int   NOTE_HISTORY_COL_WIDTH_NUMBER   =  40;
+	public static final int   NOTE_HISTORY_COL_WIDTH_NAME     = 100;
+	public static final int   NOTE_HISTORY_COL_WIDTH_VELOCITY =  40;
+	public static final int   NOTE_HISTORY_COL_WIDTH_TICK     =  70;
 	
 	private PlayerController      controller        = null;
 	private KeyEventPostProcessor keyProcessor      = null;
@@ -159,34 +159,34 @@ public class PlayerView extends JDialog {
 	private Container             lyricsArea        = null;
 	
 	// UI
-	private JCheckBox       cbxLyrics       = null;
-	private JLabel          lblLyrics       = null;
+	private JCheckBox  cbxLyrics       = null;
+	private JLabel     lblLyrics       = null;
 	
-	private JSlider         progressSlider  = null;
-	private JSlider         volumeSlider    = null;
-	private JSlider         tempoSlider     = null;
-	private JSlider         transposeSlider = null;
+	private JSlider    progressSlider  = null;
+	private JSlider    volumeSlider    = null;
+	private JSlider    tempoSlider     = null;
+	private JSlider    transposeSlider = null;
 	
-	private JButton         btnPlayPause    = null;
-	private JButton         btnReparse      = null;
-	private JButton         btnSoundcheck   = null;
-	private JButton         btnInfo         = null;
-	private JButton         btnForw         = null;
-	private JButton         btnFastForw     = null;
-	private JButton         btnRew          = null;
-	private JButton         btnFastRew      = null;
-	private JButton         btnStop         = null;
-	private JButton         btnMemorize     = null;
-	private JButton         btnJump         = null;
+	private JButton    btnPlayPause    = null;
+	private JButton    btnReparse      = null;
+	private JButton    btnSoundcheck   = null;
+	private JButton    btnInfo         = null;
+	private JButton    btnForw         = null;
+	private JButton    btnFastForw     = null;
+	private JButton    btnRew          = null;
+	private JButton    btnFastRew      = null;
+	private JButton    btnStop         = null;
+	private JButton    btnMemorize     = null;
+	private JButton    btnJump         = null;
 	
-	private JTextField      fldJump         = null;
-	private JTextField      fldTempo        = null;
-	private JTextField      fldTranspose    = null;
-	private JTextField      fldVol          = null;
-	private JLabel          lblCurrentTicks = null;
-	private JLabel          lblCurrentTime  = null;
-	private JLabel          lblTotalTicks   = null;
-	private JLabel          lblTotalTime    = null;
+	private JTextField fldJump         = null;
+	private JTextField fldTempo        = null;
+	private JTextField fldTranspose    = null;
+	private JTextField fldVol          = null;
+	private JLabel     lblCurrentTicks = null;
+	private JLabel     lblCurrentTime  = null;
+	private JLabel     lblTotalTicks   = null;
+	private JLabel     lblTotalTime    = null;
 	
 	private ArrayList<JCheckBox>  muteCbx               = null;
 	private ArrayList<JCheckBox>  soloCbx               = null;
@@ -218,7 +218,7 @@ public class PlayerView extends JDialog {
 		
 		// note history table width
 		NOTE_HISTORY_WIDTH = NOTE_HISTORY_COL_WIDTH_NAME + NOTE_HISTORY_COL_WIDTH_NUMBER
-		                   + NOTE_HISTORY_COL_WIDTH_TICK + NOTE_HISTORY_COL_WIDTH_VOLUME;
+		                   + NOTE_HISTORY_COL_WIDTH_TICK + NOTE_HISTORY_COL_WIDTH_VELOCITY;
 		
 		// add listeners
 		addWindowListener( controller );
@@ -1037,10 +1037,10 @@ public class PlayerView extends JDialog {
 		// table
 		MidicaTable table = new MidicaTable( model );
 		table.setDefaultRenderer( Object.class, renderer );
-		table.getColumnModel().getColumn( 0 ).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_NUMBER );
-		table.getColumnModel().getColumn( 1 ).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_NAME   );
-		table.getColumnModel().getColumn( 2 ).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_VOLUME );
-		table.getColumnModel().getColumn( 3 ).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_TICK   );
+		table.getColumnModel().getColumn( 0 ).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_NUMBER   );
+		table.getColumnModel().getColumn( 1 ).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_NAME     );
+		table.getColumnModel().getColumn( 2 ).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_VELOCITY );
+		table.getColumnModel().getColumn( 3 ).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_TICK     );
 		JScrollPane pane = new JScrollPane( table );
 		
 		// size

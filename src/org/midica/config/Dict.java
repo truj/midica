@@ -82,8 +82,8 @@ public class Dict {
 	public static final String SYNTAX_OPT_ASSIGNER  = "OPT_ASSIGNER";
 	public static final String SYNTAX_PROG_BANK_SEP = "PROGRAM_BANK_SEPARATOR";
 	public static final String SYNTAX_BANK_SEP      = "BANK_SEPARATOR";
-	public static final String SYNTAX_VOLUME        = "VOLUME";
-	public static final String SYNTAX_V             = "VOLUME_SHORT";
+	public static final String SYNTAX_VELOCITY      = "VELOCITY";
+	public static final String SYNTAX_V             = "VELOCITY_SHORT";
 	public static final String SYNTAX_STACCATO      = "STACCATO";
 	public static final String SYNTAX_S             = "STACCATO_SHORT";
 	public static final String SYNTAX_MULTIPLE      = "MULTIPLE";
@@ -871,7 +871,7 @@ public class Dict {
 	public static final String ERROR_MIDI_PROBLEM               = "error_midi_problem";
 	public static final String ERROR_CH_CMD_NUM_OF_ARGS         = "error_ch_num_of_args";
 	public static final String ERROR_CANT_PARSE_OPTIONS         = "error_cant_parse_options";
-	public static final String ERROR_VOL_NOT_MORE_THAN_127      = "error_vol_not_more_than_127";
+	public static final String ERROR_VEL_NOT_MORE_THAN_127      = "error_vel_not_more_than_127";
 	public static final String ERROR_UNKNOWN_OPTION             = "error_unknown_option: ";
 	public static final String ERROR_UNKNOWN_NOTE               = "error_unknown_note";
 	public static final String ERROR_UNKNOWN_PERCUSSION         = "error_unknown_percussion";
@@ -969,7 +969,7 @@ public class Dict {
 	public static final String CH_HEAD_COMMENT                  = "ch_head_comment";
 	public static final String CH_DETAILS_VOLUME                = "ch_details_volume";
 	public static final String LBL_NOTE_HISTORY                 = "lbl_note_history";
-	public static final String COLUMN_VOLUME                    = "column_volume";
+	public static final String COLUMN_VELOCITY                  = "column_velocity";
 	public static final String COLUMN_NUMBER                    = "column_number";
 	public static final String COLUMN_NAME                      = "column_name";
 	public static final String COLUMN_TICK                      = "column_tick";
@@ -1313,8 +1313,8 @@ public class Dict {
 		set( SYNTAX_OPT_ASSIGNER,    "option assignment character"                      );
 		set( SYNTAX_PROG_BANK_SEP,   "Separator between program number and bank select" );
 		set( SYNTAX_BANK_SEP,        "MSB / LSB separator for bank select"              );
-		set( SYNTAX_VOLUME,          "volume option (long)"                             );
-		set( SYNTAX_V,               "volume option (short)"                            );
+		set( SYNTAX_VELOCITY,        "velocity option (long)"                           );
+		set( SYNTAX_V,               "velocity option (short)"                          );
 		set( SYNTAX_STACCATO,        "staccato option (long)"                           );
 		set( SYNTAX_S,               "staccato option (short)"                          );
 		set( SYNTAX_MULTIPLE,        "multiple notes option (long)"                     );
@@ -1665,7 +1665,7 @@ public class Dict {
 		set( ERROR_MIDI_PROBLEM,                  "<html>Midi Problem!<br>"                                           );
 		set( ERROR_CH_CMD_NUM_OF_ARGS,            "wrong number of arguments in channel command"                      );
 		set( ERROR_CANT_PARSE_OPTIONS,            "cannot parse options"                                              );
-		set( ERROR_VOL_NOT_MORE_THAN_127,         "volume cannot be set to more than 127"                             );
+		set( ERROR_VEL_NOT_MORE_THAN_127,         "velocity cannot be set to more than 127"                           );
 		set( ERROR_UNKNOWN_OPTION,                "unknown option: "                                                  );
 		set( ERROR_UNKNOWN_NOTE,                  "unknown note: "                                                    );
 		set( ERROR_UNKNOWN_PERCUSSION,            "unknown percussion shortcut: "                                     );
@@ -1705,7 +1705,7 @@ public class Dict {
 		
 		// MidicaPLExporter
 		set( WARNING_SAME_NOTE_IN_SAME_TICK,      "The same note has been addressed more than once"
-		                                        + " at the same time and channel (current/old volume: %s/%s)"         );
+		                                        + " at the same time and channel (current/old velocity: %s/%s)"       );
 		set( WARNING_IGNORED_SHORT_MESSAGE,       "Ignored ShortMessage - command: %s, data1: %s, data2: %s"          );
 		
 		// MidiDevices
@@ -1767,25 +1767,25 @@ public class Dict {
 		set( ACTIVITY_INACTIVE,                   "inactive"                   );
 		set( CH_DETAILS_VOLUME,                   "Volume"                     );
 		set( LBL_NOTE_HISTORY,                    "<html>Note<br>History"      );
-		set( COLUMN_VOLUME,                       "Volume"                     );
+		set( COLUMN_VELOCITY,                     "Velocity"                   );
 		set( COLUMN_NUMBER,                       "Number"                     );
 		set( COLUMN_NAME,                         "Name"                       );
 		set( COLUMN_TICK,                         "Tick"                       );
 		
 		// SoundcheckView
-		set( TITLE_SOUNDCHECK,               "Midica Soundcheck"                      );
-		set( SNDCHK_CHANNEL,                 "Channel"                                );
-		set( SNDCHK_INSTRUMENT,              "Instrument"                             );
-		set( SNDCHK_NOTE,                    "Note"                                   );
-		set( SNDCHK_VOLUME,                  "<html>Channel<br>Volume"                );
-		set( SNDCHK_VELOCITY,                "<html>Note<br>Volume<br>(Velocity)<br>" );
-		set( SNDCHK_DURATION,                "Duration (ms)"                          );
-		set( SNDCHK_KEEP_SETTINGS,           "Keep Settings"                          );
-		set( SNDCHK_PLAY,                    "Play"                                   );
-		set( SNDCHK_COL_PROGRAM,             "Prog"                                   );
-		set( SNDCHK_COL_BANK,                "Bank"                                   );
-		set( SNDCHK_COL_NAME_SF,             "Soundfont Name"                         );
-		set( SNDCHK_COL_NAME_SYNTAX,         "Syntax"                                 );
+		set( TITLE_SOUNDCHECK,               "Midica Soundcheck"               );
+		set( SNDCHK_CHANNEL,                 "Channel"                         );
+		set( SNDCHK_INSTRUMENT,              "Instrument"                      );
+		set( SNDCHK_NOTE,                    "Note"                            );
+		set( SNDCHK_VOLUME,                  "<html>Channel<br>Volume"         );
+		set( SNDCHK_VELOCITY,                "<html>Note<br>Velocity<br>"      );
+		set( SNDCHK_DURATION,                "Duration (ms)"                   );
+		set( SNDCHK_KEEP_SETTINGS,           "Keep Settings"                   );
+		set( SNDCHK_PLAY,                    "Play"                            );
+		set( SNDCHK_COL_PROGRAM,             "Prog"                            );
+		set( SNDCHK_COL_BANK,                "Bank"                            );
+		set( SNDCHK_COL_NAME_SF,             "Soundfont Name"                  );
+		set( SNDCHK_COL_NAME_SYNTAX,         "Syntax"                          );
 	}
 	
 	/**
@@ -2091,7 +2091,7 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_OPT_ASSIGNER  );
 		addSyntaxForInfoView( SYNTAX_PROG_BANK_SEP );
 		addSyntaxForInfoView( SYNTAX_BANK_SEP      );
-		addSyntaxForInfoView( SYNTAX_VOLUME        );
+		addSyntaxForInfoView( SYNTAX_VELOCITY      );
 		addSyntaxForInfoView( SYNTAX_V             );
 		addSyntaxForInfoView( SYNTAX_STACCATO      );
 		addSyntaxForInfoView( SYNTAX_S             );
@@ -2670,8 +2670,8 @@ public class Dict {
 		setSyntax( SYNTAX_OPT_ASSIGNER,    ":"              );
 		setSyntax( SYNTAX_PROG_BANK_SEP,   "-"              );
 		setSyntax( SYNTAX_BANK_SEP,        "."              );
-		setSyntax( SYNTAX_VOLUME,          "volume"         );
-		setSyntax( SYNTAX_V,               "vol"            );
+		setSyntax( SYNTAX_VELOCITY,        "velocity"       );
+		setSyntax( SYNTAX_V,               "vel"            );
 		setSyntax( SYNTAX_STACCATO,        "staccato"       );
 		setSyntax( SYNTAX_S,               "stac"           );
 		setSyntax( SYNTAX_MULTIPLE,        "polyphonic"     );
@@ -2716,7 +2716,7 @@ public class Dict {
 		setSyntax( SYNTAX_OPT_ASSIGNER,    "="              );
 		setSyntax( SYNTAX_PROG_BANK_SEP,   ","              );
 		setSyntax( SYNTAX_BANK_SEP,        "/"              );
-		setSyntax( SYNTAX_VOLUME,          "volume"         );
+		setSyntax( SYNTAX_VELOCITY,        "velocity"       );
 		setSyntax( SYNTAX_V,               "v"              );
 		setSyntax( SYNTAX_STACCATO,        "staccato"       );
 		setSyntax( SYNTAX_S,               "s"              );
@@ -2762,7 +2762,7 @@ public class Dict {
 		setSyntax( SYNTAX_OPT_ASSIGNER,    "="            );
 		setSyntax( SYNTAX_PROG_BANK_SEP,   ","            );
 		setSyntax( SYNTAX_BANK_SEP,        ":"            );
-		setSyntax( SYNTAX_VOLUME,          "vol"          );
+		setSyntax( SYNTAX_VELOCITY,        "vel"          );
 		setSyntax( SYNTAX_V,               "v"            );
 		setSyntax( SYNTAX_STACCATO,        "stac"         );
 		setSyntax( SYNTAX_S,               "s"            );

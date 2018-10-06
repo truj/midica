@@ -44,7 +44,7 @@ public class MidicaPLParser extends SequenceParser {
 	 *******************/
 	
 	// identifiers for options
-	private static final String OPT_VOLUME   = "volume";
+	private static final String OPT_VELOCITY = "velocity";
 	private static final String OPT_MULTIPLE = "multiple";
 	private static final String OPT_STACCATO = "staccato";
 	private static final String OPT_QUANTITY = "quantity";
@@ -97,7 +97,7 @@ public class MidicaPLParser extends SequenceParser {
 	public static String S             = null;
 	public static String STACCATO      = null;
 	public static String V             = null;
-	public static String VOLUME        = null;
+	public static String VELOCITY      = null;
 	public static String TRIPLET       = null;
 	public static String TUPLET        = null;
 	public static String TUPLET_FOR    = null;
@@ -178,7 +178,7 @@ public class MidicaPLParser extends SequenceParser {
 		S              = Dict.getSyntax( Dict.SYNTAX_S             );
 		STACCATO       = Dict.getSyntax( Dict.SYNTAX_STACCATO      );
 		V              = Dict.getSyntax( Dict.SYNTAX_V             );
-		VOLUME         = Dict.getSyntax( Dict.SYNTAX_VOLUME        );
+		VELOCITY       = Dict.getSyntax( Dict.SYNTAX_VELOCITY      );
 		TRIPLET        = Dict.getSyntax( Dict.SYNTAX_TRIPLET       );
 		TUPLET         = Dict.getSyntax( Dict.SYNTAX_TUPLET        );
 		TUPLET_FOR     = Dict.getSyntax( Dict.SYNTAX_TUPLET_FOR    );
@@ -341,7 +341,7 @@ public class MidicaPLParser extends SequenceParser {
 					subTokens[ 0 ] = tokens[ 0 ]; // same channel
 					subTokens[ 1 ] = Integer.toString( note );
 					if (chordElements.size() == i) {
-						// last note of the chord: prevent volume
+						// last note of the chord: prevent velocity
 						subTokens[ 2 ] = tokens[ 2 ];
 					}
 					else {
@@ -871,7 +871,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( S.equals(cmdId) )             S             = cmdName;
 		else if ( STACCATO.equals(cmdId) )      STACCATO      = cmdName;
 		else if ( V.equals(cmdId) )             V             = cmdName;
-		else if ( VOLUME.equals(cmdId) )        VOLUME        = cmdName;
+		else if ( VELOCITY.equals(cmdId) )      VELOCITY      = cmdName;
 		else if ( TRIPLET.equals(cmdId) )       TRIPLET       = cmdName;
 		else if ( TUPLET.equals(cmdId) )        TUPLET        = cmdName;
 		else if ( TUPLET_FOR.equals(cmdId) )    TUPLET_FOR    = cmdName;
@@ -1060,11 +1060,11 @@ public class MidicaPLParser extends SequenceParser {
 		if (2 == subTokens.length)
 			options = parseOptions( subTokens[1] );
 		
-		// apply volume option
-		if (options.containsKey(OPT_VOLUME)) {
-			int volume = options.get( OPT_VOLUME );
+		// apply velocity option
+		if (options.containsKey(OPT_VELOCITY)) {
+			int velocity = options.get( OPT_VELOCITY );
 			if (! isFake)
-				instruments.get( channel ).setVolume( volume );
+				instruments.get( channel ).setVelocity( velocity );
 		}
 		// apply staccato option
 		if (options.containsKey(OPT_STACCATO)) {
@@ -1093,9 +1093,9 @@ public class MidicaPLParser extends SequenceParser {
 				String.format( Dict.get(Dict.ERROR_CHANNEL_UNDEFINED), channel )
 			);
 		
-		// get start ticks of the first note and volume
+		// get start ticks of the first note and velocity
 		long absoluteStartTicks = instr.getCurrentTicks();
-		int  volume             = instr.getVolume();
+		int  velocity           = instr.getVelocity();
 		
 		NOTE_QUANTITY:
 		for (int i = 0; i < quantity; i++) {
@@ -1116,7 +1116,7 @@ public class MidicaPLParser extends SequenceParser {
 				// create and add messages
 				try {
 					int newNote = transpose( note, channel );
-					SequenceCreator.addMessageKeystroke( channel, newNote, startTicks, endTicks, volume );
+					SequenceCreator.addMessageKeystroke( channel, newNote, startTicks, endTicks, velocity );
 				}
 				catch ( InvalidMidiDataException e ) {
 					throw new ParseException( Dict.get(Dict.ERROR_MIDI_PROBLEM) + e.getMessage() );
@@ -1149,11 +1149,11 @@ public class MidicaPLParser extends SequenceParser {
 			// construct name and value
 			String optName  = optParts[ 0 ];
 			int    optValue = 0;
-			if (V.equals(optName) || VOLUME.equals(optName)) {
-				optName = OPT_VOLUME;
+			if (V.equals(optName) || VELOCITY.equals(optName)) {
+				optName = OPT_VELOCITY;
 				optValue = toInt( optParts[1] );
 				if (optValue > 127)
-					throw new ParseException( Dict.get(Dict.ERROR_VOL_NOT_MORE_THAN_127) );
+					throw new ParseException( Dict.get(Dict.ERROR_VEL_NOT_MORE_THAN_127) );
 			}
 			else if (S.equals(optName) || STACCATO.equals(optName)) {
 				optName = OPT_STACCATO;
@@ -1239,7 +1239,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * This is used if a note of a predefined chord is produced - so that the next note
 	 * of the same chord starts at the same tick.
 	 * 
-	 * @param original token containing the volume and the option string: token[2]
+	 * @param original token containing the velocity and the option string: token[2]
 	 * @return same token but with the MULTIPLE option
 	 */
 	private String addMultiple( String original ) {

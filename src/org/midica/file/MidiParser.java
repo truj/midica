@@ -223,27 +223,27 @@ public class MidiParser extends SequenceParser {
 	 * @throws ParseException
 	 */
 	private void processShortMessage( ShortMessage msg, long tick ) throws InvalidMidiDataException, ParseException {
-		int cmd     = msg.getCommand();
-		int channel = msg.getChannel();
-		int note    = msg.getData1();
-		int volume  = msg.getData2();
+		int cmd      = msg.getCommand();
+		int channel  = msg.getChannel();
+		int note     = msg.getData1();
+		int velocity = msg.getData2();
 		if ( channel < 0 || channel > 15 ) {
 			// not a channel command
 			SequenceCreator.addMessageGeneric( msg, tick );
 			return;
 		}
 		
-		if ( ShortMessage.NOTE_ON == cmd && volume > 0 ) {
+		if ( ShortMessage.NOTE_ON == cmd && velocity > 0 ) {
 			
 			// note on
 			note = transpose( note, channel );
-			// TODO: delete (used to debug channel volume changes in "And then there was silence")
+			// TODO: delete (used to debug channel velocity changes in "And then there was silence")
 //			if (9==channel&&tick>99000) {
-//				System.out.println("channel: "+channel+", note: "+note+", tick:"+tick+", vol: "+volume);
+//				System.out.println("channel: "+channel+", note: "+note+", tick:"+tick+", vel: "+velocity);
 //			}
-			SequenceCreator.addMessageNoteON( channel, note, tick, volume );
+			SequenceCreator.addMessageNoteON( channel, note, tick, velocity );
 		}
-		else if ( ShortMessage.NOTE_OFF == cmd || (ShortMessage.NOTE_ON == cmd && 0 == volume) ) {
+		else if ( ShortMessage.NOTE_OFF == cmd || (ShortMessage.NOTE_ON == cmd && 0 == velocity) ) {
 			
 			// note off
 			note = transpose( note, channel );

@@ -164,10 +164,10 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 	 */
 	private void play() {
 		try {
-			// check volume/velocity/duration fields, set field color, and set the volume slider
-			checkVolumeField( "volume" );   // throws NumberFormatException
+			// check volume/velocity/duration fields, set field color, and set the volume/velocity slider
+			checkVolOrVelField("volume");   // throws NumberFormatException
 			checkDurationField();           // throws NumberFormatException
-			checkVolumeField( "velocity" ); // throws NumberFormatException
+			checkVolOrVelField("velocity"); // throws NumberFormatException
 			
 			int     channel  = view.getChannel();
 			int     note     = view.getNote();
@@ -196,9 +196,9 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 	 * value from the text field.
 	 * 
 	 * @param  type  **volume** or **velocity**, depending on the field to be checked.
-	 * @throws NumberFormatException if the field cannot be used as a volume value.
+	 * @throws NumberFormatException if the field cannot be used as a volume/velocity value.
 	 */
-	private void checkVolumeField( String type ) throws NumberFormatException {
+	private void checkVolOrVelField( String type ) throws NumberFormatException {
 		
 		// check field
 		byte value;
@@ -245,7 +245,7 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 			if ( ! view.isVolumeSliderAdjusting() )
 				return;
 			byte volume = (byte) ( (JSlider) e.getSource() ).getValue();
-			view.setVolume( volume );
+			view.setVolume(volume);
 		}
 		
 		// velocity slider
@@ -255,7 +255,7 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 			if ( ! view.isVelocitySliderAdjusting() )
 				return;
 			byte velocity = (byte) ( (JSlider) e.getSource() ).getValue();
-			view.setVelocity( velocity );
+			view.setVelocity(velocity);
 		}
 	}
 	

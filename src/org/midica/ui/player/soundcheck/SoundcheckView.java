@@ -47,30 +47,29 @@ import org.midica.ui.widget.MidicaTable;
  * @author Jan Trukenmüller
  */
 public class SoundcheckView extends JDialog {
-
+	
 	private static final long serialVersionUID = 1L;
     
-	public static final Dimension DIM_TEXT_FIELD        = new Dimension( 60, 20 );
-	public static final int       WIDTH_COL_PROG        =    35;
-	public static final int       WIDTH_COL_BANK        =    50;
-	public static final int       WIDTH_COL_NAME_SF     =   200;
-	public static final int       WIDTH_COL_NAME_SYNTAX =   200;
-	public static final int       HEIGHT_TABLE_INSTR    =   200;
-	public static final int       HEIGHT_LIST_NOTE      =   150;
-	public static final int       VOL_LABEL             =    30;
-	public static final int       DEFAULT_DURATION      =   300;
-	public static final int       MIN_DURATION          =     0;
-	public static final int       MAX_DURATION          = 10000;
+	public static final int    DEFAULT_VELOCITY =   100;
+	public static final int    MIN_DURATION     =     0;
+	public static final int    MAX_DURATION     = 10000;
+	public static final String CMD_PLAY         = "cmd_play";
+	public static final String CMD_KEEP         = "cmd_keep";
+	public static final String NAME_INSTR       = "name_instr";
+	public static final String NAME_NOTE        = "name_note";
+	public static final String NAME_VOLUME      = "name_volume";
+	public static final String NAME_VELOCITY    = "name_velocity";
+	public static final String NAME_DURATION    = "name_duration";
 	
-	public static final String CMD_PLAY      = "cmd_play";
-	public static final String CMD_KEEP      = "cmd_keep";
-	public static final String NAME_INSTR    = "name_instr";
-	public static final String NAME_NOTE     = "name_note";
-	public static final String NAME_VOLUME   = "name_volume";
-	public static final String NAME_VELOCITY = "name_velocity";
-	public static final String NAME_DURATION = "name_duration";
-	
-	public static final int DEFAULT_VELOCITY = 100;
+	private static final Dimension DIM_TEXT_FIELD        = new Dimension( 60, 20 );
+	private static final int       WIDTH_COL_PROG        =    35;
+	private static final int       WIDTH_COL_BANK        =    50;
+	private static final int       WIDTH_COL_NAME_SF     =   200;
+	private static final int       WIDTH_COL_NAME_SYNTAX =   200;
+	private static final int       HEIGHT_TABLE_INSTR    =   200;
+	private static final int       HEIGHT_LIST_NOTE      =   150;
+	private static final int       VOL_OR_VEL_LABEL_SKIP =    30;
+	private static final int       DEFAULT_DURATION      =   300;
 	
 	private Dimension dimTblInstr = null;
 	private Dimension dimListNote = null;
@@ -217,7 +216,7 @@ public class SoundcheckView extends JDialog {
 		constrRight.gridy++;
 		constrRight.gridwidth = 2;
 		constrRight.fill      = GridBagConstraints.HORIZONTAL;
-		sldVolume = createVolumeSlider( controller );
+		sldVolume = createVolOrVelSlider( controller );
 		sldVolume.setName( NAME_VOLUME );
 		sldVolume.setValue( MidiDevices.DEFAULT_VOLUME );
 		content.add( sldVolume, constrRight );
@@ -246,7 +245,7 @@ public class SoundcheckView extends JDialog {
 		constrRight.gridwidth = 2;
 		constrRight.weightx   = 1;
 		constrRight.fill      = GridBagConstraints.HORIZONTAL;
-		sldVelocity = createVolumeSlider( controller );
+		sldVelocity = createVolOrVelSlider( controller );
 		sldVelocity.setName( NAME_VELOCITY );
 		sldVelocity.setValue( DEFAULT_VELOCITY );
 		content.add( sldVelocity, constrRight );
@@ -297,12 +296,12 @@ public class SoundcheckView extends JDialog {
 	}
 	
 	/**
-	 * Creates the volume and velocity slider for the soundcheck window.
+	 * Creates the volume or velocity slider for the soundcheck window.
 	 * 
 	 * @param controller The event listener object for the soundcheck.
-	 * @return the volume slider.
+	 * @return the volume or velocity slider.
 	 */
-	private JSlider createVolumeSlider( SoundcheckController controller ) {
+	private JSlider createVolOrVelSlider( SoundcheckController controller ) {
 		JSlider slider = new JSlider( JSlider.HORIZONTAL );
 		slider.addChangeListener( controller );
 		slider.addMouseWheelListener( controller );
@@ -316,7 +315,7 @@ public class SoundcheckView extends JDialog {
 		slider.setMajorTickSpacing( PlayerView.VOL_MAJOR );
 		slider.setMinorTickSpacing( PlayerView.VOL_MINOR );
 		Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
-		for ( int i = PlayerView.VOL_MIN; i <= PlayerView.VOL_MAX; i += VOL_LABEL ) {
+		for ( int i = PlayerView.VOL_MIN; i <= PlayerView.VOL_MAX; i += VOL_OR_VEL_LABEL_SKIP ) {
 			int display = i;
 			labelTable.put( i, new JLabel(Integer.toString(display)) );
 		}
@@ -378,17 +377,17 @@ public class SoundcheckView extends JDialog {
 	/**
 	 * Sets the velocity slider and the velocity text field to the given value.
 	 * 
-	 * @param volume  The velocity value to set.
+	 * @param velocity  The velocity value to set.
 	 */
-	public void setVelocity( byte volume ) {
+	public void setVelocity( byte velocity ) {
 		
 		// set slider
-		sldVelocity.setValue( volume );
+		sldVelocity.setValue( velocity );
 		
 		// set text field
 		SoundcheckController controller = SoundcheckController.getController();
 		fldVelocity.getDocument().removeDocumentListener( controller );
-		fldVelocity.setText( Byte.toString(volume) );
+		fldVelocity.setText( Byte.toString(velocity) );
 		fldVelocity.getDocument().addDocumentListener( controller );
 		setTextFieldColor( fldVelocity.getName(), Config.COLOR_NORMAL );
 	}

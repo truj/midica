@@ -50,12 +50,12 @@ CHORD chord_4     dis   g      b
 # 2nd column: note or chord
 # 3rd column: note length
 # Right from the 3rd column: optional options.
-# In this case only the relative velocity (volume) information for
+# In this case only the velocity information for
 # the according channel.
 
 MACRO verse_1
-	1     f-          1   vol=110
-	0     chord_1     4.  vol=110
+	1     f-          1   vel=110
+	0     chord_1     4.  vel=110
 	0     chord_1     4.
 	0     chord_1     4
 
@@ -79,7 +79,7 @@ END
 # Macro definition for the bass part
 
 MACRO bassrun_1
-	5     f-     4.   vol=90
+	5     f-     4.   vel=90
 	5     f-     8
 	5     c-     4
 	5     f-     4
@@ -105,7 +105,7 @@ END
 # Macro definition for the percussion part
 
 MACRO bongo_1
-	9     BONGO_HIGH     4   vol=120
+	9     BONGO_HIGH     4   vel=120
 	9     BONGO_HIGH     4                    # program=60 (high bongo)
 	9     60             4                    # same as above but using the number
 	9     BONGO_LOW      4

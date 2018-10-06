@@ -450,9 +450,9 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			// only react if it's moved manually
 			if ( ! view.isVolumeSliderAdjusting() )
 				return;
-			byte volume  = (byte) ( (JSlider) e.getSource() ).getValue();
-			view.setVolumeField( volume );
-			MidiDevices.setVolume( volume );
+			byte volume = (byte) ((JSlider) e.getSource()).getValue();
+			view.setVolumeField(volume);
+			MidiDevices.setVolume(volume);
 		}
 		
 		// handle tempo slider changes
@@ -485,9 +485,9 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			// only react if it's moved manually
 			if ( ! view.isChVolSliderAdjusting(channel) )
 				return;
-			byte volume = (byte) ( (JSlider) e.getSource() ).getValue();
-			view.setChannelVolumeField( channel, volume );
-			MidiDevices.setChannelVolume( channel, (byte) volume );
+			byte volume = (byte) ((JSlider) e.getSource()).getValue();
+			view.setChannelVolumeField(channel, volume);
+			MidiDevices.setChannelVolume(channel, (byte) volume);
 		}
 	}
 	

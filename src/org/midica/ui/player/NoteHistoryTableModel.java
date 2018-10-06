@@ -28,7 +28,7 @@ public class NoteHistoryTableModel extends MidicaTableModel {
 	
 	private byte channel;
 	
-	/** note number -- volume -- tick -- 0=past,1=future */
+	/** note number -- velocity -- tick -- 0=past,1=future */
 	private ArrayList<Long[]> tableData = null;
 	
 	/**
@@ -46,10 +46,10 @@ public class NoteHistoryTableModel extends MidicaTableModel {
 		
 		// table header
 		columnNames = new String[ 4 ];
-		columnNames[ 0 ] = Dict.get( Dict.COLUMN_NUMBER );
-		columnNames[ 1 ] = Dict.get( Dict.COLUMN_NAME   );
-		columnNames[ 2 ] = Dict.get( Dict.COLUMN_VOLUME );
-		columnNames[ 3 ] = Dict.get( Dict.COLUMN_TICK   );
+		columnNames[ 0 ] = Dict.get( Dict.COLUMN_NUMBER   );
+		columnNames[ 1 ] = Dict.get( Dict.COLUMN_NAME     );
+		columnNames[ 2 ] = Dict.get( Dict.COLUMN_VELOCITY );
+		columnNames[ 3 ] = Dict.get( Dict.COLUMN_TICK     );
 		
 		// observe the midi channel
 		if ( 0 == channel )

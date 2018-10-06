@@ -453,10 +453,10 @@ public class MidicaPLExporter extends Exporter {
 				// short message
 				if ( msg instanceof ShortMessage ) {
 					ShortMessage shortMsg = (ShortMessage) msg;
-					int cmd     = shortMsg.getCommand();
-					int channel = shortMsg.getChannel();
-					int note    = shortMsg.getData1();
-					int volume  = shortMsg.getData2();
+					int cmd      = shortMsg.getCommand();
+					int channel  = shortMsg.getChannel();
+					int note     = shortMsg.getData1();
+					int velocity = shortMsg.getData2();
 					
 					// ignore events that are handled otherwise
 					if ( ShortMessage.PROGRAM_CHANGE == cmd
@@ -467,7 +467,7 @@ public class MidicaPLExporter extends Exporter {
 					
 					// something else?
 					else {
-						String warning = String.format( Dict.get(Dict.WARNING_IGNORED_SHORT_MESSAGE), cmd, note, volume );
+						String warning = String.format( Dict.get(Dict.WARNING_IGNORED_SHORT_MESSAGE), cmd, note, velocity );
 						exportResult.addWarning( trackNum, tick, channel, -1, warning );
 					}
 				}
@@ -790,11 +790,11 @@ public class MidicaPLExporter extends Exporter {
 				
 				// velocity
 				int velocity = Integer.parseInt( options.get("velocity") );
-				needOption   = velocity != instr.getVolume();
+				needOption   = velocity != instr.getVelocity();
 				if (needOption) {
 					hasOtherOpts = appendCommaIfNecessaryAndReturnTrue( hasOtherOpts, lines );
-					lines.append( " " + MidicaPLParser.VOLUME + MidicaPLParser.OPT_ASSIGNER + velocity );
-					instr.setVolume( velocity );
+					lines.append( " " + MidicaPLParser.VELOCITY + MidicaPLParser.OPT_ASSIGNER + velocity );
+					instr.setVelocity( velocity );
 				}
 				
 				// multiple (doesn't increment the channel tick)

@@ -19,10 +19,10 @@ import org.midica.config.Dict;
  * 
  * The following elements of a channel's state need further explication:
  * 
- * - **tickstamp** - This is the current position of the parsed/exported file, counted in MIDI ticks.
- * - **relative volume** - Velocity of the key stroke. (This is relative to the channel volume)
- * - **staccato value** - That is the number of ticks that the key is released before
- *                        the theoretical end of the note.
+ * - **tickstamp**       - This is the current position of the parsed/exported file, counted in MIDI ticks.
+ * - **velocity**        - Velocity of key strokes.
+ * - **staccato value**  - That is the number of ticks that a key is released before
+ *                         the theoretical end of the according note.
  * 
  * @author Jan Trukenmüller
  */
@@ -30,9 +30,9 @@ public class Instrument implements Comparable<Instrument> {
 	
 	/** First tickstamp where any action can occur. */
 	private static final int MIN_CURRENT_TICKS = 0;
-	/** Default relative volume for this channel unless defined differently. */
-	private static final int DEFAULT_VOLUME    = 64;
-	/** Default relative staccato value for this channel unless defined differently. */
+	/** Default velocity for this channel unless defined differently. */
+	private static final int DEFAULT_VELOCITY  = 64;
+	/** Default staccato value for this channel unless defined differently. */
 	private static final int DEFAULT_STACCATO  = 10;
 	
 	/** Channel number as defined by the MIDI specification. Between 0 and 15. */
@@ -48,8 +48,8 @@ public class Instrument implements Comparable<Instrument> {
 	/** LSB of the bank number (0-127) */
 	private int bankLSB;
 	
-	/** Relative volume */
-	private int volume = DEFAULT_VOLUME;
+	/** Current velocity */
+	private int velocity = DEFAULT_VELOCITY;
 	/** Current tickstamp */
 	private long currentTicks = MIN_CURRENT_TICKS;
 	/** Each note ends that many ticks before it would end theoretically */
@@ -99,22 +99,22 @@ public class Instrument implements Comparable<Instrument> {
 	}
 	
 	/**
-	 * Returns the current relative volume of the channel.
+	 * Returns the current velocity of the channel.
 	 * 
-	 * @return current relative volume
+	 * @return current velocity
 	 */
-	public int getVolume() {
-		return volume;
+	public int getVelocity() {
+		return velocity;
 	}
 	
 	/**
-	 * Sets the current relative volume of the channel.
+	 * Sets the velocity of the channel.
 	 * 
-	 * @param volume  New relative volume of the channel as defined in the MIDI specification.
-	 *                (0-127)
+	 * @param velocity  New velocity of the channel as defined in the MIDI specification.
+	 *                  (0-127)
 	 */
-	public void setVolume( int volume ) {
-		this.volume = volume;
+	public void setVelocity( int velocity ) {
+		this.velocity = velocity;
 	}
 	
 	/**
@@ -190,7 +190,7 @@ public class Instrument implements Comparable<Instrument> {
 		String inner =  ", channel: "          + channel
 		             +  ", instrumentNumber: " + instrumentNumber
 		             +  ", instrumentName: "   + instrumentName
-		             +  ", volume: "           + volume
+		             +  ", velocity: "         + velocity
 		             +  ", currentTicks: "     + currentTicks
 		             +  ", staccato: "         + staccato
 		             ;
