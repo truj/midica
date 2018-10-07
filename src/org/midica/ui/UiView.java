@@ -87,7 +87,6 @@ public class UiView extends JDialog {
 	private JComboBox<ComboboxStringOption> cbxSyntax              = null;
 	private JComboBox<ComboboxStringOption> cbxPercussion          = null;
 	private JComboBox<ComboboxStringOption> cbxInstrument          = null;
-	private JLabel                          configFeedbackLabel    = null;
 	private JLabel                          lblTranspose           = null;
 	private JButton                         btnInfo                = null;
 	private JButton                         btnPlayer              = null;
@@ -214,8 +213,8 @@ public class UiView extends JDialog {
 	}
 	
 	/**
-	 * Creates the configuration area containing the dropdown boxes with their labels,
-	 * the feedback label and the info button.
+	 * Creates the configuration area containing the dropdown boxes with their labels
+	 * and the button to open the info and config view.
 	 * 
 	 * @return    The created area.
 	 */
@@ -338,17 +337,8 @@ public class UiView extends JDialog {
 		
 		area.add( cbxInstrument, constraints );
 		
-		// feedback label
-		constraints.gridx = 0;
-		constraints.gridy++;
-		constraints.gridwidth = 2;
-		configFeedbackLabel = new JLabel( "" );
-		refreshConfigFeedback();
-		
-		area.add( configFeedbackLabel, constraints );
-		
 		// info button
-		constraints.gridx++;
+		constraints.gridx = 1;
 		constraints.gridy++;
 		constraints.gridwidth = 1;
 		btnInfo = new JButton( Dict.get(Dict.SHOW_INFO) );
@@ -680,23 +670,6 @@ public class UiView extends JDialog {
 			TitledBorder.TOP
 		);
 		return titledBorder;
-	}
-	
-	/**
-	 * Refreshes the label telling the user if the chosen combination of config
-	 * options is valid.
-	 */
-	public void refreshConfigFeedback() {
-		String[] feedback = Dict.getConfigFeedback();
-		boolean ok = true;
-		if ( Dict.CONF_ERROR_ERROR.equals(feedback[0]) ) {
-			ok = false;
-		}
-		if ( ok )
-			configFeedbackLabel.setForeground( COLOR_OK );
-		else
-			configFeedbackLabel.setForeground( COLOR_ERROR );
-		configFeedbackLabel.setText( feedback[1] );
 	}
 	
 	/**

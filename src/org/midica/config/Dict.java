@@ -1042,25 +1042,25 @@ public class Dict {
 		// Config
 		set( Config.CBX_HALFTONE_ID_SHARP,           "#: c#, d#, f#..."                      );
 		set( Config.CBX_HALFTONE_ID_FLAT,            "b: db, eb, gb..."                      );
-		set( Config.CBX_HALFTONE_ID_CIS,             "-is: cis, dis, fis..."                 );
-		set( Config.CBX_HALFTONE_ID_DES,             "-es: des, es, ges..."                  );
 		set( Config.CBX_HALFTONE_ID_DIESIS,          "-diesis: do-diesis, re-diesis..."      );
 		set( Config.CBX_HALFTONE_ID_BEMOLLE,         "-bemolle: re-bemolle, mi-bemolle..."   );
+		set( Config.CBX_HALFTONE_ID_CIS,             "-is: cis, dis, fis..."                 );
+		set( Config.CBX_HALFTONE_ID_DES,             "-es: des, es, ges..."                  );
 		
 		set( Config.CBX_NOTE_ID_INTERNATIONAL_LC,    "International: c, d, e, f, g, a, b"    );
 		set( Config.CBX_NOTE_ID_INTERNATIONAL_UC,    "International: C, D, E, F, G, A, B"    );
-		set( Config.CBX_NOTE_ID_GERMAN_LC,           "German (lower): c, d, e, f, g, a, h"   );
-		set( Config.CBX_NOTE_ID_GERMAN_UC,           "German (upper): C, D, E, F, G, A, H"   );
 		set( Config.CBX_NOTE_ID_ITALIAN_LC,          "Italian (lower): do, re, mi, fa..."    );
 		set( Config.CBX_NOTE_ID_ITALIAN_UC,          "Italian (upper): Do, Re, Mi, Fa..."    );
+		set( Config.CBX_NOTE_ID_GERMAN_LC,           "German (lower): c, d, e, f, g, a, h"   );
+		set( Config.CBX_NOTE_ID_GERMAN_UC,           "German (upper): C, D, E, F, G, A, H"   );
 		
+		set( Config.CBX_OCTAVE_PLUS_MINUS,           "+/-: c--, c-, c, c+, c++..."           );
 		set( Config.CBX_OCTAVE_INTERNATIONAL,        "International: c0, c1, c2..."          );
 		set( Config.CBX_OCTAVE_GERMAN,               "German: C', C, c, c', c'', c'''..."    );
-		set( Config.CBX_OCTAVE_PLUS_MINUS,           "+/-: c--, c-, c, c+, c++..."           );
 		
-		set( Config.CBX_SYNTAX_MUSICIAN_1,           "Musician Syntax"                       );
-		set( Config.CBX_SYNTAX_PROG_1,               "Programmer Syntax I"                   );
-		set( Config.CBX_SYNTAX_PROG_2,               "Programmer Syntax II"                  );
+		set( Config.CBX_SYNTAX_MIXED,                "Mixed Case Syntax"                     );
+		set( Config.CBX_SYNTAX_LOWER,                "Lower Case Syntax"                     );
+		set( Config.CBX_SYNTAX_UPPER,                "Upper Case Syntax"                     );
 		
 		set( Config.CBX_PERC_EN_1,                   "English"                               );
 		set( Config.CBX_PERC_DE_1,                   "German"                                );
@@ -1301,7 +1301,7 @@ public class Dict {
 		
 		// syntax for InfoView
 		set( SYNTAX_DEFINE,          "syntax element definition"                        );
-		set( SYNTAX_COMMENT,         "comment character"                                );
+		set( SYNTAX_COMMENT,         "comment"                                          );
 		set( SYNTAX_GLOBAL,          "global command (all channels)"                    );
 		set( SYNTAX_P,               "percussion channel"                               );
 		set( SYNTAX_END,             "end of a definition block"                        );
@@ -1796,25 +1796,25 @@ public class Dict {
 		// Config
 		set( Config.CBX_HALFTONE_ID_SHARP,           "#: c#, d#, f#..."                      );
 		set( Config.CBX_HALFTONE_ID_FLAT,            "b: db, eb, gb..."                      );
-		set( Config.CBX_HALFTONE_ID_CIS,             "-is: cis, dis, fis..."                 );
-		set( Config.CBX_HALFTONE_ID_DES,             "-es: des, es, ges..."                  );
 		set( Config.CBX_HALFTONE_ID_DIESIS,          "-diesis: do-diesis, re-diesis..."      );
 		set( Config.CBX_HALFTONE_ID_BEMOLLE,         "-bemolle: re-bemolle, mi-bemolle..."   );
+		set( Config.CBX_HALFTONE_ID_CIS,             "-is: cis, dis, fis..."                 );
+		set( Config.CBX_HALFTONE_ID_DES,             "-es: des, es, ges..."                  );
 		
 		set( Config.CBX_NOTE_ID_INTERNATIONAL_LC,    "International: c, d, e, f, g, a, b"    );
 		set( Config.CBX_NOTE_ID_INTERNATIONAL_UC,    "International: C, D, E, F, G, A, B"    );
-		set( Config.CBX_NOTE_ID_GERMAN_LC,           "Deutsch (klein): c, d, e, f, g, a, h"  );
-		set( Config.CBX_NOTE_ID_GERMAN_UC,           "Deutsch (groß): C, D, E, F, G, A, H"   );
 		set( Config.CBX_NOTE_ID_ITALIAN_LC,          "Italienisch (klein): do, re, mi..."    );
 		set( Config.CBX_NOTE_ID_ITALIAN_UC,          "Italienisch (groß): Do, Re, Mi..."     );
+		set( Config.CBX_NOTE_ID_GERMAN_LC,           "Deutsch (klein): c, d, e, f, g, a, h"  );
+		set( Config.CBX_NOTE_ID_GERMAN_UC,           "Deutsch (groß): C, D, E, F, G, A, H"   );
 		
+		set( Config.CBX_OCTAVE_PLUS_MINUS,           "+/-: c--, c-, c, c+, c++..."           );
 		set( Config.CBX_OCTAVE_INTERNATIONAL,        "International: c0, c1, c2..."          );
 		set( Config.CBX_OCTAVE_GERMAN,               "Deutsch: C', C, c, c', c'', c'''..."   );
-		set( Config.CBX_OCTAVE_PLUS_MINUS,           "+/-: c--, c-, c, c+, c++..."           );
 		
-		set( Config.CBX_SYNTAX_MUSICIAN_1,           "Musiker-Syntax"                        );
-		set( Config.CBX_SYNTAX_PROG_1,               "Programmierer-Syntax I"                );
-		set( Config.CBX_SYNTAX_PROG_2,               "Programmierer-Syntax II"               );
+		set( Config.CBX_SYNTAX_MIXED,                "Gemischte Syntax"                      );
+		set( Config.CBX_SYNTAX_LOWER,                "Syntax mit Kleinbuchstaben"            );
+		set( Config.CBX_SYNTAX_UPPER,                "Syntax mit Großbuchstaben"             );
 		
 		set( Config.CBX_PERC_EN_1,                   "Englisch"                              );
 		set( Config.CBX_PERC_DE_1,                   "Deutsch"                               );
@@ -1881,20 +1881,20 @@ public class Dict {
 			suffix = "b";
 			sharp  = false;
 		}
-		else if ( Config.CBX_HALFTONE_ID_CIS.equals(configuredHalfTone) ) {
-			suffix = "is";
-			sharp  = true;
-		}
-		else if ( Config.CBX_HALFTONE_ID_DES.equals(configuredHalfTone) ) {
-			suffix = "es";
-			sharp  = false;
-		}
 		else if ( Config.CBX_HALFTONE_ID_DIESIS.equals(configuredHalfTone) ) {
 			suffix = "-diesis";
 			sharp  = true;
 		}
 		else if ( Config.CBX_HALFTONE_ID_BEMOLLE.equals(configuredHalfTone) ) {
 			suffix = "-bemolle";
+			sharp  = false;
+		}
+		else if ( Config.CBX_HALFTONE_ID_CIS.equals(configuredHalfTone) ) {
+			suffix = "is";
+			sharp  = true;
+		}
+		else if ( Config.CBX_HALFTONE_ID_DES.equals(configuredHalfTone) ) {
+			suffix = "es";
 			sharp  = false;
 		}
 		else {
@@ -1972,26 +1972,26 @@ public class Dict {
 		isHalfTone[ 4 ] = 10; // A#, Bb
 		
 		// initialize the configuration specific note system
-		if ( Config.CBX_NOTE_ID_INTERNATIONAL_UC.equals(configuredNoteSystem) ) {
-			initNotesInternational( true );
-		}
-		else if ( Config.CBX_NOTE_ID_INTERNATIONAL_LC.equals(configuredNoteSystem) ) {
+		if ( Config.CBX_NOTE_ID_INTERNATIONAL_LC.equals(configuredNoteSystem) ) {
 			initNotesInternational( false );
 		}
-		else if ( Config.CBX_NOTE_ID_GERMAN_UC.equals(configuredNoteSystem) ) {
-			initNotesGerman( true );
-		}
-		else if ( Config.CBX_NOTE_ID_GERMAN_LC.equals(configuredNoteSystem) ) {
-			initNotesGerman( false );
-		}
-		else if ( Config.CBX_NOTE_ID_ITALIAN_UC.equals(configuredNoteSystem) ) {
-			initNotesItalian( true );
+		else if ( Config.CBX_NOTE_ID_INTERNATIONAL_UC.equals(configuredNoteSystem) ) {
+			initNotesInternational( true );
 		}
 		else if ( Config.CBX_NOTE_ID_ITALIAN_LC.equals(configuredNoteSystem) ) {
 			initNotesItalian( false );
 		}
+		else if ( Config.CBX_NOTE_ID_ITALIAN_UC.equals(configuredNoteSystem) ) {
+			initNotesItalian( true );
+		}
+		else if ( Config.CBX_NOTE_ID_GERMAN_LC.equals(configuredNoteSystem) ) {
+			initNotesGerman( false );
+		}
+		else if ( Config.CBX_NOTE_ID_GERMAN_UC.equals(configuredNoteSystem) ) {
+			initNotesGerman( true );
+		}
 		else {
-			initNotesInternational( true );
+			initNotesInternational( false );
 		}
 		
 		// the note system has changed so the half tones have to be refreshed as well
@@ -2018,17 +2018,17 @@ public class Dict {
 		noteIntToName = new HashMap<Integer, String>();
 		
 		// initialize the octave according to the configuration
-		if ( Config.CBX_OCTAVE_INTERNATIONAL.equals(configuredOctave) ) {
+		if ( Config.CBX_OCTAVE_PLUS_MINUS.equals(configuredOctave) ) {
+			initOctavesPlusMinus();
+		}
+		else if ( Config.CBX_OCTAVE_INTERNATIONAL.equals(configuredOctave) ) {
 			initOctavesInternational();
 		}
 		else if ( Config.CBX_OCTAVE_GERMAN.equals(configuredOctave) ) {
 			initOctavesGerman();
 		}
-		else if ( Config.CBX_OCTAVE_PLUS_MINUS.equals(configuredOctave) ) {
-			initOctavesPlusMinus();
-		}
 		else {
-			initOctavesInternational();
+			initOctavesPlusMinus();
 		}
 		
 		// init integers to names
@@ -2055,17 +2055,63 @@ public class Dict {
 		// init configured syntax
 		syntax = new HashMap<String, String>();
 		
-		if ( Config.CBX_SYNTAX_MUSICIAN_1.equals(configuredSyntax) ) {
-			initSyntaxMusician1();
+		// set up default syntax
+		setSyntax( SYNTAX_DEFINE,          "DEFINE"         );
+		setSyntax( SYNTAX_COMMENT,         "//"             );
+		setSyntax( SYNTAX_GLOBAL,          "*"              );
+		setSyntax( SYNTAX_P,               "p"              );
+		setSyntax( SYNTAX_END,             "END"            );
+		setSyntax( SYNTAX_MACRO,           "MACRO"          );
+		setSyntax( SYNTAX_INCLUDE,         "INCLUDE"        );
+		setSyntax( SYNTAX_INSTRUMENTS,     "INSTRUMENTS"    );
+		setSyntax( SYNTAX_BPM,             "bpm"            );
+		setSyntax( SYNTAX_OPT_SEPARATOR,   ","              );
+		setSyntax( SYNTAX_OPT_ASSIGNER,    "="              );
+		setSyntax( SYNTAX_PROG_BANK_SEP,   ","              );
+		setSyntax( SYNTAX_BANK_SEP,        "/"              );
+		setSyntax( SYNTAX_VELOCITY,        "velocity"       );
+		setSyntax( SYNTAX_V,               "v"              );
+		setSyntax( SYNTAX_STACCATO,        "staccato"       );
+		setSyntax( SYNTAX_S,               "s"              );
+		setSyntax( SYNTAX_MULTIPLE,        "multiple"       );
+		setSyntax( SYNTAX_M,               "m"              );
+		setSyntax( SYNTAX_QUANTITY,        "quantity"       );
+		setSyntax( SYNTAX_Q,               "q"              );
+		setSyntax( SYNTAX_PAUSE,           "-"              );
+		setSyntax( SYNTAX_CHORD,           "CHORD"          );
+		setSyntax( SYNTAX_INCLUDE_FILE,    "INCLUDE_FILE"   );
+		setSyntax( SYNTAX_32,              "/32"            );
+		setSyntax( SYNTAX_16,              "/16"            );
+		setSyntax( SYNTAX_8,               "/8"             );
+		setSyntax( SYNTAX_4,               "/4"             );
+		setSyntax( SYNTAX_2,               "/2"             );
+		setSyntax( SYNTAX_1,               "/1"             );
+		setSyntax( SYNTAX_M1,              "*1"             );
+		setSyntax( SYNTAX_M2,              "*2"             );
+		setSyntax( SYNTAX_M4,              "*4"             );
+		setSyntax( SYNTAX_M8,              "*8"             );
+		setSyntax( SYNTAX_M16,             "*16"            );
+		setSyntax( SYNTAX_M32,             "*32"            );
+		setSyntax( SYNTAX_DOT,             "."              );
+		setSyntax( SYNTAX_TRIPLET,         "T"              );
+		setSyntax( SYNTAX_TUPLET,          "T"              );
+		setSyntax( SYNTAX_TUPLET_FOR,      ":"              );
+		
+		// switch to lower/upper, if needed
+		if ( Config.CBX_SYNTAX_LOWER.equals(configuredSyntax) ) {
+			for (String id : syntax.keySet()) {
+				String keyword = syntax.get(id).toLowerCase();
+				setSyntax(id, keyword);
+			}
 		}
-		else if ( Config.CBX_SYNTAX_PROG_2.equals(configuredSyntax) ) {
-			initSyntaxProgrammer2();
-		}
-		else {
-			initSyntaxProgrammer1();
+		else if ( Config.CBX_SYNTAX_UPPER.equals(configuredSyntax) ) {
+			for (String id : syntax.keySet()) {
+				String keyword = syntax.get(id).toUpperCase();
+				setSyntax(id, keyword);
+			}
 		}
 		
-		// init syntax for the config feedback
+		// init syntax for the syntax tab in the info view
 		syntaxList = new ArrayList<SyntaxElement>();
 		
 		addSyntaxCategory( get(SYNTAX_CAT_DEFINITION) );
@@ -2286,6 +2332,34 @@ public class Dict {
 	}
 	
 	/**
+	 * Initializes note translations for italien note names.
+	 * 
+	 * @param upperCase true if the resulting note names shall have an capitalized
+	 *                  first character -- otherwise: false
+	 */
+	private static void initNotesItalian( boolean upperCase ) {
+		// initialize full notes
+		if (upperCase) {
+			notes[  0 ] = "Do";
+			notes[  2 ] = "Re";
+			notes[  4 ] = "Mi";
+			notes[  5 ] = "Fa";
+			notes[  7 ] = "Sol";
+			notes[  9 ] = "La";
+			notes[ 11 ] = "Si";
+		}
+		else {
+			notes[  0 ] = "do";
+			notes[  2 ] = "re";
+			notes[  4 ] = "mi";
+			notes[  5 ] = "fa";
+			notes[  7 ] = "sol";
+			notes[  9 ] = "la";
+			notes[ 11 ] = "si";
+		}
+	}
+	
+	/**
 	 * Initializes note translations for german note names.
 	 * 
 	 * @param upperCase true if the resulting note names shall be capitalized
@@ -2323,30 +2397,53 @@ public class Dict {
 	}
 	
 	/**
-	 * Initializes note translations for italien note names.
-	 * 
-	 * @param upperCase true if the resulting note names shall have an capitalized
-	 *                  first character -- otherwise: false
+	 * Sets up note names using  
+	 * `+`, `++`, `+++`, ... for higher octaves and  
+	 * `-`, `--`, `---`, ... for lower octaves.
 	 */
-	private static void initNotesItalian( boolean upperCase ) {
-		// initialize full notes
-		if (upperCase) {
-			notes[  0 ] = "Do";
-			notes[  2 ] = "Re";
-			notes[  4 ] = "Mi";
-			notes[  5 ] = "Fa";
-			notes[  7 ] = "Sol";
-			notes[  9 ] = "La";
-			notes[ 11 ] = "Si";
+	private static void initOctavesPlusMinus() {
+		
+		// define unmodified note names
+		ArrayList<NamedInteger> noteNames = new ArrayList<NamedInteger>();
+		byte i = 48; // middle C
+		for ( String name : notes ) {
+			NamedInteger note = new NamedInteger( name, i );
+			noteNames.add( note );
+			i++;
 		}
-		else {
-			notes[  0 ] = "do";
-			notes[  2 ] = "re";
-			notes[  4 ] = "mi";
-			notes[  5 ] = "fa";
-			notes[  7 ] = "sol";
-			notes[  9 ] = "la";
-			notes[ 11 ] = "si";
+		
+		// initialize unmodified and higher notes
+		StringBuilder postfix = new StringBuilder( "" );
+		OCTAVE:
+		for ( int octave = 0; ; octave++ ) {
+			if ( octave > 0 )
+				postfix.append( "+" );
+			int increment = octave * 12;
+			NAME:
+			for ( NamedInteger name : noteNames ) {
+				String newName  = name.name  + postfix;
+				int    newValue = name.value + increment;
+				if ( newValue > 127 )
+					break OCTAVE;
+				noteNameToInt.put( newName, newValue );
+			}
+		}
+		
+		// initialize lower notes
+		Collections.reverse( noteNames );
+		postfix = new StringBuilder( "" );
+		OCTAVE:
+		for ( int octave = 1; ; octave++ ) {
+			postfix.append( "-" );
+			int decrement = octave * 12;
+			NAME:
+			for ( NamedInteger name : noteNames ) {
+				String newName  = name.name  + postfix;
+				int    newValue = name.value - decrement;
+				if ( newValue < 0 )
+					break OCTAVE;
+				noteNameToInt.put( newName, newValue );
+			}
 		}
 	}
 	
@@ -2430,57 +2527,6 @@ public class Dict {
 		for ( int octave = 1; ; octave++ ) {
 			if ( octave > 1 )
 				postfix.append( "'" );
-			int decrement = octave * 12;
-			NAME:
-			for ( NamedInteger name : noteNames ) {
-				String newName  = name.name  + postfix;
-				int    newValue = name.value - decrement;
-				if ( newValue < 0 )
-					break OCTAVE;
-				noteNameToInt.put( newName, newValue );
-			}
-		}
-	}
-	
-	/**
-	 * Sets up note names using  
-	 * `+`, `++`, `+++`, ... for higher octaves and  
-	 * `-`, `--`, `---`, ... for lower octaves.
-	 */
-	private static void initOctavesPlusMinus() {
-		
-		// define unmodified note names
-		ArrayList<NamedInteger> noteNames = new ArrayList<NamedInteger>();
-		byte i = 48; // middle C
-		for ( String name : notes ) {
-			NamedInteger note = new NamedInteger( name, i );
-			noteNames.add( note );
-			i++;
-		}
-		
-		// initialize unmodified and higher notes
-		StringBuilder postfix = new StringBuilder( "" );
-		OCTAVE:
-		for ( int octave = 0; ; octave++ ) {
-			if ( octave > 0 )
-				postfix.append( "+" );
-			int increment = octave * 12;
-			NAME:
-			for ( NamedInteger name : noteNames ) {
-				String newName  = name.name  + postfix;
-				int    newValue = name.value + increment;
-				if ( newValue > 127 )
-					break OCTAVE;
-				noteNameToInt.put( newName, newValue );
-			}
-		}
-		
-		// initialize lower notes
-		Collections.reverse( noteNames );
-		postfix = new StringBuilder( "" );
-		OCTAVE:
-		for ( int octave = 1; ; octave++ ) {
-			postfix.append( "-" );
 			int decrement = octave * 12;
 			NAME:
 			for ( NamedInteger name : noteNames ) {
@@ -2651,144 +2697,6 @@ public class Dict {
 		set( DRUMKIT_ORCHESTRA,  "ORCHESTER"     );
 		set( DRUMKIT_SOUND_FX,   "SOUND_EFFEKTE" );
 		set( DRUMKIT_CM64_CM32,  "CM64_CM32"     );
-	}
-	
-	/**
-	 * Sets up programming keywords and syntax elements for musicians.
-	 */
-	private static void initSyntaxMusician1() {
-		setSyntax( SYNTAX_DEFINE,          "DEFINE"         );
-		setSyntax( SYNTAX_COMMENT,         ";"              );
-		setSyntax( SYNTAX_GLOBAL,          "*"              );
-		setSyntax( SYNTAX_P,               "P"              );
-		setSyntax( SYNTAX_END,             "END"            );
-		setSyntax( SYNTAX_MACRO,           "RIFF"           );
-		setSyntax( SYNTAX_INCLUDE,         "PLAY"           );
-		setSyntax( SYNTAX_INSTRUMENTS,     "INSTRUMENTS"    );
-		setSyntax( SYNTAX_BPM,             "bpm"            );
-		setSyntax( SYNTAX_OPT_SEPARATOR,   ","              );
-		setSyntax( SYNTAX_OPT_ASSIGNER,    ":"              );
-		setSyntax( SYNTAX_PROG_BANK_SEP,   "-"              );
-		setSyntax( SYNTAX_BANK_SEP,        "."              );
-		setSyntax( SYNTAX_VELOCITY,        "velocity"       );
-		setSyntax( SYNTAX_V,               "vel"            );
-		setSyntax( SYNTAX_STACCATO,        "staccato"       );
-		setSyntax( SYNTAX_S,               "stac"           );
-		setSyntax( SYNTAX_MULTIPLE,        "polyphonic"     );
-		setSyntax( SYNTAX_M,               "poly"           );
-		setSyntax( SYNTAX_QUANTITY,        "quantity"       );
-		setSyntax( SYNTAX_Q,               "q"              );
-		setSyntax( SYNTAX_PAUSE,           "-"              );
-		setSyntax( SYNTAX_CHORD,           "CHORD"          );
-		setSyntax( SYNTAX_INCLUDE_FILE,    "PLAY_FILE"      );
-		setSyntax( SYNTAX_32,              "TS"             );
-		setSyntax( SYNTAX_16,              "S"              );
-		setSyntax( SYNTAX_8,               "E"              );
-		setSyntax( SYNTAX_4,               "Q"              );
-		setSyntax( SYNTAX_2,               "H"              );
-		setSyntax( SYNTAX_1,               "F"              );
-		setSyntax( SYNTAX_M1,              "*1"             );
-		setSyntax( SYNTAX_M2,              "*2"             );
-		setSyntax( SYNTAX_M4,              "*4"             );
-		setSyntax( SYNTAX_M8,              "*8"             );
-		setSyntax( SYNTAX_M16,             "*16"            );
-		setSyntax( SYNTAX_M32,             "*32"            );
-		setSyntax( SYNTAX_DOT,             "."              );
-		setSyntax( SYNTAX_TRIPLET,         ")3"             );
-		setSyntax( SYNTAX_TUPLET,          ")"              );
-		setSyntax( SYNTAX_TUPLET_FOR,      ":"              );
-	}
-	
-	/**
-	 * Sets up programming keywords and syntax elements for programmers (syntax set 1).
-	 */
-	private static void initSyntaxProgrammer1() {
-		setSyntax( SYNTAX_DEFINE,          "DEFINE"         );
-		setSyntax( SYNTAX_COMMENT,         ";"              );
-		setSyntax( SYNTAX_GLOBAL,          "*"              );
-		setSyntax( SYNTAX_P,               "P"              );
-		setSyntax( SYNTAX_END,             "END"            );
-		setSyntax( SYNTAX_MACRO,           "MACRO"          );
-		setSyntax( SYNTAX_INCLUDE,         "INCLUDE"        );
-		setSyntax( SYNTAX_INSTRUMENTS,     "INSTRUMENTS"    );
-		setSyntax( SYNTAX_BPM,             "bpm"            );
-		setSyntax( SYNTAX_OPT_SEPARATOR,   ","              );
-		setSyntax( SYNTAX_OPT_ASSIGNER,    "="              );
-		setSyntax( SYNTAX_PROG_BANK_SEP,   ","              );
-		setSyntax( SYNTAX_BANK_SEP,        "/"              );
-		setSyntax( SYNTAX_VELOCITY,        "velocity"       );
-		setSyntax( SYNTAX_V,               "v"              );
-		setSyntax( SYNTAX_STACCATO,        "staccato"       );
-		setSyntax( SYNTAX_S,               "s"              );
-		setSyntax( SYNTAX_MULTIPLE,        "multiple"       );
-		setSyntax( SYNTAX_M,               "m"              );
-		setSyntax( SYNTAX_QUANTITY,        "quantity"       );
-		setSyntax( SYNTAX_Q,               "q"              );
-		setSyntax( SYNTAX_PAUSE,           "-"              );
-		setSyntax( SYNTAX_CHORD,           "CHORD"          );
-		setSyntax( SYNTAX_INCLUDE_FILE,    "INCLUDE_FILE"   );
-		setSyntax( SYNTAX_32,              "/32"            );
-		setSyntax( SYNTAX_16,              "/16"            );
-		setSyntax( SYNTAX_8,               "/8"             );
-		setSyntax( SYNTAX_4,               "/4"             );
-		setSyntax( SYNTAX_2,               "/2"             );
-		setSyntax( SYNTAX_1,               "/1"             );
-		setSyntax( SYNTAX_M1,              "*1"             );
-		setSyntax( SYNTAX_M2,              "*2"             );
-		setSyntax( SYNTAX_M4,              "*4"             );
-		setSyntax( SYNTAX_M8,              "*8"             );
-		setSyntax( SYNTAX_M16,             "*16"            );
-		setSyntax( SYNTAX_M32,             "*32"            );
-		setSyntax( SYNTAX_DOT,             "."              );
-		setSyntax( SYNTAX_TRIPLET,         "T"              );
-		setSyntax( SYNTAX_TUPLET,          "T"              );
-		setSyntax( SYNTAX_TUPLET_FOR,      ":"              );
-	}
-	
-	/**
-	 * Sets up programming keywords and syntax elements for programmers (syntax set 2).
-	 */
-	private static void initSyntaxProgrammer2() {
-		setSyntax( SYNTAX_DEFINE,          "DEFINE"       );
-		setSyntax( SYNTAX_COMMENT,         "#"            );
-		setSyntax( SYNTAX_GLOBAL,          "*"            );
-		setSyntax( SYNTAX_P,               "P"            );
-		setSyntax( SYNTAX_END,             "END"          );
-		setSyntax( SYNTAX_MACRO,           "MACRO"        );
-		setSyntax( SYNTAX_INCLUDE,         "INCLUDE"      );
-		setSyntax( SYNTAX_INSTRUMENTS,     "INSTRUMENTS"  );
-		setSyntax( SYNTAX_BPM,             "bpm"          );
-		setSyntax( SYNTAX_OPT_SEPARATOR,   ","            );
-		setSyntax( SYNTAX_OPT_ASSIGNER,    "="            );
-		setSyntax( SYNTAX_PROG_BANK_SEP,   ","            );
-		setSyntax( SYNTAX_BANK_SEP,        ":"            );
-		setSyntax( SYNTAX_VELOCITY,        "vel"          );
-		setSyntax( SYNTAX_V,               "v"            );
-		setSyntax( SYNTAX_STACCATO,        "stac"         );
-		setSyntax( SYNTAX_S,               "s"            );
-		setSyntax( SYNTAX_MULTIPLE,        "m"            );
-		setSyntax( SYNTAX_M,               "&"            );
-		setSyntax( SYNTAX_QUANTITY,        "q"            );
-		setSyntax( SYNTAX_Q,               "x"            );
-		setSyntax( SYNTAX_PAUSE,           "-"            );
-		setSyntax( SYNTAX_CHORD,           "CHORD"        );
-		setSyntax( SYNTAX_INCLUDE_FILE,    "INCLUDE_FILE" );
-		setSyntax( SYNTAX_32,              "/32"          );
-		setSyntax( SYNTAX_16,              "/16"          );
-		setSyntax( SYNTAX_8,               "/8"           );
-		setSyntax( SYNTAX_4,               "/4"           );
-		setSyntax( SYNTAX_2,               "/2"           );
-		setSyntax( SYNTAX_1,               "/1"           );
-		setSyntax( SYNTAX_M1,              "*1"           );
-		setSyntax( SYNTAX_M2,              "*2"           );
-		setSyntax( SYNTAX_M4,              "*4"           );
-		setSyntax( SYNTAX_M8,              "*8"           );
-		setSyntax( SYNTAX_M16,             "*16"          );
-		setSyntax( SYNTAX_M32,             "*32"          );
-		setSyntax( SYNTAX_DOT,             "."            );
-		setSyntax( SYNTAX_TRIPLET,         "T"            );
-		setSyntax( SYNTAX_TUPLET,          "T"            );
-		setSyntax( SYNTAX_TUPLET_FOR,      ":"            );
 	}
 	
 	/**
@@ -3467,28 +3375,5 @@ public class Dict {
 	 */
 	public static Set<Integer> getDrumkitList() {
 		return drumkitIntToName.keySet();
-	}
-	
-	/**
-	 * Returns two strings indicating if the chosen configuration is OK.
-	 * 
-	 * The first string is language independent and indicates if an error occurred at all.
-	 * The second string is the language-dependent error or success message.
-	 * 
-	 * @return strings describing the configuration error
-	 */
-	public static String[] getConfigFeedback() {
-		String[] feedback = new String[ 2 ];
-		feedback[ 0 ] = CONF_ERROR_OK;
-		feedback[ 1 ] = get( CONF_ERROR_OK );
-		
-		if ( Config.CBX_HALFTONE_ID_SHARP.equals(Config.get(Config.HALF_TONE)) ) {
-			if ( Config.CBX_SYNTAX_PROG_2.equals(Config.get(Config.SYNTAX)) ) {
-				feedback[ 0 ] = CONF_ERROR_ERROR;
-				feedback[ 1 ] = get( CONF_ERROR_HALFTONE_SYNTAX );
-			}
-		}
-		
-		return feedback;
 	}
 }

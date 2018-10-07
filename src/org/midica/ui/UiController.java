@@ -745,9 +745,6 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			}
 		}
 		
-		// show new feedback
-		view.refreshConfigFeedback();
-		
 		// refresh syntax in the parser
 		MidicaPLParser.refreshSyntax();
 	}

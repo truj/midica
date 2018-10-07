@@ -96,56 +96,56 @@ public class Config {
 	// note system combobox
 	public  static final String   CBX_NOTE_ID_INTERNATIONAL_LC = "cbx_note_id_international_lc";
 	public  static final String   CBX_NOTE_ID_INTERNATIONAL_UC = "cbx_note_id_international_uc";
-	public  static final String   CBX_NOTE_ID_GERMAN_LC        = "cbx_note_id_german_lc";
-	public  static final String   CBX_NOTE_ID_GERMAN_UC        = "cbx_note_id_german_uc";
 	public  static final String   CBX_NOTE_ID_ITALIAN_LC       = "cbx_note_id_italian_lc";
 	public  static final String   CBX_NOTE_ID_ITALIAN_UC       = "cbx_note_id_italian_uc";
+	public  static final String   CBX_NOTE_ID_GERMAN_LC        = "cbx_note_id_german_lc";
+	public  static final String   CBX_NOTE_ID_GERMAN_UC        = "cbx_note_id_german_uc";
 	private static final String[] CBX_NOTE_IDENTIFIERS = {
-		CBX_NOTE_ID_INTERNATIONAL_UC,
 		CBX_NOTE_ID_INTERNATIONAL_LC,
-		CBX_NOTE_ID_GERMAN_UC,
-		CBX_NOTE_ID_GERMAN_LC,
+		CBX_NOTE_ID_INTERNATIONAL_UC,
 		CBX_NOTE_ID_ITALIAN_LC,
 		CBX_NOTE_ID_ITALIAN_UC,
+		CBX_NOTE_ID_GERMAN_LC,
+		CBX_NOTE_ID_GERMAN_UC,
 	};
 	private static ArrayList<ComboboxStringOption> CBX_NOTE_OPTIONS = null;
 	
 	// octave naming combobox
+	public  static final String   CBX_OCTAVE_PLUS_MINUS    = "cbx_octave_plus_minus";
 	public  static final String   CBX_OCTAVE_INTERNATIONAL = "cbx_octave_international";
 	public  static final String   CBX_OCTAVE_GERMAN        = "cbx_octave_german";
-	public  static final String   CBX_OCTAVE_PLUS_MINUS    = "cbx_octave_plus_minus";
 	private static final String[] CBX_OCTAVE_IDENTIFIERS = {
+		CBX_OCTAVE_PLUS_MINUS,
 		CBX_OCTAVE_INTERNATIONAL,
 		CBX_OCTAVE_GERMAN,
-		CBX_OCTAVE_PLUS_MINUS,
 	};
 	private static ArrayList<ComboboxStringOption> CBX_OCTAVE_OPTIONS = null;
 	
 	// half tone combobox
 	public  static final String   CBX_HALFTONE_ID_SHARP   = "cbx_halftone_id_sharp";
 	public  static final String   CBX_HALFTONE_ID_FLAT    = "cbx_halftone_id_flat";
-	public  static final String   CBX_HALFTONE_ID_CIS     = "cbx_halftone_id_cis";
-	public  static final String   CBX_HALFTONE_ID_DES     = "cbx_halftone_id_des";
 	public  static final String   CBX_HALFTONE_ID_DIESIS  = "cbx_halftone_id_diesis";
 	public  static final String   CBX_HALFTONE_ID_BEMOLLE = "cbx_halftone_id_bemolle";
+	public  static final String   CBX_HALFTONE_ID_CIS     = "cbx_halftone_id_cis";
+	public  static final String   CBX_HALFTONE_ID_DES     = "cbx_halftone_id_des";
 	private static final String[] CBX_HALFTONE_IDENTIFIERS = {
 		CBX_HALFTONE_ID_SHARP,
 		CBX_HALFTONE_ID_FLAT,
-		CBX_HALFTONE_ID_CIS,
-		CBX_HALFTONE_ID_DES,
 		CBX_HALFTONE_ID_DIESIS,
 		CBX_HALFTONE_ID_BEMOLLE,
+		CBX_HALFTONE_ID_CIS,
+		CBX_HALFTONE_ID_DES,
 	};
 	private static ArrayList<ComboboxStringOption> CBX_HALFTONE_OPTIONS = null;
 	
 	// syntax combobox
-	public  static final String   CBX_SYNTAX_PROG_1     = "cbx_syntax_prog_1";
-	public  static final String   CBX_SYNTAX_PROG_2     = "cbx_syntax_prog_2";
-	public  static final String   CBX_SYNTAX_MUSICIAN_1 = "cbx_syntax_musician_1";
+	public  static final String   CBX_SYNTAX_MIXED       = "cbx_syntax_mixed";
+	public  static final String   CBX_SYNTAX_LOWER       = "cbx_syntax_lower";
+	public  static final String   CBX_SYNTAX_UPPER       = "cbx_syntax_upper";
 	private static final String[] CBX_SYNTAX_IDENTIFIERS = {
-		CBX_SYNTAX_MUSICIAN_1,
-		CBX_SYNTAX_PROG_1,
-		CBX_SYNTAX_PROG_2,
+		CBX_SYNTAX_MIXED,
+		CBX_SYNTAX_LOWER,
+		CBX_SYNTAX_UPPER,
 	};
 	private static ArrayList<ComboboxStringOption> CBX_SYNTAX_OPTIONS = null;
 	
@@ -209,8 +209,8 @@ public class Config {
 		defaults.put( LANGUAGE,    CBX_LANG_ENGLISH             );
 		defaults.put( HALF_TONE,   CBX_HALFTONE_ID_SHARP        );
 		defaults.put( NOTE,        CBX_NOTE_ID_INTERNATIONAL_LC );
-		defaults.put( OCTAVE,      CBX_OCTAVE_INTERNATIONAL     );
-		defaults.put( SYNTAX,      CBX_SYNTAX_MUSICIAN_1        );
+		defaults.put( OCTAVE,      CBX_OCTAVE_PLUS_MINUS        );
+		defaults.put( SYNTAX,      CBX_SYNTAX_MIXED             );
 		defaults.put( PERCUSSION,  CBX_PERC_EN_1                );
 		defaults.put( INSTRUMENT,  CBX_INSTR_EN_1               );
 		
