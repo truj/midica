@@ -9,6 +9,7 @@ package org.midica.ui;
 
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -74,6 +75,9 @@ public class UiView extends JDialog {
 	public static final Color  COLOR_TRANSPOSE_DEFAULT = new Color(  50, 100, 255 );
 	public static final Color  COLOR_TRANSPOSE_CHANGED = new Color( 255,   0,   0 );
 	
+	// make file names in the import section as small as possible
+	private static final Dimension MAX_FILE_NAME_DIM = new Dimension(0, new JLabel(" ").getPreferredSize().height);
+	
 	private KeyEventPostProcessor           keyProcessor           = null;
 	private Container                       content                = null;
 	private UiController                    controller             = null;
@@ -135,8 +139,6 @@ public class UiView extends JDialog {
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
-		constraints.weightx    = 0.5;
-		constraints.weighty    = 0.5;
 		
 		// left area (config and player)
 		content.add( createLeftArea(), constraints );
@@ -167,8 +169,6 @@ public class UiView extends JDialog {
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
-		constraints.weightx    = 1;
-		constraints.weighty    = 1;
 		
 		// config area
 		area.add( createConfigArea(), constraints );
@@ -199,8 +199,6 @@ public class UiView extends JDialog {
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
-		constraints.weightx    = 1;
-		constraints.weighty    = 1;
 		
 		// import area
 		area.add( createImportArea(), constraints );
@@ -232,8 +230,6 @@ public class UiView extends JDialog {
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
-		constraints.weightx    = 1;
-		constraints.weighty    = 1;
 		
 		// gui language label
 		JLabel lblLanguage = new JLabel( Dict.get(Dict.LANGUAGE) );
@@ -369,13 +365,11 @@ public class UiView extends JDialog {
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
-		constraints.weightx    = 1;
-		constraints.weighty    = 1;
 		
 		// player button
 		constraints.gridy++;
-		constraints.gridx = 0;
-		constraints.weightx = 2;
+		constraints.gridx   = 0;
+		constraints.weightx = 1;
 		btnPlayer = new JButton( Dict.get(Dict.PLAYER_BUTTON) );
 		btnPlayer.setActionCommand( CMD_START_PLAYER );
 		btnPlayer.addActionListener( controller );
@@ -408,8 +402,7 @@ public class UiView extends JDialog {
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
-		constraints.weightx    = 1;
-		constraints.weighty    = 1;
+		constraints.weightx    = 0.5;
 		
 		// MidicaPL label
 		constraints.insets = new Insets( 0, 2, 0, 2 );
@@ -445,6 +438,7 @@ public class UiView extends JDialog {
 		constraints.gridy++;
 		constraints.gridwidth = 2;
 		lblChosenMidicaPLFile = new JLabel( Dict.get(Dict.UNCHOSEN_FILE) );
+		lblChosenMidicaPLFile.setPreferredSize(MAX_FILE_NAME_DIM);
 		area.add( lblChosenMidicaPLFile, constraints );
 		String fileType = SequenceParser.getFileType();
 		String fileName = SequenceParser.getFileName();
@@ -494,6 +488,7 @@ public class UiView extends JDialog {
 		constraints.gridy++;
 		constraints.gridwidth = 2;
 		lblChosenMidiFile = new JLabel( Dict.get(Dict.UNCHOSEN_FILE) );
+		lblChosenMidiFile.setPreferredSize(MAX_FILE_NAME_DIM);
 		area.add( lblChosenMidiFile, constraints );
 		if ( "mid".equals(fileType) ) {
 			lblChosenMidiFile.setText( fileName );
@@ -540,6 +535,7 @@ public class UiView extends JDialog {
 		constraints.gridy++;
 		constraints.gridwidth = 2;
 		lblChosenSoundfontFile = new JLabel( Dict.get(Dict.UNCHOSEN_FILE) );
+		lblChosenSoundfontFile.setPreferredSize(MAX_FILE_NAME_DIM);
 		area.add( lblChosenSoundfontFile, constraints );
 		String soundfontFileName = SoundfontParser.getFileName();
 		if ( soundfontFileName != null ) {
@@ -569,7 +565,6 @@ public class UiView extends JDialog {
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 1;
-		constraints.weighty    = 1;
 		
 		// transpose level label
 		area.add( new JLabel(Dict.get(Dict.TRANSPOSE_LEVEL)), constraints );
@@ -689,7 +684,6 @@ public class UiView extends JDialog {
 	 * @param cbxName name of the checked checkbox
 	 */
 	public void rememberCheckboxChecked(String cbxName) {
-		System.out.println(cbxName);
 		if (UiView.NAME_REMEMBER_MIDICAPL.equals(cbxName)) {
 			cbxRememberMidi.setSelected(false);
 		}

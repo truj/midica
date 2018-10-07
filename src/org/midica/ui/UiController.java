@@ -419,6 +419,10 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 				MidiDevices.setSequence( null );
 			}
 		}
+		
+		// re-draw everything because the file name to be displayed can be longer or shorter
+		// and therefore the container sizes need to be adjusted
+		view.pack();
 	}
 	
 	/**
