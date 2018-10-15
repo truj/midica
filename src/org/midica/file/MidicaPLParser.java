@@ -961,11 +961,22 @@ public class MidicaPLParser extends SequenceParser {
 				// program change and instrument name
 				SequenceCreator.initChannel( channel, instrNum, instrName, tick );
 			}
-			catch ( InvalidMidiDataException e ) {
+			catch (InvalidMidiDataException e) {
 				throw new ParseException( Dict.get(Dict.ERROR_MIDI_PROBLEM) + e.getMessage() );
 			}
 		}
 		else {
+			// first instruments block
+			
+			// check if the channel has already been defined
+			for (Instrument instr : instruments) {
+				if (channel == instr.channel) {
+					throw new ParseException(
+						String.format( Dict.get(Dict.ERROR_CHANNEL_REDEFINED), channel )
+					);
+				}
+			}
+			
 			// create and add instrument
 			Instrument instr = new Instrument(
 				channel,

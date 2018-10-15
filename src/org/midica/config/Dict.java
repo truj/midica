@@ -876,6 +876,7 @@ public class Dict {
 	public static final String ERROR_UNKNOWN_NOTE               = "error_unknown_note";
 	public static final String ERROR_UNKNOWN_PERCUSSION         = "error_unknown_percussion";
 	public static final String ERROR_CHANNEL_UNDEFINED          = "error_channel_undefined";
+	public static final String ERROR_CHANNEL_REDEFINED          = "error_channel_redefined";
 	public static final String ERROR_INVALID_CHANNEL_NUMBER     = "error_invalid_channel_number";
 	
 	// SequenceParser
@@ -1670,6 +1671,7 @@ public class Dict {
 		set( ERROR_UNKNOWN_NOTE,                  "unknown note: "                                                    );
 		set( ERROR_UNKNOWN_PERCUSSION,            "unknown percussion shortcut: "                                     );
 		set( ERROR_CHANNEL_UNDEFINED,             "channel %s has not been defined"                                   );
+		set( ERROR_CHANNEL_REDEFINED,             "channel %s has been defined already"                                   );
 		set( ERROR_INVALID_CHANNEL_NUMBER,        "Invalid channel number (must be between 0 and 15): "               );
 		
 		// SequenceParser
