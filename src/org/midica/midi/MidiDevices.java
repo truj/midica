@@ -255,13 +255,13 @@ public final class MidiDevices {
 		
 		// initialize channels
 		instruments = new TreeMap<Byte, TreeMap<Integer, String>>();
-		for ( byte channel = 0; channel < 15; channel++ )
+		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
 			instruments.put( channel, new TreeMap<Integer, String>() );
 		
 		// software synthesizer
 		if (soundfontAvailable) {
 			ArrayList<HashMap<String, String>> soundfontInstruments = SoundfontParser.getSoundfontInstruments();
-			for ( byte channel = 0; channel < 15; channel ++ )
+			for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
 				initSoftwareInstruments( channel, soundfontInstruments );
 		}
 		
@@ -269,7 +269,7 @@ public final class MidiDevices {
 		else {
 			
 			// assume: 9: percussion, everything else: chromatic
-			for ( byte channel = 0; channel < 15; channel++ ) {
+			for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ ) {
 				TreeMap<Integer, String> channelInstruments = instruments.get( channel );
 				
 				// percussion
@@ -569,7 +569,7 @@ public final class MidiDevices {
 			sequencer.setTickPosition( pos );
 		
 		// reload channel activity
-		for ( byte channel = 0; channel < 16; channel++ )
+		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
 			refreshChannelActivity( channel );
 		
 		// reload note history

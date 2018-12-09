@@ -32,17 +32,6 @@ import org.midica.ui.info.InfoView;
 public abstract class SequenceParser implements IParser {
 	
 	/**
-	 * Contains information about the currently loaded MIDI stream.
-	 * 
-	 * If this stream has been loaded from a MIDI file, this is structure contains
-	 * information about the **original** stream.
-	 * 
-	 * If it has been created from a MidicaPL file, it contains information about
-	 * the created stream.
-	 */
-	public static HashMap<String, Object> streamInfo = new HashMap<String, Object>();
-	
-	/**
 	 * Defines how much the parsed input has to be transposed.
 	 * A positive transpose level causes a transposition into higher pitches.
 	 * A negative level transposes into lower pitches.
