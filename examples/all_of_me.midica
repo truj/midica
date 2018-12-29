@@ -5,7 +5,7 @@
 // - Note System:      International: c, d, e, ... (lower case)
 // - Half Tone Symbol: # (c#, d#, e#, ...)
 // - Octave Naming:    +/-
-// - Syntax:           Programmer Syntax II
+// - Syntax:           Mixed Case Syntax
 
 
 // Definition of instruments
@@ -33,7 +33,7 @@ END
 CHORD chord_1     f     c+
 CHORD chord_2     f     c#+
 CHORD chord_3     d#    g#     c+
-CHORD chord_4     d#    g      b
+CHORD chord_4     d#    g      a#
 
 
 // Speed definition:

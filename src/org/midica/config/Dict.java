@@ -836,6 +836,7 @@ public class Dict {
 	public static final String ERROR_NEGATIVE_NOT_ALLOWED       = "error_negative_not_allowed: ";
 	public static final String ERROR_NOT_AN_INTEGER             = "error_not_an_integer: ";
 	public static final String ERROR_INSTRUMENTS_NOT_DEFINED    = "error_instruments_not_defined";
+	public static final String ERROR_NO_INSTRUMENTS             = "error_no_instruments";
 	public static final String ERROR_GLOBALS_IN_INSTR_DEF       = "error_globals_in_instr_def";
 	public static final String ERROR_UNKNOWN_CMD                = "error_unknown_cmd";
 	public static final String ERROR_CMD_END_NUM_OF_ARGS        = "error_cmd_end_num_of_args";
@@ -1631,6 +1632,7 @@ public class Dict {
 		
 		// MidicaPLParser
 		set( ERROR_INSTRUMENTS_NOT_DEFINED,       "no instruments have been defined yet"                              );
+		set( ERROR_NO_INSTRUMENTS,                "no instruments have been defined"                                  );
 		set( ERROR_GLOBALS_IN_INSTR_DEF,          "global commands are not allowed inside an instrument definition"   );
 		set( ERROR_UNKNOWN_CMD,                   "unknown command: "                                                 );
 		set( ERROR_CMD_END_NUM_OF_ARGS,           "wrong number of arguments in mode command 'END'"                   );
@@ -2407,7 +2409,7 @@ public class Dict {
 		
 		// define unmodified note names
 		ArrayList<NamedInteger> noteNames = new ArrayList<NamedInteger>();
-		byte i = 48; // middle C
+		byte i = 60; // middle C
 		for ( String name : notes ) {
 			NamedInteger note = new NamedInteger( name, i );
 			noteNames.add( note );
@@ -2489,7 +2491,7 @@ public class Dict {
 		
 		// define unmodified note names for higher notes (lower case)
 		ArrayList<NamedInteger> noteNames = new ArrayList<NamedInteger>();
-		byte i = 48; // middle C
+		byte i = 48; // capizalized C without modifiers
 		for ( String name : notes ) {
 			// use lower case for higher octaves
 			name = name.toLowerCase();

@@ -238,6 +238,11 @@ public class MidicaPLParser extends SequenceParser {
 			e.printStackTrace();
 		}
 		
+		// check if the file contains a sequence at all
+		if (! instrumentsParsed) {
+			throw new ParseException( Dict.get(Dict.ERROR_NO_INSTRUMENTS) );
+		}
+		
 		// EOF has been reached
 		postprocessSequence( SequenceCreator.getSequence(), "midica", chosenCharset );
 	}
