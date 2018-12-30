@@ -61,46 +61,48 @@ public class MidicaPLParser extends SequenceParser {
 	 * class fields
 	 *******************/
 	
-	public static String BANK_SEP      = null;
-	public static String BPM           = null;
-	public static String CHORD         = null;
-	public static String COMMENT       = null;
-	public static String DEFINE        = null;
-	public static String DOT           = null;
-	public static String END           = null;
-	public static String GLOBAL        = null;
-	public static String INCLUDE       = null;
-	public static String INCLUDE_FILE  = null;
-	public static String INSTRUMENTS   = null;
-	public static String LENGTH_32     = null;
-	public static String LENGTH_16     = null;
-	public static String LENGTH_8      = null;
-	public static String LENGTH_4      = null;
-	public static String LENGTH_2      = null;
-	public static String LENGTH_1      = null;
-	public static String LENGTH_M1     = null;
-	public static String LENGTH_M2     = null;
-	public static String LENGTH_M4     = null;
-	public static String LENGTH_M8     = null;
-	public static String LENGTH_M16    = null;
-	public static String LENGTH_M32    = null;
-	public static String MACRO         = null;
-	public static String M             = null;
-	public static String MULTIPLE      = null;
-	public static String OPT_ASSIGNER  = null;
-	public static String OPT_SEPARATOR = null;
-	public static String P             = null;
-	public static String PAUSE         = null;
-	public static String PROG_BANK_SEP = null;
-	public static String Q             = null;
-	public static String QUANTITY      = null;
-	public static String S             = null;
-	public static String STACCATO      = null;
-	public static String V             = null;
-	public static String VELOCITY      = null;
-	public static String TRIPLET       = null;
-	public static String TUPLET        = null;
-	public static String TUPLET_FOR    = null;
+	public static String BANK_SEP       = null;
+	public static String BPM            = null;
+	public static String TIME_SIG       = null;
+	public static String TIME_SIG_SLASH = null;
+	public static String CHORD          = null;
+	public static String COMMENT        = null;
+	public static String DEFINE         = null;
+	public static String DOT            = null;
+	public static String END            = null;
+	public static String GLOBAL         = null;
+	public static String INCLUDE        = null;
+	public static String INCLUDE_FILE   = null;
+	public static String INSTRUMENTS    = null;
+	public static String LENGTH_32      = null;
+	public static String LENGTH_16      = null;
+	public static String LENGTH_8       = null;
+	public static String LENGTH_4       = null;
+	public static String LENGTH_2       = null;
+	public static String LENGTH_1       = null;
+	public static String LENGTH_M1      = null;
+	public static String LENGTH_M2      = null;
+	public static String LENGTH_M4      = null;
+	public static String LENGTH_M8      = null;
+	public static String LENGTH_M16     = null;
+	public static String LENGTH_M32     = null;
+	public static String MACRO          = null;
+	public static String M              = null;
+	public static String MULTIPLE       = null;
+	public static String OPT_ASSIGNER   = null;
+	public static String OPT_SEPARATOR  = null;
+	public static String P              = null;
+	public static String PAUSE          = null;
+	public static String PROG_BANK_SEP  = null;
+	public static String Q              = null;
+	public static String QUANTITY       = null;
+	public static String S              = null;
+	public static String STACCATO       = null;
+	public static String V              = null;
+	public static String VELOCITY       = null;
+	public static String TRIPLET        = null;
+	public static String TUPLET         = null;
+	public static String TUPLET_FOR     = null;
 	
 	private static ArrayList<Instrument>                instruments       = null;
 	private static HashMap<String, ArrayList<String[]>> macros            = null;
@@ -142,46 +144,48 @@ public class MidicaPLParser extends SequenceParser {
 	 * Restores the configured MidicaPL keywords and symbols.
 	 */
 	public static void refreshSyntax() {
-		BANK_SEP       = Dict.getSyntax( Dict.SYNTAX_BANK_SEP      );
-		BPM            = Dict.getSyntax( Dict.SYNTAX_BPM           );
-		CHORD          = Dict.getSyntax( Dict.SYNTAX_CHORD         );
-		COMMENT        = Dict.getSyntax( Dict.SYNTAX_COMMENT       );
-		DEFINE         = Dict.getSyntax( Dict.SYNTAX_DEFINE        );
-		DOT            = Dict.getSyntax( Dict.SYNTAX_DOT           );
-		END            = Dict.getSyntax( Dict.SYNTAX_END           );
-		GLOBAL         = Dict.getSyntax( Dict.SYNTAX_GLOBAL        );
-		INCLUDE        = Dict.getSyntax( Dict.SYNTAX_INCLUDE       );
-		INCLUDE_FILE   = Dict.getSyntax( Dict.SYNTAX_INCLUDE_FILE  );
-		INSTRUMENTS    = Dict.getSyntax( Dict.SYNTAX_INSTRUMENTS   );
-		LENGTH_32      = Dict.getSyntax( Dict.SYNTAX_32            );
-		LENGTH_16      = Dict.getSyntax( Dict.SYNTAX_16            );
-		LENGTH_8       = Dict.getSyntax( Dict.SYNTAX_8             );
-		LENGTH_4       = Dict.getSyntax( Dict.SYNTAX_4             );
-		LENGTH_2       = Dict.getSyntax( Dict.SYNTAX_2             );
-		LENGTH_1       = Dict.getSyntax( Dict.SYNTAX_1             );
-		LENGTH_M1      = Dict.getSyntax( Dict.SYNTAX_M1            );
-		LENGTH_M2      = Dict.getSyntax( Dict.SYNTAX_M2            );
-		LENGTH_M4      = Dict.getSyntax( Dict.SYNTAX_M4            );
-		LENGTH_M8      = Dict.getSyntax( Dict.SYNTAX_M8            );
-		LENGTH_M16     = Dict.getSyntax( Dict.SYNTAX_M16           );
-		LENGTH_M32     = Dict.getSyntax( Dict.SYNTAX_M32           );
-		MACRO          = Dict.getSyntax( Dict.SYNTAX_MACRO         );
-		M              = Dict.getSyntax( Dict.SYNTAX_M             );
-		MULTIPLE       = Dict.getSyntax( Dict.SYNTAX_MULTIPLE      );
-		OPT_ASSIGNER   = Dict.getSyntax( Dict.SYNTAX_OPT_ASSIGNER  );
-		OPT_SEPARATOR  = Dict.getSyntax( Dict.SYNTAX_OPT_SEPARATOR );
-		P              = Dict.getSyntax( Dict.SYNTAX_P             );
-		PAUSE          = Dict.getSyntax( Dict.SYNTAX_PAUSE         );
-		PROG_BANK_SEP  = Dict.getSyntax( Dict.SYNTAX_PROG_BANK_SEP );
-		Q              = Dict.getSyntax( Dict.SYNTAX_Q             );
-		QUANTITY       = Dict.getSyntax( Dict.SYNTAX_QUANTITY      );
-		S              = Dict.getSyntax( Dict.SYNTAX_S             );
-		STACCATO       = Dict.getSyntax( Dict.SYNTAX_STACCATO      );
-		V              = Dict.getSyntax( Dict.SYNTAX_V             );
-		VELOCITY       = Dict.getSyntax( Dict.SYNTAX_VELOCITY      );
-		TRIPLET        = Dict.getSyntax( Dict.SYNTAX_TRIPLET       );
-		TUPLET         = Dict.getSyntax( Dict.SYNTAX_TUPLET        );
-		TUPLET_FOR     = Dict.getSyntax( Dict.SYNTAX_TUPLET_FOR    );
+		BANK_SEP       = Dict.getSyntax( Dict.SYNTAX_BANK_SEP       );
+		BPM            = Dict.getSyntax( Dict.SYNTAX_BPM            );
+		TIME_SIG       = Dict.getSyntax( Dict.SYNTAX_TIME_SIG       );
+		TIME_SIG_SLASH = Dict.getSyntax( Dict.SYNTAX_TIME_SIG_SLASH );
+		CHORD          = Dict.getSyntax( Dict.SYNTAX_CHORD          );
+		COMMENT        = Dict.getSyntax( Dict.SYNTAX_COMMENT        );
+		DEFINE         = Dict.getSyntax( Dict.SYNTAX_DEFINE         );
+		DOT            = Dict.getSyntax( Dict.SYNTAX_DOT            );
+		END            = Dict.getSyntax( Dict.SYNTAX_END            );
+		GLOBAL         = Dict.getSyntax( Dict.SYNTAX_GLOBAL         );
+		INCLUDE        = Dict.getSyntax( Dict.SYNTAX_INCLUDE        );
+		INCLUDE_FILE   = Dict.getSyntax( Dict.SYNTAX_INCLUDE_FILE   );
+		INSTRUMENTS    = Dict.getSyntax( Dict.SYNTAX_INSTRUMENTS    );
+		LENGTH_32      = Dict.getSyntax( Dict.SYNTAX_32             );
+		LENGTH_16      = Dict.getSyntax( Dict.SYNTAX_16             );
+		LENGTH_8       = Dict.getSyntax( Dict.SYNTAX_8              );
+		LENGTH_4       = Dict.getSyntax( Dict.SYNTAX_4              );
+		LENGTH_2       = Dict.getSyntax( Dict.SYNTAX_2              );
+		LENGTH_1       = Dict.getSyntax( Dict.SYNTAX_1              );
+		LENGTH_M1      = Dict.getSyntax( Dict.SYNTAX_M1             );
+		LENGTH_M2      = Dict.getSyntax( Dict.SYNTAX_M2             );
+		LENGTH_M4      = Dict.getSyntax( Dict.SYNTAX_M4             );
+		LENGTH_M8      = Dict.getSyntax( Dict.SYNTAX_M8             );
+		LENGTH_M16     = Dict.getSyntax( Dict.SYNTAX_M16            );
+		LENGTH_M32     = Dict.getSyntax( Dict.SYNTAX_M32            );
+		MACRO          = Dict.getSyntax( Dict.SYNTAX_MACRO          );
+		M              = Dict.getSyntax( Dict.SYNTAX_M              );
+		MULTIPLE       = Dict.getSyntax( Dict.SYNTAX_MULTIPLE       );
+		OPT_ASSIGNER   = Dict.getSyntax( Dict.SYNTAX_OPT_ASSIGNER   );
+		OPT_SEPARATOR  = Dict.getSyntax( Dict.SYNTAX_OPT_SEPARATOR  );
+		P              = Dict.getSyntax( Dict.SYNTAX_P              );
+		PAUSE          = Dict.getSyntax( Dict.SYNTAX_PAUSE          );
+		PROG_BANK_SEP  = Dict.getSyntax( Dict.SYNTAX_PROG_BANK_SEP  );
+		Q              = Dict.getSyntax( Dict.SYNTAX_Q              );
+		QUANTITY       = Dict.getSyntax( Dict.SYNTAX_QUANTITY       );
+		S              = Dict.getSyntax( Dict.SYNTAX_S              );
+		STACCATO       = Dict.getSyntax( Dict.SYNTAX_STACCATO       );
+		V              = Dict.getSyntax( Dict.SYNTAX_V              );
+		VELOCITY       = Dict.getSyntax( Dict.SYNTAX_VELOCITY       );
+		TRIPLET        = Dict.getSyntax( Dict.SYNTAX_TRIPLET        );
+		TUPLET         = Dict.getSyntax( Dict.SYNTAX_TUPLET         );
+		TUPLET_FOR     = Dict.getSyntax( Dict.SYNTAX_TUPLET_FOR     );
 	}
 	
 	/**
@@ -840,46 +844,48 @@ public class MidicaPLParser extends SequenceParser {
 		if (cmdName.matches("\\s"))
 			throw new ParseException( Dict.get(Dict.ERROR_DEFINE_NUM_OF_ARGS) );
 		
-		if (      BANK_SEP.equals(cmdId) )      BANK_SEP      = cmdName;
-		else if ( BPM.equals(cmdId) )           BPM           = cmdName;
-		else if ( CHORD.equals(cmdId) )         CHORD         = cmdName;
-		else if ( COMMENT.equals(cmdId) )       COMMENT       = cmdName;
-		else if ( DEFINE.equals(cmdId) )        DEFINE        = cmdName;
-		else if ( END.equals(cmdId) )           END           = cmdName;
-		else if ( GLOBAL.equals(cmdId) )        GLOBAL        = cmdName;
-		else if ( DOT.equals(cmdId) )           DOT           = cmdName;
-		else if ( INCLUDE.equals(cmdId) )       INCLUDE       = cmdName;
-		else if ( INCLUDE_FILE.equals(cmdId) )  INCLUDE_FILE  = cmdName;
-		else if ( INSTRUMENTS.equals(cmdId) )   INSTRUMENTS   = cmdName;
-		else if ( LENGTH_32.equals(cmdId) )     LENGTH_32     = cmdName;
-		else if ( LENGTH_16.equals(cmdId) )     LENGTH_16     = cmdName;
-		else if ( LENGTH_8.equals(cmdId) )      LENGTH_8      = cmdName;
-		else if ( LENGTH_4.equals(cmdId) )      LENGTH_4      = cmdName;
-		else if ( LENGTH_2.equals(cmdId) )      LENGTH_2      = cmdName;
-		else if ( LENGTH_1.equals(cmdId) )      LENGTH_1      = cmdName;
-		else if ( LENGTH_M1.equals(cmdId) )     LENGTH_M1     = cmdName;
-		else if ( LENGTH_M2.equals(cmdId) )     LENGTH_M2     = cmdName;
-		else if ( LENGTH_M4.equals(cmdId) )     LENGTH_M4     = cmdName;
-		else if ( LENGTH_M8.equals(cmdId) )     LENGTH_M8     = cmdName;
-		else if ( LENGTH_M16.equals(cmdId) )    LENGTH_M16    = cmdName;
-		else if ( LENGTH_M32.equals(cmdId) )    LENGTH_M32    = cmdName;
-		else if ( MACRO.equals(cmdId) )         MACRO         = cmdName;
-		else if ( M.equals(cmdId) )             M             = cmdName;
-		else if ( MULTIPLE.equals(cmdId) )      MULTIPLE      = cmdName;
-		else if ( OPT_ASSIGNER.equals(cmdId) )  OPT_ASSIGNER  = cmdName;
-		else if ( OPT_SEPARATOR.equals(cmdId) ) OPT_SEPARATOR = cmdName;
-		else if ( P.equals(cmdId) )             P             = cmdName;
-		else if ( PAUSE.equals(cmdId) )         PAUSE         = cmdName;
-		else if ( PROG_BANK_SEP.equals(cmdId) ) PROG_BANK_SEP = cmdName;
-		else if ( Q.equals(cmdId) )             Q             = cmdName;
-		else if ( QUANTITY.equals(cmdId) )      QUANTITY      = cmdName;
-		else if ( S.equals(cmdId) )             S             = cmdName;
-		else if ( STACCATO.equals(cmdId) )      STACCATO      = cmdName;
-		else if ( V.equals(cmdId) )             V             = cmdName;
-		else if ( VELOCITY.equals(cmdId) )      VELOCITY      = cmdName;
-		else if ( TRIPLET.equals(cmdId) )       TRIPLET       = cmdName;
-		else if ( TUPLET.equals(cmdId) )        TUPLET        = cmdName;
-		else if ( TUPLET_FOR.equals(cmdId) )    TUPLET_FOR    = cmdName;
+		if (      BANK_SEP.equals(cmdId) )       BANK_SEP       = cmdName;
+		else if ( BPM.equals(cmdId) )            BPM            = cmdName;
+		else if ( TIME_SIG.equals(cmdId) )       TIME_SIG       = cmdName;
+		else if ( TIME_SIG_SLASH.equals(cmdId) ) TIME_SIG_SLASH = cmdName;
+		else if ( CHORD.equals(cmdId) )          CHORD          = cmdName;
+		else if ( COMMENT.equals(cmdId) )        COMMENT        = cmdName;
+		else if ( DEFINE.equals(cmdId) )         DEFINE         = cmdName;
+		else if ( END.equals(cmdId) )            END            = cmdName;
+		else if ( GLOBAL.equals(cmdId) )         GLOBAL         = cmdName;
+		else if ( DOT.equals(cmdId) )            DOT            = cmdName;
+		else if ( INCLUDE.equals(cmdId) )        INCLUDE        = cmdName;
+		else if ( INCLUDE_FILE.equals(cmdId) )   INCLUDE_FILE   = cmdName;
+		else if ( INSTRUMENTS.equals(cmdId) )    INSTRUMENTS    = cmdName;
+		else if ( LENGTH_32.equals(cmdId) )      LENGTH_32      = cmdName;
+		else if ( LENGTH_16.equals(cmdId) )      LENGTH_16      = cmdName;
+		else if ( LENGTH_8.equals(cmdId) )       LENGTH_8       = cmdName;
+		else if ( LENGTH_4.equals(cmdId) )       LENGTH_4       = cmdName;
+		else if ( LENGTH_2.equals(cmdId) )       LENGTH_2       = cmdName;
+		else if ( LENGTH_1.equals(cmdId) )       LENGTH_1       = cmdName;
+		else if ( LENGTH_M1.equals(cmdId) )      LENGTH_M1      = cmdName;
+		else if ( LENGTH_M2.equals(cmdId) )      LENGTH_M2      = cmdName;
+		else if ( LENGTH_M4.equals(cmdId) )      LENGTH_M4      = cmdName;
+		else if ( LENGTH_M8.equals(cmdId) )      LENGTH_M8      = cmdName;
+		else if ( LENGTH_M16.equals(cmdId) )     LENGTH_M16     = cmdName;
+		else if ( LENGTH_M32.equals(cmdId) )     LENGTH_M32     = cmdName;
+		else if ( MACRO.equals(cmdId) )          MACRO          = cmdName;
+		else if ( M.equals(cmdId) )              M              = cmdName;
+		else if ( MULTIPLE.equals(cmdId) )       MULTIPLE       = cmdName;
+		else if ( OPT_ASSIGNER.equals(cmdId) )   OPT_ASSIGNER   = cmdName;
+		else if ( OPT_SEPARATOR.equals(cmdId) )  OPT_SEPARATOR  = cmdName;
+		else if ( P.equals(cmdId) )              P              = cmdName;
+		else if ( PAUSE.equals(cmdId) )          PAUSE          = cmdName;
+		else if ( PROG_BANK_SEP.equals(cmdId) )  PROG_BANK_SEP  = cmdName;
+		else if ( Q.equals(cmdId) )              Q              = cmdName;
+		else if ( QUANTITY.equals(cmdId) )       QUANTITY       = cmdName;
+		else if ( S.equals(cmdId) )              S              = cmdName;
+		else if ( STACCATO.equals(cmdId) )       STACCATO       = cmdName;
+		else if ( V.equals(cmdId) )              V              = cmdName;
+		else if ( VELOCITY.equals(cmdId) )       VELOCITY       = cmdName;
+		else if ( TRIPLET.equals(cmdId) )        TRIPLET        = cmdName;
+		else if ( TUPLET.equals(cmdId) )         TUPLET         = cmdName;
+		else if ( TUPLET_FOR.equals(cmdId) )     TUPLET_FOR     = cmdName;
 	}
 	
 	/**
@@ -1017,11 +1023,41 @@ public class MidicaPLParser extends SequenceParser {
 		String value = tokens[2];
 		
 		try {
-			// set
+			// set tempo
 			if (cmd.equals(BPM)) {
 				int bpm = toInt( value, true );
 				if (! isFake) {
 					SequenceCreator.addMessageBpm( bpm, currentTicks );
+				}
+			}
+			
+			// set time signature
+			else if (cmd.equals(TIME_SIG)) {
+				Pattern pattern = Pattern.compile("^(\\d+)" + Pattern.quote(TIME_SIG_SLASH) + "(\\d+)$");
+				Matcher matcher = pattern.matcher(value);
+				if (matcher.matches()) {
+					int numerator   = toInt(matcher.group(1));
+					int denominator = toInt(matcher.group(2));
+					
+					// calculate valid denuminators
+					HashMap<Integer, Integer> validDemuminators = new HashMap<Integer, Integer>();
+					int validDenum = 1;
+					for (int i = 0; i < 31; i++) {
+						validDemuminators.put(validDenum, i);
+						validDenum *= 2;
+					}
+					
+					// get and check exponent
+					Integer exp = validDemuminators.get(denominator);
+					if (null == exp) {
+						throw new ParseException( Dict.get(Dict.ERROR_INVALID_TIME_DENUM) + denominator);
+					}
+					
+					// set the time signature message
+					SequenceCreator.addMessageTimeSignature(numerator, exp, currentTicks);
+				}
+				else {
+					throw new ParseException( Dict.get(Dict.ERROR_INVALID_TIME_SIG) + value);
 				}
 			}
 			
@@ -1040,7 +1076,7 @@ public class MidicaPLParser extends SequenceParser {
 				throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_GLOBAL_CMD) + cmd );
 			}
 		}
-		catch ( InvalidMidiDataException e ) {
+		catch (InvalidMidiDataException e) {
 			throw new ParseException( Dict.get(Dict.ERROR_MIDI_PROBLEM) + e.getMessage() );
 		}
 	}

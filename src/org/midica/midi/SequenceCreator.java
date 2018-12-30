@@ -250,6 +250,29 @@ public class SequenceCreator {
 	}
 	
 	/**
+	 * Sets the time signature using a meta message.
+	 * 
+	 * @param nominator  Nominator of the time signature
+	 * @param exp        Exponent for the denominator (denominator = 2^exp)
+	 * @param tick       Tickstamp of the time signature event
+	 * @throws InvalidMidiDataException if invalid MIDI data is used to create a MIDI message.
+	 */
+	public static void addMessageTimeSignature(int nominator, int exp, long tick) throws InvalidMidiDataException {
+		int cmd = MidiListener.META_TIME_SIGNATURE;
+		
+		MetaMessage msg = new MetaMessage();
+		byte[] data = new byte[4];
+		data[0] = (byte) nominator;
+		data[1] = (byte) exp;
+		data[2] = (byte) 24;
+		data[3] = (byte) 8;
+		
+		msg.setMessage(cmd, data, data.length);
+		MidiEvent event = new MidiEvent(msg, tick);
+		tracks[ 0 ].add(event);
+	}
+	
+	/**
 	 * Adds a channel-dependent generic message.
 	 * This is called by the {@link MidiParser} to add messages that are not handled by another
 	 * method.

@@ -69,46 +69,48 @@ public class Dict {
 	private static byte[]   isHalfTone = null;
 	
 	// syntax
-	public static final String SYNTAX_DEFINE        = "DEFINE";
-	public static final String SYNTAX_COMMENT       = "COMMENT";
-	public static final String SYNTAX_GLOBAL        = "GLOBAL";
-	public static final String SYNTAX_P             = "PERCUSSION_CHANNEL";
-	public static final String SYNTAX_END           = "END";
-	public static final String SYNTAX_MACRO         = "MACRO";
-	public static final String SYNTAX_INCLUDE       = "INCLUDE";
-	public static final String SYNTAX_INSTRUMENTS   = "INSTRUMENTS";
-	public static final String SYNTAX_BPM           = "BPM";
-	public static final String SYNTAX_OPT_SEPARATOR = "OPT_SEPARATOR";
-	public static final String SYNTAX_OPT_ASSIGNER  = "OPT_ASSIGNER";
-	public static final String SYNTAX_PROG_BANK_SEP = "PROGRAM_BANK_SEPARATOR";
-	public static final String SYNTAX_BANK_SEP      = "BANK_SEPARATOR";
-	public static final String SYNTAX_VELOCITY      = "VELOCITY";
-	public static final String SYNTAX_V             = "VELOCITY_SHORT";
-	public static final String SYNTAX_STACCATO      = "STACCATO";
-	public static final String SYNTAX_S             = "STACCATO_SHORT";
-	public static final String SYNTAX_MULTIPLE      = "MULTIPLE";
-	public static final String SYNTAX_M             = "MULTIPLE_SHORT";
-	public static final String SYNTAX_QUANTITY      = "QUANTITY";
-	public static final String SYNTAX_Q             = "QUANTITY_SHORT";
-	public static final String SYNTAX_PAUSE         = "PAUSE";
-	public static final String SYNTAX_CHORD         = "CHORD";
-	public static final String SYNTAX_INCLUDE_FILE  = "INCLUDE_FILE";
-	public static final String SYNTAX_32            = "LENGTH_32";
-	public static final String SYNTAX_16            = "LENGTH_16";
-	public static final String SYNTAX_8             = "LENGTH_8";
-	public static final String SYNTAX_4             = "LENGTH_4";
-	public static final String SYNTAX_2             = "LENGTH_2";
-	public static final String SYNTAX_1             = "LENGTH_1";
-	public static final String SYNTAX_M1            = "LENGTH_M1";
-	public static final String SYNTAX_M2            = "LENGTH_M2";
-	public static final String SYNTAX_M4            = "LENGTH_M4";
-	public static final String SYNTAX_M8            = "LENGTH_M8";
-	public static final String SYNTAX_M16           = "LENGTH_M16";
-	public static final String SYNTAX_M32           = "LENGTH_M32";
-	public static final String SYNTAX_DOT           = "DOT";
-	public static final String SYNTAX_TRIPLET       = "TRIPLET";
-	public static final String SYNTAX_TUPLET        = "TUPLET";
-	public static final String SYNTAX_TUPLET_FOR    = "TUPLET_FOR";
+	public static final String SYNTAX_DEFINE         = "DEFINE";
+	public static final String SYNTAX_COMMENT        = "COMMENT";
+	public static final String SYNTAX_GLOBAL         = "GLOBAL";
+	public static final String SYNTAX_P              = "PERCUSSION_CHANNEL";
+	public static final String SYNTAX_END            = "END";
+	public static final String SYNTAX_MACRO          = "MACRO";
+	public static final String SYNTAX_INCLUDE        = "INCLUDE";
+	public static final String SYNTAX_INSTRUMENTS    = "INSTRUMENTS";
+	public static final String SYNTAX_BPM            = "BPM";
+	public static final String SYNTAX_TIME_SIG       = "TIME_SIG";
+	public static final String SYNTAX_TIME_SIG_SLASH = "TIME_SIG_SLASH";
+	public static final String SYNTAX_OPT_SEPARATOR  = "OPT_SEPARATOR";
+	public static final String SYNTAX_OPT_ASSIGNER   = "OPT_ASSIGNER";
+	public static final String SYNTAX_PROG_BANK_SEP  = "PROGRAM_BANK_SEPARATOR";
+	public static final String SYNTAX_BANK_SEP       = "BANK_SEPARATOR";
+	public static final String SYNTAX_VELOCITY       = "VELOCITY";
+	public static final String SYNTAX_V              = "VELOCITY_SHORT";
+	public static final String SYNTAX_STACCATO       = "STACCATO";
+	public static final String SYNTAX_S              = "STACCATO_SHORT";
+	public static final String SYNTAX_MULTIPLE       = "MULTIPLE";
+	public static final String SYNTAX_M              = "MULTIPLE_SHORT";
+	public static final String SYNTAX_QUANTITY       = "QUANTITY";
+	public static final String SYNTAX_Q              = "QUANTITY_SHORT";
+	public static final String SYNTAX_PAUSE          = "PAUSE";
+	public static final String SYNTAX_CHORD          = "CHORD";
+	public static final String SYNTAX_INCLUDE_FILE   = "INCLUDE_FILE";
+	public static final String SYNTAX_32             = "LENGTH_32";
+	public static final String SYNTAX_16             = "LENGTH_16";
+	public static final String SYNTAX_8              = "LENGTH_8";
+	public static final String SYNTAX_4              = "LENGTH_4";
+	public static final String SYNTAX_2              = "LENGTH_2";
+	public static final String SYNTAX_1              = "LENGTH_1";
+	public static final String SYNTAX_M1             = "LENGTH_M1";
+	public static final String SYNTAX_M2             = "LENGTH_M2";
+	public static final String SYNTAX_M4             = "LENGTH_M4";
+	public static final String SYNTAX_M8             = "LENGTH_M8";
+	public static final String SYNTAX_M16            = "LENGTH_M16";
+	public static final String SYNTAX_M32            = "LENGTH_M32";
+	public static final String SYNTAX_DOT            = "DOT";
+	public static final String SYNTAX_TRIPLET        = "TRIPLET";
+	public static final String SYNTAX_TUPLET         = "TUPLET";
+	public static final String SYNTAX_TUPLET_FOR     = "TUPLET_FOR";
 	
 	// drumkit identifiers
 	public static final String DRUMKIT_STANDARD   = "drumkit_0";
@@ -860,6 +862,8 @@ public class Dict {
 	public static final String ERROR_MACRO_UNDEFINED            = "error_macro_undefined";
 	public static final String ERROR_INCLUDE_NUM_OF_ARGS        = "error_include_num_of_args";
 	public static final String ERROR_INCLUDE_UNKNOWN_ARG        = "error_include_unknown_arg";
+	public static final String ERROR_INVALID_TIME_DENUM         = "error_invalid_time_denum";
+	public static final String ERROR_INVALID_TIME_SIG           = "error_invalid_time_sig";
 	public static final String ERROR_MODE_INSTR_NUM_OF_ARGS     = "error_mode_instr_num_of_args";
 	public static final String ERROR_NOTE_TOO_BIG               = "error_note_too_big";
 	public static final String ERROR_NOTE_TOO_SMALL             = "error_note_too_small";
@@ -1311,6 +1315,8 @@ public class Dict {
 		set( SYNTAX_INCLUDE,         "macro execution"                                  );
 		set( SYNTAX_INSTRUMENTS,     "definition of instruments"                        );
 		set( SYNTAX_BPM,             "tempo definition in BPM"                          );
+		set( SYNTAX_TIME_SIG,        "time signature definition"                        );
+		set( SYNTAX_TIME_SIG_SLASH,  "fraction bar in the time signature definition"    );
 		set( SYNTAX_OPT_SEPARATOR,   "option separating character"                      );
 		set( SYNTAX_OPT_ASSIGNER,    "option assignment character"                      );
 		set( SYNTAX_PROG_BANK_SEP,   "Separator between program number and bank select" );
@@ -1656,6 +1662,8 @@ public class Dict {
 		set( ERROR_MACRO_NOT_ALLOWED_HERE,        "a macro definition is not allowed inside a block<br>maybe you forgot to close the block." );
 		set( ERROR_INCLUDE_NUM_OF_ARGS,           "wrong number of arguments in macro command 'INCLUDE'"              );
 		set( ERROR_INCLUDE_UNKNOWN_ARG,           "unknown argument for 'INCLUDE'"                                    );
+		set( ERROR_INVALID_TIME_DENUM,            "invalid denuminator in time signature: "                           );
+		set( ERROR_INVALID_TIME_SIG,              "invalid time signature argument: "                                 );
 		set( ERROR_MODE_INSTR_NUM_OF_ARGS,        "wrong number of arguments in mode command 'INSTRUMENTS'"           );
 		set( ERROR_NOTE_TOO_BIG,                  "note number too big: "                                             );
 		set( ERROR_NOTE_TOO_SMALL,                "note number too small: "                                           );
@@ -1673,7 +1681,7 @@ public class Dict {
 		set( ERROR_UNKNOWN_NOTE,                  "unknown note: "                                                    );
 		set( ERROR_UNKNOWN_PERCUSSION,            "unknown percussion shortcut: "                                     );
 		set( ERROR_CHANNEL_UNDEFINED,             "channel %s has not been defined"                                   );
-		set( ERROR_CHANNEL_REDEFINED,             "channel %s has been defined already"                                   );
+		set( ERROR_CHANNEL_REDEFINED,             "channel %s has been defined already"                               );
 		set( ERROR_INVALID_CHANNEL_NUMBER,        "Invalid channel number (must be between 0 and 15): "               );
 		
 		// SequenceParser
@@ -2069,6 +2077,8 @@ public class Dict {
 		setSyntax( SYNTAX_INCLUDE,         "INCLUDE"        );
 		setSyntax( SYNTAX_INSTRUMENTS,     "INSTRUMENTS"    );
 		setSyntax( SYNTAX_BPM,             "bpm"            );
+		setSyntax( SYNTAX_TIME_SIG,        "time"           );
+		setSyntax( SYNTAX_TIME_SIG_SLASH,  "/"              );
 		setSyntax( SYNTAX_OPT_SEPARATOR,   ","              );
 		setSyntax( SYNTAX_OPT_ASSIGNER,    "="              );
 		setSyntax( SYNTAX_PROG_BANK_SEP,   ","              );
@@ -2119,22 +2129,24 @@ public class Dict {
 		syntaxList = new ArrayList<SyntaxElement>();
 		
 		addSyntaxCategory( get(SYNTAX_CAT_DEFINITION) );
-		addSyntaxForInfoView( SYNTAX_DEFINE       );
-		addSyntaxForInfoView( SYNTAX_INSTRUMENTS  );
-		addSyntaxForInfoView( SYNTAX_CHORD        );
-		addSyntaxForInfoView( SYNTAX_MACRO        );
-		addSyntaxForInfoView( SYNTAX_END          );
+		addSyntaxForInfoView( SYNTAX_DEFINE      );
+		addSyntaxForInfoView( SYNTAX_INSTRUMENTS );
+		addSyntaxForInfoView( SYNTAX_CHORD       );
+		addSyntaxForInfoView( SYNTAX_MACRO       );
+		addSyntaxForInfoView( SYNTAX_END         );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_CALL) );
 		addSyntaxForInfoView( SYNTAX_INCLUDE      );
 		addSyntaxForInfoView( SYNTAX_INCLUDE_FILE );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_OTHER) );
-		addSyntaxForInfoView( SYNTAX_COMMENT      );
-		addSyntaxForInfoView( SYNTAX_GLOBAL       );
-		addSyntaxForInfoView( SYNTAX_BPM          );
-		addSyntaxForInfoView( SYNTAX_PAUSE        );
-		addSyntaxForInfoView( SYNTAX_P            );
+		addSyntaxForInfoView( SYNTAX_COMMENT        );
+		addSyntaxForInfoView( SYNTAX_GLOBAL         );
+		addSyntaxForInfoView( SYNTAX_BPM            );
+		addSyntaxForInfoView( SYNTAX_TIME_SIG       );
+		addSyntaxForInfoView( SYNTAX_TIME_SIG_SLASH );
+		addSyntaxForInfoView( SYNTAX_PAUSE          );
+		addSyntaxForInfoView( SYNTAX_P              );
 
 		addSyntaxCategory( get(SYNTAX_CAT_OPTION) );
 		addSyntaxForInfoView( SYNTAX_OPT_SEPARATOR );
@@ -2151,22 +2163,22 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_Q             );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_NOTE_LENGTH) );
-		addSyntaxForInfoView( SYNTAX_32            );
-		addSyntaxForInfoView( SYNTAX_16            );
-		addSyntaxForInfoView( SYNTAX_8             );
-		addSyntaxForInfoView( SYNTAX_4             );
-		addSyntaxForInfoView( SYNTAX_2             );
-		addSyntaxForInfoView( SYNTAX_1             );
-		addSyntaxForInfoView( SYNTAX_M1            );
-		addSyntaxForInfoView( SYNTAX_M2            );
-		addSyntaxForInfoView( SYNTAX_M4            );
-		addSyntaxForInfoView( SYNTAX_M8            );
-		addSyntaxForInfoView( SYNTAX_M16           );
-		addSyntaxForInfoView( SYNTAX_M32           );
-		addSyntaxForInfoView( SYNTAX_DOT           );
-		addSyntaxForInfoView( SYNTAX_TRIPLET       );
-		addSyntaxForInfoView( SYNTAX_TUPLET        );
-		addSyntaxForInfoView( SYNTAX_TUPLET_FOR    );
+		addSyntaxForInfoView( SYNTAX_32         );
+		addSyntaxForInfoView( SYNTAX_16         );
+		addSyntaxForInfoView( SYNTAX_8          );
+		addSyntaxForInfoView( SYNTAX_4          );
+		addSyntaxForInfoView( SYNTAX_2          );
+		addSyntaxForInfoView( SYNTAX_1          );
+		addSyntaxForInfoView( SYNTAX_M1         );
+		addSyntaxForInfoView( SYNTAX_M2         );
+		addSyntaxForInfoView( SYNTAX_M4         );
+		addSyntaxForInfoView( SYNTAX_M8         );
+		addSyntaxForInfoView( SYNTAX_M16        );
+		addSyntaxForInfoView( SYNTAX_M32        );
+		addSyntaxForInfoView( SYNTAX_DOT        );
+		addSyntaxForInfoView( SYNTAX_TRIPLET    );
+		addSyntaxForInfoView( SYNTAX_TUPLET     );
+		addSyntaxForInfoView( SYNTAX_TUPLET_FOR );
 	}
 	
 	/**
