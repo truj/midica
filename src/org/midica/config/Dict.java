@@ -862,7 +862,7 @@ public class Dict {
 	public static final String ERROR_MACRO_UNDEFINED            = "error_macro_undefined";
 	public static final String ERROR_INCLUDE_NUM_OF_ARGS        = "error_include_num_of_args";
 	public static final String ERROR_INCLUDE_UNKNOWN_ARG        = "error_include_unknown_arg";
-	public static final String ERROR_INVALID_TIME_DENUM         = "error_invalid_time_denum";
+	public static final String ERROR_INVALID_TIME_DENOM         = "error_invalid_time_denom";
 	public static final String ERROR_INVALID_TIME_SIG           = "error_invalid_time_sig";
 	public static final String ERROR_MODE_INSTR_NUM_OF_ARGS     = "error_mode_instr_num_of_args";
 	public static final String ERROR_NOTE_TOO_BIG               = "error_note_too_big";
@@ -1662,7 +1662,7 @@ public class Dict {
 		set( ERROR_MACRO_NOT_ALLOWED_HERE,        "a macro definition is not allowed inside a block<br>maybe you forgot to close the block." );
 		set( ERROR_INCLUDE_NUM_OF_ARGS,           "wrong number of arguments in macro command 'INCLUDE'"              );
 		set( ERROR_INCLUDE_UNKNOWN_ARG,           "unknown argument for 'INCLUDE'"                                    );
-		set( ERROR_INVALID_TIME_DENUM,            "invalid denuminator in time signature: "                           );
+		set( ERROR_INVALID_TIME_DENOM,            "invalid denominator in time signature: "                           );
 		set( ERROR_INVALID_TIME_SIG,              "invalid time signature argument: "                                 );
 		set( ERROR_MODE_INSTR_NUM_OF_ARGS,        "wrong number of arguments in mode command 'INSTRUMENTS'"           );
 		set( ERROR_NOTE_TOO_BIG,                  "note number too big: "                                             );

@@ -8,6 +8,7 @@
 package org.midica.midi;
 
 import java.util.Map.Entry;
+import java.util.HashMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -20,6 +21,7 @@ import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Track;
 
 import org.midica.Midica;
+import org.midica.config.Dict;
 import org.midica.file.CharsetUtils;
 import org.midica.file.MidiParser;
 import org.midica.file.MidicaPLParser;
@@ -252,18 +254,32 @@ public class SequenceCreator {
 	/**
 	 * Sets the time signature using a meta message.
 	 * 
-	 * @param nominator  Nominator of the time signature
-	 * @param exp        Exponent for the denominator (denominator = 2^exp)
-	 * @param tick       Tickstamp of the time signature event
+	 * @param nominator    Nominator of the time signature
+	 * @param denominator  Denominator of the time signature
+	 * @param tick         Tickstamp of the time signature event
 	 * @throws InvalidMidiDataException if invalid MIDI data is used to create a MIDI message.
 	 */
-	public static void addMessageTimeSignature(int nominator, int exp, long tick) throws InvalidMidiDataException {
+	public static void addMessageTimeSignature(int nominator, int denominator, long tick) throws InvalidMidiDataException {
 		int cmd = MidiListener.META_TIME_SIGNATURE;
+		
+		// calculate valid denominators
+		HashMap<Integer, Integer> validDemominators = new HashMap<Integer, Integer>();
+		int validDenom = 1;
+		for (int exponent = 0; exponent < 31; exponent++) {
+			validDemominators.put(validDenom, exponent);
+			validDenom *= 2;
+		}
+		
+		// get and check exponent
+		Integer exp = validDemominators.get(denominator);
+		if (null == exp) {
+			throw new InvalidMidiDataException( Dict.get(Dict.ERROR_INVALID_TIME_DENOM) + denominator);
+		}
 		
 		MetaMessage msg = new MetaMessage();
 		byte[] data = new byte[4];
 		data[0] = (byte) nominator;
-		data[1] = (byte) exp;
+		data[1] = (byte) (int) exp;
 		data[2] = (byte) 24;
 		data[3] = (byte) 8;
 		

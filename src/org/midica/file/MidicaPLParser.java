@@ -1039,22 +1039,8 @@ public class MidicaPLParser extends SequenceParser {
 					int numerator   = toInt(matcher.group(1));
 					int denominator = toInt(matcher.group(2));
 					
-					// calculate valid denuminators
-					HashMap<Integer, Integer> validDemuminators = new HashMap<Integer, Integer>();
-					int validDenum = 1;
-					for (int i = 0; i < 31; i++) {
-						validDemuminators.put(validDenum, i);
-						validDenum *= 2;
-					}
-					
-					// get and check exponent
-					Integer exp = validDemuminators.get(denominator);
-					if (null == exp) {
-						throw new ParseException( Dict.get(Dict.ERROR_INVALID_TIME_DENUM) + denominator);
-					}
-					
 					// set the time signature message
-					SequenceCreator.addMessageTimeSignature(numerator, exp, currentTicks);
+					SequenceCreator.addMessageTimeSignature(numerator, denominator, currentTicks);
 				}
 				else {
 					throw new ParseException( Dict.get(Dict.ERROR_INVALID_TIME_SIG) + value);
