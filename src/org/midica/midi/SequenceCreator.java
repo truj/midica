@@ -285,7 +285,75 @@ public class SequenceCreator {
 		
 		msg.setMessage(cmd, data, data.length);
 		MidiEvent event = new MidiEvent(msg, tick);
-		tracks[ 0 ].add(event);
+		tracks[0].add(event);
+	}
+	
+	/**
+	 * Sets the key signature using a meta message.
+	 * 
+	 * @param note     any note number from 0 to 127
+	 * @param isMajor  **true** for a major key signature, **false** for a minor one
+	 * @param tick     Tickstamp of the time signature event
+	 * @throws InvalidMidiDataException if invalid MIDI data is used to create a MIDI message.
+	 */
+	public static void addMessageKeySignature(int note, boolean isMajor, long tick) throws InvalidMidiDataException {
+		int cmd = MidiListener.META_KEY_SIGNATURE;
+		
+		// calculate sharps or flats
+		note %= 12; // ignore octaves
+		byte sharpsOrFlats = 0;
+		if (isMajor) {
+			     if ( 0 == note) { sharpsOrFlats =  0; } // C  maj: 0 sharps or flats
+			else if ( 1 == note) { sharpsOrFlats =  7; } // C# maj: 7 sharps (or Db maj: 5 flats)
+			else if ( 2 == note) { sharpsOrFlats =  2; } // D  maj: 2 sharps
+			else if ( 3 == note) { sharpsOrFlats = -3; } // Eb maj: 3 flats
+			else if ( 4 == note) { sharpsOrFlats =  4; } // E  maj: 4 sharps
+			else if ( 5 == note) { sharpsOrFlats = -1; } // F  maj: 1 flat
+			else if ( 6 == note) { sharpsOrFlats =  6; } // F# maj: 6 sharps (or Gb maj: 6 flats)
+			else if ( 7 == note) { sharpsOrFlats =  1; } // G  maj: 1 sharp
+			else if ( 8 == note) { sharpsOrFlats = -4; } // Ab maj: 4 flats
+			else if ( 9 == note) { sharpsOrFlats =  3; } // A  maj: 3 sharps
+			else if (10 == note) { sharpsOrFlats = -2; } // Bb maj: 2 flats
+			else if (11 == note) { sharpsOrFlats =  5; } // B  maj: 5 sharps (or Cb maj: 7 flats)
+		}
+		else {
+			     if ( 0 == note) { sharpsOrFlats = -3; } // C  min: 3 flats
+			else if ( 1 == note) { sharpsOrFlats =  4; } // C# min: 4 sharps
+			else if ( 2 == note) { sharpsOrFlats = -1; } // D  min: 1 flat
+			else if ( 3 == note) { sharpsOrFlats =  6; } // D# min: 6 sharps (or Eb min: 6 flats)
+			else if ( 4 == note) { sharpsOrFlats =  1; } // E  min: 1 sharp
+			else if ( 5 == note) { sharpsOrFlats = -4; } // F  min: 4 flats
+			else if ( 6 == note) { sharpsOrFlats =  3; } // F# min: 3 sharps
+			else if ( 7 == note) { sharpsOrFlats = -2; } // G  min: 2 flats
+			else if ( 8 == note) { sharpsOrFlats =  5; } // G# min: 5 sharps (or Ab min: 7 flats)
+			else if ( 9 == note) { sharpsOrFlats =  0; } // A  min: 0 sharps or flats
+			else if (10 == note) { sharpsOrFlats =  7; } // A# min: 7 sharps (or Bb min: 5 flats)
+			else if (11 == note) { sharpsOrFlats =  2; } // B  min: 2 sharps
+		}
+		
+		// In some cases there are 2 possibilities. Then we must decide using the configured
+		// half tone symbol
+		if (Dict.isFlatConfigured()) {
+			if (isMajor) {
+				     if ( 1 == note) { sharpsOrFlats = -5; } // Db maj: 5 flats
+				else if ( 6 == note) { sharpsOrFlats = -6; } // Gb maj: 6 flats
+				else if (11 == note) { sharpsOrFlats = -7; } // Cb maj: 7 flats
+			}
+			else {
+				     if ( 3 == note) { sharpsOrFlats = -6; } // Eb min: 6 flats
+				else if ( 8 == note) { sharpsOrFlats = -7; } // Ab min: 7 flats
+				else if (10 == note) { sharpsOrFlats = -5; } // Bb min: 5 flats
+			}
+		}
+		
+		MetaMessage msg = new MetaMessage();
+		byte[] data = new byte[2];
+		data[0] = sharpsOrFlats;
+		data[1] = (byte) (isMajor ? 0x00 : 0x01);
+		
+		msg.setMessage(cmd, data, data.length);
+		MidiEvent event = new MidiEvent(msg, tick);
+		tracks[0].add(event);
 	}
 	
 	/**

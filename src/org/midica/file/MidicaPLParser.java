@@ -65,6 +65,10 @@ public class MidicaPLParser extends SequenceParser {
 	public static String BPM            = null;
 	public static String TIME_SIG       = null;
 	public static String TIME_SIG_SLASH = null;
+	public static String KEY_SIG        = null;
+	public static String KEY_SEPARATOR  = null;
+	public static String KEY_MAJ        = null;
+	public static String KEY_MIN        = null;
 	public static String CHORD          = null;
 	public static String COMMENT        = null;
 	public static String DEFINE         = null;
@@ -148,6 +152,10 @@ public class MidicaPLParser extends SequenceParser {
 		BPM            = Dict.getSyntax( Dict.SYNTAX_BPM            );
 		TIME_SIG       = Dict.getSyntax( Dict.SYNTAX_TIME_SIG       );
 		TIME_SIG_SLASH = Dict.getSyntax( Dict.SYNTAX_TIME_SIG_SLASH );
+		KEY_SIG        = Dict.getSyntax( Dict.SYNTAX_KEY_SIG        );
+		KEY_SEPARATOR  = Dict.getSyntax( Dict.SYNTAX_KEY_SEPARATOR  );
+		KEY_MAJ        = Dict.getSyntax( Dict.SYNTAX_KEY_MAJ        );
+		KEY_MIN        = Dict.getSyntax( Dict.SYNTAX_KEY_MIN        );
 		CHORD          = Dict.getSyntax( Dict.SYNTAX_CHORD          );
 		COMMENT        = Dict.getSyntax( Dict.SYNTAX_COMMENT        );
 		DEFINE         = Dict.getSyntax( Dict.SYNTAX_DEFINE         );
@@ -848,6 +856,10 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( BPM.equals(cmdId) )            BPM            = cmdName;
 		else if ( TIME_SIG.equals(cmdId) )       TIME_SIG       = cmdName;
 		else if ( TIME_SIG_SLASH.equals(cmdId) ) TIME_SIG_SLASH = cmdName;
+		else if ( KEY_SIG.equals(cmdId) )        KEY_SIG        = cmdName;
+		else if ( KEY_SEPARATOR.equals(cmdId) )  KEY_SEPARATOR  = cmdName;
+		else if ( KEY_MAJ.equals(cmdId) )        KEY_MAJ        = cmdName;
+		else if ( KEY_MIN.equals(cmdId) )        KEY_MIN        = cmdName;
 		else if ( CHORD.equals(cmdId) )          CHORD          = cmdName;
 		else if ( COMMENT.equals(cmdId) )        COMMENT        = cmdName;
 		else if ( DEFINE.equals(cmdId) )         DEFINE         = cmdName;
@@ -1044,6 +1056,34 @@ public class MidicaPLParser extends SequenceParser {
 				}
 				else {
 					throw new ParseException( Dict.get(Dict.ERROR_INVALID_TIME_SIG) + value);
+				}
+			}
+			
+			// set key signature
+			else if (cmd.equals(KEY_SIG)) {
+				Pattern pattern = Pattern.compile("^(\\S+)" + Pattern.quote(KEY_SEPARATOR) + "(\\S+)$");
+				Matcher matcher = pattern.matcher(value);
+				if (matcher.matches()) {
+					String noteName = matcher.group(1);
+					String tonality = matcher.group(2);
+					
+					// check and process note and tonality
+					int     note = parseNote(noteName);
+					boolean isMajor;
+					if (tonality.equals(KEY_MAJ)) {
+						isMajor = true;
+					}
+					else if (tonality.equals(KEY_MIN)) {
+						isMajor = false;
+					}
+					else {
+						throw new ParseException( Dict.get(Dict.ERROR_INVALID_TONALITY) + tonality );
+					}
+					// set the key signature message
+					SequenceCreator.addMessageKeySignature(note, isMajor, currentTicks);
+				}
+				else {
+					throw new ParseException( Dict.get(Dict.ERROR_INVALID_KEY_SIG) + value);
 				}
 			}
 			

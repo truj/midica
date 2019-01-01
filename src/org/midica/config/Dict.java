@@ -80,6 +80,10 @@ public class Dict {
 	public static final String SYNTAX_BPM            = "BPM";
 	public static final String SYNTAX_TIME_SIG       = "TIME_SIG";
 	public static final String SYNTAX_TIME_SIG_SLASH = "TIME_SIG_SLASH";
+	public static final String SYNTAX_KEY_SIG        = "KEY_SIG_SIG";
+	public static final String SYNTAX_KEY_SEPARATOR  = "KEY_SIG_SEPARATOR";
+	public static final String SYNTAX_KEY_MAJ        = "KEY_SIG_MAJ";
+	public static final String SYNTAX_KEY_MIN        = "KEY_SIG_MIN";
 	public static final String SYNTAX_OPT_SEPARATOR  = "OPT_SEPARATOR";
 	public static final String SYNTAX_OPT_ASSIGNER   = "OPT_ASSIGNER";
 	public static final String SYNTAX_PROG_BANK_SEP  = "PROGRAM_BANK_SEPARATOR";
@@ -864,6 +868,8 @@ public class Dict {
 	public static final String ERROR_INCLUDE_UNKNOWN_ARG        = "error_include_unknown_arg";
 	public static final String ERROR_INVALID_TIME_DENOM         = "error_invalid_time_denom";
 	public static final String ERROR_INVALID_TIME_SIG           = "error_invalid_time_sig";
+	public static final String ERROR_INVALID_KEY_SIG            = "error_invalid_key_sig";
+	public static final String ERROR_INVALID_TONALITY           = "error_invalid_tonality";
 	public static final String ERROR_MODE_INSTR_NUM_OF_ARGS     = "error_mode_instr_num_of_args";
 	public static final String ERROR_NOTE_TOO_BIG               = "error_note_too_big";
 	public static final String ERROR_NOTE_TOO_SMALL             = "error_note_too_small";
@@ -1301,8 +1307,8 @@ public class Dict {
 		set( MSG_DETAILS_RPN_BYTE_PL,                "RPN Bytes:"       );
 		set( MSG_DETAILS_NRPN_BYTE_SG,               "NRPN Byte:"       );
 		set( MSG_DETAILS_NRPN_BYTE_PL,               "NRPN Bytes:"      );
-		set( MSG_DETAILS_TEXT_SG,                    "Text:"           );
-		set( MSG_DETAILS_TEXT_PL,                    "Texts:"            );
+		set( MSG_DETAILS_TEXT_SG,                    "Text:"            );
+		set( MSG_DETAILS_TEXT_PL,                    "Texts:"           );
 		set( MSG_DETAILS_MESSAGE,                    "Message (Hex):"   );
 		
 		// syntax for InfoView
@@ -1317,6 +1323,10 @@ public class Dict {
 		set( SYNTAX_BPM,             "tempo definition in BPM"                          );
 		set( SYNTAX_TIME_SIG,        "time signature definition"                        );
 		set( SYNTAX_TIME_SIG_SLASH,  "fraction bar in the time signature definition"    );
+		set( SYNTAX_KEY_SIG,         "key signature definition"                         );
+		set( SYNTAX_KEY_SEPARATOR,   "key/tonality separator in the key signature definition" );
+		set( SYNTAX_KEY_MAJ,         "major (tonality) in the key signature definition" );
+		set( SYNTAX_KEY_MIN,         "minor (tonality) in the key signature definition" );
 		set( SYNTAX_OPT_SEPARATOR,   "option separating character"                      );
 		set( SYNTAX_OPT_ASSIGNER,    "option assignment character"                      );
 		set( SYNTAX_PROG_BANK_SEP,   "Separator between program number and bank select" );
@@ -1664,6 +1674,8 @@ public class Dict {
 		set( ERROR_INCLUDE_UNKNOWN_ARG,           "unknown argument for 'INCLUDE'"                                    );
 		set( ERROR_INVALID_TIME_DENOM,            "invalid denominator in time signature: "                           );
 		set( ERROR_INVALID_TIME_SIG,              "invalid time signature argument: "                                 );
+		set( ERROR_INVALID_KEY_SIG,               "invalid key signature argument: "                                  );
+		set( ERROR_INVALID_TONALITY,              "invalid tonality: "                                                );
 		set( ERROR_MODE_INSTR_NUM_OF_ARGS,        "wrong number of arguments in mode command 'INSTRUMENTS'"           );
 		set( ERROR_NOTE_TOO_BIG,                  "note number too big: "                                             );
 		set( ERROR_NOTE_TOO_SMALL,                "note number too small: "                                           );
@@ -2079,6 +2091,10 @@ public class Dict {
 		setSyntax( SYNTAX_BPM,             "bpm"            );
 		setSyntax( SYNTAX_TIME_SIG,        "time"           );
 		setSyntax( SYNTAX_TIME_SIG_SLASH,  "/"              );
+		setSyntax( SYNTAX_KEY_SIG,         "key"            );
+		setSyntax( SYNTAX_KEY_SEPARATOR,   "/"              );
+		setSyntax( SYNTAX_KEY_MAJ,         "maj"            );
+		setSyntax( SYNTAX_KEY_MIN,         "min"            );
 		setSyntax( SYNTAX_OPT_SEPARATOR,   ","              );
 		setSyntax( SYNTAX_OPT_ASSIGNER,    "="              );
 		setSyntax( SYNTAX_PROG_BANK_SEP,   ","              );
@@ -2145,6 +2161,10 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_BPM            );
 		addSyntaxForInfoView( SYNTAX_TIME_SIG       );
 		addSyntaxForInfoView( SYNTAX_TIME_SIG_SLASH );
+		addSyntaxForInfoView( SYNTAX_KEY_SIG        );
+		addSyntaxForInfoView( SYNTAX_KEY_SEPARATOR  );
+		addSyntaxForInfoView( SYNTAX_KEY_MAJ        );
+		addSyntaxForInfoView( SYNTAX_KEY_MIN        );
 		addSyntaxForInfoView( SYNTAX_PAUSE          );
 		addSyntaxForInfoView( SYNTAX_P              );
 
@@ -3391,5 +3411,19 @@ public class Dict {
 	 */
 	public static Set<Integer> getDrumkitList() {
 		return drumkitIntToName.keySet();
+	}
+	
+	/**
+	 * Checks if the configured half tone symbol is sharp or flat.
+	 * Only needed for some special cases when parsing the key signature.
+	 * 
+	 * @return **true**, if flat is configured, otherwise false.
+	 */
+	public static boolean isFlatConfigured() {
+		String configuredHalfTone = Config.get( Config.HALF_TONE );
+		if ( Config.CBX_HALFTONE_ID_FLAT.equals(configuredHalfTone)    ) { return true; }
+		if ( Config.CBX_HALFTONE_ID_BEMOLLE.equals(configuredHalfTone) ) { return true; }
+		if ( Config.CBX_HALFTONE_ID_DES.equals(configuredHalfTone)     ) { return true; }
+		return false;
 	}
 }
