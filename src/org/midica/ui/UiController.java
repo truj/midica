@@ -121,6 +121,14 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	}
 	
 	/**
+	 * Sets the soundfont file name label after loading a soundfont by MidicaPL source code.
+	 */
+	public void soundfontLoadedBySourceCode() {
+		String text = Dict.get(Dict.SF_LOADED_BY_SOURCE);
+		view.getChosenSoundfontFileLbl().setText( text );
+	}
+	
+	/**
 	 * This method processes all action events in the {@link UiView}.
 	 * 
 	 * @param e The event to be handled.

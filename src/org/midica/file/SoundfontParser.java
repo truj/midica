@@ -25,7 +25,6 @@ import javax.sound.midi.SoundbankResource;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 
-import org.midica.Midica;
 import org.midica.config.Dict;
 import org.midica.midi.MidiDevices;
 

@@ -24,6 +24,7 @@ import java.util.regex.Pattern;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MetaMessage;
 
+import org.midica.Midica;
 import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.midi.MidiDevices;
@@ -78,6 +79,7 @@ public class MidicaPLParser extends SequenceParser {
 	public static String GLOBAL           = null;
 	public static String INCLUDE          = null;
 	public static String INCLUDE_FILE     = null;
+	public static String SOUNDFONT        = null;
 	public static String INSTRUMENTS      = null;
 	public static String LENGTH_32        = null;
 	public static String LENGTH_16        = null;
@@ -166,6 +168,7 @@ public class MidicaPLParser extends SequenceParser {
 		GLOBAL           = Dict.getSyntax( Dict.SYNTAX_GLOBAL           );
 		INCLUDE          = Dict.getSyntax( Dict.SYNTAX_INCLUDE          );
 		INCLUDE_FILE     = Dict.getSyntax( Dict.SYNTAX_INCLUDE_FILE     );
+		SOUNDFONT        = Dict.getSyntax( Dict.SYNTAX_SOUNDFONT        );
 		INSTRUMENTS      = Dict.getSyntax( Dict.SYNTAX_INSTRUMENTS      );
 		LENGTH_32        = Dict.getSyntax( Dict.SYNTAX_32               );
 		LENGTH_16        = Dict.getSyntax( Dict.SYNTAX_16               );
@@ -614,6 +617,9 @@ public class MidicaPLParser extends SequenceParser {
 		else if (INCLUDE_FILE.equals(tokens[0])) {
 			parseINCLUDE_FILE( tokens );
 		}
+		else if (SOUNDFONT.equals(tokens[0])) {
+			parseSOUNDFONT( tokens );
+		}
 		else if (DEFINE.equals(tokens[0])) {
 			parseDEFINE( tokens );
 		}
@@ -796,7 +802,7 @@ public class MidicaPLParser extends SequenceParser {
 			try {
 				// create File object with absolute path for include file
 				String inclPath = tokens[ 1 ];
-				File inclFile   = new File( inclPath );
+				File   inclFile = new File(inclPath);
 				if (! inclFile.isAbsolute()) {
 					File currentDir = file.getParentFile();
 					inclFile = new File(
@@ -823,6 +829,50 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		else
 			throw new ParseException( Dict.get(Dict.ERROR_FILE_NUM_OF_ARGS) );
+	}
+	
+	/**
+	 * Parses a SOUNDFONT command.
+	 * A SOUNDFONT command includes a soundfont file.
+	 * 
+	 * @param tokens             Token array.
+	 * @throws ParseException    If the soundfont cannot be loaded.
+	 */
+	private void parseSOUNDFONT(String[] tokens) throws ParseException {
+		if (2 == tokens.length) {
+			try {
+				// create File object with absolute path for include file
+				String inclPath = tokens[1];
+				File   inclFile = new File( inclPath );
+				if (! inclFile.isAbsolute()) {
+					File currentDir = file.getParentFile();
+					inclFile = new File(
+						currentDir.getCanonicalPath(), // parent
+						inclPath                       // child
+					);
+				}
+				
+				// check if the file can be parsed
+				if (! inclFile.exists())
+					throw new ParseException( Dict.get(Dict.ERROR_FILE_EXISTS) + inclFile.getCanonicalPath() );
+				if (! inclFile.isFile())
+					throw new ParseException( Dict.get(Dict.ERROR_FILE_NORMAL) + inclFile.getCanonicalPath() );
+				if (! inclFile.canRead())
+					throw new ParseException( Dict.get(Dict.ERROR_FILE_READABLE) + inclFile.getCanonicalPath() );
+				
+				// parse it
+				SoundfontParser parser = new SoundfontParser();
+				parser.parse( inclFile );
+				
+				// set the file name label in the main window
+				Midica.uiController.soundfontLoadedBySourceCode();
+			}
+			catch( IOException e ) {
+				throw new ParseException( Dict.get(Dict.ERROR_SOUNDFONT_IO) + e.getMessage() );
+			}
+		}
+		else
+			throw new ParseException( Dict.get(Dict.ERROR_SOUNDFONT_NUM_OF_ARGS) );
 	}
 	
 	/**

@@ -100,6 +100,7 @@ public class Dict {
 	public static final String SYNTAX_CHORD            = "CHORD";
 	public static final String SYNTAX_INLINE_CHORD_SEP = "INLINE_CHORD_SEP";
 	public static final String SYNTAX_INCLUDE_FILE     = "INCLUDE_FILE";
+	public static final String SYNTAX_SOUNDFONT        = "SOUNDFONT";
 	public static final String SYNTAX_32               = "LENGTH_32";
 	public static final String SYNTAX_16               = "LENGTH_16";
 	public static final String SYNTAX_8                = "LENGTH_8";
@@ -358,6 +359,7 @@ public class Dict {
 	public static final String REMEMBER_MID_TT             = "remember_mid_tt";
 	public static final String PLAYER_BUTTON               = "player_button";
 	public static final String UNCHOSEN_FILE               = "unchosen_file";
+	public static final String SF_LOADED_BY_SOURCE         = "sf_loaded_by_source";
 	public static final String CHOOSE_FILE                 = "choose_file";
 	public static final String CHOOSE_FILE_EXPORT          = "choose_file_export";
 	public static final String MIDI_EXPORT                 = "midi_export";
@@ -858,10 +860,12 @@ public class Dict {
 	public static final String ERROR_CHORD_NUM_OF_ARGS          = "error_chord_num_of_args";
 	public static final String ERROR_DEFINE_NUM_OF_ARGS         = "error_define_num_of_args";
 	public static final String ERROR_FILE_NUM_OF_ARGS           = "error_file_num_of_args";
+	public static final String ERROR_SOUNDFONT_NUM_OF_ARGS      = "error_soundfont_num_of_args";
 	public static final String ERROR_FILE_EXISTS                = "error_file_exists";
 	public static final String ERROR_FILE_NORMAL                = "error_file_normal";
 	public static final String ERROR_FILE_READABLE              = "error_file_readable";
 	public static final String ERROR_FILE_IO                    = "error_file_io";
+	public static final String ERROR_SOUNDFONT_IO               = "error_soundfont_io";
 	public static final String ERROR_MACRO_NUM_OF_ARGS          = "error_macronum_of_arts";
 	public static final String ERROR_MACRO_RECURSION            = "error_macro_recursion";
 	public static final String ERROR_MACRO_UNDEFINED            = "error_macro_undefined";
@@ -1116,6 +1120,7 @@ public class Dict {
 		set( REMEMBER_MID_TT,              "Load the chosen MIDI file automatically at the next startup" );
 		set( PLAYER_BUTTON,                "Start Player"                  );
 		set( UNCHOSEN_FILE,                "no file loaded"                );
+		set( SF_LOADED_BY_SOURCE,          "[loaded by MidicaPL file]"     );
 		set( CHOOSE_FILE,                  "select file"                   );
 		set( CHOOSE_FILE_EXPORT,           "select file"                   );
 		set( MIDI_EXPORT,                  "export as midi"                );
@@ -1344,6 +1349,8 @@ public class Dict {
 		set( SYNTAX_CHORD,            "chord definition"                                 );
 		set( SYNTAX_INLINE_CHORD_SEP, "inline chord separator"                           );
 		set( SYNTAX_INCLUDE_FILE,     "including another file"                           );
+		set( SYNTAX_SOUNDFONT,        "including a soundfont file"                       );
+		
 		set( SYNTAX_32,               "32nd"                                             );
 		set( SYNTAX_16,               "16th"                                             );
 		set( SYNTAX_8,                "8th"                                              );
@@ -1663,10 +1670,12 @@ public class Dict {
 		set( ERROR_CHORD_NUM_OF_ARGS,             "wrong number of arguments in CHORD command"                        );
 		set( ERROR_DEFINE_NUM_OF_ARGS,            "wrong number of arguments in DEFINE command"                       );
 		set( ERROR_FILE_NUM_OF_ARGS,              "wrong number of arguments in INCLUDE_FILE command"                 );
+		set( ERROR_SOUNDFONT_NUM_OF_ARGS,         "wrong number of arguments in SOUNDFONT command"                    );
 		set( ERROR_FILE_EXISTS,                   "file does not exist:<br>"                                          );
 		set( ERROR_FILE_NORMAL,                   "not a normal file:<br>"                                            );
 		set( ERROR_FILE_READABLE,                 "file not readable:<br>"                                            );
 		set( ERROR_FILE_IO,                       "file cannot be parsed:<br>"                                        );
+		set( ERROR_SOUNDFONT_IO,                  "soundfont cannot be parsed:<br>"                                   );
 		set( ERROR_MACRO_NUM_OF_ARGS,             "wrong number of arguments in macro command 'MACRO'"                );
 		set( ERROR_MACRO_RECURSION,               "Can't include the current macro in itself. Recursion not allowed." );
 		set( ERROR_MACRO_UNDEFINED,               "include failed. macro not yet defined."                            );
@@ -1875,6 +1884,7 @@ public class Dict {
 		set( SOUNDFONT,                              "Soundfont-Datei"                       );
 		set( PLAYER_BUTTON,                          "Abspielen"                             );
 		set( UNCHOSEN_FILE,                          "keine Datei geladen"                   );
+		set( SF_LOADED_BY_SOURCE,                    "[durch MidicaPL-Datei geladen]"        );
 		set( CHOOSE_FILE,                            "Öffnen"                                );
 		set( CHOOSE_FILE_EXPORT,                     "Speichern"                             );
 		set( MIDI_EXPORT,                            "Als MIDI exportieren"                  );
@@ -2113,6 +2123,7 @@ public class Dict {
 		setSyntax( SYNTAX_CHORD,            "CHORD"          );
 		setSyntax( SYNTAX_INLINE_CHORD_SEP, ","              );
 		setSyntax( SYNTAX_INCLUDE_FILE,     "INCLUDE_FILE"   );
+		setSyntax( SYNTAX_SOUNDFONT,        "SOUNDFONT"      );
 		setSyntax( SYNTAX_32,               "/32"            );
 		setSyntax( SYNTAX_16,               "/16"            );
 		setSyntax( SYNTAX_8,                "/8"             );
@@ -2157,6 +2168,7 @@ public class Dict {
 		addSyntaxCategory( get(SYNTAX_CAT_CALL) );
 		addSyntaxForInfoView( SYNTAX_INCLUDE      );
 		addSyntaxForInfoView( SYNTAX_INCLUDE_FILE );
+		addSyntaxForInfoView( SYNTAX_SOUNDFONT    );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_OTHER) );
 		addSyntaxForInfoView( SYNTAX_COMMENT          );
