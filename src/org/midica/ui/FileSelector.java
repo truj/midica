@@ -100,16 +100,21 @@ public class FileSelector extends JDialog {
 	}
 	
 	/**
-	 * Returns the chosen file.
+	 * Sets the directory of the chosen file in the config.
 	 * 
 	 * Remembers the directory of that file so that next time the selector defaults to the same
 	 * directory if the same file type for the same purpose is going to be opened.
-	 * 
-	 * @return    Chosen file.
 	 */
-	public File getFile() {
-		// get directory and store it into the config
+	public void rememberDirectory() {
 		File file = fileChooser.getSelectedFile();
+		
+		// no file selected? - probably this is during startup after parsing an automatically
+		// parsed, remembered file
+		if (null == file) {
+			return;
+		}
+		
+		// get directory and store it in the config
 		try {
 			String directory = file.getParentFile().getCanonicalPath();
 			if ( READ == this.filePurpose ) {
@@ -129,7 +134,5 @@ public class FileSelector extends JDialog {
 		}
 		catch ( IOException e ) {
 		}
-		
-		return file;
 	}
 }

@@ -398,6 +398,9 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 					Config.set( Config.PATH_SF2, file.getAbsolutePath() );
 				}
 			}
+			
+			// set import directory in the config
+			selector.rememberDirectory();
 		}
 		catch ( ParseException ex ) {
 			int    lineNumber = ex.getLineNumber();
@@ -466,6 +469,9 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 				// set chosen charset in the config
 				ComboboxStringOption o = (ComboboxStringOption) ConfigComboboxModel.getModel( charsetKey ).getSelectedItem();
 				Config.set( charsetKey, o.getIdentifier() );
+				
+				// set export directory in the config
+				selector.rememberDirectory();
 			}
 		}
 		catch ( ExportException ex ) {
