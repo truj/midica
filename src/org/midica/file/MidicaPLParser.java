@@ -106,6 +106,7 @@ public class MidicaPLParser extends SequenceParser {
 	public static String S                = null;
 	public static String STACCATO         = null;
 	public static String V                = null;
+	public static String STACCATO_PERCENT = null;
 	public static String VELOCITY         = null;
 	public static String TRIPLET          = null;
 	public static String TUPLET           = null;
@@ -194,6 +195,7 @@ public class MidicaPLParser extends SequenceParser {
 		QUANTITY         = Dict.getSyntax( Dict.SYNTAX_QUANTITY         );
 		S                = Dict.getSyntax( Dict.SYNTAX_S                );
 		STACCATO         = Dict.getSyntax( Dict.SYNTAX_STACCATO         );
+		STACCATO_PERCENT = Dict.getSyntax( Dict.SYNTAX_STACCATO_PERCENT );
 		V                = Dict.getSyntax( Dict.SYNTAX_V                );
 		VELOCITY         = Dict.getSyntax( Dict.SYNTAX_VELOCITY         );
 		TRIPLET          = Dict.getSyntax( Dict.SYNTAX_TRIPLET          );
@@ -755,10 +757,10 @@ public class MidicaPLParser extends SequenceParser {
 		// handle QUANTITY
 		int quantity = 1;
 		if (3 == tokens.length) {
-			HashMap<String, Integer> options = parseOptions( tokens[2] );
+			HashMap<String, Number> options = parseOptions(tokens[2]);
 			for (String key : options.keySet()) {
 				if (OPT_QUANTITY.equals(key)) {
-					quantity = options.get(key);
+					quantity = (int) options.get(key);
 				}
 				else {
 					throw new ParseException( Dict.get(Dict.ERROR_INCLUDE_UNKNOWN_ARG) );
@@ -948,6 +950,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( QUANTITY.equals(cmdId) )         QUANTITY         = cmdName;
 		else if ( S.equals(cmdId) )                S                = cmdName;
 		else if ( STACCATO.equals(cmdId) )         STACCATO         = cmdName;
+		else if ( STACCATO_PERCENT.equals(cmdId) ) STACCATO_PERCENT = cmdName;
 		else if ( V.equals(cmdId) )                V                = cmdName;
 		else if ( VELOCITY.equals(cmdId) )         VELOCITY         = cmdName;
 		else if ( TRIPLET.equals(cmdId) )          TRIPLET          = cmdName;
@@ -1189,19 +1192,19 @@ public class MidicaPLParser extends SequenceParser {
 		int duration = parseDuration( durationStr );
 		
 		// process options
-		HashMap<String, Integer> options = new HashMap<String, Integer>();
+		HashMap<String, Number> options = new HashMap<String, Number>();
 		if (2 == subTokens.length)
 			options = parseOptions( subTokens[1] );
 		
 		// apply velocity option
 		if (options.containsKey(OPT_VELOCITY)) {
-			int velocity = options.get( OPT_VELOCITY );
+			int velocity = (int) options.get( OPT_VELOCITY );
 			if (! isFake)
 				instruments.get( channel ).setVelocity( velocity );
 		}
 		// apply staccato option
 		if (options.containsKey(OPT_STACCATO)) {
-			int staccato = options.get( OPT_STACCATO );
+			float staccato = (float) options.get( OPT_STACCATO );
 			if (! isFake)
 				instruments.get( channel ).setStaccato( staccato );
 		}
@@ -1215,7 +1218,7 @@ public class MidicaPLParser extends SequenceParser {
 		// determine how often to play the note(s)
 		int quantity = 1;
 		if (options.containsKey(OPT_QUANTITY)) {
-			quantity = options.get( OPT_QUANTITY );
+			quantity = (int) options.get( OPT_QUANTITY );
 		}
 		
 		// get instrument
@@ -1270,31 +1273,40 @@ public class MidicaPLParser extends SequenceParser {
 	 *                     provided options string.
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
-	private HashMap<String, Integer> parseOptions( String optString ) throws ParseException {
-		HashMap<String, Integer> options = new HashMap<String, Integer>();
+	private HashMap<String, Number> parseOptions( String optString ) throws ParseException {
+		HashMap<String, Number> options = new HashMap<String, Number>();
 		
 		String[] optTokens = optString.split( OPT_SEPARATOR );
 		for (String opt : optTokens) {
 			opt = clean( opt );
-			String[] optParts = opt.split( "[" + Pattern.quote(OPT_ASSIGNER) + "\\s]+" ); // name and value can be separated by OPT_ASSIGNER (e,g, "=") and/or whitespace(s)
+			String[] optParts = opt.split("[" + Pattern.quote(OPT_ASSIGNER) + "\\s]+"); // name and value can be separated by OPT_ASSIGNER (e,g, "=") and/or whitespace(s)
 			if (optParts.length > 2)
 				throw new ParseException( Dict.get(Dict.ERROR_CANT_PARSE_OPTIONS) );
 			// construct name and value
-			String optName  = optParts[ 0 ];
-			int    optValue = 0;
+			String optName  = optParts[0];
+			Number optValue = 0;
 			if (V.equals(optName) || VELOCITY.equals(optName)) {
 				optName = OPT_VELOCITY;
-				optValue = toInt( optParts[1] );
-				if (optValue > 127)
+				int val = toInt(optParts[1]);
+				if (val > 127)
 					throw new ParseException( Dict.get(Dict.ERROR_VEL_NOT_MORE_THAN_127) );
+				if (val < 1)
+					throw new ParseException( Dict.get(Dict.ERROR_VEL_NOT_LESS_THAN_1) );
+				optValue = val;
 			}
 			else if (S.equals(optName) || STACCATO.equals(optName)) {
 				optName = OPT_STACCATO;
-				optValue = toInt( optParts[1], false );
+				String[] valueParts = optParts[1].split(Pattern.quote(STACCATO_PERCENT), -1);
+				float    val        = toFloat(valueParts[0]);
+				if (valueParts.length > 1)
+					val /= 100; // percentage --> numeric
+				if (val > 1.0)
+					throw new ParseException( Dict.get(Dict.ERROR_STAC_NOT_MORE_THAN_1) );
+				optValue = val;
 			}
 			else if (Q.equals(optName) || QUANTITY.equals(optName)) {
 				optName = OPT_QUANTITY;
-				optValue = toInt( optParts[1], false );
+				optValue = toInt(optParts[1], false);
 			}
 			else if (M.equals(optName) || MULTIPLE.equals(optName)) {
 				optName = OPT_MULTIPLE;
@@ -1302,7 +1314,7 @@ public class MidicaPLParser extends SequenceParser {
 			else {
 				throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_OPTION) + optName );
 			}
-			options.put( optName, optValue );
+			options.put(optName, optValue);
 		}
 		
 		return options;
@@ -1551,7 +1563,24 @@ public class MidicaPLParser extends SequenceParser {
 			return i;
 		}
 		catch ( NumberFormatException e ) {
-			throw new ParseException( Dict.get(Dict.ERROR_NOT_AN_INTEGER) + s );
+			throw new ParseException(Dict.get(Dict.ERROR_NOT_AN_INTEGER) + s);
+		}
+	}
+	
+	/**
+	 * Parses a String that is expected to be a float.
+	 * 
+	 * @param s              The string to be parsed.
+	 * @return               The parsed value.
+	 * @throws ParseException    If the string cannot be parsed.
+	 */
+	private float toFloat(String s) throws ParseException {
+		try {
+			float f = Float.parseFloat(s);
+			return f;
+		}
+		catch ( NumberFormatException e ) {
+			throw new ParseException(Dict.get(Dict.ERROR_NOT_A_FLOAT) + s);
 		}
 	}
 	

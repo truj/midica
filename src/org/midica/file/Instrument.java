@@ -21,8 +21,11 @@ import org.midica.config.Dict;
  * 
  * - **tickstamp**       - This is the current position of the parsed/exported file, counted in MIDI ticks.
  * - **velocity**        - Velocity of key strokes.
- * - **staccato value**  - That is the number of ticks that a key is released before
- *                         the theoretical end of the according note.
+ * - **staccato value**  - This is the amount of ticks that a key is released before
+ *                         the theoretical end of the according note. It's a relative value expressing
+ *                         a percentage of the theoretical note length.  
+ *                         Theoretical Minimum: minus infinite.  
+ *                         Theoretical Maximum: +1.0 (100%)
  * 
  * @author Jan Trukenmüller
  */
@@ -33,7 +36,9 @@ public class Instrument implements Comparable<Instrument> {
 	/** Default velocity for this channel unless defined differently. */
 	private static final int DEFAULT_VELOCITY  = 64;
 	/** Default staccato value for this channel unless defined differently. */
-	private static final int DEFAULT_STACCATO  = 10;
+	private static final float DEFAULT_STACCATO  = 0.01f; // 1 percent
+	/** Minimum remaining note length after applying the staccato value */
+	private static final long MIN_NOTE_LENGTH = 1;
 	
 	/** Channel number as defined by the MIDI specification. Between 0 and 15. */
 	public final int channel;
@@ -53,7 +58,7 @@ public class Instrument implements Comparable<Instrument> {
 	/** Current tickstamp */
 	private long currentTicks = MIN_CURRENT_TICKS;
 	/** Each note ends that many ticks before it would end theoretically */
-	private int staccato = DEFAULT_STACCATO;
+	private float staccato = DEFAULT_STACCATO;
 	
 	/**
 	 * Creates a new Instrument object representing a channel during the parsing or export
@@ -147,12 +152,12 @@ public class Instrument implements Comparable<Instrument> {
 	
 	/**
 	 * Returns the current staccato value of the channel.
-	 * That is the number of ticks that the key is released before the theoretical end of
-	 * the note.
+	 * That is the percentage of ticks that the key is released before the theoretical end of
+	 * the note. 0% means 0.0, 100% means 1.0
 	 * 
 	 * @return Current staccato value
 	 */
-	public int getStaccato() {
+	public float getStaccato() {
 		return staccato;
 	}
 	
@@ -161,19 +166,24 @@ public class Instrument implements Comparable<Instrument> {
 	 * 
 	 * @param staccato New staccato value.
 	 */
-	public void setStaccato(int staccato) {
+	public void setStaccato(float staccato) {
 		this.staccato = staccato;
 	}
 	
 	/**
 	 * Increments the tickstamp according to the note's duration.
 	 * 
-	 * @param duration Duration of the note in ticks.
-	 * @return Tickstamp for the note end according to duration and staccato (key release tick).
+	 * @param duration    Duration of the note in ticks.
+	 * @return Tickstamp for the note end according to duration and staccato (key release percentage).
 	 */
-	public long addNote( int duration ) {
-		incrementTicks( duration );
-		return currentTicks - staccato;
+	public long addNote(int duration) {
+		incrementTicks(duration);
+		long staccatoTicks = Math.round(duration * staccato);
+		long endTick       = currentTicks - staccatoTicks;
+		if (endTick < MIN_NOTE_LENGTH) {
+			endTick = MIN_NOTE_LENGTH;
+		}
+		return endTick;
 	}
 	
 	/**

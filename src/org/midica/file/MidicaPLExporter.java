@@ -778,6 +778,7 @@ public class MidicaPLExporter extends Exporter {
 				// TODO: Replace if(true) according to the channel state.
 				
 				// staccato
+				// TODO: rewrite this to use the relative staccato value instead of absolute ticks
 				Instrument instr        = instruments.get( (byte) channel );
 				boolean    hasOtherOpts = false;
 				int        staccato     = Integer.parseInt( options.get("staccato") );

@@ -92,6 +92,7 @@ public class Dict {
 	public static final String SYNTAX_V                = "VELOCITY_SHORT";
 	public static final String SYNTAX_STACCATO         = "STACCATO";
 	public static final String SYNTAX_S                = "STACCATO_SHORT";
+	public static final String SYNTAX_STACCATO_PERCENT = "STACCATO_PERCENT";
 	public static final String SYNTAX_MULTIPLE         = "MULTIPLE";
 	public static final String SYNTAX_M                = "MULTIPLE_SHORT";
 	public static final String SYNTAX_QUANTITY         = "QUANTITY";
@@ -842,8 +843,9 @@ public class Dict {
 	
 	// MidicaPLParser
 	public static final String ERROR_0_NOT_ALLOWED              = "error_0_not_allowed";
-	public static final String ERROR_NEGATIVE_NOT_ALLOWED       = "error_negative_not_allowed: ";
-	public static final String ERROR_NOT_AN_INTEGER             = "error_not_an_integer: ";
+	public static final String ERROR_NEGATIVE_NOT_ALLOWED       = "error_negative_not_allowed";
+	public static final String ERROR_NOT_AN_INTEGER             = "error_not_an_integer";
+	public static final String ERROR_NOT_A_FLOAT                = "error_not_a_float";
 	public static final String ERROR_INSTRUMENTS_NOT_DEFINED    = "error_instruments_not_defined";
 	public static final String ERROR_NO_INSTRUMENTS             = "error_no_instruments";
 	public static final String ERROR_GLOBALS_IN_INSTR_DEF       = "error_globals_in_instr_def";
@@ -888,6 +890,8 @@ public class Dict {
 	public static final String ERROR_CH_CMD_NUM_OF_ARGS         = "error_ch_num_of_args";
 	public static final String ERROR_CANT_PARSE_OPTIONS         = "error_cant_parse_options";
 	public static final String ERROR_VEL_NOT_MORE_THAN_127      = "error_vel_not_more_than_127";
+	public static final String ERROR_VEL_NOT_LESS_THAN_1        = "error_vel_not_less_than_1";
+	public static final String ERROR_STAC_NOT_MORE_THAN_1       = "error_stac_not_more_than_1";
 	public static final String ERROR_UNKNOWN_OPTION             = "error_unknown_option: ";
 	public static final String ERROR_UNKNOWN_NOTE               = "error_unknown_note";
 	public static final String ERROR_UNKNOWN_PERCUSSION         = "error_unknown_percussion";
@@ -1341,6 +1345,7 @@ public class Dict {
 		set( SYNTAX_V,                "velocity option (short)"                          );
 		set( SYNTAX_STACCATO,         "staccato option (long)"                           );
 		set( SYNTAX_S,                "staccato option (short)"                          );
+		set( SYNTAX_STACCATO_PERCENT, "percent indicator of the staccato option"         );
 		set( SYNTAX_MULTIPLE,         "multiple notes option (long)"                     );
 		set( SYNTAX_M,                "multiple notes option (short)"                    );
 		set( SYNTAX_QUANTITY,         "quantity: how often to play the note"             );
@@ -1651,6 +1656,7 @@ public class Dict {
 		set( ERROR_0_NOT_ALLOWED,                 "0 not allowed"                 );
 		set( ERROR_NEGATIVE_NOT_ALLOWED,          "negative number not allowed: " );
 		set( ERROR_NOT_AN_INTEGER,                "not an integer: "              );
+		set( ERROR_NOT_A_FLOAT,                   "not a valid number: "          );
 		
 		// MidiParser
 		set( ERROR_ONLY_PPQ_SUPPORTED,            "Only MIDI files with division type PPQ are supported." );
@@ -1700,6 +1706,8 @@ public class Dict {
 		set( ERROR_CH_CMD_NUM_OF_ARGS,            "wrong number of arguments in channel command"                      );
 		set( ERROR_CANT_PARSE_OPTIONS,            "cannot parse options"                                              );
 		set( ERROR_VEL_NOT_MORE_THAN_127,         "velocity cannot be set to more than 127"                           );
+		set( ERROR_VEL_NOT_LESS_THAN_1,           "velocity must be more than 0"                                      );
+		set( ERROR_STAC_NOT_MORE_THAN_1,          "staccato cannot be more than 1.0 (or 100%)"                        );
 		set( ERROR_UNKNOWN_OPTION,                "unknown option: "                                                  );
 		set( ERROR_UNKNOWN_NOTE,                  "unknown note: "                                                    );
 		set( ERROR_UNKNOWN_PERCUSSION,            "unknown percussion shortcut: "                                     );
@@ -2115,6 +2123,7 @@ public class Dict {
 		setSyntax( SYNTAX_V,                "v"              );
 		setSyntax( SYNTAX_STACCATO,         "staccato"       );
 		setSyntax( SYNTAX_S,                "s"              );
+		setSyntax( SYNTAX_STACCATO_PERCENT, "%"              );
 		setSyntax( SYNTAX_MULTIPLE,         "multiple"       );
 		setSyntax( SYNTAX_M,                "m"              );
 		setSyntax( SYNTAX_QUANTITY,         "quantity"       );
@@ -2185,18 +2194,19 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_INLINE_CHORD_SEP );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_OPTION) );
-		addSyntaxForInfoView( SYNTAX_OPT_SEPARATOR );
-		addSyntaxForInfoView( SYNTAX_OPT_ASSIGNER  );
-		addSyntaxForInfoView( SYNTAX_PROG_BANK_SEP );
-		addSyntaxForInfoView( SYNTAX_BANK_SEP      );
-		addSyntaxForInfoView( SYNTAX_VELOCITY      );
-		addSyntaxForInfoView( SYNTAX_V             );
-		addSyntaxForInfoView( SYNTAX_STACCATO      );
-		addSyntaxForInfoView( SYNTAX_S             );
-		addSyntaxForInfoView( SYNTAX_MULTIPLE      );
-		addSyntaxForInfoView( SYNTAX_M             );
-		addSyntaxForInfoView( SYNTAX_QUANTITY      );
-		addSyntaxForInfoView( SYNTAX_Q             );
+		addSyntaxForInfoView( SYNTAX_OPT_SEPARATOR    );
+		addSyntaxForInfoView( SYNTAX_OPT_ASSIGNER     );
+		addSyntaxForInfoView( SYNTAX_PROG_BANK_SEP    );
+		addSyntaxForInfoView( SYNTAX_BANK_SEP         );
+		addSyntaxForInfoView( SYNTAX_VELOCITY         );
+		addSyntaxForInfoView( SYNTAX_V                );
+		addSyntaxForInfoView( SYNTAX_STACCATO         );
+		addSyntaxForInfoView( SYNTAX_S                );
+		addSyntaxForInfoView( SYNTAX_STACCATO_PERCENT );
+		addSyntaxForInfoView( SYNTAX_MULTIPLE         );
+		addSyntaxForInfoView( SYNTAX_M                );
+		addSyntaxForInfoView( SYNTAX_QUANTITY         );
+		addSyntaxForInfoView( SYNTAX_Q                );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_NOTE_LENGTH) );
 		addSyntaxForInfoView( SYNTAX_32         );
