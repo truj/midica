@@ -118,6 +118,7 @@ public class Dict {
 	public static final String SYNTAX_TRIPLET          = "TRIPLET";
 	public static final String SYNTAX_TUPLET           = "TUPLET";
 	public static final String SYNTAX_TUPLET_FOR       = "TUPLET_FOR";
+	public static final String SYNTAX_DURATION_PLUS    = "DURATION_PLUS";
 	
 	// drumkit identifiers
 	public static final String DRUMKIT_STANDARD   = "drumkit_0";
@@ -881,6 +882,7 @@ public class Dict {
 	public static final String ERROR_NOTE_TOO_BIG               = "error_note_too_big";
 	public static final String ERROR_NOTE_TOO_SMALL             = "error_note_too_small";
 	public static final String ERROR_NOTE_LENGTH_INVALID        = "error_note_length_invalid";
+	public static final String ERROR_EMPTY_DURATION_SUMMAND     = "error_empty_duration_summand";
 	public static final String ERROR_UNKNOWN_MACRO_CMD          = "error_unknown_macro_cmd";
 	public static final String ERROR_INSTR_NUM_OF_ARGS          = "error_num_of_args";
 	public static final String ERROR_INSTR_BANK                 = "error_instr_bank";
@@ -1372,6 +1374,7 @@ public class Dict {
 		set( SYNTAX_TRIPLET,          "triplet (note length devided by 1.5)"             );
 		set( SYNTAX_TUPLET,           "tuplet"                                           );
 		set( SYNTAX_TUPLET_FOR,       "tuplet definition separator"                      );
+		set( SYNTAX_DURATION_PLUS,    "duration addition symbol"                         );
 		
 		// messages for InfoView
 		set( MSG1_VOICE,                  "Voice Messages"                                 );
@@ -1697,6 +1700,7 @@ public class Dict {
 		set( ERROR_NOTE_TOO_BIG,                  "note number too big: "                                             );
 		set( ERROR_NOTE_TOO_SMALL,                "note number too small: "                                           );
 		set( ERROR_NOTE_LENGTH_INVALID,           "invalid note length expression: "                                  );
+		set( ERROR_EMPTY_DURATION_SUMMAND,        "empty summand in duration string: "                                );
 		set( ERROR_UNKNOWN_MACRO_CMD,             "unknown macro command: "                                           );
 		set( ERROR_INSTR_NUM_OF_ARGS,             "wrong number of arguments in instrument command"                   );
 		set( ERROR_INSTR_BANK,                    "Instrument and/or Bank definition erroneous"                       );
@@ -2149,6 +2153,7 @@ public class Dict {
 		setSyntax( SYNTAX_TRIPLET,          "T"              );
 		setSyntax( SYNTAX_TUPLET,           "T"              );
 		setSyntax( SYNTAX_TUPLET_FOR,       ":"              );
+		setSyntax( SYNTAX_DURATION_PLUS,    "+"              );
 		
 		// switch to lower/upper, if needed
 		if ( Config.CBX_SYNTAX_LOWER.equals(configuredSyntax) ) {
@@ -2209,22 +2214,23 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_Q                );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_NOTE_LENGTH) );
-		addSyntaxForInfoView( SYNTAX_32         );
-		addSyntaxForInfoView( SYNTAX_16         );
-		addSyntaxForInfoView( SYNTAX_8          );
-		addSyntaxForInfoView( SYNTAX_4          );
-		addSyntaxForInfoView( SYNTAX_2          );
-		addSyntaxForInfoView( SYNTAX_1          );
-		addSyntaxForInfoView( SYNTAX_M1         );
-		addSyntaxForInfoView( SYNTAX_M2         );
-		addSyntaxForInfoView( SYNTAX_M4         );
-		addSyntaxForInfoView( SYNTAX_M8         );
-		addSyntaxForInfoView( SYNTAX_M16        );
-		addSyntaxForInfoView( SYNTAX_M32        );
-		addSyntaxForInfoView( SYNTAX_DOT        );
-		addSyntaxForInfoView( SYNTAX_TRIPLET    );
-		addSyntaxForInfoView( SYNTAX_TUPLET     );
-		addSyntaxForInfoView( SYNTAX_TUPLET_FOR );
+		addSyntaxForInfoView( SYNTAX_32            );
+		addSyntaxForInfoView( SYNTAX_16            );
+		addSyntaxForInfoView( SYNTAX_8             );
+		addSyntaxForInfoView( SYNTAX_4             );
+		addSyntaxForInfoView( SYNTAX_2             );
+		addSyntaxForInfoView( SYNTAX_1             );
+		addSyntaxForInfoView( SYNTAX_M1            );
+		addSyntaxForInfoView( SYNTAX_M2            );
+		addSyntaxForInfoView( SYNTAX_M4            );
+		addSyntaxForInfoView( SYNTAX_M8            );
+		addSyntaxForInfoView( SYNTAX_M16           );
+		addSyntaxForInfoView( SYNTAX_M32           );
+		addSyntaxForInfoView( SYNTAX_DOT           );
+		addSyntaxForInfoView( SYNTAX_TRIPLET       );
+		addSyntaxForInfoView( SYNTAX_TUPLET        );
+		addSyntaxForInfoView( SYNTAX_TUPLET_FOR    );
+		addSyntaxForInfoView( SYNTAX_DURATION_PLUS );
 	}
 	
 	/**

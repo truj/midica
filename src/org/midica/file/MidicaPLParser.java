@@ -111,6 +111,7 @@ public class MidicaPLParser extends SequenceParser {
 	public static String TRIPLET          = null;
 	public static String TUPLET           = null;
 	public static String TUPLET_FOR       = null;
+	public static String DURATION_PLUS    = null;
 	
 	private static ArrayList<Instrument>                instruments       = null;
 	private static HashMap<String, ArrayList<String[]>> macros            = null;
@@ -201,6 +202,7 @@ public class MidicaPLParser extends SequenceParser {
 		TRIPLET          = Dict.getSyntax( Dict.SYNTAX_TRIPLET          );
 		TUPLET           = Dict.getSyntax( Dict.SYNTAX_TUPLET           );
 		TUPLET_FOR       = Dict.getSyntax( Dict.SYNTAX_TUPLET_FOR       );
+		DURATION_PLUS    = Dict.getSyntax( Dict.SYNTAX_DURATION_PLUS    );
 	}
 	
 	/**
@@ -480,11 +482,33 @@ public class MidicaPLParser extends SequenceParser {
 	 * Parses the duration string from a channel command and calculates the
 	 * duration in ticks.
 	 * 
+	 * The duration can be a sum of durations, separated by **+** characters.
+	 * 
 	 * @param s  The duration string, extracted from the MidicaPL line.
 	 * @return   The duration of the note in ticks.
 	 * @throws ParseException  If the duration string cannot be parsed.
 	 */
 	private int parseDuration( String s ) throws ParseException {
+		String[] summands = s.split(Pattern.quote(DURATION_PLUS), -1);
+		int      duration = 0;
+		for (String summand : summands) {
+			if ("".equals(summand))
+				throw new ParseException( Dict.get(Dict.ERROR_EMPTY_DURATION_SUMMAND) + s );
+			duration += parseDurationSummand(summand);
+		}
+		
+		return duration;
+	}
+	
+	/**
+	 * Parses the duration string from one duration summand channel command
+	 * and calculates the duration in ticks.
+	 * 
+	 * @param s  One duration summand, extracted from the MidicaPL line.
+	 * @return   The duration of the summand in ticks.
+	 * @throws ParseException  If the duration summand cannot be parsed.
+	 */
+	private int parseDurationSummand( String s ) throws ParseException {
 		Pattern pattern = Pattern.compile(
 			  "^(\\d+|.+?)"                // basic divisor (basic note length)
 			+ "(("                         // open capturing group for modifiers
@@ -504,7 +528,7 @@ public class MidicaPLParser extends SequenceParser {
 			int    factor  = 4; // the resolution is for a quarter note but we are based on a full note
 			int    divisor = 1;
 			
-			// parse unmodified note length
+			// parse unmodified summand length
 			if (prefix.matches("^\\d+$"))
 				divisor = toInt( prefix );
 			else if (LENGTH_32.equals(prefix))
@@ -550,7 +574,7 @@ public class MidicaPLParser extends SequenceParser {
 				divisor   = divisor * power;
 			}
 			
-			// parse modifications by (nested) triplets
+			// parse modifications by (nested) tuplets
 			// this must be before the triplet parsing to support the same symbol
 			// for tuplets and triplets
 			Pattern tupletPattern = Pattern.compile(
@@ -956,6 +980,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( TRIPLET.equals(cmdId) )          TRIPLET          = cmdName;
 		else if ( TUPLET.equals(cmdId) )           TUPLET           = cmdName;
 		else if ( TUPLET_FOR.equals(cmdId) )       TUPLET_FOR       = cmdName;
+		else if ( DURATION_PLUS.equals(cmdId) )    DURATION_PLUS    = cmdName;
 	}
 	
 	/**
