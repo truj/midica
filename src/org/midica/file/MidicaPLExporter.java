@@ -238,10 +238,10 @@ public class MidicaPLExporter extends Exporter {
 					// create structure for this note
 					TreeMap<String, String> noteStruct = new TreeMap<String, String>();
 					String[] cmdLength = convertLength( endTick - tick );
-					noteStruct.put( "velocity", velocity + "" );
-					noteStruct.put( "end_tick", endTick  + "" );
-					noteStruct.put( "length",   cmdLength[0]  );
-					noteStruct.put( "staccato", cmdLength[1]  );
+					noteStruct.put( "velocity",       velocity + "" );
+					noteStruct.put( "end_tick",       endTick  + "" );
+					noteStruct.put( "length",         cmdLength[0]  );
+					noteStruct.put( "duration_ratio", cmdLength[1]  );
 					
 					// add to the tick notes
 					String noteName = Dict.getNote( (int) note );
@@ -777,16 +777,16 @@ public class MidicaPLExporter extends Exporter {
 				// TODO: Use the Instrument class to track the channel state.
 				// TODO: Replace if(true) according to the channel state.
 				
-				// staccato
-				// TODO: rewrite this to use the relative staccato value instead of absolute ticks
-				Instrument instr        = instruments.get( (byte) channel );
-				boolean    hasOtherOpts = false;
-				int        staccato     = Integer.parseInt( options.get("staccato") );
-				boolean    needOption   = staccato != instr.getStaccato();
+				// duration ratio
+				// TODO: rewrite this to use the duration ratio instead of absolute staccato ticks
+				Instrument instr         = instruments.get( (byte) channel );
+				boolean    hasOtherOpts  = false;
+				int        durationRatio = Integer.parseInt( options.get("duration_ratio") );
+				boolean    needOption    = durationRatio != instr.getDurationRatio();
 				if (needOption) {
 					hasOtherOpts = appendCommaIfNecessaryAndReturnTrue( hasOtherOpts, lines );
-					lines.append( " " + MidicaPLParser.STACCATO + MidicaPLParser.OPT_ASSIGNER + staccato );
-					instr.setStaccato( staccato );
+					lines.append( " " + MidicaPLParser.DURATION + MidicaPLParser.OPT_ASSIGNER + durationRatio );
+					instr.setDurationRatio(durationRatio);
 				}
 				
 				// velocity
@@ -807,7 +807,8 @@ public class MidicaPLExporter extends Exporter {
 				else {
 					// update channel tick
 					long endTick = Long.parseLong( options.get("end_tick") );
-					instr.setCurrentTicks( endTick + staccato );
+					// TODO: rewrite and test
+					instr.setCurrentTicks( endTick + durationRatio );
 				}
 				
 				lines.append("\n");

@@ -19,13 +19,12 @@ import org.midica.config.Dict;
  * 
  * The following elements of a channel's state need further explication:
  * 
- * - **tickstamp**       - This is the current position of the parsed/exported file, counted in MIDI ticks.
- * - **velocity**        - Velocity of key strokes.
- * - **staccato value**  - This is the amount of ticks that a key is released before
- *                         the theoretical end of the according note. It's a relative value expressing
- *                         a percentage of the theoretical note length.  
- *                         Theoretical Minimum: minus infinite.  
- *                         Theoretical Maximum: +1.0 (100%)
+ * - **tickstamp**      - This is the current position of the parsed/exported file, counted in MIDI ticks.
+ * - **velocity**       - Velocity of key strokes.
+ * - **durationRatio**  - Ratio between key press duration and note length duration.  
+ *                        Low values result in staccato, high values in legato.  
+ *                        Minimum: >0.0 (>0%)  
+ *                        Maximum: infinite (max possible float value)
  * 
  * @author Jan Trukenmüller
  */
@@ -35,9 +34,9 @@ public class Instrument implements Comparable<Instrument> {
 	private static final int MIN_CURRENT_TICKS = 0;
 	/** Default velocity for this channel unless defined differently. */
 	private static final int DEFAULT_VELOCITY  = 64;
-	/** Default staccato value for this channel unless defined differently. */
-	private static final float DEFAULT_STACCATO  = 0.01f; // 1 percent
-	/** Minimum remaining note length after applying the staccato value */
+	/** Default duration ratio for this channel unless defined differently. */
+	private static final float DEFAULT_DURATION_RATIO = 0.95f; // 95 percent
+	/** Minimum remaining note length after applying the duration ratio */
 	private static final long MIN_NOTE_LENGTH = 1;
 	
 	/** Channel number as defined by the MIDI specification. Between 0 and 15. */
@@ -57,8 +56,8 @@ public class Instrument implements Comparable<Instrument> {
 	private int velocity = DEFAULT_VELOCITY;
 	/** Current tickstamp */
 	private long currentTicks = MIN_CURRENT_TICKS;
-	/** Each note ends that many ticks before it would end theoretically */
-	private float staccato = DEFAULT_STACCATO;
+	/** Ratio between key press duration and note length duration */
+	private float durationRatio = DEFAULT_DURATION_RATIO;
 	
 	/**
 	 * Creates a new Instrument object representing a channel during the parsing or export
@@ -151,47 +150,55 @@ public class Instrument implements Comparable<Instrument> {
 	}
 	
 	/**
-	 * Returns the current staccato value of the channel.
-	 * That is the percentage of ticks that the key is released before the theoretical end of
-	 * the note. 0% means 0.0, 100% means 1.0
+	 * Returns the current duration ratio of the channel.
+	 * This is the ratio between key press duration and note length duration.
+	 * 0.1 means 1% (strong staccato)  
+	 * 0.5 means 5% (staccato)  
+	 * 1.0 means 100% (legato)  
+	 * more than 1.0 is overlapping legato
 	 * 
-	 * @return Current staccato value
+	 * @return Current duration ratio
 	 */
-	public float getStaccato() {
-		return staccato;
+	public float getDurationRatio() {
+		return durationRatio;
 	}
 	
 	/**
-	 * Sets a new staccato value.
+	 * Sets a new key-press/note-length duration ratio.
 	 * 
-	 * @param staccato New staccato value.
+	 * @param duration New duration ratio.
 	 */
-	public void setStaccato(float staccato) {
-		this.staccato = staccato;
+	public void setDurationRatio(float durationRatio) {
+		this.durationRatio = durationRatio;
 	}
 	
 	/**
-	 * Increments the tickstamp according to the note's duration.
+	 * Increments the tickstamp according to the note's duration in ticks.
 	 * 
-	 * @param duration    Duration of the note in ticks.
-	 * @return Tickstamp for the note end according to duration and staccato (key release percentage).
+	 * @param duration    Note length duration in ticks.
+	 * @return Tickstamp for the key release according to note length duration and key press duration ratio.
 	 */
 	public long addNote(int duration) {
-		incrementTicks(duration);
-		long staccatoTicks = Math.round(duration * staccato);
-		long endTick       = currentTicks - staccatoTicks;
-		if (endTick < MIN_NOTE_LENGTH) {
-			endTick = MIN_NOTE_LENGTH;
+		
+		// calculate key release tickstamp
+		long pressTicks = Math.round(duration * this.durationRatio);
+		if (pressTicks < MIN_NOTE_LENGTH) {
+			pressTicks = MIN_NOTE_LENGTH;
 		}
+		long endTick = currentTicks + pressTicks;
+		
+		// increment channel tickstamp
+		incrementTicks(duration);
+		
 		return endTick;
 	}
 	
 	/**
-	 * Increments the tickstamp according to the duration.
+	 * Increments the tickstamp according to the note length duration.
 	 * 
 	 * @param duration duration in ticks
 	 */
-	public void incrementTicks( int duration ) {
+	public void incrementTicks(int duration) {
 		currentTicks += duration;
 	}
 	
@@ -202,7 +209,7 @@ public class Instrument implements Comparable<Instrument> {
 		             +  ", instrumentName: "   + instrumentName
 		             +  ", velocity: "         + velocity
 		             +  ", currentTicks: "     + currentTicks
-		             +  ", staccato: "         + staccato
+		             +  ", durationRatio: "    + durationRatio
 		             ;
 		return "\n{" + inner + "}";
 	}

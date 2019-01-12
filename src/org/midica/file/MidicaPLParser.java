@@ -47,7 +47,7 @@ public class MidicaPLParser extends SequenceParser {
 	// identifiers for options
 	private static final String OPT_VELOCITY = "velocity";
 	private static final String OPT_MULTIPLE = "multiple";
-	private static final String OPT_STACCATO = "staccato";
+	private static final String OPT_DURATION = "duration";
 	private static final String OPT_QUANTITY = "quantity";
 	
 	private static final int MODE_INSTRUMENTS = 0;
@@ -103,10 +103,10 @@ public class MidicaPLParser extends SequenceParser {
 	public static String PROG_BANK_SEP    = null;
 	public static String Q                = null;
 	public static String QUANTITY         = null;
-	public static String S                = null;
-	public static String STACCATO         = null;
+	public static String D                = null;
+	public static String DURATION         = null;
+	public static String DURATION_PERCENT = null;
 	public static String V                = null;
-	public static String STACCATO_PERCENT = null;
 	public static String VELOCITY         = null;
 	public static String TRIPLET          = null;
 	public static String TUPLET           = null;
@@ -194,9 +194,9 @@ public class MidicaPLParser extends SequenceParser {
 		PROG_BANK_SEP    = Dict.getSyntax( Dict.SYNTAX_PROG_BANK_SEP    );
 		Q                = Dict.getSyntax( Dict.SYNTAX_Q                );
 		QUANTITY         = Dict.getSyntax( Dict.SYNTAX_QUANTITY         );
-		S                = Dict.getSyntax( Dict.SYNTAX_S                );
-		STACCATO         = Dict.getSyntax( Dict.SYNTAX_STACCATO         );
-		STACCATO_PERCENT = Dict.getSyntax( Dict.SYNTAX_STACCATO_PERCENT );
+		D                = Dict.getSyntax( Dict.SYNTAX_D                );
+		DURATION         = Dict.getSyntax( Dict.SYNTAX_DURATION         );
+		DURATION_PERCENT = Dict.getSyntax( Dict.SYNTAX_DURATION_PERCENT );
 		V                = Dict.getSyntax( Dict.SYNTAX_V                );
 		VELOCITY         = Dict.getSyntax( Dict.SYNTAX_VELOCITY         );
 		TRIPLET          = Dict.getSyntax( Dict.SYNTAX_TRIPLET          );
@@ -972,9 +972,9 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( PROG_BANK_SEP.equals(cmdId) )    PROG_BANK_SEP    = cmdName;
 		else if ( Q.equals(cmdId) )                Q                = cmdName;
 		else if ( QUANTITY.equals(cmdId) )         QUANTITY         = cmdName;
-		else if ( S.equals(cmdId) )                S                = cmdName;
-		else if ( STACCATO.equals(cmdId) )         STACCATO         = cmdName;
-		else if ( STACCATO_PERCENT.equals(cmdId) ) STACCATO_PERCENT = cmdName;
+		else if ( D.equals(cmdId) )                D                = cmdName;
+		else if ( DURATION.equals(cmdId) )         DURATION         = cmdName;
+		else if ( DURATION_PERCENT.equals(cmdId) ) DURATION_PERCENT = cmdName;
 		else if ( V.equals(cmdId) )                V                = cmdName;
 		else if ( VELOCITY.equals(cmdId) )         VELOCITY         = cmdName;
 		else if ( TRIPLET.equals(cmdId) )          TRIPLET          = cmdName;
@@ -1227,11 +1227,11 @@ public class MidicaPLParser extends SequenceParser {
 			if (! isFake)
 				instruments.get( channel ).setVelocity( velocity );
 		}
-		// apply staccato option
-		if (options.containsKey(OPT_STACCATO)) {
-			float staccato = (float) options.get( OPT_STACCATO );
+		// apply duration option
+		if (options.containsKey(OPT_DURATION)) {
+			float durationRatio = (float) options.get(OPT_DURATION);
 			if (! isFake)
-				instruments.get( channel ).setStaccato( staccato );
+				instruments.get(channel).setDurationRatio(durationRatio);
 		}
 		
 		// determine if more notes for this channel are expected at the same time
@@ -1243,7 +1243,7 @@ public class MidicaPLParser extends SequenceParser {
 		// determine how often to play the note(s)
 		int quantity = 1;
 		if (options.containsKey(OPT_QUANTITY)) {
-			quantity = (int) options.get( OPT_QUANTITY );
+			quantity = (int) options.get(OPT_QUANTITY);
 		}
 		
 		// get instrument
@@ -1319,14 +1319,14 @@ public class MidicaPLParser extends SequenceParser {
 					throw new ParseException( Dict.get(Dict.ERROR_VEL_NOT_LESS_THAN_1) );
 				optValue = val;
 			}
-			else if (S.equals(optName) || STACCATO.equals(optName)) {
-				optName = OPT_STACCATO;
-				String[] valueParts = optParts[1].split(Pattern.quote(STACCATO_PERCENT), -1);
+			else if (D.equals(optName) || DURATION.equals(optName)) {
+				optName = OPT_DURATION;
+				String[] valueParts = optParts[1].split(Pattern.quote(DURATION_PERCENT), -1);
 				float    val        = toFloat(valueParts[0]);
 				if (valueParts.length > 1)
 					val /= 100; // percentage --> numeric
-				if (val > 1.0)
-					throw new ParseException( Dict.get(Dict.ERROR_STAC_NOT_MORE_THAN_1) );
+				if (val <= 0.0)
+					throw new ParseException( Dict.get(Dict.ERROR_DURATION_MORE_THAN_0) );
 				optValue = val;
 			}
 			else if (Q.equals(optName) || QUANTITY.equals(optName)) {
