@@ -544,17 +544,17 @@ public class MidicaPLParser extends SequenceParser {
 			else if (LENGTH_1.equals(prefix))
 				divisor = 1;
 			else if (LENGTH_M1.equals(prefix))
-				factor = 1;
+				factor *= 1;
 			else if (LENGTH_M2.equals(prefix))
-				factor = 2;
+				factor *= 2;
 			else if (LENGTH_M4.equals(prefix))
-				factor = 4;
+				factor *= 4;
 			else if (LENGTH_M8.equals(prefix))
-				factor = 8;
+				factor *= 8;
 			else if (LENGTH_M16.equals(prefix))
-				factor = 16;
+				factor *= 16;
 			else if (LENGTH_M32.equals(prefix))
-				factor = 32;
+				factor *= 32;
 			else
 				throw new ParseException( Dict.get(Dict.ERROR_NOTE_LENGTH_INVALID) + s );
 			
