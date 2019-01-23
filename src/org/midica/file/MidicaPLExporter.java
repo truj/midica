@@ -246,7 +246,7 @@ public class MidicaPLExporter extends Exporter {
 					// add to the tick notes
 					String noteName = Dict.getNote( (int) note );
 					if ( 9 == channel ) {
-						noteName = Dict.getPercussion( (int) note );
+						noteName = Dict.getPercussionLongId( (int) note );
 						if ( noteName.equals(Dict.get(Dict.UNKNOWN_PERCUSSION_NAME)) ) {
 							noteName = note + ""; // name unknown - use number instead
 						}

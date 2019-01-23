@@ -1213,7 +1213,7 @@ public class SequenceAnalyzer {
 		String programID  = String.format( "%02X", config[2] );
 		String instrTxt   = 9 == channel ? Dict.getDrumkit( config[2] ) : Dict.getInstrument( config[2] );
 		String noteStr    = note + "";
-		String noteTxt    = 9 == channel ? Dict.getPercussion( note ) : Dict.getNote( note );
+		String noteTxt    = 9 == channel ? Dict.getPercussionLongId( note ) : Dict.getNote( note );
 		String noteID     = String.format( "%02X", note );
 		if (9 == channel) {
 			noteID = "Z" + noteID; // give percussion notes have a different (higher) ID

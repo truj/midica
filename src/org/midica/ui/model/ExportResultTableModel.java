@@ -105,7 +105,7 @@ public class ExportResultTableModel extends MidicaTableModel {
 			String channel = warnings.get( rowIndex ).get( "channel" );
 			String noteName;
 			if ( "9".equals(channel) )
-				noteName = Dict.getPercussion( Integer.parseInt(noteNum) );
+				noteName = Dict.getPercussionLongId( Integer.parseInt(noteNum) );
 			else
 				noteName = Dict.getNote( Integer.parseInt(noteNum) );
 			return noteNum + ": " + noteName;

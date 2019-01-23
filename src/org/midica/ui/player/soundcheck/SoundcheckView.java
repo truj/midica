@@ -10,6 +10,7 @@ package org.midica.ui.player.soundcheck;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -70,6 +71,9 @@ public class SoundcheckView extends JDialog {
 	private static final int       HEIGHT_LIST_NOTE      =   150;
 	private static final int       VOL_OR_VEL_LABEL_SKIP =    30;
 	private static final int       DEFAULT_DURATION      =   300;
+	private static final String    LIST_FONT_NAME        = "monospaced";
+	private static final int       LIST_FONT_STYLE       = Font.BOLD;
+	private static final int       LIST_FONT_SIZE        = 12;
 	
 	private Dimension dimTblInstr = null;
 	private Dimension dimListNote = null;
@@ -184,6 +188,8 @@ public class SoundcheckView extends JDialog {
 		// note list
 		constrRight.gridy++;
 		lstNote = new JList<NamedInteger>();
+		Font listFont = new Font(LIST_FONT_NAME, LIST_FONT_STYLE, LIST_FONT_SIZE);
+		lstNote.setFont(listFont);
 		lstNote.setName( NAME_NOTE );
 		lstNote.setModel( noteModel );
 		lstNote.addListSelectionListener( controller );

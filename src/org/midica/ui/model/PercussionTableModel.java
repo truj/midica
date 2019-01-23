@@ -34,9 +34,10 @@ public class PercussionTableModel extends MidicaTableModel {
 	public PercussionTableModel() {
 		
 		// table header
-		columnNames = new String[ 2 ];
-		columnNames[ 0 ] = Dict.get( Dict.INFO_COL_PERC_NUM  );
-		columnNames[ 1 ] = Dict.get( Dict.INFO_COL_PERC_NAME );
+		columnNames = new String[ 3 ];
+		columnNames[ 0 ] = Dict.get( Dict.INFO_COL_PERC_NUM      );
+		columnNames[ 1 ] = Dict.get( Dict.INFO_COL_PERC_ID_SHORT );
+		columnNames[ 2 ] = Dict.get( Dict.INFO_COL_PERC_ID_LONG  );
 		
 		for ( int instrNum : Dict.getPercussionNotes() ) {
 			instrumentNumbers.add( instrNum );
@@ -64,16 +65,19 @@ public class PercussionTableModel extends MidicaTableModel {
 	 */
 	@Override
 	public Object getValueAt( int rowIndex, int colIndex ) {
+		int instrNum = instrumentNumbers.get( rowIndex );
 		
 		// number
-		if ( 0 == colIndex )
-			return instrumentNumbers.get( rowIndex );
+		if (0 == colIndex)
+			return instrNum;
 		
-		// name
-		else if ( 1 == colIndex ) {
-			int instrNum = instrumentNumbers.get( rowIndex );
-			return Dict.getPercussion( instrNum );
-		}
+		// short id
+		else if (1 == colIndex)
+			return Dict.getPercussionShortId( instrNum );
+		
+		// long id
+		else if (2 == colIndex)
+			return Dict.getPercussionLongId( instrNum );
 		
 		// default
 		return "";

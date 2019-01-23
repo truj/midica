@@ -112,7 +112,7 @@ public class NoteHistoryTableModel extends MidicaTableModel {
 				long   number = row[ 0 ];
 				if ( 9 == channel )
 					// percussion channel
-					name = Dict.getPercussion( (int) number );
+					name = Dict.getPercussionLongId( (int) number );
 				else
 					name = Dict.getNote( (int) number );
 				return name;
@@ -154,6 +154,17 @@ public class NoteHistoryTableModel extends MidicaTableModel {
 			return true;
 		
 		return false;
+	}
+	
+	/**
+	 * Returns the channel number.
+	 * 
+	 * This is called by the cell renderer for choosing the right tooltip for percussion IDs.
+	 * 
+	 * @return channel number
+	 */
+	public byte getChannel() {
+		return this.channel;
 	}
 }
 

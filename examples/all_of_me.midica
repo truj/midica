@@ -105,10 +105,10 @@ END
 // Macro definition for the percussion part
 
 MACRO bongo_1
-	9     BONGO_HIGH     4   v=120
-	9     BONGO_HIGH     4                    // program=60 (high bongo)
+	9     bongo_high     4   v=120
+	9     bongo_high     4                    // program=60 (high bongo)
 	9     60             4                    // same as above but using the number
-	9     BONGO_LOW      4
+	9     bongo_low      4
 END
 
 

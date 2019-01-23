@@ -9,15 +9,19 @@ package org.midica.ui.player;
 
 import java.awt.Component;
 
+import javax.swing.JComponent;
 import javax.swing.JTable;
 
 import org.midica.config.Config;
+import org.midica.config.Dict;
 import org.midica.ui.renderer.MidicaTableCellRenderer;
 
 /**
  * Cell renderer for the note history table for each channel.
  * 
  * Past and future notes are rendered with a different background color.
+ * 
+ * Cells containing a long percussion ID get a tooltip with the corresponding short ID.
  * 
  * Each row represents a played note.
  * 
@@ -42,12 +46,29 @@ public class NoteHistoryTableCellRenderer extends MidicaTableCellRenderer {
 	public Component getTableCellRendererComponent( JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col ) {
 		Component cell = super.getTableCellRendererComponent( table, value, isSelected, hasFocus, row, col );
 		
+		// set background color
 		if ( model.isFuture(row) ) {
 			cell.setBackground( Config.TABLE_CELL_FUTURE_COLOR );
 		}
 		else {
 			cell.setBackground( Config.TABLE_CELL_DEFAULT_COLOR );
 		}
+		
+		// set tooltip for percussion IDs
+		if (9 == model.getChannel() && 1 == col && cell instanceof JComponent) {
+			try {
+				Object     element = table.getValueAt(row, col);
+				JComponent jCell   = (JComponent) cell;
+				String     longId  = (String) element;
+				int        percNum = Dict.getPercussion(longId);
+				String     shortId = Dict.getPercussionShortId(percNum);
+				jCell.setToolTipText(shortId);
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
 		return cell;
 	}
 }

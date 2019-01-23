@@ -91,7 +91,8 @@ public class InfoView extends JDialog {
 	private static final int COL_WIDTH_NOTE_NUM          =  60;
 	private static final int COL_WIDTH_NOTE_NAME         = 240;
 	private static final int COL_WIDTH_PERC_NUM          =  60;
-	private static final int COL_WIDTH_PERC_NAME         = 300;
+	private static final int COL_WIDTH_PERC_ID_SHORT     =  80;
+	private static final int COL_WIDTH_PERC_ID_LONG      = 250;
 	private static final int COL_WIDTH_SYNTAX_NAME       = 180;
 	private static final int COL_WIDTH_SYNTAX_DESC       = 230;
 	private static final int COL_WIDTH_SYNTAX_KEYWORD    = 130;
@@ -200,8 +201,9 @@ public class InfoView extends JDialog {
 		setTitle( Dict.get(Dict.TITLE_INFO_VIEW) );
 		
 		// initialize table dimensions
-		int noteWidth       = COL_WIDTH_NOTE_NUM    + COL_WIDTH_NOTE_NAME;
-		int percWidth       = COL_WIDTH_PERC_NUM    + COL_WIDTH_PERC_NAME;
+		int noteWidth       = COL_WIDTH_NOTE_NUM + COL_WIDTH_NOTE_NAME;
+		int percWidth       = COL_WIDTH_PERC_NUM + COL_WIDTH_PERC_ID_SHORT
+							+ COL_WIDTH_PERC_ID_LONG;
 		int syntaxWidth     = COL_WIDTH_SYNTAX_NAME + COL_WIDTH_SYNTAX_KEYWORD
 		                    + COL_WIDTH_SYNTAX_DESC;
 		int instrWidth      = COL_WIDTH_INSTR_NUM        + COL_WIDTH_INSTR_NAME;
@@ -408,8 +410,9 @@ public class InfoView extends JDialog {
 		area.add( scroll, constraints );
 		
 		// set column sizes
-		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_PERC_NUM  );
-		table.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_PERC_NAME );
+		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_PERC_NUM      );
+		table.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_PERC_ID_SHORT );
+		table.getColumnModel().getColumn( 2 ).setPreferredWidth( COL_WIDTH_PERC_ID_LONG  );
 		
 		return area;
 	}

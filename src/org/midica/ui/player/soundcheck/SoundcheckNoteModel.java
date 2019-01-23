@@ -76,10 +76,18 @@ public class SoundcheckNoteModel extends DefaultListModel<NamedInteger> {
 			}
 			Collections.sort( sortedPercussion );
 			
+			// get longest possible amount of characters for a short option
+			int shortOptChars = Dict.getPercussionShortIdLength();
+			
 			// construct and add each option
 			for ( int key : sortedPercussion ) {
-				String name = Dict.getPercussion( key );
-				NamedInteger option = new NamedInteger( name, key );
+				StringBuffer name = new StringBuffer(Dict.getPercussionShortId(key));
+				int numSpaces     = shortOptChars - name.length();
+				for (int i = 0; i < numSpaces; i++)
+					name.append(" ");
+				name.append(" / ");
+				name.append( Dict.getPercussionLongId(key) );
+				NamedInteger option = new NamedInteger( name.toString(), key );
 				list.add( option );
 				addElement( option );
 			}

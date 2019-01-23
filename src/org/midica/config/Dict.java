@@ -51,18 +51,19 @@ public class Dict {
 	public static final int UNKNOWN_CODE = -1;
 	
 	// the different dictionaries
-	private static HashMap<String, String>      dictionary          = null;
-	private static HashMap<String, Integer>     noteNameToInt       = null;
-	private static HashMap<Integer, String>     noteIntToName       = null;
-	private static HashMap<String, Integer>     percussionNameToInt = null;
-	private static HashMap<Integer, String>     percussionIntToName = null;
-	private static HashMap<String, Integer>     drumkitNameToInt    = null;
-	private static HashMap<Integer, String>     drumkitIntToName    = null;
-	private static HashMap<String, String>      syntax              = null;
-	private static HashMap<String, Integer>     instrNameToInt      = null;
-	private static HashMap<Integer, String>     instrIntToName      = null;
-	private static ArrayList<SyntaxElement>     syntaxList          = null;
-	private static ArrayList<InstrumentElement> instrumentList      = null;
+	private static HashMap<String, String>      dictionary             = null;
+	private static HashMap<String, Integer>     noteNameToInt          = null;
+	private static HashMap<Integer, String>     noteIntToName          = null;
+	private static HashMap<String, Integer>     percussionIdToInt      = null;
+	private static HashMap<Integer, String>     percussionIntToLongId  = null;
+	private static HashMap<Integer, String>     percussionIntToShortId = null;
+	private static HashMap<String, Integer>     drumkitNameToInt       = null;
+	private static HashMap<Integer, String>     drumkitIntToName       = null;
+	private static HashMap<String, String>      syntax                 = null;
+	private static HashMap<String, Integer>     instrNameToInt         = null;
+	private static HashMap<Integer, String>     instrIntToName         = null;
+	private static ArrayList<SyntaxElement>     syntaxList             = null;
+	private static ArrayList<InstrumentElement> instrumentList         = null;
 	
 	// needed to build up the note dictionaries (noteNameToInt and noteIntToName)
 	private static String[] notes      = new String[12];
@@ -121,79 +122,142 @@ public class Dict {
 	public static final String SYNTAX_DURATION_PLUS    = "DURATION_PLUS";
 	
 	// drumkit identifiers
-	public static final String DRUMKIT_STANDARD   = "drumkit_0";
-	public static final String DRUMKIT_ROOM       = "drumkit_8";
-	public static final String DRUMKIT_POWER      = "drumkit_16";
-	public static final String DRUMKIT_ELECTRONIC = "drumkit_24";
-	public static final String DRUMKIT_TR808      = "drumkit_25";
-	public static final String DRUMKIT_JAZZ       = "drumkit_32";
-	public static final String DRUMKIT_BRUSH      = "drumkit_40";
-	public static final String DRUMKIT_ORCHESTRA  = "drumkit_48";
-	public static final String DRUMKIT_SOUND_FX   = "drumkit_56";
-	public static final String DRUMKIT_CM64_CM32  = "drumkit_127";
+	private static final String DRUMKIT_STANDARD   = "drumkit_0";
+	private static final String DRUMKIT_ROOM       = "drumkit_8";
+	private static final String DRUMKIT_POWER      = "drumkit_16";
+	private static final String DRUMKIT_ELECTRONIC = "drumkit_24";
+	private static final String DRUMKIT_TR808      = "drumkit_25";
+	private static final String DRUMKIT_JAZZ       = "drumkit_32";
+	private static final String DRUMKIT_BRUSH      = "drumkit_40";
+	private static final String DRUMKIT_ORCHESTRA  = "drumkit_48";
+	private static final String DRUMKIT_SOUND_FX   = "drumkit_56";
+	private static final String DRUMKIT_CM64_CM32  = "drumkit_127";
 	
-	// percussion identifiers
-	public static final String PERCUSSION_HIGH_Q          = "percussion_27";
-	public static final String PERCUSSION_SLAP            = "percussion_28";
-	public static final String PERCUSSION_SCRATCH_PUSH    = "percussion_29";
-	public static final String PERCUSSION_SCRATCH_PULL    = "percussion_30";
-	public static final String PERCUSSION_STICKS          = "percussion_31";
-	public static final String PERCUSSION_SQUARE_CLICK    = "percussion_32";
-	public static final String PERCUSSION_METRONOME_CLICK = "percussion_33";
-	public static final String PERCUSSION_METRONOME_BELL  = "percussion_34";
-	public static final String PERCUSSION_BASS_DRUM_2     = "percussion_35";
-	public static final String PERCUSSION_BASS_DRUM_1     = "percussion_36";
-	public static final String PERCUSSION_RIM_SHOT        = "percussion_37";
-	public static final String PERCUSSION_SNARE_DRUM_1    = "percussion_38";
-	public static final String PERCUSSION_HAND_CLAP       = "percussion_39";
-	public static final String PERCUSSION_SNARE_DRUM_2    = "percussion_40";
-	public static final String PERCUSSION_TOM_1           = "percussion_41";
-	public static final String PERCUSSION_HI_HAT_CLOSED   = "percussion_42";
-	public static final String PERCUSSION_TOM_2           = "percussion_43";
-	public static final String PERCUSSION_HI_HAT_PEDAL    = "percussion_44";
-	public static final String PERCUSSION_TOM_3           = "percussion_45";
-	public static final String PERCUSSION_HI_HAT_OPEN     = "percussion_46";
-	public static final String PERCUSSION_TOM_4           = "percussion_47";
-	public static final String PERCUSSION_TOM_5           = "percussion_48";
-	public static final String PERCUSSION_CRASH_CYMBAL_1  = "percussion_49";
-	public static final String PERCUSSION_TOM_6           = "percussion_50";
-	public static final String PERCUSSION_RIDE_CYMBAL_1   = "percussion_51";
-	public static final String PERCUSSION_CHINESE_CYMBAL  = "percussion_52";
-	public static final String PERCUSSION_RIDE_BELL       = "percussion_53";
-	public static final String PERCUSSION_TAMBOURINE      = "percussion_54";
-	public static final String PERCUSSION_SPLASH_CYMBAL   = "percussion_55";
-	public static final String PERCUSSION_COWBELL         = "percussion_56";
-	public static final String PERCUSSION_CRASH_CYMBAL_2  = "percussion_57";
-	public static final String PERCUSSION_VIBRA_SLAP      = "percussion_58";
-	public static final String PERCUSSION_RIDE_CYMBAL_2   = "percussion_59";
-	public static final String PERCUSSION_BONGO_HIGH      = "percussion_60";
-	public static final String PERCUSSION_BONGO_LOW       = "percussion_61";
-	public static final String PERCUSSION_CONGA_MUTE      = "percussion_62";
-	public static final String PERCUSSION_CONGA_OPEN      = "percussion_63";
-	public static final String PERCUSSION_CONGA_LOW       = "percussion_64";
-	public static final String PERCUSSION_TIMBALES_HIGH   = "percussion_65";
-	public static final String PERCUSSION_TIMBALES_LOW    = "percussion_66";
-	public static final String PERCUSSION_AGOGO_HIGH      = "percussion_67";
-	public static final String PERCUSSION_AGOGO_LOW       = "percussion_68";
-	public static final String PERCUSSION_CABASA          = "percussion_69";
-	public static final String PERCUSSION_MARACAS         = "percussion_70";
-	public static final String PERCUSSION_WHISTLE_SHORT   = "percussion_71";
-	public static final String PERCUSSION_WHISTLE_LONG    = "percussion_72";
-	public static final String PERCUSSION_GUIRO_SHORT     = "percussion_73";
-	public static final String PERCUSSION_GUIRO_LONG      = "percussion_74";
-	public static final String PERCUSSION_CLAVE           = "percussion_75";
-	public static final String PERCUSSION_WOOD_BLOCK_HIGH = "percussion_76";
-	public static final String PERCUSSION_WOOD_BLOCK_LOW  = "percussion_77";
-	public static final String PERCUSSION_CUICA_MUTE      = "percussion_78";
-	public static final String PERCUSSION_CUICA_OPEN      = "percussion_79";
-	public static final String PERCUSSION_TRIANGLE_MUTE   = "percussion_80";
-	public static final String PERCUSSION_TRIANGLE_OPEN   = "percussion_81";
-	public static final String PERCUSSION_SHAKER          = "percussion_82";
-	public static final String PERCUSSION_JINGLE_BELL     = "percussion_83";
-	public static final String PERCUSSION_BELLTREE        = "percussion_84";
-	public static final String PERCUSSION_CASTANETS       = "percussion_85";
-	public static final String PERCUSSION_SURDO_MUTE      = "percussion_86";
-	public static final String PERCUSSION_SURDO_OPEN      = "percussion_87";
+	// percussion identifiers (long)
+	private static final String PERCUSSION_HIGH_Q          = "percussion_27";
+	private static final String PERCUSSION_SLAP            = "percussion_28";
+	private static final String PERCUSSION_SCRATCH_PUSH    = "percussion_29";
+	private static final String PERCUSSION_SCRATCH_PULL    = "percussion_30";
+	private static final String PERCUSSION_STICKS          = "percussion_31";
+	private static final String PERCUSSION_SQUARE_CLICK    = "percussion_32";
+	private static final String PERCUSSION_METRONOME_CLICK = "percussion_33";
+	private static final String PERCUSSION_METRONOME_BELL  = "percussion_34";
+	private static final String PERCUSSION_BASS_DRUM_2     = "percussion_35";
+	private static final String PERCUSSION_BASS_DRUM_1     = "percussion_36";
+	private static final String PERCUSSION_RIM_SHOT        = "percussion_37";
+	private static final String PERCUSSION_SNARE_DRUM_1    = "percussion_38";
+	private static final String PERCUSSION_HAND_CLAP       = "percussion_39";
+	private static final String PERCUSSION_SNARE_DRUM_2    = "percussion_40";
+	private static final String PERCUSSION_TOM_1           = "percussion_41";
+	private static final String PERCUSSION_HI_HAT_CLOSED   = "percussion_42";
+	private static final String PERCUSSION_TOM_2           = "percussion_43";
+	private static final String PERCUSSION_HI_HAT_PEDAL    = "percussion_44";
+	private static final String PERCUSSION_TOM_3           = "percussion_45";
+	private static final String PERCUSSION_HI_HAT_OPEN     = "percussion_46";
+	private static final String PERCUSSION_TOM_4           = "percussion_47";
+	private static final String PERCUSSION_TOM_5           = "percussion_48";
+	private static final String PERCUSSION_CRASH_CYMBAL_1  = "percussion_49";
+	private static final String PERCUSSION_TOM_6           = "percussion_50";
+	private static final String PERCUSSION_RIDE_CYMBAL_1   = "percussion_51";
+	private static final String PERCUSSION_CHINESE_CYMBAL  = "percussion_52";
+	private static final String PERCUSSION_RIDE_BELL       = "percussion_53";
+	private static final String PERCUSSION_TAMBOURINE      = "percussion_54";
+	private static final String PERCUSSION_SPLASH_CYMBAL   = "percussion_55";
+	private static final String PERCUSSION_COWBELL         = "percussion_56";
+	private static final String PERCUSSION_CRASH_CYMBAL_2  = "percussion_57";
+	private static final String PERCUSSION_VIBRA_SLAP      = "percussion_58";
+	private static final String PERCUSSION_RIDE_CYMBAL_2   = "percussion_59";
+	private static final String PERCUSSION_BONGO_HIGH      = "percussion_60";
+	private static final String PERCUSSION_BONGO_LOW       = "percussion_61";
+	private static final String PERCUSSION_CONGA_MUTE      = "percussion_62";
+	private static final String PERCUSSION_CONGA_OPEN      = "percussion_63";
+	private static final String PERCUSSION_CONGA_LOW       = "percussion_64";
+	private static final String PERCUSSION_TIMBALES_HIGH   = "percussion_65";
+	private static final String PERCUSSION_TIMBALES_LOW    = "percussion_66";
+	private static final String PERCUSSION_AGOGO_HIGH      = "percussion_67";
+	private static final String PERCUSSION_AGOGO_LOW       = "percussion_68";
+	private static final String PERCUSSION_CABASA          = "percussion_69";
+	private static final String PERCUSSION_MARACAS         = "percussion_70";
+	private static final String PERCUSSION_WHISTLE_SHORT   = "percussion_71";
+	private static final String PERCUSSION_WHISTLE_LONG    = "percussion_72";
+	private static final String PERCUSSION_GUIRO_SHORT     = "percussion_73";
+	private static final String PERCUSSION_GUIRO_LONG      = "percussion_74";
+	private static final String PERCUSSION_CLAVE           = "percussion_75";
+	private static final String PERCUSSION_WOOD_BLOCK_HIGH = "percussion_76";
+	private static final String PERCUSSION_WOOD_BLOCK_LOW  = "percussion_77";
+	private static final String PERCUSSION_CUICA_MUTE      = "percussion_78";
+	private static final String PERCUSSION_CUICA_OPEN      = "percussion_79";
+	private static final String PERCUSSION_TRIANGLE_MUTE   = "percussion_80";
+	private static final String PERCUSSION_TRIANGLE_OPEN   = "percussion_81";
+	private static final String PERCUSSION_SHAKER          = "percussion_82";
+	private static final String PERCUSSION_JINGLE_BELL     = "percussion_83";
+	private static final String PERCUSSION_BELLTREE        = "percussion_84";
+	private static final String PERCUSSION_CASTANETS       = "percussion_85";
+	private static final String PERCUSSION_SURDO_MUTE      = "percussion_86";
+	private static final String PERCUSSION_SURDO_OPEN      = "percussion_87";
+	
+	// percussion identifiers (short)
+	private static final String PERCUSSION_SHORT_HIGH_Q          = "percussion_short_27";
+	private static final String PERCUSSION_SHORT_SLAP            = "percussion_short_28";
+	private static final String PERCUSSION_SHORT_SCRATCH_PUSH    = "percussion_short_29";
+	private static final String PERCUSSION_SHORT_SCRATCH_PULL    = "percussion_short_30";
+	private static final String PERCUSSION_SHORT_STICKS          = "percussion_short_31";
+	private static final String PERCUSSION_SHORT_SQUARE_CLICK    = "percussion_short_32";
+	private static final String PERCUSSION_SHORT_METRONOME_CLICK = "percussion_short_33";
+	private static final String PERCUSSION_SHORT_METRONOME_BELL  = "percussion_short_34";
+	private static final String PERCUSSION_SHORT_BASS_DRUM_2     = "percussion_short_35";
+	private static final String PERCUSSION_SHORT_BASS_DRUM_1     = "percussion_short_36";
+	private static final String PERCUSSION_SHORT_RIM_SHOT        = "percussion_short_37";
+	private static final String PERCUSSION_SHORT_SNARE_DRUM_1    = "percussion_short_38";
+	private static final String PERCUSSION_SHORT_HAND_CLAP       = "percussion_short_39";
+	private static final String PERCUSSION_SHORT_SNARE_DRUM_2    = "percussion_short_40";
+	private static final String PERCUSSION_SHORT_TOM_1           = "percussion_short_41";
+	private static final String PERCUSSION_SHORT_HI_HAT_CLOSED   = "percussion_short_42";
+	private static final String PERCUSSION_SHORT_TOM_2           = "percussion_short_43";
+	private static final String PERCUSSION_SHORT_HI_HAT_PEDAL    = "percussion_short_44";
+	private static final String PERCUSSION_SHORT_TOM_3           = "percussion_short_45";
+	private static final String PERCUSSION_SHORT_HI_HAT_OPEN     = "percussion_short_46";
+	private static final String PERCUSSION_SHORT_TOM_4           = "percussion_short_47";
+	private static final String PERCUSSION_SHORT_TOM_5           = "percussion_short_48";
+	private static final String PERCUSSION_SHORT_CRASH_CYMBAL_1  = "percussion_short_49";
+	private static final String PERCUSSION_SHORT_TOM_6           = "percussion_short_50";
+	private static final String PERCUSSION_SHORT_RIDE_CYMBAL_1   = "percussion_short_51";
+	private static final String PERCUSSION_SHORT_CHINESE_CYMBAL  = "percussion_short_52";
+	private static final String PERCUSSION_SHORT_RIDE_BELL       = "percussion_short_53";
+	private static final String PERCUSSION_SHORT_TAMBOURINE      = "percussion_short_54";
+	private static final String PERCUSSION_SHORT_SPLASH_CYMBAL   = "percussion_short_55";
+	private static final String PERCUSSION_SHORT_COWBELL         = "percussion_short_56";
+	private static final String PERCUSSION_SHORT_CRASH_CYMBAL_2  = "percussion_short_57";
+	private static final String PERCUSSION_SHORT_VIBRA_SLAP      = "percussion_short_58";
+	private static final String PERCUSSION_SHORT_RIDE_CYMBAL_2   = "percussion_short_59";
+	private static final String PERCUSSION_SHORT_BONGO_HIGH      = "percussion_short_60";
+	private static final String PERCUSSION_SHORT_BONGO_LOW       = "percussion_short_61";
+	private static final String PERCUSSION_SHORT_CONGA_MUTE      = "percussion_short_62";
+	private static final String PERCUSSION_SHORT_CONGA_OPEN      = "percussion_short_63";
+	private static final String PERCUSSION_SHORT_CONGA_LOW       = "percussion_short_64";
+	private static final String PERCUSSION_SHORT_TIMBALES_HIGH   = "percussion_short_65";
+	private static final String PERCUSSION_SHORT_TIMBALES_LOW    = "percussion_short_66";
+	private static final String PERCUSSION_SHORT_AGOGO_HIGH      = "percussion_short_67";
+	private static final String PERCUSSION_SHORT_AGOGO_LOW       = "percussion_short_68";
+	private static final String PERCUSSION_SHORT_CABASA          = "percussion_short_69";
+	private static final String PERCUSSION_SHORT_MARACAS         = "percussion_short_70";
+	private static final String PERCUSSION_SHORT_WHISTLE_SHORT   = "percussion_short_71";
+	private static final String PERCUSSION_SHORT_WHISTLE_LONG    = "percussion_short_72";
+	private static final String PERCUSSION_SHORT_GUIRO_SHORT     = "percussion_short_73";
+	private static final String PERCUSSION_SHORT_GUIRO_LONG      = "percussion_short_74";
+	private static final String PERCUSSION_SHORT_CLAVE           = "percussion_short_75";
+	private static final String PERCUSSION_SHORT_WOOD_BLOCK_HIGH = "percussion_short_76";
+	private static final String PERCUSSION_SHORT_WOOD_BLOCK_LOW  = "percussion_short_77";
+	private static final String PERCUSSION_SHORT_CUICA_MUTE      = "percussion_short_78";
+	private static final String PERCUSSION_SHORT_CUICA_OPEN      = "percussion_short_79";
+	private static final String PERCUSSION_SHORT_TRIANGLE_MUTE   = "percussion_short_80";
+	private static final String PERCUSSION_SHORT_TRIANGLE_OPEN   = "percussion_short_81";
+	private static final String PERCUSSION_SHORT_SHAKER          = "percussion_short_82";
+	private static final String PERCUSSION_SHORT_JINGLE_BELL     = "percussion_short_83";
+	private static final String PERCUSSION_SHORT_BELLTREE        = "percussion_short_84";
+	private static final String PERCUSSION_SHORT_CASTANETS       = "percussion_short_85";
+	private static final String PERCUSSION_SHORT_SURDO_MUTE      = "percussion_short_86";
+	private static final String PERCUSSION_SHORT_SURDO_OPEN      = "percussion_short_87";
 	
 	// TODO: use for the syntax or delete
 	// instrument identifiers
@@ -463,7 +527,8 @@ public class Dict {
 	public static final String INFO_COL_SYNTAX_DESC        = "info_col_syntax_desc";
 	public static final String INFO_COL_SYNTAX_SHORTCUT    = "info_col_syntax_shortcut";
 	public static final String INFO_COL_PERC_NUM           = "info_col_perc_num";
-	public static final String INFO_COL_PERC_NAME          = "info_col_perc_name";
+	public static final String INFO_COL_PERC_ID_LONG       = "info_col_perc_id_long";
+	public static final String INFO_COL_PERC_ID_SHORT      = "info_col_perc_id_short";
 	public static final String INFO_COL_INSTR_NUM          = "info_col_instr_num";
 	public static final String INFO_COL_INSTR_NAME         = "info_col_instr_name";
 	public static final String INFO_COL_SF_INSTR_PROGRAM   = "info_col_sf_instr_program";
@@ -1227,7 +1292,8 @@ public class Dict {
 		set( INFO_COL_SYNTAX_DESC,                   "Description"                   );
 		set( INFO_COL_SYNTAX_SHORTCUT,               "Keyword"                       );
 		set( INFO_COL_PERC_NUM,                      "Number"                        );
-		set( INFO_COL_PERC_NAME,                     "Name"                          );
+		set( INFO_COL_PERC_ID_LONG,                  "Long ID"                       );
+		set( INFO_COL_PERC_ID_SHORT,                 "Short ID"                      );
 		set( INFO_COL_INSTR_NUM,                     "Number"                        );
 		set( INFO_COL_INSTR_NAME,                    "Name"                          );
 		set( INFO_COL_SF_INSTR_PROGRAM,              "Number"                        );
@@ -2150,8 +2216,8 @@ public class Dict {
 		setSyntax( SYNTAX_M16,              "*16"            );
 		setSyntax( SYNTAX_M32,              "*32"            );
 		setSyntax( SYNTAX_DOT,              "."              );
-		setSyntax( SYNTAX_TRIPLET,          "T"              );
-		setSyntax( SYNTAX_TUPLET,           "T"              );
+		setSyntax( SYNTAX_TRIPLET,          "t"              );
+		setSyntax( SYNTAX_TUPLET,           "t"              );
 		setSyntax( SYNTAX_TUPLET_FOR,       ":"              );
 		setSyntax( SYNTAX_DURATION_PLUS,    "+"              );
 		
@@ -2250,80 +2316,154 @@ public class Dict {
 		String percSet = Config.get( Config.PERCUSSION );
 		
 		// init percussion translations
-		initPercussionSetEnglish1();
+		initPercussionEnglish();
 		if ( Config.CBX_PERC_DE_1.equals( percSet ) ) {
-			initPercussionSetGerman1();
+			initPercussionGerman();
 		}
 		
 		// init names to integers (for percussion instruments)
-		percussionNameToInt = new HashMap<String, Integer>();
+		percussionIdToInt = new HashMap<String, Integer>();
 		
-		percussionNameToInt.put( get(PERCUSSION_HIGH_Q),          27 );
-		percussionNameToInt.put( get(PERCUSSION_SLAP),            28 );
-		percussionNameToInt.put( get(PERCUSSION_SCRATCH_PUSH),    29 );
-		percussionNameToInt.put( get(PERCUSSION_SCRATCH_PULL),    30 );
-		percussionNameToInt.put( get(PERCUSSION_STICKS),          31 );
-		percussionNameToInt.put( get(PERCUSSION_SQUARE_CLICK),    32 );
-		percussionNameToInt.put( get(PERCUSSION_METRONOME_CLICK), 33 );
-		percussionNameToInt.put( get(PERCUSSION_METRONOME_BELL),  34 );
-		percussionNameToInt.put( get(PERCUSSION_BASS_DRUM_2),     35 );
-		percussionNameToInt.put( get(PERCUSSION_BASS_DRUM_1),     36 );
-		percussionNameToInt.put( get(PERCUSSION_RIM_SHOT),        37 );
-		percussionNameToInt.put( get(PERCUSSION_SNARE_DRUM_1),    38 );
-		percussionNameToInt.put( get(PERCUSSION_HAND_CLAP),       39 );
-		percussionNameToInt.put( get(PERCUSSION_SNARE_DRUM_2),    40 );
-		percussionNameToInt.put( get(PERCUSSION_TOM_1),           41 );
-		percussionNameToInt.put( get(PERCUSSION_HI_HAT_CLOSED),   42 );
-		percussionNameToInt.put( get(PERCUSSION_TOM_2),           43 );
-		percussionNameToInt.put( get(PERCUSSION_HI_HAT_PEDAL),    44 );
-		percussionNameToInt.put( get(PERCUSSION_TOM_3),           45 );
-		percussionNameToInt.put( get(PERCUSSION_HI_HAT_OPEN),     46 );
-		percussionNameToInt.put( get(PERCUSSION_TOM_4),           47 );
-		percussionNameToInt.put( get(PERCUSSION_TOM_5),           48 );
-		percussionNameToInt.put( get(PERCUSSION_CRASH_CYMBAL_1),  49 );
-		percussionNameToInt.put( get(PERCUSSION_TOM_6),           50 );
-		percussionNameToInt.put( get(PERCUSSION_RIDE_CYMBAL_1),   51 );
-		percussionNameToInt.put( get(PERCUSSION_CHINESE_CYMBAL),  52 );
-		percussionNameToInt.put( get(PERCUSSION_RIDE_BELL),       53 );
-		percussionNameToInt.put( get(PERCUSSION_TAMBOURINE),      54 );
-		percussionNameToInt.put( get(PERCUSSION_SPLASH_CYMBAL),   55 );
-		percussionNameToInt.put( get(PERCUSSION_COWBELL),         56 );
-		percussionNameToInt.put( get(PERCUSSION_CRASH_CYMBAL_2),  57 );
-		percussionNameToInt.put( get(PERCUSSION_VIBRA_SLAP),      58 );
-		percussionNameToInt.put( get(PERCUSSION_RIDE_CYMBAL_2),   59 );
-		percussionNameToInt.put( get(PERCUSSION_BONGO_HIGH),      60 );
-		percussionNameToInt.put( get(PERCUSSION_BONGO_LOW),       61 );
-		percussionNameToInt.put( get(PERCUSSION_CONGA_MUTE),      62 );
-		percussionNameToInt.put( get(PERCUSSION_CONGA_OPEN),      63 );
-		percussionNameToInt.put( get(PERCUSSION_CONGA_LOW),       64 );
-		percussionNameToInt.put( get(PERCUSSION_TIMBALES_HIGH),   65 );
-		percussionNameToInt.put( get(PERCUSSION_TIMBALES_LOW),    66 );
-		percussionNameToInt.put( get(PERCUSSION_AGOGO_HIGH),      67 );
-		percussionNameToInt.put( get(PERCUSSION_AGOGO_LOW),       68 );
-		percussionNameToInt.put( get(PERCUSSION_CABASA),          69 );
-		percussionNameToInt.put( get(PERCUSSION_MARACAS),         70 );
-		percussionNameToInt.put( get(PERCUSSION_WHISTLE_SHORT),   71 );
-		percussionNameToInt.put( get(PERCUSSION_WHISTLE_LONG),    72 );
-		percussionNameToInt.put( get(PERCUSSION_GUIRO_SHORT),     73 );
-		percussionNameToInt.put( get(PERCUSSION_GUIRO_LONG),      74 );
-		percussionNameToInt.put( get(PERCUSSION_CLAVE),           75 );
-		percussionNameToInt.put( get(PERCUSSION_WOOD_BLOCK_HIGH), 76 );
-		percussionNameToInt.put( get(PERCUSSION_WOOD_BLOCK_LOW),  77 );
-		percussionNameToInt.put( get(PERCUSSION_CUICA_MUTE),      78 );
-		percussionNameToInt.put( get(PERCUSSION_CUICA_OPEN),      79 );
-		percussionNameToInt.put( get(PERCUSSION_TRIANGLE_MUTE),   80 );
-		percussionNameToInt.put( get(PERCUSSION_TRIANGLE_OPEN),   81 );
-		percussionNameToInt.put( get(PERCUSSION_SHAKER),          82 );
-		percussionNameToInt.put( get(PERCUSSION_JINGLE_BELL),     83 );
-		percussionNameToInt.put( get(PERCUSSION_BELLTREE),        84 );
-		percussionNameToInt.put( get(PERCUSSION_CASTANETS),       85 );
-		percussionNameToInt.put( get(PERCUSSION_SURDO_MUTE),      86 );
-		percussionNameToInt.put( get(PERCUSSION_SURDO_OPEN),      87 );
+		// long identifiers
+		percussionIdToInt.put( get(PERCUSSION_HIGH_Q),          27 );
+		percussionIdToInt.put( get(PERCUSSION_SLAP),            28 );
+		percussionIdToInt.put( get(PERCUSSION_SCRATCH_PUSH),    29 );
+		percussionIdToInt.put( get(PERCUSSION_SCRATCH_PULL),    30 );
+		percussionIdToInt.put( get(PERCUSSION_STICKS),          31 );
+		percussionIdToInt.put( get(PERCUSSION_SQUARE_CLICK),    32 );
+		percussionIdToInt.put( get(PERCUSSION_METRONOME_CLICK), 33 );
+		percussionIdToInt.put( get(PERCUSSION_METRONOME_BELL),  34 );
+		percussionIdToInt.put( get(PERCUSSION_BASS_DRUM_2),     35 );
+		percussionIdToInt.put( get(PERCUSSION_BASS_DRUM_1),     36 );
+		percussionIdToInt.put( get(PERCUSSION_RIM_SHOT),        37 );
+		percussionIdToInt.put( get(PERCUSSION_SNARE_DRUM_1),    38 );
+		percussionIdToInt.put( get(PERCUSSION_HAND_CLAP),       39 );
+		percussionIdToInt.put( get(PERCUSSION_SNARE_DRUM_2),    40 );
+		percussionIdToInt.put( get(PERCUSSION_TOM_1),           41 );
+		percussionIdToInt.put( get(PERCUSSION_HI_HAT_CLOSED),   42 );
+		percussionIdToInt.put( get(PERCUSSION_TOM_2),           43 );
+		percussionIdToInt.put( get(PERCUSSION_HI_HAT_PEDAL),    44 );
+		percussionIdToInt.put( get(PERCUSSION_TOM_3),           45 );
+		percussionIdToInt.put( get(PERCUSSION_HI_HAT_OPEN),     46 );
+		percussionIdToInt.put( get(PERCUSSION_TOM_4),           47 );
+		percussionIdToInt.put( get(PERCUSSION_TOM_5),           48 );
+		percussionIdToInt.put( get(PERCUSSION_CRASH_CYMBAL_1),  49 );
+		percussionIdToInt.put( get(PERCUSSION_TOM_6),           50 );
+		percussionIdToInt.put( get(PERCUSSION_RIDE_CYMBAL_1),   51 );
+		percussionIdToInt.put( get(PERCUSSION_CHINESE_CYMBAL),  52 );
+		percussionIdToInt.put( get(PERCUSSION_RIDE_BELL),       53 );
+		percussionIdToInt.put( get(PERCUSSION_TAMBOURINE),      54 );
+		percussionIdToInt.put( get(PERCUSSION_SPLASH_CYMBAL),   55 );
+		percussionIdToInt.put( get(PERCUSSION_COWBELL),         56 );
+		percussionIdToInt.put( get(PERCUSSION_CRASH_CYMBAL_2),  57 );
+		percussionIdToInt.put( get(PERCUSSION_VIBRA_SLAP),      58 );
+		percussionIdToInt.put( get(PERCUSSION_RIDE_CYMBAL_2),   59 );
+		percussionIdToInt.put( get(PERCUSSION_BONGO_HIGH),      60 );
+		percussionIdToInt.put( get(PERCUSSION_BONGO_LOW),       61 );
+		percussionIdToInt.put( get(PERCUSSION_CONGA_MUTE),      62 );
+		percussionIdToInt.put( get(PERCUSSION_CONGA_OPEN),      63 );
+		percussionIdToInt.put( get(PERCUSSION_CONGA_LOW),       64 );
+		percussionIdToInt.put( get(PERCUSSION_TIMBALES_HIGH),   65 );
+		percussionIdToInt.put( get(PERCUSSION_TIMBALES_LOW),    66 );
+		percussionIdToInt.put( get(PERCUSSION_AGOGO_HIGH),      67 );
+		percussionIdToInt.put( get(PERCUSSION_AGOGO_LOW),       68 );
+		percussionIdToInt.put( get(PERCUSSION_CABASA),          69 );
+		percussionIdToInt.put( get(PERCUSSION_MARACAS),         70 );
+		percussionIdToInt.put( get(PERCUSSION_WHISTLE_SHORT),   71 );
+		percussionIdToInt.put( get(PERCUSSION_WHISTLE_LONG),    72 );
+		percussionIdToInt.put( get(PERCUSSION_GUIRO_SHORT),     73 );
+		percussionIdToInt.put( get(PERCUSSION_GUIRO_LONG),      74 );
+		percussionIdToInt.put( get(PERCUSSION_CLAVE),           75 );
+		percussionIdToInt.put( get(PERCUSSION_WOOD_BLOCK_HIGH), 76 );
+		percussionIdToInt.put( get(PERCUSSION_WOOD_BLOCK_LOW),  77 );
+		percussionIdToInt.put( get(PERCUSSION_CUICA_MUTE),      78 );
+		percussionIdToInt.put( get(PERCUSSION_CUICA_OPEN),      79 );
+		percussionIdToInt.put( get(PERCUSSION_TRIANGLE_MUTE),   80 );
+		percussionIdToInt.put( get(PERCUSSION_TRIANGLE_OPEN),   81 );
+		percussionIdToInt.put( get(PERCUSSION_SHAKER),          82 );
+		percussionIdToInt.put( get(PERCUSSION_JINGLE_BELL),     83 );
+		percussionIdToInt.put( get(PERCUSSION_BELLTREE),        84 );
+		percussionIdToInt.put( get(PERCUSSION_CASTANETS),       85 );
+		percussionIdToInt.put( get(PERCUSSION_SURDO_MUTE),      86 );
+		percussionIdToInt.put( get(PERCUSSION_SURDO_OPEN),      87 );
 		
-		// init integers to names (for percussion instruments)
-		percussionIntToName = new HashMap<Integer, String>();
-		for ( String key : percussionNameToInt.keySet() ) {
-			percussionIntToName.put( percussionNameToInt.get(key), key );
+		// init translation integer --> long ID
+		percussionIntToLongId = new HashMap<Integer, String>();
+		for ( String key : percussionIdToInt.keySet() ) {
+			percussionIntToLongId.put( percussionIdToInt.get(key), key );
+		}
+		
+		// short identifiers
+		percussionIdToInt.put( get(PERCUSSION_SHORT_HIGH_Q),          27 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_SLAP),            28 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_SCRATCH_PUSH),    29 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_SCRATCH_PULL),    30 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_STICKS),          31 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_SQUARE_CLICK),    32 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_METRONOME_CLICK), 33 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_METRONOME_BELL),  34 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_BASS_DRUM_2),     35 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_BASS_DRUM_1),     36 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_RIM_SHOT),        37 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_SNARE_DRUM_1),    38 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_HAND_CLAP),       39 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_SNARE_DRUM_2),    40 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_TOM_1),           41 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_HI_HAT_CLOSED),   42 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_TOM_2),           43 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_HI_HAT_PEDAL),    44 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_TOM_3),           45 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_HI_HAT_OPEN),     46 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_TOM_4),           47 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_TOM_5),           48 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_CRASH_CYMBAL_1),  49 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_TOM_6),           50 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_RIDE_CYMBAL_1),   51 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_CHINESE_CYMBAL),  52 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_RIDE_BELL),       53 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_TAMBOURINE),      54 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_SPLASH_CYMBAL),   55 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_COWBELL),         56 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_CRASH_CYMBAL_2),  57 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_VIBRA_SLAP),      58 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_RIDE_CYMBAL_2),   59 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_BONGO_HIGH),      60 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_BONGO_LOW),       61 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_CONGA_MUTE),      62 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_CONGA_OPEN),      63 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_CONGA_LOW),       64 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_TIMBALES_HIGH),   65 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_TIMBALES_LOW),    66 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_AGOGO_HIGH),      67 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_AGOGO_LOW),       68 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_CABASA),          69 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_MARACAS),         70 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_WHISTLE_SHORT),   71 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_WHISTLE_LONG),    72 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_GUIRO_SHORT),     73 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_GUIRO_LONG),      74 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_CLAVE),           75 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_WOOD_BLOCK_HIGH), 76 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_WOOD_BLOCK_LOW),  77 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_CUICA_MUTE),      78 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_CUICA_OPEN),      79 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_TRIANGLE_MUTE),   80 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_TRIANGLE_OPEN),   81 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_SHAKER),          82 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_JINGLE_BELL),     83 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_BELLTREE),        84 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_CASTANETS),       85 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_SURDO_MUTE),      86 );
+		percussionIdToInt.put( get(PERCUSSION_SHORT_SURDO_OPEN),      87 );
+		
+		// init translation integer --> short ID
+		percussionIntToShortId = new HashMap<Integer, String>();
+		for (String key : percussionIdToInt.keySet()) {
+			int    number = percussionIdToInt.get(key);
+			String longId = percussionIntToLongId.get(number);
+			if (key.equals(longId))
+				continue;
+			percussionIntToShortId.put( percussionIdToInt.get(key), key );
 		}
 		
 		// init names to integers (for drum kits)
@@ -2610,69 +2750,132 @@ public class Dict {
 	/**
 	 * Sets up english drumkit and percussion instrument translation shortcuts.
 	 */
-	private static void initPercussionSetEnglish1() {
-		// percussion instruments
-		set( PERCUSSION_HIGH_Q,          "HIGH_Q"          );
-		set( PERCUSSION_SLAP,            "SLAP"            );
-		set( PERCUSSION_SCRATCH_PUSH,    "SCRATCH_PUSH"    );
-		set( PERCUSSION_SCRATCH_PULL,    "SCRATCH_PULL"    );
-		set( PERCUSSION_STICKS,          "STICKS"          );
-		set( PERCUSSION_SQUARE_CLICK,    "SQUARE_CLICK"    );
-		set( PERCUSSION_METRONOME_CLICK, "METRONOME_CLICK" );
-		set( PERCUSSION_METRONOME_BELL,  "METRONOME_BELL"  );
-		set( PERCUSSION_BASS_DRUM_2,     "BASS_DRUM_2"     );
-		set( PERCUSSION_BASS_DRUM_1,     "BASS_DRUM_1"     );
-		set( PERCUSSION_RIM_SHOT,        "RIM_SHOT"        );
-		set( PERCUSSION_SNARE_DRUM_1,    "SNARE_DRUM_1"    );
-		set( PERCUSSION_HAND_CLAP,       "HAND_CLAP"       );
-		set( PERCUSSION_SNARE_DRUM_2,    "SNARE_DRUM_2"    );
-		set( PERCUSSION_TOM_1,           "TOM_1"           );
-		set( PERCUSSION_HI_HAT_CLOSED,   "HI_HAT_CLOSED"   );
-		set( PERCUSSION_TOM_2,           "TOM_2"           );
-		set( PERCUSSION_HI_HAT_PEDAL,    "HI_HAT_PEDAL"    );
-		set( PERCUSSION_TOM_3,           "TOM_3"           );
-		set( PERCUSSION_HI_HAT_OPEN,     "HI_HAT_OPEN"     );
-		set( PERCUSSION_TOM_4,           "TOM_4"           );
-		set( PERCUSSION_TOM_5,           "TOM_5"           );
-		set( PERCUSSION_CRASH_CYMBAL_1,  "CRASH_CYMBAL_1"  );
-		set( PERCUSSION_TOM_6,           "TOM_6"           );
-		set( PERCUSSION_RIDE_CYMBAL_1,   "RIDE_CYMBAL_1"   );
-		set( PERCUSSION_CHINESE_CYMBAL,  "CHINESE_CYMBAL"  );
-		set( PERCUSSION_RIDE_BELL,       "RIDE_BELL"       );
-		set( PERCUSSION_TAMBOURINE,      "TAMBOURINE"      );
-		set( PERCUSSION_SPLASH_CYMBAL,   "SPLASH_CYMBAL"   );
-		set( PERCUSSION_COWBELL,         "COWBELL"         );
-		set( PERCUSSION_CRASH_CYMBAL_2,  "CRASH_CYMBAL_2"  );
-		set( PERCUSSION_VIBRA_SLAP,      "VIBRA_SLAP"      );
-		set( PERCUSSION_RIDE_CYMBAL_2,   "RIDE_CYMBAL_2"   );
-		set( PERCUSSION_BONGO_HIGH,      "BONGO_HIGH"      );
-		set( PERCUSSION_BONGO_LOW,       "BONGO_LOW"       );
-		set( PERCUSSION_CONGA_MUTE,      "CONGA_MUTE"      );
-		set( PERCUSSION_CONGA_OPEN,      "CONGA_OPEN"      );
-		set( PERCUSSION_CONGA_LOW,       "CONGA_LOW"       );
-		set( PERCUSSION_TIMBALES_HIGH,   "TIMBALES_HIGH"   );
-		set( PERCUSSION_TIMBALES_LOW,    "TIMBALES_LOW"    );
-		set( PERCUSSION_AGOGO_HIGH,      "AGOGO_HIGH"      );
-		set( PERCUSSION_AGOGO_LOW,       "AGOGO_LOW"       );
-		set( PERCUSSION_CABASA,          "CABASA"          );
-		set( PERCUSSION_MARACAS,         "MARACAS"         );
-		set( PERCUSSION_WHISTLE_SHORT,   "WHISTLE_SHORT"   );
-		set( PERCUSSION_WHISTLE_LONG,    "WHISTLE_LONG"    );
-		set( PERCUSSION_GUIRO_SHORT,     "GUIRO_SHORT"     );
-		set( PERCUSSION_GUIRO_LONG,      "GUIRO_LONG"      );
-		set( PERCUSSION_CLAVE,           "CLAVE"           );
-		set( PERCUSSION_WOOD_BLOCK_HIGH, "WOOD_BLOCK_HIGH" );
-		set( PERCUSSION_WOOD_BLOCK_LOW,  "WOOD_BLOCK_LOW"  );
-		set( PERCUSSION_CUICA_MUTE,      "CUICA_MUTE"      );
-		set( PERCUSSION_CUICA_OPEN,      "CUICA_OPEN"      );
-		set( PERCUSSION_TRIANGLE_MUTE,   "TRIANGLE_MUTE"   );
-		set( PERCUSSION_TRIANGLE_OPEN,   "TRIANGLE_OPEN"   );
-		set( PERCUSSION_SHAKER,          "SHAKER"          );
-		set( PERCUSSION_JINGLE_BELL,     "JINGLE_BELL"     );
-		set( PERCUSSION_BELLTREE,        "BELLTREE"        );
-		set( PERCUSSION_CASTANETS,       "CASTANETS"       );
-		set( PERCUSSION_SURDO_MUTE,      "SURDO_MUTE"      );
-		set( PERCUSSION_SURDO_OPEN,      "SURDO_OPEN"      );
+	private static void initPercussionEnglish() {
+		// percussion instruments (long)
+		set( PERCUSSION_HIGH_Q,          "high_q"          );
+		set( PERCUSSION_SLAP,            "slap"            );
+		set( PERCUSSION_SCRATCH_PUSH,    "scratch_push"    );
+		set( PERCUSSION_SCRATCH_PULL,    "scratch_pull"    );
+		set( PERCUSSION_STICKS,          "sticks"          );
+		set( PERCUSSION_SQUARE_CLICK,    "square_click"    );
+		set( PERCUSSION_METRONOME_CLICK, "metronome_click" );
+		set( PERCUSSION_METRONOME_BELL,  "metronome_bell"  );
+		set( PERCUSSION_BASS_DRUM_2,     "bass_drum_2"     );
+		set( PERCUSSION_BASS_DRUM_1,     "bass_drum_1"     );
+		set( PERCUSSION_RIM_SHOT,        "rim_shot"        );
+		set( PERCUSSION_SNARE_DRUM_1,    "snare_drum_1"    );
+		set( PERCUSSION_HAND_CLAP,       "hand_clap"       );
+		set( PERCUSSION_SNARE_DRUM_2,    "snare_drum_2"    );
+		set( PERCUSSION_TOM_1,           "tom_1"           );
+		set( PERCUSSION_HI_HAT_CLOSED,   "hi_hat_closed"   );
+		set( PERCUSSION_TOM_2,           "tom_2"           );
+		set( PERCUSSION_HI_HAT_PEDAL,    "hi_hat_pedal"    );
+		set( PERCUSSION_TOM_3,           "tom_3"           );
+		set( PERCUSSION_HI_HAT_OPEN,     "hi_hat_open"     );
+		set( PERCUSSION_TOM_4,           "tom_4"           );
+		set( PERCUSSION_TOM_5,           "tom_5"           );
+		set( PERCUSSION_CRASH_CYMBAL_1,  "crash_cymbal_1"  );
+		set( PERCUSSION_TOM_6,           "tom_6"           );
+		set( PERCUSSION_RIDE_CYMBAL_1,   "ride_cymbal_1"   );
+		set( PERCUSSION_CHINESE_CYMBAL,  "chinese_cymbal"  );
+		set( PERCUSSION_RIDE_BELL,       "ride_bell"       );
+		set( PERCUSSION_TAMBOURINE,      "tambourine"      );
+		set( PERCUSSION_SPLASH_CYMBAL,   "splash_cymbal"   );
+		set( PERCUSSION_COWBELL,         "cowbell"         );
+		set( PERCUSSION_CRASH_CYMBAL_2,  "crash_cymbal_2"  );
+		set( PERCUSSION_VIBRA_SLAP,      "vibra_slap"      );
+		set( PERCUSSION_RIDE_CYMBAL_2,   "ride_cymbal_2"   );
+		set( PERCUSSION_BONGO_HIGH,      "bongo_high"      );
+		set( PERCUSSION_BONGO_LOW,       "bongo_low"       );
+		set( PERCUSSION_CONGA_MUTE,      "conga_mute"      );
+		set( PERCUSSION_CONGA_OPEN,      "conga_open"      );
+		set( PERCUSSION_CONGA_LOW,       "conga_low"       );
+		set( PERCUSSION_TIMBALES_HIGH,   "timbales_high"   );
+		set( PERCUSSION_TIMBALES_LOW,    "timbales_low"    );
+		set( PERCUSSION_AGOGO_HIGH,      "agogo_high"      );
+		set( PERCUSSION_AGOGO_LOW,       "agogo_low"       );
+		set( PERCUSSION_CABASA,          "cabasa"          );
+		set( PERCUSSION_MARACAS,         "maracas"         );
+		set( PERCUSSION_WHISTLE_SHORT,   "whistle_short"   );
+		set( PERCUSSION_WHISTLE_LONG,    "whistle_long"    );
+		set( PERCUSSION_GUIRO_SHORT,     "guiro_short"     );
+		set( PERCUSSION_GUIRO_LONG,      "guiro_long"      );
+		set( PERCUSSION_CLAVE,           "clave"           );
+		set( PERCUSSION_WOOD_BLOCK_HIGH, "wood_block_high" );
+		set( PERCUSSION_WOOD_BLOCK_LOW,  "wood_block_low"  );
+		set( PERCUSSION_CUICA_MUTE,      "cuica_mute"      );
+		set( PERCUSSION_CUICA_OPEN,      "cuica_open"      );
+		set( PERCUSSION_TRIANGLE_MUTE,   "triangle_mute"   );
+		set( PERCUSSION_TRIANGLE_OPEN,   "triangle_open"   );
+		set( PERCUSSION_SHAKER,          "shaker"          );
+		set( PERCUSSION_JINGLE_BELL,     "jingle_bell"     );
+		set( PERCUSSION_BELLTREE,        "belltree"        );
+		set( PERCUSSION_CASTANETS,       "castanets"       );
+		set( PERCUSSION_SURDO_MUTE,      "surdo_mute"      );
+		set( PERCUSSION_SURDO_OPEN,      "surdo_open"      );
+		
+		// percussion instruments (short)
+		set( PERCUSSION_SHORT_HIGH_Q,          "hq"  );
+		set( PERCUSSION_SHORT_SLAP,            "sl"  );
+		set( PERCUSSION_SHORT_SCRATCH_PUSH,    "sph" );
+		set( PERCUSSION_SHORT_SCRATCH_PULL,    "spl" );
+		set( PERCUSSION_SHORT_STICKS,          "st"  );
+		set( PERCUSSION_SHORT_SQUARE_CLICK,    "sqc" );
+		set( PERCUSSION_SHORT_METRONOME_CLICK, "mc"  );
+		set( PERCUSSION_SHORT_METRONOME_BELL,  "mb"  );
+		set( PERCUSSION_SHORT_BASS_DRUM_2,     "bd2" );
+		set( PERCUSSION_SHORT_BASS_DRUM_1,     "bd1" );
+		set( PERCUSSION_SHORT_RIM_SHOT,        "rs"  );
+		set( PERCUSSION_SHORT_SNARE_DRUM_1,    "sd1" );
+		set( PERCUSSION_SHORT_HAND_CLAP,       "hc"  );
+		set( PERCUSSION_SHORT_SNARE_DRUM_2,    "sd2" );
+		set( PERCUSSION_SHORT_TOM_1,           "t1"  );
+		set( PERCUSSION_SHORT_HI_HAT_CLOSED,   "hhc" );
+		set( PERCUSSION_SHORT_TOM_2,           "t2"  );
+		set( PERCUSSION_SHORT_HI_HAT_PEDAL,    "hhp" );
+		set( PERCUSSION_SHORT_TOM_3,           "t3"  );
+		set( PERCUSSION_SHORT_HI_HAT_OPEN,     "hho" );
+		set( PERCUSSION_SHORT_TOM_4,           "t4"  );
+		set( PERCUSSION_SHORT_TOM_5,           "t5"  );
+		set( PERCUSSION_SHORT_CRASH_CYMBAL_1,  "cc1" );
+		set( PERCUSSION_SHORT_TOM_6,           "t6"  );
+		set( PERCUSSION_SHORT_RIDE_CYMBAL_1,   "rc1" );
+		set( PERCUSSION_SHORT_CHINESE_CYMBAL,  "chc" );
+		set( PERCUSSION_SHORT_RIDE_BELL,       "rb"  );
+		set( PERCUSSION_SHORT_TAMBOURINE,      "ta"  );
+		set( PERCUSSION_SHORT_SPLASH_CYMBAL,   "sc"  );
+		set( PERCUSSION_SHORT_COWBELL,         "cwb" );
+		set( PERCUSSION_SHORT_CRASH_CYMBAL_2,  "cc2" );
+		set( PERCUSSION_SHORT_VIBRA_SLAP,      "vs"  );
+		set( PERCUSSION_SHORT_RIDE_CYMBAL_2,   "rc2" );
+		set( PERCUSSION_SHORT_BONGO_HIGH,      "bh"  );
+		set( PERCUSSION_SHORT_BONGO_LOW,       "bl"  );
+		set( PERCUSSION_SHORT_CONGA_MUTE,      "cm"  );
+		set( PERCUSSION_SHORT_CONGA_OPEN,      "co"  );
+		set( PERCUSSION_SHORT_CONGA_LOW,       "cl"  );
+		set( PERCUSSION_SHORT_TIMBALES_HIGH,   "th"  );
+		set( PERCUSSION_SHORT_TIMBALES_LOW,    "tl"  );
+		set( PERCUSSION_SHORT_AGOGO_HIGH,      "ah"  );
+		set( PERCUSSION_SHORT_AGOGO_LOW,       "al"  );
+		set( PERCUSSION_SHORT_CABASA,          "cab" );
+		set( PERCUSSION_SHORT_MARACAS,         "ma"  );
+		set( PERCUSSION_SHORT_WHISTLE_SHORT,   "ws"  );
+		set( PERCUSSION_SHORT_WHISTLE_LONG,    "wl"  );
+		set( PERCUSSION_SHORT_GUIRO_SHORT,     "gs"  );
+		set( PERCUSSION_SHORT_GUIRO_LONG,      "gl"  );
+		set( PERCUSSION_SHORT_CLAVE,           "cla" );
+		set( PERCUSSION_SHORT_WOOD_BLOCK_HIGH, "wbh" );
+		set( PERCUSSION_SHORT_WOOD_BLOCK_LOW,  "wbl" );
+		set( PERCUSSION_SHORT_CUICA_MUTE,      "cum" );
+		set( PERCUSSION_SHORT_CUICA_OPEN,      "cuo" );
+		set( PERCUSSION_SHORT_TRIANGLE_MUTE,   "tm"  );
+		set( PERCUSSION_SHORT_TRIANGLE_OPEN,   "to"  );
+		set( PERCUSSION_SHORT_SHAKER,          "sh"  );
+		set( PERCUSSION_SHORT_JINGLE_BELL,     "jb"  );
+		set( PERCUSSION_SHORT_BELLTREE,        "bt"  );
+		set( PERCUSSION_SHORT_CASTANETS,       "cas" );
+		set( PERCUSSION_SHORT_SURDO_MUTE,      "sm"  );
+		set( PERCUSSION_SHORT_SURDO_OPEN,      "so"  );
 		
 		// drumkits
 		set( DRUMKIT_STANDARD,   "STANDARD"   );
@@ -2690,69 +2893,132 @@ public class Dict {
 	/**
 	 * Sets up german drumkit and percussion instrument translation shortcuts.
 	 */
-	private static void initPercussionSetGerman1() {
-		// percussion instruments
-		set( PERCUSSION_HIGH_Q,          "HIGH_Q"              );
-		set( PERCUSSION_SLAP,            "SCHLAG"              );
-		set( PERCUSSION_SCRATCH_PUSH,    "SCRATCH_PUSH"        );
-		set( PERCUSSION_SCRATCH_PULL,    "SCRATCH_PULL"        );
-		set( PERCUSSION_STICKS,          "STÖCKE"              );
-		set( PERCUSSION_SQUARE_CLICK,    "SQUARE_CLICK"        );
-		set( PERCUSSION_METRONOME_CLICK, "METRONOM_KLICK"      );
-		set( PERCUSSION_METRONOME_BELL,  "METRONOM_KLINGEL"    );
-		set( PERCUSSION_BASS_DRUM_2,     "BASSTROMMEL_2"       );
-		set( PERCUSSION_BASS_DRUM_1,     "BASSTROMMEL_1"       );
-		set( PERCUSSION_RIM_SHOT,        "RIMSHOT"             );
-		set( PERCUSSION_SNARE_DRUM_1,    "KLEINE_TROMMEL_1"    );
-		set( PERCUSSION_HAND_CLAP,       "KLATSCHEN"           );
-		set( PERCUSSION_SNARE_DRUM_2,    "KLEINE_TROMMEL_2"    );
-		set( PERCUSSION_TOM_1,           "TOMTOM_1"            );
-		set( PERCUSSION_HI_HAT_CLOSED,   "HI_HAT_GESCHLOSSEN"  );
-		set( PERCUSSION_TOM_2,           "TOMTOM_2"            );
-		set( PERCUSSION_HI_HAT_PEDAL,    "HI_HAT_PEDAL"        );
-		set( PERCUSSION_TOM_3,           "TOMTOM_3"            );
-		set( PERCUSSION_HI_HAT_OPEN,     "HI_HAT_OFFEN"        );
-		set( PERCUSSION_TOM_4,           "TOMTOM_4"            );
-		set( PERCUSSION_TOM_5,           "TOMTOM_5"            );
-		set( PERCUSSION_CRASH_CYMBAL_1,  "CRASH_BECKEN_1"      );
-		set( PERCUSSION_TOM_6,           "TOMTOM_6"            );
-		set( PERCUSSION_RIDE_CYMBAL_1,   "RIDE_BECKEN_1"       );
-		set( PERCUSSION_CHINESE_CYMBAL,  "CHINESISCHES_BECKEN" );
-		set( PERCUSSION_RIDE_BELL,       "RIDE_BELL"           );
-		set( PERCUSSION_TAMBOURINE,      "TAMBURIN"            );
-		set( PERCUSSION_SPLASH_CYMBAL,   "SPLASH_BECKEN"       );
-		set( PERCUSSION_COWBELL,         "KUHGLOCKE"           );
-		set( PERCUSSION_CRASH_CYMBAL_2,  "CRASH_BECKEN_2"      );
-		set( PERCUSSION_VIBRA_SLAP,      "VIBRASLAP"           );
-		set( PERCUSSION_RIDE_CYMBAL_2,   "RIDE_BECKEN_2"       );
-		set( PERCUSSION_BONGO_HIGH,      "BONGO_HOCH"          );
-		set( PERCUSSION_BONGO_LOW,       "BONGO_TIEF"          );
-		set( PERCUSSION_CONGA_MUTE,      "CONGA_GEDÄMPFT"      );
-		set( PERCUSSION_CONGA_OPEN,      "CONGA_OFFEN"         );
-		set( PERCUSSION_CONGA_LOW,       "CONGA_TIEF"          );
-		set( PERCUSSION_TIMBALES_HIGH,   "TIMBALES_HOCH"       );
-		set( PERCUSSION_TIMBALES_LOW,    "TIMBALES_TIEF"       );
-		set( PERCUSSION_AGOGO_HIGH,      "AGOGO_HOCH"          );
-		set( PERCUSSION_AGOGO_LOW,       "AGOGO_TIEF"          );
-		set( PERCUSSION_CABASA,          "CABASA"              );
-		set( PERCUSSION_MARACAS,         "MARACAS"             );
-		set( PERCUSSION_WHISTLE_SHORT,   "PFEIFE_KURZ"         );
-		set( PERCUSSION_WHISTLE_LONG,    "PFEIFE_LANG"         );
-		set( PERCUSSION_GUIRO_SHORT,     "GUIRO_KURZ"          );
-		set( PERCUSSION_GUIRO_LONG,      "GUIRO_LANG"          );
-		set( PERCUSSION_CLAVE,           "CLAVE"               );
-		set( PERCUSSION_WOOD_BLOCK_HIGH, "HOLZBLOCK_HOCH"      );
-		set( PERCUSSION_WOOD_BLOCK_LOW,  "HOLZBLOCK_TIEF"      );
-		set( PERCUSSION_CUICA_MUTE,      "CUICA_GEDÄMPFT"      );
-		set( PERCUSSION_CUICA_OPEN,      "CUICA_OFFEN"         );
-		set( PERCUSSION_TRIANGLE_MUTE,   "TRIANGEL_GEDÄMPFT"   );
-		set( PERCUSSION_TRIANGLE_OPEN,   "TRIANGEL_OFFEN"      );
-		set( PERCUSSION_SHAKER,          "SCHÜTTLER"           );
-		set( PERCUSSION_JINGLE_BELL,     "SCHELLE"             );
-		set( PERCUSSION_BELLTREE,        "GLOCKENBAUM"         );
-		set( PERCUSSION_CASTANETS,       "KASTAGNETTEN"        );
-		set( PERCUSSION_SURDO_MUTE,      "SURDO_GEDÄMPFT"      );
-		set( PERCUSSION_SURDO_OPEN,      "SURDO_OFFEN"         );
+	private static void initPercussionGerman() {
+		// percussion instruments (long)
+		set( PERCUSSION_HIGH_Q,          "high_q"              );
+		set( PERCUSSION_SLAP,            "schlag"              );
+		set( PERCUSSION_SCRATCH_PUSH,    "scratch_push"        );
+		set( PERCUSSION_SCRATCH_PULL,    "scratch_pull"        );
+		set( PERCUSSION_STICKS,          "stöcke"              );
+		set( PERCUSSION_SQUARE_CLICK,    "square_klick"        );
+		set( PERCUSSION_METRONOME_CLICK, "metronom_klick"      );
+		set( PERCUSSION_METRONOME_BELL,  "metronom_glocke"     );
+		set( PERCUSSION_BASS_DRUM_2,     "basstrommel_2"       );
+		set( PERCUSSION_BASS_DRUM_1,     "basstrommel_1"       );
+		set( PERCUSSION_RIM_SHOT,        "rimshot"             );
+		set( PERCUSSION_SNARE_DRUM_1,    "kleine_trommel_1"    );
+		set( PERCUSSION_HAND_CLAP,       "klatschen"           );
+		set( PERCUSSION_SNARE_DRUM_2,    "kleine_trommel_2"    );
+		set( PERCUSSION_TOM_1,           "tomtom_1"            );
+		set( PERCUSSION_HI_HAT_CLOSED,   "hi_hat_geschlossen"  );
+		set( PERCUSSION_TOM_2,           "tomtom_2"            );
+		set( PERCUSSION_HI_HAT_PEDAL,    "hi_hat_pedal"        );
+		set( PERCUSSION_TOM_3,           "tomtom_3"            );
+		set( PERCUSSION_HI_HAT_OPEN,     "hi_hat_offen"        );
+		set( PERCUSSION_TOM_4,           "tomtom_4"            );
+		set( PERCUSSION_TOM_5,           "tomtom_5"            );
+		set( PERCUSSION_CRASH_CYMBAL_1,  "crash_becken_1"      );
+		set( PERCUSSION_TOM_6,           "tomtom_6"            );
+		set( PERCUSSION_RIDE_CYMBAL_1,   "ride_becken_1"       );
+		set( PERCUSSION_CHINESE_CYMBAL,  "chinesisches_becken" );
+		set( PERCUSSION_RIDE_BELL,       "ride_bell"           );
+		set( PERCUSSION_TAMBOURINE,      "tamburin"            );
+		set( PERCUSSION_SPLASH_CYMBAL,   "splash_becken"       );
+		set( PERCUSSION_COWBELL,         "kuhglocke"           );
+		set( PERCUSSION_CRASH_CYMBAL_2,  "crash_becken_2"      );
+		set( PERCUSSION_VIBRA_SLAP,      "vibraslap"           );
+		set( PERCUSSION_RIDE_CYMBAL_2,   "ride_becken_2"       );
+		set( PERCUSSION_BONGO_HIGH,      "bongo_hoch"          );
+		set( PERCUSSION_BONGO_LOW,       "bongo_tief"          );
+		set( PERCUSSION_CONGA_MUTE,      "conga_gedämpft"      );
+		set( PERCUSSION_CONGA_OPEN,      "conga_offen"         );
+		set( PERCUSSION_CONGA_LOW,       "conga_tief"          );
+		set( PERCUSSION_TIMBALES_HIGH,   "timbales_hoch"       );
+		set( PERCUSSION_TIMBALES_LOW,    "timbales_tief"       );
+		set( PERCUSSION_AGOGO_HIGH,      "agogo_hoch"          );
+		set( PERCUSSION_AGOGO_LOW,       "agogo_tief"          );
+		set( PERCUSSION_CABASA,          "cabasa"              );
+		set( PERCUSSION_MARACAS,         "maracas"             );
+		set( PERCUSSION_WHISTLE_SHORT,   "pfeife_kurz"         );
+		set( PERCUSSION_WHISTLE_LONG,    "pfeife_lang"         );
+		set( PERCUSSION_GUIRO_SHORT,     "guiro_kurz"          );
+		set( PERCUSSION_GUIRO_LONG,      "guiro_lang"          );
+		set( PERCUSSION_CLAVE,           "clave"               );
+		set( PERCUSSION_WOOD_BLOCK_HIGH, "holzblock_hoch"      );
+		set( PERCUSSION_WOOD_BLOCK_LOW,  "holzblock_tief"      );
+		set( PERCUSSION_CUICA_MUTE,      "cuica_gedämpft"      );
+		set( PERCUSSION_CUICA_OPEN,      "cuica_offen"         );
+		set( PERCUSSION_TRIANGLE_MUTE,   "triangel_gedämpft"   );
+		set( PERCUSSION_TRIANGLE_OPEN,   "triangel_offen"      );
+		set( PERCUSSION_SHAKER,          "schüttler"           );
+		set( PERCUSSION_JINGLE_BELL,     "schelle"             );
+		set( PERCUSSION_BELLTREE,        "glockenbaum"         );
+		set( PERCUSSION_CASTANETS,       "kastagnetten"        );
+		set( PERCUSSION_SURDO_MUTE,      "surdo_gedämpft"      );
+		set( PERCUSSION_SURDO_OPEN,      "surdo_offen"         );
+		
+		// percussion instruments (short)
+		set( PERCUSSION_SHORT_HIGH_Q,          "hq"  );
+		set( PERCUSSION_SHORT_SLAP,            "sg"  );
+		set( PERCUSSION_SHORT_SCRATCH_PUSH,    "sph" );
+		set( PERCUSSION_SHORT_SCRATCH_PULL,    "spl" );
+		set( PERCUSSION_SHORT_STICKS,          "st"  );
+		set( PERCUSSION_SHORT_SQUARE_CLICK,    "sk"  );
+		set( PERCUSSION_SHORT_METRONOME_CLICK, "mk"  );
+		set( PERCUSSION_SHORT_METRONOME_BELL,  "mg"  );
+		set( PERCUSSION_SHORT_BASS_DRUM_2,     "bt2" );
+		set( PERCUSSION_SHORT_BASS_DRUM_1,     "bt1" );
+		set( PERCUSSION_SHORT_RIM_SHOT,        "rs"  );
+		set( PERCUSSION_SHORT_SNARE_DRUM_1,    "kt1" );
+		set( PERCUSSION_SHORT_HAND_CLAP,       "kl"  );
+		set( PERCUSSION_SHORT_SNARE_DRUM_2,    "kt2" );
+		set( PERCUSSION_SHORT_TOM_1,           "t1"  );
+		set( PERCUSSION_SHORT_HI_HAT_CLOSED,   "hhg" );
+		set( PERCUSSION_SHORT_TOM_2,           "t2"  );
+		set( PERCUSSION_SHORT_HI_HAT_PEDAL,    "hhp" );
+		set( PERCUSSION_SHORT_TOM_3,           "t3"  );
+		set( PERCUSSION_SHORT_HI_HAT_OPEN,     "hho" );
+		set( PERCUSSION_SHORT_TOM_4,           "t4"  );
+		set( PERCUSSION_SHORT_TOM_5,           "t5"  );
+		set( PERCUSSION_SHORT_CRASH_CYMBAL_1,  "cb1" );
+		set( PERCUSSION_SHORT_TOM_6,           "t6"  );
+		set( PERCUSSION_SHORT_RIDE_CYMBAL_1,   "rb1" );
+		set( PERCUSSION_SHORT_CHINESE_CYMBAL,  "cbk" );
+		set( PERCUSSION_SHORT_RIDE_BELL,       "rb"  );
+		set( PERCUSSION_SHORT_TAMBOURINE,      "ta"  );
+		set( PERCUSSION_SHORT_SPLASH_CYMBAL,   "spk" );
+		set( PERCUSSION_SHORT_COWBELL,         "kg"  );
+		set( PERCUSSION_SHORT_CRASH_CYMBAL_2,  "cb2" );
+		set( PERCUSSION_SHORT_VIBRA_SLAP,      "vs"  );
+		set( PERCUSSION_SHORT_RIDE_CYMBAL_2,   "rb2" );
+		set( PERCUSSION_SHORT_BONGO_HIGH,      "bh"  );
+		set( PERCUSSION_SHORT_BONGO_LOW,       "bt"  );
+		set( PERCUSSION_SHORT_CONGA_MUTE,      "cg"  );
+		set( PERCUSSION_SHORT_CONGA_OPEN,      "co"  );
+		set( PERCUSSION_SHORT_CONGA_LOW,       "ct"  );
+		set( PERCUSSION_SHORT_TIMBALES_HIGH,   "th"  );
+		set( PERCUSSION_SHORT_TIMBALES_LOW,    "tt"  );
+		set( PERCUSSION_SHORT_AGOGO_HIGH,      "ah"  );
+		set( PERCUSSION_SHORT_AGOGO_LOW,       "at"  );
+		set( PERCUSSION_SHORT_CABASA,          "ca"  );
+		set( PERCUSSION_SHORT_MARACAS,         "ma"  );
+		set( PERCUSSION_SHORT_WHISTLE_SHORT,   "pk"  );
+		set( PERCUSSION_SHORT_WHISTLE_LONG,    "pl"  );
+		set( PERCUSSION_SHORT_GUIRO_SHORT,     "gk"  );
+		set( PERCUSSION_SHORT_GUIRO_LONG,      "gl"  );
+		set( PERCUSSION_SHORT_CLAVE,           "cl"  );
+		set( PERCUSSION_SHORT_WOOD_BLOCK_HIGH, "hbh" );
+		set( PERCUSSION_SHORT_WOOD_BLOCK_LOW,  "hbt" );
+		set( PERCUSSION_SHORT_CUICA_MUTE,      "cug" );
+		set( PERCUSSION_SHORT_CUICA_OPEN,      "cuo" );
+		set( PERCUSSION_SHORT_TRIANGLE_MUTE,   "tg"  );
+		set( PERCUSSION_SHORT_TRIANGLE_OPEN,   "to"  );
+		set( PERCUSSION_SHORT_SHAKER,          "sr"  );
+		set( PERCUSSION_SHORT_JINGLE_BELL,     "sc"  );
+		set( PERCUSSION_SHORT_BELLTREE,        "glb" );
+		set( PERCUSSION_SHORT_CASTANETS,       "ka"  );
+		set( PERCUSSION_SHORT_SURDO_MUTE,      "sug" );
+		set( PERCUSSION_SHORT_SURDO_OPEN,      "suo" );
 		
 		// drumkits
 		set( DRUMKIT_STANDARD,   "STANDARD"      );
@@ -3305,30 +3571,61 @@ public class Dict {
 	}
 	
 	/**
-	 * Returns a percussion instrument value by name.
+	 * Returns a percussion instrument number by percussion ID.
 	 * 
-	 * @param name  shortcut of the percussion instrument
+	 * @param id    long or short ID of the percussion instrument
 	 * @return      instrument value as defined by the MIDI specification
 	 */
-	public static int getPercussion( String name ) {
-		if ( percussionNameToInt.containsKey(name) )
-			return percussionNameToInt.get( name );
+	public static int getPercussion(String name) {
+		if ( percussionIdToInt.containsKey(name) )
+			return percussionIdToInt.get(name);
 		else
 			return UNKNOWN_CODE;
 	}
 	
 	/**
-	 * Returns a percussion instrument shortcut by value.
+	 * Returns the long form of a percussion instrument id by MIDI number.
 	 * 
-	 * @param i  instrument value as defined by the MIDI specification
-	 * @return   currently configured percussion shortcut for the requested
+	 * @param i  percussion instrument number as defined by the MIDI specification
+	 * @return   currently configured percussion ID (long form) for the requested
 	 *           percussion instrument
 	 */
-	public static String getPercussion( int i ) {
-		if ( percussionIntToName.containsKey(i) )
-			return percussionIntToName.get( i );
+	public static String getPercussionLongId(int i) {
+		if ( percussionIntToLongId.containsKey(i) )
+			return percussionIntToLongId.get(i);
 		else
-			return get( UNKNOWN_PERCUSSION_NAME );
+			return get(UNKNOWN_PERCUSSION_NAME);
+	}
+	
+	/**
+	 * Returns the short form of a percussion instrument id by MIDI number.
+	 * 
+	 * @param i  percussion instrument number as defined by the MIDI specification
+	 * @return   currently configured percussion ID (short form) for the requested
+	 *           percussion instrument
+	 */
+	public static String getPercussionShortId(int i) {
+		if ( percussionIntToShortId.containsKey(i) )
+			return percussionIntToShortId.get(i);
+		else
+			return get(UNKNOWN_PERCUSSION_NAME);
+	}
+	
+	/**
+	 * Returns the longest number of characters that a (short) percussion ID can have.
+	 * 
+	 * @return longest possible percussion short ID
+	 */
+	public static int getPercussionShortIdLength() {
+		int longest = 0;
+		for (int number : percussionIntToShortId.keySet()) {
+			String id = percussionIntToShortId.get(number);
+			if (id.length() > longest) {
+				longest = id.length();
+			}
+		}
+		
+		return longest;
 	}
 	
 	/**
@@ -3337,9 +3634,9 @@ public class Dict {
 	 * @param name  drumkit shortcut
 	 * @return      drumkit number as defined by the General Standard specification
 	 */
-	public static int getDrumkit( String name ) {
+	public static int getDrumkit(String name) {
 		if ( drumkitNameToInt.containsKey(name) )
-			return drumkitNameToInt.get( name );
+			return drumkitNameToInt.get(name);
 		else
 			return UNKNOWN_CODE;
 	}
@@ -3350,11 +3647,11 @@ public class Dict {
 	 * @param i  drumkit value as defined by the General Standard specification
 	 * @return drumkit shortcut.
 	 */
-	public static String getDrumkit( int i ) {
+	public static String getDrumkit(int i) {
 		if ( drumkitIntToName.containsKey(i) )
-			return drumkitIntToName.get( i );
+			return drumkitIntToName.get(i);
 		else
-			return get( UNKNOWN_DRUMKIT_NAME );
+			return get(UNKNOWN_DRUMKIT_NAME);
 	}
 	
 	/**
@@ -3363,8 +3660,8 @@ public class Dict {
 	 * @param name  percussion name to be checked
 	 * @return      true, if the percussion name is configured -- otherwise: false
 	 */
-	public static boolean percussionExists( String name ) {
-		if ( percussionNameToInt.containsKey(name) )
+	public static boolean percussionExists(String name) {
+		if ( percussionIdToInt.containsKey(name) )
 			return true;
 		return false;
 	}
@@ -3375,9 +3672,9 @@ public class Dict {
 	 * @param id  identifier for the syntax element
 	 * @return    currently configured syntax keyword
 	 */
-	public static String getSyntax( String id ) {
+	public static String getSyntax(String id) {
 		if ( syntax.containsKey(id) )
-			return syntax.get( id );
+			return syntax.get(id);
 		else
 			return UNKNOWN_SYNTAX;
 	}
@@ -3392,12 +3689,12 @@ public class Dict {
 	}
 	
 	/**
-	 * Counts the currently configured percussion shortcuts.
+	 * Counts the currently configured percussion IDs.
 	 * 
-	 * @return number of currently configured percussion shortcuts
+	 * @return number of currently configured percussion IDs
 	 */
 	public static int countPercussion() {
-		return percussionIntToName.size();
+		return percussionIntToLongId.size();
 	}
 	
 	/**
@@ -3410,12 +3707,12 @@ public class Dict {
 	}
 	
 	/**
-	 * Returns all currently configured percussion shortcuts.
+	 * Returns all currently configured percussion IDs (long form).
 	 * 
-	 * @return all currently configured percussion shortcuts
+	 * @return all currently configured (long) percussion IDs
 	 */
 	public static Set<Integer> getPercussionNotes() {
-		return percussionIntToName.keySet();
+		return percussionIntToLongId.keySet();
 	}
 	
 	/**
