@@ -953,6 +953,7 @@ public class Dict {
 	public static final String ERROR_INSTR_BANK                 = "error_instr_bank";
 	public static final String ERROR_GLOBAL_NUM_OF_ARGS         = "error_global_num_of_args";
 	public static final String ERROR_UNKNOWN_GLOBAL_CMD         = "error_unknown_global_cmd: ";
+	public static final String ERROR_UNKNOWN_COMMAND_ID         = "error_unknown_command_id";
 	public static final String ERROR_MIDI_PROBLEM               = "error_midi_problem";
 	public static final String ERROR_CH_CMD_NUM_OF_ARGS         = "error_ch_num_of_args";
 	public static final String ERROR_CANT_PARSE_OPTIONS         = "error_cant_parse_options";
@@ -1772,6 +1773,7 @@ public class Dict {
 		set( ERROR_INSTR_BANK,                    "Instrument and/or Bank definition erroneous"                       );
 		set( ERROR_GLOBAL_NUM_OF_ARGS,            "wrong number of arguments in global command"                       );
 		set( ERROR_UNKNOWN_GLOBAL_CMD,            "unknown global command: "                                          );
+		set( ERROR_UNKNOWN_COMMAND_ID,            "Unknown command ID: "                                              );
 		set( ERROR_MIDI_PROBLEM,                  "<html>Midi Problem!<br>"                                           );
 		set( ERROR_CH_CMD_NUM_OF_ARGS,            "wrong number of arguments in channel command"                      );
 		set( ERROR_CANT_PARSE_OPTIONS,            "cannot parse options"                                              );

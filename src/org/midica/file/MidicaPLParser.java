@@ -113,20 +113,31 @@ public class MidicaPLParser extends SequenceParser {
 	public static String TUPLET_FOR       = null;
 	public static String DURATION_PLUS    = null;
 	
-	private static ArrayList<Instrument>                instruments       = null;
-	private static HashMap<String, ArrayList<String[]>> macros            = null;
-	private static HashMap<String, HashSet<Integer>>    chords            = null;
-	private static boolean                              instrumentsParsed = false;
-	private static String                               chosenCharset     = null;
+	public static String ORIGINAL_DEFINE       = null;
+	public static String ORIGINAL_INCLUDE_FILE = null;
+	
+	private static ArrayList<Instrument>              instruments       = null;
+	private static HashMap<String, ArrayList<String>> macros            = null;
+	private static HashMap<String, HashSet<Integer>>  chords            = null;
+	private static boolean                            instrumentsParsed = false;
+	private static boolean                            frstInstrBlkOver  = false;
+	private static String                             chosenCharset     = null;
+	private static HashSet<String>                    definedMacroNames = null;
+	
+	private static boolean isDefineParsRun   = false; // parsing run for define commands
+	private static boolean isChInstrParsRun  = false; // parsing run for chords and instruments
+	private static boolean isMacrNameParsRun = false; // parsing run for defined macro names
+	private static boolean isMacroParsRun    = false; // parsing run for macros
+	private static boolean isDefaultParsRun  = false; // final parsing run
 	
 	/* *******************
 	 * instance fields
 	 *********************/
 	
-	private File                file             = null;
-	private int                 currentMode      = MODE_DEFAULT;
-	private String              currentMacroName = null;
-	private ArrayList<String[]> currentMacro     = null;
+	private File              file              = null;
+	private int               currentMode       = MODE_DEFAULT;
+	private String            currentMacroName  = null;
+	private ArrayList<String> currentMacro      = null;
 	
 	/**
 	 * Indicates if the current parser object parses the file chosen by the user.  
@@ -203,6 +214,11 @@ public class MidicaPLParser extends SequenceParser {
 		TUPLET           = Dict.getSyntax( Dict.SYNTAX_TUPLET           );
 		TUPLET_FOR       = Dict.getSyntax( Dict.SYNTAX_TUPLET_FOR       );
 		DURATION_PLUS    = Dict.getSyntax( Dict.SYNTAX_DURATION_PLUS    );
+		
+		// Remember the original names of some commands.
+		// Needed to redefine them without getting an error in the following parsing runs.
+		ORIGINAL_DEFINE       = DEFINE;
+		ORIGINAL_INCLUDE_FILE = INCLUDE_FILE;
 	}
 	
 	/**
@@ -210,12 +226,14 @@ public class MidicaPLParser extends SequenceParser {
 	 * 
 	 * @param file  MidicaPL source file.
 	 */
-	public void parse( File file ) throws ParseException {
+	public void parse(File file) throws ParseException {
 		this.file = file;
 		
 		// clean up and make parser ready for parsing
-		preprocess( file );
-		reset();
+		if (isRootParser) {
+			preprocess(file);
+			reset();
+		}
 		
 		// get charset
 		chosenCharset   = ((ComboboxStringOption) ConfigComboboxModel.getModel( Config.CHARSET_MPL ).getSelectedItem() ).getIdentifier();
@@ -223,34 +241,59 @@ public class MidicaPLParser extends SequenceParser {
 		
 		try {
 			// open file for reading
-			FileInputStream   fis        = new FileInputStream( file );
-			InputStreamReader ir         = new InputStreamReader( fis, charset );
-			BufferedReader    br         = new BufferedReader( ir );
-			int               lineNumber = 0;
-			String            line;
+			FileInputStream   fis = new FileInputStream(file);
+			InputStreamReader ir  = new InputStreamReader(fis, charset);
+			BufferedReader    br  = new BufferedReader(ir);
+			String            rawLine;
 			
-			// parse line by line
-			while (null != (line = br.readLine())) {
-				lineNumber++;
-				try {
-					parseLine( line );
-				}
-				catch ( ParseException e ) {
-					// Add file name and line number to exception and throw it again
-					// but only if this is not yet done.
-					// If this information is already available than it comes from
-					// another parser instance. In this case we must not overwrite it.
-					if (0 == e.getLineNumber()) {
-						e.setLineNumber( lineNumber );
-					}
-					if (null == e.getFileName()) {
-						e.setFileName( file.getCanonicalPath() );
-					}
-					br.close();
-					throw e;
-				}
+			// get lines from file
+			ArrayList<String> lines = new ArrayList<String>();
+			while (null != (rawLine = br.readLine())) {
+				
+				// cut away comments
+				String cleanedLine = rawLine.split( Pattern.quote(COMMENT) + "|$", 2 )[ 0 ];
+				
+				// eliminate leading and trailing whitespaces
+				cleanedLine = clean(cleanedLine);
+				
+				lines.add(cleanedLine);
 			}
 			br.close();
+			
+			if (isRootParser) {
+				// look for define commands
+				isDefineParsRun = true;
+				parsingRun(lines);
+				isDefineParsRun = false;
+				
+				// look for chords and the first instruments block
+				isChInstrParsRun = true;
+				parsingRun(lines);
+				isChInstrParsRun = false;
+				
+				// collect all macro names that are defined somewhere
+				isMacrNameParsRun = true;
+				parsingRun(lines);
+				isMacrNameParsRun = false;
+				
+				// look for macros
+				isMacroParsRun = true;
+				parsingRun(lines);
+				isMacroParsRun = false;
+				
+				// look for everything else
+				// final parsing run, building up the sequence
+				isDefaultParsRun = true;
+				parsingRun(lines);
+				isDefaultParsRun = false;
+			}
+			else {
+				// Not the root parser.
+				// This is called for each INCLUDE_FILE command and parsing run.
+				// So the parsing run has to be executed only once here.
+				// For which run it's called is obvious because the according fields are static.
+				parsingRun(lines);
+			}
 		}
 		catch ( FileNotFoundException e ) {
 			e.printStackTrace();
@@ -260,44 +303,63 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// check if the file contains a sequence at all
-		if (! instrumentsParsed) {
+		if (isRootParser && ! instrumentsParsed) {
 			throw new ParseException( Dict.get(Dict.ERROR_NO_INSTRUMENTS) );
 		}
 		
 		// EOF has been reached
-		postprocessSequence( SequenceCreator.getSequence(), "midica", chosenCharset );
+		if (isRootParser) {
+			postprocessSequence( SequenceCreator.getSequence(), "midica", chosenCharset );
+		}
+	}
+	
+	/**
+	 * Parses all MidicaPL source lines for a specific purpose.
+	 * E.g. find definition commands, chords, macros, and so on.
+	 * 
+	 * @param lines           All pre-cleaned lines of the MidicaPL source.
+	 * @throws ParseException if one of the lines cannot be parsed.
+	 * @throws IOException    if the file path cannot be calculated.
+	 */
+	private void parsingRun(ArrayList<String> lines) throws ParseException, IOException {
+		int lineNumber = 0;
+		for (String line : lines) {
+			lineNumber++;
+			try {
+				parseLine(line);
+			}
+			catch (ParseException e) {
+				// Add file name and line number to exception and throw it again
+				// but only if this is not yet done.
+				// If this information is already available than it comes from
+				// another parser instance. In this case we must not overwrite it.
+				if (0 == e.getLineNumber()) {
+					e.setLineNumber( lineNumber );
+				}
+				if (null == e.getFileName()) {
+					e.setFileName( file.getCanonicalPath() );
+				}
+				throw e;
+			}
+		}
 	}
 	
 	/**
 	 * Parses one single line of a MidicaPL source file.
+	 * The line is expected to be cleaned already from comments and leading/trailing whitespaces.
 	 * 
 	 * @param line             The line to be parsed.
 	 * @throws ParseException  If the line cannot be parsed.
 	 */
-	private void parseLine( String line ) throws ParseException {
-		
-		// cut away comments
-		String cleanedLine = line.split( Pattern.quote(COMMENT) + "|$", 2 )[ 0 ];
-		cleanedLine        = clean( cleanedLine ); // eliminate leading and trailing whitespaces
-		String[] tokens    = getTokens( cleanedLine );
+	private void parseLine(String line) throws ParseException {
+		String[] tokens = line.split("\\s+", 3);
 		
 		if ("".equals(tokens[0])) {
 			// empty line or only comments
 			return;
 		}
 		
-		parseTokens( tokens );
-	}
-	
-	/**
-	 * Extracts the tokens of one MidicaPL line.
-	 * 
-	 * @param line  The line containing the tokens.
-	 * @return      The extracted tokens.
-	 */
-	private String[] getTokens( String line ) {
-		String[] tokens = line.split( "\\s+", 3 );
-		return tokens;
+		parseTokens(tokens);
 	}
 	
 	/**
@@ -306,7 +368,15 @@ public class MidicaPLParser extends SequenceParser {
 	 * @param  tokens          The tokens from one MidicaPL line.
 	 * @throws ParseException  If the tokens cannot be parsed.
 	 */
-	private void parseTokens( String[] tokens ) throws ParseException {
+	private void parseTokens(String[] tokens) throws ParseException {
+		
+		checkIfCmdExists(tokens[0]);
+		
+		// continue or not - decide depending on parsing run and current mode
+		boolean mustIgnore = mustIgnore(tokens[0]);
+		if (mustIgnore) {
+			return;
+		}
 		
 		// replace note, instrument, percussion and drumkit names
 		if (tokens.length > 2) {
@@ -315,7 +385,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// mode command (instruments, macro, end)
 		// or definition (define, chord)
-		// or call (include, include_file)
+		// or call (include, include_file, soundfont)
 		if (tokens[0].matches("^[A-Za-z_]\\w*$")) {
 			parseModeCmd(tokens);
 			return;
@@ -334,7 +404,8 @@ public class MidicaPLParser extends SequenceParser {
 			}
 			else if (MODE_MACRO == currentMode) {
 				// we are inside a macro definition
-				currentMacro.add(tokens);
+				// reconstruct and remember the line
+				currentMacro.add(String.join(" ", tokens));
 				
 				// fake a global command (so that in case of an error
 				// the exception is thrown with the right line number)
@@ -376,7 +447,7 @@ public class MidicaPLParser extends SequenceParser {
 						// so that the next note of the same chord starts at the same time
 						subTokens[2] = addMultiple( tokens[2] );
 					}
-					parseTokens( subTokens );
+					parseTokens(subTokens);
 					i++;
 				}
 				
@@ -386,7 +457,8 @@ public class MidicaPLParser extends SequenceParser {
 			// channel command with a single note
 			if (MODE_MACRO == currentMode) {
 				// we are inside a macro definition
-				currentMacro.add( tokens );
+				// reconstruct and remember the line
+				currentMacro.add(String.join(" ", tokens));
 				
 				// fake a channel command (so that in case of an error
 				// the exception is thrown with the right line number)
@@ -399,6 +471,213 @@ public class MidicaPLParser extends SequenceParser {
 		
 		else
 			throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_CMD) + tokens[0] );
+	}
+	
+	/**
+	 * Throws an error if the given command does not exist.
+	 * 
+	 * Each command is also checked at the place it's parsed. But sometimes this is too late.
+	 * Different parsing runs ignore different lines, so that the real error is not shown but
+	 * a consecutive error with a much higher line number.
+	 * 
+	 * Example:
+	 * 
+	 *     DEFINE CHORD CRD
+	 *     // ...
+	 *     CHORD cmay c,e,g
+	 *     // ...
+	 *     0 cmay /4
+	 * 
+	 * This would say: `unknown note: cmay`
+	 * 
+	 * But correct is: `unknown command: CHORD`
+	 * 
+	 * We need this check early or otherwise the error messages could be confusing.
+	 * 
+	 * @param cmd
+	 * @throws ParseException
+	 */
+	private void checkIfCmdExists(String cmd) throws ParseException {
+		
+		// The define parsing run itself is too early.
+		// Otherwise, a DEFINE would not work.
+		//
+		// The only Exception would be an (erronous) DEFINE command itself.
+		// However that's pretty hard to detect earlier than the consecutive errors.
+		// 
+		// "Workaround" for the MidicaPL author:
+		// 1. Always write the DEFINE command correctly
+		// 2. Don't redefine the same definition ID twice.
+		if (isDefineParsRun) {
+			return;
+		}
+		
+		if      ( END.equals(cmd)                   ) {}
+		else if ( MACRO.equals(cmd)                 ) {}
+		else if ( CHORD.equals(cmd)                 ) {}
+		else if ( INCLUDE.equals(cmd)               ) {}
+		else if ( INCLUDE_FILE.equals(cmd)          ) {}
+		else if ( SOUNDFONT.equals(cmd)             ) {}
+		else if ( DEFINE.equals(cmd)                ) {}
+		else if ( INSTRUMENTS.equals(cmd)           ) {}
+		else if ( GLOBAL.equals(cmd)                ) {}
+		else if ( P.equals(cmd)                     ) {}
+		else if ( ORIGINAL_DEFINE.equals(cmd)       ) {}
+		else if ( ORIGINAL_INCLUDE_FILE.equals(cmd) ) {}
+		else if ( cmd.matches("^\\d+$")             ) {}
+		else {
+			throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_CMD) + cmd );
+		}
+	}
+	
+	/**
+	 * Determins if a command must be ignored in the current parsing run and mode.
+	 * 
+	 * This is called for each line in each parsing run.
+	 * 
+	 * There are different parsing runs, in the following order:
+	 *  - parse define commands
+	 *  - parse chords and the first instruments block
+	 *  - get all needed macro names from include commands
+	 *  - parse macros
+	 *  - parse everything else
+	 * 
+	 * @param cmd    The first token in the line
+	 * @return **true**, if the current line must be ignored.
+	 * @throws ParseException if this method is called without configuring the parsing run before.
+	 */
+	private boolean mustIgnore(String cmd) throws ParseException {
+		
+		// always follow files
+		if (INCLUDE_FILE.equals(cmd) || ORIGINAL_INCLUDE_FILE.equals(cmd)) {
+			return false;
+		}
+		
+		// look for DEFINE
+		if (isDefineParsRun) {
+			if (DEFINE.equals(cmd)) {
+				return false;
+			}
+			return true;
+		}
+		
+		// ignore DEFINE in all other runs
+		if (DEFINE.equals(cmd) || ORIGINAL_DEFINE.equals(cmd)) {
+			return true;
+		}
+		
+		// from now on, always parse the block opening command --> set currend mode correctly
+		if (INSTRUMENTS.equals(cmd)) {
+			return false;
+		}
+		
+		// chords and first instruments block
+		if (isChInstrParsRun) {
+			if (CHORD.equals(cmd)) {
+				return false;
+			}
+			
+			// only care about the very first instruments block
+			if (MODE_INSTRUMENTS == currentMode) {
+				
+				// NOT the first instruments block? --> Don't parse. Just care about END.
+				if (instrumentsParsed) {
+					if (END.equals(cmd)) {
+						currentMode = MODE_DEFAULT;
+					}
+					return true;
+				}
+				
+				// First instruments block --> parse everything.
+				else {
+					return false;
+				}
+			}
+			
+			// ignore everything else here
+			else {
+				return true;
+			}
+		}
+		
+		// from now on: ignore chord commands
+		if (CHORD.equals(cmd)) {
+			return true;
+		}
+		
+		// care about instruments only in the default run
+		if ( ! isDefaultParsRun && MODE_INSTRUMENTS == currentMode ) {
+			if (END.equals(cmd)) {
+				// reset mode manually
+				currentMode = MODE_DEFAULT;
+			}
+			return true;
+		}
+		
+		// look for defined macro names
+		if (isMacrNameParsRun) {
+			if (MACRO.equals(cmd)) {
+				return false;
+			}
+			
+			// handle macro-END
+			if (END.equals(cmd)) {
+				currentMode = MODE_DEFAULT;
+			}
+			
+			return true;
+		}
+		
+		// parse macros
+		if (isMacroParsRun) {
+			if (MACRO.equals(cmd)) {
+				return false;
+			}
+			if (MODE_MACRO == currentMode) {
+				return false;
+			}
+			return true;
+		}
+		
+		// main parsing run
+		if (isDefaultParsRun) {
+			
+			// ignore the first instruments block but parse the rest
+			if (MODE_INSTRUMENTS == currentMode) {
+				
+				// NOT the first instruments block? --> Parse everything.
+				if (frstInstrBlkOver) {
+					return false;
+				}
+				
+				// First instruments block --> Don't parse. Just care about END.
+				else {
+					if (END.equals(cmd)) {
+						currentMode      = MODE_DEFAULT;
+						frstInstrBlkOver = true;
+					}
+					return true;
+				}
+			}
+			
+			if (MACRO.equals(cmd)) {
+				currentMode = MODE_MACRO;
+				return true;
+			}
+			else if (MODE_MACRO == currentMode) {
+				if (END.equals(cmd)) {
+					currentMode = MODE_DEFAULT;
+				}
+				return true;
+			}
+		}
+		
+		// should never happen
+		else {
+			throw new ParseException("Undefined parsing run called");
+		}
+		
+		return false;
 	}
 	
 	/**
@@ -626,30 +905,31 @@ public class MidicaPLParser extends SequenceParser {
 	 * @param tokens            Mode command token array.
 	 * @throws ParseException   If the mode command cannot be parsed.
 	 */
-	private void parseModeCmd( String[] tokens ) throws ParseException {
+	private void parseModeCmd(String[] tokens) throws ParseException {
+		String cmd = tokens[0];
 		
-		if (END.equals(tokens[0])) {
+		if (END.equals(cmd)) {
 			parseEND( tokens );
 		}
-		else if (MACRO.equals(tokens[0])) {
+		else if (MACRO.equals(cmd)) {
 			parseMACRO( tokens );
 		}
-		else if (CHORD.equals(tokens[0])) {
+		else if (CHORD.equals(cmd)) {
 			parseCHORD( tokens );
 		}
-		else if (INCLUDE.equals(tokens[0])) {
+		else if (INCLUDE.equals(cmd)) {
 			parseINCLUDE( tokens );
 		}
-		else if (INCLUDE_FILE.equals(tokens[0])) {
+		else if (INCLUDE_FILE.equals(cmd) || ORIGINAL_INCLUDE_FILE.equals(cmd)) {
 			parseINCLUDE_FILE( tokens );
 		}
-		else if (SOUNDFONT.equals(tokens[0])) {
+		else if (SOUNDFONT.equals(cmd)) {
 			parseSOUNDFONT( tokens );
 		}
-		else if (DEFINE.equals(tokens[0])) {
+		else if (DEFINE.equals(cmd) || ORIGINAL_DEFINE.equals(cmd)) {
 			parseDEFINE( tokens );
 		}
-		else if (INSTRUMENTS.equals(tokens[0])) {
+		else if (INSTRUMENTS.equals(cmd)) {
 			if (1 == tokens.length ) {
 				currentMode = MODE_INSTRUMENTS;
 			}
@@ -660,7 +940,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// other
 		else {
-			throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_CMD) + tokens[0] );
+			throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_CMD) + cmd );
 		}
 	}
 	
@@ -697,18 +977,26 @@ public class MidicaPLParser extends SequenceParser {
 	 * @param tokens             Token array.
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
-	private void parseMACRO( String[] tokens ) throws ParseException {
+	private void parseMACRO(String[] tokens) throws ParseException {
 		if (MODE_DEFAULT != currentMode) {
 			throw new ParseException( Dict.get(Dict.ERROR_MACRO_NOT_ALLOWED_HERE) );
 		}
 		if (2 == tokens.length) {
 			currentMode      = MODE_MACRO;
 			currentMacroName = tokens[1];
-			currentMacro     = new ArrayList<String[]>();
 			if (macros.containsKey(currentMacroName)) {
 				throw new ParseException( Dict.get(Dict.ERROR_MACRO_ALREADY_DEFINED) + currentMacroName );
 			}
-			macros.put( currentMacroName, currentMacro );
+			
+			// only collect the macro name?
+			if (isMacrNameParsRun) {
+				definedMacroNames.add(currentMacroName);
+				return;
+			}
+			
+			// real macro parsing run
+			currentMacro = new ArrayList<String>();
+			macros.put(currentMacroName, currentMacro);
 		}
 		else
 			throw new ParseException( Dict.get(Dict.ERROR_MACRO_NUM_OF_ARGS) );
@@ -776,7 +1064,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * @param tokens             Token array.
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
-	private void parseINCLUDE( String[] tokens ) throws ParseException {
+	private void parseINCLUDE(String[] tokens) throws ParseException {
 		
 		// handle QUANTITY
 		int quantity = 1;
@@ -797,16 +1085,24 @@ public class MidicaPLParser extends SequenceParser {
 			if (includeName.equals(currentMacroName)) {
 				throw new ParseException( Dict.get(Dict.ERROR_MACRO_RECURSION) );
 			}
-			if (! macros.containsKey(includeName)) {
+			if (! definedMacroNames.contains(includeName)) {
 				throw new ParseException( Dict.get(Dict.ERROR_MACRO_UNDEFINED) );
 			}
+			
+			if (isMacroParsRun) {
+				// only store, but don't execute yet
+				currentMacro.add(String.join(" ", tokens));
+				return;
+			}
+			
 			// fetch the right macro
-			ArrayList<String[]> macro = macros.get( includeName );
-			// apply all commands of the called macro
+			ArrayList<String> macro = macros.get(includeName);
+			
+			// apply all lines of the called macro
 			for (int m=0; m<quantity; m++) {
 				for (int i=0; i<macro.size(); i++) {
-					String[] macroTokens = macro.get( i );
-					parseTokens( macroTokens );
+					String macroLine = macro.get(i);
+					parseLine(macroLine);
 				}
 			}
 		}
@@ -846,8 +1142,8 @@ public class MidicaPLParser extends SequenceParser {
 					throw new ParseException( Dict.get(Dict.ERROR_FILE_READABLE) + inclFile.getCanonicalPath() );
 				
 				// parse it
-				MidicaPLParser parser = new MidicaPLParser( false );
-				parser.parse( inclFile );
+				MidicaPLParser parser = new MidicaPLParser(false);
+				parser.parse(inclFile);
 			}
 			catch( IOException e ) {
 				throw new ParseException( Dict.get(Dict.ERROR_FILE_IO) + e.getMessage() );
@@ -908,7 +1204,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * @param tokens             Token array.
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
-	private void parseDEFINE( String[] tokens ) throws ParseException {
+	private void parseDEFINE(String[] tokens) throws ParseException {
 		String def;
 		if (2 == tokens.length) {
 			// e.g. DEFINE DEFINE=def
@@ -932,55 +1228,58 @@ public class MidicaPLParser extends SequenceParser {
 		if (cmdName.matches("\\s"))
 			throw new ParseException( Dict.get(Dict.ERROR_DEFINE_NUM_OF_ARGS) );
 		
-		if (      BANK_SEP.equals(cmdId) )         BANK_SEP         = cmdName;
-		else if ( BPM.equals(cmdId) )              BPM              = cmdName;
-		else if ( TIME_SIG.equals(cmdId) )         TIME_SIG         = cmdName;
-		else if ( TIME_SIG_SLASH.equals(cmdId) )   TIME_SIG_SLASH   = cmdName;
-		else if ( KEY_SIG.equals(cmdId) )          KEY_SIG          = cmdName;
-		else if ( KEY_SEPARATOR.equals(cmdId) )    KEY_SEPARATOR    = cmdName;
-		else if ( KEY_MAJ.equals(cmdId) )          KEY_MAJ          = cmdName;
-		else if ( KEY_MIN.equals(cmdId) )          KEY_MIN          = cmdName;
-		else if ( CHORD.equals(cmdId) )            CHORD            = cmdName;
-		else if ( INLINE_CHORD_SEP.equals(cmdId) ) INLINE_CHORD_SEP = cmdName;
-		else if ( COMMENT.equals(cmdId) )          COMMENT          = cmdName;
-		else if ( DEFINE.equals(cmdId) )           DEFINE           = cmdName;
-		else if ( END.equals(cmdId) )              END              = cmdName;
-		else if ( GLOBAL.equals(cmdId) )           GLOBAL           = cmdName;
-		else if ( DOT.equals(cmdId) )              DOT              = cmdName;
-		else if ( INCLUDE.equals(cmdId) )          INCLUDE          = cmdName;
-		else if ( INCLUDE_FILE.equals(cmdId) )     INCLUDE_FILE     = cmdName;
-		else if ( INSTRUMENTS.equals(cmdId) )      INSTRUMENTS      = cmdName;
-		else if ( LENGTH_32.equals(cmdId) )        LENGTH_32        = cmdName;
-		else if ( LENGTH_16.equals(cmdId) )        LENGTH_16        = cmdName;
-		else if ( LENGTH_8.equals(cmdId) )         LENGTH_8         = cmdName;
-		else if ( LENGTH_4.equals(cmdId) )         LENGTH_4         = cmdName;
-		else if ( LENGTH_2.equals(cmdId) )         LENGTH_2         = cmdName;
-		else if ( LENGTH_1.equals(cmdId) )         LENGTH_1         = cmdName;
-		else if ( LENGTH_M1.equals(cmdId) )        LENGTH_M1        = cmdName;
-		else if ( LENGTH_M2.equals(cmdId) )        LENGTH_M2        = cmdName;
-		else if ( LENGTH_M4.equals(cmdId) )        LENGTH_M4        = cmdName;
-		else if ( LENGTH_M8.equals(cmdId) )        LENGTH_M8        = cmdName;
-		else if ( LENGTH_M16.equals(cmdId) )       LENGTH_M16       = cmdName;
-		else if ( LENGTH_M32.equals(cmdId) )       LENGTH_M32       = cmdName;
-		else if ( MACRO.equals(cmdId) )            MACRO            = cmdName;
-		else if ( M.equals(cmdId) )                M                = cmdName;
-		else if ( MULTIPLE.equals(cmdId) )         MULTIPLE         = cmdName;
-		else if ( OPT_ASSIGNER.equals(cmdId) )     OPT_ASSIGNER     = cmdName;
-		else if ( OPT_SEPARATOR.equals(cmdId) )    OPT_SEPARATOR    = cmdName;
-		else if ( P.equals(cmdId) )                P                = cmdName;
-		else if ( PAUSE.equals(cmdId) )            PAUSE            = cmdName;
-		else if ( PROG_BANK_SEP.equals(cmdId) )    PROG_BANK_SEP    = cmdName;
-		else if ( Q.equals(cmdId) )                Q                = cmdName;
-		else if ( QUANTITY.equals(cmdId) )         QUANTITY         = cmdName;
-		else if ( D.equals(cmdId) )                D                = cmdName;
-		else if ( DURATION.equals(cmdId) )         DURATION         = cmdName;
-		else if ( DURATION_PERCENT.equals(cmdId) ) DURATION_PERCENT = cmdName;
-		else if ( V.equals(cmdId) )                V                = cmdName;
-		else if ( VELOCITY.equals(cmdId) )         VELOCITY         = cmdName;
-		else if ( TRIPLET.equals(cmdId) )          TRIPLET          = cmdName;
-		else if ( TUPLET.equals(cmdId) )           TUPLET           = cmdName;
-		else if ( TUPLET_FOR.equals(cmdId) )       TUPLET_FOR       = cmdName;
-		else if ( DURATION_PLUS.equals(cmdId) )    DURATION_PLUS    = cmdName;
+		if (      "BANK_SEP".equals(cmdId) )         BANK_SEP         = cmdName;
+		else if ( "BPM".equals(cmdId) )              BPM              = cmdName;
+		else if ( "TIME_SIG".equals(cmdId) )         TIME_SIG         = cmdName;
+		else if ( "TIME_SIG_SLASH".equals(cmdId) )   TIME_SIG_SLASH   = cmdName;
+		else if ( "KEY_SIG".equals(cmdId) )          KEY_SIG          = cmdName;
+		else if ( "KEY_SEPARATOR".equals(cmdId) )    KEY_SEPARATOR    = cmdName;
+		else if ( "KEY_MAJ".equals(cmdId) )          KEY_MAJ          = cmdName;
+		else if ( "KEY_MIN".equals(cmdId) )          KEY_MIN          = cmdName;
+		else if ( "CHORD".equals(cmdId) )            CHORD            = cmdName;
+		else if ( "INLINE_CHORD_SEP".equals(cmdId) ) INLINE_CHORD_SEP = cmdName;
+		else if ( "COMMENT".equals(cmdId) )          COMMENT          = cmdName;
+		else if ( "DEFINE".equals(cmdId) )           DEFINE           = cmdName;
+		else if ( "END".equals(cmdId) )              END              = cmdName;
+		else if ( "GLOBAL".equals(cmdId) )           GLOBAL           = cmdName;
+		else if ( "DOT".equals(cmdId) )              DOT              = cmdName;
+		else if ( "INCLUDE".equals(cmdId) )          INCLUDE          = cmdName;
+		else if ( "INCLUDE_FILE".equals(cmdId) )     INCLUDE_FILE     = cmdName;
+		else if ( "INSTRUMENTS".equals(cmdId) )      INSTRUMENTS      = cmdName;
+		else if ( "LENGTH_32".equals(cmdId) )        LENGTH_32        = cmdName;
+		else if ( "LENGTH_16".equals(cmdId) )        LENGTH_16        = cmdName;
+		else if ( "LENGTH_8".equals(cmdId) )         LENGTH_8         = cmdName;
+		else if ( "LENGTH_4".equals(cmdId) )         LENGTH_4         = cmdName;
+		else if ( "LENGTH_2".equals(cmdId) )         LENGTH_2         = cmdName;
+		else if ( "LENGTH_1".equals(cmdId) )         LENGTH_1         = cmdName;
+		else if ( "LENGTH_M1".equals(cmdId) )        LENGTH_M1        = cmdName;
+		else if ( "LENGTH_M2".equals(cmdId) )        LENGTH_M2        = cmdName;
+		else if ( "LENGTH_M4".equals(cmdId) )        LENGTH_M4        = cmdName;
+		else if ( "LENGTH_M8".equals(cmdId) )        LENGTH_M8        = cmdName;
+		else if ( "LENGTH_M16".equals(cmdId) )       LENGTH_M16       = cmdName;
+		else if ( "LENGTH_M32".equals(cmdId) )       LENGTH_M32       = cmdName;
+		else if ( "MACRO".equals(cmdId) )            MACRO            = cmdName;
+		else if ( "M".equals(cmdId) )                M                = cmdName;
+		else if ( "MULTIPLE".equals(cmdId) )         MULTIPLE         = cmdName;
+		else if ( "OPT_ASSIGNER".equals(cmdId) )     OPT_ASSIGNER     = cmdName;
+		else if ( "OPT_SEPARATOR".equals(cmdId) )    OPT_SEPARATOR    = cmdName;
+		else if ( "P".equals(cmdId) )                P                = cmdName;
+		else if ( "PAUSE".equals(cmdId) )            PAUSE            = cmdName;
+		else if ( "PROG_BANK_SEP".equals(cmdId) )    PROG_BANK_SEP    = cmdName;
+		else if ( "Q".equals(cmdId) )                Q                = cmdName;
+		else if ( "QUANTITY".equals(cmdId) )         QUANTITY         = cmdName;
+		else if ( "D".equals(cmdId) )                D                = cmdName;
+		else if ( "DURATION".equals(cmdId) )         DURATION         = cmdName;
+		else if ( "DURATION_PERCENT".equals(cmdId) ) DURATION_PERCENT = cmdName;
+		else if ( "V".equals(cmdId) )                V                = cmdName;
+		else if ( "VELOCITY".equals(cmdId) )         VELOCITY         = cmdName;
+		else if ( "TRIPLET".equals(cmdId) )          TRIPLET          = cmdName;
+		else if ( "TUPLET".equals(cmdId) )           TUPLET           = cmdName;
+		else if ( "TUPLET_FOR".equals(cmdId) )       TUPLET_FOR       = cmdName;
+		else if ( "DURATION_PLUS".equals(cmdId) )    DURATION_PLUS    = cmdName;
+		else {
+			throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_COMMAND_ID) + cmdId );
+		}
 	}
 	
 	/**
@@ -1647,8 +1946,15 @@ public class MidicaPLParser extends SequenceParser {
 		
 		if (isRootParser) {
 			instrumentsParsed = false;
+			frstInstrBlkOver  = false;
+			isDefineParsRun   = false;
+			isChInstrParsRun  = false;
+			isMacrNameParsRun = false;
+			isMacroParsRun    = false;
+			isDefaultParsRun  = false;
 			instruments       = new ArrayList<Instrument>();
-			macros            = new HashMap<String, ArrayList<String[]>>();
+			definedMacroNames = new HashSet<String>();
+			macros            = new HashMap<String, ArrayList<String>>();
 			chords            = new HashMap<String, HashSet<Integer>>();
 			refreshSyntax();
 		}
