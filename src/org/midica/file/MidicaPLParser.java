@@ -1066,13 +1066,17 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void parseINCLUDE(String[] tokens) throws ParseException {
 		
-		// handle QUANTITY
-		int quantity = 1;
+		// get options (quantity / multiple)
+		int     quantity = 1;
+		boolean multiple = false;
 		if (3 == tokens.length) {
 			HashMap<String, Number> options = parseOptions(tokens[2]);
 			for (String key : options.keySet()) {
 				if (OPT_QUANTITY.equals(key)) {
 					quantity = (int) options.get(key);
+				}
+				else if (OPT_MULTIPLE.equals(key)) {
+					multiple = true;
 				}
 				else {
 					throw new ParseException( Dict.get(Dict.ERROR_INCLUDE_UNKNOWN_ARG) );
@@ -1095,6 +1099,9 @@ public class MidicaPLParser extends SequenceParser {
 				return;
 			}
 			
+			// remember current tickstamps if needed (included from outside of any macro)
+			ArrayList<Long> tickstamps = rememberTickstamps();
+			
 			// fetch the right macro
 			ArrayList<String> macro = macros.get(includeName);
 			
@@ -1105,9 +1112,42 @@ public class MidicaPLParser extends SequenceParser {
 					parseLine(macroLine);
 				}
 			}
+			
+			// restore tickstamps, if needed (included from outside of any macro)
+			if (multiple) {
+				restoreTickstamps(tickstamps);
+			}
 		}
 		else {
 			throw new ParseException( Dict.get(Dict.ERROR_INCLUDE_NUM_OF_ARGS) );
+		}
+	}
+	
+	/**
+	 * Creates and returns a snapshot of the tickstamps of all channels.
+	 * The indexes of the returned structure are the channels.
+	 * The values are the tickstamps.
+	 * 
+	 * @return snapshot of tickstamps
+	 */
+	private ArrayList<Long> rememberTickstamps() {
+		ArrayList<Long> tickstampByChannel = new ArrayList<Long>();
+		for (int channel = 0; channel < 16; channel++) {
+			long ticks = instruments.get(channel).getCurrentTicks();
+			tickstampByChannel.add(ticks);
+		}
+		return tickstampByChannel;
+	}
+	
+	/**
+	 * Restores a snapshot of tickstamps for each channel.
+	 * 
+	 * @param tickstamps the tickstamps to be restored - indexes are channels, values are tickstamps.
+	 */
+	private void restoreTickstamps(ArrayList<Long> tickstamps) {
+		for (int channel = 0; channel < 16; channel++) {
+			long ticks = tickstamps.get(channel);
+			instruments.get(channel).setCurrentTicks(ticks);
 		}
 	}
 	
