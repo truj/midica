@@ -75,6 +75,8 @@ public class Dict {
 	public static final String SYNTAX_GLOBAL           = "GLOBAL";
 	public static final String SYNTAX_P                = "PERCUSSION_CHANNEL";
 	public static final String SYNTAX_END              = "END";
+	public static final String SYNTAX_BLOCK_OPEN       = "BLOCK_OPEN";
+	public static final String SYNTAX_BLOCK_CLOSE      = "BLOCK_CLOSE";
 	public static final String SYNTAX_MACRO            = "MACRO";
 	public static final String SYNTAX_INCLUDE          = "INCLUDE";
 	public static final String SYNTAX_INSTRUMENTS      = "INSTRUMENTS";
@@ -916,8 +918,11 @@ public class Dict {
 	public static final String ERROR_NO_INSTRUMENTS             = "error_no_instruments";
 	public static final String ERROR_GLOBALS_IN_INSTR_DEF       = "error_globals_in_instr_def";
 	public static final String ERROR_UNKNOWN_CMD                = "error_unknown_cmd";
-	public static final String ERROR_CMD_END_NUM_OF_ARGS        = "error_cmd_end_num_of_args";
 	public static final String ERROR_CMD_END_WITHOUT_BEGIN      = "error_cmd_end_without_begin";
+	public static final String ERROR_BLOCK_INVALID_ARG          = "error_block_invalid_arg";
+	public static final String ERROR_BLOCK_UNMATCHED_CLOSE      = "error_block_unmatched_close";
+	public static final String ERROR_BLOCK_UNMATCHED_OPEN       = "error_block_unmatched_open";
+	public static final String ERROR_ARGS_NOT_ALLOWED           = "error_args_not_allowed";
 	public static final String ERROR_MACRO_ALREADY_DEFINED      = "error_macro_already_defined";
 	public static final String ERROR_MACRO_NOT_ALLOWED_HERE     = "error_macro_not_allowed_here";
 	public static final String ERROR_CHORD_ALREADY_DEFINED      = "error_chord_already_defined";
@@ -927,6 +932,7 @@ public class Dict {
 	public static final String ERROR_CHORD_DEF_NOT_ALLOWED_HERE = "error_chord_def_not_allowed_here";
 	public static final String ERROR_CHORD_NUM_OF_ARGS          = "error_chord_num_of_args";
 	public static final String ERROR_DEFINE_NUM_OF_ARGS         = "error_define_num_of_args";
+	public static final String ERROR_ALREADY_REDEFINED          = "error_already_redefined";
 	public static final String ERROR_FILE_NUM_OF_ARGS           = "error_file_num_of_args";
 	public static final String ERROR_SOUNDFONT_NUM_OF_ARGS      = "error_soundfont_num_of_args";
 	public static final String ERROR_FILE_EXISTS                = "error_file_exists";
@@ -957,6 +963,7 @@ public class Dict {
 	public static final String ERROR_MIDI_PROBLEM               = "error_midi_problem";
 	public static final String ERROR_CH_CMD_NUM_OF_ARGS         = "error_ch_num_of_args";
 	public static final String ERROR_CANT_PARSE_OPTIONS         = "error_cant_parse_options";
+	public static final String ERROR_OPTION_NEEDS_VAL           = "error_option_needs_val";
 	public static final String ERROR_VEL_NOT_MORE_THAN_127      = "error_vel_not_more_than_127";
 	public static final String ERROR_VEL_NOT_LESS_THAN_1        = "error_vel_not_less_than_1";
 	public static final String ERROR_DURATION_MORE_THAN_0       = "error_duration_more_than_0";
@@ -966,6 +973,8 @@ public class Dict {
 	public static final String ERROR_CHANNEL_UNDEFINED          = "error_channel_undefined";
 	public static final String ERROR_CHANNEL_REDEFINED          = "error_channel_redefined";
 	public static final String ERROR_INVALID_CHANNEL_NUMBER     = "error_invalid_channel_number";
+	public static final String ERROR_NOT_ALLOWED_IN_INSTR_BLK   = "error_not_allowed_in_instr_blk";
+	public static final String ERROR_NOT_ALLOWED_IN_BLK         = "error_not_allowed_in_blk";
 	
 	// SequenceParser
 	public static final String ERROR_ANALYZE_POSTPROCESS        = "error_analyze_postprocess";
@@ -1396,6 +1405,8 @@ public class Dict {
 		set( SYNTAX_GLOBAL,           "global command (all channels)"                    );
 		set( SYNTAX_P,                "percussion channel"                               );
 		set( SYNTAX_END,              "end of a definition block"                        );
+		set( SYNTAX_BLOCK_OPEN,       "opens a nestable block"                           );
+		set( SYNTAX_BLOCK_CLOSE,      "closes a nestable block"                          );
 		set( SYNTAX_MACRO,            "macro definition"                                 );
 		set( SYNTAX_INCLUDE,          "macro execution"                                  );
 		set( SYNTAX_INSTRUMENTS,      "definition of instruments"                        );
@@ -1736,8 +1747,11 @@ public class Dict {
 		set( ERROR_NO_INSTRUMENTS,                "no instruments have been defined"                                  );
 		set( ERROR_GLOBALS_IN_INSTR_DEF,          "global commands are not allowed inside an instrument definition"   );
 		set( ERROR_UNKNOWN_CMD,                   "unknown command: "                                                 );
-		set( ERROR_CMD_END_NUM_OF_ARGS,           "wrong number of arguments in mode command 'END'"                   );
 		set( ERROR_CMD_END_WITHOUT_BEGIN,         "there is no open block to be closed"                               );
+		set( ERROR_BLOCK_INVALID_ARG,             "invalid block argument: "                                          );
+		set( ERROR_BLOCK_UNMATCHED_CLOSE,         "there is no open block to be closed"                               );
+		set( ERROR_BLOCK_UNMATCHED_OPEN,          "nestable block not closed"                                         );
+		set( ERROR_ARGS_NOT_ALLOWED,              "arguments not allowed here"                                        );
 		set( ERROR_CHORD_ALREADY_DEFINED,         "chord name has been already defined: "                             );
 		set( ERROR_CHORD_EQUALS_NOTE,             "illegal chord name (equals a note name): "                         );
 		set( ERROR_CHORD_EQUALS_PERCUSSION,       "illegal chord name (equals a percussion shortcut): "               );
@@ -1745,6 +1759,7 @@ public class Dict {
 		set( ERROR_CHORD_DEF_NOT_ALLOWED_HERE,    "a chord definition is not allowed inside a block<br>maybe you forgot to close the block." );
 		set( ERROR_CHORD_NUM_OF_ARGS,             "wrong number of arguments in CHORD command"                        );
 		set( ERROR_DEFINE_NUM_OF_ARGS,            "wrong number of arguments in DEFINE command"                       );
+		set( ERROR_ALREADY_REDEFINED,             "Command ID already redefined. Cannot be redefined again: "         );
 		set( ERROR_FILE_NUM_OF_ARGS,              "wrong number of arguments in INCLUDE_FILE command"                 );
 		set( ERROR_SOUNDFONT_NUM_OF_ARGS,         "wrong number of arguments in SOUNDFONT command"                    );
 		set( ERROR_FILE_EXISTS,                   "file does not exist:<br>"                                          );
@@ -1777,6 +1792,7 @@ public class Dict {
 		set( ERROR_MIDI_PROBLEM,                  "<html>Midi Problem!<br>"                                           );
 		set( ERROR_CH_CMD_NUM_OF_ARGS,            "wrong number of arguments in channel command"                      );
 		set( ERROR_CANT_PARSE_OPTIONS,            "cannot parse options"                                              );
+		set( ERROR_OPTION_NEEDS_VAL,              "option needs value: "                                              );
 		set( ERROR_VEL_NOT_MORE_THAN_127,         "velocity cannot be set to more than 127"                           );
 		set( ERROR_VEL_NOT_LESS_THAN_1,           "velocity must be more than 0"                                      );
 		set( ERROR_DURATION_MORE_THAN_0,          "duration must be more than 0.0 (or 0%)"                            );
@@ -1786,6 +1802,8 @@ public class Dict {
 		set( ERROR_CHANNEL_UNDEFINED,             "channel %s has not been defined"                                   );
 		set( ERROR_CHANNEL_REDEFINED,             "channel %s has been defined already"                               );
 		set( ERROR_INVALID_CHANNEL_NUMBER,        "Invalid channel number (must be between 0 and 15): "               );
+		set( ERROR_NOT_ALLOWED_IN_INSTR_BLK,      "Command not allowed inside of instruments definition block: "      );
+		set( ERROR_NOT_ALLOWED_IN_BLK,            "Command not allowed inside of a block: "                           );
 		
 		// SequenceParser
 		set( ERROR_ANALYZE_POSTPROCESS,           "Error while postprocessing the sequence"                           );
@@ -2177,6 +2195,8 @@ public class Dict {
 		setSyntax( SYNTAX_GLOBAL,           "*"              );
 		setSyntax( SYNTAX_P,                "p"              );
 		setSyntax( SYNTAX_END,              "END"            );
+		setSyntax( SYNTAX_BLOCK_OPEN,       "("              );
+		setSyntax( SYNTAX_BLOCK_CLOSE,      ")"              );
 		setSyntax( SYNTAX_MACRO,            "MACRO"          );
 		setSyntax( SYNTAX_INCLUDE,          "INCLUDE"        );
 		setSyntax( SYNTAX_INSTRUMENTS,      "INSTRUMENTS"    );
@@ -2246,6 +2266,8 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_CHORD       );
 		addSyntaxForInfoView( SYNTAX_MACRO       );
 		addSyntaxForInfoView( SYNTAX_END         );
+		addSyntaxForInfoView( SYNTAX_BLOCK_OPEN  );
+		addSyntaxForInfoView( SYNTAX_BLOCK_CLOSE );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_CALL) );
 		addSyntaxForInfoView( SYNTAX_INCLUDE      );
