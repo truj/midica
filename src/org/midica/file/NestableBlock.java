@@ -9,6 +9,8 @@ package org.midica.file;
 
 import java.util.ArrayList;
 
+import org.midica.config.Dict;
+
 /**
  * This class represents a nestable block, used by the MidicaPL parser.
  * 
@@ -21,6 +23,9 @@ public class NestableBlock {
 	private int               quantity = 1;
 	private ArrayList<Object> elements = null;
 	
+	private boolean isMultipleSet = false;
+	private boolean isQuantitySet = false;
+	
 	/**
 	 * Creates a new nestable block.
 	 * 
@@ -28,12 +33,46 @@ public class NestableBlock {
 	 * @param multiple    indicates if the channel tickstamps are reverted at the end of the block
 	 * @param quantity    indicates how often the block is executed
 	 */
-	public NestableBlock(MidicaPLParser parser, boolean multiple, int quantity) {
+	public NestableBlock(MidicaPLParser parser) {
 		this.parser   = parser;
-		this.multiple = multiple;
-		this.quantity = quantity;
+		this.elements = new ArrayList<Object>();
+	}
+	
+	/**
+	 * Sets the multiple option.
+	 * 
+	 * @param optId           option ID (only needed for the exception description)
+	 * @throws ParseException if this option has already been set for this block.
+	 */
+	public void setMultiple(String optId) throws ParseException {
 		
-		elements = new ArrayList<Object>();
+		// already set?
+		if (isMultipleSet) {
+			throw new ParseException( Dict.get(Dict.ERROR_BLOCK_ARG_ALREADY_SET) + optId );
+		}
+		
+		// set
+		multiple      = true;
+		isMultipleSet = true;
+	}
+	
+	/**
+	 * Sets the quantity option.
+	 * 
+	 * @param quantity        the quantity value
+	 * @param optId           option ID (only needed for the exception description)
+	 * @throws ParseException if this option has already been set for this block.
+	 */
+	public void setQuantity(int quantity, String optId) throws ParseException {
+		
+		// already set?
+		if (isQuantitySet) {
+			throw new ParseException( Dict.get(Dict.ERROR_BLOCK_ARG_ALREADY_SET) + optId );
+		}
+		
+		// set
+		this.quantity = quantity;
+		isQuantitySet = true;
 	}
 	
 	/**

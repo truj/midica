@@ -1169,11 +1169,6 @@ public class MidicaPLParser extends SequenceParser {
 			throw new ParseException( Dict.get(Dict.ERROR_BLOCK_UNMATCHED_CLOSE) );
 		}
 		
-		// arguments in end block not allowed
-		if (BLOCK_CLOSE.equals(cmd) && tokens.length > 1) {
-			throw new ParseException( Dict.get(Dict.ERROR_ARGS_NOT_ALLOWED) );
-		}
-		
 		// construct options string from tokens
 		StringBuffer optionsStrBuf = new StringBuffer("");
 		String       optionsStr    = "";
@@ -1185,7 +1180,7 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// get options (quantity / multiple)
-		int     quantity = 1;
+		int     quantity = -1;
 		boolean multiple = false;
 		HashMap<String, Number> options = new HashMap<String, Number>();
 		if (optionsStr.length() > 0) {
@@ -1209,13 +1204,14 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// parse open and close
+		NestableBlock block;
 		if (BLOCK_OPEN.equals(cmd)) {
-			NestableBlock block = new NestableBlock(this, multiple, quantity);
+			block = new NestableBlock(this);
 			
-			// root block?
+			// nested?
 			if (nestableBlkDepth > 1) {
-				NestableBlock lastBlock = nestableBlkStack.peek();
-				lastBlock.add(block);
+				NestableBlock parentBlock = nestableBlkStack.peek();
+				parentBlock.add(block);
 			}
 			
 			// add to stack
@@ -1223,12 +1219,18 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		else {
 			// BLOCK_CLOSE
-			NestableBlock deeperBlock = nestableBlkStack.pop();
-			
-			// apply root block
-			if (nestableBlkDepth == 0) {
-				deeperBlock.play();
-			}
+			block = nestableBlkStack.pop();
+		}
+		
+		// apply options
+		if (multiple)
+			block.setMultiple(OPT_MULTIPLE);
+		if (quantity != -1)
+			block.setQuantity(quantity, OPT_QUANTITY);
+		
+		// apply root block
+		if (BLOCK_CLOSE.equals(cmd) && nestableBlkDepth == 0) {
+			block.play();
 		}
 	}
 	

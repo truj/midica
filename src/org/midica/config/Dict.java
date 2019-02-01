@@ -976,6 +976,9 @@ public class Dict {
 	public static final String ERROR_NOT_ALLOWED_IN_INSTR_BLK   = "error_not_allowed_in_instr_blk";
 	public static final String ERROR_NOT_ALLOWED_IN_BLK         = "error_not_allowed_in_blk";
 	
+	// NestableBlock
+	public static final String ERROR_BLOCK_ARG_ALREADY_SET      = "error_block_arg_already_set";
+	
 	// SequenceParser
 	public static final String ERROR_ANALYZE_POSTPROCESS        = "error_analyze_postprocess";
 	
@@ -1804,6 +1807,9 @@ public class Dict {
 		set( ERROR_INVALID_CHANNEL_NUMBER,        "Invalid channel number (must be between 0 and 15): "               );
 		set( ERROR_NOT_ALLOWED_IN_INSTR_BLK,      "Command not allowed inside of instruments definition block: "      );
 		set( ERROR_NOT_ALLOWED_IN_BLK,            "Command not allowed inside of a block: "                           );
+		
+		// NestableBlock
+		set( ERROR_BLOCK_ARG_ALREADY_SET,         "Block argument has already been set before: "                      );
 		
 		// SequenceParser
 		set( ERROR_ANALYZE_POSTPROCESS,           "Error while postprocessing the sequence"                           );
