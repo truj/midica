@@ -875,7 +875,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * @return   The duration of the note in ticks.
 	 * @throws ParseException  If the duration string cannot be parsed.
 	 */
-	private int parseDuration( String s ) throws ParseException {
+	private int parseDuration(String s) throws ParseException {
 		String[] summands = s.split(Pattern.quote(DURATION_PLUS), -1);
 		int      duration = 0;
 		for (String summand : summands) {
@@ -895,7 +895,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * @return   The duration of the summand in ticks.
 	 * @throws ParseException  If the duration summand cannot be parsed.
 	 */
-	private int parseDurationSummand( String s ) throws ParseException {
+	private int parseDurationSummand(String s) throws ParseException {
 		Pattern pattern = Pattern.compile(
 			  "^(\\d+|.+?)"                // basic divisor (basic note length)
 			+ "(("                         // open capturing group for modifiers
@@ -974,7 +974,10 @@ public class MidicaPLParser extends SequenceParser {
 					int count    = toInt( tupletMatcher.group(1), true );
 					int countFor = toInt( tupletMatcher.group(2), true );
 					// cut away the matched tuplet
-					postfix = tupletMatcher.replaceFirst( "" );
+					postfix = postfix.replaceFirst(
+							Pattern.quote(TUPLET) + count + Pattern.quote(TUPLET_FOR) + countFor,
+							""
+					);
 					// a tuplet a:b (a for b) modifies the note length by the factor b/a
 					factor  *= countFor;
 					divisor *= count;
@@ -1767,7 +1770,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// process duration
 		String durationStr = subTokens[0];
-		int duration = parseDuration( durationStr );
+		int duration = parseDuration(durationStr);
 		
 		// process options
 		HashMap<String, Number> options = new HashMap<String, Number>();
