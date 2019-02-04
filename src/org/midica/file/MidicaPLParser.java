@@ -58,7 +58,7 @@ public class MidicaPLParser extends SequenceParser {
 	
 	private static final int TICK_BANK_BEFORE_PROGRAM = 10; // how many ticks a bank select will be made before the program change
 	
-	private static final int  PAUSE_VALUE = -1;
+	private static final int REST_VALUE = -1;
 	
 	/* *****************
 	 * class fields
@@ -103,7 +103,7 @@ public class MidicaPLParser extends SequenceParser {
 	public static String OPT_ASSIGNER     = null;
 	public static String OPT_SEPARATOR    = null;
 	public static String P                = null;
-	public static String PAUSE            = null;
+	public static String REST             = null;
 	public static String PROG_BANK_SEP    = null;
 	public static String Q                = null;
 	public static String QUANTITY         = null;
@@ -210,7 +210,7 @@ public class MidicaPLParser extends SequenceParser {
 		OPT_ASSIGNER     = Dict.getSyntax( Dict.SYNTAX_OPT_ASSIGNER     );
 		OPT_SEPARATOR    = Dict.getSyntax( Dict.SYNTAX_OPT_SEPARATOR    );
 		P                = Dict.getSyntax( Dict.SYNTAX_P                );
-		PAUSE            = Dict.getSyntax( Dict.SYNTAX_PAUSE            );
+		REST             = Dict.getSyntax( Dict.SYNTAX_REST             );
 		PROG_BANK_SEP    = Dict.getSyntax( Dict.SYNTAX_PROG_BANK_SEP    );
 		Q                = Dict.getSyntax( Dict.SYNTAX_Q                );
 		QUANTITY         = Dict.getSyntax( Dict.SYNTAX_QUANTITY         );
@@ -1521,7 +1521,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_OPT_ASSIGNER.equals(cmdId) )     OPT_ASSIGNER     = cmdName;
 		else if ( Dict.SYNTAX_OPT_SEPARATOR.equals(cmdId) )    OPT_SEPARATOR    = cmdName;
 		else if ( Dict.SYNTAX_P.equals(cmdId) )                P                = cmdName;
-		else if ( Dict.SYNTAX_PAUSE.equals(cmdId) )            PAUSE            = cmdName;
+		else if ( Dict.SYNTAX_REST.equals(cmdId) )             REST             = cmdName;
 		else if ( Dict.SYNTAX_PROG_BANK_SEP.equals(cmdId) )    PROG_BANK_SEP    = cmdName;
 		else if ( Dict.SYNTAX_Q.equals(cmdId) )                Q                = cmdName;
 		else if ( Dict.SYNTAX_QUANTITY.equals(cmdId) )         QUANTITY         = cmdName;
@@ -1816,7 +1816,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		NOTE_QUANTITY:
 		for (int i = 0; i < quantity; i++) {
-			if (PAUSE_VALUE == note) {
+			if (REST_VALUE == note) {
 				if (! isFake)
 					instr.incrementTicks( duration );
 				continue;
@@ -1914,7 +1914,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * 
 	 * The string can be:
 	 * 
-	 * - the pause character (in this case PAUSE_VALUE is returned)
+	 * - the pause character (in this case REST_VALUE is returned)
 	 * - the note value in numeric characters
 	 * - the note name as defined by the chosen configuration (if the channel is not the percussion channel)
 	 * - the percussion name as defined by the chosen configutation (if channel is 9)
@@ -1925,8 +1925,8 @@ public class MidicaPLParser extends SequenceParser {
 	 * @throws ParseExceptionif the note or percussion name is unknown or the note value is out of the legal range for MIDI notes
 	 */
 	private int parseNote( String note, int channel ) throws ParseException {
-		if (note.equals(PAUSE))
-			return PAUSE_VALUE;
+		if (note.equals(REST))
+			return REST_VALUE;
 		else if (note.matches("^\\d+$"))
 			return toInt( note );
 		else {
@@ -2087,12 +2087,9 @@ public class MidicaPLParser extends SequenceParser {
 	 * Initializes all necessary data structures for all channels. Thereby all undefined
 	 * channels will be initialized with a fake instrument so that the data structures work.
 	 * 
-	 * @throws ParseException    If the command cannot be parsed.
+	 * @throws ParseException    If something went wrong.
 	 */
 	private void postprocessInstruments() throws ParseException {
-		
-		if (0 == instruments.size())
-			throw new ParseException( Dict.get(Dict.ERROR_INSTRUMENTS_NOT_DEFINED) );
 		
 		// sort instruments ascending
 		Collections.sort( instruments );

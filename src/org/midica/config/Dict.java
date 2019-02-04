@@ -26,8 +26,8 @@ import org.midica.ui.model.ConfigComboboxModel;
  * - Language specific translations
  * - Note system specific symbols (including octave and half tone symbols)
  * - MidicaPL syntax keywords
- * - Percussion shortcut naming
- * - Instrument shortcut naming
+ * - Percussion IDs
+ * - Instrument IDs
  * 
  * It defines different types of translation keys as public member variables.
  * It also contains methods to set and return values of a certain translation type.
@@ -37,8 +37,8 @@ import org.midica.ui.model.ConfigComboboxModel;
  * The member variables' beginning depends on the type of translation they are used for:
  * 
  * - **SYNTAX_** - Keys beginning with this string identify keys for MidicaPL syntax keywords.
- * - **PERCUSSION_** - Those keys identify shortcuts for percussion instruments.
- * - **INSTR_** - Those keys identify instrument shortcuts.
+ * - **PERCUSSION_** - Those keys identify IDs for percussion instruments.
+ * - **INSTR_** - Those keys identify instrument IDs.
  * - Most member variables without a special beginning identify language-specific translations.
  * 
  * This class contains only static methods.
@@ -100,7 +100,7 @@ public class Dict {
 	public static final String SYNTAX_M                = "MULTIPLE_SHORT";
 	public static final String SYNTAX_QUANTITY         = "QUANTITY";
 	public static final String SYNTAX_Q                = "QUANTITY_SHORT";
-	public static final String SYNTAX_PAUSE            = "PAUSE";
+	public static final String SYNTAX_REST             = "REST";
 	public static final String SYNTAX_CHORD            = "CHORD";
 	public static final String SYNTAX_INLINE_CHORD_SEP = "INLINE_CHORD_SEP";
 	public static final String SYNTAX_INCLUDE_FILE     = "INCLUDE_FILE";
@@ -1103,9 +1103,9 @@ public class Dict {
 	 * - Initializing language specific translations using {@link #initLanguage()}
 	 * - Initializing the note system (including half tone and octave symbols)
 	 *   using {@link #initNoteSystem()}
-	 * - Initializing percussion shortcuts using {@link #initPercussion()}
+	 * - Initializing percussion IDs using {@link #initPercussion()}
 	 * - Initializing MidicaPL syntax keywords using {@link #initSyntax()}
-	 * - Initializing instrument shortcuts using {@link #initInstruments()}
+	 * - Initializing instrument IDs using {@link #initInstruments()}
 	 * 
 	 * This method is called initially on program startup and then always if
 	 * the user changes a configuration using the GUI.
@@ -1179,8 +1179,8 @@ public class Dict {
 		set( HALF_TONE_SYMBOL,             "Half Tone Symbol"              );
 		set( OCTAVE_NAMING,                "Octave Naming"                 );
 		set( SYNTAX,                       "Syntax"                        );
-		set( PERCUSSION,                   "Percussion Shortcuts"          );
-		set( INSTRUMENT,                   "Instrument Shortcuts"          );
+		set( PERCUSSION,                   "Percussion IDs"                );
+		set( INSTRUMENT,                   "Instrument IDs"                );
 		set( TITLE_MAIN_WINDOW,            "Midica " + Midica.VERSION      );
 		set( SHOW_INFO,                    "Info & Configuration Details"  );
 		set( SHOW_INFO_FROM_PLAYER,        "Info & Configuration"          );
@@ -1227,7 +1227,7 @@ public class Dict {
 		set( TAB_MIDI_SEQUENCE,                      "MIDI Sequence"                 );
 		set( TAB_MIDICA,                             "Midica"                        );
 		set( TAB_NOTE_DETAILS,                       "Note Table"                    );
-		set( TAB_PERCUSSION_DETAILS,                 "Percussion Shortcuts"          );
+		set( TAB_PERCUSSION_DETAILS,                 "Percussion IDs"                );
 		set( TAB_SYNTAX_DETAILS,                     "Commands"                      );
 		set( TAB_SOUNDFONT_INFO,                     "General Info"                  );
 		set( TAB_SOUNDFONT_INSTRUMENTS,              "Instruments & Drum Kits"       );
@@ -1301,14 +1301,14 @@ public class Dict {
 		set( DESCRIPTION,                            "Description"                   );
 		set( INFO_COL_NOTE_NUM,                      "Number"                        );
 		set( INFO_COL_NOTE_NAME,                     "Name"                          );
-		set( INFO_COL_SYNTAX_NAME,                   "Name"                          );
+		set( INFO_COL_SYNTAX_NAME,                   "ID"                            );
 		set( INFO_COL_SYNTAX_DESC,                   "Description"                   );
 		set( INFO_COL_SYNTAX_SHORTCUT,               "Keyword"                       );
 		set( INFO_COL_PERC_NUM,                      "Number"                        );
 		set( INFO_COL_PERC_ID_LONG,                  "Long ID"                       );
 		set( INFO_COL_PERC_ID_SHORT,                 "Short ID"                      );
 		set( INFO_COL_INSTR_NUM,                     "Number"                        );
-		set( INFO_COL_INSTR_NAME,                    "Name"                          );
+		set( INFO_COL_INSTR_NAME,                    "Instrument ID"                 );
 		set( INFO_COL_SF_INSTR_PROGRAM,              "Number"                        );
 		set( INFO_COL_SF_INSTR_BANK,                 "Bank"                          );
 		set( INFO_COL_SF_INSTR_NAME,                 "Name"                          );
@@ -1433,7 +1433,7 @@ public class Dict {
 		set( SYNTAX_M,                "multiple notes option (short)"                    );
 		set( SYNTAX_QUANTITY,         "quantity: how often to play the note"             );
 		set( SYNTAX_Q,                "quantity option (short)"                          );
-		set( SYNTAX_PAUSE,            "pause character"                                  );
+		set( SYNTAX_REST,             "rest character"                                   );
 		set( SYNTAX_CHORD,            "chord definition"                                 );
 		set( SYNTAX_INLINE_CHORD_SEP, "inline chord separator"                           );
 		set( SYNTAX_INCLUDE_FILE,     "including another file"                           );
@@ -1757,7 +1757,7 @@ public class Dict {
 		set( ERROR_ARGS_NOT_ALLOWED,              "arguments not allowed here"                                        );
 		set( ERROR_CHORD_ALREADY_DEFINED,         "chord name has been already defined: "                             );
 		set( ERROR_CHORD_EQUALS_NOTE,             "illegal chord name (equals a note name): "                         );
-		set( ERROR_CHORD_EQUALS_PERCUSSION,       "illegal chord name (equals a percussion shortcut): "               );
+		set( ERROR_CHORD_EQUALS_PERCUSSION,       "illegal chord name (equals a percussion ID): "                     );
 		set( ERROR_CHORD_CONTAINS_ALREADY,        "Note cannot be defined more than once in the same chord: "         );
 		set( ERROR_CHORD_DEF_NOT_ALLOWED_HERE,    "a chord definition is not allowed inside a block<br>maybe you forgot to close the block." );
 		set( ERROR_CHORD_NUM_OF_ARGS,             "wrong number of arguments in CHORD command"                        );
@@ -1801,7 +1801,7 @@ public class Dict {
 		set( ERROR_DURATION_MORE_THAN_0,          "duration must be more than 0.0 (or 0%)"                            );
 		set( ERROR_UNKNOWN_OPTION,                "unknown option: "                                                  );
 		set( ERROR_UNKNOWN_NOTE,                  "unknown note: "                                                    );
-		set( ERROR_UNKNOWN_PERCUSSION,            "unknown percussion shortcut: "                                     );
+		set( ERROR_UNKNOWN_PERCUSSION,            "unknown percussion ID: "                                           );
 		set( ERROR_CHANNEL_UNDEFINED,             "channel %s has not been defined"                                   );
 		set( ERROR_CHANNEL_REDEFINED,             "channel %s has been defined already"                               );
 		set( ERROR_INVALID_CHANNEL_NUMBER,        "Invalid channel number (must be between 0 and 15): "               );
@@ -2226,7 +2226,7 @@ public class Dict {
 		setSyntax( SYNTAX_M,                "m"              );
 		setSyntax( SYNTAX_QUANTITY,         "quantity"       );
 		setSyntax( SYNTAX_Q,                "q"              );
-		setSyntax( SYNTAX_PAUSE,            "-"              );
+		setSyntax( SYNTAX_REST,             "-"              );
 		setSyntax( SYNTAX_CHORD,            "CHORD"          );
 		setSyntax( SYNTAX_INLINE_CHORD_SEP, ","              );
 		setSyntax( SYNTAX_INCLUDE_FILE,     "INCLUDE_FILE"   );
@@ -2290,7 +2290,7 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_KEY_SEPARATOR    );
 		addSyntaxForInfoView( SYNTAX_KEY_MAJ          );
 		addSyntaxForInfoView( SYNTAX_KEY_MIN          );
-		addSyntaxForInfoView( SYNTAX_PAUSE            );
+		addSyntaxForInfoView( SYNTAX_REST             );
 		addSyntaxForInfoView( SYNTAX_P                );
 		addSyntaxForInfoView( SYNTAX_INLINE_CHORD_SEP );
 		
@@ -2333,9 +2333,9 @@ public class Dict {
 	 * Creates drumkit and percussion instrument translations.
 	 * 
 	 * - Creates translations between note values and the corresponding configured
-	 *   percussion instrument shortcuts.
+	 *   percussion ID.
 	 * - Creates translations between program numbers and the corresponding configured
-	 *   drumkit shortcuts.
+	 *   drumkit IDs.
 	 */
 	public static void initPercussion() {
 		
@@ -2519,7 +2519,7 @@ public class Dict {
 	
 	/**
 	 * Creates translations between note values and the corresponding configured
-	 * instrument shortcuts.
+	 * instrument IDs.
 	 */
 	public static void initInstruments() {
 		
@@ -2778,7 +2778,7 @@ public class Dict {
 	}
 	
 	/**
-	 * Sets up english drumkit and percussion instrument translation shortcuts.
+	 * Sets up english drumkit and percussion IDs.
 	 */
 	private static void initPercussionEnglish() {
 		// percussion instruments (long)
@@ -2921,7 +2921,7 @@ public class Dict {
 	}
 	
 	/**
-	 * Sets up german drumkit and percussion instrument translation shortcuts.
+	 * Sets up german drumkit and percussion IDs.
 	 */
 	private static void initPercussionGerman() {
 		// percussion instruments (long)
@@ -3105,7 +3105,7 @@ public class Dict {
 	
 	/**
 	 * Creates english translations between note values and the corresponding
-	 * instrument shortcuts.
+	 * instrument IDs.
 	 */
 	private static void initInstrumentsEnglish1() {
 		// piano
@@ -3287,7 +3287,7 @@ public class Dict {
 	
 	/**
 	 * Creates german translations between note values and the corresponding
-	 * instrument shortcuts.
+	 * instrument IDs.
 	 */
 	private static void initInstrumentsGerman1() {
 		// TODO: translate
@@ -3661,7 +3661,7 @@ public class Dict {
 	/**
 	 * Returns a drumkit number by name.
 	 * 
-	 * @param name  drumkit shortcut
+	 * @param name  drumkit ID
 	 * @return      drumkit number as defined by the General Standard specification
 	 */
 	public static int getDrumkit(String name) {
@@ -3672,10 +3672,10 @@ public class Dict {
 	}
 	
 	/**
-	 * Returns a drumkit shortcut by value.
+	 * Returns a drumkit ID by value.
 	 * 
 	 * @param i  drumkit value as defined by the General Standard specification
-	 * @return drumkit shortcut.
+	 * @return drumkit ID.
 	 */
 	public static String getDrumkit(int i) {
 		if ( drumkitIntToName.containsKey(i) )
@@ -3685,7 +3685,7 @@ public class Dict {
 	}
 	
 	/**
-	 * Indicates if the given name is a currently configured percussion shortcut.
+	 * Indicates if the given name is a currently configured percussion ID.
 	 * 
 	 * @param name  percussion name to be checked
 	 * @return      true, if the percussion name is configured -- otherwise: false
