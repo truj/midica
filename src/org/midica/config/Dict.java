@@ -915,7 +915,6 @@ public class Dict {
 	public static final String ERROR_NOT_AN_INTEGER             = "error_not_an_integer";
 	public static final String ERROR_NOT_A_FLOAT                = "error_not_a_float";
 	public static final String ERROR_INSTRUMENTS_NOT_DEFINED    = "error_instruments_not_defined";
-	public static final String ERROR_NO_INSTRUMENTS             = "error_no_instruments";
 	public static final String ERROR_GLOBALS_IN_INSTR_DEF       = "error_globals_in_instr_def";
 	public static final String ERROR_UNKNOWN_CMD                = "error_unknown_cmd";
 	public static final String ERROR_CMD_END_WITHOUT_BEGIN      = "error_cmd_end_without_begin";
@@ -1747,7 +1746,6 @@ public class Dict {
 		
 		// MidicaPLParser
 		set( ERROR_INSTRUMENTS_NOT_DEFINED,       "no instruments have been defined yet"                              );
-		set( ERROR_NO_INSTRUMENTS,                "no instruments have been defined"                                  );
 		set( ERROR_GLOBALS_IN_INSTR_DEF,          "global commands are not allowed inside an instrument definition"   );
 		set( ERROR_UNKNOWN_CMD,                   "unknown command: "                                                 );
 		set( ERROR_CMD_END_WITHOUT_BEGIN,         "there is no open block to be closed"                               );

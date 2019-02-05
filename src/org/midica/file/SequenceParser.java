@@ -8,7 +8,6 @@
 package org.midica.file;
 
 import java.io.File;
-import java.util.HashMap;
 
 import javax.sound.midi.Sequence;
 

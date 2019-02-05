@@ -312,9 +312,9 @@ public class MidicaPLParser extends SequenceParser {
 			e.printStackTrace();
 		}
 		
-		// check if the file contains a sequence at all
+		// allow an empty sequence?
 		if (isRootParser && ! instrumentsParsed) {
-			throw new ParseException( Dict.get(Dict.ERROR_NO_INSTRUMENTS) );
+			postprocessInstruments();
 		}
 		
 		// EOF has been reached
@@ -1800,6 +1800,11 @@ public class MidicaPLParser extends SequenceParser {
 		int quantity = 1;
 		if (options.containsKey(OPT_QUANTITY)) {
 			quantity = (int) options.get(OPT_QUANTITY);
+		}
+		
+		// allow drum-only sequences without an INSTRUMENTS block
+		if (!instrumentsParsed) {
+			postprocessInstruments();
 		}
 		
 		// get instrument
