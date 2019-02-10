@@ -40,6 +40,7 @@ import org.midica.config.Dict;
 import org.midica.file.SequenceParser;
 import org.midica.file.SoundfontParser;
 import org.midica.midi.SequenceAnalyzer;
+import org.midica.ui.model.DrumkitTableModel;
 import org.midica.ui.model.IMessageDetailProvider;
 import org.midica.ui.model.InstrumentTableModel;
 import org.midica.ui.model.MessageTableModel;
@@ -98,6 +99,8 @@ public class InfoView extends JDialog {
 	private static final int COL_WIDTH_SYNTAX_KEYWORD    = 130;
 	private static final int COL_WIDTH_INSTR_NUM         =  60;
 	private static final int COL_WIDTH_INSTR_NAME        = 300;
+	private static final int COL_WIDTH_DRUMKIT_NUM       =  60;
+	private static final int COL_WIDTH_DRUMKIT_NAME      = 200;
 	private static final int COL_WIDTH_SF_INSTR_PROGRAM  =  60;
 	private static final int COL_WIDTH_SF_INSTR_BANK     =  80;
 	private static final int COL_WIDTH_SF_INSTR_NAME     = 300;
@@ -161,6 +164,7 @@ public class InfoView extends JDialog {
 	private static Dimension percTableDim       = null;
 	private static Dimension syntaxTableDim     = null;
 	private static Dimension instrTableDim      = null;
+	private static Dimension drumkitTableDim    = null;
 	private static Dimension sfInstrTableDim    = null;
 	private static Dimension sfResourceTableDim = null;
 	private static Dimension msgTreeDim         = null;
@@ -207,6 +211,7 @@ public class InfoView extends JDialog {
 		int syntaxWidth     = COL_WIDTH_SYNTAX_NAME + COL_WIDTH_SYNTAX_KEYWORD
 		                    + COL_WIDTH_SYNTAX_DESC;
 		int instrWidth      = COL_WIDTH_INSTR_NUM        + COL_WIDTH_INSTR_NAME;
+		int drumkitWidth    = COL_WIDTH_DRUMKIT_NUM      + COL_WIDTH_DRUMKIT_NAME;
 		int sfInstrWidth    = COL_WIDTH_SF_INSTR_PROGRAM + COL_WIDTH_SF_INSTR_BANK
 		                    + COL_WIDTH_SF_INSTR_NAME    + COL_WIDTH_SF_INSTR_CHANNELS
 		                    + COL_WIDTH_SF_INSTR_KEYS;
@@ -220,6 +225,7 @@ public class InfoView extends JDialog {
 		percTableDim       = new Dimension( percWidth,       TABLE_HEIGHT          );
 		syntaxTableDim     = new Dimension( syntaxWidth,     TABLE_HEIGHT          );
 		instrTableDim      = new Dimension( instrWidth,      TABLE_HEIGHT          );
+		drumkitTableDim    = new Dimension( drumkitWidth,    TABLE_HEIGHT          );
 		sfInstrTableDim    = new Dimension( sfInstrWidth,    TABLE_HEIGHT          );
 		sfResourceTableDim = new Dimension( sfResourceWidth, TABLE_HEIGHT          );
 		msgTableDim        = new Dimension( msgTableWidth,   MSG_TABLE_PREF_HEIGHT );
@@ -275,7 +281,8 @@ public class InfoView extends JDialog {
 		contentConfig.addTab( Dict.get(Dict.TAB_NOTE_DETAILS),       createNoteArea()       );
 		contentConfig.addTab( Dict.get(Dict.TAB_PERCUSSION_DETAILS), createPercussionArea() );
 		contentConfig.addTab( Dict.get(Dict.SYNTAX),                 createSyntaxArea()     );
-		contentConfig.addTab( Dict.get(Dict.INSTRUMENT),             createInstrumentArea() );
+		contentConfig.addTab( Dict.get(Dict.INSTRUMENT_IDS),         createInstrumentArea() );
+		contentConfig.addTab( Dict.get(Dict.DRUMKIT_IDS),            createDrumkitArea()    );
 		
 		return contentConfig;
 	}
@@ -463,8 +470,8 @@ public class InfoView extends JDialog {
 	}
 	
 	/**
-	 * Creates the instrument area containing the translation table for instrument names.
-	 * The table translates between MIDI instrument values and their configured names.
+	 * Creates the instrument area containing the translation table for instrument IDs.
+	 * The table translates between MIDI program numbers and their configured instrument names.
 	 * 
 	 * @return the created instrument area
 	 */
@@ -486,7 +493,7 @@ public class InfoView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// label
-		JLabel label = new JLabel( Dict.get(Dict.INSTRUMENT) );
+		JLabel label = new JLabel( Dict.get(Dict.INSTRUMENT_IDS) );
 		area.add( label, constraints );
 		
 		// table
@@ -503,6 +510,51 @@ public class InfoView extends JDialog {
 		// set column sizes
 		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_INSTR_NUM  );
 		table.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_INSTR_NAME );
+		
+		return area;
+	}
+	
+	/**
+	 * Creates the drumkit area containing the translation table for drumkit IDs.
+	 * The table translates between MIDI program numbers and their configured drumkit names.
+	 * 
+	 * @return the created drumkit area
+	 */
+	private Container createDrumkitArea() {
+		// content
+		JPanel area = new JPanel();
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout( layout );
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill   = GridBagConstraints.NONE;
+		constraints.insets = new Insets( 2, 2, 2, 2 );
+		constraints.gridx = 0;
+		constraints.gridy = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 1;
+		constraints.weighty    = 0;
+		
+		// label
+		JLabel label = new JLabel( Dict.get(Dict.DRUMKIT_IDS) );
+		area.add( label, constraints );
+		
+		// table
+		constraints.fill    = GridBagConstraints.VERTICAL;
+		constraints.weighty = 1;
+		constraints.gridy++;
+		MidicaTable table = new MidicaTable();
+		table.setModel( new DrumkitTableModel() );
+		table.setDefaultRenderer( Object.class, new MidicaTableCellRenderer() );
+		JScrollPane scroll = new JScrollPane( table );
+		scroll.setPreferredSize( drumkitTableDim );
+		area.add( scroll, constraints );
+		
+		// set column sizes
+		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_DRUMKIT_NUM  );
+		table.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_DRUMKIT_NAME );
 		
 		return area;
 	}

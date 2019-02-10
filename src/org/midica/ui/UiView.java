@@ -321,7 +321,7 @@ public class UiView extends JDialog {
 		// instrument naming label
 		constraints.gridx = 0;
 		constraints.gridy++;
-		JLabel lblInstrument = new JLabel( Dict.get(Dict.INSTRUMENT) );
+		JLabel lblInstrument = new JLabel( Dict.get(Dict.INSTRUMENT_IDS) );
 		area.add( lblInstrument, constraints );
 		
 		// instrument naming selection

@@ -64,6 +64,7 @@ public class Dict {
 	private static HashMap<Integer, String>     instrIntToName         = null;
 	private static ArrayList<SyntaxElement>     syntaxList             = null;
 	private static ArrayList<InstrumentElement> instrumentList         = null;
+	private static ArrayList<InstrumentElement> drumkitList            = null;
 	
 	// needed to build up the note dictionaries (noteNameToInt and noteIntToName)
 	private static String[] notes      = new String[12];
@@ -123,17 +124,18 @@ public class Dict {
 	public static final String SYNTAX_TUPLET_FOR       = "TUPLET_FOR";
 	public static final String SYNTAX_DURATION_PLUS    = "DURATION_PLUS";
 	
+	// TODO: use for the syntax or delete
 	// drumkit identifiers
-	private static final String DRUMKIT_STANDARD   = "drumkit_0";
-	private static final String DRUMKIT_ROOM       = "drumkit_8";
-	private static final String DRUMKIT_POWER      = "drumkit_16";
-	private static final String DRUMKIT_ELECTRONIC = "drumkit_24";
-	private static final String DRUMKIT_TR808      = "drumkit_25";
-	private static final String DRUMKIT_JAZZ       = "drumkit_32";
-	private static final String DRUMKIT_BRUSH      = "drumkit_40";
-	private static final String DRUMKIT_ORCHESTRA  = "drumkit_48";
-	private static final String DRUMKIT_SOUND_FX   = "drumkit_56";
-	private static final String DRUMKIT_CM64_CM32  = "drumkit_127";
+	public static final String DRUMKIT_STANDARD   = "drumkit_0";
+	public static final String DRUMKIT_ROOM       = "drumkit_8";
+	public static final String DRUMKIT_POWER      = "drumkit_16";
+	public static final String DRUMKIT_ELECTRONIC = "drumkit_24";
+	public static final String DRUMKIT_TR808      = "drumkit_25";
+	public static final String DRUMKIT_JAZZ       = "drumkit_32";
+	public static final String DRUMKIT_BRUSH      = "drumkit_40";
+	public static final String DRUMKIT_ORCHESTRA  = "drumkit_48";
+	public static final String DRUMKIT_SOUND_FX   = "drumkit_56";
+	public static final String DRUMKIT_CM64_CM32  = "drumkit_127";
 	
 	// percussion identifiers (long)
 	private static final String PERCUSSION_HIGH_Q          = "percussion_27";
@@ -409,7 +411,8 @@ public class Dict {
 	public static final String OCTAVE_NAMING               = "octave_naming";
 	public static final String SYNTAX                      = "syntax";
 	public static final String PERCUSSION                  = "percussion";
-	public static final String INSTRUMENT                  = "instrument";
+	public static final String INSTRUMENT_IDS              = "instrument_ids";
+	public static final String DRUMKIT_IDS                 = "drumkit_ids";
 	public static final String SHOW_INFO                   = "show_info";
 	public static final String SHOW_INFO_FROM_PLAYER       = "show_info_from_player";
 	public static final String IMPORT                      = "import";
@@ -533,6 +536,8 @@ public class Dict {
 	public static final String INFO_COL_PERC_ID_SHORT      = "info_col_perc_id_short";
 	public static final String INFO_COL_INSTR_NUM          = "info_col_instr_num";
 	public static final String INFO_COL_INSTR_NAME         = "info_col_instr_name";
+	public static final String INFO_COL_DRUMKIT_NUM        = "info_col_drumkit_num";
+	public static final String INFO_COL_DRUMKIT_NAME       = "info_col_drumkit_name";
 	public static final String INFO_COL_SF_INSTR_PROGRAM   = "info_col_sf_instr_program";
 	public static final String INFO_COL_SF_INSTR_BANK      = "info_col_sf_instr_bank";
 	public static final String INFO_COL_SF_INSTR_NAME      = "info_col_sf_instr_name";
@@ -1179,7 +1184,8 @@ public class Dict {
 		set( OCTAVE_NAMING,                "Octave Naming"                 );
 		set( SYNTAX,                       "Syntax"                        );
 		set( PERCUSSION,                   "Percussion IDs"                );
-		set( INSTRUMENT,                   "Instrument IDs"                );
+		set( INSTRUMENT_IDS,               "Instrument IDs"                );
+		set( DRUMKIT_IDS,                  "Drumkit IDs"                   );
 		set( TITLE_MAIN_WINDOW,            "Midica " + Midica.VERSION      );
 		set( SHOW_INFO,                    "Info & Configuration Details"  );
 		set( SHOW_INFO_FROM_PLAYER,        "Info & Configuration"          );
@@ -1308,6 +1314,8 @@ public class Dict {
 		set( INFO_COL_PERC_ID_SHORT,                 "Short ID"                      );
 		set( INFO_COL_INSTR_NUM,                     "Number"                        );
 		set( INFO_COL_INSTR_NAME,                    "Instrument ID"                 );
+		set( INFO_COL_DRUMKIT_NUM,                   "Number"                        );
+		set( INFO_COL_DRUMKIT_NAME,                  "Drumkit ID"                    );
 		set( INFO_COL_SF_INSTR_PROGRAM,              "Number"                        );
 		set( INFO_COL_SF_INSTR_BANK,                 "Bank"                          );
 		set( INFO_COL_SF_INSTR_NAME,                 "Name"                          );
@@ -1967,7 +1975,8 @@ public class Dict {
 		set( OCTAVE_NAMING,                          "Oktavenbezeichner"                     );
 		set( SYNTAX,                                 "Syntax"                                );
 		set( PERCUSSION,                             "Percussion-Bezeichner"                 );
-		set( INSTRUMENT,                             "Instrumenten-Bezeichner"               );
+		set( INSTRUMENT_IDS,                         "Instrumenten-Bezeichner"               );
+		set( DRUMKIT_IDS,                            "Drumkit-Bezeichner"                    );
 		set( TITLE_MAIN_WINDOW,                      "Midica " + Midica.VERSION              );
 		set( TIMESTAMP_FORMAT,                       "dd.MM.yyyy HH:mm:ss"                   );
 		set( SHOW_INFO,                              "Info & Konfigurationsdetails"          );
@@ -2493,26 +2502,6 @@ public class Dict {
 				continue;
 			percussionIntToShortId.put( percussionIdToInt.get(key), key );
 		}
-		
-		// init names to integers (for drum kits)
-		drumkitNameToInt = new HashMap<String, Integer>();
-		
-		drumkitNameToInt.put( get(DRUMKIT_STANDARD),     0 );
-		drumkitNameToInt.put( get(DRUMKIT_ROOM),         8 );
-		drumkitNameToInt.put( get(DRUMKIT_POWER),       16 );
-		drumkitNameToInt.put( get(DRUMKIT_ELECTRONIC),  24 );
-		drumkitNameToInt.put( get(DRUMKIT_TR808),       25 );
-		drumkitNameToInt.put( get(DRUMKIT_JAZZ),        32 );
-		drumkitNameToInt.put( get(DRUMKIT_BRUSH),       40 );
-		drumkitNameToInt.put( get(DRUMKIT_ORCHESTRA),   48 );
-		drumkitNameToInt.put( get(DRUMKIT_SOUND_FX),    56 );
-		drumkitNameToInt.put( get(DRUMKIT_CM64_CM32),  127 );
-		
-		// init integers to names (for drum kits)
-		drumkitIntToName = new HashMap<Integer, String>();
-		for ( String key : drumkitNameToInt.keySet() ) {
-			drumkitIntToName.put( drumkitNameToInt.get(key), key );
-		}
 	}
 	
 	/**
@@ -2528,9 +2517,12 @@ public class Dict {
 		String instrSet = Config.get( Config.INSTRUMENT );
 		
 		// init instrument translations
-		instrIntToName = new HashMap<Integer, String>();
-		instrNameToInt = new HashMap<String, Integer>();
-		instrumentList = new ArrayList<InstrumentElement>();
+		instrIntToName   = new HashMap<Integer, String>();
+		instrNameToInt   = new HashMap<String, Integer>();
+		instrumentList   = new ArrayList<InstrumentElement>();
+		drumkitIntToName = new HashMap<Integer, String>();
+		drumkitNameToInt = new HashMap<String, Integer>();
+		drumkitList      = new ArrayList<InstrumentElement>();
 		if ( Config.CBX_PERC_DE_1.equals( instrSet ) ) {
 			initInstrumentsGerman1();
 		}
@@ -2776,7 +2768,7 @@ public class Dict {
 	}
 	
 	/**
-	 * Sets up english drumkit and percussion IDs.
+	 * Sets up english percussion IDs.
 	 */
 	private static void initPercussionEnglish() {
 		// percussion instruments (long)
@@ -2904,22 +2896,10 @@ public class Dict {
 		set( PERCUSSION_SHORT_CASTANETS,       "cas" );
 		set( PERCUSSION_SHORT_SURDO_MUTE,      "sm"  );
 		set( PERCUSSION_SHORT_SURDO_OPEN,      "so"  );
-		
-		// drumkits
-		set( DRUMKIT_STANDARD,   "STANDARD"   );
-		set( DRUMKIT_ROOM,       "ROOM"       );
-		set( DRUMKIT_POWER,      "POWER"      );
-		set( DRUMKIT_ELECTRONIC, "ELECTRONIC" );
-		set( DRUMKIT_TR808,      "TR808"      );
-		set( DRUMKIT_JAZZ,       "JAZZ"       );
-		set( DRUMKIT_BRUSH,      "BRUSH"      );
-		set( DRUMKIT_ORCHESTRA,  "ORCHESTRA"  );
-		set( DRUMKIT_SOUND_FX,   "SOUND_FX"   );
-		set( DRUMKIT_CM64_CM32,  "CM64_CM32"  );
 	}
 	
 	/**
-	 * Sets up german drumkit and percussion IDs.
+	 * Sets up german percussion IDs.
 	 */
 	private static void initPercussionGerman() {
 		// percussion instruments (long)
@@ -3047,18 +3027,6 @@ public class Dict {
 		set( PERCUSSION_SHORT_CASTANETS,       "ka"  );
 		set( PERCUSSION_SHORT_SURDO_MUTE,      "sug" );
 		set( PERCUSSION_SHORT_SURDO_OPEN,      "suo" );
-		
-		// drumkits
-		set( DRUMKIT_STANDARD,   "STANDARD"      );
-		set( DRUMKIT_ROOM,       "RAUM"          );
-		set( DRUMKIT_POWER,      "POWER"         );
-		set( DRUMKIT_ELECTRONIC, "ELEKTRO"       );
-		set( DRUMKIT_TR808,      "TR808"         );
-		set( DRUMKIT_JAZZ,       "JAZZ"          );
-		set( DRUMKIT_BRUSH,      "BÜRSTE"        );
-		set( DRUMKIT_ORCHESTRA,  "ORCHESTER"     );
-		set( DRUMKIT_SOUND_FX,   "SOUND_EFFEKTE" );
-		set( DRUMKIT_CM64_CM32,  "CM64_CM32"     );
 	}
 	
 	/**
@@ -3281,6 +3249,18 @@ public class Dict {
 		setInstrument( 125, "HELICOPTER"            );
 		setInstrument( 126, "APPLAUSE"              );
 		setInstrument( 127, "GUNSHOT"               );
+		
+		// drumkits
+		setDrumkit(   0, "STANDARD"   );
+		setDrumkit(   8, "ROOM"       );
+		setDrumkit(  16, "POWER"      );
+		setDrumkit(  24, "ELECTRONIC" );
+		setDrumkit(  25, "TR808"      );
+		setDrumkit(  32, "JAZZ"       );
+		setDrumkit(  40, "BRUSH"      );
+		setDrumkit(  48, "ORCHESTRA"  );
+		setDrumkit(  56, "SOUND_FX"   );
+		setDrumkit( 127, "CM64_CM32"  );
 	}
 	
 	/**
@@ -3464,6 +3444,18 @@ public class Dict {
 		setInstrument( 125, "HELICOPTER"            );
 		setInstrument( 126, "APPLAUSE"              );
 		setInstrument( 127, "GUNSHOT"               );
+		
+		// drumkits
+		setDrumkit(   0, "STANDARD"      );
+		setDrumkit(   8, "RAUM"          );
+		setDrumkit(  16, "POWER"         );
+		setDrumkit(  24, "ELEKTRO"       );
+		setDrumkit(  25, "TR808"         );
+		setDrumkit(  32, "JAZZ"          );
+		setDrumkit(  40, "BÜRSTE"        );
+		setDrumkit(  48, "ORCHESTER"     );
+		setDrumkit(  56, "SOUND_EFFEKTE" );
+		setDrumkit( 127, "CM64_CM32"     );
 	}
 	
 	/**
@@ -3474,13 +3466,29 @@ public class Dict {
 	 * @param number  instrument number as it is defined by MIDI
 	 * @param name    name of the instrument as it is used by the Midica user
 	 */
-	private static void setInstrument( int number, String name ) {
-		instrIntToName.put( number, name ); // TODO: check if this is needed
-		instrNameToInt.put( name, number );
+	private static void setInstrument(int number, String name) {
+		instrIntToName.put(number, name);
+		instrNameToInt.put(name, number);
 		
 		// prepare for the info view
-		InstrumentElement elem = new InstrumentElement( number, name, false );
-		instrumentList.add( elem );
+		InstrumentElement elem = new InstrumentElement(number, name, false);
+		instrumentList.add(elem);
+	}
+	
+	/**
+	 * Sets the translation for one specific drumkit.
+	 * Also makes the drumkit name available for the info view.
+	 * 
+	 * @param number  drumkit program number as it is defined by MIDI
+	 * @param name    name of the drumkit as it is used by the Midica user
+	 */
+	private static void setDrumkit(int number, String name) {
+		drumkitIntToName.put(number, name);
+		drumkitNameToInt.put(name, number);
+		
+		// prepare for the info view
+		InstrumentElement elem = new InstrumentElement(number, name, false);
+		drumkitList.add(elem);
 	}
 	
 	/**
@@ -3502,8 +3510,8 @@ public class Dict {
 	 * @param id           identifier of the translation
 	 * @param translation  translated text corresponding to the identifier
 	 */
-	private static void set( String id, String translation ) {
-		dictionary.put( id, translation );
+	private static void set(String id, String translation) {
+		dictionary.put(id, translation);
 	}
 	
 	/**
@@ -3579,9 +3587,9 @@ public class Dict {
 	 * @param i  instrument value as defined by the MIDI specification
 	 * @return   currently configured name for the requested instrument
 	 */
-	public static String getInstrument( int i ) {
+	public static String getInstrument(int i) {
 		if ( instrIntToName.containsKey(i) )
-			return instrIntToName.get( i );
+			return instrIntToName.get(i);
 		else
 			return get( UNKNOWN_INSTRUMENT );
 	}
@@ -3592,7 +3600,7 @@ public class Dict {
 	 * @param name  note name to be checked
 	 * @return      true, if the note name is configured -- otherwise: false
 	 */
-	public static boolean noteExists( String name ) {
+	public static boolean noteExists(String name) {
 		if ( noteNameToInt.containsKey(name) )
 			return true;
 		return false;
@@ -3762,12 +3770,12 @@ public class Dict {
 	}
 	
 	/**
-	 * Returns all configured drumkit numbers.
+	 * Returns all currently configured drumkits.
 	 * 
-	 * @return all configured drumkit numbers
+	 * @return all currently configured drumkits
 	 */
-	public static Set<Integer> getDrumkitList() {
-		return drumkitIntToName.keySet();
+	public static ArrayList<InstrumentElement> getDrumkitList() {
+		return drumkitList;
 	}
 	
 	/**

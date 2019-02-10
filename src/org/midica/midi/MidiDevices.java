@@ -275,11 +275,10 @@ public final class MidiDevices {
 				// percussion
 				if ( 9 == channel ) {
 					// assume: MSB=0, LSB=0, program: 27-87
-					Set<Integer> predefinedDrumkits = Dict.getDrumkitList();
-					for ( int program : predefinedDrumkits ) {
-						String name = Dict.getDrumkit( program );
-						int    key  = program << 14;   // program * 2^14 + 0 + 0
-						channelInstruments.put( key, name );
+					ArrayList<InstrumentElement> predefinedDrumkits = Dict.getDrumkitList();
+					for (InstrumentElement drumkit : predefinedDrumkits) {
+						int key = drumkit.instrNum << 14;         // program * 2^14 + 0 + 0
+						channelInstruments.put(key, drumkit.name);
 					}
 				}
 				
@@ -287,9 +286,9 @@ public final class MidiDevices {
 				else {
 					// assume: MSB=0, LSB=0, program: 0-127
 					ArrayList<InstrumentElement> predefinedInstruments = Dict.getInstrumentList();
-					for ( InstrumentElement instr : predefinedInstruments ) {
+					for (InstrumentElement instr : predefinedInstruments) {
 						int key = instr.instrNum << 14;           // program * 2^14 + 0 + 0
-						channelInstruments.put( key, instr.name );
+						channelInstruments.put(key, instr.name);
 					}
 				}
 			}
