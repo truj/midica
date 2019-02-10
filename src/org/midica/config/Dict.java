@@ -449,7 +449,7 @@ public class Dict {
 	public static final String TAB_CONFIG                  = "tab_config";
 	public static final String TAB_SOUNDFONT               = "tab_soundfont";
 	public static final String TAB_MIDI_SEQUENCE           = "tab_midi_sequence";
-	public static final String TAB_MIDICA                  = "tab_midica";
+	public static final String TAB_ABOUT                   = "tab_about";
 	public static final String TAB_NOTE_DETAILS            = "tab_note_details";
 	public static final String TAB_PERCUSSION_DETAILS      = "tab_percussion_details";
 	public static final String TAB_SYNTAX_DETAILS          = "tab_syntax_details";
@@ -1224,7 +1224,7 @@ public class Dict {
 		set( TAB_CONFIG,                             "Configuration"                 );
 		set( TAB_SOUNDFONT,                          "Soundfont"                     );
 		set( TAB_MIDI_SEQUENCE,                      "MIDI Sequence"                 );
-		set( TAB_MIDICA,                             "Midica"                        );
+		set( TAB_ABOUT,                              "About"                         );
 		set( TAB_NOTE_DETAILS,                       "Note Table"                    );
 		set( TAB_PERCUSSION_DETAILS,                 "Percussion IDs"                );
 		set( TAB_SYNTAX_DETAILS,                     "Commands"                      );

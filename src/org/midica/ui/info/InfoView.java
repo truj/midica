@@ -253,7 +253,7 @@ public class InfoView extends JDialog {
 		content.addTab( Dict.get(Dict.TAB_CONFIG),        createConfigArea()       );
 		content.addTab( Dict.get(Dict.TAB_SOUNDFONT),     createSoundfontArea()    );
 		content.addTab( Dict.get(Dict.TAB_MIDI_SEQUENCE), createMidiSequenceArea() );
-		content.addTab( Dict.get(Dict.TAB_MIDICA),        createVersionArea()      );
+		content.addTab( Dict.get(Dict.TAB_ABOUT),         createAboutArea()        );
 	}
 	
 	/**
@@ -1990,11 +1990,11 @@ public class InfoView extends JDialog {
 	}
 	
 	/**
-	 * Creates the version area containing version, author and general information.
+	 * Creates the about area containing version, author and general information.
 	 * 
-	 * @return the created version area
+	 * @return the created area
 	 */
-	private Container createVersionArea() {
+	private Container createAboutArea() {
 		// content
 		JPanel area = new JPanel();
 		
