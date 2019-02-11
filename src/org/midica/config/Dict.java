@@ -944,6 +944,7 @@ public class Dict {
 	public static final String ERROR_FILE_READABLE              = "error_file_readable";
 	public static final String ERROR_FILE_IO                    = "error_file_io";
 	public static final String ERROR_SOUNDFONT_IO               = "error_soundfont_io";
+	public static final String ERROR_SOUNDFONT_ALREADY_PARSED   = "error_soundfont_already_parsed";
 	public static final String ERROR_MACRO_NUM_OF_ARGS          = "error_macronum_of_arts";
 	public static final String ERROR_MACRO_RECURSION            = "error_macro_recursion";
 	public static final String ERROR_MACRO_UNDEFINED            = "error_macro_undefined";
@@ -1776,6 +1777,7 @@ public class Dict {
 		set( ERROR_FILE_READABLE,                 "file not readable:<br>"                                            );
 		set( ERROR_FILE_IO,                       "file cannot be parsed:<br>"                                        );
 		set( ERROR_SOUNDFONT_IO,                  "soundfont cannot be parsed:<br>"                                   );
+		set( ERROR_SOUNDFONT_ALREADY_PARSED,      "a soundfont can be included only once"                             );
 		set( ERROR_MACRO_NUM_OF_ARGS,             "wrong number of arguments in macro command 'MACRO'"                );
 		set( ERROR_MACRO_RECURSION,               "Can't include the current macro in itself. Recursion not allowed." );
 		set( ERROR_MACRO_UNDEFINED,               "include failed. macro not yet defined."                            );

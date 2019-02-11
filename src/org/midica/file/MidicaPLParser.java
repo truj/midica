@@ -130,6 +130,7 @@ public class MidicaPLParser extends SequenceParser {
 	private static int                                nestableBlkDepth  = 0;
 	private static Deque<NestableBlock>               nestableBlkStack  = null;
 	private static HashSet<String>                    redefinitions     = null;
+	private static boolean                            soundfontParsed   = false;
 	
 	private static boolean isDefineParsRun   = false; // parsing run for define commands
 	private static boolean isChInstrParsRun  = false; // parsing run for chords instruments and block nesting
@@ -1379,6 +1380,9 @@ public class MidicaPLParser extends SequenceParser {
 						inclPath                       // child
 					);
 				}
+
+				// make it canonical
+				inclFile = inclFile.getCanonicalFile();
 				
 				// check if the file can be parsed
 				if (! inclFile.exists())
@@ -1392,7 +1396,7 @@ public class MidicaPLParser extends SequenceParser {
 				MidicaPLParser parser = new MidicaPLParser(false);
 				parser.parse(inclFile);
 			}
-			catch( IOException e ) {
+			catch (IOException e) {
 				throw new ParseException( Dict.get(Dict.ERROR_FILE_IO) + e.getMessage() );
 			}
 		}
@@ -1408,6 +1412,13 @@ public class MidicaPLParser extends SequenceParser {
 	 * @throws ParseException    If the soundfont cannot be loaded.
 	 */
 	private void parseSOUNDFONT(String[] tokens) throws ParseException {
+		
+		// prevent more than one soundfont include
+		if (soundfontParsed) {
+			throw new ParseException( Dict.get(Dict.ERROR_SOUNDFONT_ALREADY_PARSED) );
+		}
+		soundfontParsed = true;
+		
 		if (2 == tokens.length) {
 			try {
 				// create File object with absolute path for include file
@@ -1419,6 +1430,16 @@ public class MidicaPLParser extends SequenceParser {
 						currentDir.getCanonicalPath(), // parent
 						inclPath                       // child
 					);
+				}
+				
+				// make it canonical
+				inclFile = inclFile.getCanonicalFile();
+				
+				// check if this file is already loaded
+				String oldPath = SoundfontParser.getFilePath();
+				String newPath = inclFile.getCanonicalPath();
+				if (oldPath != null && oldPath.equals(newPath)) {
+					return;
 				}
 				
 				// check if the file can be parsed
@@ -1436,7 +1457,7 @@ public class MidicaPLParser extends SequenceParser {
 				// set the file name label in the main window
 				Midica.uiController.soundfontLoadedBySourceCode();
 			}
-			catch( IOException e ) {
+			catch (IOException e) {
 				throw new ParseException( Dict.get(Dict.ERROR_SOUNDFONT_IO) + e.getMessage() );
 			}
 		}
@@ -2264,6 +2285,7 @@ public class MidicaPLParser extends SequenceParser {
 			chords            = new HashMap<String, HashSet<Integer>>();
 			nestableBlkStack  = new ArrayDeque<NestableBlock>();
 			redefinitions     = new HashSet<String>();
+			soundfontParsed   = false;
 			refreshSyntax();
 		}
 	}

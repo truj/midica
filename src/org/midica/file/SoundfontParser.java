@@ -112,7 +112,12 @@ public class SoundfontParser implements IParser {
 		if ( null == soundfontFile ) {
 			return null;
 		}
-		return soundfontFile.getAbsolutePath();
+		try {
+			return soundfontFile.getCanonicalPath();
+		}
+		catch (IOException e) {
+			return null;
+		}
 	}
 	
 	/**
