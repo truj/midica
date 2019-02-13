@@ -1781,7 +1781,7 @@ public class MidicaPLParser extends SequenceParser {
 		if (tokenCount < 3)
 			throw new ParseException( Dict.get(Dict.ERROR_CH_CMD_NUM_OF_ARGS) );
 		
-		int channel = toInt(tokens[0]);
+		int channel = toChannel(tokens[0]);
 		int note    = parseNote(tokens[1], channel);
 		
 		// separate the duration from further arguments
@@ -2035,6 +2035,10 @@ public class MidicaPLParser extends SequenceParser {
 	 * @throws ParseException    if one of the notes cannot be parsed.
 	 */
 	private boolean parseChordNotes(String[] tokens) throws ParseException {
+		
+		if (tokens.length < 3) {
+			throw new ParseException( Dict.get(Dict.ERROR_CH_CMD_NUM_OF_ARGS) );
+		}
 		
 		// chord or not?
 		HashSet<String> chordElements = parseChord(tokens[1]);
