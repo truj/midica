@@ -231,13 +231,13 @@ public class SequenceCreator {
 	/**
 	 * Sets the tempo in beats per minute by creating a tempo change message.
 	 * 
-	 * @param newBpm    Tempo in beats per minute.
-	 * @param tick      Tickstamp of the tempo change event.
+	 * @param bpm     Tempo in beats per minute.
+	 * @param tick    Tickstamp of the tempo change event.
 	 * @throws InvalidMidiDataException if invalid MIDI data is used to create a MIDI message.
 	 */
-	public static void addMessageBpm( int newBpm, long tick ) throws InvalidMidiDataException {
+	public static void addMessageTempo(int bpm, long tick) throws InvalidMidiDataException {
 		// bpm (beats per minute) --> mpq (microseconds per quarter)
-		int mpq = (int) MidiUtils.convertTempo( newBpm );
+		int mpq = (int) MidiUtils.convertTempo( bpm );
 		int cmd = MidiListener.META_SET_TEMPO;
 		
 		MetaMessage msg = new MetaMessage();

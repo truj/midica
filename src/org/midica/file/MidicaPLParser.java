@@ -64,58 +64,60 @@ public class MidicaPLParser extends SequenceParser {
 	 * class fields
 	 *******************/
 	
-	public static String BANK_SEP         = null;
-	public static String BPM              = null;
-	public static String TIME_SIG         = null;
-	public static String TIME_SIG_SLASH   = null;
-	public static String KEY_SIG          = null;
-	public static String KEY_SEPARATOR    = null;
-	public static String KEY_MAJ          = null;
-	public static String KEY_MIN          = null;
-	public static String CHORD            = null;
-	public static String INLINE_CHORD_SEP = null;
-	public static String COMMENT          = null;
-	public static String DEFINE           = null;
-	public static String DOT              = null;
-	public static String END              = null;
-	public static String BLOCK_OPEN       = null;
-	public static String BLOCK_CLOSE      = null;
-	public static String GLOBAL           = null;
-	public static String INCLUDE          = null;
-	public static String INCLUDE_FILE     = null;
-	public static String SOUNDFONT        = null;
-	public static String INSTRUMENTS      = null;
-	public static String LENGTH_32        = null;
-	public static String LENGTH_16        = null;
-	public static String LENGTH_8         = null;
-	public static String LENGTH_4         = null;
-	public static String LENGTH_2         = null;
-	public static String LENGTH_1         = null;
-	public static String LENGTH_M1        = null;
-	public static String LENGTH_M2        = null;
-	public static String LENGTH_M4        = null;
-	public static String LENGTH_M8        = null;
-	public static String LENGTH_M16       = null;
-	public static String LENGTH_M32       = null;
-	public static String MACRO            = null;
-	public static String M                = null;
-	public static String MULTIPLE         = null;
-	public static String OPT_ASSIGNER     = null;
-	public static String OPT_SEPARATOR    = null;
-	public static String P                = null;
-	public static String REST             = null;
-	public static String PROG_BANK_SEP    = null;
-	public static String Q                = null;
-	public static String QUANTITY         = null;
-	public static String D                = null;
-	public static String DURATION         = null;
-	public static String DURATION_PERCENT = null;
-	public static String V                = null;
-	public static String VELOCITY         = null;
-	public static String TRIPLET          = null;
-	public static String TUPLET           = null;
-	public static String TUPLET_FOR       = null;
-	public static String DURATION_PLUS    = null;
+	public static String BANK_SEP           = null;
+	public static String TEMPO              = null;
+	public static String TIME_SIG           = null;
+	public static String TIME_SIG_SLASH     = null;
+	public static String KEY_SIG            = null;
+	public static String KEY_SEPARATOR      = null;
+	public static String KEY_MAJ            = null;
+	public static String KEY_MIN            = null;
+	public static String PARTIAL_SYNC_RANGE = null;
+	public static String PARTIAL_SYNC_SEP   = null;
+	public static String CHORD              = null;
+	public static String INLINE_CHORD_SEP   = null;
+	public static String COMMENT            = null;
+	public static String DEFINE             = null;
+	public static String DOT                = null;
+	public static String END                = null;
+	public static String BLOCK_OPEN         = null;
+	public static String BLOCK_CLOSE        = null;
+	public static String GLOBAL             = null;
+	public static String INCLUDE            = null;
+	public static String INCLUDE_FILE       = null;
+	public static String SOUNDFONT          = null;
+	public static String INSTRUMENTS        = null;
+	public static String LENGTH_32          = null;
+	public static String LENGTH_16          = null;
+	public static String LENGTH_8           = null;
+	public static String LENGTH_4           = null;
+	public static String LENGTH_2           = null;
+	public static String LENGTH_1           = null;
+	public static String LENGTH_M1          = null;
+	public static String LENGTH_M2          = null;
+	public static String LENGTH_M4          = null;
+	public static String LENGTH_M8          = null;
+	public static String LENGTH_M16         = null;
+	public static String LENGTH_M32         = null;
+	public static String MACRO              = null;
+	public static String M                  = null;
+	public static String MULTIPLE           = null;
+	public static String OPT_ASSIGNER       = null;
+	public static String OPT_SEPARATOR      = null;
+	public static String P                  = null;
+	public static String REST               = null;
+	public static String PROG_BANK_SEP      = null;
+	public static String Q                  = null;
+	public static String QUANTITY           = null;
+	public static String D                  = null;
+	public static String DURATION           = null;
+	public static String DURATION_PERCENT   = null;
+	public static String V                  = null;
+	public static String VELOCITY           = null;
+	public static String TRIPLET            = null;
+	public static String TUPLET             = null;
+	public static String TUPLET_FOR         = null;
+	public static String DURATION_PLUS      = null;
 	
 	public static String ORIGINAL_DEFINE       = null;
 	public static String ORIGINAL_INCLUDE_FILE = null;
@@ -172,58 +174,60 @@ public class MidicaPLParser extends SequenceParser {
 	 * Restores the configured MidicaPL keywords and symbols.
 	 */
 	public static void refreshSyntax() {
-		BANK_SEP         = Dict.getSyntax( Dict.SYNTAX_BANK_SEP         );
-		BPM              = Dict.getSyntax( Dict.SYNTAX_BPM              );
-		TIME_SIG         = Dict.getSyntax( Dict.SYNTAX_TIME_SIG         );
-		TIME_SIG_SLASH   = Dict.getSyntax( Dict.SYNTAX_TIME_SIG_SLASH   );
-		KEY_SIG          = Dict.getSyntax( Dict.SYNTAX_KEY_SIG          );
-		KEY_SEPARATOR    = Dict.getSyntax( Dict.SYNTAX_KEY_SEPARATOR    );
-		KEY_MAJ          = Dict.getSyntax( Dict.SYNTAX_KEY_MAJ          );
-		KEY_MIN          = Dict.getSyntax( Dict.SYNTAX_KEY_MIN          );
-		CHORD            = Dict.getSyntax( Dict.SYNTAX_CHORD            );
-		INLINE_CHORD_SEP = Dict.getSyntax( Dict.SYNTAX_INLINE_CHORD_SEP );
-		COMMENT          = Dict.getSyntax( Dict.SYNTAX_COMMENT          );
-		DEFINE           = Dict.getSyntax( Dict.SYNTAX_DEFINE           );
-		DOT              = Dict.getSyntax( Dict.SYNTAX_DOT              );
-		END              = Dict.getSyntax( Dict.SYNTAX_END              );
-		BLOCK_OPEN       = Dict.getSyntax( Dict.SYNTAX_BLOCK_OPEN       );
-		BLOCK_CLOSE      = Dict.getSyntax( Dict.SYNTAX_BLOCK_CLOSE      );
-		GLOBAL           = Dict.getSyntax( Dict.SYNTAX_GLOBAL           );
-		INCLUDE          = Dict.getSyntax( Dict.SYNTAX_INCLUDE          );
-		INCLUDE_FILE     = Dict.getSyntax( Dict.SYNTAX_INCLUDE_FILE     );
-		SOUNDFONT        = Dict.getSyntax( Dict.SYNTAX_SOUNDFONT        );
-		INSTRUMENTS      = Dict.getSyntax( Dict.SYNTAX_INSTRUMENTS      );
-		LENGTH_32        = Dict.getSyntax( Dict.SYNTAX_32               );
-		LENGTH_16        = Dict.getSyntax( Dict.SYNTAX_16               );
-		LENGTH_8         = Dict.getSyntax( Dict.SYNTAX_8                );
-		LENGTH_4         = Dict.getSyntax( Dict.SYNTAX_4                );
-		LENGTH_2         = Dict.getSyntax( Dict.SYNTAX_2                );
-		LENGTH_1         = Dict.getSyntax( Dict.SYNTAX_1                );
-		LENGTH_M1        = Dict.getSyntax( Dict.SYNTAX_M1               );
-		LENGTH_M2        = Dict.getSyntax( Dict.SYNTAX_M2               );
-		LENGTH_M4        = Dict.getSyntax( Dict.SYNTAX_M4               );
-		LENGTH_M8        = Dict.getSyntax( Dict.SYNTAX_M8               );
-		LENGTH_M16       = Dict.getSyntax( Dict.SYNTAX_M16              );
-		LENGTH_M32       = Dict.getSyntax( Dict.SYNTAX_M32              );
-		MACRO            = Dict.getSyntax( Dict.SYNTAX_MACRO            );
-		M                = Dict.getSyntax( Dict.SYNTAX_M                );
-		MULTIPLE         = Dict.getSyntax( Dict.SYNTAX_MULTIPLE         );
-		OPT_ASSIGNER     = Dict.getSyntax( Dict.SYNTAX_OPT_ASSIGNER     );
-		OPT_SEPARATOR    = Dict.getSyntax( Dict.SYNTAX_OPT_SEPARATOR    );
-		P                = Dict.getSyntax( Dict.SYNTAX_P                );
-		REST             = Dict.getSyntax( Dict.SYNTAX_REST             );
-		PROG_BANK_SEP    = Dict.getSyntax( Dict.SYNTAX_PROG_BANK_SEP    );
-		Q                = Dict.getSyntax( Dict.SYNTAX_Q                );
-		QUANTITY         = Dict.getSyntax( Dict.SYNTAX_QUANTITY         );
-		D                = Dict.getSyntax( Dict.SYNTAX_D                );
-		DURATION         = Dict.getSyntax( Dict.SYNTAX_DURATION         );
-		DURATION_PERCENT = Dict.getSyntax( Dict.SYNTAX_DURATION_PERCENT );
-		V                = Dict.getSyntax( Dict.SYNTAX_V                );
-		VELOCITY         = Dict.getSyntax( Dict.SYNTAX_VELOCITY         );
-		TRIPLET          = Dict.getSyntax( Dict.SYNTAX_TRIPLET          );
-		TUPLET           = Dict.getSyntax( Dict.SYNTAX_TUPLET           );
-		TUPLET_FOR       = Dict.getSyntax( Dict.SYNTAX_TUPLET_FOR       );
-		DURATION_PLUS    = Dict.getSyntax( Dict.SYNTAX_DURATION_PLUS    );
+		BANK_SEP           = Dict.getSyntax( Dict.SYNTAX_BANK_SEP           );
+		TEMPO              = Dict.getSyntax( Dict.SYNTAX_TEMPO              );
+		TIME_SIG           = Dict.getSyntax( Dict.SYNTAX_TIME_SIG           );
+		TIME_SIG_SLASH     = Dict.getSyntax( Dict.SYNTAX_TIME_SIG_SLASH     );
+		KEY_SIG            = Dict.getSyntax( Dict.SYNTAX_KEY_SIG            );
+		KEY_SEPARATOR      = Dict.getSyntax( Dict.SYNTAX_KEY_SEPARATOR      );
+		KEY_MAJ            = Dict.getSyntax( Dict.SYNTAX_KEY_MAJ            );
+		KEY_MIN            = Dict.getSyntax( Dict.SYNTAX_KEY_MIN            );
+		PARTIAL_SYNC_RANGE = Dict.getSyntax( Dict.SYNTAX_PARTIAL_SYNC_RANGE );
+		PARTIAL_SYNC_SEP   = Dict.getSyntax( Dict.SYNTAX_PARTIAL_SYNC_SEP   );
+		CHORD              = Dict.getSyntax( Dict.SYNTAX_CHORD              );
+		INLINE_CHORD_SEP   = Dict.getSyntax( Dict.SYNTAX_INLINE_CHORD_SEP   );
+		COMMENT            = Dict.getSyntax( Dict.SYNTAX_COMMENT            );
+		DEFINE             = Dict.getSyntax( Dict.SYNTAX_DEFINE             );
+		DOT                = Dict.getSyntax( Dict.SYNTAX_DOT                );
+		END                = Dict.getSyntax( Dict.SYNTAX_END                );
+		BLOCK_OPEN         = Dict.getSyntax( Dict.SYNTAX_BLOCK_OPEN         );
+		BLOCK_CLOSE        = Dict.getSyntax( Dict.SYNTAX_BLOCK_CLOSE        );
+		GLOBAL             = Dict.getSyntax( Dict.SYNTAX_GLOBAL             );
+		INCLUDE            = Dict.getSyntax( Dict.SYNTAX_INCLUDE            );
+		INCLUDE_FILE       = Dict.getSyntax( Dict.SYNTAX_INCLUDE_FILE       );
+		SOUNDFONT          = Dict.getSyntax( Dict.SYNTAX_SOUNDFONT          );
+		INSTRUMENTS        = Dict.getSyntax( Dict.SYNTAX_INSTRUMENTS        );
+		LENGTH_32          = Dict.getSyntax( Dict.SYNTAX_32                 );
+		LENGTH_16          = Dict.getSyntax( Dict.SYNTAX_16                 );
+		LENGTH_8           = Dict.getSyntax( Dict.SYNTAX_8                  );
+		LENGTH_4           = Dict.getSyntax( Dict.SYNTAX_4                  );
+		LENGTH_2           = Dict.getSyntax( Dict.SYNTAX_2                  );
+		LENGTH_1           = Dict.getSyntax( Dict.SYNTAX_1                  );
+		LENGTH_M1          = Dict.getSyntax( Dict.SYNTAX_M1                 );
+		LENGTH_M2          = Dict.getSyntax( Dict.SYNTAX_M2                 );
+		LENGTH_M4          = Dict.getSyntax( Dict.SYNTAX_M4                 );
+		LENGTH_M8          = Dict.getSyntax( Dict.SYNTAX_M8                 );
+		LENGTH_M16         = Dict.getSyntax( Dict.SYNTAX_M16                );
+		LENGTH_M32         = Dict.getSyntax( Dict.SYNTAX_M32                );
+		MACRO              = Dict.getSyntax( Dict.SYNTAX_MACRO              );
+		M                  = Dict.getSyntax( Dict.SYNTAX_M                  );
+		MULTIPLE           = Dict.getSyntax( Dict.SYNTAX_MULTIPLE           );
+		OPT_ASSIGNER       = Dict.getSyntax( Dict.SYNTAX_OPT_ASSIGNER       );
+		OPT_SEPARATOR      = Dict.getSyntax( Dict.SYNTAX_OPT_SEPARATOR      );
+		P                  = Dict.getSyntax( Dict.SYNTAX_P                  );
+		REST               = Dict.getSyntax( Dict.SYNTAX_REST               );
+		PROG_BANK_SEP      = Dict.getSyntax( Dict.SYNTAX_PROG_BANK_SEP      );
+		Q                  = Dict.getSyntax( Dict.SYNTAX_Q                  );
+		QUANTITY           = Dict.getSyntax( Dict.SYNTAX_QUANTITY           );
+		D                  = Dict.getSyntax( Dict.SYNTAX_D                  );
+		DURATION           = Dict.getSyntax( Dict.SYNTAX_DURATION           );
+		DURATION_PERCENT   = Dict.getSyntax( Dict.SYNTAX_DURATION_PERCENT   );
+		V                  = Dict.getSyntax( Dict.SYNTAX_V                  );
+		VELOCITY           = Dict.getSyntax( Dict.SYNTAX_VELOCITY           );
+		TRIPLET            = Dict.getSyntax( Dict.SYNTAX_TRIPLET            );
+		TUPLET             = Dict.getSyntax( Dict.SYNTAX_TUPLET             );
+		TUPLET_FOR         = Dict.getSyntax( Dict.SYNTAX_TUPLET_FOR         );
+		DURATION_PLUS      = Dict.getSyntax( Dict.SYNTAX_DURATION_PLUS      );
 		
 		// Remember the original names of some commands.
 		// Needed to redefine them without getting an error in the following parsing runs.
@@ -1506,55 +1510,57 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		redefinitions.add(cmdId);
 		
-		if (      Dict.SYNTAX_BANK_SEP.equals(cmdId) )         BANK_SEP         = cmdName;
-		else if ( Dict.SYNTAX_BPM.equals(cmdId) )              BPM              = cmdName;
-		else if ( Dict.SYNTAX_TIME_SIG.equals(cmdId) )         TIME_SIG         = cmdName;
-		else if ( Dict.SYNTAX_TIME_SIG_SLASH.equals(cmdId) )   TIME_SIG_SLASH   = cmdName;
-		else if ( Dict.SYNTAX_KEY_SIG.equals(cmdId) )          KEY_SIG          = cmdName;
-		else if ( Dict.SYNTAX_KEY_SEPARATOR.equals(cmdId) )    KEY_SEPARATOR    = cmdName;
-		else if ( Dict.SYNTAX_KEY_MAJ.equals(cmdId) )          KEY_MAJ          = cmdName;
-		else if ( Dict.SYNTAX_KEY_MIN.equals(cmdId) )          KEY_MIN          = cmdName;
-		else if ( Dict.SYNTAX_CHORD.equals(cmdId) )            CHORD            = cmdName;
-		else if ( Dict.SYNTAX_INLINE_CHORD_SEP.equals(cmdId) ) INLINE_CHORD_SEP = cmdName;
-		else if ( Dict.SYNTAX_COMMENT.equals(cmdId) )          COMMENT          = cmdName;
-		else if ( Dict.SYNTAX_DEFINE.equals(cmdId) )           DEFINE           = cmdName;
-		else if ( Dict.SYNTAX_END.equals(cmdId) )              END              = cmdName;
-		else if ( Dict.SYNTAX_GLOBAL.equals(cmdId) )           GLOBAL           = cmdName;
-		else if ( Dict.SYNTAX_DOT.equals(cmdId) )              DOT              = cmdName;
-		else if ( Dict.SYNTAX_INCLUDE.equals(cmdId) )          INCLUDE          = cmdName;
-		else if ( Dict.SYNTAX_INCLUDE_FILE.equals(cmdId) )     INCLUDE_FILE     = cmdName;
-		else if ( Dict.SYNTAX_INSTRUMENTS.equals(cmdId) )      INSTRUMENTS      = cmdName;
-		else if ( Dict.SYNTAX_32.equals(cmdId) )               LENGTH_32        = cmdName;
-		else if ( Dict.SYNTAX_16.equals(cmdId) )               LENGTH_16        = cmdName;
-		else if ( Dict.SYNTAX_8.equals(cmdId) )                LENGTH_8         = cmdName;
-		else if ( Dict.SYNTAX_4.equals(cmdId) )                LENGTH_4         = cmdName;
-		else if ( Dict.SYNTAX_2.equals(cmdId) )                LENGTH_2         = cmdName;
-		else if ( Dict.SYNTAX_1.equals(cmdId) )                LENGTH_1         = cmdName;
-		else if ( Dict.SYNTAX_M1.equals(cmdId) )               LENGTH_M1        = cmdName;
-		else if ( Dict.SYNTAX_M2.equals(cmdId) )               LENGTH_M2        = cmdName;
-		else if ( Dict.SYNTAX_M4.equals(cmdId) )               LENGTH_M4        = cmdName;
-		else if ( Dict.SYNTAX_M8.equals(cmdId) )               LENGTH_M8        = cmdName;
-		else if ( Dict.SYNTAX_M16.equals(cmdId) )              LENGTH_M16       = cmdName;
-		else if ( Dict.SYNTAX_M32.equals(cmdId) )              LENGTH_M32       = cmdName;
-		else if ( Dict.SYNTAX_MACRO.equals(cmdId) )            MACRO            = cmdName;
-		else if ( Dict.SYNTAX_M.equals(cmdId) )                M                = cmdName;
-		else if ( Dict.SYNTAX_MULTIPLE.equals(cmdId) )         MULTIPLE         = cmdName;
-		else if ( Dict.SYNTAX_OPT_ASSIGNER.equals(cmdId) )     OPT_ASSIGNER     = cmdName;
-		else if ( Dict.SYNTAX_OPT_SEPARATOR.equals(cmdId) )    OPT_SEPARATOR    = cmdName;
-		else if ( Dict.SYNTAX_P.equals(cmdId) )                P                = cmdName;
-		else if ( Dict.SYNTAX_REST.equals(cmdId) )             REST             = cmdName;
-		else if ( Dict.SYNTAX_PROG_BANK_SEP.equals(cmdId) )    PROG_BANK_SEP    = cmdName;
-		else if ( Dict.SYNTAX_Q.equals(cmdId) )                Q                = cmdName;
-		else if ( Dict.SYNTAX_QUANTITY.equals(cmdId) )         QUANTITY         = cmdName;
-		else if ( Dict.SYNTAX_D.equals(cmdId) )                D                = cmdName;
-		else if ( Dict.SYNTAX_DURATION.equals(cmdId) )         DURATION         = cmdName;
-		else if ( Dict.SYNTAX_DURATION_PERCENT.equals(cmdId) ) DURATION_PERCENT = cmdName;
-		else if ( Dict.SYNTAX_V.equals(cmdId) )                V                = cmdName;
-		else if ( Dict.SYNTAX_VELOCITY.equals(cmdId) )         VELOCITY         = cmdName;
-		else if ( Dict.SYNTAX_TRIPLET.equals(cmdId) )          TRIPLET          = cmdName;
-		else if ( Dict.SYNTAX_TUPLET.equals(cmdId) )           TUPLET           = cmdName;
-		else if ( Dict.SYNTAX_TUPLET_FOR.equals(cmdId) )       TUPLET_FOR       = cmdName;
-		else if ( Dict.SYNTAX_DURATION_PLUS.equals(cmdId) )    DURATION_PLUS    = cmdName;
+		if      ( Dict.SYNTAX_BANK_SEP.equals(cmdId)           ) BANK_SEP           = cmdName;
+		else if ( Dict.SYNTAX_TEMPO.equals(cmdId)              ) TEMPO              = cmdName;
+		else if ( Dict.SYNTAX_TIME_SIG.equals(cmdId)           ) TIME_SIG           = cmdName;
+		else if ( Dict.SYNTAX_TIME_SIG_SLASH.equals(cmdId)     ) TIME_SIG_SLASH     = cmdName;
+		else if ( Dict.SYNTAX_KEY_SIG.equals(cmdId)            ) KEY_SIG            = cmdName;
+		else if ( Dict.SYNTAX_KEY_SEPARATOR.equals(cmdId)      ) KEY_SEPARATOR      = cmdName;
+		else if ( Dict.SYNTAX_KEY_MAJ.equals(cmdId)            ) KEY_MAJ            = cmdName;
+		else if ( Dict.SYNTAX_KEY_MIN.equals(cmdId)            ) KEY_MIN            = cmdName;
+		else if ( Dict.SYNTAX_PARTIAL_SYNC_RANGE.equals(cmdId) ) PARTIAL_SYNC_RANGE = cmdName;
+		else if ( Dict.SYNTAX_PARTIAL_SYNC_SEP.equals(cmdId)   ) PARTIAL_SYNC_SEP   = cmdName;
+		else if ( Dict.SYNTAX_CHORD.equals(cmdId)              ) CHORD              = cmdName;
+		else if ( Dict.SYNTAX_INLINE_CHORD_SEP.equals(cmdId)   ) INLINE_CHORD_SEP   = cmdName;
+		else if ( Dict.SYNTAX_COMMENT.equals(cmdId)            ) COMMENT            = cmdName;
+		else if ( Dict.SYNTAX_DEFINE.equals(cmdId)             ) DEFINE             = cmdName;
+		else if ( Dict.SYNTAX_END.equals(cmdId)                ) END                = cmdName;
+		else if ( Dict.SYNTAX_GLOBAL.equals(cmdId)             ) GLOBAL             = cmdName;
+		else if ( Dict.SYNTAX_DOT.equals(cmdId)                ) DOT                = cmdName;
+		else if ( Dict.SYNTAX_INCLUDE.equals(cmdId)            ) INCLUDE            = cmdName;
+		else if ( Dict.SYNTAX_INCLUDE_FILE.equals(cmdId)       ) INCLUDE_FILE       = cmdName;
+		else if ( Dict.SYNTAX_INSTRUMENTS.equals(cmdId)        ) INSTRUMENTS        = cmdName;
+		else if ( Dict.SYNTAX_32.equals(cmdId)                 ) LENGTH_32          = cmdName;
+		else if ( Dict.SYNTAX_16.equals(cmdId)                 ) LENGTH_16          = cmdName;
+		else if ( Dict.SYNTAX_8.equals(cmdId)                  ) LENGTH_8           = cmdName;
+		else if ( Dict.SYNTAX_4.equals(cmdId)                  ) LENGTH_4           = cmdName;
+		else if ( Dict.SYNTAX_2.equals(cmdId)                  ) LENGTH_2           = cmdName;
+		else if ( Dict.SYNTAX_1.equals(cmdId)                  ) LENGTH_1           = cmdName;
+		else if ( Dict.SYNTAX_M1.equals(cmdId)                 ) LENGTH_M1          = cmdName;
+		else if ( Dict.SYNTAX_M2.equals(cmdId)                 ) LENGTH_M2          = cmdName;
+		else if ( Dict.SYNTAX_M4.equals(cmdId)                 ) LENGTH_M4          = cmdName;
+		else if ( Dict.SYNTAX_M8.equals(cmdId)                 ) LENGTH_M8          = cmdName;
+		else if ( Dict.SYNTAX_M16.equals(cmdId)                ) LENGTH_M16         = cmdName;
+		else if ( Dict.SYNTAX_M32.equals(cmdId)                ) LENGTH_M32         = cmdName;
+		else if ( Dict.SYNTAX_MACRO.equals(cmdId)              ) MACRO              = cmdName;
+		else if ( Dict.SYNTAX_M.equals(cmdId)                  ) M                  = cmdName;
+		else if ( Dict.SYNTAX_MULTIPLE.equals(cmdId)           ) MULTIPLE           = cmdName;
+		else if ( Dict.SYNTAX_OPT_ASSIGNER.equals(cmdId)       ) OPT_ASSIGNER       = cmdName;
+		else if ( Dict.SYNTAX_OPT_SEPARATOR.equals(cmdId)      ) OPT_SEPARATOR      = cmdName;
+		else if ( Dict.SYNTAX_P.equals(cmdId)                  ) P                  = cmdName;
+		else if ( Dict.SYNTAX_REST.equals(cmdId)               ) REST               = cmdName;
+		else if ( Dict.SYNTAX_PROG_BANK_SEP.equals(cmdId)      ) PROG_BANK_SEP      = cmdName;
+		else if ( Dict.SYNTAX_Q.equals(cmdId)                  ) Q                  = cmdName;
+		else if ( Dict.SYNTAX_QUANTITY.equals(cmdId)           ) QUANTITY           = cmdName;
+		else if ( Dict.SYNTAX_D.equals(cmdId)                  ) D                  = cmdName;
+		else if ( Dict.SYNTAX_DURATION.equals(cmdId)           ) DURATION           = cmdName;
+		else if ( Dict.SYNTAX_DURATION_PERCENT.equals(cmdId)   ) DURATION_PERCENT   = cmdName;
+		else if ( Dict.SYNTAX_V.equals(cmdId)                  ) V                  = cmdName;
+		else if ( Dict.SYNTAX_VELOCITY.equals(cmdId)           ) VELOCITY           = cmdName;
+		else if ( Dict.SYNTAX_TRIPLET.equals(cmdId)            ) TRIPLET            = cmdName;
+		else if ( Dict.SYNTAX_TUPLET.equals(cmdId)             ) TUPLET             = cmdName;
+		else if ( Dict.SYNTAX_TUPLET_FOR.equals(cmdId)         ) TUPLET_FOR         = cmdName;
+		else if ( Dict.SYNTAX_DURATION_PLUS.equals(cmdId)      ) DURATION_PLUS      = cmdName;
 		else {
 			throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_COMMAND_ID) + cmdId );
 		}
@@ -1682,24 +1688,28 @@ public class MidicaPLParser extends SequenceParser {
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
 	private void parseGlobalCmd(String[] tokens, boolean isFake) throws ParseException {
-		synchronize();
-		long currentTicks = instruments.get( 0 ).getCurrentTicks();
+		String channelDesc = "0-15";
+		int    tokenCount  = tokens.length;
 		
-		int tokenCount = tokens.length;
-		if (1 == tokenCount)
-			return;
-		else if (3 != tokenCount)
+		if (tokenCount > 3)
 			throw new ParseException( Dict.get(Dict.ERROR_GLOBAL_NUM_OF_ARGS) );
+		if (2 == tokenCount)
+			channelDesc = tokens[1]; // partial sync
 		
+		synchronize(channelDesc);
+		if (tokenCount < 3)
+			return;
+		
+		long currentTicks = instruments.get( 0 ).getCurrentTicks();
 		String cmd   = tokens[1];
 		String value = tokens[2];
 		
 		try {
 			// set tempo
-			if (cmd.equals(BPM)) {
+			if (cmd.equals(TEMPO)) {
 				int bpm = toInt( value, true );
 				if (! isFake) {
-					SequenceCreator.addMessageBpm( bpm, currentTicks );
+					SequenceCreator.addMessageTempo(bpm, currentTicks);
 				}
 			}
 			
@@ -2100,14 +2110,50 @@ public class MidicaPLParser extends SequenceParser {
 	}
 
 	/**
-	 * Synchronizes all instruments.
-	 * Sets the current ticks of each channel to the value of the channel with the maximum
-	 * current tick value.
+	 * Synchronizes all channels according to the given channel description.
+	 * Sets the current ticks of each of these channels to the value of the
+	 * channel with the maximum current tick value.
+	 * 
+	 * @param channelDesc    channel description (e.g. "1-3,5,7-p")
+	 * @throws ParseException    If the channel description cannot be parsed.
 	 */
-	private void synchronize() {
-		long maxTicks = Instrument.getMaxCurrentTicks( instruments );
-		for (int i=0; i<instruments.size(); i++) {
-			instruments.get( i ).setCurrentTicks( maxTicks );
+	private void synchronize(String channelDesc) throws ParseException {
+		
+		// find out which channels to sync
+		HashSet<Integer> channels = new HashSet<Integer>();
+		String[] ranges = channelDesc.split(Pattern.quote(PARTIAL_SYNC_SEP), -1);
+		for (String range : ranges) {
+			String[] limits = range.split(Pattern.quote(PARTIAL_SYNC_RANGE), -1);
+			if (1 == limits.length) {
+				if ("".equals(range))
+					throw new ParseException( Dict.get(Dict.ERROR_PARTIAL_RANGE_EMPTY) );
+				channels.add( toChannel(range) );
+			}
+			else if (2 == limits.length) {
+				int fromCh = toChannel( limits[0] );
+				int toCh   = toChannel( limits[1] );
+				if (toCh <= fromCh) {
+					throw new ParseException( Dict.get(Dict.ERROR_PARTIAL_RANGE_ORDER) + range );
+				}
+				for (int channel = fromCh; channel <= toCh; channel++) {
+					channels.add(channel);
+				}
+			}
+			else {
+				throw new ParseException( Dict.get(Dict.ERROR_PARTIAL_RANGE) + range );
+			}
+		}
+		
+		// collect all relevant instruments
+		ArrayList<Instrument> partialInstruments = new ArrayList<Instrument>();
+		for (int channel : channels) {
+			partialInstruments.add( instruments.get(channel) );
+		}
+		
+		// sync the channels
+		long maxTicks = Instrument.getMaxCurrentTicks(partialInstruments);
+		for (int channel : channels) {
+			instruments.get( channel ).setCurrentTicks( maxTicks );
 		}
 	}
 	
@@ -2246,7 +2292,10 @@ public class MidicaPLParser extends SequenceParser {
 	 * @return     Parsed channel number.
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
-	private int toChannel( String s ) throws ParseException {
+	private int toChannel(String s) throws ParseException {
+		if (s.equals(P)) {
+			return 9;
+		}
 		int channel = toInt( s );
 		if (channel > 15)
 			throw new ParseException( Dict.get(Dict.ERROR_INVALID_CHANNEL_NUMBER) + s );

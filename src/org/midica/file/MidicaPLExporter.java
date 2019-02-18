@@ -485,7 +485,7 @@ public class MidicaPLExporter extends Exporter {
 						int    bpm    = (int) MidiUtils.convertTempo( mpq );
 						String bpmStr = Integer.toString( bpm );
 						
-						addToTimeline( tick, PRIO_GLOBAL, "bpm", bpmStr );
+						addToTimeline( tick, PRIO_GLOBAL, "tempo", bpmStr );
 					}
 					
 				}
@@ -522,10 +522,10 @@ public class MidicaPLExporter extends Exporter {
 				}
 				
 				// tempo change
-				else if ( contentStruct.containsKey("bpm") ) {
-					String bpm = (String) contentStruct.get( "bpm" );
+				else if ( contentStruct.containsKey("tempo") ) {
+					String bpm = (String) contentStruct.get( "tempo" );
 					output.append( createTickComment(tick) );
-					output.append( MidicaPLParser.GLOBAL + "\t" + MidicaPLParser.BPM + "\t" + bpm + NEW_LINE + NEW_LINE );
+					output.append( MidicaPLParser.GLOBAL + "\t" + MidicaPLParser.TEMPO + "\t" + bpm + NEW_LINE + NEW_LINE );
 				}
 				
 				// notes

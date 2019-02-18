@@ -39,10 +39,10 @@ CHORD chord_4     d#    g      a#
 // Speed definition:
 // *:   necessary because a tempo definition is a global (channel-independent) command.
 //      The * is the symbol for "global"
-// bpm: Beats per Minute (tempo definition)
+// tempo: Beats per Minute (tempo definition)
 // 128: From now on the MIDI stream runs with 128 beats per minute.
 
-*    bpm    128
+*    tempo    128
 
 
 // Macro definition for the piano part
