@@ -7,12 +7,13 @@ This is the heart of the development tools in this directory. It's a Perl script
 to be used from GIT's precommit hook.
 
 What precommit.pl does:
+- Executing the unit tests (JUnit 5)
 - Injecting a new minor version number into the source code (Midica.java)
 - Deleting the old jar file and creating a new one (inside of the repository)
 - Deleting the old Javadoc and creating a new version (outside of the repository)
 
-The first of these tasks is always done. The other two are optional.
-The script is configured via the following environment variables:
+The first two of these tasks are always done. The other two are optional.
+The script is configured with the following environment variables:
 - `project_path` - absolute path to your repository
 - `create_jar` - determins if the old jar file shall be replaced by a new one
 - `create_javadoc` - determins if the old Javadoc files shall be replaced by new ones
@@ -22,6 +23,11 @@ System requirements for using precommit.pl:
 - **Perl**
 - **Bash-like shell** (Or you have to set the environment variables differently in the precommit hook)
 - **Unix-like operating system**
+- **Java Development Kit 1.8 or higher**
+
+Besides you need the project to be configured the following way:
+- `src` and `test` must be configured as source directories.
+- `bin` must be configured as output folder for class files (both from `src` and `test`).
 
 You can embed `precommit.pl` into your precommit hook like this:
 
@@ -50,6 +56,13 @@ https://github.com/Abnaxos/pegdown-doclet
 
 ## Java Version
 Currently the source is compliant with Java version 1.7 or higher.
+
+However as a developer you need Java Development Kit 1.8 or higher in order to execute the unit tests as they are written in JUnit 5.
+## Unit Tests
+
+Given your output directory for class files is the **bin** folder, you can execute the unit tests like this:
+
+`java -jar build_helper/junit-platform-console-standalone-1.4.0.jar --class-path bin --scan-class-path`
 
 ## Create JAR file
 In order to create the jar file you can use the file `manifest`.

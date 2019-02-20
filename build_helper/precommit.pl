@@ -71,6 +71,16 @@ if (!$is_clean) {
 	die "Midica.java is modified but not fully staged.\n";
 }
 
+# execute unit tests
+my $junit_jar = $project_path . '/build_helper/junit-platform-console-standalone-1.4.0.jar';
+my $bin_path  = $project_path . '/bin';
+my $cmd       = "java -jar '$junit_jar' --class-path '$bin_path' --scan-class-path";
+my $status    = system $cmd;
+if ($status) {
+	die "Unit tests failed (using the following command):\n"
+	  . "$cmd\n";
+}
+
 # get major and minor version number
 my $major_version = -1;
 open my $fh, '<', $java_file or die "Cannot read $java_file: $!\n";
@@ -91,7 +101,7 @@ my $version       = $major_version . '.' . $minor_version;
 # 1. perl and options and opening single quote (') for the regex
 # 2. the regex
 # 3. closing single quote for the regex and single-quoted file parameter
-my $cmd = "perl -CSD -Mutf8 -p -i -e '"
+$cmd = "perl -CSD -Mutf8 -p -i -e '"
         . 's/(\bint\s+VERSION_MINOR\s*=)\s*(\d+)/\1 ' . $minor_version . '/'
         . "' '$java_file'";
 
@@ -131,7 +141,7 @@ if ($must_create_jar) {
 	
 	# compile classes into temp dir
 	my $src_path = $project_path . '/src';
-	my $cmd      = "javac -source 7 -target 7 -sourcepath '$src_path' -d '$tmp_path' '$java_file'";
+	my $cmd      = "javac -source 8 -target 8 -sourcepath '$src_path' -d '$tmp_path' '$java_file'";
 	$status      = system $cmd;
 	if ($status) {
 		die "Command failed: $cmd\n";

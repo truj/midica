@@ -199,10 +199,11 @@ public class Config {
 	
 	/**
 	 * Sets the current configuration to the default configuration.
+	 * Must be public because we must be able to call it from test classes as well.
 	 * 
 	 * @param homeDir Home directory of the current user
 	 */
-	private static void restoreDefaults( String homeDir ) {
+	public static void restoreDefaults( String homeDir ) {
 		
 		// init defaults
 		defaults = new TreeMap<String, String>();

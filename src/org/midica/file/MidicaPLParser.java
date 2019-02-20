@@ -122,7 +122,8 @@ public class MidicaPLParser extends SequenceParser {
 	public static String ORIGINAL_DEFINE       = null;
 	public static String ORIGINAL_INCLUDE_FILE = null;
 	
-	private static ArrayList<Instrument>              instruments       = null;
+	protected static ArrayList<Instrument> instruments = null;
+	
 	private static HashMap<String, ArrayList<String>> macros            = null;
 	private static HashMap<String, HashSet<Integer>>  chords            = null;
 	private static boolean                            instrumentsParsed = false;
@@ -880,7 +881,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * @return   The duration of the note in ticks.
 	 * @throws ParseException  If the duration string cannot be parsed.
 	 */
-	private int parseDuration(String s) throws ParseException {
+	protected int parseDuration(String s) throws ParseException {
 		String[] summands = s.split(Pattern.quote(DURATION_PLUS), -1);
 		int      duration = 0;
 		for (String summand : summands) {
@@ -1003,7 +1004,7 @@ public class MidicaPLParser extends SequenceParser {
 			
 			// Theoretically: duration = resolution * factor / divisor
 			// But integer divisions are always rounded down and we want to round mathematically
-			int duration = ( resolution * factor * 10 + 5 ) / ( divisor * 10 );
+			int duration = ( resolution * factor * 10 + divisor * 5 ) / ( divisor * 10 );
 			return duration;
 		}
 		else
