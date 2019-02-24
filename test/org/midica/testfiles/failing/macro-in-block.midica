@@ -1,0 +1,9 @@
+INCLUDE_FILE inc/instruments.midica
+
+(
+
+	MACRO mac1
+		0 c /4
+	END
+
+)

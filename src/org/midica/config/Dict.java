@@ -929,6 +929,8 @@ public class Dict {
 	public static final String ERROR_BLOCK_INVALID_ARG          = "error_block_invalid_arg";
 	public static final String ERROR_BLOCK_UNMATCHED_CLOSE      = "error_block_unmatched_close";
 	public static final String ERROR_BLOCK_UNMATCHED_OPEN       = "error_block_unmatched_open";
+	public static final String ERROR_NESTABLE_BLOCK_OPEN_AT_EOF = "error_nestable_block_open_at_eof";
+	public static final String ERROR_NAMED_BLOCK_OPEN_AT_EOF    = "error_named_block_open_at_eof";
 	public static final String ERROR_ARGS_NOT_ALLOWED           = "error_args_not_allowed";
 	public static final String ERROR_MACRO_ALREADY_DEFINED      = "error_macro_already_defined";
 	public static final String ERROR_MACRO_NOT_ALLOWED_HERE     = "error_macro_not_allowed_here";
@@ -1770,6 +1772,8 @@ public class Dict {
 		set( ERROR_BLOCK_INVALID_ARG,             "invalid block argument: "                                          );
 		set( ERROR_BLOCK_UNMATCHED_CLOSE,         "there is no open block to be closed"                               );
 		set( ERROR_BLOCK_UNMATCHED_OPEN,          "nestable block not closed"                                         );
+		set( ERROR_NESTABLE_BLOCK_OPEN_AT_EOF,    "nestable block not closed until end of file"                       );
+		set( ERROR_NAMED_BLOCK_OPEN_AT_EOF,       "named block not closed until end of file"                          );
 		set( ERROR_ARGS_NOT_ALLOWED,              "arguments not allowed here"                                        );
 		set( ERROR_CHORD_ALREADY_DEFINED,         "chord name has been already defined: "                             );
 		set( ERROR_CHORD_EQUALS_NOTE,             "illegal chord name (equals a note name): "                         );

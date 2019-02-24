@@ -1,0 +1,8 @@
+INCLUDE_FILE inc/instruments.midica
+
+0 c /4
+*
+
+INSTRUMENTS
+	p 123 testing
+END

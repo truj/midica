@@ -1,0 +1,6 @@
+INCLUDE_FILE inc/instruments.midica
+
+MACRO test
+	CHORD testchord c d e
+	0 c /4
+END

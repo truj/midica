@@ -1,0 +1,9 @@
+INCLUDE_FILE inc/instruments.midica
+
+0 99 /4
+0 -  /4
+*
+
+INSTRUMENTS
+	p ROOM test room
+END

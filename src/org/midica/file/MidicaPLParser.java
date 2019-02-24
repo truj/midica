@@ -300,6 +300,7 @@ public class MidicaPLParser extends SequenceParser {
 				// look for everything else
 				// final parsing run, building up the sequence
 				isDefaultParsRun = true;
+				nestableBlkDepth = 0; // correct line number in a certain error message
 				parsingRun(lines);
 				isDefaultParsRun = false;
 			}
@@ -312,10 +313,11 @@ public class MidicaPLParser extends SequenceParser {
 			}
 		}
 		catch ( FileNotFoundException e ) {
-			e.printStackTrace();
+			throw new ParseException(e.toString());
 		}
 		catch ( IOException e ) {
 			e.printStackTrace();
+			throw new ParseException(e.toString());
 		}
 		
 		// allow an empty sequence?
@@ -386,24 +388,36 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void parsingRun(ArrayList<String> lines) throws ParseException, IOException {
 		int lineNumber = 0;
-		for (String line : lines) {
-			lineNumber++;
-			try {
+		try {
+			for (String line : lines) {
+				lineNumber++;
 				parseLine(line);
 			}
-			catch (ParseException e) {
-				// Add file name and line number to exception and throw it again
-				// but only if this is not yet done.
-				// If this information is already available than it comes from
-				// another parser instance. In this case we must not overwrite it.
-				if (0 == e.getLineNumber()) {
-					e.setLineNumber( lineNumber );
-				}
-				if (null == e.getFileName()) {
-					e.setFileName( file.getCanonicalPath() );
-				}
-				throw e;
+			
+			// find open blocks at the end of the file
+			lineNumber++;
+			checkNestingAtEOF();
+		}
+		catch (ParseException e) {
+			// Add file name and line number to exception and throw it again
+			// but only if this is not yet done.
+			// If this information is already available than it comes from
+			// another parser instance. In this case we must not overwrite it.
+			if (0 == e.getLineNumber()) {
+				e.setLineNumber(lineNumber);
 			}
+			if (null == e.getFileName()) {
+				e.setFileName( file.getCanonicalPath() );
+			}
+			throw e;
+		}
+		catch (Exception e) {
+			// any other exception? - wrap it into a parsing exception with file and line
+			ParseException pe = new ParseException(e.toString());
+			e.printStackTrace();
+			pe.setLineNumber(lineNumber);
+			pe.setFileName( file.getCanonicalPath() );
+			throw pe;
 		}
 	}
 	
@@ -631,12 +645,31 @@ public class MidicaPLParser extends SequenceParser {
 			// track nesting level
 			if (BLOCK_OPEN.equals(cmd) || BLOCK_CLOSE.equals(cmd)) {
 				checkNesting(cmd);
-				return false; // set nesting level correctly
+				
+				// set nesting level correctly
+				if (BLOCK_OPEN.equals(cmd))
+					nestableBlkDepth++;
+				else
+					nestableBlkDepth--;
+				return true;
 			}
 			
 			// don't allow overlappings between nestable and named blocks
 			if (MACRO.equals(cmd) || END.equals(cmd)) {
 				checkNesting(cmd);
+				
+				// track current mode
+				if (MACRO.equals(cmd) && MODE_DEFAULT == currentMode) {
+					currentMode = MODE_MACRO;
+					return true;
+				}
+				else if (END.equals(cmd) && MODE_MACRO == currentMode) {
+					currentMode = MODE_DEFAULT;
+					return true;
+				}
+				if (MODE_MACRO == currentMode) {
+					return false;
+				}
 			}
 			
 			// chord
@@ -763,6 +796,20 @@ public class MidicaPLParser extends SequenceParser {
 			if (MODE_INSTRUMENTS == currentMode) {
 				throw new ParseException( Dict.get(Dict.ERROR_NOT_ALLOWED_IN_INSTR_BLK) + cmd );
 			}
+		}
+	}
+	
+	/**
+	 * Checks nesting of named or nestable blocks at end of file.
+	 * 
+	 * @throws ParseException if the check fails.
+	 */
+	private void checkNestingAtEOF() throws ParseException {
+		if (nestableBlkDepth > 0) {
+			throw new ParseException( Dict.get(Dict.ERROR_NESTABLE_BLOCK_OPEN_AT_EOF) );
+		}
+		if (currentMode != MODE_DEFAULT) {
+			throw new ParseException( Dict.get(Dict.ERROR_NAMED_BLOCK_OPEN_AT_EOF) );
 		}
 	}
 	
@@ -1526,10 +1573,13 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_COMMENT.equals(cmdId)            ) COMMENT            = cmdName;
 		else if ( Dict.SYNTAX_DEFINE.equals(cmdId)             ) DEFINE             = cmdName;
 		else if ( Dict.SYNTAX_END.equals(cmdId)                ) END                = cmdName;
+		else if ( Dict.SYNTAX_BLOCK_OPEN.equals(cmdId)         ) BLOCK_OPEN         = cmdName;
+		else if ( Dict.SYNTAX_BLOCK_CLOSE.equals(cmdId)        ) BLOCK_CLOSE        = cmdName;
 		else if ( Dict.SYNTAX_GLOBAL.equals(cmdId)             ) GLOBAL             = cmdName;
 		else if ( Dict.SYNTAX_DOT.equals(cmdId)                ) DOT                = cmdName;
 		else if ( Dict.SYNTAX_INCLUDE.equals(cmdId)            ) INCLUDE            = cmdName;
 		else if ( Dict.SYNTAX_INCLUDE_FILE.equals(cmdId)       ) INCLUDE_FILE       = cmdName;
+		else if ( Dict.SYNTAX_SOUNDFONT.equals(cmdId)          ) SOUNDFONT          = cmdName;
 		else if ( Dict.SYNTAX_INSTRUMENTS.equals(cmdId)        ) INSTRUMENTS        = cmdName;
 		else if ( Dict.SYNTAX_32.equals(cmdId)                 ) LENGTH_32          = cmdName;
 		else if ( Dict.SYNTAX_16.equals(cmdId)                 ) LENGTH_16          = cmdName;
@@ -1689,7 +1739,13 @@ public class MidicaPLParser extends SequenceParser {
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
 	private void parseGlobalCmd(String[] tokens, boolean isFake) throws ParseException {
-		String channelDesc = "0-15";
+		
+		// allow global commands in drum-only sequences without an INSTRUMENTS block
+		if (!instrumentsParsed) {
+			postprocessInstruments();
+		}
+		
+		String channelDesc = "0" + PARTIAL_SYNC_RANGE + "15";
 		int    tokenCount  = tokens.length;
 		
 		if (tokenCount > 3)
@@ -1697,11 +1753,14 @@ public class MidicaPLParser extends SequenceParser {
 		if (2 == tokenCount)
 			channelDesc = tokens[1]; // partial sync
 		
-		synchronize(channelDesc);
+		long currentTicks = 0;
+		if (! isFake) {
+			synchronize(channelDesc);
+			currentTicks = instruments.get( 0 ).getCurrentTicks();
+		}
 		if (tokenCount < 3)
 			return;
 		
-		long currentTicks = instruments.get( 0 ).getCurrentTicks();
 		String cmd   = tokens[1];
 		String value = tokens[2];
 		
@@ -1723,7 +1782,8 @@ public class MidicaPLParser extends SequenceParser {
 					int denominator = toInt(matcher.group(2));
 					
 					// set the time signature message
-					SequenceCreator.addMessageTimeSignature(numerator, denominator, currentTicks);
+					if (! isFake)
+						SequenceCreator.addMessageTimeSignature(numerator, denominator, currentTicks);
 				}
 				else {
 					throw new ParseException( Dict.get(Dict.ERROR_INVALID_TIME_SIG) + value);
@@ -1751,7 +1811,8 @@ public class MidicaPLParser extends SequenceParser {
 						throw new ParseException( Dict.get(Dict.ERROR_INVALID_TONALITY) + tonality );
 					}
 					// set the key signature message
-					SequenceCreator.addMessageKeySignature(note, isMajor, currentTicks);
+					if (! isFake)
+						SequenceCreator.addMessageKeySignature(note, isMajor, currentTicks);
 				}
 				else {
 					throw new ParseException( Dict.get(Dict.ERROR_INVALID_KEY_SIG) + value);
@@ -2337,6 +2398,7 @@ public class MidicaPLParser extends SequenceParser {
 			definedMacroNames = new HashSet<String>();
 			macros            = new HashMap<String, ArrayList<String>>();
 			chords            = new HashMap<String, HashSet<Integer>>();
+			nestableBlkDepth  = 0;
 			nestableBlkStack  = new ArrayDeque<NestableBlock>();
 			redefinitions     = new HashSet<String>();
 			soundfontParsed   = false;

@@ -1,0 +1,7 @@
+INCLUDE_FILE inc/instruments.midica
+
+0 c /4
+
+(
+	SOUNDFONT ../working/java-emergency-soundfont.sf2
+)

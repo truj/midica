@@ -1,0 +1,5 @@
+INCLUDE_FILE inc/instruments.midica
+
+MACRO test
+	0 c /4
+	0 d /4

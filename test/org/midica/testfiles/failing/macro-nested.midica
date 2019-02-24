@@ -1,0 +1,9 @@
+INCLUDE_FILE inc/instruments.midica
+
+MACRO outer
+	0 c /4
+	MACRO inner
+		0 c /4
+	END
+	0 c /4
+END

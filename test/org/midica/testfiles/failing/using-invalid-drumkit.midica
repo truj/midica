@@ -1,0 +1,11 @@
+INSTRUMENTS
+	0 0 piano
+	p 0 standard
+END
+
+0 c /4
+*
+
+INSTRUMENTS
+	p 128 testing
+END

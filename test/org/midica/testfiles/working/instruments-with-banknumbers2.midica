@@ -1,0 +1,15 @@
+INSTRUMENTS
+	1	ELECTRIC_GRAND_PIANO,0		E-Piano on bank 0 in another channel
+	2	ELECTRIC_GRAND_PIANO,0/0	E-Piano on bank 0 in another channel
+	10	ELECTRONIC,120				E-Drums in another channel on bank 15360
+	12	ELECTRONIC,15360			E-Drums in another channel on bank 15360
+	15	24,15361					E-Drums in another channel on bank 15360
+END
+
+INSTRUMENTS
+	1	0 test
+	2	0 test
+	10	0 test
+	12	0 test
+	15	0 test
+END

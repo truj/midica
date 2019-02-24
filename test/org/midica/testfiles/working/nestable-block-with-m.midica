@@ -1,0 +1,9 @@
+INCLUDE_FILE inc/instruments.midica
+
+( m
+	*
+	0 c *1
+	0 d *1
+	0 e *1
+)
+0 c /4

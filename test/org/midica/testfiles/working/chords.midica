@@ -1,0 +1,17 @@
+INCLUDE_FILE inc/instruments.midica
+
+CHORD ch1=c,d,e
+CHORD ch2 f g 99
+CHORD ch3 b, c, d
+
+MACRO test
+	( q=2
+		0 ch1 /4
+		0 ch2 /4
+		0 ch3 /4
+		0 c,e,g /4
+	)
+	0 c /4
+END
+INCLUDE test q=3
+0 c,e,g /4

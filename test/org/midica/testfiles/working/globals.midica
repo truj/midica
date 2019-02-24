@@ -1,0 +1,20 @@
+INSTRUMENTS
+	0    ACOUSTIC_GRAND_PIANO    Piano
+	1    VIOLIN                  Fiddle
+END
+
+* tempo 120
+* key   c/maj
+* time  3/4
+
+0 c /4
+0 d /4
+*
+* key   c/min
+
+INSTRUMENTS
+	0    VIOLIN                  Fiddle
+	1    ACOUSTIC_GRAND_PIANO    Piano
+END
+
+1 c /4

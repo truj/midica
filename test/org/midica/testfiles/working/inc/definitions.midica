@@ -1,0 +1,12 @@
+DEFINE DEFINE def
+def INCLUDE_FILE incl_f
+def INSTRUMENTS instruments[
+def END ]
+def MACRO macro[
+def BLOCK_OPEN {
+def BLOCK_CLOSE }
+def PERCUSSION_CHANNEL perc
+def INCLUDE inc
+def GLOBAL glob
+DEFINE PARTIAL_SYNC_RANGE ..
+def SOUNDFONT load_sf

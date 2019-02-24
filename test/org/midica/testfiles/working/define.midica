@@ -1,0 +1,16 @@
+INCLUDE_FILE inc/definitions.midica
+
+instruments[
+	0 0 piano
+	perc 0 standard percussion
+]
+
+macro[ test
+	perc hhc /4 q=4
+	0 c++ /8 q=8
+	glob
+]
+
+inc test
+incl_f inc/channel-cmds.midica   // ch0: 480, ch9: 0
+load_sf java-emergency-soundfont.sf2
