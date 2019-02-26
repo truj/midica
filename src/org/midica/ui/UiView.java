@@ -30,6 +30,7 @@ import javax.swing.JSeparator;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
+import org.midica.Midica;
 import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.SequenceParser;
@@ -115,8 +116,14 @@ public class UiView extends JDialog {
 		this.controller = controller;
 		addWindowListener( controller );
 		init();
+		
+		// don't show the window in CLI mode
+		if (Midica.isCliMode) {
+			return;
+		}
+		
 		pack();
-		setVisible( true );
+		setVisible(true);
 	}
 	
 	/**

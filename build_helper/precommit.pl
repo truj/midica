@@ -106,7 +106,7 @@ $cmd = "perl -CSD -Mutf8 -p -i -e '"
         . "' '$java_file'";
 
 # execute the replacement command
-my $status = system $cmd;
+$status = system $cmd;
 if ($status) {
 	die "Could not replace minor version in $java_file.\n"
 	  . "Command failed: $cmd\n";

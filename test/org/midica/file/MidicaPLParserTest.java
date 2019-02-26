@@ -35,7 +35,8 @@ class MidicaPLParserTest extends MidicaPLParser {
 	static void setUpBeforeClass() throws Exception {
 		
 		// init (mostly static) dependencies
-		Midica.main(new String[0]);
+		String[] args = {"--cli"};
+		Midica.main(args);
 		
 		// ignore config file
 		Config.restoreDefaults("");

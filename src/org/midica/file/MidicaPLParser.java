@@ -300,7 +300,6 @@ public class MidicaPLParser extends SequenceParser {
 				// look for everything else
 				// final parsing run, building up the sequence
 				isDefaultParsRun = true;
-				nestableBlkDepth = 0; // correct line number in a certain error message
 				parsingRun(lines);
 				isDefaultParsRun = false;
 			}
@@ -397,6 +396,10 @@ public class MidicaPLParser extends SequenceParser {
 			// find open blocks at the end of the file
 			lineNumber++;
 			checkNestingAtEOF();
+			
+			// In case of wrong block nesting make sure that the correct
+			// error message and line number is shown
+			nestableBlkDepth = 0;
 		}
 		catch (ParseException e) {
 			// Add file name and line number to exception and throw it again
@@ -642,34 +645,16 @@ public class MidicaPLParser extends SequenceParser {
 		// chords, first instruments block, and block nesting
 		if (isChInstrParsRun) {
 			
-			// track nesting level
-			if (BLOCK_OPEN.equals(cmd) || BLOCK_CLOSE.equals(cmd)) {
-				checkNesting(cmd);
-				
-				// set nesting level correctly
-				if (BLOCK_OPEN.equals(cmd))
-					nestableBlkDepth++;
-				else
-					nestableBlkDepth--;
-				return true;
-			}
-			
 			// don't allow overlappings between nestable and named blocks
-			if (MACRO.equals(cmd) || END.equals(cmd)) {
-				checkNesting(cmd);
-				
-				// track current mode
-				if (MACRO.equals(cmd) && MODE_DEFAULT == currentMode) {
-					currentMode = MODE_MACRO;
-					return true;
-				}
-				else if (END.equals(cmd) && MODE_MACRO == currentMode) {
-					currentMode = MODE_DEFAULT;
-					return true;
-				}
-				if (MODE_MACRO == currentMode) {
-					return false;
-				}
+			checkNesting(cmd);
+			
+			// ignore blocks other than instruments
+			if (END.equals(cmd) && MODE_INSTRUMENTS == currentMode) {
+				// do more checks later
+			}
+			else if (BLOCK_OPEN.equals(cmd) || BLOCK_CLOSE.equals(cmd) || MACRO.equals(cmd) || END.equals(cmd)) {
+				trackNesting(cmd);
+				return true;
 			}
 			
 			// chord
@@ -781,6 +766,24 @@ public class MidicaPLParser extends SequenceParser {
 	}
 	
 	/**
+	 * Tracks nesting and mode of nestable and named blocks.
+	 * Used only if nothing more is needed.
+	 * Otherwise the nesting will be tracked by the according parse method.
+	 * 
+	 * @param cmd command to be tracked
+	 */
+	private void trackNesting(String cmd) {
+		if (BLOCK_OPEN.equals(cmd))
+			nestableBlkDepth++;
+		else if (BLOCK_CLOSE.equals(cmd))
+			nestableBlkDepth--;
+		else if (MACRO.equals(cmd) && MODE_DEFAULT == currentMode)
+			currentMode = MODE_MACRO;
+		else if (END.equals(cmd) && currentMode != MODE_INSTRUMENTS)
+			currentMode = MODE_DEFAULT;
+	}
+	
+	/**
 	 * Checks nesting of named or nestable blocks.
 	 * 
 	 * @param cmd    The command to be checked
@@ -792,7 +795,7 @@ public class MidicaPLParser extends SequenceParser {
 				throw new ParseException( Dict.get(Dict.ERROR_BLOCK_UNMATCHED_OPEN) );
 			}
 		}
-		if (BLOCK_OPEN.equals(cmd) || BLOCK_CLOSE.equals(cmd)) {
+		else if (BLOCK_OPEN.equals(cmd) || BLOCK_CLOSE.equals(cmd)) {
 			if (MODE_INSTRUMENTS == currentMode) {
 				throw new ParseException( Dict.get(Dict.ERROR_NOT_ALLOWED_IN_INSTR_BLK) + cmd );
 			}

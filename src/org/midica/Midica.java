@@ -22,7 +22,7 @@ public class Midica {
 	public static final int VERSION_MAJOR = 0;
 	
 	/** Minor version number. This is intended to be incremented automatically by precommit.pl. */
-	public static final int VERSION_MINOR = 1551038315;
+	public static final int VERSION_MINOR = 1551209624;
 	
 	/** Full version string. */
 	public static final String VERSION = VERSION_MAJOR + "." + VERSION_MINOR;
@@ -39,12 +39,18 @@ public class Midica {
 	/** Controller of the main window */
 	public static UiController uiController;
 	
+	/** CLI mode (command line interface) without GUI - e.g. for unit tests */
+	public static boolean isCliMode = false;
+	
 	/**
 	 * The entry method which is launched on program startup.
 	 * 
 	 * @param args No specific arguments are supported so far.
 	 */
 	public static void main(String[] args) {
+		
+		// command line arguments
+		processCmdLineArgs(args);
 		
 		// init config
 		Config.init();
@@ -54,5 +60,47 @@ public class Midica {
 		
 		// start the GUI
 		uiController = new UiController();
+	}
+	
+	/**
+	 * Processes command line arguments.
+	 * 
+	 * @param args command line arguments.
+	 */
+	private static void processCmdLineArgs(String[] args) {
+		for (String arg : args) {
+			if ("--cli".equals(arg)) {
+				isCliMode = true;
+			}
+			else if ("--help".equals(arg)) {
+				help(true);
+			}
+			else {
+				help(false);
+			}
+		}
+	}
+	
+	/**
+	 * Prints a hepl message and exits.
+	 * The exit code is 0, if called with `--help`.
+	 * Otherwise the parameters are regarded as erroneous and the exit code is 1.
+	 * 
+	 * @param isHelpRequested **true**, if called with `--help` on the command line
+	 */
+	private static void help(boolean isHelpRequested) {
+		
+		StringBuffer msg = new StringBuffer("Options:\n");
+		msg.append("--help : Print this message.\n");
+		msg.append("--cli  : Run in CLI mode (command line interface) without GUI.\n");
+		
+		if (isHelpRequested) {
+			System.out.println(msg);
+			System.exit(0);
+		}
+		else {
+			System.err.println(msg);
+			System.exit(67);
+		}
 	}
 }
