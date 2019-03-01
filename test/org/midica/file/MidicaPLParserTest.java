@@ -11,6 +11,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 
+import javax.sound.midi.MetaMessage;
+import javax.sound.midi.MidiMessage;
+import javax.sound.midi.Sequence;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.midica.Midica;
@@ -149,6 +153,20 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 0, instruments.get(15).instrumentNumber );
 		assertEquals( 0, instruments.get(15).getBankMSB()     );
 		assertEquals( 0, instruments.get(15).getBankLSB()     );
+		
+		parse(getWorkingFile("meta"));
+		assertEquals(
+			"(c) test\r\n2nd line",
+			getMetaMsgText(0, 1)  // copyright
+		);
+		assertEquals(
+			  "{#title=Title with tab\\t!}"
+			+ "{#composer=Wolfgang Amadeus Mozart\\r\\nHaydn}"
+			+ "{#lyrics=Some\\\\One}"
+			+ "{#artist=\\{Someone\\} \\[Else\\]}"
+			+ "{#}",
+			getMetaMsgText(2, 0)  // RP-026 tags
+		);
 	}
 	
 	/**
@@ -287,7 +305,37 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-missing-lsb")) );
 		assertEquals( 4, e.getLineNumber() );
 		
-		// System.out.println(e.getMessage() + "\n" + e.getFileName());
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("meta-in-block")) );
+		assertEquals( 5, e.getLineNumber() );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("meta-with-block")) );
+		assertEquals( 4, e.getLineNumber() );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("meta-in-macro")) );
+		assertEquals( 5, e.getLineNumber() );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("meta-with-param")) );
+		assertEquals( 3, e.getLineNumber() );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-inside-meta")) );
+		assertEquals( 4, e.getLineNumber() );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("note-in-percussion-channel")) );
+		assertEquals( 3, e.getLineNumber() );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("note-unknown")) );
+		assertEquals( 3, e.getLineNumber() );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-with-unknown-note")) );
+		assertEquals( 3, e.getLineNumber() );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-with-unknown-note-number")) );
+		assertEquals( 3, e.getLineNumber() );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("channel-cmd-missing-param")) );
+		assertEquals( 3, e.getLineNumber() );
+		
+//		System.out.println(e.getMessage() + "\n" + e.getFileName());
 	}
 	
 	/**
@@ -324,8 +372,24 @@ class MidicaPLParserTest extends MidicaPLParser {
 	 * @return testfile directory.
 	 */
 	private static String getTestfileDirectory() {
-		return System.getProperty("user.dir") + File.separator
-				+ "test" + File.separator + "org" + File.separator + "midica" + File.separator
-				+ "testfiles" + File.separator;
+		return System.getProperty("user.dir") + File.separator + "test" + File.separator
+			+ "org" + File.separator + "midica" + File.separator + "testfiles" + File.separator;
+	}
+	
+	/**
+	 * Returns the text of the requested message, assuming that it is a meta message.
+	 * 
+	 * @param track    Track index, beginning with 0.
+	 * @param i        Message index inside of the track.
+	 * @return         Text of the message.
+	 */
+	private static String getMetaMsgText(int track, int i) {
+		Sequence  seq = SequenceCreator.getSequence();
+		
+		MidiMessage msg  = seq.getTracks()[track].get(i).getMessage();
+		byte[]      data = ((MetaMessage) msg).getData();
+		String      text = CharsetUtils.getTextFromBytes(data, "UTF-8", null);
+		
+		return text;
 	}
 }

@@ -357,6 +357,34 @@ public class SequenceCreator {
 	}
 	
 	/**
+	 * Adds a copyright meta message to tick 0 of the sequence.
+	 * This is called from the {@link MidicaPLParser} when postprocessing meta commands.
+	 * 
+	 * @param copyright The message to be added to the sequence.
+	 * @throws InvalidMidiDataException if invalid MIDI data is used to create a MIDI message.
+	 */
+	public static void addMessageCopyright(String copyright) throws InvalidMidiDataException {
+		MetaMessage metaMsg = new MetaMessage();
+		byte[] data = CharsetUtils.getBytesFromText(copyright, charset);
+		metaMsg.setMessage( MidiListener.META_COPYRIGHT, data, data.length );
+		tracks[ 0 ].add( new MidiEvent(metaMsg, 0) );
+	}
+	
+	/**
+	 * Adds a lyrics meta message.
+	 * The message may also be a meta message according to RP-026.
+	 * 
+	 * @param lyrics The message to be added.
+	 * @throws InvalidMidiDataException if invalid MIDI data is used to create a MIDI message.
+	 */
+	public static void addMessageLyrics(String lyrics, long tick) throws InvalidMidiDataException {
+		MetaMessage metaMsg = new MetaMessage();
+		byte[] data = CharsetUtils.getBytesFromText(lyrics, charset);
+		metaMsg.setMessage( MidiListener.META_LYRICS, data, data.length );
+		tracks[ 2 ].add( new MidiEvent(metaMsg, 0) );
+	}
+	
+	/**
 	 * Adds a channel-dependent generic message.
 	 * This is called by the {@link MidiParser} to add messages that are not handled by another
 	 * method.

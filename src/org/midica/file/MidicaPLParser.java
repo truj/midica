@@ -52,9 +52,10 @@ public class MidicaPLParser extends SequenceParser {
 	private static final String OPT_DURATION = "duration";
 	private static final String OPT_QUANTITY = "quantity";
 	
-	private static final int MODE_INSTRUMENTS = 0;
-	private static final int MODE_MACRO       = 1;
-	private static final int MODE_DEFAULT     = 2;
+	private static final int MODE_DEFAULT     = 0;
+	private static final int MODE_INSTRUMENTS = 1;
+	private static final int MODE_MACRO       = 2;
+	private static final int MODE_META        = 3;
 	
 	private static final int TICK_BANK_BEFORE_PROGRAM = 10; // how many ticks a bank select will be made before the program change
 	
@@ -87,6 +88,12 @@ public class MidicaPLParser extends SequenceParser {
 	public static String INCLUDE_FILE       = null;
 	public static String SOUNDFONT          = null;
 	public static String INSTRUMENTS        = null;
+	public static String META               = null;
+	public static String META_COPYRIGHT     = null;
+	public static String META_TITLE         = null;
+	public static String META_COMPOSER      = null;
+	public static String META_LYRICIST      = null;
+	public static String META_ARTIST        = null;
 	public static String LENGTH_32          = null;
 	public static String LENGTH_16          = null;
 	public static String LENGTH_8           = null;
@@ -127,6 +134,7 @@ public class MidicaPLParser extends SequenceParser {
 	private static HashMap<String, ArrayList<String>> macros            = null;
 	private static HashMap<String, HashSet<Integer>>  chords            = null;
 	private static boolean                            instrumentsParsed = false;
+	private static HashMap<String, StringBuffer>      metaInfo          = null;
 	private static boolean                            frstInstrBlkOver  = false;
 	private static String                             chosenCharset     = null;
 	private static HashSet<String>                    definedMacroNames = null;
@@ -135,11 +143,11 @@ public class MidicaPLParser extends SequenceParser {
 	private static HashSet<String>                    redefinitions     = null;
 	private static boolean                            soundfontParsed   = false;
 	
-	private static boolean isDefineParsRun   = false; // parsing run for define commands
-	private static boolean isChInstrParsRun  = false; // parsing run for chords instruments and block nesting
-	private static boolean isMacrNameParsRun = false; // parsing run for defined macro names
-	private static boolean isMacroParsRun    = false; // parsing run for macros
-	private static boolean isDefaultParsRun  = false; // final parsing run
+	private static boolean isDefineParsRun     = false; // parsing run for define commands
+	private static boolean isChInstMetaParsRun = false; // parsing run for chords, meta, instruments and block nesting
+	private static boolean isMacrNameParsRun   = false; // parsing run for defined macro names
+	private static boolean isMacroParsRun      = false; // parsing run for macros
+	private static boolean isDefaultParsRun    = false; // final parsing run
 	
 	/* *******************
 	 * instance fields
@@ -198,6 +206,12 @@ public class MidicaPLParser extends SequenceParser {
 		INCLUDE_FILE       = Dict.getSyntax( Dict.SYNTAX_INCLUDE_FILE       );
 		SOUNDFONT          = Dict.getSyntax( Dict.SYNTAX_SOUNDFONT          );
 		INSTRUMENTS        = Dict.getSyntax( Dict.SYNTAX_INSTRUMENTS        );
+		META               = Dict.getSyntax( Dict.SYNTAX_META               );
+		META_COPYRIGHT     = Dict.getSyntax( Dict.SYNTAX_META_COPYRIGHT     );
+		META_TITLE         = Dict.getSyntax( Dict.SYNTAX_META_TITLE         );
+		META_COMPOSER      = Dict.getSyntax( Dict.SYNTAX_META_COMPOSER      );
+		META_LYRICIST      = Dict.getSyntax( Dict.SYNTAX_META_LYRICIST      );
+		META_ARTIST        = Dict.getSyntax( Dict.SYNTAX_META_ARTIST        );
 		LENGTH_32          = Dict.getSyntax( Dict.SYNTAX_32                 );
 		LENGTH_16          = Dict.getSyntax( Dict.SYNTAX_16                 );
 		LENGTH_8           = Dict.getSyntax( Dict.SYNTAX_8                  );
@@ -282,10 +296,11 @@ public class MidicaPLParser extends SequenceParser {
 				isDefineParsRun = false;
 				
 				// look for chords, the very first instruments block,
-				// and checks block nesting
-				isChInstrParsRun = true;
+				// meta definitions, and checks block nesting
+				isChInstMetaParsRun = true;
 				parsingRun(lines);
-				isChInstrParsRun = false;
+				postprocessMeta(); // apply all collected meta info
+				isChInstMetaParsRun = false;
 				
 				// collect all macro names that are defined somewhere
 				isMacrNameParsRun = true;
@@ -346,7 +361,32 @@ public class MidicaPLParser extends SequenceParser {
 			return;
 		}
 		
+		// only 2 tokens for meta commands
+		if (isChInstMetaParsRun && isMetaCmd(tokens[0])) {
+			tokens = line.split("\\s+", 2);
+		}
+		
 		parseTokens(tokens);
+	}
+	
+	/**
+	 * Determins if the given command is a META command.
+	 * 
+	 * @param cmd    The command to be judged.
+	 * @return **true**, if cmd is a meta command, otherwise: **false**.
+	 */
+	private boolean isMetaCmd(String cmd) {
+		if (META_COPYRIGHT.equals(cmd))
+			return true;
+		if (META_TITLE.equals(cmd))
+			return true;
+		if (META_COMPOSER.equals(cmd))
+			return true;
+		if (META_LYRICIST.equals(cmd))
+			return true;
+		if (META_ARTIST.equals(cmd))
+			return true;
+		return false;
 	}
 	
 	/**
@@ -527,10 +567,15 @@ public class MidicaPLParser extends SequenceParser {
 			parseBLOCK(tokens, isMacro);
 		}
 		
-		// mode command (instruments, macro, end)
-		else if (INSTRUMENTS.equals(tokens[0]) || MACRO.equals(tokens[0]) || END.equals(tokens[0])) {
+		// mode command (instruments, macro, meta, end)
+		else if (INSTRUMENTS.equals(tokens[0]) || MACRO.equals(tokens[0]) || META.equals(tokens[0]) || END.equals(tokens[0])) {
 			parseModeCmd(tokens);
 			return;
+		}
+		
+		// meta definition
+		else if (MODE_META == currentMode) {
+			parseMetaCmd(tokens);
 		}
 		
 		// root-level commands (that are not allowed to appear inside of a block)
@@ -582,6 +627,12 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( SOUNDFONT.equals(cmd)             ) {}
 		else if ( DEFINE.equals(cmd)                ) {}
 		else if ( INSTRUMENTS.equals(cmd)           ) {}
+		else if ( META.equals(cmd)                  ) {}
+		else if ( META_COPYRIGHT.equals(cmd)        ) {}
+		else if ( META_TITLE.equals(cmd)            ) {}
+		else if ( META_COMPOSER.equals(cmd)         ) {}
+		else if ( META_LYRICIST.equals(cmd)         ) {}
+		else if ( META_ARTIST.equals(cmd)           ) {}
 		else if ( GLOBAL.equals(cmd)                ) {}
 		else if ( P.equals(cmd)                     ) {}
 		else if ( ORIGINAL_DEFINE.equals(cmd)       ) {}
@@ -643,14 +694,14 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// chords, first instruments block, and block nesting
-		if (isChInstrParsRun) {
+		if (isChInstMetaParsRun) {
 			
 			// don't allow overlappings between nestable and named blocks
 			checkNesting(cmd);
 			
-			// ignore blocks other than instruments
-			if (END.equals(cmd) && MODE_INSTRUMENTS == currentMode) {
-				// do more checks later
+			// ignore blocks other than instruments or meta
+			if (END.equals(cmd) && (MODE_INSTRUMENTS == currentMode || MODE_META == currentMode)) {
+				// handle later
 			}
 			else if (BLOCK_OPEN.equals(cmd) || BLOCK_CLOSE.equals(cmd) || MACRO.equals(cmd) || END.equals(cmd)) {
 				trackNesting(cmd);
@@ -659,6 +710,11 @@ public class MidicaPLParser extends SequenceParser {
 			
 			// chord
 			if (CHORD.equals(cmd)) {
+				return false;
+			}
+			
+			// parse meta
+			if (META.equals(cmd) || MODE_META == currentMode) {
 				return false;
 			}
 			
@@ -685,8 +741,12 @@ public class MidicaPLParser extends SequenceParser {
 			}
 		}
 		
-		// from now on: ignore chord commands
+		// from now on: ignore chord commands and meta blocks
 		if (CHORD.equals(cmd)) {
+			return true;
+		}
+		if (META.equals(cmd) || MODE_META == currentMode) {
+			trackNesting(cmd);
 			return true;
 		}
 		
@@ -779,6 +839,8 @@ public class MidicaPLParser extends SequenceParser {
 			nestableBlkDepth--;
 		else if (MACRO.equals(cmd) && MODE_DEFAULT == currentMode)
 			currentMode = MODE_MACRO;
+		else if (META.equals(cmd) && MODE_DEFAULT == currentMode)
+			currentMode = MODE_META;
 		else if (END.equals(cmd) && currentMode != MODE_INSTRUMENTS)
 			currentMode = MODE_DEFAULT;
 	}
@@ -790,7 +852,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * @throws ParseException if the check fails.
 	 */
 	private void checkNesting(String cmd) throws ParseException {
-		if (INSTRUMENTS.equals(cmd) || MACRO.equals(cmd) || END.equals(cmd)) {
+		if (INSTRUMENTS.equals(cmd) || MACRO.equals(cmd) || META.equals(cmd) || END.equals(cmd)) {
 			if (nestableBlkDepth > 0) {
 				throw new ParseException( Dict.get(Dict.ERROR_BLOCK_UNMATCHED_OPEN) );
 			}
@@ -798,6 +860,9 @@ public class MidicaPLParser extends SequenceParser {
 		else if (BLOCK_OPEN.equals(cmd) || BLOCK_CLOSE.equals(cmd)) {
 			if (MODE_INSTRUMENTS == currentMode) {
 				throw new ParseException( Dict.get(Dict.ERROR_NOT_ALLOWED_IN_INSTR_BLK) + cmd );
+			}
+			if (MODE_META == currentMode) {
+				throw new ParseException( Dict.get(Dict.ERROR_NOT_ALLOWED_IN_META_BLK) + cmd );
 			}
 		}
 	}
@@ -829,11 +894,11 @@ public class MidicaPLParser extends SequenceParser {
 	private void checkInstrumentsParsed() throws ParseException {
 		
 		// wrong parsing run?
-		if (!isChInstrParsRun) {
+		if (!isChInstMetaParsRun) {
 			return;
 		}
 		
-		// are currently parsing the first instruments block?
+		// are we currently parsing the first instruments block?
 		if (MODE_INSTRUMENTS == currentMode) {
 			return;
 		}
@@ -1069,6 +1134,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * 
 	 * - instruments
 	 * - macro
+	 * - meta
 	 * - end
 	 * 
 	 * Determines the type of mode command and calls the appropriate method to
@@ -1093,6 +1159,9 @@ public class MidicaPLParser extends SequenceParser {
 			else {
 				throw new ParseException( Dict.get(Dict.ERROR_MODE_INSTR_NUM_OF_ARGS) );
 			}
+		}
+		else if (META.equals(cmd)) {
+			parseMETA(tokens);
 		}
 		
 		// other - may never happen
@@ -1204,6 +1273,24 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		else
 			throw new ParseException( Dict.get(Dict.ERROR_MACRO_NUM_OF_ARGS) );
+	}
+	
+	/**
+	 * Parses a META command.
+	 * A META command is a mode command that opens a META definition block.
+	 * 
+	 * @param tokens             Token array.
+	 * @throws ParseException    If the command cannot be parsed.
+	 */
+	private void parseMETA(String[] tokens) throws ParseException {
+		if (MODE_DEFAULT != currentMode) {
+			throw new ParseException( Dict.get(Dict.ERROR_META_NOT_ALLOWED_HERE) );
+		}
+		if (1 == tokens.length) {
+			currentMode = MODE_META;
+		}
+		else
+			throw new ParseException( Dict.get(Dict.ERROR_META_NUM_OF_ARGS) );
 	}
 	
 	/**
@@ -1584,6 +1671,12 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_INCLUDE_FILE.equals(cmdId)       ) INCLUDE_FILE       = cmdName;
 		else if ( Dict.SYNTAX_SOUNDFONT.equals(cmdId)          ) SOUNDFONT          = cmdName;
 		else if ( Dict.SYNTAX_INSTRUMENTS.equals(cmdId)        ) INSTRUMENTS        = cmdName;
+		else if ( Dict.SYNTAX_META.equals(cmdId)               ) META               = cmdName;
+		else if ( Dict.SYNTAX_META_COPYRIGHT.equals(cmdId)     ) META_COPYRIGHT     = cmdName;
+		else if ( Dict.SYNTAX_META_TITLE.equals(cmdId)         ) META_TITLE         = cmdName;
+		else if ( Dict.SYNTAX_META_COMPOSER.equals(cmdId)      ) META_COMPOSER      = cmdName;
+		else if ( Dict.SYNTAX_META_LYRICIST.equals(cmdId)      ) META_LYRICIST      = cmdName;
+		else if ( Dict.SYNTAX_META_ARTIST.equals(cmdId)        ) META_ARTIST        = cmdName;
 		else if ( Dict.SYNTAX_32.equals(cmdId)                 ) LENGTH_32          = cmdName;
 		else if ( Dict.SYNTAX_16.equals(cmdId)                 ) LENGTH_16          = cmdName;
 		else if ( Dict.SYNTAX_8.equals(cmdId)                  ) LENGTH_8           = cmdName;
@@ -1630,7 +1723,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * @param tokens             Token array.
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
-	private void parseInstrumentCmd( String[] tokens ) throws ParseException{
+	private void parseInstrumentCmd(String[] tokens) throws ParseException {
 		if (3 != tokens.length) {
 			throw new ParseException( Dict.get(Dict.ERROR_INSTR_NUM_OF_ARGS) );
 		}
@@ -1730,6 +1823,57 @@ public class MidicaPLParser extends SequenceParser {
 			instr.setBank( bankMSB, bankLSB );
 			instruments.add( instr );
 		}
+	}
+	
+	/**
+	 * Parses one command inside of a META block.
+	 * 
+	 * @param tokens             Token array.
+	 * @throws ParseException    If the command cannot be parsed.
+	 */
+	private void parseMetaCmd(String[] tokens) throws ParseException {
+		String key;
+		String crlf = "\\r\\n"; // according to RP-026
+		if (META_COPYRIGHT.equals(tokens[0])) {
+			key  = "copyright";
+			crlf = "\r\n"; // not RP-026
+		}
+		else if (META_TITLE.equals(tokens[0]))
+			key = "title";
+		else if (META_COMPOSER.equals(tokens[0]))
+			key = "composer";
+		else if (META_LYRICIST.equals(tokens[0]))
+			key = "lyrics";
+		else if (META_ARTIST.equals(tokens[0]))
+			key = "artist";
+		else
+			throw new ParseException( Dict.get(Dict.ERROR_META_UNKNOWN_CMD) + tokens[0] );
+		
+		// prepare the new meta line
+		String line = tokens[1];
+		if ("copyright".equals(key)) {
+			// nothing more to do
+		}
+		else {
+			// replace characters according to RP-026
+			line = line.replaceAll("\\\\", "\\\\\\\\"); // \   --> \\
+			line = line.replaceAll("\t",  "\\\\t");     // tab --> \t
+			line = line.replaceAll("\\[", "\\\\[");     // [   --> \[
+			line = line.replaceAll("\\]", "\\\\]");     // ]   --> \]
+			line = line.replaceAll("\\{", "\\\\{");     // {   --> \{
+			line = line.replaceAll("\\}", "\\\\}");     // }   --> \}
+		}
+		
+		// create or append to the meta message
+		StringBuffer val = metaInfo.get(key);
+		if (null == val) {
+			val = new StringBuffer();
+			metaInfo.put(key, val);
+		}
+		else {
+			val.append(crlf);
+		}
+		val.append(line);
 	}
 	
 	/**
@@ -2289,6 +2433,42 @@ public class MidicaPLParser extends SequenceParser {
 	}
 	
 	/**
+	 * Postprocesses a finished META block.
+	 * 
+	 * Sets all defined meta events in the MIDI sequence.
+	 * 
+	 * @throws ParseException    If something went wrong.
+	 */
+	private void postprocessMeta() throws ParseException {
+		try {
+			// copyright
+			StringBuffer copyright = metaInfo.get("copyright");
+			if (copyright != null) {
+				SequenceCreator.addMessageCopyright(copyright.toString());
+			}
+			
+			// RP-026 messages
+			StringBuffer rp26 = new StringBuffer("");
+			String[]     keys = {"title", "composer", "lyrics", "artist"};
+			for (String key : keys) {
+				StringBuffer value = metaInfo.get(key);
+				if (value != null) {
+					rp26.append("{#" + key + "=" + value + "}");
+				}
+			}
+			
+			// add end tag and write RP-026 tags, if any
+			if (! rp26.toString().equals("")) {
+				rp26.append("{#}");
+				SequenceCreator.addMessageLyrics(rp26.toString(), 0);
+			}
+		}
+		catch (InvalidMidiDataException e) {
+			throw new ParseException( Dict.get(Dict.ERROR_MIDI_PROBLEM) + e.getMessage() );
+		}
+	}
+	
+	/**
 	 * Parses a String that is expected to be an integer.
 	 * 
 	 * - If greaterZero is true: Accepts only values > 0
@@ -2390,21 +2570,22 @@ public class MidicaPLParser extends SequenceParser {
 		currentMacroName = null;
 		
 		if (isRootParser) {
-			instrumentsParsed = false;
-			frstInstrBlkOver  = false;
-			isDefineParsRun   = false;
-			isChInstrParsRun  = false;
-			isMacrNameParsRun = false;
-			isMacroParsRun    = false;
-			isDefaultParsRun  = false;
-			instruments       = new ArrayList<Instrument>();
-			definedMacroNames = new HashSet<String>();
-			macros            = new HashMap<String, ArrayList<String>>();
-			chords            = new HashMap<String, HashSet<Integer>>();
-			nestableBlkDepth  = 0;
-			nestableBlkStack  = new ArrayDeque<NestableBlock>();
-			redefinitions     = new HashSet<String>();
-			soundfontParsed   = false;
+			instrumentsParsed   = false;
+			metaInfo            = new HashMap<String, StringBuffer>();
+			frstInstrBlkOver    = false;
+			isDefineParsRun     = false;
+			isChInstMetaParsRun = false;
+			isMacrNameParsRun   = false;
+			isMacroParsRun      = false;
+			isDefaultParsRun    = false;
+			instruments         = new ArrayList<Instrument>();
+			definedMacroNames   = new HashSet<String>();
+			macros              = new HashMap<String, ArrayList<String>>();
+			chords              = new HashMap<String, HashSet<Integer>>();
+			nestableBlkDepth    = 0;
+			nestableBlkStack    = new ArrayDeque<NestableBlock>();
+			redefinitions       = new HashSet<String>();
+			soundfontParsed     = false;
 			refreshSyntax();
 		}
 	}

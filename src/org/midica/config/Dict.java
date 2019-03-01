@@ -81,6 +81,12 @@ public class Dict {
 	public static final String SYNTAX_MACRO              = "MACRO";
 	public static final String SYNTAX_INCLUDE            = "INCLUDE";
 	public static final String SYNTAX_INSTRUMENTS        = "INSTRUMENTS";
+	public static final String SYNTAX_META               = "META";
+	public static final String SYNTAX_META_COPYRIGHT     = "META_COPYRIGHT";
+	public static final String SYNTAX_META_TITLE         = "META_TITLE";
+	public static final String SYNTAX_META_COMPOSER      = "META_COMPOSER";
+	public static final String SYNTAX_META_LYRICIST      = "META_LYRICIST";
+	public static final String SYNTAX_META_ARTIST        = "META_ARTIST";
 	public static final String SYNTAX_TEMPO              = "TEMPO";
 	public static final String SYNTAX_TIME_SIG           = "TIME_SIG";
 	public static final String SYNTAX_TIME_SIG_SLASH     = "TIME_SIG_SLASH";
@@ -569,6 +575,7 @@ public class Dict {
 	public static final String SYNTAX_CAT_OPTION           = "syntax_cat_option";
 	public static final String SYNTAX_CAT_GLOBAL           = "syntax_cat_global";
 	public static final String SYNTAX_CAT_OTHER            = "syntax_cat_other";
+	public static final String SYNTAX_CAT_META             = "syntax_cat_meta";
 	public static final String SYNTAX_CAT_NOTE_LENGTH      = "syntax_cat_note_length";
 	public static final String INSTR_CAT_PIANO             = "instr_cat_piano";
 	public static final String INSTR_CAT_CHROM_PERC        = "instr_cat_chrom_perc";
@@ -934,6 +941,7 @@ public class Dict {
 	public static final String ERROR_ARGS_NOT_ALLOWED           = "error_args_not_allowed";
 	public static final String ERROR_MACRO_ALREADY_DEFINED      = "error_macro_already_defined";
 	public static final String ERROR_MACRO_NOT_ALLOWED_HERE     = "error_macro_not_allowed_here";
+	public static final String ERROR_META_NOT_ALLOWED_HERE      = "error_meta_not_allowed_here";
 	public static final String ERROR_CHORD_ALREADY_DEFINED      = "error_chord_already_defined";
 	public static final String ERROR_CHORD_EQUALS_NOTE          = "error_chord_equals_note";
 	public static final String ERROR_CHORD_EQUALS_PERCUSSION    = "error_chord_equals_percussion";
@@ -950,7 +958,9 @@ public class Dict {
 	public static final String ERROR_FILE_IO                    = "error_file_io";
 	public static final String ERROR_SOUNDFONT_IO               = "error_soundfont_io";
 	public static final String ERROR_SOUNDFONT_ALREADY_PARSED   = "error_soundfont_already_parsed";
-	public static final String ERROR_MACRO_NUM_OF_ARGS          = "error_macronum_of_arts";
+	public static final String ERROR_MACRO_NUM_OF_ARGS          = "error_macro_num_of_arts";
+	public static final String ERROR_META_NUM_OF_ARGS           = "error_meta_num_of_arts";
+	public static final String ERROR_META_UNKNOWN_CMD           = "error_meta_unknown_cmd";
 	public static final String ERROR_MACRO_RECURSION            = "error_macro_recursion";
 	public static final String ERROR_MACRO_UNDEFINED            = "error_macro_undefined";
 	public static final String ERROR_INCLUDE_NUM_OF_ARGS        = "error_include_num_of_args";
@@ -987,6 +997,7 @@ public class Dict {
 	public static final String ERROR_CHANNEL_REDEFINED          = "error_channel_redefined";
 	public static final String ERROR_INVALID_CHANNEL_NUMBER     = "error_invalid_channel_number";
 	public static final String ERROR_NOT_ALLOWED_IN_INSTR_BLK   = "error_not_allowed_in_instr_blk";
+	public static final String ERROR_NOT_ALLOWED_IN_META_BLK    = "error_not_allowed_in_meta_blk";
 	public static final String ERROR_NOT_ALLOWED_IN_BLK         = "error_not_allowed_in_blk";
 	
 	// NestableBlock
@@ -1354,6 +1365,7 @@ public class Dict {
 		set( SYNTAX_CAT_OPTION,                      "Option Syntax"                 );
 		set( SYNTAX_CAT_GLOBAL,                      "Global Commands"               );
 		set( SYNTAX_CAT_OTHER,                       "Other Commands"                );
+		set( SYNTAX_CAT_META,                        "Meta Commands"                 );
 		set( SYNTAX_CAT_NOTE_LENGTH,                 "Note Length Definitions"       );
 		set( INSTR_CAT_PIANO,                        "Piano"                         );
 		set( INSTR_CAT_CHROM_PERC,                   "Chromatic Percussion"          );
@@ -1430,6 +1442,12 @@ public class Dict {
 		set( SYNTAX_MACRO,              "macro definition"                                 );
 		set( SYNTAX_INCLUDE,            "macro execution"                                  );
 		set( SYNTAX_INSTRUMENTS,        "definition of instruments"                        );
+		set( SYNTAX_META,               "meta information block definition"                );
+		set( SYNTAX_META_COPYRIGHT,     "copyright information"                            );
+		set( SYNTAX_META_TITLE,         "song title"                                       );
+		set( SYNTAX_META_COMPOSER,      "coposer"                                          );
+		set( SYNTAX_META_LYRICIST,      "lyricist"                                         );
+		set( SYNTAX_META_ARTIST,        "artist"                                           );
 		set( SYNTAX_TEMPO,              "tempo definition in quarter notes per minute"     );
 		set( SYNTAX_TIME_SIG,           "time signature definition"                        );
 		set( SYNTAX_TIME_SIG_SLASH,     "fraction bar in the time signature definition"    );
@@ -1791,11 +1809,14 @@ public class Dict {
 		set( ERROR_FILE_IO,                       "file cannot be parsed:<br>"                                        );
 		set( ERROR_SOUNDFONT_IO,                  "soundfont cannot be parsed:<br>"                                   );
 		set( ERROR_SOUNDFONT_ALREADY_PARSED,      "a soundfont can be included only once"                             );
-		set( ERROR_MACRO_NUM_OF_ARGS,             "wrong number of arguments in macro command 'MACRO'"                );
+		set( ERROR_MACRO_NUM_OF_ARGS,             "wrong number of arguments in macro command"                        );
+		set( ERROR_META_NUM_OF_ARGS,              "no arguments allowed in meta command"                              );
+		set( ERROR_META_UNKNOWN_CMD,              "unknown meta command: "                                            );
 		set( ERROR_MACRO_RECURSION,               "Can't include the current macro in itself. Recursion not allowed." );
 		set( ERROR_MACRO_UNDEFINED,               "include failed. macro not yet defined."                            );
 		set( ERROR_MACRO_ALREADY_DEFINED,         "macro name has been already defined: "                             );
 		set( ERROR_MACRO_NOT_ALLOWED_HERE,        "a macro definition is not allowed inside a block<br>maybe you forgot to close the block." );
+		set( ERROR_META_NOT_ALLOWED_HERE,         "a meta definition is not allowed inside a block<br>maybe you forgot to close the block." );
 		set( ERROR_INCLUDE_NUM_OF_ARGS,           "wrong number of arguments in macro command 'INCLUDE'"              );
 		set( ERROR_INCLUDE_UNKNOWN_ARG,           "unknown argument for 'INCLUDE'"                                    );
 		set( ERROR_INVALID_TIME_DENOM,            "invalid denominator in time signature: "                           );
@@ -1829,7 +1850,8 @@ public class Dict {
 		set( ERROR_CHANNEL_UNDEFINED,             "channel %s has not been defined"                                   );
 		set( ERROR_CHANNEL_REDEFINED,             "channel %s has been defined already"                               );
 		set( ERROR_INVALID_CHANNEL_NUMBER,        "Invalid channel number (must be between 0 and 15): "               );
-		set( ERROR_NOT_ALLOWED_IN_INSTR_BLK,      "Command not allowed inside of instruments definition block: "      );
+		set( ERROR_NOT_ALLOWED_IN_INSTR_BLK,      "Command not allowed inside of an instruments definition block: "   );
+		set( ERROR_NOT_ALLOWED_IN_META_BLK,       "Command not allowed inside of a meta block: "                      );
 		set( ERROR_NOT_ALLOWED_IN_BLK,            "Command not allowed inside of a block: "                           );
 		
 		// NestableBlock
@@ -2231,6 +2253,12 @@ public class Dict {
 		setSyntax( SYNTAX_MACRO,             "MACRO"         );
 		setSyntax( SYNTAX_INCLUDE,           "INCLUDE"       );
 		setSyntax( SYNTAX_INSTRUMENTS,       "INSTRUMENTS"   );
+		setSyntax( SYNTAX_META,              "META"          );
+		setSyntax( SYNTAX_META_COPYRIGHT,    "copyright"     );
+		setSyntax( SYNTAX_META_TITLE,        "title"         );
+		setSyntax( SYNTAX_META_COMPOSER,     "composer"      );
+		setSyntax( SYNTAX_META_LYRICIST,     "lyrics"        );
+		setSyntax( SYNTAX_META_ARTIST,       "artist"        );
 		setSyntax( SYNTAX_TEMPO,             "tempo"         );
 		setSyntax( SYNTAX_TIME_SIG,          "time"          );
 		setSyntax( SYNTAX_TIME_SIG_SLASH,    "/"             );
@@ -2296,6 +2324,7 @@ public class Dict {
 		addSyntaxCategory( get(SYNTAX_CAT_DEFINITION) );
 		addSyntaxForInfoView( SYNTAX_DEFINE      );
 		addSyntaxForInfoView( SYNTAX_INSTRUMENTS );
+		addSyntaxForInfoView( SYNTAX_META        );
 		addSyntaxForInfoView( SYNTAX_CHORD       );
 		addSyntaxForInfoView( SYNTAX_MACRO       );
 		addSyntaxForInfoView( SYNTAX_END         );
@@ -2324,6 +2353,13 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_REST             );
 		addSyntaxForInfoView( SYNTAX_P                );
 		addSyntaxForInfoView( SYNTAX_INLINE_CHORD_SEP );
+		
+		addSyntaxCategory( get(SYNTAX_CAT_META) );
+		addSyntaxForInfoView( SYNTAX_META_COPYRIGHT );
+		addSyntaxForInfoView( SYNTAX_META_TITLE     );
+		addSyntaxForInfoView( SYNTAX_META_COMPOSER  );
+		addSyntaxForInfoView( SYNTAX_META_LYRICIST  );
+		addSyntaxForInfoView( SYNTAX_META_ARTIST    );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_OPTION) );
 		addSyntaxForInfoView( SYNTAX_OPT_SEPARATOR    );

@@ -1,0 +1,9 @@
+INCLUDE_FILE inc/instruments.midica
+
+(
+
+	META
+		composer	Beethoven
+	END
+
+)

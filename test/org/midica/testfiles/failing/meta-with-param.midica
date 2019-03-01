@@ -1,0 +1,5 @@
+INCLUDE_FILE inc/instruments.midica
+
+META test
+	composer	Beethoven
+END
