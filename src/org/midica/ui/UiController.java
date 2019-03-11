@@ -372,6 +372,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 				}
 			}
 			catch ( InterruptedException | ExecutionException workerException ) {
+				workerException.printStackTrace();
 				throw new ParseException( workerException.getMessage() );
 			}
 			

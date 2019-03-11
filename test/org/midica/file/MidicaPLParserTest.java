@@ -157,13 +157,14 @@ class MidicaPLParserTest extends MidicaPLParser {
 		parse(getWorkingFile("meta"));
 		assertEquals(
 			"(c) test\r\n2nd line",
-			getMetaMsgText(0, 1)  // copyright
+			getMetaMsgText(0, 0)  // copyright
 		);
 		assertEquals(
 			  "{#title=Title with tab\\t!}"
 			+ "{#composer=Wolfgang Amadeus Mozart\\r\\nHaydn}"
 			+ "{#lyrics=Some\\\\One}"
 			+ "{#artist=\\{Someone\\} \\[Else\\]}"
+			+ "{#software=Midica " + Midica.VERSION + "}"
 			+ "{#}",
 			getMetaMsgText(2, 0)  // RP-026 tags
 		);

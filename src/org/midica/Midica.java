@@ -22,7 +22,7 @@ public class Midica {
 	public static final int VERSION_MAJOR = 0;
 	
 	/** Minor version number. This is intended to be incremented automatically by precommit.pl. */
-	public static final int VERSION_MINOR = 1551468477;
+	public static final int VERSION_MINOR = 1552337777;
 	
 	/** Full version string. */
 	public static final String VERSION = VERSION_MAJOR + "." + VERSION_MINOR;
@@ -90,7 +90,7 @@ public class Midica {
 	 */
 	private static void help(boolean isHelpRequested) {
 		
-		StringBuffer msg = new StringBuffer("Options:\n");
+		StringBuilder msg = new StringBuilder("Options:\n");
 		msg.append("--help : Print this message.\n");
 		msg.append("--cli  : Run in CLI mode (command line interface) without GUI.\n");
 		

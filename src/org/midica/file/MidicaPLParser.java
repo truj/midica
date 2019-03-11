@@ -29,6 +29,7 @@ import javax.sound.midi.MetaMessage;
 import org.midica.Midica;
 import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.midi.LyricUtil;
 import org.midica.midi.MidiDevices;
 import org.midica.midi.MidiListener;
 import org.midica.midi.SequenceCreator;
@@ -131,10 +132,12 @@ public class MidicaPLParser extends SequenceParser {
 	
 	protected static ArrayList<Instrument> instruments = null;
 	
+	private static LyricUtil lyricUtil = LyricUtil.getInstance();
+	
 	private static HashMap<String, ArrayList<String>> macros            = null;
 	private static HashMap<String, HashSet<Integer>>  chords            = null;
 	private static boolean                            instrumentsParsed = false;
-	private static HashMap<String, StringBuffer>      metaInfo          = null;
+	private static HashMap<String, StringBuilder>     metaInfo          = null;
 	private static boolean                            frstInstrBlkOver  = false;
 	private static String                             chosenCharset     = null;
 	private static HashSet<String>                    definedMacroNames = null;
@@ -1316,8 +1319,8 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// construct options string from tokens
-		StringBuffer optionsStrBuf = new StringBuffer("");
-		String       optionsStr    = "";
+		StringBuilder optionsStrBuf = new StringBuilder("");
+		String        optionsStr    = "";
 		if (tokens.length > 1) {
 			for (int i = 1; i < tokens.length; i++) {
 				optionsStrBuf.append(tokens[i] + " ");
@@ -1856,18 +1859,13 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		else {
 			// replace characters according to RP-026
-			line = line.replaceAll("\\\\", "\\\\\\\\"); // \   --> \\
-			line = line.replaceAll("\t",  "\\\\t");     // tab --> \t
-			line = line.replaceAll("\\[", "\\\\[");     // [   --> \[
-			line = line.replaceAll("\\]", "\\\\]");     // ]   --> \]
-			line = line.replaceAll("\\{", "\\\\{");     // {   --> \{
-			line = line.replaceAll("\\}", "\\\\}");     // }   --> \}
+			line = lyricUtil.escape(line);
 		}
 		
 		// create or append to the meta message
-		StringBuffer val = metaInfo.get(key);
+		StringBuilder val = metaInfo.get(key);
 		if (null == val) {
-			val = new StringBuffer();
+			val = new StringBuilder();
 			metaInfo.put(key, val);
 		}
 		else {
@@ -2442,26 +2440,27 @@ public class MidicaPLParser extends SequenceParser {
 	private void postprocessMeta() throws ParseException {
 		try {
 			// copyright
-			StringBuffer copyright = metaInfo.get("copyright");
+			StringBuilder copyright = metaInfo.get("copyright");
 			if (copyright != null) {
 				SequenceCreator.addMessageCopyright(copyright.toString());
 			}
 			
 			// RP-026 messages
-			StringBuffer rp26 = new StringBuffer("");
-			String[]     keys = {"title", "composer", "lyrics", "artist"};
+			StringBuilder rp26 = new StringBuilder("");
+			String[]      keys = {"title", "composer", "lyrics", "artist"};
 			for (String key : keys) {
-				StringBuffer value = metaInfo.get(key);
+				StringBuilder value = metaInfo.get(key);
 				if (value != null) {
 					rp26.append("{#" + key + "=" + value + "}");
 				}
 			}
+
+			// add midica version
+			rp26.append("{#" + LyricUtil.SOFTWARE + "=" + "Midica " + Midica.VERSION + "}");
 			
-			// add end tag and write RP-026 tags, if any
-			if (! rp26.toString().equals("")) {
-				rp26.append("{#}");
-				SequenceCreator.addMessageLyrics(rp26.toString(), 0);
-			}
+			// add end tag and write RP-026 tags
+			rp26.append("{#}");
+			SequenceCreator.addMessageLyrics(rp26.toString(), 0);
 		}
 		catch (InvalidMidiDataException e) {
 			throw new ParseException( Dict.get(Dict.ERROR_MIDI_PROBLEM) + e.getMessage() );
@@ -2571,7 +2570,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		if (isRootParser) {
 			instrumentsParsed   = false;
-			metaInfo            = new HashMap<String, StringBuffer>();
+			metaInfo            = new HashMap<String, StringBuilder>();
 			frstInstrBlkOver    = false;
 			isDefineParsRun     = false;
 			isChInstMetaParsRun = false;

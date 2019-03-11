@@ -62,7 +62,6 @@ public class SequenceAnalyzer {
 	private static final int    KARAOKE_LYRICS         =  2; // meta message type: lyrics
 	private static final float  KAR_PRE_ALERT_QUARTERS =  1; // pre-alert so many quarter notes before a lyric change
 	private static final float  KAR_MAX_SYL_SPACE_RATE =  8; // max syllables-per-whitespace - add spaces, if there are not enough
-	private static final String KAR_TYPE_MIDICA_SIMPLE = "MIDICA SIMPLE";
 	
 	// message sorting
 	public static final String MSG_LVL_1_SORT_VOICE   = "1";
@@ -75,15 +74,20 @@ public class SequenceAnalyzer {
 	
 	private static final long DEFAULT_CHANNEL_CONFIG_TICK = -100;
 	
-	private static Sequence sequence      = null;
-	private static String   chosenCharset = null;
+	private static Sequence  sequence      = null;
+	private static String    chosenCharset = null;
+	private static LyricUtil lyricUtil     = null;
 	
 	// karaoke-related fields
-	private static final Pattern pattSongInfo = Pattern.compile( "\\{#\\s*(.+?)\\s*=\\s*(.+?)\\s*\\}" );
-	private static String midiFileCharset     = null;
-	private static String karaokeMode         = null;
-	private static long   karLineTick         = -1;
-	private static long   karPreAlertTicks    = 0;
+	private static String  midiFileCharset  = null;
+	private static String  karaokeMode      = null;
+	private static long    karLineTick      = -1;
+	private static boolean karLineEnded     = false;
+	private static long    karPreAlertTicks = 0;
+	private static int     karTextCounter   = 0;
+	private static int     karLyricsCounter = 0;
+	private static boolean karUseLyrics     = true;
+	private static Pattern karPattSecond    = Pattern.compile( Pattern.quote("<span class='second'>") );
 	
 	private static HashMap<String, Object> sequenceInfo = null;
 	private static HashMap<String, Object> karaokeInfo  = null;
@@ -175,6 +179,7 @@ public class SequenceAnalyzer {
 				throw (ParseException) e;
 			}
 			else {
+				e.printStackTrace();
 				throw new ParseException( e.getMessage() );
 			}
 		}
@@ -248,6 +253,7 @@ public class SequenceAnalyzer {
 	 *         tree cannot be created.
 	 */
 	private static void init() throws ReflectiveOperationException {
+		lyricUtil = LyricUtil.getInstance();
 		
 		// initialize data structures for the sequence info
 		sequenceInfo   = new HashMap<String, Object>();
@@ -287,8 +293,12 @@ public class SequenceAnalyzer {
 		
 		// initialize data structures for karaoke
 		karPreAlertTicks = (long) (resolution / KAR_PRE_ALERT_QUARTERS);
+		karTextCounter   = 0;
+		karLyricsCounter = 0;
+		karUseLyrics     = true;
 		karaokeMode      = null;
 		karLineTick      = -1;
+		karLineEnded     = false;
 		karaokeInfo      = new HashMap<String, Object>();
 		lyrics           = new TreeMap<Long, TreeMap<Long, String>>();
 		lyricsEvent      = new TreeSet<Long>();
@@ -336,32 +346,10 @@ public class SequenceAnalyzer {
 	 */
 	private static void parse() throws ReflectiveOperationException {
 		
-		// Analyze for channel activity, note history, banks and instruments.
-		// Therefore the CREATED sequence is used.
-		// In this sequence tracks match channels. So we know that we will
-		// process the note-related events in the right order.
-		midiFileCharset = null;
-		int trackNum    = 0;
-		for (Track t : SequenceCreator.getSequence().getTracks()) {
-			for (int i=0; i < t.size(); i++) {
-				MidiEvent   event = t.get( i );
-				long        tick  = event.getTick();
-				MidiMessage msg   = event.getMessage();
-				
-				if (msg instanceof ShortMessage) {
-					processShortMessageByChannel( (ShortMessage) msg, tick );
-				}
-				else if (msg instanceof MetaMessage) {
-					processMetaMessageByChannel( (MetaMessage) msg, tick, trackNum );
-				}
-			}
-			trackNum++;
-		}
-		
 		// Analyze for general statistics.
 		// Therefore the ORIGINAL sequence is used.
 		midiFileCharset = null;
-		trackNum        = 0;
+		int trackNum    = 0;
 		for (Track t : sequence.getTracks()) {
 			int msgNum = 0;
 			for (int i=0; i < t.size(); i++) {
@@ -389,8 +377,34 @@ public class SequenceAnalyzer {
 			}
 			trackNum++;
 		}
-		
 		sequenceInfo.put( "num_tracks", trackNum );
+		
+		// use lyrics or text events for karaoke?
+		if (karTextCounter > karLyricsCounter) {
+			karUseLyrics = false;
+		}
+		
+		// Analyze for channel activity, note history, banks and instruments.
+		// Therefore the CREATED sequence is used.
+		// In this sequence tracks match channels. So we know that we will
+		// process the note-related events in the right order.
+		midiFileCharset = null;
+		trackNum        = 0;
+		for (Track t : SequenceCreator.getSequence().getTracks()) {
+			for (int i=0; i < t.size(); i++) {
+				MidiEvent   event = t.get( i );
+				long        tick  = event.getTick();
+				MidiMessage msg   = event.getMessage();
+				
+				if (msg instanceof ShortMessage) {
+					processShortMessageByChannel( (ShortMessage) msg, tick );
+				}
+				else if (msg instanceof MetaMessage) {
+					processMetaMessageByChannel( (MetaMessage) msg, tick, trackNum );
+				}
+			}
+			trackNum++;
+		}
 	}
 	
 	/**
@@ -714,51 +728,33 @@ public class SequenceAnalyzer {
 		
 		// TEXT
 		else if (MidiListener.META_TEXT == type) {
-			text = CharsetUtils.getTextFromBytes( content, chosenCharset, midiFileCharset );
-			
-			// software?
-			Pattern patternSW = Pattern.compile( "^" + Pattern.quote(SequenceCreator.GENERATED_BY) + "(.+)$" );
-			Matcher matcherSW = patternSW.matcher( text );
-			if (matcherSW.matches()) {
-				String                  software = matcherSW.group( 1 );
-				HashMap<String, String> metaInfo = (HashMap<String, String>) sequenceInfo.get( "meta_info" );
-				metaInfo.put( "software", software );
-				
-				// minor version?
-				Pattern patternMV = Pattern.compile( ".+\\.(\\d{10})$" );
-				Matcher matcherMV = patternMV.matcher( software );
-				if (matcherMV.matches()) {
-					int  minor     = Integer.parseInt( matcherMV.group(1) );
-					Date timestamp = new Date( minor * 1000L );
-					SimpleDateFormat formatter    = new SimpleDateFormat( Dict.get(Dict.TIMESTAMP_FORMAT) );
-					String           softwareDate = formatter.format( timestamp );
-					metaInfo.put( "software_date", softwareDate );
-				}
-			}
+			karTextCounter++;
 		}
 		
 		// {#...=...} song info according to recommended practice RP-026
 		else if (MidiListener.META_LYRICS == type) {
-			text = CharsetUtils.getTextFromBytes( content, chosenCharset, midiFileCharset );
-			if (text.contains("{#")) {
-				Matcher m = pattSongInfo.matcher( text );
-				while (m.find()) {
-					String key   = m.group( 1 ).toLowerCase();
-					String value = m.group( 2 );
-					if ("lyrics".equals(key)) {
-						key = "lyricist";
+			karLyricsCounter++;
+			text = CharsetUtils.getTextFromBytes(content, chosenCharset, midiFileCharset);
+			
+			// charset switch?
+			String newCharset = CharsetUtils.findCharsetSwitch(text);
+			if (newCharset != null) {
+				midiFileCharset = newCharset;
+			}
+			
+			HashMap<String, String> info = lyricUtil.getSongInfo(text);
+			if (info != null) {
+				for (String key : info.keySet()) {
+					String value = info.get(key);
+					if (LyricUtil.SOFTWARE.equals(key)) {
+						retrieveSoftwareVersion(value);
 					}
-					if ( "title".equals(key)
-					  || "composer".equals(key)
-					  || "lyricist".equals(key)
-					  || "artist".equals(key) ) {
-						if (karaokeInfo.containsKey(key)) {
-							String oldValue = (String) karaokeInfo.get( key );
-							karaokeInfo.put( key, oldValue + "\n" + value );
-						}
-						else {
-							karaokeInfo.put( key, value );
-						}
+					else if (karaokeInfo.containsKey(key)) {
+						String oldValue = (String) karaokeInfo.get( key );
+						karaokeInfo.put( key, oldValue + "\n" + value );
+					}
+					else {
+						karaokeInfo.put( key, value );
 					}
 				}
 			}
@@ -846,14 +842,6 @@ public class SequenceAnalyzer {
 		}
 		msgDetail.setOption( "leaf_node", leaf );
 		msgDetail.setOption( "message", message );
-		
-		// charset switch in a TEXT or LYRICS event?
-		if (MidiListener.META_LYRICS == type || MidiListener.META_TEXT == type) {
-			String newCharset = CharsetUtils.findCharsetSwitch( text );
-			if (newCharset != null) {
-				midiFileCharset = newCharset;
-			}
-		}
 	}
 	
 	/**
@@ -867,6 +855,19 @@ public class SequenceAnalyzer {
 		int    type = msg.getType();
 		byte[] data = msg.getData();
 		String text = null;
+		
+		// LYRICS
+		if (MidiListener.META_LYRICS == type) {
+			text = CharsetUtils.getTextFromBytes( data, chosenCharset, midiFileCharset );
+			
+			// charset switch?
+			String newCharset = CharsetUtils.findCharsetSwitch(text);
+			if (newCharset != null) {
+				midiFileCharset = newCharset;
+			}
+			text = lyricUtil.removeTags(text);
+			processKaraoke( text, KARAOKE_LYRICS, tick );
+		}
 		
 		// INSTRUMENT NAME
 		if (MidiListener.META_INSTRUMENT_NAME == type) {
@@ -884,45 +885,67 @@ public class SequenceAnalyzer {
 			commentHistory.get( channel ).put( tick, text );
 		}
 		
-		// LYRICS
-		else if (MidiListener.META_LYRICS == type) {
-			text = CharsetUtils.getTextFromBytes( data, chosenCharset, midiFileCharset );
-			processKaraoke( text, KARAOKE_LYRICS, tick );
-		}
-		
 		// TEXT
 		else if (MidiListener.META_TEXT == type) {
 			text = CharsetUtils.getTextFromBytes( data, chosenCharset, midiFileCharset );
 			
-			// karaoke type definition?
-			if (text.startsWith("@K")) {
-				karaokeMode = text.substring( 2 );
-				karaokeInfo.put( "type", karaokeMode );
-			}
-			
-			// software version (probably created by Midica)
-			else if (tick <= SequenceCreator.TICK_SOFTWARE
-			  && text.startsWith(SequenceCreator.GENERATED_BY)) {
-				// not karaoke-related - nothing more to do
+			// karaoke meta message according to .kar files?
+			if (text.startsWith("@") && text.length() > 1) {
+				String prefix = text.substring( 0, 2 );
+				text          = text.substring( 2 );
+				
+				// karaoke type definition?
+				if ("@K".equals(prefix)) {
+					karaokeMode = text;
+					karaokeInfo.put( "type", karaokeMode );
+				}
+				
+				// version
+				else if ("@V".equals(prefix)) {
+					if (null == karaokeInfo.get("version")) {
+						karaokeInfo.put( "version", text );
+					}
+				}
+				
+				// language
+				else if ("@L".equals(prefix)) {
+					if (null == karaokeInfo.get("language")) {
+						karaokeInfo.put( "language", text );
+					}
+				}
+				
+				// title, author or copyright
+				else if ("@T".equals(prefix)) {
+					if (null == karaokeInfo.get("title")) {
+						karaokeInfo.put( "title", text );
+					}
+					else if (null == karaokeInfo.get("author")) {
+						karaokeInfo.put( "author", text );
+					}
+					else if (null == karaokeInfo.get("copyright")) {
+						karaokeInfo.put( "copyright", text );
+					}
+				}
+				
+				// further information
+				else if ("@I".equals(prefix)) {
+					ArrayList<String> infos = (ArrayList<String>) karaokeInfo.get( "infos" );
+					if (null == infos) {
+						infos = new ArrayList<String>();
+						karaokeInfo.put( "infos", infos );
+					}
+					infos.add( text );
+				}
+				
+				// ignore all other messages beginning with "@"
+				return;
 			}
 			
 			// Normal text, maybe lyrics.
 			// Unfortunately some MIDI files contain lyrics as type TEXT
 			// instead of LYRICS without providing an @K header. So we must
 			// consider all text as possibly lyrics.
-			else if (! KAR_TYPE_MIDICA_SIMPLE.equals(karaokeMode)) {
-				processKaraoke( text, KARAOKE_TEXT, tick );
-			}
-			
-			// TODO: handle KAR_TYPE_MIDICA_SIMPLE
-		}
-		
-		// charset switch in a TEXT or LYRICS event?
-		if (MidiListener.META_LYRICS == type || MidiListener.META_TEXT == type) {
-			String newCharset = CharsetUtils.findCharsetSwitch( text );
-			if (newCharset != null) {
-				midiFileCharset = newCharset;
-			}
+			processKaraoke( text, KARAOKE_TEXT, tick );
 		}
 	}
 	
@@ -1308,90 +1331,74 @@ public class SequenceAnalyzer {
 	 */
 	private static void processKaraoke( String text, int type, long tick ) {
 		
-		boolean mustAddLyricsMarker = false;
+		// Process as syllable-based lyrics?
+		// Some @K songs contain duplicate lyrics (text and lyrics messages).
+		// In this case show only one part of them.
+		if (karUseLyrics && KARAOKE_TEXT == type)
+			return;
+		if (! karUseLyrics && KARAOKE_LYRICS == type)
+			return;
+		if ( "".equals(text) )
+			return;
 		
-		// karaoke meta message?
-		if (KARAOKE_TEXT == type && text.startsWith("@") && text.length() > 1) {
-			String prefix = text.substring( 0, 2 );
-			text          = text.substring( 2 );
-			
-			// version
-			if ("@V".equals(prefix)) {
-				if (null == karaokeInfo.get("version")) {
-					karaokeInfo.put( "version", text );
-				}
-			}
-			
-			// language
-			if ("@L".equals(prefix)) {
-				if (null == karaokeInfo.get("language")) {
-					karaokeInfo.put( "language", text );
-				}
-			}
-			
-			// title, author or copyright
-			else if ("@T".equals(prefix)) {
-				if (null == karaokeInfo.get("title")) {
-					karaokeInfo.put( "title", text );
-				}
-				else if (null == karaokeInfo.get("author")) {
-					karaokeInfo.put( "author", text );
-				}
-				else if (null == karaokeInfo.get("copyright")) {
-					karaokeInfo.put( "copyright", text );
-				}
-			}
-			
-			// further information
-			else if ("@I".equals(prefix)) {
-				ArrayList<String> infos = (ArrayList<String>) karaokeInfo.get( "infos" );
-				if (null == infos) {
-					infos = new ArrayList<String>();
-					karaokeInfo.put( "infos", infos );
-				}
-				infos.add( text );
-			}
-			
-			// ignore all other messages beginning with "@"
+		// UNIFY WHITESPACES FROM DIFFERENT SOURCES
+		if (KARAOKE_LYRICS == type) {
+			// unescape \r, \n, \t
+			text = lyricUtil.unescapeSpecialWhitespaces(text);
+		}
+		else {
+			// unescape /, \
+			if (text.startsWith("/"))
+				text = "\r" + text.substring(1);
+			else if (text.startsWith("\\"))
+				text = "\n" + text.substring(1);
+		}
+		
+		// get last or current line
+		TreeMap<Long, String> line = lyrics.get( karLineTick );
+		
+		// Did we already find another lyrics/text event at this tick?
+		if (line != null && line.containsKey(tick)) {
+			// Assume that the first one was the right one and ignore the rest.
 			return;
 		}
 		
-		// process simple lyrics (not syllable-based)
-		else if (KAR_TYPE_MIDICA_SIMPLE.equals(karaokeMode) && KARAOKE_LYRICS == type) {
-			
-			// TODO: implement
-			mustAddLyricsMarker = true;
+		// do we need (a) new line(s)?
+		boolean needNewLineNow         = false;
+		boolean beginsWithNewLine      = false;
+		boolean beginsWithNewParagraph = false;
+		boolean endsWithNewLine        = false;
+		boolean endsWithNewParagraph   = false;
+		if (-1 == karLineTick || karLineEnded) {
+			needNewLineNow = true;
+			karLineEnded   = false;
+		}
+		if (text.length() > 1) { // regard "\r" as belonging only to the LAST line
+			if (text.startsWith("\r")) {
+				needNewLineNow    = true;
+				beginsWithNewLine = true;
+			}
+			else if (text.startsWith("\n")) {
+				needNewLineNow         = true;
+				beginsWithNewLine      = true;
+				beginsWithNewParagraph = true;
+			}
+		}
+		if (text.endsWith("\r")) {
+			endsWithNewLine = true;
+			karLineEnded    = true;
+		}
+		else if (text.endsWith("\n")) {
+			endsWithNewLine      = true;
+			endsWithNewParagraph = true;
+			karLineEnded         = true;
 		}
 		
-		// process possibly syllable-based lyrics
-		else if (!KAR_TYPE_MIDICA_SIMPLE.equals(karaokeMode)) {
-			
-			// get current line
-			TreeMap<Long, String> line = lyrics.get( karLineTick );
-			
-			// Did we already find another lyrics/text event at this tick?
-			if (line != null && line.containsKey(tick)) {
-				// Assume that the first one was the right one and ignore the rest.
-				// At least in "Cats in the cradle" that gives the best result.
-				// The tune-1000-formatted text events come first, followed by
-				// several alternative lyrics events with worse formatting but at
-				// the same tick.
-				return;
-			}
-			
-			// do we need a new line?
-			boolean needNewLine      = false;
-			boolean needNewParagraph = false;
-			if (-1 == karLineTick || text.startsWith("/")) {
-				needNewLine = true;
-			}
-			if (text.startsWith("\\")) {
-				needNewLine      = true;
-				needNewParagraph = true;
-			}
-			
-			// add line break(s) to the last syllable
-			if (needNewLine && line != null) {
+		// BEGINNING WITH LINEBREAK(S)?
+		// move CR/LF from the beginning to the end of the last syllable
+		if (beginsWithNewLine) {
+			text = text.substring(1); // remove CR/LF
+			if (line != null) {
 				Entry<Long, String> lastSylEntry = line.lastEntry();
 				long lastSylTick    = lastSylEntry.getKey();
 				String lastSyllable = lastSylEntry.getValue();
@@ -1400,45 +1407,46 @@ public class SequenceAnalyzer {
 				lastSyllable = lastSyllable + "\n";
 				
 				// add 2nd line break (for the new paragraph)
-				if (needNewParagraph) {
+				if (beginsWithNewParagraph) {
 					lastSyllable = lastSyllable + "\n";
 				}
 				
 				// commit the changes
 				line.put( lastSylTick, lastSyllable );
 			}
-			
-			// create new line data structure
-			if (needNewLine) {
-				karLineTick = tick;
-				line        = new TreeMap<Long, String>();
-				lyrics.put( tick, line );
-			}
-			
-			// remove special character, if necessary
-			if (text.startsWith("\\") || text.startsWith("/")) {
-				text = text.substring( 1 );
-			}
-			
-			// add the syllable
-			line.put( tick, text );
-			mustAddLyricsMarker = true;
 		}
 		
-		// prepare marker events
-		if (mustAddLyricsMarker) {
-			// the lyrics event itself
-			lyricsEvent.add( tick );
-			markerTicks.add( tick );
-			
-			// pre-alert before the lyrics event
-			tick -= karPreAlertTicks;
-			if (tick < 0) {
-				tick = 0;
-			}
-			lyricsEvent.add( tick );
-			markerTicks.add( tick );
+		// ADD NEW LINE
+		if (needNewLineNow) {
+			karLineTick = tick;
+			line        = new TreeMap<Long, String>();
+			lyrics.put( tick, line );
 		}
+		
+		// ENDING WITH LINEBREAK(S)?
+		if (endsWithNewLine) {
+			text = text.substring(0, text.length() - 1) + "\n"; // replace \r with \n
+			if (endsWithNewParagraph) {
+				text += "\n"; // add a second line break
+			}
+		}
+		
+		// add the syllable
+		line.put( tick, text );
+		
+		// PREPARE MARKER EVENTS
+		
+		// the lyrics event itself
+		lyricsEvent.add( tick );
+		markerTicks.add( tick );
+		
+		// pre-alert before the lyrics event
+		tick -= karPreAlertTicks;
+		if (tick < 0) {
+			tick = 0;
+		}
+		lyricsEvent.add( tick );
+		markerTicks.add( tick );
 	}
 	
 	/**
@@ -1648,21 +1656,18 @@ public class SequenceAnalyzer {
 	private static void postprocessKaraoke() {
 		
 		// join all info headers (@I)
-		ArrayList<String> infoObj = (ArrayList<String>) karaokeInfo.get( "infos" );
-		if (infoObj != null) {
-			StringBuilder infoBuf = new StringBuilder( infoObj.get(0) );
-			for (int i = 1; i < infoObj.size(); i++) {
-				infoBuf.append( "\n" + infoObj.get(i) );
-			}
-			karaokeInfo.put( "info", infoBuf.toString() );
+		ArrayList<String> infoHeaders = (ArrayList<String>) karaokeInfo.get( "infos" );
+		if (infoHeaders != null) {
+			karaokeInfo.put( "info", String.join("\n", infoHeaders) );
 		}
 		
-		// delete non-printable characters
+		// delete carriage returns from the middle of syllables
+		Pattern patCR = Pattern.compile( Pattern.quote("\r") );
 		for (TreeMap<Long, String> line : lyrics.values()) {
 			for (Entry<Long, String> sylEntry : line.entrySet()) {
 				long   tick     = sylEntry.getKey();
 				String syllable = sylEntry.getValue();
-				syllable        = syllable.replaceAll( "\\r", "" );
+				syllable        = patCR.matcher(syllable).replaceAll("");
 				line.put( tick, syllable );
 			}
 		}
@@ -1721,7 +1726,7 @@ public class SequenceAnalyzer {
 		}
 		
 		// create full lyrics string (for the info view)
-		StringBuilder lyricsFull = new StringBuilder( "" );
+		StringBuilder lyricsFull = new StringBuilder("");
 		for (TreeMap<Long, String> line : lyrics.values()) {
 			for (String syllable : line.values()) {
 				lyricsFull.append( syllable );
@@ -1799,14 +1804,18 @@ public class SequenceAnalyzer {
 		lyrics = newLyrics;
 		
 		// HTML replacements and entities
+		Pattern pattAMP = Pattern.compile("&");
+		Pattern pattLT  = Pattern.compile("<");
+		Pattern pattGT  = Pattern.compile(">");
+		Pattern pattLF  = Pattern.compile( Pattern.quote("\n") );
 		for (TreeMap<Long, String> line : lyrics.values()) {
 			for (Entry<Long, String> sylEntry : line.entrySet()) {
 				long   tick     = sylEntry.getKey();
 				String syllable = sylEntry.getValue();
-				syllable        = syllable.replaceAll( "&",   "&amp;"  );
-				syllable        = syllable.replaceAll( "<",   "&lt;"   );
-				syllable        = syllable.replaceAll( ">",   "&gt;"   );
-				syllable        = syllable.replaceAll( "\\n", "<br>\n" );
+				syllable        = pattAMP.matcher(syllable).replaceAll("&amp;");
+				syllable        = pattLT.matcher(syllable).replaceAll("&lt;");
+				syllable        = pattGT.matcher(syllable).replaceAll("&gt;");
+				syllable        = pattLF.matcher(syllable).replaceAll( Matcher.quoteReplacement("<br>\n") );
 				line.put( tick, syllable );
 			}
 		}
@@ -2086,8 +2095,9 @@ public class SequenceAnalyzer {
 				// So this is not supported:
 				// '<style>.future .second { color: ...; }</style>'
 				if (! isPast) {
+					// <span class='second'> --> <span class='future_second'>
 					// necessary because nesting CSS classes doesn't work in swing
-					syllable = syllable.replaceAll( "<span class='second'>", "<span class='future_second'>" );
+					syllable = karPattSecond.matcher(syllable).replaceAll( "<span class='future_second'>" );
 				}
 				
 				// must alert?
@@ -3468,6 +3478,28 @@ public class SequenceAnalyzer {
 		
 		// fallback
 		return Dict.get( Dict.UNKNOWN );
+	}
+	
+	/**
+	 * Analyzes the software version string from the MIDI sequence.
+	 * 
+	 * @param text    software version string.
+	 */
+	private static void retrieveSoftwareVersion(String text) {
+		
+		HashMap<String, String> metaInfo = (HashMap<String, String>) sequenceInfo.get( "meta_info" );
+		metaInfo.put( "software", text );
+		
+		// minor version?
+		Pattern patternMV = Pattern.compile( ".+\\.(\\d{10})$" );
+		Matcher matcherMV = patternMV.matcher( text );
+		if (matcherMV.matches()) {
+			int  minor     = Integer.parseInt( matcherMV.group(1) );
+			Date timestamp = new Date( minor * 1000L );
+			SimpleDateFormat formatter    = new SimpleDateFormat( Dict.get(Dict.TIMESTAMP_FORMAT) );
+			String           softwareDate = formatter.format( timestamp );
+			metaInfo.put( "software_date", softwareDate );
+		}
 	}
 	
 	/**

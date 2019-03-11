@@ -9,6 +9,7 @@ package org.midica.file;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MetaMessage;
@@ -22,6 +23,7 @@ import javax.sound.midi.Track;
 
 import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.midi.LyricUtil;
 import org.midica.midi.MidiListener;
 import org.midica.midi.SequenceCreator;
 import org.midica.ui.model.ComboboxStringOption;
@@ -52,6 +54,8 @@ public class MidiParser extends SequenceParser {
 	
 	private String chosenCharset = null;
 	
+	private static LyricUtil lyricUtil = LyricUtil.getInstance();
+	
 	/**
 	 * Parses a MIDI file.
 	 * 
@@ -77,6 +81,7 @@ public class MidiParser extends SequenceParser {
 			throw new ParseException( e.getMessage() );
 		}
 		catch ( IOException e ) {
+			e.printStackTrace();
 			throw new ParseException( e.getMessage() );
 		}
 	}
@@ -150,23 +155,26 @@ public class MidiParser extends SequenceParser {
 		// lyrics: track 2
 		if ( MidiListener.META_LYRICS == type ) {
 			track = 2;
+			
+			// produced by midica?
+			String text = CharsetUtils.getTextFromBytes( msg.getData(), chosenCharset, midiFileCharset );
+			HashMap<String, String> info = lyricUtil.getSongInfo(text);
+			if (info != null && info.containsKey(LyricUtil.SOFTWARE)) {
+				String value = info.get(LyricUtil.SOFTWARE);
+				if (value.startsWith("Midica ")) {
+					isProducedByMidica = true;
+				}
+			}
 		}
 		
 		// text: further checks needed
 		else if ( MidiListener.META_TEXT == type ) {
 			String text = CharsetUtils.getTextFromBytes( msg.getData(), chosenCharset, midiFileCharset );
 			
-			// software version (file probably created by Midica before)
-			if ( tick <= SequenceCreator.TICK_SOFTWARE
-			  && text.startsWith( SequenceCreator.GENERATED_BY + "Midica ") ) {
-				track              = 0;
-				isProducedByMidica = true;
-			}
-			
 			// karaoke meta information for track 1
-			else if ( text.startsWith("@K")
-			       || text.startsWith("@V")
-			       || text.startsWith("@I") ) {
+			if ( text.startsWith("@K")
+			  || text.startsWith("@V")
+			  || text.startsWith("@I") ) {
 				track = 1;
 			}
 			

@@ -81,8 +81,8 @@ public class SoundcheckNoteModel extends DefaultListModel<NamedInteger> {
 			
 			// construct and add each option
 			for ( int key : sortedPercussion ) {
-				StringBuffer name = new StringBuffer(Dict.getPercussionShortId(key));
-				int numSpaces     = shortOptChars - name.length();
+				StringBuilder name = new StringBuilder(Dict.getPercussionShortId(key));
+				int numSpaces      = shortOptChars - name.length();
 				for (int i = 0; i < numSpaces; i++)
 					name.append(" ");
 				name.append(" / ");
