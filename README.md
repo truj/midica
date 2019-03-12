@@ -26,6 +26,10 @@ You write your songs in plain text files using the text editor of your choice. M
     - Channel Detail viewer (Note name and number, volume and tick, channel by channel)
     - Channel configuration (Volume, Mute and Solo configurable channel by channel)
     - Quick reloading and reparsing of a loaded MidicaPL script
+- **Karaoke Player**
+    - Integrated as a part of the MIDI player
+    - displaying syllables in italic, shortly before they must be sung
+    - displaying syllables in a different color, when they must be sung
 - **Soundfonts**
     - Loading Soundfonts and using them for playback
     - Analyzing Soundfont contents

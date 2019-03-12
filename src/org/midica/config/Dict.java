@@ -109,6 +109,11 @@ public class Dict {
 	public static final String SYNTAX_M                  = "MULTIPLE_SHORT";
 	public static final String SYNTAX_QUANTITY           = "QUANTITY";
 	public static final String SYNTAX_Q                  = "QUANTITY_SHORT";
+	public static final String SYNTAX_LYRICS             = "LYRICS";
+	public static final String SYNTAX_L                  = "LYRICS_SHORT";
+	public static final String SYNTAX_LYRICS_SPACE       = "LYRICS_SPACE";
+	public static final String SYNTAX_LYRICS_CR          = "LYRICS_CR";
+	public static final String SYNTAX_LYRICS_LF          = "LYRICS_LF";
 	public static final String SYNTAX_REST               = "REST";
 	public static final String SYNTAX_CHORD              = "CHORD";
 	public static final String SYNTAX_INLINE_CHORD_SEP   = "INLINE_CHORD_SEP";
@@ -1470,6 +1475,11 @@ public class Dict {
 		set( SYNTAX_M,                  "multiple notes option (short)"                    );
 		set( SYNTAX_QUANTITY,           "quantity: how often to play the note"             );
 		set( SYNTAX_Q,                  "quantity option (short)"                          );
+		set( SYNTAX_LYRICS,             "lyrics option (long)"                             );
+		set( SYNTAX_L,                  "lyrics option (short)"                            );
+		set( SYNTAX_LYRICS_SPACE,       "placeholder for a space inside of a syllable"     );
+		set( SYNTAX_LYRICS_CR,          "placeholder for a new line inside of a syllable"  );
+		set( SYNTAX_LYRICS_LF,          "placeholder for a new paragraph inside of a syllable" );
 		set( SYNTAX_REST,               "rest character"                                   );
 		set( SYNTAX_CHORD,              "chord definition"                                 );
 		set( SYNTAX_INLINE_CHORD_SEP,   "inline chord separator"                           );
@@ -1818,7 +1828,7 @@ public class Dict {
 		set( ERROR_MACRO_NOT_ALLOWED_HERE,        "a macro definition is not allowed inside a block<br>maybe you forgot to close the block." );
 		set( ERROR_META_NOT_ALLOWED_HERE,         "a meta definition is not allowed inside a block<br>maybe you forgot to close the block." );
 		set( ERROR_INCLUDE_NUM_OF_ARGS,           "wrong number of arguments in macro command 'INCLUDE'"              );
-		set( ERROR_INCLUDE_UNKNOWN_ARG,           "unknown argument for 'INCLUDE'"                                    );
+		set( ERROR_INCLUDE_UNKNOWN_ARG,           "unknown argument for 'INCLUDE': "                                  );
 		set( ERROR_INVALID_TIME_DENOM,            "invalid denominator in time signature: "                           );
 		set( ERROR_INVALID_TIME_SIG,              "invalid time signature argument: "                                 );
 		set( ERROR_INVALID_KEY_SIG,               "invalid key signature argument: "                                  );
@@ -2281,6 +2291,11 @@ public class Dict {
 		setSyntax( SYNTAX_M,                  "m"            );
 		setSyntax( SYNTAX_QUANTITY,           "quantity"     );
 		setSyntax( SYNTAX_Q,                  "q"            );
+		setSyntax( SYNTAX_LYRICS,             "lyrics"       );
+		setSyntax( SYNTAX_L,                  "l"            );
+		setSyntax( SYNTAX_LYRICS_SPACE,       "_"            );
+		setSyntax( SYNTAX_LYRICS_CR,          "\\r"          );
+		setSyntax( SYNTAX_LYRICS_LF,          "\\n"          );
 		setSyntax( SYNTAX_REST,               "-"            );
 		setSyntax( SYNTAX_CHORD,              "CHORD"        );
 		setSyntax( SYNTAX_INLINE_CHORD_SEP,   ","            );
@@ -2375,6 +2390,11 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_M                );
 		addSyntaxForInfoView( SYNTAX_QUANTITY         );
 		addSyntaxForInfoView( SYNTAX_Q                );
+		addSyntaxForInfoView( SYNTAX_LYRICS           );
+		addSyntaxForInfoView( SYNTAX_L                );
+		addSyntaxForInfoView( SYNTAX_LYRICS_SPACE     );
+		addSyntaxForInfoView( SYNTAX_LYRICS_CR        );
+		addSyntaxForInfoView( SYNTAX_LYRICS_LF        );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_NOTE_LENGTH) );
 		addSyntaxForInfoView( SYNTAX_32            );

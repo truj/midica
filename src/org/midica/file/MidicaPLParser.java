@@ -48,10 +48,11 @@ public class MidicaPLParser extends SequenceParser {
 	 *******************/
 	
 	// identifiers for options
-	private static final String OPT_VELOCITY = "velocity";
-	private static final String OPT_MULTIPLE = "multiple";
-	private static final String OPT_DURATION = "duration";
-	private static final String OPT_QUANTITY = "quantity";
+	public static final String OPT_VELOCITY = "velocity";
+	public static final String OPT_MULTIPLE = "multiple";
+	public static final String OPT_DURATION = "duration";
+	public static final String OPT_QUANTITY = "quantity";
+	public static final String OPT_LYRICS   = "lyrics";
 	
 	private static final int MODE_DEFAULT     = 0;
 	private static final int MODE_INSTRUMENTS = 1;
@@ -107,6 +108,11 @@ public class MidicaPLParser extends SequenceParser {
 	public static String LENGTH_M8          = null;
 	public static String LENGTH_M16         = null;
 	public static String LENGTH_M32         = null;
+	public static String L                  = null;
+	public static String LYRICS             = null;
+	public static String LYRICS_SPACE       = null;
+	public static String LYRICS_CR          = null;
+	public static String LYRICS_LF          = null;
 	public static String MACRO              = null;
 	public static String M                  = null;
 	public static String MULTIPLE           = null;
@@ -227,6 +233,11 @@ public class MidicaPLParser extends SequenceParser {
 		LENGTH_M8          = Dict.getSyntax( Dict.SYNTAX_M8                 );
 		LENGTH_M16         = Dict.getSyntax( Dict.SYNTAX_M16                );
 		LENGTH_M32         = Dict.getSyntax( Dict.SYNTAX_M32                );
+		L                  = Dict.getSyntax( Dict.SYNTAX_L                  );
+		LYRICS             = Dict.getSyntax( Dict.SYNTAX_LYRICS             );
+		LYRICS_SPACE       = Dict.getSyntax( Dict.SYNTAX_LYRICS_SPACE       );
+		LYRICS_CR          = Dict.getSyntax( Dict.SYNTAX_LYRICS_CR          );
+		LYRICS_LF          = Dict.getSyntax( Dict.SYNTAX_LYRICS_LF          );
 		MACRO              = Dict.getSyntax( Dict.SYNTAX_MACRO              );
 		M                  = Dict.getSyntax( Dict.SYNTAX_M                  );
 		MULTIPLE           = Dict.getSyntax( Dict.SYNTAX_MULTIPLE           );
@@ -1331,18 +1342,18 @@ public class MidicaPLParser extends SequenceParser {
 		// get options (quantity / multiple)
 		int     quantity = -1;
 		boolean multiple = false;
-		HashMap<String, Number> options = new HashMap<String, Number>();
 		if (optionsStr.length() > 0) {
-			options = parseOptions(optionsStr);
-			for (String key : options.keySet()) {
-				if (OPT_QUANTITY.equals(key)) {
-					quantity = (int) options.get(key);
+			ArrayList<CommandOption> options = parseOptions(optionsStr);
+			for (CommandOption opt : options) {
+				String optName = opt.getName();
+				if (OPT_QUANTITY.equals(optName)) {
+					quantity = opt.getQuantity();
 				}
-				else if (OPT_MULTIPLE.equals(key)) {
+				else if (OPT_MULTIPLE.equals(optName)) {
 					multiple = true;
 				}
 				else {
-					throw new ParseException( Dict.get(Dict.ERROR_BLOCK_INVALID_ARG) + key );
+					throw new ParseException( Dict.get(Dict.ERROR_BLOCK_INVALID_ARG) + optName );
 				}
 			}
 		}
@@ -1452,16 +1463,17 @@ public class MidicaPLParser extends SequenceParser {
 		int     quantity = 1;
 		boolean multiple = false;
 		if (3 == tokens.length) {
-			HashMap<String, Number> options = parseOptions(tokens[2]);
-			for (String key : options.keySet()) {
-				if (OPT_QUANTITY.equals(key)) {
-					quantity = (int) options.get(key);
+			ArrayList<CommandOption> options = parseOptions(tokens[2]);
+			for (CommandOption opt : options) {
+				String optName = opt.getName();
+				if (OPT_QUANTITY.equals(optName)) {
+					quantity = opt.getQuantity();
 				}
-				else if (OPT_MULTIPLE.equals(key)) {
+				else if (OPT_MULTIPLE.equals(optName)) {
 					multiple = true;
 				}
 				else {
-					throw new ParseException( Dict.get(Dict.ERROR_INCLUDE_UNKNOWN_ARG) );
+					throw new ParseException( Dict.get(Dict.ERROR_INCLUDE_UNKNOWN_ARG) + optName );
 				}
 			}
 		}
@@ -1692,6 +1704,11 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_M8.equals(cmdId)                 ) LENGTH_M8          = cmdName;
 		else if ( Dict.SYNTAX_M16.equals(cmdId)                ) LENGTH_M16         = cmdName;
 		else if ( Dict.SYNTAX_M32.equals(cmdId)                ) LENGTH_M32         = cmdName;
+		else if ( Dict.SYNTAX_L.equals(cmdId)                  ) L                  = cmdName;
+		else if ( Dict.SYNTAX_LYRICS.equals(cmdId)             ) LYRICS             = cmdName;
+		else if ( Dict.SYNTAX_LYRICS_SPACE.equals(cmdId)       ) LYRICS_SPACE       = cmdName;
+		else if ( Dict.SYNTAX_LYRICS_CR.equals(cmdId)          ) LYRICS_CR          = cmdName;
+		else if ( Dict.SYNTAX_LYRICS_LF.equals(cmdId)          ) LYRICS_LF          = cmdName;
 		else if ( Dict.SYNTAX_MACRO.equals(cmdId)              ) MACRO              = cmdName;
 		else if ( Dict.SYNTAX_M.equals(cmdId)                  ) M                  = cmdName;
 		else if ( Dict.SYNTAX_MULTIPLE.equals(cmdId)           ) MULTIPLE           = cmdName;
@@ -2011,33 +2028,35 @@ public class MidicaPLParser extends SequenceParser {
 		int duration = parseDuration(durationStr);
 		
 		// process options
-		HashMap<String, Number> options = new HashMap<String, Number>();
-		if (2 == subTokens.length)
-			options = parseOptions(subTokens[1]);
-		
-		// apply velocity option
-		if (options.containsKey(OPT_VELOCITY)) {
-			int velocity = (int) options.get( OPT_VELOCITY );
-			if (! isFake)
-				instruments.get( channel ).setVelocity( velocity );
-		}
-		// apply duration option
-		if (options.containsKey(OPT_DURATION)) {
-			float durationRatio = (float) options.get(OPT_DURATION);
-			if (! isFake)
-				instruments.get(channel).setDurationRatio(durationRatio);
-		}
-		
-		// determine if more notes for this channel are expected at the same time
 		boolean multiple = false;
-		if (options.containsKey(OPT_MULTIPLE)) {
-			multiple = true;
-		}
-		
-		// determine how often to play the note(s)
-		int quantity = 1;
-		if (options.containsKey(OPT_QUANTITY)) {
-			quantity = (int) options.get(OPT_QUANTITY);
+		int     quantity = 1;
+		String  syllable = null;
+		if (2 == subTokens.length) {
+			ArrayList<CommandOption> options = parseOptions(subTokens[1]);
+			
+			for (CommandOption opt : options) {
+				String optName = opt.getName();
+				
+				if (OPT_VELOCITY.equals(optName)) {
+					int velocity = opt.getVelocity();
+					if (! isFake)
+						instruments.get( channel ).setVelocity( velocity );
+				}
+				else if (OPT_DURATION.equals(optName)) {
+					float durationRatio = opt.getDuration();
+					if (! isFake)
+						instruments.get(channel).setDurationRatio(durationRatio);
+				}
+				else if (OPT_MULTIPLE.equals(optName)) {
+					multiple = true;
+				}
+				else if (OPT_QUANTITY.equals(optName)) {
+					quantity = opt.getQuantity();
+				}
+				else if (OPT_LYRICS.equals(optName)) {
+					syllable = opt.getLyrics();
+				}
+			}
 		}
 		
 		// allow drum-only sequences without an INSTRUMENTS block
@@ -2057,32 +2076,38 @@ public class MidicaPLParser extends SequenceParser {
 		long absoluteStartTicks = instr.getCurrentTicks();
 		int  velocity           = instr.getVelocity();
 		
-		NOTE_QUANTITY:
-		for (int i = 0; i < quantity; i++) {
-			if (REST_VALUE == note) {
-				if (! isFake)
-					instr.incrementTicks( duration );
-				continue;
-			}
-			
-			if (isFake) {
-				transpose(note, channel);
-				return;
-			}
-			else {
-				// calculate beginning and end ticks of the current note
+		try {
+			NOTE_QUANTITY:
+			for (int i = 0; i < quantity; i++) {
 				long startTicks = instr.getCurrentTicks();
-				long endTicks   = instr.addNote( duration );
+				if (! isFake && syllable != null) {
+					syllable = syllable.replaceAll(Pattern.quote(LYRICS_SPACE), " ");
+					syllable = syllable.replaceAll(Pattern.quote(LYRICS_CR), "\r");
+					syllable = syllable.replaceAll(Pattern.quote(LYRICS_LF), "\n");
+					SequenceCreator.addMessageLyrics(syllable, startTicks);
+				}
+				if (REST_VALUE == note) {
+					if (! isFake)
+						instr.incrementTicks( duration );
+					continue;
+				}
 				
-				// create and add messages
-				try {
+				if (isFake) {
+					transpose(note, channel);
+					return;
+				}
+				else {
+					// get end ticks of the current note
+					long endTicks = instr.addNote( duration );
+					
+					// create and add messages
 					int newNote = transpose( note, channel );
 					SequenceCreator.addMessageKeystroke( channel, newNote, startTicks, endTicks, velocity );
 				}
-				catch ( InvalidMidiDataException e ) {
-					throw new ParseException( Dict.get(Dict.ERROR_MIDI_PROBLEM) + e.getMessage() );
-				}
 			}
+		}
+		catch (InvalidMidiDataException e) {
+			throw new ParseException( Dict.get(Dict.ERROR_MIDI_PROBLEM) + e.getMessage() );
 		}
 		
 		if (multiple) {
@@ -2098,8 +2123,8 @@ public class MidicaPLParser extends SequenceParser {
 	 *                     provided options string.
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
-	private HashMap<String, Number> parseOptions(String optString) throws ParseException {
-		HashMap<String, Number> options = new HashMap<String, Number>();
+	private ArrayList<CommandOption> parseOptions(String optString) throws ParseException {
+		ArrayList<CommandOption> options = new ArrayList<CommandOption>();
 		
 		String[] optTokens = optString.split( OPT_SEPARATOR );
 		for (String opt : optTokens) {
@@ -2108,8 +2133,8 @@ public class MidicaPLParser extends SequenceParser {
 			if (optParts.length > 2)
 				throw new ParseException( Dict.get(Dict.ERROR_CANT_PARSE_OPTIONS) );
 			// construct name and value
-			String optName  = optParts[0];
-			Number optValue = 0;
+			String        optName  = optParts[0];
+			CommandOption optValue = new CommandOption();
 			if (V.equals(optName) || VELOCITY.equals(optName)) {
 				if (optParts.length < 2) {
 					throw new ParseException( Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName );
@@ -2120,7 +2145,7 @@ public class MidicaPLParser extends SequenceParser {
 					throw new ParseException( Dict.get(Dict.ERROR_VEL_NOT_MORE_THAN_127) );
 				if (val < 1)
 					throw new ParseException( Dict.get(Dict.ERROR_VEL_NOT_LESS_THAN_1) );
-				optValue = val;
+				optValue.set(optName, val);
 			}
 			else if (D.equals(optName) || DURATION.equals(optName)) {
 				if (optParts.length < 2) {
@@ -2133,19 +2158,24 @@ public class MidicaPLParser extends SequenceParser {
 					val /= 100; // percentage --> numeric
 				if (val <= 0.0)
 					throw new ParseException( Dict.get(Dict.ERROR_DURATION_MORE_THAN_0) );
-				optValue = val;
+				optValue.set(optName, val);
 			}
 			else if (Q.equals(optName) || QUANTITY.equals(optName)) {
 				optName = OPT_QUANTITY;
-				optValue = toInt(optParts[1], false);
+				optValue.set( optName, toInt(optParts[1], false) );
 			}
 			else if (M.equals(optName) || MULTIPLE.equals(optName)) {
 				optName = OPT_MULTIPLE;
+				optValue.set(optName, true);
+			}
+			else if (L.equals(optName) || LYRICS.equals(optName)) {
+				optName = OPT_LYRICS;
+				optValue.set( optName, optParts[1] );
 			}
 			else {
 				throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_OPTION) + optName );
 			}
-			options.put(optName, optValue);
+			options.add(optValue);
 		}
 		
 		return options;

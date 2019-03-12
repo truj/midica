@@ -10,6 +10,7 @@ package org.midica.file;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
+import java.util.HashMap;
 
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiMessage;
@@ -19,6 +20,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.midica.Midica;
 import org.midica.config.Config;
+import org.midica.midi.SequenceAnalyzer;
 import org.midica.midi.SequenceCreator;
 
 /**
@@ -168,6 +170,10 @@ class MidicaPLParserTest extends MidicaPLParser {
 			+ "{#}",
 			getMetaMsgText(2, 0)  // RP-026 tags
 		);
+		
+		parse(getWorkingFile("lyrics"));
+		String lyricsFull = (String) ((HashMap<String, Object>)SequenceAnalyzer.getSequenceInfo().get("karaoke")).get("lyrics_full");
+		assertEquals( "happy birthday to you\nhappy birthday to you\n\nhappy", lyricsFull );
 	}
 	
 	/**

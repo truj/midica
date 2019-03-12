@@ -20,7 +20,6 @@ import javax.sound.midi.Sequence;
 import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Track;
 
-import org.midica.Midica;
 import org.midica.config.Dict;
 import org.midica.file.CharsetUtils;
 import org.midica.file.MidiParser;
@@ -360,14 +359,15 @@ public class SequenceCreator {
 	 * Adds a lyrics meta message.
 	 * The message may also be a meta message according to RP-026.
 	 * 
-	 * @param lyrics The message to be added.
+	 * @param lyrics    The message to be added.
+	 * @param tick      The tick where the lyrics event shall be added.
 	 * @throws InvalidMidiDataException if invalid MIDI data is used to create a MIDI message.
 	 */
 	public static void addMessageLyrics(String lyrics, long tick) throws InvalidMidiDataException {
 		MetaMessage metaMsg = new MetaMessage();
 		byte[] data = CharsetUtils.getBytesFromText(lyrics, charset);
 		metaMsg.setMessage( MidiListener.META_LYRICS, data, data.length );
-		tracks[ 2 ].add( new MidiEvent(metaMsg, 0) );
+		tracks[ 2 ].add( new MidiEvent(metaMsg, tick) );
 	}
 	
 	/**
