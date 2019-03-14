@@ -46,6 +46,9 @@ public class CommandOption {
 		else if (MidicaPLParser.OPT_LYRICS.equals(name)) {
 			this.value = (String) value;
 		}
+		else if (MidicaPLParser.OPT_TUPLET.equals(name)) {
+			this.value = (String) value;
+		}
 		else {
 			// should never happen
 			throw new ParseException("Invalid option name: " + name + ". Please report.");
@@ -89,6 +92,14 @@ public class CommandOption {
 	 * @return lyrics syllable.
 	 */
 	public String getLyrics() {
+		return (String) value;
+	}
+	
+	/**
+	 * Returns a tuplet modifier.
+	 * @return tuplet modifier.
+	 */
+	public String getTuplet() {
 		return (String) value;
 	}
 }

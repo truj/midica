@@ -174,6 +174,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 		parse(getWorkingFile("lyrics"));
 		String lyricsFull = (String) ((HashMap<String, Object>)SequenceAnalyzer.getSequenceInfo().get("karaoke")).get("lyrics_full");
 		assertEquals( "happy birthday to you\nhappy birthday to you\n\nhappy", lyricsFull );
+		
+		parse(getWorkingFile("block-tuplets"));
+		assertEquals( 2538, instruments.get(0).getCurrentTicks() );
 	}
 	
 	/**
@@ -342,7 +345,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("channel-cmd-missing-param")) );
 		assertEquals( 3, e.getLineNumber() );
 		
-//		System.out.println(e.getMessage() + "\n" + e.getFileName());
+		// System.out.println(e.getMessage() + "\n" + e.getFileName());
 	}
 	
 	/**

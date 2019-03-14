@@ -114,6 +114,8 @@ public class Dict {
 	public static final String SYNTAX_LYRICS_SPACE       = "LYRICS_SPACE";
 	public static final String SYNTAX_LYRICS_CR          = "LYRICS_CR";
 	public static final String SYNTAX_LYRICS_LF          = "LYRICS_LF";
+	public static final String SYNTAX_TUPLET             = "TUPLET";
+	public static final String SYNTAX_T                  = "TUPLET_SHORT";
 	public static final String SYNTAX_REST               = "REST";
 	public static final String SYNTAX_CHORD              = "CHORD";
 	public static final String SYNTAX_INLINE_CHORD_SEP   = "INLINE_CHORD_SEP";
@@ -133,7 +135,7 @@ public class Dict {
 	public static final String SYNTAX_M32                = "LENGTH_M32";
 	public static final String SYNTAX_DOT                = "DOT";
 	public static final String SYNTAX_TRIPLET            = "TRIPLET";
-	public static final String SYNTAX_TUPLET             = "TUPLET";
+	public static final String SYNTAX_TUPLET_INTRO       = "TUPLET_INTRO";
 	public static final String SYNTAX_TUPLET_FOR         = "TUPLET_FOR";
 	public static final String SYNTAX_DURATION_PLUS      = "DURATION_PLUS";
 	
@@ -994,6 +996,7 @@ public class Dict {
 	public static final String ERROR_OPTION_NEEDS_VAL           = "error_option_needs_val";
 	public static final String ERROR_VEL_NOT_MORE_THAN_127      = "error_vel_not_more_than_127";
 	public static final String ERROR_VEL_NOT_LESS_THAN_1        = "error_vel_not_less_than_1";
+	public static final String ERROR_TUPLET_INVALID             = "error_tuplet_invalid";
 	public static final String ERROR_DURATION_MORE_THAN_0       = "error_duration_more_than_0";
 	public static final String ERROR_UNKNOWN_OPTION             = "error_unknown_option: ";
 	public static final String ERROR_UNKNOWN_NOTE               = "error_unknown_note";
@@ -1480,6 +1483,8 @@ public class Dict {
 		set( SYNTAX_LYRICS_SPACE,       "placeholder for a space inside of a syllable"     );
 		set( SYNTAX_LYRICS_CR,          "placeholder for a new line inside of a syllable"  );
 		set( SYNTAX_LYRICS_LF,          "placeholder for a new paragraph inside of a syllable" );
+		set( SYNTAX_TUPLET,             "tuplet option (long)"                             );
+		set( SYNTAX_T,                  "tuplet option (short)"                            );
 		set( SYNTAX_REST,               "rest character"                                   );
 		set( SYNTAX_CHORD,              "chord definition"                                 );
 		set( SYNTAX_INLINE_CHORD_SEP,   "inline chord separator"                           );
@@ -1500,7 +1505,7 @@ public class Dict {
 		set( SYNTAX_M32,              "32 full notes"                                    );
 		set( SYNTAX_DOT,              "dot (note length multiplied by 1.5)"              );
 		set( SYNTAX_TRIPLET,          "triplet (note length devided by 1.5)"             );
-		set( SYNTAX_TUPLET,           "tuplet"                                           );
+		set( SYNTAX_TUPLET_INTRO,     "tuplet opener"                                    );
 		set( SYNTAX_TUPLET_FOR,       "tuplet definition separator"                      );
 		set( SYNTAX_DURATION_PLUS,    "duration addition symbol"                         );
 		
@@ -1853,6 +1858,7 @@ public class Dict {
 		set( ERROR_OPTION_NEEDS_VAL,              "option needs value: "                                              );
 		set( ERROR_VEL_NOT_MORE_THAN_127,         "velocity cannot be set to more than 127"                           );
 		set( ERROR_VEL_NOT_LESS_THAN_1,           "velocity must be more than 0"                                      );
+		set( ERROR_TUPLET_INVALID,                "Invalid tuplet or triplet definition: "                            );
 		set( ERROR_DURATION_MORE_THAN_0,          "duration must be more than 0.0 (or 0%)"                            );
 		set( ERROR_UNKNOWN_OPTION,                "unknown option: "                                                  );
 		set( ERROR_UNKNOWN_NOTE,                  "unknown note: "                                                    );
@@ -2296,6 +2302,8 @@ public class Dict {
 		setSyntax( SYNTAX_LYRICS_SPACE,       "_"            );
 		setSyntax( SYNTAX_LYRICS_CR,          "\\r"          );
 		setSyntax( SYNTAX_LYRICS_LF,          "\\n"          );
+		setSyntax( SYNTAX_TUPLET,             "tuplet"       );
+		setSyntax( SYNTAX_T,                  "t"            );
 		setSyntax( SYNTAX_REST,               "-"            );
 		setSyntax( SYNTAX_CHORD,              "CHORD"        );
 		setSyntax( SYNTAX_INLINE_CHORD_SEP,   ","            );
@@ -2315,7 +2323,7 @@ public class Dict {
 		setSyntax( SYNTAX_M32,                "*32"          );
 		setSyntax( SYNTAX_DOT,                "."            );
 		setSyntax( SYNTAX_TRIPLET,            "t"            );
-		setSyntax( SYNTAX_TUPLET,             "t"            );
+		setSyntax( SYNTAX_TUPLET_INTRO,       "t"            );
 		setSyntax( SYNTAX_TUPLET_FOR,         ":"            );
 		setSyntax( SYNTAX_DURATION_PLUS,      "+"            );
 		
@@ -2395,6 +2403,8 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_LYRICS_SPACE     );
 		addSyntaxForInfoView( SYNTAX_LYRICS_CR        );
 		addSyntaxForInfoView( SYNTAX_LYRICS_LF        );
+		addSyntaxForInfoView( SYNTAX_TUPLET           );
+		addSyntaxForInfoView( SYNTAX_T                );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_NOTE_LENGTH) );
 		addSyntaxForInfoView( SYNTAX_32            );
@@ -2411,7 +2421,7 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_M32           );
 		addSyntaxForInfoView( SYNTAX_DOT           );
 		addSyntaxForInfoView( SYNTAX_TRIPLET       );
-		addSyntaxForInfoView( SYNTAX_TUPLET        );
+		addSyntaxForInfoView( SYNTAX_TUPLET_INTRO  );
 		addSyntaxForInfoView( SYNTAX_TUPLET_FOR    );
 		addSyntaxForInfoView( SYNTAX_DURATION_PLUS );
 	}

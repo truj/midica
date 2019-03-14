@@ -24,14 +24,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MetaMessage;
 
 import org.midica.Midica;
 import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.midi.LyricUtil;
 import org.midica.midi.MidiDevices;
-import org.midica.midi.MidiListener;
 import org.midica.midi.SequenceCreator;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
@@ -53,6 +51,7 @@ public class MidicaPLParser extends SequenceParser {
 	public static final String OPT_DURATION = "duration";
 	public static final String OPT_QUANTITY = "quantity";
 	public static final String OPT_LYRICS   = "lyrics";
+	public static final String OPT_TUPLET   = "tuplet";
 	
 	private static final int MODE_DEFAULT     = 0;
 	private static final int MODE_INSTRUMENTS = 1;
@@ -126,10 +125,12 @@ public class MidicaPLParser extends SequenceParser {
 	public static String D                  = null;
 	public static String DURATION           = null;
 	public static String DURATION_PERCENT   = null;
+	public static String T                  = null;
+	public static String TUPLET             = null;
 	public static String V                  = null;
 	public static String VELOCITY           = null;
 	public static String TRIPLET            = null;
-	public static String TUPLET             = null;
+	public static String TUPLET_INTRO       = null;
 	public static String TUPLET_FOR         = null;
 	public static String DURATION_PLUS      = null;
 	
@@ -251,10 +252,12 @@ public class MidicaPLParser extends SequenceParser {
 		D                  = Dict.getSyntax( Dict.SYNTAX_D                  );
 		DURATION           = Dict.getSyntax( Dict.SYNTAX_DURATION           );
 		DURATION_PERCENT   = Dict.getSyntax( Dict.SYNTAX_DURATION_PERCENT   );
+		T                  = Dict.getSyntax( Dict.SYNTAX_T                  );
+		TUPLET             = Dict.getSyntax( Dict.SYNTAX_TUPLET             );
 		V                  = Dict.getSyntax( Dict.SYNTAX_V                  );
 		VELOCITY           = Dict.getSyntax( Dict.SYNTAX_VELOCITY           );
 		TRIPLET            = Dict.getSyntax( Dict.SYNTAX_TRIPLET            );
-		TUPLET             = Dict.getSyntax( Dict.SYNTAX_TUPLET             );
+		TUPLET_INTRO       = Dict.getSyntax( Dict.SYNTAX_TUPLET_INTRO       );
 		TUPLET_FOR         = Dict.getSyntax( Dict.SYNTAX_TUPLET_FOR         );
 		DURATION_PLUS      = Dict.getSyntax( Dict.SYNTAX_DURATION_PLUS      );
 		
@@ -429,6 +432,23 @@ public class MidicaPLParser extends SequenceParser {
 			long ticks = tickstamps.get(channel);
 			instruments.get(channel).setCurrentTicks(ticks);
 		}
+	}
+	
+	/**
+	 * Parses a channel number.
+	 * 
+	 * @param s    Channel number string.
+	 * @return     Parsed channel number.
+	 * @throws ParseException    If the command cannot be parsed.
+	 */
+	public int toChannel(String s) throws ParseException {
+		if (s.equals(P)) {
+			return 9;
+		}
+		int channel = toInt( s );
+		if (channel > 15)
+			throw new ParseException( Dict.get(Dict.ERROR_INVALID_CHANNEL_NUMBER) + s );
+		return channel;
 	}
 	
 	/**
@@ -1034,7 +1054,7 @@ public class MidicaPLParser extends SequenceParser {
 		Pattern pattern = Pattern.compile(
 			  "^(\\d+|.+?)"                // basic divisor (basic note length)
 			+ "(("                         // open capturing group for modifiers
-			+ Pattern.quote(TUPLET)        //   customized tuplet
+			+ Pattern.quote(TUPLET_INTRO)  //   customized tuplet
 			+ "\\d+"                       //     first number of the customized tuplet
 			+ Pattern.quote(TUPLET_FOR)    //     separator between the 2 numbers
 			+ "\\d+"                       //     second number of the customized tuplet
@@ -1100,7 +1120,7 @@ public class MidicaPLParser extends SequenceParser {
 			// this must be before the triplet parsing to support the same symbol
 			// for tuplets and triplets
 			Pattern tupletPattern = Pattern.compile(
-				".*" + Pattern.quote(TUPLET) + "(\\d+)" + Pattern.quote(TUPLET_FOR) + "(\\d+)" + ".*"
+				".*" + Pattern.quote(TUPLET_INTRO) + "(\\d+)" + Pattern.quote(TUPLET_FOR) + "(\\d+)" + ".*"
 			);
 			TUPLET:
 			while (postfix.matches(tupletPattern.toString())) {
@@ -1110,8 +1130,8 @@ public class MidicaPLParser extends SequenceParser {
 					int countFor = toInt( tupletMatcher.group(2), true );
 					// cut away the matched tuplet
 					postfix = postfix.replaceFirst(
-							Pattern.quote(TUPLET) + count + Pattern.quote(TUPLET_FOR) + countFor,
-							""
+						Pattern.quote(TUPLET_INTRO) + count + Pattern.quote(TUPLET_FOR) + countFor,
+						""
 					);
 					// a tuplet a:b (a for b) modifies the note length by the factor b/a
 					factor  *= countFor;
@@ -1342,6 +1362,7 @@ public class MidicaPLParser extends SequenceParser {
 		// get options (quantity / multiple)
 		int     quantity = -1;
 		boolean multiple = false;
+		String  tuplet   = null;
 		if (optionsStr.length() > 0) {
 			ArrayList<CommandOption> options = parseOptions(optionsStr);
 			for (CommandOption opt : options) {
@@ -1351,6 +1372,9 @@ public class MidicaPLParser extends SequenceParser {
 				}
 				else if (OPT_MULTIPLE.equals(optName)) {
 					multiple = true;
+				}
+				else if (OPT_TUPLET.equals(optName)) {
+					tuplet = opt.getTuplet();
 				}
 				else {
 					throw new ParseException( Dict.get(Dict.ERROR_BLOCK_INVALID_ARG) + optName );
@@ -1387,9 +1411,12 @@ public class MidicaPLParser extends SequenceParser {
 			block.setMultiple(OPT_MULTIPLE);
 		if (quantity != -1)
 			block.setQuantity(quantity, OPT_QUANTITY);
+		if (tuplet != null)
+			block.setTuplet(tuplet, OPT_TUPLET);
 		
 		// apply root block
 		if (BLOCK_CLOSE.equals(cmd) && nestableBlkDepth == 0) {
+			block.applyTuplets(null);
 			block.play();
 		}
 	}
@@ -1722,10 +1749,12 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_D.equals(cmdId)                  ) D                  = cmdName;
 		else if ( Dict.SYNTAX_DURATION.equals(cmdId)           ) DURATION           = cmdName;
 		else if ( Dict.SYNTAX_DURATION_PERCENT.equals(cmdId)   ) DURATION_PERCENT   = cmdName;
+		else if ( Dict.SYNTAX_T.equals(cmdId)                  ) T                  = cmdName;
+		else if ( Dict.SYNTAX_TUPLET.equals(cmdId)             ) TUPLET             = cmdName;
 		else if ( Dict.SYNTAX_V.equals(cmdId)                  ) V                  = cmdName;
 		else if ( Dict.SYNTAX_VELOCITY.equals(cmdId)           ) VELOCITY           = cmdName;
 		else if ( Dict.SYNTAX_TRIPLET.equals(cmdId)            ) TRIPLET            = cmdName;
-		else if ( Dict.SYNTAX_TUPLET.equals(cmdId)             ) TUPLET             = cmdName;
+		else if ( Dict.SYNTAX_TUPLET_INTRO.equals(cmdId)       ) TUPLET_INTRO       = cmdName;
 		else if ( Dict.SYNTAX_TUPLET_FOR.equals(cmdId)         ) TUPLET_FOR         = cmdName;
 		else if ( Dict.SYNTAX_DURATION_PLUS.equals(cmdId)      ) DURATION_PLUS      = cmdName;
 		else {
@@ -1981,17 +2010,6 @@ public class MidicaPLParser extends SequenceParser {
 				}
 			}
 			
-			// TODO: delete
-			else if (cmd.equals("lyrics")) { // TODO: use Dict
-				MetaMessage msg = new MetaMessage();
-				value = value.replaceAll( "//", "#" );
-				byte[] content = CharsetUtils.getBytesFromText( value, chosenCharset );
-				msg.setMessage( MidiListener.META_LYRICS, content, content.length );
-				if (! isFake) {
-					SequenceCreator.addMessageToTrack( msg, 2, currentTicks );
-				}
-			}
-			
 			else {
 				throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_GLOBAL_CMD) + cmd );
 			}
@@ -2171,6 +2189,25 @@ public class MidicaPLParser extends SequenceParser {
 			else if (L.equals(optName) || LYRICS.equals(optName)) {
 				optName = OPT_LYRICS;
 				optValue.set( optName, optParts[1] );
+			}
+			else if (T.equals(optName) || TUPLET.equals(optName)) {
+				optName = OPT_TUPLET;
+				Pattern pattern = Pattern.compile(
+					  "^(?:"                       // open non-capturing group for all tuplets and triplets
+					+ Pattern.quote(TUPLET_INTRO)  //   customized tuplet
+					+ "\\d+"                       //     first number of the customized tuplet
+					+ Pattern.quote(TUPLET_FOR)    //     separator between the 2 numbers
+					+ "\\d+"                       //     second number of the customized tuplet
+					+ "|" + Pattern.quote(TRIPLET) //   ordinary triplet
+					+ ")+"                         // close non-capturing group
+					+ "$"
+				);
+				if (pattern.matcher(optParts[1]).matches()) {
+					optValue.set( optName, optParts[1] );
+				}
+				else {
+					throw new ParseException( Dict.get(Dict.ERROR_TUPLET_INVALID) + optParts[1] );
+				}
 			}
 			else {
 				throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_OPTION) + optName );
@@ -2557,23 +2594,6 @@ public class MidicaPLParser extends SequenceParser {
 		catch ( NumberFormatException e ) {
 			throw new ParseException(Dict.get(Dict.ERROR_NOT_A_FLOAT) + s);
 		}
-	}
-	
-	/**
-	 * Parses a channel number.
-	 * 
-	 * @param s    Channel number string.
-	 * @return     Parsed channel number.
-	 * @throws ParseException    If the command cannot be parsed.
-	 */
-	private int toChannel(String s) throws ParseException {
-		if (s.equals(P)) {
-			return 9;
-		}
-		int channel = toInt( s );
-		if (channel > 15)
-			throw new ParseException( Dict.get(Dict.ERROR_INVALID_CHANNEL_NUMBER) + s );
-		return channel;
 	}
 	
 	/**

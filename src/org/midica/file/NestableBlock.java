@@ -21,17 +21,17 @@ public class NestableBlock {
 	private MidicaPLParser    parser   = null;
 	private boolean           multiple = false;
 	private int               quantity = 1;
+	private String            tuplet   = null;
 	private ArrayList<Object> elements = null;
 	
 	private boolean isMultipleSet = false;
 	private boolean isQuantitySet = false;
+	private boolean isTupletSet   = false;
 	
 	/**
 	 * Creates a new nestable block.
 	 * 
-	 * @param parser      the parser object that was responsible to create the block
-	 * @param multiple    indicates if the channel tickstamps are reverted at the end of the block
-	 * @param quantity    indicates how often the block is executed
+	 * @param parser    The parser object that was responsible to create the block.
 	 */
 	public NestableBlock(MidicaPLParser parser) {
 		this.parser   = parser;
@@ -40,6 +40,7 @@ public class NestableBlock {
 	
 	/**
 	 * Sets the multiple option.
+	 * This option indicates if the channel tickstamps are reverted at the end of the block.
 	 * 
 	 * @param optId           option ID (only needed for the exception description)
 	 * @throws ParseException if this option has already been set for this block.
@@ -58,6 +59,7 @@ public class NestableBlock {
 	
 	/**
 	 * Sets the quantity option.
+	 * This option indicates how often the block is executed.
 	 * 
 	 * @param quantity        the quantity value
 	 * @param optId           option ID (only needed for the exception description)
@@ -76,6 +78,63 @@ public class NestableBlock {
 	}
 	
 	/**
+	 * Sets the tuplet modifier.
+	 * This modifier shortens all notes of this block according to the tuplet value.
+	 * This applies for notes and rests as well as for child blocks.
+	 * 
+	 * @param tuplet
+	 * @param optId           option ID (only needed for the exception description)
+	 * @throws ParseException if this option has already been set for this block.
+	 */
+	public void setTuplet(String tuplet, String optId) throws ParseException {
+		
+		// already set?
+		if (isTupletSet) {
+			throw new ParseException( Dict.get(Dict.ERROR_BLOCK_ARG_ALREADY_SET) + optId );
+		}
+		
+		this.tuplet = tuplet;
+		isTupletSet = true;
+	}
+	
+	/**
+	 * Applies tuplets to all child elements.
+	 * 
+	 * @param parentTuplets    The tuplet modifiers from all (grand)parents to be applied as well.
+	 */
+	public void applyTuplets(String parentTuplets) {
+		String resultingTuplet = tuplet;
+		if (resultingTuplet == null) {
+			resultingTuplet = parentTuplets;
+		}
+		else if (parentTuplets != null) {
+			resultingTuplet += parentTuplets;
+		}
+		
+		// apply to children
+		for (Object element : elements) {
+			if (element instanceof NestableBlock) {
+				((NestableBlock) element).applyTuplets(resultingTuplet);
+			}
+			else if (resultingTuplet != null && element instanceof String[]) {
+				String[] tokens = (String[]) element;
+				if (tokens.length >= 3) {
+					try {
+						// channel command?
+						parser.toChannel(tokens[0]);
+						
+						// no exception - channel command
+						tokens[2] += resultingTuplet;
+					}
+					catch (ParseException e) {
+						// not a channel command - probably an include
+					}
+				}
+			}
+		}
+	}
+	
+	/**
 	 * Adds a new content element to this block.
 	 * The content to be added can be one of the following objects:
 	 * 
@@ -85,12 +144,6 @@ public class NestableBlock {
 	 * @param element the content to be added
 	 */
 	public void add(Object element) {
-		
-		// tokens?
-		if (element instanceof String[]) {
-			element = String.join(" ", (String[]) element);
-		}
-		
 		elements.add(element);
 	}
 	
@@ -113,8 +166,8 @@ public class NestableBlock {
 				if (element instanceof NestableBlock) {
 					((NestableBlock) element).play();
 				}
-				else if (element instanceof String) {
-					parser.parseLine((String) element);
+				else if (element instanceof String[]) {
+					parser.parseLine( String.join(" ", (String[]) element) );
 				}
 				else {
 					throw new ParseException("invalid block element class: " + element);
@@ -136,6 +189,24 @@ public class NestableBlock {
 		if (null == elements) {
 			return "null";
 		}
-		return "\n{q" + quantity + "\n" + elements.toString() + "\n}\n";
+		StringBuilder str = new StringBuilder("( ");
+		if (isMultipleSet)
+			str.append("m ");
+		if (isQuantitySet)
+			str.append("q=" + quantity + " ");
+		if (isTupletSet)
+			str.append("t=" + tuplet);
+		str.append("\n");
+		for (Object element : elements) {
+			if (element instanceof NestableBlock) {
+				str.append(element);
+			}
+			else {
+				str.append( String.join(" ", (String[]) element) );
+				str.append("\n");
+			}
+		}
+		str.append(")\n");
+		return str.toString();
 	}
 }
