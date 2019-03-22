@@ -14,6 +14,7 @@ import java.awt.event.WindowListener;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 
 /**
  * This class provides a modal window belonging to a parent window.
@@ -44,11 +45,23 @@ public abstract class MessageView extends JDialog {
 	 * Creates a new modal message window.
 	 * Creates a new {@link MessageController} object and adds it as a {@link WindowListener}.
 	 * 
-	 * @param view     Parent window.
+	 * @param view     Parent window (Player).
 	 * @param title    Window title.
 	 */
-	public MessageView( JDialog view, String title ) {
-		super( view, title, true );
+	public MessageView(JDialog view, String title) {
+		super(view, title, true);
+		addWindowListener( new MessageController(this) );
+	}
+	
+	/**
+	 * Creates a new modal message window.
+	 * Creates a new {@link MessageController} object and adds it as a {@link WindowListener}.
+	 * 
+	 * @param view     Parent window (main window).
+	 * @param title    Window title.
+	 */
+	public MessageView(JFrame view, String title) {
+		super(view, title, true);
 		addWindowListener( new MessageController(this) );
 	}
 	

@@ -97,18 +97,34 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	 * This method is also called after changing the language in order to re-draw everything.
 	 */
 	private void initView() {
-		mplSelector = new FileSelector( view, this );
-		mplSelector.init( FileSelector.FILE_TYPE_MPL, FileSelector.READ );
-		midiSelector = new FileSelector( view, this );
-		midiSelector.init( FileSelector.FILE_TYPE_MIDI, FileSelector.READ );
-		soundfontSelector = new FileSelector( view, this );
-		soundfontSelector.init( FileSelector.FILE_TYPE_SOUNDFONT, FileSelector.READ );
-		midiExportSelector = new FileSelector( view, this );
-		midiExportSelector.init( FileSelector.FILE_TYPE_MIDI, FileSelector.WRITE );
-		mplExportSelector = new FileSelector( view, this );
-		mplExportSelector.init( FileSelector.FILE_TYPE_MPL, FileSelector.WRITE );
-		
-		view = new UiView( this );
+		view = new UiView(this);
+		initSelectorsIfNotYetDone();
+	}
+	
+	/**
+	 * Initializes all possible types of {@link FileSelector}s.
+	 */
+	private void initSelectorsIfNotYetDone() {
+		if (null == mplSelector) {
+			mplSelector = new FileSelector(view, this);
+			mplSelector.init( FileSelector.FILE_TYPE_MPL, FileSelector.READ );
+		}
+		if (null == midiSelector) {
+			midiSelector = new FileSelector(view, this);
+			midiSelector.init( FileSelector.FILE_TYPE_MIDI, FileSelector.READ );
+		}
+		if (null == soundfontSelector) {
+			soundfontSelector = new FileSelector(view, this);
+			soundfontSelector.init( FileSelector.FILE_TYPE_SOUNDFONT, FileSelector.READ );
+		}
+		if (null == midiExportSelector) {
+			midiExportSelector = new FileSelector(view, this);
+			midiExportSelector.init( FileSelector.FILE_TYPE_MIDI, FileSelector.WRITE );
+		}
+		if (null == mplExportSelector) {
+			mplExportSelector = new FileSelector(view, this);
+			mplExportSelector.init( FileSelector.FILE_TYPE_MPL, FileSelector.WRITE );
+		}
 	}
 	
 	/**
@@ -222,7 +238,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		
 		// button pressed: show info view
 		else if ( UiView.CMD_SHOW_INFO_WINDOW.equals(cmd) ) {
-			InfoView.showInfoWindow();
+			InfoView.showInfoWindow(view);
 		}
 		
 		// not yet implemented function used
@@ -322,6 +338,8 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	 */
 	private void parseChosenFile( String type, File file ) {
 		
+		initSelectorsIfNotYetDone();
+		
 		// initialize variables based on the file type to be parsed
 		WaitView     waitView = new WaitView( view );
 		String       waitMsg;
@@ -357,6 +375,13 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		
 		// close file selector
 		selector.setVisible( false );
+		
+		// Set icon inactive BEFORE parsing a sequence.
+		// This makes sure that the window of an error message already has the right icon.
+		if ( FileSelector.FILE_TYPE_MPL.equals(type)
+		  || FileSelector.FILE_TYPE_MIDI.equals(type) ) {
+			view.setAppIcon(false);
+		}
 		
 		// start file parsing in the background and show the wait window
 		ParsingWorker worker = new ParsingWorker( waitView, parser, file );
@@ -428,7 +453,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			// reset sequence (but not if a soundfont has been parsed)
 			if ( FileSelector.FILE_TYPE_MPL.equals(type)
 			  || FileSelector.FILE_TYPE_MIDI.equals(type) ) {
-				MidiDevices.setSequence( null );
+				MidiDevices.setSequence(null);
 			}
 		}
 		

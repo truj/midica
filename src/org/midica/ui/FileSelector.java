@@ -43,10 +43,10 @@ public class FileSelector extends JDialog {
 	/**
 	 * Creates a new file selector window.
 	 * 
-	 * @param v    Parent window.
+	 * @param v    Parent view.
 	 * @param c    Listener for file choosing events.
 	 */
-	public FileSelector( UiView v, UiController c ) {
+	public FileSelector(UiView v, UiController c) {
 		super( v, Dict.get(Dict.TITLE_FILE_SELECTOR), true );
 		controller = c;
 	}

@@ -15,6 +15,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.KeyEventPostProcessor;
 import java.awt.KeyboardFocusManager;
+import java.awt.Window;
 import java.awt.event.KeyEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -189,19 +190,12 @@ public class InfoView extends JDialog {
 	private HashMap<String, JComponent> filterWidgets = null;
 	
 	/**
-	 * Creates a new info view window with owner = null.
-	 */
-	private InfoView() {
-		this( (JDialog) null );
-	}
-	
-	/**
 	 * Creates a new info view window and sets the given owner Dialog.
 	 * 
 	 * @param owner  window to be set as the info view's owner
 	 */
-	private InfoView( JDialog owner ) {
-		super( owner );
+	private InfoView(Window owner) {
+		super(owner);
 		setTitle( Dict.get(Dict.TITLE_INFO_VIEW) );
 		
 		// initialize table dimensions
@@ -2172,14 +2166,6 @@ public class InfoView extends JDialog {
 	}
 	
 	/**
-	 * Creates and shows the info view passing **owner = null** to the constructor.
-	 * This is done by calling {@link #showInfoWindow(JDialog)} with parameter **null**.
-	 */
-	public static void showInfoWindow() {
-		showInfoWindow( null );
-	}
-	
-	/**
 	 * Creates and shows the info view passing the specified owner window to the constructor.
 	 * 
 	 * If an info view already exists it will be destroyed before.
@@ -2191,7 +2177,7 @@ public class InfoView extends JDialog {
 	 * 
 	 * @param owner  The GUI window owning the info window.
 	 */
-	public static void showInfoWindow( JDialog owner ) {
+	public static void showInfoWindow(Window owner) {
 		
 		// it cannot be guaranteed that the info view can be focused
 		// so we have to destroy and rebuild it

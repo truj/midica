@@ -16,6 +16,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 
@@ -51,15 +52,26 @@ public class ExportResultView extends MessageView {
 	 * Creates a new export result window.
 	 * The window is not visible by default and must be initialized and set visible via init().
 	 * 
-	 * @param view          The parent window (owner).
+	 * @param owner         The parent window (Player).
 	 * @param controller    The controller that acts as an {@link ActionListener} for this
 	 *                      window.
 	 */
-	public ExportResultView( JDialog view, ActionListener controller ) {
-		super( view, Dict.get(Dict.TITLE_EXPORT_RESULT) );
+	public ExportResultView(JDialog owner, ActionListener controller) {
+		super( owner, Dict.get(Dict.TITLE_EXPORT_RESULT) );
 		this.controller = controller;
-		int tableWidth  = COL_WIDTH_TRACK + COL_WIDTH_TICK + COL_WIDTH_CHANNEL + COL_WIDTH_NOTE + COL_WIDTH_MSG;
-		this.tableDim   = new Dimension( tableWidth, TABLE_HEIGHT );
+	}
+	
+	/**
+	 * Creates a new export result window.
+	 * The window is not visible by default and must be initialized and set visible via init().
+	 * 
+	 * @param owner         The parent window (main window).
+	 * @param controller    The controller that acts as an {@link ActionListener} for this
+	 *                      window.
+	 */
+	public ExportResultView(JFrame owner, ActionListener controller) {
+		super( owner, Dict.get(Dict.TITLE_EXPORT_RESULT) );
+		this.controller = controller;
 	}
 	
 	/**
@@ -94,6 +106,8 @@ public class ExportResultView extends MessageView {
 		content.add( warningCountLbl, constraints );
 		
 		// scrollable warning table
+		int tableWidth = COL_WIDTH_TRACK + COL_WIDTH_TICK + COL_WIDTH_CHANNEL + COL_WIDTH_NOTE + COL_WIDTH_MSG;
+		this.tableDim  = new Dimension( tableWidth, TABLE_HEIGHT );
 		if ( result.countWarnings() > 0 ) {
     		constraints.gridy++;
     		constraints.weighty = 1;

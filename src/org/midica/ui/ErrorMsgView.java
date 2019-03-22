@@ -15,6 +15,7 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 import org.midica.config.Dict;
@@ -36,12 +37,25 @@ public class ErrorMsgView extends MessageView {
 	 * Creates a new error message window.
 	 * The window is not visible by default and must be initialized and set visible via init().
 	 * 
-	 * @param view          The parent window (owner).
+	 * @param owner         The parent window (Player).
 	 * @param controller    The controller that acts as an {@link ActionListener} for this
 	 *                      window.
 	 */
-	public ErrorMsgView( JDialog view, ActionListener controller ) {
-		super( view, Dict.get(Dict.TITLE_ERROR) );
+	public ErrorMsgView(JDialog owner, ActionListener controller) {
+		super( owner, Dict.get(Dict.TITLE_ERROR) );
+		this.controller = controller;
+	}
+	
+	/**
+	 * Creates a new error message window.
+	 * The window is not visible by default and must be initialized and set visible via init().
+	 * 
+	 * @param owner         The parent window (main window).
+	 * @param controller    The controller that acts as an {@link ActionListener} for this
+	 *                      window.
+	 */
+	public ErrorMsgView(JFrame owner, ActionListener controller) {
+		super( owner, Dict.get(Dict.TITLE_ERROR) );
 		this.controller = controller;
 	}
 	

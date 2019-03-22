@@ -12,6 +12,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.Insets;
 import java.awt.KeyEventPostProcessor;
 import java.awt.KeyboardFocusManager;
@@ -20,10 +21,11 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowListener;
 
 import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
-import javax.swing.JDialog;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
@@ -46,7 +48,7 @@ import org.midica.ui.model.ConfigComboboxModel;
  * 
  * @author Jan Trukenmüller
  */
-public class UiView extends JDialog {
+public class UiView extends JFrame {
 	
 	private static final long serialVersionUID = 1L;
     
@@ -71,10 +73,14 @@ public class UiView extends JDialog {
 	public static final String CMD_EXPORT_MIDICAPL     = "cmd_export_midicapl";
 	public static final String CMD_OPEN_FCT_NOT_READY  = "cmd_open_fct_not_ready";
 	
-	public static final Color  COLOR_OK                = new Color(   0, 150,   0 );
-	public static final Color  COLOR_ERROR             = new Color( 255,   0,   0 );
 	public static final Color  COLOR_TRANSPOSE_DEFAULT = new Color(  50, 100, 255 );
 	public static final Color  COLOR_TRANSPOSE_CHANGED = new Color( 255,   0,   0 );
+	
+	// application icons
+	private static final String inactiveAppIconPath = "org/midica/resources/app-icon-inactive.png";
+	private static final String activeAppIconPath   = "org/midica/resources/app-icon-active.png";
+	private static Image inactiveIcon = null;
+	private static Image activeIcon   = null;
 	
 	// make file names in the import section as small as possible
 	private static final Dimension MAX_FILE_NAME_DIM = new Dimension(0, new JLabel(" ").getPreferredSize().height);
@@ -112,7 +118,7 @@ public class UiView extends JDialog {
 	 * @param controller    Used as listener for all events.
 	 */
 	public UiView( UiController controller ) {
-		super( (JDialog) null, Dict.get(Dict.TITLE_MAIN_WINDOW) );
+		super( Dict.get(Dict.TITLE_MAIN_WINDOW) );
 		this.controller = controller;
 		addWindowListener( controller );
 		init();
@@ -122,8 +128,27 @@ public class UiView extends JDialog {
 			return;
 		}
 		
+		// initialize icons
+		ImageIcon icon = new ImageIcon( ClassLoader.getSystemResource(inactiveAppIconPath) );
+		inactiveIcon   = icon.getImage();
+		icon           = new ImageIcon( ClassLoader.getSystemResource(activeAppIconPath) );
+		activeIcon     = icon.getImage();
+		setAppIcon(false);
+		
 		pack();
 		setVisible(true);
+	}
+	
+	/**
+	 * Sets the application icon indicating if a sequence has been loaded.
+	 * 
+	 * @param active    **true** to set the active icon, **false** for setting the inactive icon
+	 */
+	public void setAppIcon(boolean active) {
+		if (active)
+			setIconImage(activeIcon);
+		else
+			setIconImage(inactiveIcon);
 	}
 	
 	/**

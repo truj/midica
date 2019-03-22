@@ -12,6 +12,7 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.Window;
 
 import javax.swing.JDialog;
 import javax.swing.JLabel;
@@ -39,17 +40,17 @@ public class WaitView extends JDialog {
 	 * Creates a new 'please wait' window.
 	 * The window is not visible by default and must be initialized and set visible via init().
 	 * 
-	 * @param view    The parent window (owner).
+	 * @param owner    The parent window (owner).
 	 */
-	public WaitView( JDialog view ) {
-		super( view, Dict.get(Dict.TITLE_WAIT) );
+	public WaitView(Window owner) {
+		super( owner, Dict.get(Dict.TITLE_WAIT) );
 		setPreferredSize( new Dimension(MIN_WIDTH, MIN_HEIGHT) );
 		
 		// don't let the user close this window
 		setDefaultCloseOperation( JDialog.DO_NOTHING_ON_CLOSE );
 		
 		// show the window in the center of the parent window
-		setLocationRelativeTo( view );
+		setLocationRelativeTo(owner);
 	}
 	
 	/**
