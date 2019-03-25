@@ -647,19 +647,25 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		String rememberMidi     = Config.get( Config.REMEMBER_MIDI );
 		String midiPath         = Config.get( Config.PATH_MIDI );
 		
-		// load soundfont, if needed
-		if ( "true".equals(rememberSf) && ! soundfontPath.equals("") ) {
-			parseChosenFile( FileSelector.FILE_TYPE_SOUNDFONT, new File(soundfontPath) );
-		}
-		
-		// load MidicaPL, if needed
-		if ( "true".equals(rememberMidicapl) && ! midicaplPath.equals("") ) {
-			parseChosenFile( FileSelector.FILE_TYPE_MPL, new File(midicaplPath) );
-		}
-		
-		// load MIDI, if needed
-		if ( "true".equals(rememberMidi) && ! midiPath.equals("") ) {
-			parseChosenFile( FileSelector.FILE_TYPE_MIDI, new File(midiPath) );
+		// Wait until Midica.uiController is not null any more.
+		// Otherwise a remembered file could be parsed faster (race condition) and
+		// we would get a null pointer exception in the SequenceParser.
+		synchronized(UiController.class) {
+			
+			// load soundfont, if needed
+			if ( "true".equals(rememberSf) && ! soundfontPath.equals("") ) {
+				parseChosenFile( FileSelector.FILE_TYPE_SOUNDFONT, new File(soundfontPath) );
+			}
+			
+			// load MidicaPL, if needed
+			if ( "true".equals(rememberMidicapl) && ! midicaplPath.equals("") ) {
+				parseChosenFile( FileSelector.FILE_TYPE_MPL, new File(midicaplPath) );
+			}
+			
+			// load MIDI, if needed
+			if ( "true".equals(rememberMidi) && ! midiPath.equals("") ) {
+				parseChosenFile( FileSelector.FILE_TYPE_MIDI, new File(midiPath) );
+			}
 		}
 	}
 	
