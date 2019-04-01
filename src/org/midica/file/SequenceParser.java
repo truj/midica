@@ -157,15 +157,20 @@ public abstract class SequenceParser implements IParser {
 	}
 	
 	/**
-	 * Returns the absolute path of the successfully parsed file.
+	 * Returns the absolute path of the successfully parsed file, if it matches the requested type.
+	 * Returns **null**, if the requested type doesn't match or no file has been parsed successfully.
 	 * 
-	 * @return the parsed file path if available, or **null** otherwise.
+	 * @param type    **midica** or **mid**
+	 * @return file path or **null**.
 	 */
-	public static String getFilePath() {
-		if ( null == sequenceFile ) {
+	public static String getFilePath(String type) {
+		if (null == sequenceFile)
 			return null;
-		}
-		return sequenceFile.getAbsolutePath();
+		if (fileType == null)
+			return null;
+		if (fileType.equals(type))
+			return sequenceFile.getAbsolutePath();
+		return null;
 	}
 	
 	/**

@@ -57,6 +57,17 @@ public class MidiParser extends SequenceParser {
 	private static LyricUtil lyricUtil = LyricUtil.getInstance();
 	
 	/**
+	 * Returns the absolute path of the successfully parsed MIDI file.
+	 * Returns **null**, if no file has been successfully parsed or the successfully parsed file
+	 * is not a MIDI file.
+	 * 
+	 * @return file path or **null**.
+	 */
+	public static String getFilePath() {
+		return getFilePath("mid");
+	}
+	
+	/**
 	 * Parses a MIDI file.
 	 * 
 	 * @param file  MIDI file to be parsed.

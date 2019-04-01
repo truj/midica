@@ -169,6 +169,17 @@ public class MidicaPLParser extends SequenceParser {
 	private ArrayList<String> currentMacro      = null;
 	
 	/**
+	 * Returns the absolute path of the successfully parsed MidicaPL file.
+	 * Returns **null**, if no file has been successfully parsed or the successfully parsed file
+	 * is not a MidicaPL file.
+	 * 
+	 * @return file path or **null**.
+	 */
+	public static String getFilePath() {
+		return getFilePath("midica");
+	}
+	
+	/**
 	 * Indicates if the current parser object parses the file chosen by the user.  
 	 * Otherwise it parses an included file.
 	 */
