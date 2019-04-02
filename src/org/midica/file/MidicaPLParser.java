@@ -1422,8 +1422,12 @@ public class MidicaPLParser extends SequenceParser {
 			block.setMultiple(OPT_MULTIPLE);
 		if (quantity != -1)
 			block.setQuantity(quantity, OPT_QUANTITY);
-		if (tuplet != null)
-			block.setTuplet(tuplet, OPT_TUPLET);
+		if (tuplet != null) {
+			if (TRIPLET.equals(tuplet))
+				block.setTuplet(TRIPLET, OPT_TUPLET);
+			else
+				block.setTuplet(TUPLET_INTRO + tuplet, OPT_TUPLET);
+		}
 		
 		// apply root block
 		if (BLOCK_CLOSE.equals(cmd) && nestableBlkDepth == 0) {
@@ -2155,10 +2159,10 @@ public class MidicaPLParser extends SequenceParser {
 	private ArrayList<CommandOption> parseOptions(String optString) throws ParseException {
 		ArrayList<CommandOption> options = new ArrayList<CommandOption>();
 		
-		String[] optTokens = optString.split( OPT_SEPARATOR );
+		String[] optTokens = optString.split(OPT_SEPARATOR, -1);
 		for (String opt : optTokens) {
 			opt = clean( opt );
-			String[] optParts = opt.split("[" + Pattern.quote(OPT_ASSIGNER) + "\\s]+"); // name and value can be separated by OPT_ASSIGNER (e,g, "=") and/or whitespace(s)
+			String[] optParts = opt.split("[" + Pattern.quote(OPT_ASSIGNER) + "\\s]+", -1); // name and value can be separated by OPT_ASSIGNER (e,g, "=") and/or whitespace(s)
 			if (optParts.length > 2)
 				throw new ParseException( Dict.get(Dict.ERROR_CANT_PARSE_OPTIONS) );
 			// construct name and value
@@ -2196,6 +2200,8 @@ public class MidicaPLParser extends SequenceParser {
 			else if (M.equals(optName) || MULTIPLE.equals(optName)) {
 				optName = OPT_MULTIPLE;
 				optValue.set(optName, true);
+				if (optParts.length > 1)
+					throw new ParseException( Dict.get(Dict.ERROR_OPTION_VAL_NOT_ALLOWED) + optName );
 			}
 			else if (L.equals(optName) || LYRICS.equals(optName)) {
 				optName = OPT_LYRICS;
@@ -2203,21 +2209,17 @@ public class MidicaPLParser extends SequenceParser {
 			}
 			else if (T.equals(optName) || TUPLET.equals(optName)) {
 				optName = OPT_TUPLET;
-				Pattern pattern = Pattern.compile(
-					  "^(?:"                       // open non-capturing group for all tuplets and triplets
-					+ Pattern.quote(TUPLET_INTRO)  //   customized tuplet
-					+ "\\d+"                       //     first number of the customized tuplet
-					+ Pattern.quote(TUPLET_FOR)    //     separator between the 2 numbers
-					+ "\\d+"                       //     second number of the customized tuplet
-					+ "|" + Pattern.quote(TRIPLET) //   ordinary triplet
-					+ ")+"                         // close non-capturing group
-					+ "$"
-				);
-				if (pattern.matcher(optParts[1]).matches()) {
-					optValue.set( optName, optParts[1] );
+				if (1 == optParts.length) {
+					optValue.set(optName, TRIPLET);
 				}
 				else {
-					throw new ParseException( Dict.get(Dict.ERROR_TUPLET_INVALID) + optParts[1] );
+					Pattern pattern = Pattern.compile("^\\d+" + Pattern.quote(TUPLET_FOR) + "\\d+$");
+					if (pattern.matcher(optParts[1]).matches()) {
+						optValue.set( optName, optParts[1] );
+					}
+					else {
+						throw new ParseException( Dict.get(Dict.ERROR_TUPLET_INVALID) + optParts[1] );
+					}
 				}
 			}
 			else {

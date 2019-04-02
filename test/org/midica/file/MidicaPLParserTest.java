@@ -176,7 +176,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "happy birthday to you\nhappy birthday to you\n\nhappy", lyricsFull );
 		
 		parse(getWorkingFile("block-tuplets"));
-		assertEquals( 2538, instruments.get(0).getCurrentTicks() );
+		assertEquals( 2709, instruments.get(0).getCurrentTicks() );
 	}
 	
 	/**

@@ -994,6 +994,7 @@ public class Dict {
 	public static final String ERROR_CH_CMD_NUM_OF_ARGS         = "error_ch_num_of_args";
 	public static final String ERROR_CANT_PARSE_OPTIONS         = "error_cant_parse_options";
 	public static final String ERROR_OPTION_NEEDS_VAL           = "error_option_needs_val";
+	public static final String ERROR_OPTION_VAL_NOT_ALLOWED     = "error_option_val_not_allowed";
 	public static final String ERROR_VEL_NOT_MORE_THAN_127      = "error_vel_not_more_than_127";
 	public static final String ERROR_VEL_NOT_LESS_THAN_1        = "error_vel_not_less_than_1";
 	public static final String ERROR_TUPLET_INVALID             = "error_tuplet_invalid";
@@ -1856,9 +1857,10 @@ public class Dict {
 		set( ERROR_CH_CMD_NUM_OF_ARGS,            "wrong number of arguments in channel command"                      );
 		set( ERROR_CANT_PARSE_OPTIONS,            "cannot parse options"                                              );
 		set( ERROR_OPTION_NEEDS_VAL,              "option needs value: "                                              );
+		set( ERROR_OPTION_VAL_NOT_ALLOWED,        "no value allowed for option: "                                     );
 		set( ERROR_VEL_NOT_MORE_THAN_127,         "velocity cannot be set to more than 127"                           );
 		set( ERROR_VEL_NOT_LESS_THAN_1,           "velocity must be more than 0"                                      );
-		set( ERROR_TUPLET_INVALID,                "Invalid tuplet or triplet definition: "                            );
+		set( ERROR_TUPLET_INVALID,                "Invalid tuplet definition: "                                       );
 		set( ERROR_DURATION_MORE_THAN_0,          "duration must be more than 0.0 (or 0%)"                            );
 		set( ERROR_UNKNOWN_OPTION,                "unknown option: "                                                  );
 		set( ERROR_UNKNOWN_NOTE,                  "unknown note: "                                                    );
