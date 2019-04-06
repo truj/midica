@@ -420,7 +420,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 				String pathKey      = Config.PATH_MIDICAPL;
 				if (FileSelector.FILE_TYPE_MIDI.equals(type)) {
 					mustRemember = Config.get( Config.REMEMBER_MIDI );
-					pathKey      = Config.PATH_MIDICAPL;
+					pathKey      = Config.PATH_MIDI;
 				}
 				if (mustRemember.equals("true")) {
 					Config.set( pathKey, file.getAbsolutePath() );
