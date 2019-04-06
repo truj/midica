@@ -111,10 +111,12 @@ public class Config {
 	private static ArrayList<ComboboxStringOption> CBX_NOTE_OPTIONS = null;
 	
 	// octave naming combobox
+	public  static final String   CBX_OCTAVE_PLUS_MINUS_N  = "cbx_octave_plus_minus_n";
 	public  static final String   CBX_OCTAVE_PLUS_MINUS    = "cbx_octave_plus_minus";
 	public  static final String   CBX_OCTAVE_INTERNATIONAL = "cbx_octave_international";
 	public  static final String   CBX_OCTAVE_GERMAN        = "cbx_octave_german";
 	private static final String[] CBX_OCTAVE_IDENTIFIERS = {
+		CBX_OCTAVE_PLUS_MINUS_N,
 		CBX_OCTAVE_PLUS_MINUS,
 		CBX_OCTAVE_INTERNATIONAL,
 		CBX_OCTAVE_GERMAN,
@@ -210,7 +212,7 @@ public class Config {
 		defaults.put( LANGUAGE,    CBX_LANG_ENGLISH             );
 		defaults.put( HALF_TONE,   CBX_HALFTONE_ID_SHARP        );
 		defaults.put( NOTE,        CBX_NOTE_ID_INTERNATIONAL_LC );
-		defaults.put( OCTAVE,      CBX_OCTAVE_PLUS_MINUS        );
+		defaults.put( OCTAVE,      CBX_OCTAVE_PLUS_MINUS_N      );
 		defaults.put( SYNTAX,      CBX_SYNTAX_MIXED             );
 		defaults.put( PERCUSSION,  CBX_PERC_EN_1                );
 		defaults.put( INSTRUMENT,  CBX_INSTR_EN_1               );

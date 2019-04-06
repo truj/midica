@@ -7,7 +7,7 @@ instruments[
 
 macro[ test
 	perc hhc /4 q=4
-	0 c++ /8 q=8
+	0 c+2 /8 q=8
 	glob
 ]
 

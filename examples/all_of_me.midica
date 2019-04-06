@@ -4,7 +4,7 @@
 // This file assumes the following program configuration:
 // - Note System:      International: c, d, e, ... (lower case)
 // - Half Tone Symbol: # (c#, d#, e#, ...)
-// - Octave Naming:    +/-
+// - Octave Naming:    +n/-n
 // - Syntax:           Mixed Case Syntax
 
 
@@ -64,7 +64,7 @@ MACRO verse_1
 	0     chord_2     4.
 	0     chord_2     4
 
-	1     g#--        1
+	1     g#-2        1
 	0     chord_3     4.
 	0     chord_3     4.
 	0     chord_3     4
@@ -86,7 +86,7 @@ MACRO bassrun_1
 
 	5     g-     4.
 	5     g-     8
-	5     b--    4
+	5     b-2    4
 	5     g-     4
 
 	5     g#-    4.
@@ -96,7 +96,7 @@ MACRO bassrun_1
 
 	5     g-     4.
 	5     g-     8
-	5     b--    4
+	5     b-2    4
 	5     g-     4
 
 END

@@ -1188,6 +1188,7 @@ public class Dict {
 		set( Config.CBX_NOTE_ID_GERMAN_LC,           "German (lower): c, d, e, f, g, a, h"   );
 		set( Config.CBX_NOTE_ID_GERMAN_UC,           "German (upper): C, D, E, F, G, A, H"   );
 		
+		set( Config.CBX_OCTAVE_PLUS_MINUS_N,         "+n/-n: c-2, c-, c, c+, c+2, c+3..."    );
 		set( Config.CBX_OCTAVE_PLUS_MINUS,           "+/-: c--, c-, c, c+, c++..."           );
 		set( Config.CBX_OCTAVE_INTERNATIONAL,        "International: c0, c1, c2..."          );
 		set( Config.CBX_OCTAVE_GERMAN,               "German: C', C, c, c', c'', c'''..."    );
@@ -2011,6 +2012,7 @@ public class Dict {
 		set( Config.CBX_NOTE_ID_GERMAN_LC,           "Deutsch (klein): c, d, e, f, g, a, h"  );
 		set( Config.CBX_NOTE_ID_GERMAN_UC,           "Deutsch (groß): C, D, E, F, G, A, H"   );
 		
+		set( Config.CBX_OCTAVE_PLUS_MINUS_N,         "+n/-n: c-2, c-, c, c+, c+2, c+3..."    );
 		set( Config.CBX_OCTAVE_PLUS_MINUS,           "+/-: c--, c-, c, c+, c++..."           );
 		set( Config.CBX_OCTAVE_INTERNATIONAL,        "International: c0, c1, c2..."          );
 		set( Config.CBX_OCTAVE_GERMAN,               "Deutsch: C', C, c, c', c'', c'''..."   );
@@ -2224,6 +2226,9 @@ public class Dict {
 		
 		// initialize the octave according to the configuration
 		if ( Config.CBX_OCTAVE_PLUS_MINUS.equals(configuredOctave) ) {
+			initOctavesPlusMinusN();
+		}
+		else if ( Config.CBX_OCTAVE_PLUS_MINUS.equals(configuredOctave) ) {
 			initOctavesPlusMinus();
 		}
 		else if ( Config.CBX_OCTAVE_INTERNATIONAL.equals(configuredOctave) ) {
@@ -2233,7 +2238,7 @@ public class Dict {
 			initOctavesGerman();
 		}
 		else {
-			initOctavesPlusMinus();
+			initOctavesPlusMinusN();
 		}
 		
 		// init integers to names
@@ -2717,144 +2722,202 @@ public class Dict {
 	}
 	
 	/**
-	 * Sets up note names using  
-	 * `+`, `++`, `+++`, ... for higher octaves and  
-	 * `-`, `--`, `---`, ... for lower octaves.
+	 * Sets up note names using:
+	 * 
+	 * - `+`, `+2`, `+3`, ... for higher octaves
+	 * - `-`, `-2`, `-3`, ... for lower octaves
+	 */
+	private static void initOctavesPlusMinusN() {
+		
+		// define unmodified note names
+		ArrayList<NamedInteger> noteNames = new ArrayList<NamedInteger>();
+		byte i = 60; // middle C
+		for (String name : notes) {
+			NamedInteger note = new NamedInteger(name, i);
+			noteNames.add(note);
+			i++;
+		}
+		
+		// initialize unmodified and higher notes
+		String postfix = "";
+		OCTAVE:
+		for (int octave = 0; ; octave++) {
+			if (1 == octave)
+				postfix = "+";
+			if (octave > 1)
+				postfix = "+" + (octave - 1);
+			int increment = octave * 12;
+			for (NamedInteger name : noteNames) {
+				String newName  = name.name  + postfix;
+				int    newValue = name.value + increment;
+				if (newValue > 127)
+					break OCTAVE;
+				noteNameToInt.put(newName, newValue);
+			}
+		}
+		
+		// initialize lower notes
+		Collections.reverse( noteNames );
+		postfix = "";
+		OCTAVE:
+		for (int octave = 1; ; octave++) {
+			if (1 == octave)
+				postfix = "-";
+			if (octave > 1)
+				postfix = "-" + (octave - 1);
+			int decrement = octave * 12;
+			for (NamedInteger name : noteNames) {
+				String newName  = name.name  + postfix;
+				int    newValue = name.value - decrement;
+				if (newValue < 0)
+					break OCTAVE;
+				noteNameToInt.put(newName, newValue);
+			}
+		}
+	}
+	
+	/**
+	 * Sets up note names using:
+	 * 
+	 * - `+`, `++`, `+++`, ... for higher octaves
+	 * - `-`, `--`, `---`, ... for lower octaves
 	 */
 	private static void initOctavesPlusMinus() {
 		
 		// define unmodified note names
 		ArrayList<NamedInteger> noteNames = new ArrayList<NamedInteger>();
 		byte i = 60; // middle C
-		for ( String name : notes ) {
-			NamedInteger note = new NamedInteger( name, i );
-			noteNames.add( note );
+		for (String name : notes) {
+			NamedInteger note = new NamedInteger(name, i);
+			noteNames.add(note);
 			i++;
 		}
 		
 		// initialize unmodified and higher notes
-		StringBuilder postfix = new StringBuilder( "" );
+		StringBuilder postfix = new StringBuilder("");
 		OCTAVE:
-		for ( int octave = 0; ; octave++ ) {
-			if ( octave > 0 )
-				postfix.append( "+" );
+		for (int octave = 0; ; octave++) {
+			if (octave > 0)
+				postfix.append("+");
 			int increment = octave * 12;
 			NAME:
-			for ( NamedInteger name : noteNames ) {
+			for (NamedInteger name : noteNames) {
 				String newName  = name.name  + postfix;
 				int    newValue = name.value + increment;
-				if ( newValue > 127 )
+				if (newValue > 127)
 					break OCTAVE;
-				noteNameToInt.put( newName, newValue );
+				noteNameToInt.put(newName, newValue);
 			}
 		}
 		
 		// initialize lower notes
-		Collections.reverse( noteNames );
-		postfix = new StringBuilder( "" );
+		Collections.reverse(noteNames);
+		postfix = new StringBuilder("");
 		OCTAVE:
 		for ( int octave = 1; ; octave++ ) {
-			postfix.append( "-" );
+			postfix.append("-");
 			int decrement = octave * 12;
 			NAME:
-			for ( NamedInteger name : noteNames ) {
+			for (NamedInteger name : noteNames) {
 				String newName  = name.name  + postfix;
 				int    newValue = name.value - decrement;
-				if ( newValue < 0 )
+				if (newValue < 0)
 					break OCTAVE;
-				noteNameToInt.put( newName, newValue );
+				noteNameToInt.put(newName, newValue);
 			}
 		}
 	}
 	
 	/**
-	 * Sets up note names using the international octave naming system  
-	 * C-1, C0, C1, C2, C3, C4...
+	 * Sets up note names using the international octave naming system:
+	 * 
+	 * - C-1, C0, C1, C2, C3, C4...
 	 */
 	private static void initOctavesInternational() {
 		// define unmodified note names
 		ArrayList<NamedInteger> noteNames = new ArrayList<NamedInteger>();
 		byte i = 0; // C-1
-		for ( String name : notes ) {
-			NamedInteger note = new NamedInteger( name, i );
-			noteNames.add( note );
+		for (String name : notes) {
+			NamedInteger note = new NamedInteger(name, i);
+			noteNames.add(note);
 			i++;
 		}
 		
 		// initialize octaves
 		byte postfix = -1;
 		OCTAVE:
-		for ( int octave = 0; ; octave++ ) {
+		for (int octave = 0; ; octave++) {
 			int increment = octave * 12;
 			NAME:
-			for ( NamedInteger name : noteNames ) {
+			for (NamedInteger name : noteNames) {
 				String newName  = name.name  + postfix;
 				int    newValue = name.value + increment;
-				if ( newValue > 127 )
+				if (newValue > 127)
 					break OCTAVE;
-				noteNameToInt.put( newName, newValue );
+				noteNameToInt.put(newName, newValue);
 			}
 			postfix++;
 		}
 	}
 	
 	/**
-	 * Sets up note names using the traditional german octave naming system  
-	 * lower case c, c', c'', c'''... for higher octaves and  
-	 * upper case C, C', C'', C'''... for lower octaves
+	 * Sets up note names using the traditional german octave naming system:
+	 * 
+	 * - lower case c, c', c'', c'''... for higher octaves and
+	 * - upper case C, C', C'', C'''... for lower octaves
 	 */
 	private static void initOctavesGerman() {
 		
 		// define unmodified note names for higher notes (lower case)
 		ArrayList<NamedInteger> noteNames = new ArrayList<NamedInteger>();
 		byte i = 48; // capizalized C without modifiers
-		for ( String name : notes ) {
+		for (String name : notes) {
 			// use lower case for higher octaves
 			name = name.toLowerCase();
-			NamedInteger note = new NamedInteger( name, i );
-			noteNames.add( note );
+			NamedInteger note = new NamedInteger(name, i);
+			noteNames.add(note);
 			i++;
 		}
 		
 		// initialize unmodified and higher notes
-		StringBuilder postfix = new StringBuilder( "" );
+		StringBuilder postfix = new StringBuilder("");
 		OCTAVE:
-		for ( int octave = 0; ; octave++ ) {
+		for (int octave = 0; ; octave++) {
 			if ( octave > 0 )
-				postfix.append( "'" );
+				postfix.append("'");
 			int increment = octave * 12;
 			NAME:
-			for ( NamedInteger name : noteNames ) {
+			for (NamedInteger name : noteNames) {
 				String newName  = name.name  + postfix;
 				int    newValue = name.value + increment;
 				if ( newValue > 127 )
 					break OCTAVE;
-				noteNameToInt.put( newName, newValue );
+				noteNameToInt.put(newName, newValue);
 			}
 		}
 		
 		// define unmodified note names for lower notes (upper case)
-		for ( NamedInteger note : noteNames ) {
+		for (NamedInteger note : noteNames) {
 			note.name = note.name.substring( 0, 1 ).toUpperCase()
 			          + note.name.substring( 1 )
 			          ;
 		}
 		Collections.reverse( noteNames );
-		postfix = new StringBuilder( "" );
+		postfix = new StringBuilder("");
 		
 		// initialize lower notes
 		OCTAVE:
-		for ( int octave = 1; ; octave++ ) {
-			if ( octave > 1 )
-				postfix.append( "'" );
+		for (int octave = 1; ; octave++) {
+			if (octave > 1)
+				postfix.append("'");
 			int decrement = octave * 12;
 			NAME:
-			for ( NamedInteger name : noteNames ) {
+			for (NamedInteger name : noteNames) {
 				String newName  = name.name  + postfix;
 				int    newValue = name.value - decrement;
-				if ( newValue < 0 )
+				if (newValue < 0)
 					break OCTAVE;
-				noteNameToInt.put( newName, newValue );
+				noteNameToInt.put(newName, newValue);
 			}
 		}
 	}

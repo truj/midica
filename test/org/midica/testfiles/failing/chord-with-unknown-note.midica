@@ -1,3 +1,3 @@
 INCLUDE_FILE inc/instruments.midica
 
-CHORD test c d e c+++++++++++++++++++++++++
+CHORD test c d e c+5
