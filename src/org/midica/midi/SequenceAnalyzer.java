@@ -2637,6 +2637,8 @@ public class SequenceAnalyzer {
 					paramTxt = Dict.get( Dict.MSG4_RPN_TUN_BANK_SELECT );
 				else if (0x05 == lsb)
 					paramTxt = Dict.get( Dict.MSG4_RPN_MOD_DEPTH_RANGE );
+				else if (0x06 == lsb)
+					paramTxt = Dict.get( Dict.MSG4_RPN_MPE_CONFIG );
 			}
 			else if (0x3D == msb) {
 				if (0x00 == lsb)

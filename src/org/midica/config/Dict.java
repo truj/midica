@@ -782,6 +782,7 @@ public class Dict {
 	public static final String MSG4_RPN_TUN_PROG_CHANGE    = "msg4_rpn_tuning_program_change"; // MSG5_C_RPN_[MSB|LSB]
 	public static final String MSG4_RPN_TUN_BANK_SELECT    = "msg4_rpn_tuning_bank_select";    // MSG5_C_RPN_[MSB|LSB]
 	public static final String MSG4_RPN_MOD_DEPTH_RANGE    = "msg4_rpn_mod_depth_range";       // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_RPN_MPE_CONFIG         = "msg4_rpn_mpe_config";            // MSG5_C_RPN_[MSB|LSB]
 	public static final String MSG4_RPN_AZIMUTH_ANGLE      = "msg4_rpn_azimuth_angle";         // MSG5_C_RPN_[MSB|LSB]
 	public static final String MSG4_RPN_ELEVATION_ANGLE    = "msg4_rpn_elevation_angle";       // MSG5_C_RPN_[MSB|LSB]
 	public static final String MSG4_RPN_GAIN               = "msg4_rpn_gain";                  // MSG5_C_RPN_[MSB|LSB]
@@ -1647,6 +1648,7 @@ public class Dict {
 		set( MSG4_RPN_TUN_PROG_CHANGE,    "Tuning Program Change"                          );
 		set( MSG4_RPN_TUN_BANK_SELECT,    "Tuning Bank Select"                             );
 		set( MSG4_RPN_MOD_DEPTH_RANGE,    "Modulation Depth Range"                         );
+		set( MSG4_RPN_MPE_CONFIG,         "MPE Config Msg (MCM)"                           );
 		set( MSG4_RPN_AZIMUTH_ANGLE,      "Azimuth Angle"                                  );
 		set( MSG4_RPN_ELEVATION_ANGLE,    "Elevation Angle"                                );
 		set( MSG4_RPN_GAIN,               "Gain"                                           );
