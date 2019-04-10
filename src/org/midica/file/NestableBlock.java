@@ -8,6 +8,7 @@
 package org.midica.file;
 
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 import org.midica.config.Dict;
 
@@ -17,6 +18,8 @@ import org.midica.config.Dict;
  * @author Jan Trukenmüller
  */
 public class NestableBlock {
+	
+	private static Pattern plus = null;
 	
 	private MidicaPLParser    parser   = null;
 	private boolean           multiple = false;
@@ -36,6 +39,13 @@ public class NestableBlock {
 	public NestableBlock(MidicaPLParser parser) {
 		this.parser   = parser;
 		this.elements = new ArrayList<Object>();
+	}
+	
+	/**
+	 * Resets the precompiled PLUS pattern because in the next compile run it could be redefined.
+	 */
+	public static void reset() {
+		plus = null;
 	}
 	
 	/**
@@ -103,6 +113,10 @@ public class NestableBlock {
 	 * @param parentTuplets    The tuplet modifiers from all (grand)parents to be applied as well.
 	 */
 	public void applyTuplets(String parentTuplets) {
+		
+		if (null == plus)
+			plus = Pattern.compile( Pattern.quote(MidicaPLParser.DURATION_PLUS) );
+		
 		String resultingTuplet = tuplet;
 		if (resultingTuplet == null) {
 			resultingTuplet = parentTuplets;
@@ -124,7 +138,13 @@ public class NestableBlock {
 						parser.toChannel(tokens[0]);
 						
 						// no exception - channel command
-						tokens[2] += resultingTuplet;
+						// add tuplet to all summands inside of the duration column
+						// e.g. *1+/8 --> *1t4:3+/8t4:3
+						String[] atoms = plus.split(tokens[2], -1);
+						for (int i=0; i < atoms.length; i++) {
+							atoms[i] += resultingTuplet;
+						}
+						tokens[2] = String.join(MidicaPLParser.DURATION_PLUS, atoms);
 					}
 					catch (ParseException e) {
 						// not a channel command - probably an include

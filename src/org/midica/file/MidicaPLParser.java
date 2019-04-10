@@ -423,8 +423,15 @@ public class MidicaPLParser extends SequenceParser {
 	 * The values are the tickstamps.
 	 * 
 	 * @return snapshot of tickstamps
+	 * @throws ParseException    if something went wrong.
 	 */
-	public ArrayList<Long> rememberTickstamps() {
+	public ArrayList<Long> rememberTickstamps() throws ParseException {
+		
+		// allow drum-only sequences beginning with an empty multiple block or empty macro include
+		if (! instrumentsParsed) {
+			postprocessInstruments();
+		}
+		
 		ArrayList<Long> tickstampByChannel = new ArrayList<Long>();
 		for (int channel = 0; channel < 16; channel++) {
 			long ticks = instruments.get(channel).getCurrentTicks();
@@ -1947,7 +1954,7 @@ public class MidicaPLParser extends SequenceParser {
 	private void parseGlobalCmd(String[] tokens, boolean isFake) throws ParseException {
 		
 		// allow global commands in drum-only sequences without an INSTRUMENTS block
-		if (!instrumentsParsed) {
+		if (! instrumentsParsed) {
 			postprocessInstruments();
 		}
 		
@@ -2093,7 +2100,7 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// allow drum-only sequences without an INSTRUMENTS block
-		if (!instrumentsParsed) {
+		if (! instrumentsParsed) {
 			postprocessInstruments();
 		}
 		
@@ -2450,7 +2457,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * Initializes all necessary data structures for all channels. Thereby all undefined
 	 * channels will be initialized with a fake instrument so that the data structures work.
 	 * 
-	 * @throws ParseException    If something went wrong.
+	 * @throws ParseException    if something went wrong.
 	 */
 	private void postprocessInstruments() throws ParseException {
 		
@@ -2515,7 +2522,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * 
 	 * Sets all defined meta events in the MIDI sequence.
 	 * 
-	 * @throws ParseException    If something went wrong.
+	 * @throws ParseException    if something went wrong.
 	 */
 	private void postprocessMeta() throws ParseException {
 		try {
@@ -2649,6 +2656,7 @@ public class MidicaPLParser extends SequenceParser {
 			redefinitions       = new HashSet<String>();
 			soundfontParsed     = false;
 			refreshSyntax();
+			NestableBlock.reset();
 		}
 	}
 }

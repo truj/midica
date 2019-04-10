@@ -176,7 +176,19 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "happy birthday to you\nhappy birthday to you\n\nhappy", lyricsFull );
 		
 		parse(getWorkingFile("block-tuplets"));
-		assertEquals( 2709, instruments.get(0).getCurrentTicks() );
+		assertEquals( 3668, instruments.get(0).getCurrentTicks() );
+		
+		parse(getWorkingFile("drum-only-with-global"));
+		assertEquals( 960, instruments.get(9).getCurrentTicks() );
+		
+		parse(getWorkingFile("drum-only-with-empty-multiple-block"));
+		assertEquals( 0, instruments.get(9).getCurrentTicks() );
+		
+		parse(getWorkingFile("drum-only-with-empty-multiple-macro"));
+		assertEquals( 0, instruments.get(9).getCurrentTicks() );
+		
+		parse(getWorkingFile("drum-only-with-multiple"));
+		assertEquals( 0, instruments.get(9).getCurrentTicks() );
 	}
 	
 	/**

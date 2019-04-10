@@ -3,9 +3,10 @@ INCLUDE_FILE inc/instruments.midica
 0 c /4               // 480
 ( tuplet             // (3:2) = 2/3 of each note length
     0 c /4           //     320 (480 * 2/3)
+    INCLUDE test q=2 //     960 (480*2)
     ( t=7:5          //     (7:5) = 5/7 of each note length
-        0 e /4       //         229 (480 * 2/3 * 5/7)
-        0 f /4       //         229 (480 * 2/3 * 5/7)
+        0 e /4       //         229   (480 * 2/3 * 5/7)
+        0 f /8+/8    //         228 2*(240 * 2/3 * 5/7)
         (
             0 g /4   //             171 (480 * 2/3 * 5/7 * 3/4)
         ) t=4:3
@@ -14,4 +15,8 @@ INCLUDE_FILE inc/instruments.midica
 )
 0 c /2               // 960
 
-// total: 480 + 320 + 229 + 229 + 171 + 320 + 960 = 2709
+// total: 480 + 320 + 960 + 229 + 228 + 171 + 320 + 960 = 3668
+
+MACRO test
+	0 g+ /4
+END
