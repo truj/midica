@@ -1,0 +1,48 @@
+/*
+ * This Source Code Form is subject to the terms of the
+ * Mozilla Public License, v. 2.0. 
+ * If a copy of the MPL was not distributed with this file,
+ * You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
+package org.midica;
+
+import java.io.File;
+
+import org.midica.config.Config;
+
+/**
+ * This class provides static methods that can be used by other test classes.
+ * 
+ * @author Jan Trukenmüller
+ */
+public class TestUtil {
+	
+	private static boolean isMidicaInitialized = false;
+	
+	/**
+	 * Initializes and stores midica in test mode, if not yet done.
+	 */
+	public static void initMidica() {
+		
+		if (isMidicaInitialized)
+			return;
+		
+		// init (mostly static) dependencies
+		String[] args = {"--cli"};
+		Midica.main(args);
+		
+		// ignore config file
+		Config.restoreDefaults("");
+	}
+	
+	/**
+	 * Returns the directory with testfiles.
+	 * 
+	 * @return testfile directory.
+	 */
+	public static String getTestfileDirectory() {
+		return System.getProperty("user.dir") + File.separator + "test" + File.separator
+			+ "org" + File.separator + "midica" + File.separator + "testfiles" + File.separator;
+	}
+}

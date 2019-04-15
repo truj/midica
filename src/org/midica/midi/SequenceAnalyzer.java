@@ -153,14 +153,14 @@ public class SequenceAnalyzer {
 	}
 	
 	/**
-	 * Analyzes the given MIDI stream and collects information about it.
+	 * Analyzes the given MIDI sequence and collects information about it.
 	 * Adds marker events for channel activity changes.
 	 * 
 	 * @param seq      The MIDI sequence to be analyzed.
 	 * @param charset  The charset that has been chosen in the file chooser.
 	 * @throws ParseException if something went wrong.
 	 */
-	public static void analyze( Sequence seq, String charset ) throws ParseException {
+	public static void analyze(Sequence seq, String charset) throws ParseException {
 		sequence      = seq;
 		chosenCharset = charset;
 		
@@ -171,7 +171,7 @@ public class SequenceAnalyzer {
 			// fill data structures
 			parse();
 		}
-		catch( Exception e ) {
+		catch (Exception e) {
 			if (DEBUG_MODE) {
 				e.printStackTrace();
 			}
@@ -192,9 +192,9 @@ public class SequenceAnalyzer {
 	 * Returns the information that have been collected while
 	 * analyzing the MIDI sequence.
 	 * 
-	 * If no MIDI stream has been loaded: returns an empty data structure.
+	 * If no MIDI sequence has been loaded: returns an empty data structure.
 	 * 
-	 * @return MIDI stream info.
+	 * @return MIDI sequence info.
 	 */
 	public static HashMap<String, Object> getSequenceInfo() {
 		if (null == sequenceInfo) {
@@ -346,10 +346,27 @@ public class SequenceAnalyzer {
 	 */
 	private static void parse() throws ReflectiveOperationException {
 		
+		// Analyze for channel activity, note history, banks, instruments and (N)RPN.
+		// Therefore the CREATED sequence is used.
+		// In this sequence tracks match channels. So we know that we will
+		// process the note-related events in the right order.
+		int trackNum = 0;
+		for (Track t : SequenceCreator.getSequence().getTracks()) {
+			for (int i=0; i < t.size(); i++) {
+				MidiEvent   event = t.get( i );
+				long        tick  = event.getTick();
+				MidiMessage msg   = event.getMessage();
+				
+				if (msg instanceof ShortMessage) {
+					processShortMessageByChannel( (ShortMessage) msg, tick );
+				}
+			}
+		}
+		
 		// Analyze for general statistics.
 		// Therefore the ORIGINAL sequence is used.
 		midiFileCharset = null;
-		int trackNum    = 0;
+		trackNum        = 0;
 		for (Track t : sequence.getTracks()) {
 			int msgNum = 0;
 			for (int i=0; i < t.size(); i++) {
@@ -384,10 +401,8 @@ public class SequenceAnalyzer {
 			karUseLyrics = false;
 		}
 		
-		// Analyze for channel activity, note history, banks and instruments.
+		// Analyze for karaoke events and channel names (instrument names).
 		// Therefore the CREATED sequence is used.
-		// In this sequence tracks match channels. So we know that we will
-		// process the note-related events in the right order.
 		midiFileCharset = null;
 		trackNum        = 0;
 		for (Track t : SequenceCreator.getSequence().getTracks()) {
@@ -396,10 +411,7 @@ public class SequenceAnalyzer {
 				long        tick  = event.getTick();
 				MidiMessage msg   = event.getMessage();
 				
-				if (msg instanceof ShortMessage) {
-					processShortMessageByChannel( (ShortMessage) msg, tick );
-				}
-				else if (msg instanceof MetaMessage) {
+				if (msg instanceof MetaMessage) {
 					processMetaMessageByChannel( (MetaMessage) msg, tick, trackNum );
 				}
 			}
@@ -417,7 +429,7 @@ public class SequenceAnalyzer {
 	 * @throws ReflectiveOperationException if the message cannot be added to
 	 *         the tree model.
 	 */
-	private static void processShortMessage( ShortMessage msg, long tick, int trackNum, int msgNum ) throws ReflectiveOperationException {
+	private static void processShortMessage(ShortMessage msg, long tick, int trackNum, int msgNum) throws ReflectiveOperationException {
 		
 		// prepare data structures
 		ArrayList<String[]>     path            = new ArrayList<String[]>();
@@ -585,47 +597,45 @@ public class SequenceAnalyzer {
 	}
 	
 	/**
-	 * Retrieves some channel-specific information from short messages.
+	 * Retrieves some channel-specific information from short messages that can affect following messages.
 	 * 
-	 * This following information is parsed:
+	 * The regarded messages are:
 	 * 
-	 * - note on/off
-	 * - bank select (MSB/LSB)
-	 * - program change
-	 * - RPN (MSB/LSB)
-	 * - NRPN (MSB/LSB)
+	 * - Bank Select
+	 * - Program Change
+	 * - Note On/Off
+	 * - RPN
+	 * - NRPN
+	 * 
+	 * Stores these information in order to lookup their values later, when other
+	 * (affected) messages are found.
+	 * 
+	 * Fills the trees for the info view tab "Banks, Instruments, Notes".
+	 * 
+	 * Does **not** fill the tree in the tab "MIDI Messages".
 	 * 
 	 * @param msg   Short message
 	 * @param tick  Tickstamp
 	 * @throws ReflectiveOperationException if the note-on event cannot be
 	 *         added to one of the tree models.
 	 */
-	private static void processShortMessageByChannel( ShortMessage msg, long tick ) throws ReflectiveOperationException {
+	private static void processShortMessageByChannel(ShortMessage msg, long tick) throws ReflectiveOperationException {
 		int  cmd     = msg.getCommand();
 		byte channel = (byte) msg.getChannel();
 		
-		// NOTE ON or OFF
-		if (ShortMessage.NOTE_ON == cmd) {
-			byte note     = (byte) msg.getData1();
-			byte velocity = (byte) msg.getData2();
+		// Program Change?
+		if (ShortMessage.PROGRAM_CHANGE == cmd) {
+			// PROGRAM index = 2
+			channelConfig.get( channel )[ 2 ] = (byte) msg.getData1();
+			Byte[] confAtTick = channelConfig.get( channel ).clone();
+			instrumentHistory.get( channel ).put( tick, confAtTick );
+			markerTicks.add( tick ); // prepare marker event
 			
-			// on or off?
-			if (velocity > 0) {
-				addNoteOn( tick, channel, note, velocity );
-			}
-			else {
-				addNoteOff( tick, channel, note );
-			}
-		}
-		
-		// NOTE OFF
-		else if (ShortMessage.NOTE_OFF == cmd) {
-			byte note = (byte) msg.getData1();
-			addNoteOff( tick, channel, note );
+			return;
 		}
 		
 		// CONTROL CHANGE
-		else if (ShortMessage.CONTROL_CHANGE == cmd) {
+		if (ShortMessage.CONTROL_CHANGE == cmd) {
 			int controller = msg.getData1();
 			int value      = msg.getData2();
 			
@@ -661,13 +671,13 @@ public class SequenceAnalyzer {
 				byte currentLsb;
 				if (controller >= 0x64) {
 					rpnNrpnReset = 1;  // RPN
-					currentMsb   = channelParamConfig.get( channel )[ 0 ];
-					currentLsb   = channelParamConfig.get( channel )[ 1 ];
+					currentMsb = channelParamConfig.get( channel )[ 0 ];
+					currentLsb = channelParamConfig.get( channel )[ 1 ];
 				}
 				else {
 					rpnNrpnReset = 0;  // NRPN
-					currentMsb   = channelParamConfig.get( channel )[ 2 ];
-					currentLsb   = channelParamConfig.get( channel )[ 3 ];
+					currentMsb = channelParamConfig.get( channel )[ 2 ];
+					currentLsb = channelParamConfig.get( channel )[ 3 ];
 				}
 				if (((byte) 0x7F) == currentMsb && ((byte) 0x7F) == currentLsb) {
 					// reset
@@ -681,18 +691,29 @@ public class SequenceAnalyzer {
 			}
 		}
 		
-		// Instrument Change
-		else if (ShortMessage.PROGRAM_CHANGE == cmd) {
-			// PROGRAM index = 2
-			channelConfig.get( channel )[ 2 ] = (byte) msg.getData1();
-			Byte[] confAtTick = channelConfig.get( channel ).clone();
-			instrumentHistory.get( channel ).put( tick, confAtTick );
-			markerTicks.add( tick ); // prepare marker event
+		// NOTE ON or OFF
+		else if (ShortMessage.NOTE_ON == cmd) {
+			byte note     = (byte) msg.getData1();
+			byte velocity = (byte) msg.getData2();
+			
+			// on or off?
+			if (velocity > 0) {
+				addNoteOn( tick, channel, note, velocity );
+			}
+			else {
+				addNoteOff( tick, channel, note );
+			}
+		}
+		
+		// NOTE OFF
+		else if (ShortMessage.NOTE_OFF == cmd) {
+			byte note = (byte) msg.getData1();
+			addNoteOff( tick, channel, note );
 		}
 	}
 	
 	/**
-	 * Retrieves information from meta messages.
+	 * Retrieves general information from meta messages.
 	 * 
 	 * @param msg       Meta message
 	 * @param tick      Tickstamp
@@ -701,7 +722,7 @@ public class SequenceAnalyzer {
 	 * @throws ReflectiveOperationException if the message cannot be added to
 	 *         the tree model.
 	 */
-	private static void processMetaMessage( MetaMessage msg, long tick, int trackNum, int msgNum ) throws ReflectiveOperationException {
+	private static void processMetaMessage(MetaMessage msg, long tick, int trackNum, int msgNum) throws ReflectiveOperationException {
 		
 		// prepare data structures for the message tree
 		ArrayList<String[]>     path            = new ArrayList<String[]>();
@@ -851,7 +872,7 @@ public class SequenceAnalyzer {
 	 * @param tick      Tickstamp.
 	 * @param trackNum  Track number of the created string.
 	 */
-	private static void processMetaMessageByChannel( MetaMessage msg, long tick, int trackNum ) {
+	private static void processMetaMessageByChannel(MetaMessage msg, long tick, int trackNum) {
 		int    type = msg.getType();
 		byte[] data = msg.getData();
 		String text = null;
@@ -959,7 +980,7 @@ public class SequenceAnalyzer {
 	 * @throws ReflectiveOperationException if the message cannot be added to
 	 *         the tree model.
 	 */
-	private static void processSysexMessage( SysexMessage msg, long tick, int trackNum, int msgNum ) throws ReflectiveOperationException {
+	private static void processSysexMessage(SysexMessage msg, long tick, int trackNum, int msgNum) throws ReflectiveOperationException {
 		
 		// prepare data structures
 		ArrayList<String[]>     path            = new ArrayList<String[]>();
@@ -1165,7 +1186,7 @@ public class SequenceAnalyzer {
 	 * @throws ReflectiveOperationException if the note cannot be added to
 	 *         one of the tree models.
 	 */
-	private static void addNoteOn( long tick, byte channel, byte note, byte velocity ) throws ReflectiveOperationException {
+	private static void addNoteOn(long tick, byte channel, byte note, byte velocity) throws ReflectiveOperationException {
 		
 		// note on/off tracking
 		TreeMap<Byte, TreeMap<Long, Boolean>> noteTickOnOff = noteOnOffByChannel.get( channel );
@@ -1273,7 +1294,7 @@ public class SequenceAnalyzer {
 	 * @param channel  The MIDI channel number.
 	 * @param note     The note number.
 	 */
-	private static void addNoteOff( long tick, byte channel, byte note ) {
+	private static void addNoteOff(long tick, byte channel, byte note) {
 		
 		// check if the released key has been pressed before
 		TreeMap<Byte, TreeMap<Long, Boolean>> noteTickOnOff = noteOnOffByChannel.get( channel );
@@ -1329,7 +1350,7 @@ public class SequenceAnalyzer {
 	 * @param type  The message type (1: text, 2: lyrics).
 	 * @param tick  Tickstamp of the event.
 	 */
-	private static void processKaraoke( String text, int type, long tick ) {
+	private static void processKaraoke(String text, int type, long tick) {
 		
 		// Process as syllable-based lyrics?
 		// Some @K songs contain duplicate lyrics (text and lyrics messages).
@@ -1450,8 +1471,8 @@ public class SequenceAnalyzer {
 	}
 	
 	/**
-	 * Adds last information to the info data structure about the MIDI stream.
-	 * Adds marker events to the stream.
+	 * Adds last information to the info data structure about the MIDI sequence.
+	 * Adds marker events to the sequence.
 	 * 
 	 * @throws ParseException if the marker events cannot be added to the MIDI sequence.
 	 */
@@ -1634,7 +1655,7 @@ public class SequenceAnalyzer {
 		try {
 			SequenceCreator.addMarkers( markers );
 		}
-		catch ( InvalidMidiDataException e ) {
+		catch (InvalidMidiDataException e) {
 			throw new ParseException( Dict.get(Dict.ERROR_ANALYZE_POSTPROCESS) + e.getMessage() );
 		}
 		
@@ -1892,7 +1913,7 @@ public class SequenceAnalyzer {
 	 * @param tick     tickstamp of the sequence
 	 * @return   the channel activity
 	 */
-	public static boolean getChannelActivity( byte channel, long tick ) {
+	public static boolean getChannelActivity(byte channel, long tick) {
 		
 		// get ticks of this channel
 		TreeMap<Long, Integer> ticksInChannel = activityByChannel.get( channel );
@@ -1932,7 +1953,7 @@ public class SequenceAnalyzer {
 	 * @param tick     tickstamp of the sequence
 	 * @return   the note history
 	 */
-	public static ArrayList<Long[]> getNoteHistory( byte channel, long tick ) {
+	public static ArrayList<Long[]> getNoteHistory(byte channel, long tick) {
 		
 		ArrayList<Long[]> result = new ArrayList<Long[]>();
 		if (null == noteHistory) {
@@ -2029,7 +2050,7 @@ public class SequenceAnalyzer {
 	 * @param tick  Tickstamp in the MIDI sequence.
 	 * @return  the lyrics to be displayed.
 	 */
-	public static String getLyrics( long tick ) {
+	public static String getLyrics(long tick) {
 		
 		if (null == lyrics) {
 			return "";
@@ -2127,7 +2148,7 @@ public class SequenceAnalyzer {
 	 * @param tick     tickstamp of the sequence
 	 * @return         instrument description as described above
 	 */
-	public static Byte[] getInstrument( byte channel, long tick ) {
+	public static Byte[] getInstrument(byte channel, long tick) {
 		Entry<Long, Byte[]> entry = instrumentHistory.get( channel ).floorEntry( tick );
 		return entry.getValue();
 	}
@@ -2139,7 +2160,7 @@ public class SequenceAnalyzer {
 	 * @param tick     tickstamp of the sequence
 	 * @return         channel comment
 	 */
-	public static String getChannelComment ( byte channel, long tick ) {
+	public static String getChannelComment(byte channel, long tick) {
 		Entry<Long, String> entry = commentHistory.get( channel ).floorEntry( tick );
 		
 		if (null == entry) {
@@ -2163,7 +2184,7 @@ public class SequenceAnalyzer {
 	 * @param tick     tickstamp of the sequence
 	 * @return         MSB/LSB/type as described above
 	 */
-	private static Byte[] getChannelParamMsbLsbType( byte channel, long tick ) {
+	private static Byte[] getChannelParamMsbLsbType(byte channel, long tick) {
 		
 		// get all params at the given tick
 		Entry<Long, Byte[]> entry = channelParamHistory.get( channel ).floorEntry( tick );
@@ -2197,7 +2218,7 @@ public class SequenceAnalyzer {
 	 * @param status Status byte of the message.
 	 * @return Level 2 Message type.
 	 */
-	private static final String getLvl2SystemMsgTxtByStatusByte( int status ) {
+	private static final String getLvl2SystemMsgTxtByStatusByte(int status) {
 		
 		// system common
 		if (0xF1 == status)
@@ -2236,7 +2257,7 @@ public class SequenceAnalyzer {
 	 * @param type  Second byte of the message.
 	 * @return Level 2 META message type.
 	 */
-	private static final String getLvl2MetaText( int type ) {
+	private static final String getLvl2MetaText(int type) {
 		
 		if (0x00 == type)
 			return Dict.get( Dict.MSG2_M_SEQUENCE_NUMBER );
@@ -2282,7 +2303,7 @@ public class SequenceAnalyzer {
 	 * @param cmd  Command of the voice message.
 	 * @return Level 2 Message type.
 	 */
-	private static final String getLvl2VoiceMsgTxtByCommand (int cmd) {
+	private static final String getLvl2VoiceMsgTxtByCommand(int cmd) {
 		
 		if (0x80 == cmd)
 			return Dict.get( Dict.MSG2_V_NOTE_OFF );
@@ -2695,7 +2716,7 @@ public class SequenceAnalyzer {
 	 * @param sub2        **Sub-ID 2** (5th byte of the message)
 	 * @return level 4 and 5 text and Sub-ID 2, as described above.
 	 */
-	private static final String[] getLvl45UniversalSysexTxt( boolean isRealTime, byte sub1, byte sub2 ) {
+	private static final String[] getLvl45UniversalSysexTxt(boolean isRealTime, byte sub1, byte sub2) {
 		
 		// init fallback
 		boolean hasLvl5 = false;
@@ -2945,7 +2966,7 @@ public class SequenceAnalyzer {
 	 * @param vendorNum  The vendor number as described above.
 	 * @return the vendor name.
 	 */
-	private static String getVendorName( String vendorNum ) {
+	private static String getVendorName(String vendorNum) {
 		
 		// invalid (vendor number not found, message too short)
 		if ("-".equals(vendorNum)) {
@@ -3513,7 +3534,7 @@ public class SequenceAnalyzer {
 	 * @param tick   The tickstamp when the message occurs.
 	 * @return the replaced message.
 	 */
-	private static final MidiMessage replaceMessage( MidiMessage msg, long tick ) {
+	private static final MidiMessage replaceMessage(MidiMessage msg, long tick) {
 		
 		// only replace messages in a certain tick range
 		try {
@@ -3577,7 +3598,7 @@ public class SequenceAnalyzer {
 						content     = text.getBytes( Charset.forName("UTF-8") );
 					}
 				}
-				catch ( UnsupportedEncodingException e ) {
+				catch (UnsupportedEncodingException e) {
 					String text = "faked DEFAULT lyrics after UnsupportedEncodingException for testing äöü ÄÖÜ § 中中中中";
 					content     = text.getBytes();
 				}
@@ -3608,7 +3629,7 @@ public class SequenceAnalyzer {
 				msg = new MetaMessage( type, content, content.length );
 			}
 		}
-		catch ( InvalidMidiDataException e ) {
+		catch (InvalidMidiDataException e) {
 			e.printStackTrace();
 		}
 		

@@ -19,7 +19,7 @@ import javax.sound.midi.Sequence;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.midica.Midica;
-import org.midica.config.Config;
+import org.midica.TestUtil;
 import org.midica.midi.SequenceAnalyzer;
 import org.midica.midi.SequenceCreator;
 
@@ -35,17 +35,11 @@ class MidicaPLParserTest extends MidicaPLParser {
 	}
 
 	/**
-	 * @throws java.lang.Exception
+	 * Initializes midica in test mode.
 	 */
 	@BeforeAll
-	static void setUpBeforeClass() throws Exception {
-		
-		// init (mostly static) dependencies
-		String[] args = {"--cli"};
-		Midica.main(args);
-		
-		// ignore config file
-		Config.restoreDefaults("");
+	static void setUpBeforeClass() {
+		TestUtil.initMidica();
 	}
 	
 	/**
@@ -368,7 +362,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 	 * @return file object of the file to be tested
 	 */
 	private static File getWorkingFile(String name) {
-		String sourceDir = getTestfileDirectory() + "working" + File.separator;
+		String sourceDir = TestUtil.getTestfileDirectory() + "working" + File.separator;
 		File file = new File(sourceDir + name + ".midica");
 		
 		return file;
@@ -382,20 +376,10 @@ class MidicaPLParserTest extends MidicaPLParser {
 	 * @return file object of the file to be tested
 	 */
 	private static File getFailingFile(String name) {
-		String sourceDir = getTestfileDirectory() + "failing" + File.separator;
+		String sourceDir = TestUtil.getTestfileDirectory() + "failing" + File.separator;
 		File file = new File(sourceDir + name + ".midica");
 		
 		return file;
-	}
-	
-	/**
-	 * Returns the directory with testfiles.
-	 * 
-	 * @return testfile directory.
-	 */
-	private static String getTestfileDirectory() {
-		return System.getProperty("user.dir") + File.separator + "test" + File.separator
-			+ "org" + File.separator + "midica" + File.separator + "testfiles" + File.separator;
 	}
 	
 	/**

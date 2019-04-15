@@ -140,8 +140,8 @@ public class PlayerView extends JDialog {
 	public static final Color COLOR_CH_COMMENT        = new Color(  50, 100, 255 );
 	
 	// for activity control
-	public static final ImageIcon AC_ICON_INACTIVE  = new ImageIcon( ClassLoader.getSystemResource("org/midica/resources/inactive.png") );
-	public static final ImageIcon AC_ICON_ACTIVE    = new ImageIcon( ClassLoader.getSystemResource("org/midica/resources/active.png") );
+	public static final ImageIcon AC_ICON_INACTIVE  = new ImageIcon( ClassLoader.getSystemResource("org/midica/resources/channel-inactive.png") );
+	public static final ImageIcon AC_ICON_ACTIVE    = new ImageIcon( ClassLoader.getSystemResource("org/midica/resources/channel-active.png") );
 	
 	// for channel details
 	public static       int   NOTE_HISTORY_WIDTH              =   0; // will be set later
