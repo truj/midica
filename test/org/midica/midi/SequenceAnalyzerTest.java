@@ -29,6 +29,8 @@ import org.midica.TestUtil;
 import org.midica.file.MidiParser;
 import org.midica.file.ParseException;
 import org.midica.ui.model.MessageDetail;
+import org.midica.ui.model.MessageTreeNode;
+import org.midica.ui.model.MidicaTreeModel;
 
 /**
  * This is the test class for {@link org.midica.midi.SequenceAnalyzer}.
@@ -63,33 +65,42 @@ public class SequenceAnalyzerTest {
 	 */
 	@Test
 	void testAnalyze() throws InvalidMidiDataException, IOException, ParseException {
-		ArrayList<List<Number>> events = new ArrayList<List<Number>>();
+		ArrayList<List<Number>> events = new ArrayList<>();
 		int  track = 0;
 		long tick  = 10;
 		
 		// RPN / Data Entry
-		if (RECREATE_MIDI_FILES) {
-			// pitch bend sensitivity --> 0x02 0x01
-			events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x65, 0x00) ); // RPN MSB
-			events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x64, 0x00) ); // RPN LSB
-			events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x06, 0x02) ); // Data Entry MSB
-			events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x26, 0x01) ); // Data Entry LSB
-			
-			// master fine tuning --> 0x02 0x01
-			events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB1, 0x65, 0x00) ); // RPN MSB
-			events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB1, 0x64, 0x01) ); // RPN LSB
-			events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB1, 0x06, 0x02) ); // Data Entry MSB
-			events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB1, 0x26, 0x01) ); // Data Entry LSB
-		}
-		ArrayList<MessageDetail> messages = parseMidiFile("rpn_data_entry", events);
-		assertEquals( "[101] MSB (RPN) (2)",       getNodeText(messages, 0) );
-		assertEquals( "[100] LSB (RPN) (2)",       getNodeText(messages, 1) );
-		assertEquals( "[6] MSB (Data Entry) (1)",  getNodeText(messages, 2) );
-		assertEquals( "[38] LSB (Data Entry) (1)", getNodeText(messages, 3) );
-		assertEquals( "[101] MSB (RPN) (2)",       getNodeText(messages, 4) );
-		assertEquals( "[100] LSB (RPN) (2)",       getNodeText(messages, 5) );
-		assertEquals( "[6] MSB (Data Entry) (1)",  getNodeText(messages, 6) );
-		assertEquals( "[38] LSB (Data Entry) (1)", getNodeText(messages, 7) );
+		String filename = "rpn-data-entry";
+		
+		// pitch bend sensitivity --> 0x02 0x01
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x65, 0x00) ); // RPN MSB
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x64, 0x00) ); // RPN LSB
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x06, 0x02) ); // Data Entry MSB
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x26, 0x01) ); // Data Entry LSB
+		
+		// master fine tuning --> 0x02 0x01
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB1, 0x65, 0x00) ); // RPN MSB
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB1, 0x64, 0x01) ); // RPN LSB
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB1, 0x06, 0x02) ); // Data Entry MSB
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB1, 0x26, 0x01) ); // Data Entry LSB
+		
+		ArrayList<MessageDetail> messages = parseMidiFile(filename, events);
+		assertEquals( "[101] MSB (RPN) (2)",                     getNodeText(messages, 0, 0) );
+		assertEquals( "RPN (Registered Parameter) (4)",          getNodeText(messages, 0, 1) );
+		assertEquals( "[100] LSB (RPN) (2)",                     getNodeText(messages, 1, 0) );
+		assertEquals( "RPN (Registered Parameter) (4)",          getNodeText(messages, 1, 1) );
+		assertEquals( "[6] MSB (Data Entry) (1)",                getNodeText(messages, 2, 0) );
+		assertEquals( "[0,0] Pitch Bend Sensitivity (2)",        getNodeText(messages, 2, 1) );
+		assertEquals( "[38] LSB (Data Entry) (1)",               getNodeText(messages, 3, 0) );
+		assertEquals( "[0,0] Pitch Bend Sensitivity (2)",        getNodeText(messages, 3, 1) );
+		assertEquals( "[101] MSB (RPN) (2)",                     getNodeText(messages, 4, 0) );
+		assertEquals( "RPN (Registered Parameter) (4)",          getNodeText(messages, 4, 1) );
+		assertEquals( "[100] LSB (RPN) (2)",                     getNodeText(messages, 5, 0) );
+		assertEquals( "RPN (Registered Parameter) (4)",          getNodeText(messages, 5, 1) );
+		assertEquals( "[6] MSB (Data Entry) (1)",                getNodeText(messages, 6, 0) );
+		assertEquals( "[0,1] Master Fine Tuning (in Cents) (2)", getNodeText(messages, 6, 1) );
+		assertEquals( "[38] LSB (Data Entry) (1)",               getNodeText(messages, 7, 0) );
+		assertEquals( "[0,1] Master Fine Tuning (in Cents) (2)", getNodeText(messages, 7, 1) );
 	}
 	
 	/**
@@ -114,6 +125,10 @@ public class SequenceAnalyzerTest {
 		// parse
 		parser.parse(file);
 		
+		// postprocess tree model and connect nodes with each other
+		MidicaTreeModel model = (MidicaTreeModel) SequenceAnalyzer.getSequenceInfo().get("msg_tree_model");
+		model.postprocess();
+		
 		return (ArrayList<MessageDetail>) SequenceAnalyzer.getSequenceInfo().get("messages");
 	}
 	
@@ -130,7 +145,7 @@ public class SequenceAnalyzerTest {
 		
 		// create sequence
 		Sequence seq = new Sequence( Sequence.PPQ, 480 );
-		ArrayList<Track> tracks = new ArrayList<Track>();
+		ArrayList<Track> tracks = new ArrayList<>();
 		for (List<Number> event : events) {
 			
 			// create message
@@ -168,13 +183,20 @@ public class SequenceAnalyzerTest {
 	}
 	
 	/**
-	 * Searches the tree node message/index combination and returns it's text.
+	 * Searches a tree node and returns it's text.
 	 * 
 	 * @param messages    MIDI message list as created by the SequenceAnalyzer.
 	 * @param index       The index of the message we are interested in.
+	 * @param stepsUp     The number of steps to go up from the leaf node towards the root node.
 	 * @return tree node text.
 	 */
-	private static String getNodeText(ArrayList<MessageDetail> messages, int index) {
-		return messages.get( index ).getOption("leaf_node").toString();
+	private static String getNodeText(ArrayList<MessageDetail> messages, int index, int stepsUp) {
+		
+		MessageTreeNode currentNode = (MessageTreeNode) messages.get( index ).getOption("leaf_node");
+		for (int i = 0; i < stepsUp; i++) {
+			currentNode = (MessageTreeNode) currentNode.getParent();
+		}
+		
+		return currentNode.toString();
 	}
 }

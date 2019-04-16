@@ -22,7 +22,7 @@ public class Midica {
 	public static final int VERSION_MAJOR = 0;
 	
 	/** Minor version number. This is intended to be incremented automatically by precommit.pl. */
-	public static final int VERSION_MINOR = 1555436996;
+	public static final int VERSION_MINOR = 1555439457;
 	
 	/** Full version string. */
 	public static final String VERSION = VERSION_MAJOR + "." + VERSION_MINOR;
@@ -41,6 +41,9 @@ public class Midica {
 	
 	/** CLI mode (command line interface) without GUI - e.g. for unit tests */
 	public static boolean isCliMode = false;
+	
+	/** Determins if the local config file shall be used or not. */
+	public static boolean useLocalConfig = true;
 	
 	/**
 	 * The entry method which is launched on program startup.
@@ -74,6 +77,9 @@ public class Midica {
 			if ("--cli".equals(arg)) {
 				isCliMode = true;
 			}
+			else if ("--ignore-local-config".equals(arg)) {
+				useLocalConfig = false;
+			}
 			else if ("--help".equals(arg)) {
 				help(true);
 			}
@@ -93,8 +99,9 @@ public class Midica {
 	private static void help(boolean isHelpRequested) {
 		
 		StringBuilder msg = new StringBuilder("Options:\n");
-		msg.append("--help : Print this message.\n");
-		msg.append("--cli  : Run in CLI mode (command line interface) without GUI.\n");
+		msg.append("--help                : Print this message.\n");
+		msg.append("--cli                 : Run in CLI mode (command line interface) without GUI.\n");
+		msg.append("--ignore-local-config : Doesn't use local config file. Use default config.\n");
 		
 		if (isHelpRequested) {
 			System.out.println(msg);

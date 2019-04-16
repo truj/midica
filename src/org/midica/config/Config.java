@@ -22,6 +22,7 @@ import java.util.TreeMap;
 
 import javax.swing.UIManager;
 
+import org.midica.Midica;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
 
@@ -191,7 +192,9 @@ public class Config {
 	public static void init() {
 		String homeDir  = System.getProperty( "user.home" );
 		String fileName = ".midica.conf";
-		configFile = new File( homeDir + File.separator + fileName );
+		if (Midica.useLocalConfig) {
+			configFile = new File( homeDir + File.separator + fileName );
+		}
 		
 		restoreDefaults( homeDir );
 		readConfigFile();
@@ -243,8 +246,14 @@ public class Config {
 	
 	/**
 	 * Reads the config file and sets the current configuration accordingly.
+	 * Does not do anything, if the command line option --ignore-local-config has been used.
 	 */
 	private static void readConfigFile() {
+		
+		if (! Midica.useLocalConfig) {
+			return;
+		}
+		
 		if ( configFile.canRead() ) {
 			try {
 				// open file for reading
@@ -270,10 +279,16 @@ public class Config {
 	
 	/**
 	 * Saves the current configuration to the config file.
+	 * Does not do anything, if the command line option --ignore-local-config has been used.
 	 * 
 	 * This is called if the main GUI window is closed.
 	 */
 	public static void writeConfigFile() {
+		
+		if (! Midica.useLocalConfig) {
+			return;
+		}
+		
 		try {
 			// create file if not yet done
 			if ( ! configFile.canWrite() ) {

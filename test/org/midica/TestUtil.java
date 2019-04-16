@@ -9,8 +9,6 @@ package org.midica;
 
 import java.io.File;
 
-import org.midica.config.Config;
-
 /**
  * This class provides static methods that can be used by other test classes.
  * 
@@ -29,11 +27,13 @@ public class TestUtil {
 			return;
 		
 		// init (mostly static) dependencies
-		String[] args = {"--cli"};
+		String[] args = {
+			"--cli",
+			"--ignore-local-config",
+		};
 		Midica.main(args);
 		
-		// ignore config file
-		Config.restoreDefaults("");
+		isMidicaInitialized = true;
 	}
 	
 	/**
