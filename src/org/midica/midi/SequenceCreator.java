@@ -20,6 +20,7 @@ import javax.sound.midi.Sequence;
 import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Track;
 
+import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.CharsetUtils;
 import org.midica.file.MidiParser;
@@ -63,6 +64,11 @@ public class SequenceCreator {
 	 */
 	public static void reset( String chosenCharset ) throws InvalidMidiDataException {
 		resolution = DEFAULT_RESOLUTION;
+		
+		if (null == chosenCharset) {
+			chosenCharset = Config.get( Config.CHARSET_MPL );
+		}
+		
 		reset( resolution, chosenCharset );
 		fileType = "midica";
 	}
@@ -79,7 +85,7 @@ public class SequenceCreator {
 	 */
 	public static void reset( int res, String chosenCharset ) throws InvalidMidiDataException {
 		
-		// create a new stream
+		// create a new sequence
 		resolution = res;
 		charset    = chosenCharset;
 		seq        = new Sequence( Sequence.PPQ, resolution );

@@ -2490,7 +2490,6 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// initialize sequence
 		try {
-			SequenceCreator.reset( chosenCharset );
 			for (Instrument instr : instruments) {
 				int    channel      = instr.channel;
 				int    instrNum     = instr.instrumentNumber;
@@ -2632,13 +2631,21 @@ public class MidicaPLParser extends SequenceParser {
 	/**
 	 * Initializes the parser for a new parsing run.
 	 * This is called at the beginning of parse().
+	 * 
+	 * @throws ParseException if sequence creation fails.
 	 */
-	private void reset() {
+	private void reset() throws ParseException {
 		// reset fields
 		currentMode      = MODE_DEFAULT;
 		currentMacroName = null;
 		
 		if (isRootParser) {
+			try {
+				SequenceCreator.reset( chosenCharset );
+			}
+			catch (InvalidMidiDataException e) {
+				throw new ParseException(e.toString());
+			}
 			instrumentsParsed   = false;
 			metaInfo            = new HashMap<String, StringBuilder>();
 			frstInstrBlkOver    = false;
