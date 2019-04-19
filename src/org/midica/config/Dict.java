@@ -792,8 +792,6 @@ public class Dict {
 	public static final String MSG4_RPN_REF_DISTANCE_RATIO = "msg4_rpn_ref_distance_ratio";    // MSG5_C_RPN_[MSB|LSB]
 	public static final String MSG4_RPN_PAN_SPREAD_ANGLE   = "msg4_rpn_pan_spread_angle";      // MSG5_C_RPN_[MSB|LSB]
 	public static final String MSG4_RPN_ROLL_ANGLE         = "msg4_rpn_roll_angle";            // MSG5_C_RPN_[MSB|LSB]
-	public static final String MSG4_RPN_RPN_RESET          = "msg4_rpn_rpn_reset";             // MSG5_C_RPN_[MSB|LSB]
-	public static final String MSG4_RPN_END_OF_RPN         = "msg4_rpn_end_of_rpn";            // MSG5_C_RPN_[MSB|LSB]
 	public static final String MSG4_SX_NU_SMPL_DUMP_HDR    = "msg4_sx_nu_smpl_dump_hdr";
 	public static final String MSG4_SX_NU_SMPL_DATA_PKT    = "msg4_sx_nu_smpl_data_pkt";
 	public static final String MSG4_SX_NU_SMPL_DUMP_REQ    = "msg4_sx_nu_smpl_dump_req";
@@ -1658,8 +1656,6 @@ public class Dict {
 		set( MSG4_RPN_REF_DISTANCE_RATIO, "Reference Distance Ratio"                       );
 		set( MSG4_RPN_PAN_SPREAD_ANGLE,   "Pan Spread Angle"                               );
 		set( MSG4_RPN_ROLL_ANGLE,         "Roll Angle"                                     );
-		set( MSG4_RPN_RPN_RESET,          "RPN Reset"                                      );
-		set( MSG4_RPN_END_OF_RPN,         "Null Function Number for RPN/NRPN (End of RPN)" );
 		set( MSG5_C_NRPN_LSB,             "LSB (NRPN)"                                     );
 		set( MSG5_C_NRPN_MSB,             "MSB (NRPN)"                                     );
 		set( MSG5_C_RPN_LSB,              "LSB (RPN)"                                      );

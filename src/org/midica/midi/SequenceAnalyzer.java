@@ -500,9 +500,11 @@ public class SequenceAnalyzer {
 				// level 3
 				byte    data1Byte    = (byte) data1;
 				byte    ctrlBitmask  = (byte) 0b1101_1111; // 3rd bit: MSB or LSB
+				boolean isRpnOrNrpn  = false;
 				boolean isDataChange = false;
 				if (data1 >= 0x62 && data1 <= 0x65) {
 					// RPN or NRPN
+					isRpnOrNrpn        = true;
 					ctrlBitmask        = (byte) 0b1111_1110; // last bit: MSB or LSB
 					String paramNumStr = String.format( "%02X", data2 );
 					if (data1 >= 0x64) {
@@ -532,10 +534,20 @@ public class SequenceAnalyzer {
 				
 				// level 4 (MSB or LSB)
 				if (ctrlTxt[1] != null) {
-					String   data1ID   = String.format( "%02X", data1 );
+					String   data1ID   = String.format("%02X", data1);
 					String   msbLsbStr = data1 + "";
 					String[] msgLvl4   = { data1ID, ctrlTxt[1], msbLsbStr };
 					path.add( msgLvl4 );
+				}
+				
+				// level 5 for (N)RPN (only MSB or LSB number)
+				if (isRpnOrNrpn) {
+					String [] msgLvl5 = {
+						String.format("%02X", data2),        // ID
+						"0x" + String.format("%02X", data2), // text
+						data2 + ""                           // number
+					};
+					path.add( msgLvl5 );
 				}
 				
 				// level 4 and 5 data entry/increment/decrement for RPN or NRPN
@@ -2639,7 +2651,7 @@ public class SequenceAnalyzer {
 		String paramStr = String.format( msb + "," + lsb );
 		
 		// none
-		if (-1 == type) {
+		if (-1 == type || 0x7F == msb && 0x7F == lsb) {
 			paramTxt = Dict.get( Dict.UNSET );
 		}
 		
@@ -2680,12 +2692,6 @@ public class SequenceAnalyzer {
 					paramTxt = Dict.get( Dict.MSG4_RPN_PAN_SPREAD_ANGLE );
 				else if (0x08 == lsb)
 					paramTxt = Dict.get( Dict.MSG4_RPN_ROLL_ANGLE );
-			}
-			else if (0x3F == msb && ((byte) 0xFF) == lsb) {
-				paramTxt = Dict.get( Dict.MSG4_RPN_RPN_RESET );
-			}
-			else if (0x7F == msb && 0x7F == lsb) {
-				paramTxt = Dict.get( Dict.MSG4_RPN_END_OF_RPN );
 			}
 		}
 		

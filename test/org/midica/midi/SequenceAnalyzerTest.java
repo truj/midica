@@ -57,20 +57,24 @@ public class SequenceAnalyzerTest {
 	}
 	
 	/**
-	 * Tests for analyzing (and creating) full MIDI files.
+	 * Tests for analyzing (N)RPN and Data Entry / Increment / Decrement messages.
 	 * 
 	 * @throws InvalidMidiDataException if something went wrong.
 	 * @throws ParseException if something went wrong.
 	 * @throws IOException if something went wrong.
 	 */
 	@Test
-	void testAnalyze() throws InvalidMidiDataException, IOException, ParseException {
+	void testRpnNrpnData() throws InvalidMidiDataException, IOException, ParseException {
 		ArrayList<List<Number>> events = new ArrayList<>();
 		int  track = 0;
 		long tick  = 10;
 		
 		// RPN / Data Entry
 		String filename = "rpn-data-entry";
+		
+		// data entry without setting RPN
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x06, 0x02) ); // Data Entry MSB
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x26, 0x01) ); // Data Entry LSB
 		
 		// pitch bend sensitivity --> 0x02 0x01
 		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x65, 0x00) ); // RPN MSB
@@ -84,23 +88,101 @@ public class SequenceAnalyzerTest {
 		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB1, 0x06, 0x02) ); // Data Entry MSB
 		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB1, 0x26, 0x01) ); // Data Entry LSB
 		
+		// Data Increment (on a valid RPN)
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB1, 0x60, 0x00) ); // Data Increment
+		
+		// Disable RPN
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x65, 0x7F) ); // RPN MSB
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x64, 0x7F) ); // RPN LSB
+		
+		// Data Increment (on an unset RPN)
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x60, 0x00) ); // Data Increment
+		
+		// Data Increment (on an unknown RPN)
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x65, 0x12) ); // RPN MSB
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x64, 0x34) ); // RPN LSB
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x60, 0x00) ); // Data Increment
+		
+		// Data Increment (on an unknown NRPN)
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x63, 0x0A) ); // NRPN MSB
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x62, 0x0B) ); // NRPN LSB
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x60, 0x00) ); // Data Increment
+		
+		// Data Decrement (on an unknown NRPN)
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x61, 0x00) ); // Data Decrement
+		
 		ArrayList<MessageDetail> messages = parseMidiFile(filename, events);
-		assertEquals( "[101] MSB (RPN) (2)",                     getNodeText(messages, 0, 0) );
-		assertEquals( "RPN (Registered Parameter) (4)",          getNodeText(messages, 0, 1) );
-		assertEquals( "[100] LSB (RPN) (2)",                     getNodeText(messages, 1, 0) );
-		assertEquals( "RPN (Registered Parameter) (4)",          getNodeText(messages, 1, 1) );
-		assertEquals( "[6] MSB (Data Entry) (1)",                getNodeText(messages, 2, 0) );
-		assertEquals( "[0,0] Pitch Bend Sensitivity (2)",        getNodeText(messages, 2, 1) );
-		assertEquals( "[38] LSB (Data Entry) (1)",               getNodeText(messages, 3, 0) );
-		assertEquals( "[0,0] Pitch Bend Sensitivity (2)",        getNodeText(messages, 3, 1) );
-		assertEquals( "[101] MSB (RPN) (2)",                     getNodeText(messages, 4, 0) );
-		assertEquals( "RPN (Registered Parameter) (4)",          getNodeText(messages, 4, 1) );
-		assertEquals( "[100] LSB (RPN) (2)",                     getNodeText(messages, 5, 0) );
-		assertEquals( "RPN (Registered Parameter) (4)",          getNodeText(messages, 5, 1) );
-		assertEquals( "[6] MSB (Data Entry) (1)",                getNodeText(messages, 6, 0) );
-		assertEquals( "[0,1] Master Fine Tuning (in Cents) (2)", getNodeText(messages, 6, 1) );
-		assertEquals( "[38] LSB (Data Entry) (1)",               getNodeText(messages, 7, 0) );
-		assertEquals( "[0,1] Master Fine Tuning (in Cents) (2)", getNodeText(messages, 7, 1) );
+		int i = 0;
+		
+		// data entry without setting RPN
+		assertEquals( "[127,127] Not Set",                   getNodeText(messages,   i, 1) );
+		assertEquals( "[6] MSB (Data Entry)",                getNodeText(messages,   i, 0) );
+		assertEquals( "[127,127] Not Set",                   getNodeText(messages, ++i, 1) );
+		assertEquals( "[38] LSB (Data Entry)",               getNodeText(messages,   i, 0) );
+		
+		// pitch bend sensitivity
+		assertEquals( "RPN (Registered Parameter)",          getNodeText(messages, ++i, 2) );
+		assertEquals( "[101] MSB (RPN)",                     getNodeText(messages,   i, 1) );
+		assertEquals( "[0] 0x00",                            getNodeText(messages,   i, 0) );
+		assertEquals( "RPN (Registered Parameter)",          getNodeText(messages, ++i, 2) );
+		assertEquals( "[100] LSB (RPN)",                     getNodeText(messages,   i, 1) );
+		assertEquals( "[0] 0x00",                            getNodeText(messages,   i, 0) );
+		assertEquals( "[0,0] Pitch Bend Sensitivity",        getNodeText(messages, ++i, 1) );
+		assertEquals( "[6] MSB (Data Entry)",                getNodeText(messages,   i, 0) );
+		assertEquals( "[0,0] Pitch Bend Sensitivity",        getNodeText(messages, ++i, 1) );
+		assertEquals( "[38] LSB (Data Entry)",               getNodeText(messages,   i, 0) );
+		
+		// master fine tuning
+		assertEquals( "RPN (Registered Parameter)",          getNodeText(messages, ++i, 2) );
+		assertEquals( "[101] MSB (RPN)",                     getNodeText(messages,   i, 1) );
+		assertEquals( "[0] 0x00",                            getNodeText(messages,   i, 0) );
+		assertEquals( "RPN (Registered Parameter)",          getNodeText(messages, ++i, 2) );
+		assertEquals( "[100] LSB (RPN)",                     getNodeText(messages,   i, 1) );
+		assertEquals( "[1] 0x01",                            getNodeText(messages,   i, 0) );
+		assertEquals( "[0,1] Master Fine Tuning (in Cents)", getNodeText(messages, ++i, 1) );
+		assertEquals( "[6] MSB (Data Entry)",                getNodeText(messages,   i, 0) );
+		assertEquals( "[0,1] Master Fine Tuning (in Cents)", getNodeText(messages, ++i, 1) );
+		assertEquals( "[38] LSB (Data Entry)",               getNodeText(messages,   i, 0) );
+		
+		// Data Increment (on a valid RPN)
+		assertEquals( "[96] Data Button Increment",          getNodeText(messages, ++i, 1) );
+		assertEquals( "[0,1] Master Fine Tuning (in Cents)", getNodeText(messages,   i, 0) );
+		
+		// Disable RPN
+		assertEquals( "RPN (Registered Parameter)",          getNodeText(messages, ++i, 2) );
+		assertEquals( "[101] MSB (RPN)",                     getNodeText(messages,   i, 1) );
+		assertEquals( "[127] 0x7F",                          getNodeText(messages,   i, 0) );
+		assertEquals( "RPN (Registered Parameter)",          getNodeText(messages, ++i, 2) );
+		assertEquals( "[100] LSB (RPN)",                     getNodeText(messages,   i, 1) );
+		assertEquals( "[127] 0x7F",                          getNodeText(messages,   i, 0) );
+		
+		// Data Increment (on an unset RPN)
+		assertEquals( "[96] Data Button Increment",          getNodeText(messages, ++i, 1) );
+		assertEquals( "[127,127] Not Set",                   getNodeText(messages,   i, 0) );
+		
+		// Data Increment (on an unknown RPN)
+		assertEquals( "RPN (Registered Parameter)",          getNodeText(messages, ++i, 2) );
+		assertEquals( "[101] MSB (RPN)",                     getNodeText(messages,   i, 1) );
+		assertEquals( "[18] 0x12",                           getNodeText(messages,   i, 0) );
+		assertEquals( "RPN (Registered Parameter)",          getNodeText(messages, ++i, 2) );
+		assertEquals( "[100] LSB (RPN)",                     getNodeText(messages,   i, 1) );
+		assertEquals( "[52] 0x34",                           getNodeText(messages,   i, 0) );
+		assertEquals( "[96] Data Button Increment",          getNodeText(messages, ++i, 1) );
+		assertEquals( "[18,52] Unknown",                     getNodeText(messages,   i, 0) );
+		
+		// Data Increment (on an unknown NRPN)
+		assertEquals( "NRPN (Non-Registered Parameter)",     getNodeText(messages, ++i, 2) );
+		assertEquals( "[99] MSB (NRPN)",                     getNodeText(messages,   i, 1) );
+		assertEquals( "[10] 0x0A",                           getNodeText(messages,   i, 0) );
+		assertEquals( "NRPN (Non-Registered Parameter)",     getNodeText(messages, ++i, 2) );
+		assertEquals( "[98] LSB (NRPN)",                     getNodeText(messages,   i, 1) );
+		assertEquals( "[11] 0x0B",                           getNodeText(messages,   i, 0) );
+		assertEquals( "[96] Data Button Increment",          getNodeText(messages, ++i, 1) );
+		assertEquals( "[10,11] Unknown",                     getNodeText(messages,   i, 0) );
+		
+		// Data Decrement (on an unknown NRPN)
+		assertEquals( "[97] Data Button Decrement",          getNodeText(messages, ++i, 1) );
+		assertEquals( "[10,11] Unknown",                     getNodeText(messages,   i, 0) );
 	}
 	
 	/**
@@ -197,6 +279,12 @@ public class SequenceAnalyzerTest {
 			currentNode = (MessageTreeNode) currentNode.getParent();
 		}
 		
-		return currentNode.toString();
+		String text;
+		if (null == currentNode.getNumber())
+			text = currentNode.getName();
+		else
+			text = "[" + currentNode.getNumber() + "] " + currentNode.getName();
+		
+		return text;
 	}
 }
