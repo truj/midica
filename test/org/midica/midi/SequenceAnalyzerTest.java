@@ -31,6 +31,7 @@ import org.midica.file.ParseException;
 import org.midica.ui.model.MessageDetail;
 import org.midica.ui.model.MessageTreeNode;
 import org.midica.ui.model.MidicaTreeModel;
+import org.midica.ui.model.MidicaTreeNode;
 
 /**
  * This is the test class for {@link org.midica.midi.SequenceAnalyzer}.
@@ -65,12 +66,10 @@ public class SequenceAnalyzerTest {
 	 */
 	@Test
 	void testRpnNrpnData() throws InvalidMidiDataException, IOException, ParseException {
-		ArrayList<List<Number>> events = new ArrayList<>();
+		String                  filename = "rpn-data-entry";
+		ArrayList<List<Number>> events   = new ArrayList<>();
 		int  track = 0;
 		long tick  = 10;
-		
-		// RPN / Data Entry
-		String filename = "rpn-data-entry";
 		
 		// data entry without setting RPN
 		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x06, 0x02) ); // Data Entry MSB
@@ -115,74 +114,198 @@ public class SequenceAnalyzerTest {
 		int i = 0;
 		
 		// data entry without setting RPN
-		assertEquals( "[127,127] Not Set",                   getNodeText(messages,   i, 1) );
-		assertEquals( "[6] MSB (Data Entry)",                getNodeText(messages,   i, 0) );
-		assertEquals( "[127,127] Not Set",                   getNodeText(messages, ++i, 1) );
-		assertEquals( "[38] LSB (Data Entry)",               getNodeText(messages,   i, 0) );
+		assertEquals( "[127,127] Not Set",                   getMsgNodeText(messages,   i, 1) );
+		assertEquals( "[6] MSB (Data Entry)",                getMsgNodeText(messages,   i, 0) );
+		assertEquals( "[127,127] Not Set",                   getMsgNodeText(messages, ++i, 1) );
+		assertEquals( "[38] LSB (Data Entry)",               getMsgNodeText(messages,   i, 0) );
 		
 		// pitch bend sensitivity
-		assertEquals( "RPN (Registered Parameter)",          getNodeText(messages, ++i, 2) );
-		assertEquals( "[101] MSB (RPN)",                     getNodeText(messages,   i, 1) );
-		assertEquals( "[0] 0x00",                            getNodeText(messages,   i, 0) );
-		assertEquals( "RPN (Registered Parameter)",          getNodeText(messages, ++i, 2) );
-		assertEquals( "[100] LSB (RPN)",                     getNodeText(messages,   i, 1) );
-		assertEquals( "[0] 0x00",                            getNodeText(messages,   i, 0) );
-		assertEquals( "[0,0] Pitch Bend Sensitivity",        getNodeText(messages, ++i, 1) );
-		assertEquals( "[6] MSB (Data Entry)",                getNodeText(messages,   i, 0) );
-		assertEquals( "[0,0] Pitch Bend Sensitivity",        getNodeText(messages, ++i, 1) );
-		assertEquals( "[38] LSB (Data Entry)",               getNodeText(messages,   i, 0) );
+		assertEquals( "RPN (Registered Parameter)",          getMsgNodeText(messages, ++i, 2) );
+		assertEquals( "[101] MSB (RPN)",                     getMsgNodeText(messages,   i, 1) );
+		assertEquals( "[0] 0x00",                            getMsgNodeText(messages,   i, 0) );
+		assertEquals( "RPN (Registered Parameter)",          getMsgNodeText(messages, ++i, 2) );
+		assertEquals( "[100] LSB (RPN)",                     getMsgNodeText(messages,   i, 1) );
+		assertEquals( "[0] 0x00",                            getMsgNodeText(messages,   i, 0) );
+		assertEquals( "[0,0] Pitch Bend Sensitivity",        getMsgNodeText(messages, ++i, 1) );
+		assertEquals( "[6] MSB (Data Entry)",                getMsgNodeText(messages,   i, 0) );
+		assertEquals( "[0,0] Pitch Bend Sensitivity",        getMsgNodeText(messages, ++i, 1) );
+		assertEquals( "[38] LSB (Data Entry)",               getMsgNodeText(messages,   i, 0) );
 		
 		// master fine tuning
-		assertEquals( "RPN (Registered Parameter)",          getNodeText(messages, ++i, 2) );
-		assertEquals( "[101] MSB (RPN)",                     getNodeText(messages,   i, 1) );
-		assertEquals( "[0] 0x00",                            getNodeText(messages,   i, 0) );
-		assertEquals( "RPN (Registered Parameter)",          getNodeText(messages, ++i, 2) );
-		assertEquals( "[100] LSB (RPN)",                     getNodeText(messages,   i, 1) );
-		assertEquals( "[1] 0x01",                            getNodeText(messages,   i, 0) );
-		assertEquals( "[0,1] Master Fine Tuning (in Cents)", getNodeText(messages, ++i, 1) );
-		assertEquals( "[6] MSB (Data Entry)",                getNodeText(messages,   i, 0) );
-		assertEquals( "[0,1] Master Fine Tuning (in Cents)", getNodeText(messages, ++i, 1) );
-		assertEquals( "[38] LSB (Data Entry)",               getNodeText(messages,   i, 0) );
+		assertEquals( "RPN (Registered Parameter)",          getMsgNodeText(messages, ++i, 2) );
+		assertEquals( "[101] MSB (RPN)",                     getMsgNodeText(messages,   i, 1) );
+		assertEquals( "[0] 0x00",                            getMsgNodeText(messages,   i, 0) );
+		assertEquals( "RPN (Registered Parameter)",          getMsgNodeText(messages, ++i, 2) );
+		assertEquals( "[100] LSB (RPN)",                     getMsgNodeText(messages,   i, 1) );
+		assertEquals( "[1] 0x01",                            getMsgNodeText(messages,   i, 0) );
+		assertEquals( "[0,1] Master Fine Tuning (in Cents)", getMsgNodeText(messages, ++i, 1) );
+		assertEquals( "[6] MSB (Data Entry)",                getMsgNodeText(messages,   i, 0) );
+		assertEquals( "[0,1] Master Fine Tuning (in Cents)", getMsgNodeText(messages, ++i, 1) );
+		assertEquals( "[38] LSB (Data Entry)",               getMsgNodeText(messages,   i, 0) );
 		
 		// Data Increment (on a valid RPN)
-		assertEquals( "[96] Data Button Increment",          getNodeText(messages, ++i, 1) );
-		assertEquals( "[0,1] Master Fine Tuning (in Cents)", getNodeText(messages,   i, 0) );
+		assertEquals( "[96] Data Button Increment",          getMsgNodeText(messages, ++i, 1) );
+		assertEquals( "[0,1] Master Fine Tuning (in Cents)", getMsgNodeText(messages,   i, 0) );
 		
 		// Disable RPN
-		assertEquals( "RPN (Registered Parameter)",          getNodeText(messages, ++i, 2) );
-		assertEquals( "[101] MSB (RPN)",                     getNodeText(messages,   i, 1) );
-		assertEquals( "[127] 0x7F",                          getNodeText(messages,   i, 0) );
-		assertEquals( "RPN (Registered Parameter)",          getNodeText(messages, ++i, 2) );
-		assertEquals( "[100] LSB (RPN)",                     getNodeText(messages,   i, 1) );
-		assertEquals( "[127] 0x7F",                          getNodeText(messages,   i, 0) );
+		assertEquals( "RPN (Registered Parameter)",          getMsgNodeText(messages, ++i, 2) );
+		assertEquals( "[101] MSB (RPN)",                     getMsgNodeText(messages,   i, 1) );
+		assertEquals( "[127] 0x7F",                          getMsgNodeText(messages,   i, 0) );
+		assertEquals( "RPN (Registered Parameter)",          getMsgNodeText(messages, ++i, 2) );
+		assertEquals( "[100] LSB (RPN)",                     getMsgNodeText(messages,   i, 1) );
+		assertEquals( "[127] 0x7F",                          getMsgNodeText(messages,   i, 0) );
 		
 		// Data Increment (on an unset RPN)
-		assertEquals( "[96] Data Button Increment",          getNodeText(messages, ++i, 1) );
-		assertEquals( "[127,127] Not Set",                   getNodeText(messages,   i, 0) );
+		assertEquals( "[96] Data Button Increment",          getMsgNodeText(messages, ++i, 1) );
+		assertEquals( "[127,127] Not Set",                   getMsgNodeText(messages,   i, 0) );
 		
 		// Data Increment (on an unknown RPN)
-		assertEquals( "RPN (Registered Parameter)",          getNodeText(messages, ++i, 2) );
-		assertEquals( "[101] MSB (RPN)",                     getNodeText(messages,   i, 1) );
-		assertEquals( "[18] 0x12",                           getNodeText(messages,   i, 0) );
-		assertEquals( "RPN (Registered Parameter)",          getNodeText(messages, ++i, 2) );
-		assertEquals( "[100] LSB (RPN)",                     getNodeText(messages,   i, 1) );
-		assertEquals( "[52] 0x34",                           getNodeText(messages,   i, 0) );
-		assertEquals( "[96] Data Button Increment",          getNodeText(messages, ++i, 1) );
-		assertEquals( "[18,52] Unknown",                     getNodeText(messages,   i, 0) );
+		assertEquals( "RPN (Registered Parameter)",          getMsgNodeText(messages, ++i, 2) );
+		assertEquals( "[101] MSB (RPN)",                     getMsgNodeText(messages,   i, 1) );
+		assertEquals( "[18] 0x12",                           getMsgNodeText(messages,   i, 0) );
+		assertEquals( "RPN (Registered Parameter)",          getMsgNodeText(messages, ++i, 2) );
+		assertEquals( "[100] LSB (RPN)",                     getMsgNodeText(messages,   i, 1) );
+		assertEquals( "[52] 0x34",                           getMsgNodeText(messages,   i, 0) );
+		assertEquals( "[96] Data Button Increment",          getMsgNodeText(messages, ++i, 1) );
+		assertEquals( "[18,52] Unknown",                     getMsgNodeText(messages,   i, 0) );
 		
 		// Data Increment (on an unknown NRPN)
-		assertEquals( "NRPN (Non-Registered Parameter)",     getNodeText(messages, ++i, 2) );
-		assertEquals( "[99] MSB (NRPN)",                     getNodeText(messages,   i, 1) );
-		assertEquals( "[10] 0x0A",                           getNodeText(messages,   i, 0) );
-		assertEquals( "NRPN (Non-Registered Parameter)",     getNodeText(messages, ++i, 2) );
-		assertEquals( "[98] LSB (NRPN)",                     getNodeText(messages,   i, 1) );
-		assertEquals( "[11] 0x0B",                           getNodeText(messages,   i, 0) );
-		assertEquals( "[96] Data Button Increment",          getNodeText(messages, ++i, 1) );
-		assertEquals( "[10,11] Unknown",                     getNodeText(messages,   i, 0) );
+		assertEquals( "NRPN (Non-Registered Parameter)",     getMsgNodeText(messages, ++i, 2) );
+		assertEquals( "[99] MSB (NRPN)",                     getMsgNodeText(messages,   i, 1) );
+		assertEquals( "[10] 0x0A",                           getMsgNodeText(messages,   i, 0) );
+		assertEquals( "NRPN (Non-Registered Parameter)",     getMsgNodeText(messages, ++i, 2) );
+		assertEquals( "[98] LSB (NRPN)",                     getMsgNodeText(messages,   i, 1) );
+		assertEquals( "[11] 0x0B",                           getMsgNodeText(messages,   i, 0) );
+		assertEquals( "[96] Data Button Increment",          getMsgNodeText(messages, ++i, 1) );
+		assertEquals( "[10,11] Unknown",                     getMsgNodeText(messages,   i, 0) );
 		
 		// Data Decrement (on an unknown NRPN)
-		assertEquals( "[97] Data Button Decrement",          getNodeText(messages, ++i, 1) );
-		assertEquals( "[10,11] Unknown",                     getNodeText(messages,   i, 0) );
+		assertEquals( "[97] Data Button Decrement",          getMsgNodeText(messages, ++i, 1) );
+		assertEquals( "[10,11] Unknown",                     getMsgNodeText(messages,   i, 0) );
+	}
+	
+	/**
+	 * Tests for analyzing bank-select, program-change and note-on messages.
+	 * 
+	 * @throws InvalidMidiDataException if something went wrong.
+	 * @throws ParseException if something went wrong.
+	 * @throws IOException if something went wrong.
+	 */
+	@Test
+	void testBankProgramNote() throws InvalidMidiDataException, IOException, ParseException {
+		String                  filename = "bank-program-note";
+		ArrayList<List<Number>> events   = new ArrayList<>();
+		int  track = 0;
+		long tick  = 10;
+		
+		// c in channel 0, clave in channel 9
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0x90, 0x3C, 0x7F) ); // Note-On
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0x80, 0x3C, 0x00) ); // Note-Off
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0x99, 0x4B, 0x7F) ); // Note-On
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0x89, 0x4B, 0x00) ); // Note-Off
+		
+		// VIOLIN, c in channel 0; ROOM, clave in channel 9
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xC0, 0x28, 0x00) ); // Prog Change: VIOLIN
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0x90, 0x3C, 0x7F) ); // Note-On
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0x80, 0x3C, 0x00) ); // Note-Off
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xC9, 0x08, 0x00) ); // Prog Change: ROOM
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0x99, 0x4B, 0x7F) ); // Note-On
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0x89, 0x4B, 0x00) ); // Note-Off
+		
+		// Ch0: Bank Select: MSB=10, LSB=20, Bank=1300
+		// Program: CELESTA=8
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x00, 0x0A) ); // Bank Select MSB
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x20, 0x14) ); // Bank Select LSB
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xC0, 0x08, 0x00) ); // Prog Change: CELESTA
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0x90, 0x3C, 0x7F) ); // Note-On
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0x80, 0x3C, 0x00) ); // Note-Off
+		
+		// Ch9: Bank Select: MSB=120, LSB=0, Bank=1300
+		// Program: ELECTRONIC=24
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB9, 0x00, 0x78) ); // Bank Select MSB
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB9, 0x20, 0x00) ); // Bank Select LSB
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xC9, 0x18, 0x00) ); // Prog Change: ELECTRONIC
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0x99, 0x4B, 0x7F) ); // Note-On
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0x89, 0x4B, 0x00) ); // Note-Off
+		
+		// parse and get tree
+		parseMidiFile(filename, events);
+		MidicaTreeModel model = (MidicaTreeModel) SequenceAnalyzer.getSequenceInfo().get("banks_per_channel");
+		model.postprocess();
+		MidicaTreeNode  rootNode = (MidicaTreeNode) model.getRoot();
+		assertEquals( "Per Channel", rootNode.getName() );
+		
+		// channel 0
+		MidicaTreeNode nodeCh0 = (MidicaTreeNode) rootNode.getChildAt( 0 );
+		assertEquals( "Channel 0", nodeCh0.getName() );
+		
+		// channel 0, bank 0
+		MidicaTreeNode nodeCh0bank0 = (MidicaTreeNode) nodeCh0.getChildAt( 0 );
+		assertEquals( "Bank 0, MSB: 0, LSB: 0", nodeCh0bank0.getName() );
+		
+		// channel 0, bank 0, program 0
+		MidicaTreeNode nodeCh0bank0prog0 = (MidicaTreeNode) nodeCh0bank0.getChildAt( 0 );
+		assertEquals( "ACOUSTIC_GRAND_PIANO", nodeCh0bank0prog0.getName() );
+		
+		// channel 0, bank 0, program 0, note c
+		MidicaTreeNode nodeCh0bank0prog0c = (MidicaTreeNode) nodeCh0bank0prog0.getChildAt( 0 );
+		assertEquals( "c", nodeCh0bank0prog0c.getName() );
+		
+		// channel 0, bank 0, program 40
+		MidicaTreeNode nodeCh0bank0prog40 = (MidicaTreeNode) nodeCh0bank0.getChildAt( 1 );
+		assertEquals( "VIOLIN", nodeCh0bank0prog40.getName() );
+		
+		// channel 0, bank 0, program 0, note c
+		MidicaTreeNode nodeCh0bank0prog40c = (MidicaTreeNode) nodeCh0bank0prog40.getChildAt( 0 );
+		assertEquals( "c", nodeCh0bank0prog40c.getName() );
+		
+		// channel 0, bank 1300
+		MidicaTreeNode nodeCh0bank1300 = (MidicaTreeNode) nodeCh0.getChildAt( 1 );
+		assertEquals( "Bank 1300, MSB: 10, LSB: 20", nodeCh0bank1300.getName() );
+		
+		// channel 0, bank 1300, program 8
+		MidicaTreeNode nodeCh0bank1300prog8 = (MidicaTreeNode) nodeCh0bank1300.getChildAt( 0 );
+		assertEquals( "CELESTA", nodeCh0bank1300prog8.getName() );
+		
+		// channel 0, bank 1300, program 8, note c
+		MidicaTreeNode nodeCh0bank1300prog8c = (MidicaTreeNode) nodeCh0bank1300prog8.getChildAt( 0 );
+		assertEquals( "c", nodeCh0bank1300prog8c.getName() );
+		
+		// channel 9
+		MidicaTreeNode nodeCh9 = (MidicaTreeNode) rootNode.getChildAt( 1 );
+		assertEquals( "Channel 9", nodeCh9.getName() );
+		
+		// channel 9, bank 0
+		MidicaTreeNode nodeCh9bank0 = (MidicaTreeNode) nodeCh9.getChildAt( 0 );
+		assertEquals( "Bank 0, MSB: 0, LSB: 0", nodeCh9bank0.getName() );
+		
+		// channel 9, bank 0, program 0
+		MidicaTreeNode nodeCh9bank0prog0 = (MidicaTreeNode) nodeCh9bank0.getChildAt( 0 );
+		assertEquals( "STANDARD", nodeCh9bank0prog0.getName() );
+		
+		// channel 9, bank 0, program 0, note clave
+		MidicaTreeNode nodeCh9bank0prog0cla = (MidicaTreeNode) nodeCh9bank0prog0.getChildAt( 0 );
+		assertEquals( "clave", nodeCh9bank0prog0cla.getName() );
+		
+		// channel 9, bank 0, program 8
+		MidicaTreeNode nodeCh9bank0prog8 = (MidicaTreeNode) nodeCh9bank0.getChildAt( 1 );
+		assertEquals( "ROOM", nodeCh9bank0prog8.getName() );
+		
+		// channel 9, bank 0, program 8, note clave
+		MidicaTreeNode nodeCh9bank0prog8cla = (MidicaTreeNode) nodeCh9bank0prog8.getChildAt( 0 );
+		assertEquals( "clave", nodeCh9bank0prog8cla.getName() );
+		
+		// channel 9, bank 15360
+		MidicaTreeNode nodeCh9bank15360 = (MidicaTreeNode) nodeCh9.getChildAt( 1 );
+		assertEquals( "Bank 15360, MSB: 120, LSB: 0", nodeCh9bank15360.getName() );
+		
+		// channel 9, bank 15360, program 24
+		MidicaTreeNode nodeCh9bank15360prog24 = (MidicaTreeNode) nodeCh9bank15360.getChildAt( 0 );
+		assertEquals( "ELECTRONIC", nodeCh9bank15360prog24.getName() );
+		
+		// channel 9, bank 15360, program 24, note clave
+		MidicaTreeNode nodeCh9bank15360prog24cla = (MidicaTreeNode) nodeCh9bank15360prog24.getChildAt( 0 );
+		assertEquals( "clave", nodeCh9bank15360prog24cla.getName() );
 	}
 	
 	/**
@@ -231,13 +354,13 @@ public class SequenceAnalyzerTest {
 		for (List<Number> event : events) {
 			
 			// create message
-			int  type  = (int)  event.get( 0 );
-			int  track = (int)  event.get( 1 );
-			long tick  = (long) event.get( 2 );
-			byte[] content = new byte[ event.size() - 3 ];
+			int   type    = (int)  event.get( 0 );
+			int   track   = (int)  event.get( 1 );
+			long  tick    = (long) event.get( 2 );
+			int[] content = new int[ event.size() - 3 ];
 			for (int i = 3; i < event.size(); i++) {
 				int byteAsInt = (Integer) event.get( i );
-				content[ i - 3 ] = (byte) byteAsInt;
+				content[ i - 3 ] = byteAsInt;
 			}
 			
 			// create new track(s), if necessary
@@ -265,14 +388,14 @@ public class SequenceAnalyzerTest {
 	}
 	
 	/**
-	 * Searches a tree node and returns it's text.
+	 * Searches a message tree node and returns it's text.
 	 * 
 	 * @param messages    MIDI message list as created by the SequenceAnalyzer.
 	 * @param index       The index of the message we are interested in.
 	 * @param stepsUp     The number of steps to go up from the leaf node towards the root node.
 	 * @return tree node text.
 	 */
-	private static String getNodeText(ArrayList<MessageDetail> messages, int index, int stepsUp) {
+	private static String getMsgNodeText(ArrayList<MessageDetail> messages, int index, int stepsUp) {
 		
 		MessageTreeNode currentNode = (MessageTreeNode) messages.get( index ).getOption("leaf_node");
 		for (int i = 0; i < stepsUp; i++) {
