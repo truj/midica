@@ -13,7 +13,7 @@ import java.awt.Component;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 
-import org.midica.ui.model.MessageDetail;
+import org.midica.ui.model.SingleMessage;
 import org.midica.ui.model.MessageTableModel;
 
 /**
@@ -36,20 +36,20 @@ public class MessageTableCellRenderer extends MidicaTableCellRenderer {
 	/**
 	 * Creates a cell renderer for the MIDI messages table.
 	 */
-	public MessageTableCellRenderer( MessageTableModel model, Color bgColor ) {
+	public MessageTableCellRenderer(MessageTableModel model, Color bgColor) {
 		this.model = model;
-		setBackground( bgColor );
+		setBackground(bgColor);
 	}
 	
 	@Override
-	public Component getTableCellRendererComponent( JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col ) {
-		Component cell = super.getTableCellRendererComponent( table, value, isSelected, hasFocus, row, col );
+	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
+		Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
 		
 		if ( col != 5 )
 			return cell;
 		
 		// set the tooltip for the type column
-		MessageDetail msg = model.getMsg( row );
+		SingleMessage msg = model.getMsg(row);
 		JComponent jCell = (JComponent) cell;
 		jCell.setToolTipText( msg.getTypeTooltip() );
 		

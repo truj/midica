@@ -641,7 +641,8 @@ public class Dict {
 	public static final String MSG_DETAILS_NRPN_BYTE_PL    = "msg_details_nrpn_byte_pl";
 	public static final String MSG_DETAILS_TEXT_SG         = "msg_details_text_sg";
 	public static final String MSG_DETAILS_TEXT_PL         = "msg_details_text_pl";
-	public static final String MSG_DETAILS_MESSAGE         = "msg_details_";
+	public static final String MSG_DETAILS_MESSAGE         = "msg_details_message";
+	public static final String MSG_DETAILS_MEANING         = "msg_details_meaning";
 	
 	// MIDI messages for InfoView - level 1
 	public static final String MSG1_VOICE               = "msg1_voice";             // MSG2_V_*
@@ -1439,6 +1440,7 @@ public class Dict {
 		set( MSG_DETAILS_TEXT_SG,                    "Text:"            );
 		set( MSG_DETAILS_TEXT_PL,                    "Texts:"           );
 		set( MSG_DETAILS_MESSAGE,                    "Message (Hex):"   );
+		set( MSG_DETAILS_MEANING,                    "Details"          );
 		
 		// syntax for InfoView
 		set( SYNTAX_DEFINE,             "syntax element definition"                        );

@@ -14,92 +14,95 @@ import java.util.List;
 
 import javax.swing.tree.TreeNode;
 
+import org.midica.midi.SequenceAnalyzer;
+
 /**
- * This class represents a certain MIDI message.
+ * This class represents one single MIDI message.
+ * It's used for the messages in the messages table, produced by the {@link SequenceAnalyzer}.
  * 
  * Jan Trukenmüller
  */
-public class MessageDetail implements IMessageDetailProvider, Comparable<MessageDetail> {
+public class SingleMessage implements IMessageType, Comparable<SingleMessage> {
 	
 	/** can be used to store custom options */
-	private HashMap<String, Object> options = new HashMap<String, Object>();
+	private HashMap<Integer, Object> options = new HashMap<>();
 	
 	/**
-	 * Sets the custom option with the given name.
+	 * Sets the custom option with the given ID.
 	 * 
-	 * @param name   The option name.
+	 * @param id     The option ID.
 	 * @param value  The option value.
 	 */
-	public void setOption( String name, Object value ) {
-		options.put( name, value );
+	public void setOption(int id, Object value) {
+		options.put(id, value);
 	}
 	
 	/**
-	 * Returns the custom option with the given name.
+	 * Returns the custom option with the given ID.
 	 * 
-	 * Returns **null**, if no option of the given name exists.
+	 * Returns **null**, if no option of the given ID exists.
 	 * 
-	 * @param name   The option name.
+	 * @param id    The option ID.
 	 * @return the option value or **null** if not available.
 	 */
 	@Override
-	public Object getOption( String name ) {
-		return options.get( name );
+	public Object getOption(int id) {
+		return options.get(id);
 	}
 	
 	/**
-	 * Returns the custom option with the given name.
+	 * Returns the custom option with the given ID.
 	 * 
-	 * Returns **null**, if no option of the given name exists.
+	 * Returns **null**, if no option of the given ID exists.
 	 * 
 	 * Same as {@link #getDistinctOptions(String)}, but necessary in order to
 	 * fulfill the interface requirements.
 	 * 
-	 * @param name   The option name.
+	 * @param id  The option ID.
 	 * @return the option value or **null** if not available.
 	 */
 	@Override
-	public String getRange( String name ) {
-		return getDistinctOptions( name );
+	public String getRange(int id) {
+		return getDistinctOptions(id);
 	}
 	
 	/**
-	 * Returns the custom option with the given name as a string.
+	 * Returns the custom option with the given ID as a string.
 	 * 
-	 * Returns **null**, if no option of the given name exists.
+	 * Returns **null**, if no option of the given ID exists.
 	 * 
 	 * The only difference to {@link #getOption(String)} is the
 	 * return type.
 	 * 
-	 * @param name   The option name.
+	 * @param id  The option ID.
 	 * @return the option value or **null** if not available.
 	 */
 	@Override
-	public String getDistinctOptions( String name ) {
-		if ( ! options.containsKey(name) )
+	public String getDistinctOptions(int id) {
+		if ( ! options.containsKey(id) )
 			return null;
 		
-		return options.get( name ) + "";
+		return options.get( id ) + "";
 	}
 	
 	/**
-	 * Returns the custom option with the given name.
+	 * Returns the custom option with the given ID.
 	 * 
-	 * Returns **null**, if no option of the given name exists.
+	 * Returns **null**, if no option of the given ID exists.
 	 * 
 	 * Same as {@link #getOption(String)}, but necessary in order to
 	 * fulfill the interface requirements.
 	 * 
-	 * @param name   The option name.
+	 * @param id  The option ID.
 	 * @return the option value or **null** if not available.
 	 */
 	@Override
-	public String getDistinctOptions( String name, String separator ) {
-		return getDistinctOptions( name );
+	public String getDistinctOptions(int id, String separator) {
+		return getDistinctOptions(id);
 	}
 	
 	/**
-	 * Compares 2 this message with the given one. This is needed for sorting.
+	 * Compares this message with the given one. This is needed for sorting.
 	 * 
 	 * Sorting criteria are:
 	 * 
@@ -108,34 +111,34 @@ public class MessageDetail implements IMessageDetailProvider, Comparable<Message
 	 * # message number inside the track
 	 * 
 	 * - Returns **+1**, if this message is "greater" than the other message.
-	 * - Returns **11**, if this message is "lesser" than the other message.
+	 * - Returns **-1**, if this message is "lesser" than the other message.
 	 * - Returns **0**, if both messages are considered equal.
 	 * 
 	 * @param other  The other message to be compared with.
 	 * @return the comparison result as described above.
 	 */
 	@Override
-	public int compareTo( MessageDetail other ) {
+	public int compareTo(SingleMessage other) {
 		
 		// sort by tickstamp first
-		Long tick      = (Long) getOption( "tick" );
-		Long otherTick = (Long) other.getOption( "tick" );
+		Long tick      = (Long) getOption( IMessageType.OPT_TICK );
+		Long otherTick = (Long) other.getOption( IMessageType.OPT_TICK );
 		int  result    = tick.compareTo( otherTick );
 		if ( result != 0 ) {
 			return result;
 		}
 		
 		// sort by track number
-		Integer track      = (Integer) getOption( "track" );
-		Integer otherTrack = (Integer) other.getOption( "track" );
+		Integer track      = (Integer) getOption( IMessageType.OPT_TRACK );
+		Integer otherTrack = (Integer) other.getOption( IMessageType.OPT_TRACK );
 		result             = track.compareTo( otherTrack );
 		if ( result != 0 ) {
 			return result;
 		}
 		
 		// sort by message number inside the track
-		Integer msgNum      = (Integer) getOption( "msg_num" );
-		Integer otherMsgNum = (Integer) other.getOption( "msg_num" );
+		Integer msgNum      = (Integer) getOption( IMessageType.OPT_MSG_NUM );
+		Integer otherMsgNum = (Integer) other.getOption( IMessageType.OPT_MSG_NUM );
 		result              = msgNum.compareTo( otherMsgNum );
 		if ( result != 0 ) {
 			return result;
@@ -156,7 +159,7 @@ public class MessageDetail implements IMessageDetailProvider, Comparable<Message
 	public String getType() {
 		
 		// get reverse tree path
-		MidicaTreeNode leaf  = (MidicaTreeNode) getOption( "leaf_node" );
+		MidicaTreeNode leaf  = (MidicaTreeNode) getOption( IMessageType.OPT_LEAF_NODE );
 		TreeNode[]     paths = leaf.getPath();
 		
 		// remove the first (root) element
@@ -198,7 +201,7 @@ public class MessageDetail implements IMessageDetailProvider, Comparable<Message
 	public String getTypeTooltip() {
 		
 		// get tree path
-		MidicaTreeNode leaf  = (MidicaTreeNode) getOption( "leaf_node" );
+		MidicaTreeNode leaf  = (MidicaTreeNode) getOption( IMessageType.OPT_LEAF_NODE );
 		TreeNode[]     paths = leaf.getPath();
 		
 		// construct tooltip text

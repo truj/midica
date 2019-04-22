@@ -28,7 +28,8 @@ import org.junit.jupiter.api.Test;
 import org.midica.TestUtil;
 import org.midica.file.MidiParser;
 import org.midica.file.ParseException;
-import org.midica.ui.model.MessageDetail;
+import org.midica.ui.model.IMessageType;
+import org.midica.ui.model.SingleMessage;
 import org.midica.ui.model.MessageTreeNode;
 import org.midica.ui.model.MidicaTreeModel;
 import org.midica.ui.model.MidicaTreeNode;
@@ -110,7 +111,7 @@ public class SequenceAnalyzerTest {
 		// Data Decrement (on an unknown NRPN)
 		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x61, 0x00) ); // Data Decrement
 		
-		ArrayList<MessageDetail> messages = parseMidiFile(filename, events);
+		ArrayList<SingleMessage> messages = parseMidiFile(filename, events);
 		int i = 0;
 		
 		// data entry without setting RPN
@@ -318,7 +319,7 @@ public class SequenceAnalyzerTest {
 	 * @throws InvalidMidiDataException if something goes wrong.
 	 * @throws ParseException if something goes wrong.
 	 */
-	private ArrayList<MessageDetail> parseMidiFile(String name, ArrayList<List<Number>> events) throws IOException, InvalidMidiDataException, ParseException {
+	private ArrayList<SingleMessage> parseMidiFile(String name, ArrayList<List<Number>> events) throws IOException, InvalidMidiDataException, ParseException {
 		
 		File file = new File(TestUtil.getTestfileDirectory() + "midi" + File.separator + name + ".mid");
 		
@@ -334,7 +335,7 @@ public class SequenceAnalyzerTest {
 		MidicaTreeModel model = (MidicaTreeModel) SequenceAnalyzer.getSequenceInfo().get("msg_tree_model");
 		model.postprocess();
 		
-		return (ArrayList<MessageDetail>) SequenceAnalyzer.getSequenceInfo().get("messages");
+		return (ArrayList<SingleMessage>) SequenceAnalyzer.getSequenceInfo().get("messages");
 	}
 	
 	/**
@@ -395,9 +396,9 @@ public class SequenceAnalyzerTest {
 	 * @param stepsUp     The number of steps to go up from the leaf node towards the root node.
 	 * @return tree node text.
 	 */
-	private static String getMsgNodeText(ArrayList<MessageDetail> messages, int index, int stepsUp) {
+	private static String getMsgNodeText(ArrayList<SingleMessage> messages, int index, int stepsUp) {
 		
-		MessageTreeNode currentNode = (MessageTreeNode) messages.get( index ).getOption("leaf_node");
+		MessageTreeNode currentNode = (MessageTreeNode) messages.get( index ).getOption( IMessageType.OPT_LEAF_NODE );
 		for (int i = 0; i < stepsUp; i++) {
 			currentNode = (MessageTreeNode) currentNode.getParent();
 		}

@@ -18,8 +18,9 @@ import org.midica.ui.info.InfoView;
  * This class represents the data model of the messages table in the
  * MIDI sequence > MIDI messages tab of the info window.
  * 
- * Each row represents a MIDI event. (MIDI events are MIDI messages occurring
- * at a certain tick.)
+ * Each row represents a single MIDI message that occurred at a certain tick.
+ * (So to be picky it represents a MIDI event, because an event is a message
+ * occurring at a certain tick.)
  * 
  * @author Jan Trukenmüller
  */
@@ -30,8 +31,8 @@ public class MessageTableModel extends MidicaTableModel {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private ArrayList<MessageDetail> allMessages     = null;
-	private ArrayList<MessageDetail> visibleMessages = new ArrayList<MessageDetail>();
+	private ArrayList<SingleMessage> allMessages     = null;
+	private ArrayList<SingleMessage> visibleMessages = new ArrayList<>();
     
 	/**
 	 * Creates a new instance of the message table data model.
@@ -44,14 +45,14 @@ public class MessageTableModel extends MidicaTableModel {
 	 * @param messages  All messages found in the MIDI sequence -- or **null**,
 	 *                  if no sequence has been loaded yet.
 	 */
-	public MessageTableModel( ArrayList<MessageDetail> messages ) {
+	public MessageTableModel(ArrayList<SingleMessage> messages) {
 		
 		// store messages
 		allMessages = messages;
 		if ( null == allMessages ) {
-			allMessages = new ArrayList<MessageDetail>();
+			allMessages = new ArrayList<>();
 		}
-		visibleMessages = (ArrayList<MessageDetail>) allMessages.clone();
+		visibleMessages = (ArrayList<SingleMessage>) allMessages.clone();
 		
 		// save counts
 		msgCountTotal   = allMessages.size();
@@ -104,41 +105,41 @@ public class MessageTableModel extends MidicaTableModel {
 		if ( rowIndex < 0 || visibleMessages.size() < rowIndex + 1 )
 			return "";
 		
-		MessageDetail msgDetail = visibleMessages.get( rowIndex );
+		SingleMessage singleMessage = visibleMessages.get(rowIndex);
 		
 		// tick
 		if ( 0 == colIndex ) {
-			return msgDetail.getOption( "tick" );
+			return singleMessage.getOption( IMessageType.OPT_TICK );
 		}
 		
 		// status byte
 		else if ( 1 == colIndex ) {
-			return "0x" + msgDetail.getOption( "status_byte" );
+			return "0x" + singleMessage.getOption( IMessageType.OPT_STATUS_BYTE );
 		}
 		
 		// track
 		else if ( 2 == colIndex ) {
-			return msgDetail.getOption( "track" );
+			return singleMessage.getOption( IMessageType.OPT_TRACK );
 		}
 		
 		// channel
 		else if ( 3 == colIndex ) {
-			Object channelObj = msgDetail.getOption( "channel" );
+			Object channelObj = singleMessage.getOption( IMessageType.OPT_CHANNEL );
 			if ( null == channelObj ) {
 				return "-";
 			}
 			
-			return msgDetail.getOption( "channel" );
+			return singleMessage.getOption( IMessageType.OPT_CHANNEL );
 		}
 		
 		// length
 		else if ( 4 == colIndex ) {
-			return msgDetail.getOption( "length" );
+			return singleMessage.getOption( IMessageType.OPT_LENGTH );
 		}
 		
 		// type
 		else if ( 5 == colIndex ) {
-			return msgDetail.getType();
+			return singleMessage.getType();
 		}
 		
 		return "";
@@ -150,13 +151,13 @@ public class MessageTableModel extends MidicaTableModel {
 	 * @param row  Table row (beginning with 0)
 	 * @return  message details or **null** if the given row is invalid.
 	 */
-	public MessageDetail getMsg( int row ) {
+	public SingleMessage getMsg(int row) {
 		
 		// invalid row?
 		if ( row < 0 || row > visibleMessages.size() - 1 )
 			return null;
 		
-		return visibleMessages.get( row );
+		return visibleMessages.get(row);
 	}
 	
 	/**
@@ -176,7 +177,7 @@ public class MessageTableModel extends MidicaTableModel {
 		boolean          limitTicks      = filterBoolean.get( InfoView.FILTER_CBX_LIMIT_TICKS  );
 		boolean          limitTracks     = filterBoolean.get( InfoView.FILTER_CBX_LIMIT_TRACKS );
 		boolean          mustFilterNodes = filterBoolean.get( InfoView.FILTER_CBX_NODE         );
-		HashSet<Integer> fltrChannel     = new HashSet<Integer>();
+		HashSet<Integer> fltrChannel     = new HashSet<>();
 		for ( int channel = 0; channel < 16; channel++ ) {
 			String name             = InfoView.FILTER_CBX_CHAN_PREFIX + channel;
 			boolean mustShowChannel = filterBoolean.get( name );
@@ -194,10 +195,10 @@ public class MessageTableModel extends MidicaTableModel {
 		
 		// refill visible messages
 		MESSAGE:
-		for ( MessageDetail msg : allMessages ) {
+		for (SingleMessage msg : allMessages) {
 			
 			// get channel (-1 = channel independent)
-			Object channelObj = msg.getOption( "channel" );
+			Object channelObj = msg.getOption( IMessageType.OPT_CHANNEL );
 			int    channel    = -1;
 			if ( channelObj instanceof Integer ) {
 				channel = (int) channelObj;
@@ -210,7 +211,7 @@ public class MessageTableModel extends MidicaTableModel {
 			
 			// apply limit-ticks filter
 			if (limitTicks) {
-				Object tickObj = msg.getOption( "tick" );
+				Object tickObj = msg.getOption( IMessageType.OPT_TICK );
 				if ( tickObj instanceof Long ) {
 					long tick = (long) tickObj;
 					if ( tick < filterFrom || tick > filterTo ) {
@@ -221,7 +222,7 @@ public class MessageTableModel extends MidicaTableModel {
 			
 			// apply limit-tracks filter
 			if (limitTracks) {
-				Object trackObj = msg.getOption( "track" );
+				Object trackObj = msg.getOption( IMessageType.OPT_TRACK );
 				if ( trackObj instanceof Integer ) {
 					int track = (int) trackObj;
 					if ( ! filterTracks.contains(track) ) {
@@ -234,7 +235,7 @@ public class MessageTableModel extends MidicaTableModel {
 			if (mustFilterNodes) {
 				
 				// get the leaf node of the message
-				MessageTreeNode leaf = (MessageTreeNode) msg.getOption( "leaf_node" );
+				MessageTreeNode leaf = (MessageTreeNode) msg.getOption( IMessageType.OPT_LEAF_NODE );
 				
 				// check if the leaf node is a descendant of one of the selected nodes
 				boolean matches = false;
@@ -262,11 +263,11 @@ public class MessageTableModel extends MidicaTableModel {
 	/**
 	 * Returns the row index of the given message in the table.
 	 * 
-	 * @param msgDetail  The message detail representing a table row.
-	 * @return  the row index, or **-1**, if the row is not visible.
+	 * @param  singleMessage  The message representing a table row.
+	 * @return the row index, or **-1**, if the row is not visible.
 	 */
-	public int getTableRow( MessageDetail msgDetail ) {
-		return visibleMessages.indexOf( msgDetail );
+	public int getTableRow(SingleMessage singleMessage) {
+		return visibleMessages.indexOf(singleMessage);
 	}
 }
 

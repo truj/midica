@@ -47,7 +47,8 @@ import javax.swing.tree.TreePath;
 import org.midica.config.Config;
 import org.midica.midi.SequenceAnalyzer;
 import org.midica.ui.model.MessageTableModel;
-import org.midica.ui.model.MessageDetail;
+import org.midica.ui.model.IMessageType;
+import org.midica.ui.model.SingleMessage;
 import org.midica.ui.model.MessageTreeNode;
 import org.midica.ui.model.MidicaTreeModel;
 import org.midica.ui.widget.MidicaTable;
@@ -219,8 +220,8 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 		displayDetailsIfPossible( false );
 		
 		// row selected?
-		MessageDetail msgDetail = getSelectedMessage();
-		if ( msgDetail != null ) {
+		SingleMessage singleMessage = getSelectedMessage();
+		if (singleMessage != null) {
 			
 			// show in the tree, if needed
 			HashMap<String, JComponent> widgets = getMsgFilterWidgetsIfReady();
@@ -470,12 +471,12 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 		
 		// display details from the table, if possible
 		else {
-			MessageDetail msgDetail = getSelectedMessage();
-			if ( msgDetail != null ) {
+			SingleMessage singleMessage = getSelectedMessage();
+			if (singleMessage != null) {
 				
 				// (re)fill the details area
 				view.cleanMsgDetails();
-				view.fillMsgDetails( msgDetail );
+				view.fillMsgDetails(singleMessage);
 			}
 		}
 	}
@@ -725,12 +726,12 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 	}
 	
 	/**
-	 * Returns the currently selected message from the message table ocheckedr
+	 * Returns the currently selected message from the message table or
 	 * **null**, if no message is selected.
 	 * 
 	 * @return the selected message, if possible. Otherwise: **null**.
 	 */
-	private MessageDetail getSelectedMessage() {
+	private SingleMessage getSelectedMessage() {
 		
 		// get table
 		MidicaTable table = view.getMsgTable();
@@ -743,10 +744,10 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 			return null;
 		
 		// get row object
-		MessageTableModel model     = (MessageTableModel) table.getModel();
-		MessageDetail     msgDetail = model.getMsg( row );
+		MessageTableModel model         = (MessageTableModel) table.getModel();
+		SingleMessage     singleMessage = model.getMsg( row );
 		
-		return msgDetail;
+		return singleMessage;
 	}
 	
 	/**
@@ -767,8 +768,8 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 			return;
 		
 		// is a message selected?
-		MessageDetail msgDetail     = getSelectedMessage();
-		boolean       isMsgSelected = null == msgDetail ? false : true;
+		SingleMessage singleMessage = getSelectedMessage();
+		boolean       isMsgSelected = null == singleMessage ? false : true;
 		
 		// is the auto-show checkbox selected?
 		JCheckBox cbxAutoShow = (JCheckBox) widgets.get( InfoView.FILTER_CBX_AUTO_SHOW );
@@ -870,7 +871,7 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 		}
 		
 		// remember the currently selected message
-		MessageDetail selectedMsg = getSelectedMessage();
+		SingleMessage selectedMsg = getSelectedMessage();
 		
 		// apply filter
 		MidicaTable       table = view.getMsgTable();
@@ -906,19 +907,19 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 	private void showInTree() {
 		
 		// get leaf node of the selected message
-		MessageDetail msgDetail = getSelectedMessage();
-		if ( null == msgDetail )
+		SingleMessage singleMessage = getSelectedMessage();
+		if (null == singleMessage)
 			return;
-		MessageTreeNode leaf = (MessageTreeNode) msgDetail.getOption( "leaf_node" );
+		MessageTreeNode leaf = (MessageTreeNode) singleMessage.getOption( IMessageType.OPT_LEAF_NODE );
 		
 		// collapse the whole tree, than select a node and scroll to it
 		MidicaTree tree = tmMessages.getTree();
-		tree.removeTreeSelectionListener( this );
+		tree.removeTreeSelectionListener(this);
 		tmMessages.reload();                                // collapse
 		TreePath leafPath = new TreePath( leaf.getPath() );
-		tree.setSelectionPath( leafPath );                  // select and expand
-		tree.scrollPathToVisible( leafPath );               // scroll
-		tree.addTreeSelectionListener( this );
+		tree.setSelectionPath(leafPath);                    // select and expand
+		tree.scrollPathToVisible(leafPath);                 // scroll
+		tree.addTreeSelectionListener(this);
 	}
 	
 	/**

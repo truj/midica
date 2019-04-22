@@ -42,10 +42,10 @@ import org.midica.file.SequenceParser;
 import org.midica.file.SoundfontParser;
 import org.midica.midi.SequenceAnalyzer;
 import org.midica.ui.model.DrumkitTableModel;
-import org.midica.ui.model.IMessageDetailProvider;
+import org.midica.ui.model.IMessageType;
 import org.midica.ui.model.InstrumentTableModel;
 import org.midica.ui.model.MessageTableModel;
-import org.midica.ui.model.MessageDetail;
+import org.midica.ui.model.SingleMessage;
 import org.midica.ui.model.MessageTreeNode;
 import org.midica.ui.model.MidicaTreeModel;
 import org.midica.ui.model.NoteTableModel;
@@ -1579,16 +1579,16 @@ public class InfoView extends JDialog {
 		// get messages
 		HashMap<String, Object>  sequenceInfo = SequenceAnalyzer.getSequenceInfo();
 		Object                   msgObj       = sequenceInfo.get( "messages" );
-		ArrayList<MessageDetail> messages     = (ArrayList<MessageDetail>) msgObj;
+		ArrayList<SingleMessage> messages     = (ArrayList<SingleMessage>) msgObj;
 		
 		// filter
 		long minTick = 0;
 		long maxTick = 0;
-		if ( null != messages ) {
+		if (null != messages) {
 			int last = messages.size() - 1;
 			if ( last > 0 ) {
-				minTick = (long) messages.get( 0    ).getOption( "tick" );
-				maxTick = (long) messages.get( last ).getOption( "tick" );
+				minTick = (long) messages.get( 0    ).getOption( IMessageType.OPT_TICK );
+				maxTick = (long) messages.get( last ).getOption( IMessageType.OPT_TICK );
 			}
 		}
 		Container filter = createMsgFilterArea( minTick, maxTick );
@@ -1599,8 +1599,8 @@ public class InfoView extends JDialog {
 		constraints.weightx     = 1;
 		constraints.weighty     = 1;
 		constraints.fill        = GridBagConstraints.BOTH;
-		MessageTableModel model = new MessageTableModel( messages );
-		msgTable                = new MidicaTable( model );
+		MessageTableModel model = new MessageTableModel(messages);
+		msgTable                = new MidicaTable(model);
 		msgTable.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
 		msgTable.getSelectionModel().addListSelectionListener( controller );
 		msgTable.addFocusListener( controller );
@@ -2204,13 +2204,13 @@ public class InfoView extends JDialog {
 	 * Adjusts the background color according to the click source
 	 * (message table or message tree)
 	 *
-	 * @param msgDetail  The selected leaf node or table row object.
+	 * @param messageSource  The selected leaf node or table row object.
 	 */
-	public void fillMsgDetails( IMessageDetailProvider msgDetail ) {
+	public void fillMsgDetails(IMessageType messageSource) {
 		
 		// single message from the table or multiple messages from a table node?
 		boolean fromTable = false;
-		if ( msgDetail instanceof MessageDetail ) {
+		if (messageSource instanceof SingleMessage) {
 			fromTable = true;
 		}
 		
@@ -2219,7 +2219,7 @@ public class InfoView extends JDialog {
 		if (fromTable) {
 			bgColor = Config.MSG_TABLE_COLOR;
 		}
-		msgDetails.setBackground( bgColor );
+		msgDetails.setBackground(bgColor);
 		
 		// adjust translations (singular or plural)
 		String translTick     = Dict.get( Dict.MSG_DETAILS_TICK_PL      );
@@ -2257,7 +2257,7 @@ public class InfoView extends JDialog {
 		constrRight.anchor  = GridBagConstraints.NORTHWEST;
 		
 		// tick range
-		String tickRange = msgDetail.getRange( "tick" );
+		String tickRange = messageSource.getRange( IMessageType.OPT_TICK );
 		if ( tickRange != null ) {
 			
 			// label
@@ -2271,7 +2271,7 @@ public class InfoView extends JDialog {
 		}
 		
 		// message length
-		String lengthRange = msgDetail.getRange( "length" );
+		String lengthRange = messageSource.getRange( IMessageType.OPT_LENGTH );
 		if ( lengthRange != null ) {
 			
 			// label
@@ -2287,7 +2287,7 @@ public class InfoView extends JDialog {
 		}
 		
 		// status byte
-		Object statusObj = msgDetail.getOption( "status_byte" );
+		Object statusObj = messageSource.getOption( IMessageType.OPT_STATUS_BYTE );
 		if ( statusObj != null ) {
 			
 			// label
@@ -2311,7 +2311,7 @@ public class InfoView extends JDialog {
 		}
 		
 		// tracks
-		String tracksStr = msgDetail.getDistinctOptions( "track" );
+		String tracksStr = messageSource.getDistinctOptions( IMessageType.OPT_TRACK );
 		if ( tracksStr != null ) {
 			
 			// label
@@ -2327,7 +2327,7 @@ public class InfoView extends JDialog {
 		}
 		
 		// channels
-		String channelsStr = msgDetail.getDistinctOptions( "channel" );
+		String channelsStr = messageSource.getDistinctOptions( IMessageType.OPT_CHANNEL );
 		if ( channelsStr != null ) {
 			
 			// label
@@ -2343,7 +2343,7 @@ public class InfoView extends JDialog {
 		}
 		
 		// meta type
-		Object metaTypeObj = msgDetail.getOption( "meta_type" );
+		Object metaTypeObj = messageSource.getOption( IMessageType.OPT_META_TYPE );
 		if ( metaTypeObj instanceof Integer ) {
 			
 			// label
@@ -2361,8 +2361,8 @@ public class InfoView extends JDialog {
 		}
 		
 		// vendor - byte(s) and name
-		Object vendorObj     = msgDetail.getOption( "vendor_id" );
-		Object vendorNameObj = msgDetail.getOption( "vendor_name" );
+		Object vendorObj     = messageSource.getOption( IMessageType.OPT_VENDOR_ID   );
+		Object vendorNameObj = messageSource.getOption( IMessageType.OPT_VENDOR_NAME );
 		if ( vendorObj instanceof String ) {
 			
 			// label
@@ -2384,7 +2384,7 @@ public class InfoView extends JDialog {
 		}
 		
 		// sysex channel
-		Object sysexChannelObj = msgDetail.getDistinctOptions( "sysex_channel" );
+		Object sysexChannelObj = messageSource.getDistinctOptions( IMessageType.OPT_SYSEX_CHANNEL );
 		if ( sysexChannelObj instanceof String ) {
 			
 			// label
@@ -2401,7 +2401,7 @@ public class InfoView extends JDialog {
 		}
 		
 		// sub ID 1 byte
-		Object subId1Obj = msgDetail.getOption( "sub_id_1" );
+		Object subId1Obj = messageSource.getOption( IMessageType.OPT_SUB_ID_1 );
 		if ( subId1Obj instanceof String ) {
 			
 			// label
@@ -2418,7 +2418,7 @@ public class InfoView extends JDialog {
 		}
 		
 		// sub ID 2 byte
-		Object subId2Obj = msgDetail.getOption( "sub_id_2" );
+		Object subId2Obj = messageSource.getOption( IMessageType.OPT_SUB_ID_2 );
 		if ( subId2Obj instanceof String ) {
 			
 			// label
@@ -2435,7 +2435,7 @@ public class InfoView extends JDialog {
 		}
 		
 		// controller byte
-		Object ctrlObj = msgDetail.getOption( "controller" );
+		Object ctrlObj = messageSource.getOption( IMessageType.OPT_CONTROLLER );
 		if ( ctrlObj instanceof Byte ) {
 			
 			// label
@@ -2453,7 +2453,7 @@ public class InfoView extends JDialog {
 		}
 		
 		// RPN - parameter number(s)
-		Object rpnObj = msgDetail.getDistinctOptions( "rpn" );
+		Object rpnObj = messageSource.getDistinctOptions( IMessageType.OPT_RPN );
 		if ( rpnObj != null ) {
 			
 			// label
@@ -2470,7 +2470,7 @@ public class InfoView extends JDialog {
 		}
 		
 		// NRPN - parameter number(s)
-		Object nrpnObj = msgDetail.getDistinctOptions( "nrpn" );
+		Object nrpnObj = messageSource.getDistinctOptions( IMessageType.OPT_NRPN );
 		if ( nrpnObj != null ) {
 			
 			// label
@@ -2487,7 +2487,7 @@ public class InfoView extends JDialog {
 		}
 		
 		// text content
-		Object textObj = msgDetail.getDistinctOptions( "text", "\n============\n" );
+		Object textObj = messageSource.getDistinctOptions( IMessageType.OPT_TEXT, "\n============\n" );
 		if ( textObj instanceof String ) {
 			
 			// label
@@ -2503,8 +2503,26 @@ public class InfoView extends JDialog {
 			msgDetails.add( text, constrRight );
 		}
 		
+		// detail/meaning
+		Object meaningObj = messageSource.getOption( IMessageType.OPT_MEANING );
+		if ( meaningObj != null ) {
+
+			// label
+			constrLeft.gridy++;
+			JLabel lblMsg = new JLabel( Dict.get(Dict.MSG_DETAILS_MEANING) );
+			msgDetails.add( lblMsg, constrLeft );
+
+			// content
+			constrRight.gridy++;
+			String meaning = (String) meaningObj;
+			
+			FlowLabel msg = new FlowLabel( meaning, CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
+			msg.setBackground( bgColor );
+			msgDetails.add( msg, constrRight );
+		}
+		
 		// complete message
-		Object msgObj = msgDetail.getOption( "message" );
+		Object msgObj = messageSource.getOption( IMessageType.OPT_MESSAGE );
 		if ( msgObj != null ) {
 
 			// label
