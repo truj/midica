@@ -642,7 +642,7 @@ public class Dict {
 	public static final String MSG_DETAILS_TEXT_SG         = "msg_details_text_sg";
 	public static final String MSG_DETAILS_TEXT_PL         = "msg_details_text_pl";
 	public static final String MSG_DETAILS_MESSAGE         = "msg_details_message";
-	public static final String MSG_DETAILS_MEANING         = "msg_details_meaning";
+	public static final String MSG_DETAILS_DESCRIPTION     = "msg_details_description";
 	
 	// MIDI messages for InfoView - level 1
 	public static final String MSG1_VOICE               = "msg1_voice";             // MSG2_V_*
@@ -924,6 +924,41 @@ public class Dict {
 	public static final String MSG5_SXR9_CHANNEL_PRESSURE  = "msg5_sxr9_channel_pressure";
 	public static final String MSG5_SXR9_POLY_KEY_PRESSURE = "msg5_sxr9_poly_key_pressure";
 	public static final String MSG5_SXR9_CTRL              = "msg5_sxr9_ctrl";
+	
+	// MessageClassifier: message description
+	public static final String MSG_DESC_MEANING            = "msg_desc_meaning";
+	public static final String MSG_DESC_VALUE              = "msg_desc_value";
+	public static final String MSG_DESC_ON                 = "msg_desc_on";
+	public static final String MSG_DESC_OFF                = "msg_desc_off";
+	public static final String MSG_DESC_89A_NOTE           = "msg_desc_89a_note";
+	public static final String MSG_DESC_89A_VELOCITY       = "msg_desc_89a_velocity";
+	public static final String MSG_DESC_89AD_PRESSURE      = "msg_desc_89ad_pressure";
+	public static final String MSG_DESC_B_POS_MEANINGS     = "msg_desc_b_pos_meanings";
+	public static final String MSG_DESC_B_FOR_PARAM        = "msg_desc_b_for_param";
+	public static final String MSG_DESC_B_RPN_MSB_00       = "msg_desc_b_rpm_msb_00";
+	public static final String MSG_DESC_B_RPN_MSB_3D       = "msg_desc_b_rpm_msb_3d";
+	public static final String MSG_DESC_B_RPN_LSB_00       = "msg_desc_b_rpm_lsb_00";
+	public static final String MSG_DESC_B_RPN_LSB_01       = "msg_desc_b_rpm_lsb_01";
+	public static final String MSG_DESC_B_RPN_LSB_02       = "msg_desc_b_rpm_lsb_02";
+	public static final String MSG_DESC_B_RPN_LSB_03       = "msg_desc_b_rpm_lsb_03";
+	public static final String MSG_DESC_B_RPN_LSB_04       = "msg_desc_b_rpm_lsb_04";
+	public static final String MSG_DESC_B_RPN_LSB_05       = "msg_desc_b_rpm_lsb_05";
+	public static final String MSG_DESC_B_RPN_LSB_06       = "msg_desc_b_rpm_lsb_06";
+	public static final String MSG_DESC_B_RPN_LSB_07       = "msg_desc_b_rpm_lsb_07";
+	public static final String MSG_DESC_B_RPN_LSB_08       = "msg_desc_b_rpm_lsb_08";
+	public static final String MSG_DESC_B_RPN_NRPN_7F      = "msg_desc_b_rpm_nrpn_7f";
+	public static final String MSG_DESC_C_PROGRAM          = "msg_desc_c_program";
+	public static final String MSG_DESC_C_INSTRUMENT       = "msg_desc_c_instrument";
+	public static final String MSG_DESC_C_DRUMKIT          = "msg_desc_c_drumkit";
+	public static final String MSG_DESC_E_GENERAL_DESC     = "msg_desc_e_general_desc";
+	public static final String MSG_DESC_E_CURRENT_SENS     = "msg_desc_e_current_sens";
+	public static final String MSG_DESC_E_HALF_TONE        = "msg_desc_e_half_tone";
+	public static final String MSG_DESC_F_TEMPO_MPQ        = "msg_desc_f_tempo_mpq";
+	public static final String MSG_DESC_F_TEMPO_BPM        = "msg_desc_f_tempo_bpm";
+	public static final String MSG_DESC_F_KEY_SIG_SHARPS   = "msg_desc_f_key_sig_sharps";
+	public static final String MSG_DESC_F_KEY_SIG_FLATS    = "msg_desc_f_key_sig_flats";
+	public static final String MSG_DESC_F_KEY_SIG_NONE     = "msg_desc_f_key_sig_none";
+	public static final String MSG_DESC_F_UNKNOWN_TONALITY = "msg_desc_f_unknown_tonality";
 	
 	// UiControler + PlayerControler
 	public static final String ERROR_IN_LINE               = "parsing_error_in_line";
@@ -1440,7 +1475,7 @@ public class Dict {
 		set( MSG_DETAILS_TEXT_SG,                    "Text:"            );
 		set( MSG_DETAILS_TEXT_PL,                    "Texts:"           );
 		set( MSG_DETAILS_MESSAGE,                    "Message (Hex):"   );
-		set( MSG_DETAILS_MEANING,                    "Details"          );
+		set( MSG_DETAILS_DESCRIPTION,                "Description"      );
 		
 		// syntax for InfoView
 		set( SYNTAX_DEFINE,             "syntax element definition"                        );
@@ -1786,6 +1821,41 @@ public class Dict {
 		set( MSG5_SXR9_CHANNEL_PRESSURE,  "Channel Pressure (Aftertouch)"                  );
 		set( MSG5_SXR9_POLY_KEY_PRESSURE, "Polyphonic Key Pressure (Aftertouch)"           );
 		set( MSG5_SXR9_CTRL,              "Controller (Control Change)"                    );
+		
+		// MessageClassifier: message description
+		set( MSG_DESC_MEANING,            "Meaning: "                                      );
+		set( MSG_DESC_VALUE,              "Value: "                                        );
+		set( MSG_DESC_ON,                 "ON"                                             );
+		set( MSG_DESC_OFF,                "OFF"                                            );
+		set( MSG_DESC_89A_NOTE,           "Note: "                                         );
+		set( MSG_DESC_89A_VELOCITY,       "Velocity: "                                     );
+		set( MSG_DESC_89AD_PRESSURE,      "Pressure: "                                     );
+		set( MSG_DESC_B_POS_MEANINGS,     "Possible Meanings: "                            );
+		set( MSG_DESC_B_FOR_PARAM,        "For Parameter: "                                );
+		set( MSG_DESC_B_RPN_MSB_00,       "Any of the standard controllers"                );
+		set( MSG_DESC_B_RPN_MSB_3D,       "Any of the three-dimensional sound controllers" );
+		set( MSG_DESC_B_RPN_LSB_00,       "Standard: Pitch Bend Sensitivity / 3D: Azimuth Angle"                     );
+		set( MSG_DESC_B_RPN_LSB_01,       "Standard: Channel Fine Tuning  / 3D: Elevation Angle"                     );
+		set( MSG_DESC_B_RPN_LSB_02,       "Standard: Channel Coarse Tuning / 3D: Gain"                               );
+		set( MSG_DESC_B_RPN_LSB_03,       "Standard: Tuning Program Change / 3D: Distance Ratio"                     );
+		set( MSG_DESC_B_RPN_LSB_04,       "Standard: Tuning Bank Select / 3D: Maximum Distance"                      );
+		set( MSG_DESC_B_RPN_LSB_05,       "Standard: Modulation Depth Range / 3D: Gain at maximum distance"          );
+		set( MSG_DESC_B_RPN_LSB_06,       "Standard: MPE Configurarion Message (MCM) / 3D: Reference distance ratio" );
+		set( MSG_DESC_B_RPN_LSB_07,       "3D: Pan spread angle"                                                     );
+		set( MSG_DESC_B_RPN_LSB_08,       "3D: Roll angle"                                                           );
+		set( MSG_DESC_B_RPN_NRPN_7F,      "Null Function Number (Reset)"                   );
+		set( MSG_DESC_C_PROGRAM,          "Program: "                                      );
+		set( MSG_DESC_C_INSTRUMENT,       "Instrument: "                                   );
+		set( MSG_DESC_C_DRUMKIT,          "Drumkit: "                                      );
+		set( MSG_DESC_E_GENERAL_DESC,     "Possible values: -8192 to 8191"                 );
+		set( MSG_DESC_E_CURRENT_SENS,     "Current pitch bend sensitivity (+/- half tones): " );
+		set( MSG_DESC_E_HALF_TONE,        "Resulting half tones: "                         );
+		set( MSG_DESC_F_TEMPO_MPQ,        "MPQ (milliseconds per quarter note)"            );
+		set( MSG_DESC_F_TEMPO_BPM,        "BPM (beats/quarter notes per minute)"           );
+		set( MSG_DESC_F_KEY_SIG_SHARPS,   "Sharps (♯)"                                     );
+		set( MSG_DESC_F_KEY_SIG_FLATS,    "Flats (♭)"                                      );
+		set( MSG_DESC_F_KEY_SIG_NONE,     "Sharps (♯) or Flats (♭)"                        );
+		set( MSG_DESC_F_UNKNOWN_TONALITY, "Unknown tonality"                               );
 		
 		// UiControler + PlayerControler
 		set( ERROR_IN_LINE,                       "<html>parsing error in file:<br>%s<br>line: %s<br>" );
@@ -2764,7 +2834,7 @@ public class Dict {
 			if (1 == octave)
 				postfix = "-";
 			if (octave > 1)
-				postfix = "-" + (octave - 1);
+				postfix = "-" + octave;
 			int decrement = octave * 12;
 			for (NamedInteger name : noteNames) {
 				String newName  = name.name  + postfix;

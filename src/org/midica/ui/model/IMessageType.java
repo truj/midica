@@ -14,8 +14,8 @@ package org.midica.ui.model;
  * 
  * It's implemented by the following classes:
  * 
- * - {@link MidicaTreeNode} -- represents a type of MIDI messages
- * - {@link SingleMessage}  -- represents a certain MIDI message
+ * - {@link MessageTreeNode} -- represents a type of MIDI messages
+ * - {@link SingleMessage}   -- represents a certain MIDI message
  * 
  * The implementing classes provide different kinds of options. Each option
  * has a certain (arbitrary) ID and a value. Depending on the kind of
@@ -49,7 +49,6 @@ public interface IMessageType {
 	public static final int OPT_TEXT          = 18;
 	public static final int OPT_TEMPO_MPQ     = 19;
 	public static final int OPT_TEMPO_BPM     = 20;
-	public static final int OPT_MEANING       = 21;
 	
 	/** Contains all option IDs in the right order. */
 	public static final int[] OPTIONS = {

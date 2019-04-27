@@ -40,6 +40,7 @@ import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.SequenceParser;
 import org.midica.file.SoundfontParser;
+import org.midica.midi.MessageClassifier;
 import org.midica.midi.SequenceAnalyzer;
 import org.midica.ui.model.DrumkitTableModel;
 import org.midica.ui.model.IMessageType;
@@ -2503,24 +2504,6 @@ public class InfoView extends JDialog {
 			msgDetails.add( text, constrRight );
 		}
 		
-		// detail/meaning
-		Object meaningObj = messageSource.getOption( IMessageType.OPT_MEANING );
-		if ( meaningObj != null ) {
-
-			// label
-			constrLeft.gridy++;
-			JLabel lblMsg = new JLabel( Dict.get(Dict.MSG_DETAILS_MEANING) );
-			msgDetails.add( lblMsg, constrLeft );
-
-			// content
-			constrRight.gridy++;
-			String meaning = (String) meaningObj;
-			
-			FlowLabel msg = new FlowLabel( meaning, CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
-			msg.setBackground( bgColor );
-			msgDetails.add( msg, constrRight );
-		}
-		
 		// complete message
 		Object msgObj = messageSource.getOption( IMessageType.OPT_MESSAGE );
 		if ( msgObj != null ) {
@@ -2542,6 +2525,22 @@ public class InfoView extends JDialog {
 					msgStr.append( " " + hex );
 			}
 			FlowLabel msg = new FlowLabel( msgStr.toString(), CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
+			msg.setBackground( bgColor );
+			msgDetails.add( msg, constrRight );
+		}
+		
+		// message description
+		String description = MessageClassifier.getDescription(messageSource);
+		if (description != null) {
+
+			// label
+			constrLeft.gridy++;
+			JLabel lblMsg = new JLabel( Dict.get(Dict.MSG_DETAILS_DESCRIPTION) );
+			msgDetails.add( lblMsg, constrLeft );
+
+			// content
+			constrRight.gridy++;
+			FlowLabel msg = new FlowLabel( description, CPL_MSG_DETAILS, PWIDTH_MSG_DETAIL_CONTENT );
 			msg.setBackground( bgColor );
 			msgDetails.add( msg, constrRight );
 		}

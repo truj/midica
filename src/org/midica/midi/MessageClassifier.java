@@ -44,6 +44,297 @@ public class MessageClassifier {
 	}
 	
 	/**
+	 * Returns a message description for the given message or message category.
+	 * 
+	 * This is used for the description part in the message detail field.
+	 * 
+	 * @param message  message or message category
+	 * @return a description or **null**, if no special description is available.
+	 */
+	public static final String getDescription(IMessageType message) {
+		String  statusByte    = (String)  message.getOption( IMessageType.OPT_STATUS_BYTE );
+		Integer channel       = (Integer) message.getOption( IMessageType.OPT_CHANNEL );
+		long    tick          = (Long)    message.getOption( IMessageType.OPT_TICK );
+		byte[]  msg           = (byte[])  message.getOption( IMessageType.OPT_MESSAGE );
+		char    statusNibble1 = statusByte.charAt(0);
+		
+		// default = name of the leaf node
+		MessageTreeNode leaf;
+		if (message instanceof MessageTreeNode)
+			leaf = (MessageTreeNode) message;
+		else
+			leaf = (MessageTreeNode) message.getOption( IMessageType.OPT_LEAF_NODE );
+		String        leafName    = leaf.getName();
+		StringBuilder description = new StringBuilder(leafName);
+		
+		// note off / note on / polyphonic aftertouch
+		if ('8' == statusNibble1 || '9' == statusNibble1 || 'A' == statusNibble1) {
+			if (msg != null) {
+				String note  = getNoteString(msg[1], channel);
+				byte   value = msg[2];
+				description.append("\n" + Dict.get(Dict.MSG_DESC_89A_NOTE) + note);
+				if ('A' == statusNibble1)
+					description.append("\n" + Dict.get(Dict.MSG_DESC_89AD_PRESSURE) + value);
+				else
+					description.append("\n" + Dict.get(Dict.MSG_DESC_89A_VELOCITY) + value);
+				if ('9' == statusNibble1 && 0 == value)
+					description.append("\n" + Dict.get(Dict.MSG_DESC_MEANING) + Dict.get(Dict.MSG2_V_NOTE_OFF));
+			}
+		}
+		
+		// control change
+		if ('B' == statusNibble1) {
+			if (msg != null) {
+				byte controller = msg[1];
+				byte value      = msg[2];
+				description.append("\n" + Dict.get(Dict.MSG_DESC_VALUE) + value);
+				
+				// Hold pedal 1 / Portamento pedal / Sostenuto pedal /
+				// Soft pedal / Legato pedal / Hold pedal 2
+				if (64 <= controller && controller <= 69) {
+					if (value < 64)
+						description = new StringBuilder( Dict.get(Dict.MSG_DESC_OFF) );
+					else
+						description = new StringBuilder( Dict.get(Dict.MSG_DESC_ON) );
+				}
+				
+				// data entry MSB (0x06) or LSB (0x26)
+				if (0x06 == controller || 0x26 == controller) {
+					description = new StringBuilder(leafName);
+					MessageTreeNode parent = (MessageTreeNode) leaf.getParent();
+					description.append("\n" + Dict.get(Dict.MSG_DESC_B_FOR_PARAM) + parent.getName());
+					description.append("\n" + Dict.get(Dict.MSG_DESC_VALUE) + value);
+				}
+				
+				// data increment (0x60) / decrement (0x61)
+				if (0x60 == controller || 0x61 == controller) {
+					MessageTreeNode parent = (MessageTreeNode) leaf.getParent();
+					description = new StringBuilder(parent.getName());
+					description.append("\n" + Dict.get(Dict.MSG_DESC_B_FOR_PARAM) + leafName);
+				}
+				
+				// NRPN LSB (0x62)
+				if (0x62 == controller) {
+					if (0x7F == value)
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_NRPN_7F) );
+					else
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.UNKNOWN) );
+				}
+				
+				// NRPN MSB (0x63)
+				if (0x63 == controller) {
+					if (0x7F == value)
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_NRPN_7F) );
+					else
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.UNKNOWN) );
+				}
+				
+				// RPN LSB (0x64)
+				if (0x64 == controller) {
+					if (0x00 == value)
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_00) );
+					else if (0x01 == value)
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_01) );
+					else if (0x02 == value)
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_02) );
+					else if (0x03 == value)
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_03) );
+					else if (0x04 == value)
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_04) );
+					else if (0x05 == value)
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_05) );
+					else if (0x06 == value)
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_06) );
+					else if (0x07 == value)
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_07) );
+					else if (0x08 == value)
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_08) );
+					else if (0x7F == value)
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_NRPN_7F) );
+					else
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.UNKNOWN) );
+				}
+				
+				// RPN MSB (0x65)
+				if (0x65 == controller) {
+					if (0x00 == value)
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_MSB_00) );
+					else if (0x3D == value)
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_MSB_3D) );
+					else if (0x7F == value)
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_NRPN_7F) );
+					else
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.UNKNOWN) );
+				}
+				
+				// local control
+				if (0x7A == controller) {
+					if (0 == value)
+						description.append("\n" + Dict.get(Dict.MSG_DESC_MEANING) + Dict.get(Dict.MSG_DESC_OFF));
+					else if (0x7F == value)
+						description.append("\n" + Dict.get(Dict.MSG_DESC_MEANING) + Dict.get(Dict.MSG_DESC_ON));
+					else
+						description.append("\n" + Dict.get(Dict.MSG_DESC_MEANING) + Dict.get(Dict.UNKNOWN));
+				}
+			}
+		}
+		
+		// program change
+		if ('C' == statusNibble1 && msg != null) {
+			if (9 == channel) {
+				String drumkit = Dict.getDrumkit(msg[1]);
+				description.append("\n" + Dict.get(Dict.MSG_DESC_C_PROGRAM) + msg[1]);
+				description.append("\n" + Dict.get(Dict.MSG_DESC_C_DRUMKIT) + drumkit);
+			}
+			else {
+				String instrument = Dict.getInstrument(msg[1]);
+				description.append("\n" + Dict.get(Dict.MSG_DESC_C_PROGRAM) + msg[1]);
+				description.append("\n" + Dict.get(Dict.MSG_DESC_C_INSTRUMENT) + instrument);
+			}
+		}
+		
+		// channel pressure
+		if ('D' == statusNibble1) {
+			if (msg != null) {
+				byte value = msg[1];
+				description.append("\n" + Dict.get(Dict.MSG_DESC_89AD_PRESSURE) + value);
+			}
+		}
+		
+		// pitch bend
+		if ('E' == statusNibble1) {
+			description.append("\n" + Dict.get(Dict.MSG_DESC_E_GENERAL_DESC));
+			if (msg != null) {
+				byte   lsb         = msg[1];
+				byte   msb         = msg[2];
+				int    neutral     = 0x2000;
+				byte   sens        = SequenceAnalyzer.getPitchBendSensitivity((byte) (int) channel, tick);
+				int    value       = msb * 128 + lsb - neutral;
+				int    maxVal      = (value > 0) ? 0x2000 - 1 : 0x2000;
+				float  halfTones   = ((float) sens) * ((float) value) / ((float) maxVal);
+				String halfToneStr = (value > 0) ? "+" + halfTones : "" + halfTones;
+				description.append("\n" + Dict.get(Dict.MSG_DESC_VALUE) + value);
+				description.append("\n" + Dict.get(Dict.MSG_DESC_E_CURRENT_SENS) + sens);
+				description.append("\n" + Dict.get(Dict.MSG_DESC_E_HALF_TONE) + halfToneStr);
+			}
+		}
+		
+		// meta / system common / system realtime
+		if ('F' == statusNibble1) {
+			char statusNibble2 = statusByte.charAt(1);
+			
+			// meta
+			if ('F' == statusNibble2) {
+				if (msg != null) {
+					byte type = msg[1];
+					
+					// tempo change
+					if (0x51 == type) {
+						int mpq = (Integer) message.getOption( IMessageType.OPT_TEMPO_MPQ );
+						int bpm = (Integer) message.getOption( IMessageType.OPT_TEMPO_BPM );
+						description.append( "\n" + mpq + " " + Dict.get(Dict.MSG_DESC_F_TEMPO_MPQ) );
+						description.append( "\n" + bpm + " " + Dict.get(Dict.MSG_DESC_F_TEMPO_BPM) );
+					}
+					
+					// time signature
+					if (0x58 == type) {
+						int numerator   = msg[3];
+						int exp         = msg[4];
+						int denominator = (int) Math.pow(2, exp);
+						description.append( "\n" + numerator + Dict.getSyntax(Dict.SYNTAX_TIME_SIG_SLASH) + denominator );
+					}
+					
+					// key signature
+					if (0x59 == type) {
+						byte    sharpsOrFlats = msg[3];
+						byte    tonality      = msg[4];
+						boolean isMajor       = 0 == tonality;
+						boolean isMinor       = 1 == tonality;
+						
+						// note and tonality
+						int    note        = -1;
+						String tonalityStr = "";
+						if (isMajor) {
+							tonalityStr = Dict.getSyntax(Dict.SYNTAX_KEY_SEPARATOR) + Dict.getSyntax(Dict.SYNTAX_KEY_MAJ);
+							if      (0  == sharpsOrFlats) note = 60; // C maj
+							else if (1  == sharpsOrFlats) note = 67; // G maj
+							else if (2  == sharpsOrFlats) note = 62; // D maj
+							else if (3  == sharpsOrFlats) note = 69; // A maj
+							else if (4  == sharpsOrFlats) note = 64; // E maj
+							else if (5  == sharpsOrFlats) note = 71; // B maj
+							else if (6  == sharpsOrFlats) note = 66; // F# maj
+							else if (7  == sharpsOrFlats) note = 61; // C# maj
+							else if (-1 == sharpsOrFlats) note = 65; // F maj
+							else if (-2 == sharpsOrFlats) note = 70; // Bb maj
+							else if (-3 == sharpsOrFlats) note = 63; // Eb maj
+							else if (-4 == sharpsOrFlats) note = 68; // Ab maj
+							else if (-5 == sharpsOrFlats) note = 61; // Db maj
+							else if (-6 == sharpsOrFlats) note = 66; // Gb maj
+							else if (-7 == sharpsOrFlats) note = 71; // Cb maj
+						}
+						else if (isMinor) {
+							tonalityStr = Dict.getSyntax(Dict.SYNTAX_KEY_SEPARATOR) + Dict.getSyntax(Dict.SYNTAX_KEY_MIN);
+							if      (0  == sharpsOrFlats) note = 69; // A min
+							else if (1  == sharpsOrFlats) note = 64; // E min
+							else if (2  == sharpsOrFlats) note = 71; // B min
+							else if (3  == sharpsOrFlats) note = 66; // F# min
+							else if (4  == sharpsOrFlats) note = 61; // C# min
+							else if (5  == sharpsOrFlats) note = 68; // G# min
+							else if (6  == sharpsOrFlats) note = 63; // D# min
+							else if (7  == sharpsOrFlats) note = 70; // A# min
+							else if (-1 == sharpsOrFlats) note = 62; // D min
+							else if (-2 == sharpsOrFlats) note = 67; // G min
+							else if (-3 == sharpsOrFlats) note = 60; // C min
+							else if (-4 == sharpsOrFlats) note = 65; // F min
+							else if (-5 == sharpsOrFlats) note = 70; // Bb min
+							else if (-6 == sharpsOrFlats) note = 63; // Eb min
+							else if (-7 == sharpsOrFlats) note = 68; // Ab min
+						}
+						
+						// display sharps / flats
+						String  sharpFlatStr;
+						if (sharpsOrFlats > 0)
+							sharpFlatStr = sharpsOrFlats + " " + Dict.get(Dict.MSG_DESC_F_KEY_SIG_SHARPS);
+						else if (sharpsOrFlats < 0)
+							sharpFlatStr = sharpsOrFlats + " " + Dict.get(Dict.MSG_DESC_F_KEY_SIG_FLATS);
+						else
+							sharpFlatStr = "0 " + Dict.get(Dict.MSG_DESC_F_KEY_SIG_NONE);
+						
+						// put it all together
+						if (-1 == note || "".equals(tonalityStr)) {
+							description.append( "\n" + Dict.get(Dict.MSG_DESC_F_UNKNOWN_TONALITY) );
+						}
+						else {
+							String keyStr = Dict.getNote(note);
+							description.append("\n" + keyStr + tonalityStr);
+						}
+						description.append("\n" + sharpFlatStr);
+					}
+				}
+			}
+		}
+		
+		// return result
+		if (description != null && description.toString().length() > 0)
+			return description.toString();
+		return null;
+	}
+	
+	/**
+	 * Returns the configured note name or percussion IDs by number and channel.
+	 * 
+	 * @param number   MIDI number
+	 * @param channel  MIDI channel
+	 * @return note or percussion description
+	 */
+	private static final String getNoteString(byte number, int channel) {
+		if (9 == channel) {
+			return Dict.getPercussionLongId(number) + " (" + Dict.getPercussionShortId(number) + ")";
+		}
+		return Dict.getNote(number);
+	}
+	
+	/**
 	 * Retrieves general information from short messages.
 	 * 
 	 * Creates a path and adds it to the given tree model.
@@ -58,7 +349,7 @@ public class MessageClassifier {
 	 * @param msgTreeModel  Tree model where the created leaf note will be added.
 	 * @throws ReflectiveOperationException if the message cannot be added to the tree model.
 	 */
-	public static void processShortMessage(ShortMessage msg, long tick, int trackNum, int msgNum,
+	public static final void processShortMessage(ShortMessage msg, long tick, int trackNum, int msgNum,
 		ArrayList<SingleMessage> messages, MidicaTreeModel msgTreeModel) throws ReflectiveOperationException {
 		
 		// prepare data structures
@@ -184,7 +475,7 @@ public class MessageClassifier {
 				if (isDataChange) {
 					
 					// get MSB, LSB and type (RPN/NRPN)
-					Byte[]  paramMsbLsb = SequenceAnalyzer.getChannelParamMsbLsbType( (byte) channel, tick );
+					Byte[] paramMsbLsb = SequenceAnalyzer.getChannelParamMsbLsbType( (byte) channel, tick );
 					byte msb  = paramMsbLsb[ 0 ];
 					byte lsb  = paramMsbLsb[ 1 ];
 					byte type = paramMsbLsb[ 2 ];
@@ -255,7 +546,7 @@ public class MessageClassifier {
 	 * @param midiFileCharset  The last charset from a charset switch inside of a lyrics message.
 	 * @throws ReflectiveOperationException if the message cannot be added to the tree model.
 	 */
-	public static void processMetaMessage(MetaMessage msg, long tick, int trackNum, int msgNum,
+	public static final void processMetaMessage(MetaMessage msg, long tick, int trackNum, int msgNum,
 		ArrayList<SingleMessage> messages, MidicaTreeModel msgTreeModel,
 		String chosenCharset, String midiFileCharset) throws ReflectiveOperationException {
 		
@@ -369,7 +660,7 @@ public class MessageClassifier {
 	 * @param msgTreeModel  Tree model where the created leaf note will be added.
 	 * @throws ReflectiveOperationException if the message cannot be added to the tree model.
 	 */
-	public static void processSysexMessage(SysexMessage msg, long tick, int trackNum, int msgNum,
+	public static final void processSysexMessage(SysexMessage msg, long tick, int trackNum, int msgNum,
 		ArrayList<SingleMessage> messages, MidicaTreeModel msgTreeModel) throws ReflectiveOperationException {
 		
 		// prepare data structures
@@ -1310,7 +1601,7 @@ public class MessageClassifier {
 	 * @param vendorNum  The vendor number as described above.
 	 * @return the vendor name.
 	 */
-	private static String getVendorName(String vendorNum) {
+	private static final String getVendorName(String vendorNum) {
 		
 		// invalid (vendor number not found, message too short)
 		if ("-".equals(vendorNum)) {

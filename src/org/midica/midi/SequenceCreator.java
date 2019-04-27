@@ -245,12 +245,12 @@ public class SequenceCreator {
 	/**
 	 * Sets the time signature using a meta message.
 	 * 
-	 * @param nominator    Nominator of the time signature
+	 * @param numerator    Numerator of the time signature
 	 * @param denominator  Denominator of the time signature
 	 * @param tick         Tickstamp of the time signature event
 	 * @throws InvalidMidiDataException if invalid MIDI data is used to create a MIDI message.
 	 */
-	public static void addMessageTimeSignature(int nominator, int denominator, long tick) throws InvalidMidiDataException {
+	public static void addMessageTimeSignature(int numerator, int denominator, long tick) throws InvalidMidiDataException {
 		int cmd = MidiListener.META_TIME_SIGNATURE;
 		
 		// calculate valid denominators
@@ -269,7 +269,7 @@ public class SequenceCreator {
 		
 		MetaMessage msg = new MetaMessage();
 		byte[] data = new byte[4];
-		data[0] = (byte) nominator;
+		data[0] = (byte) numerator;
 		data[1] = (byte) (int) exp;
 		data[2] = (byte) 24;
 		data[3] = (byte) 8;
