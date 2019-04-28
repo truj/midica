@@ -44,14 +44,18 @@ public class MessageClassifier {
 	}
 	
 	/**
-	 * Returns a message description for the given message or message category.
+	 * Returns a long and short description for the given message or message category.
 	 * 
-	 * This is used for the description part in the message detail field.
+	 * The first returned value is the long description or **null**, if not available.
+	 * It's used for the description part in the message detail field.
+	 * 
+	 * The second returned value is the short description or an empty string, if not available.
+	 * It's used for the summary column message table.
 	 * 
 	 * @param message  message or message category
-	 * @return a description or **null**, if no special description is available.
+	 * @return long and short description as described above.
 	 */
-	public static final String getDescription(IMessageType message) {
+	public static final String[] getDescription(IMessageType message) {
 		String  statusByte    = (String)  message.getOption( IMessageType.OPT_STATUS_BYTE );
 		Integer channel       = (Integer) message.getOption( IMessageType.OPT_CHANNEL );
 		long    tick          = (Long)    message.getOption( IMessageType.OPT_TICK );
@@ -66,6 +70,7 @@ public class MessageClassifier {
 			leaf = (MessageTreeNode) message.getOption( IMessageType.OPT_LEAF_NODE );
 		String        leafName    = leaf.getName();
 		StringBuilder description = new StringBuilder(leafName);
+		String        shortDesc   = "";
 		
 		// note off / note on / polyphonic aftertouch
 		if ('8' == statusNibble1 || '9' == statusNibble1 || 'A' == statusNibble1) {
@@ -79,6 +84,7 @@ public class MessageClassifier {
 					description.append("\n" + Dict.get(Dict.MSG_DESC_89A_VELOCITY) + value);
 				if ('9' == statusNibble1 && 0 == value)
 					description.append("\n" + Dict.get(Dict.MSG_DESC_MEANING) + Dict.get(Dict.MSG2_V_NOTE_OFF));
+				shortDesc = note + " / " + value;
 			}
 		}
 		
@@ -88,29 +94,38 @@ public class MessageClassifier {
 				byte controller = msg[1];
 				byte value      = msg[2];
 				description.append("\n" + Dict.get(Dict.MSG_DESC_VALUE) + value);
+				shortDesc = value + "";
 				
 				// Hold pedal 1 / Portamento pedal / Sostenuto pedal /
 				// Soft pedal / Legato pedal / Hold pedal 2
 				if (64 <= controller && controller <= 69) {
-					if (value < 64)
-						description = new StringBuilder( Dict.get(Dict.MSG_DESC_OFF) );
-					else
-						description = new StringBuilder( Dict.get(Dict.MSG_DESC_ON) );
+					if (value < 64) {
+						shortDesc = Dict.get(Dict.MSG_DESC_OFF);
+						description.append("\n" + Dict.get(Dict.MSG_DESC_MEANING) + shortDesc);
+					}
+					else {
+						shortDesc = Dict.get(Dict.MSG_DESC_ON);
+						description.append("\n" + Dict.get(Dict.MSG_DESC_MEANING) + shortDesc);
+					}
 				}
 				
 				// data entry MSB (0x06) or LSB (0x26)
 				if (0x06 == controller || 0x26 == controller) {
 					description = new StringBuilder(leafName);
 					MessageTreeNode parent = (MessageTreeNode) leaf.getParent();
-					description.append("\n" + Dict.get(Dict.MSG_DESC_B_FOR_PARAM) + parent.getName());
+					if (parent != null)
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_FOR_PARAM) + parent.getName());
 					description.append("\n" + Dict.get(Dict.MSG_DESC_VALUE) + value);
 				}
 				
 				// data increment (0x60) / decrement (0x61)
 				if (0x60 == controller || 0x61 == controller) {
 					MessageTreeNode parent = (MessageTreeNode) leaf.getParent();
-					description = new StringBuilder(parent.getName());
+					if (parent != null)
+						description = new StringBuilder(parent.getName());
 					description.append("\n" + Dict.get(Dict.MSG_DESC_B_FOR_PARAM) + leafName);
+					description.append("\n" + Dict.get(Dict.MSG_DESC_VALUE) + value);
+					shortDesc = "";
 				}
 				
 				// NRPN LSB (0x62)
@@ -170,11 +185,12 @@ public class MessageClassifier {
 				// local control
 				if (0x7A == controller) {
 					if (0 == value)
-						description.append("\n" + Dict.get(Dict.MSG_DESC_MEANING) + Dict.get(Dict.MSG_DESC_OFF));
+						shortDesc = Dict.get(Dict.MSG_DESC_OFF);
 					else if (0x7F == value)
-						description.append("\n" + Dict.get(Dict.MSG_DESC_MEANING) + Dict.get(Dict.MSG_DESC_ON));
+						shortDesc = Dict.get(Dict.MSG_DESC_ON);
 					else
-						description.append("\n" + Dict.get(Dict.MSG_DESC_MEANING) + Dict.get(Dict.UNKNOWN));
+						shortDesc = Dict.get(Dict.UNKNOWN);
+					description.append("\n" + Dict.get(Dict.MSG_DESC_MEANING) + shortDesc);
 				}
 			}
 		}
@@ -185,11 +201,13 @@ public class MessageClassifier {
 				String drumkit = Dict.getDrumkit(msg[1]);
 				description.append("\n" + Dict.get(Dict.MSG_DESC_C_PROGRAM) + msg[1]);
 				description.append("\n" + Dict.get(Dict.MSG_DESC_C_DRUMKIT) + drumkit);
+				shortDesc = drumkit;
 			}
 			else {
 				String instrument = Dict.getInstrument(msg[1]);
 				description.append("\n" + Dict.get(Dict.MSG_DESC_C_PROGRAM) + msg[1]);
 				description.append("\n" + Dict.get(Dict.MSG_DESC_C_INSTRUMENT) + instrument);
+				shortDesc = instrument;
 			}
 		}
 		
@@ -198,6 +216,7 @@ public class MessageClassifier {
 			if (msg != null) {
 				byte value = msg[1];
 				description.append("\n" + Dict.get(Dict.MSG_DESC_89AD_PRESSURE) + value);
+				shortDesc = value + "";
 			}
 		}
 		
@@ -216,6 +235,7 @@ public class MessageClassifier {
 				description.append("\n" + Dict.get(Dict.MSG_DESC_VALUE) + value);
 				description.append("\n" + Dict.get(Dict.MSG_DESC_E_CURRENT_SENS) + sens);
 				description.append("\n" + Dict.get(Dict.MSG_DESC_E_HALF_TONE) + halfToneStr);
+				shortDesc = halfToneStr;
 			}
 		}
 		
@@ -234,6 +254,7 @@ public class MessageClassifier {
 						int bpm = (Integer) message.getOption( IMessageType.OPT_TEMPO_BPM );
 						description.append( "\n" + mpq + " " + Dict.get(Dict.MSG_DESC_F_TEMPO_MPQ) );
 						description.append( "\n" + bpm + " " + Dict.get(Dict.MSG_DESC_F_TEMPO_BPM) );
+						shortDesc = bpm + " " + Dict.get(Dict.MSG_DESC_F_BPM);
 					}
 					
 					// time signature
@@ -242,6 +263,7 @@ public class MessageClassifier {
 						int exp         = msg[4];
 						int denominator = (int) Math.pow(2, exp);
 						description.append( "\n" + numerator + Dict.getSyntax(Dict.SYNTAX_TIME_SIG_SLASH) + denominator );
+						shortDesc = numerator + Dict.getSyntax(Dict.SYNTAX_TIME_SIG_SLASH) + denominator;
 					}
 					
 					// key signature
@@ -291,33 +313,46 @@ public class MessageClassifier {
 							else if (-7 == sharpsOrFlats) note = 68; // Ab min
 						}
 						
+						// get note as string
+						String keyStr = Dict.getNote(note);
+						shortDesc     = keyStr + tonalityStr + ", " + Math.abs(sharpsOrFlats) + " ";
+						
 						// display sharps / flats
 						String  sharpFlatStr;
-						if (sharpsOrFlats > 0)
+						if (sharpsOrFlats > 0) {
 							sharpFlatStr = sharpsOrFlats + " " + Dict.get(Dict.MSG_DESC_F_KEY_SIG_SHARPS);
-						else if (sharpsOrFlats < 0)
+							shortDesc += "♯";
+						}
+						else if (sharpsOrFlats < 0) {
 							sharpFlatStr = sharpsOrFlats + " " + Dict.get(Dict.MSG_DESC_F_KEY_SIG_FLATS);
-						else
-							sharpFlatStr = "0 " + Dict.get(Dict.MSG_DESC_F_KEY_SIG_NONE);
-						
-						// put it all together
-						if (-1 == note || "".equals(tonalityStr)) {
-							description.append( "\n" + Dict.get(Dict.MSG_DESC_F_UNKNOWN_TONALITY) );
+							shortDesc += "♭";
 						}
 						else {
-							String keyStr = Dict.getNote(note);
-							description.append("\n" + keyStr + tonalityStr);
+							sharpFlatStr = "0 " + Dict.get(Dict.MSG_DESC_F_KEY_SIG_NONE);
+							shortDesc += "♯/♭";
 						}
+						
+						// put it all together
+						if (-1 == note || "".equals(tonalityStr))
+							description.append( "\n" + Dict.get(Dict.MSG_DESC_F_UNKNOWN_TONALITY) );
+						else
+							description.append("\n" + keyStr + tonalityStr);
 						description.append("\n" + sharpFlatStr);
 					}
+					
+					// any text-based meta message?
+					String text = (String) message.getOption( IMessageType.OPT_TEXT );
+					if (text != null)
+						shortDesc = text;
 				}
 			}
 		}
 		
 		// return result
+		String[] result = {null, shortDesc};
 		if (description != null && description.toString().length() > 0)
-			return description.toString();
-		return null;
+			result[0] = description.toString();
+		return result;
 	}
 	
 	/**
@@ -527,6 +562,9 @@ public class MessageClassifier {
 		singleMessage.setOption( IMessageType.OPT_STATUS_BYTE, String.format("%02X", statusByte) );
 		singleMessage.setOption( IMessageType.OPT_LEAF_NODE, leaf );
 		singleMessage.setOption( IMessageType.OPT_MESSAGE, message );
+		String[] desc = getDescription(singleMessage);
+		if (desc[1].length() > 0)
+			singleMessage.setOption( IMessageType.OPT_SUMMARY, desc[1] );
 	}
 	
 	/**
@@ -643,6 +681,9 @@ public class MessageClassifier {
 		}
 		singleMessage.setOption( IMessageType.OPT_LEAF_NODE, leaf );
 		singleMessage.setOption( IMessageType.OPT_MESSAGE, message );
+		String[] desc = getDescription(singleMessage);
+		if (desc[1].length() > 0)
+			singleMessage.setOption( IMessageType.OPT_SUMMARY, desc[1] );
 	}
 	
 	/**

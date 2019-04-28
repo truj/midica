@@ -49,6 +49,7 @@ public interface IMessageType {
 	public static final int OPT_TEXT          = 18;
 	public static final int OPT_TEMPO_MPQ     = 19;
 	public static final int OPT_TEMPO_BPM     = 20;
+	public static final int OPT_SUMMARY       = 21;
 	
 	/** Contains all option IDs in the right order. */
 	public static final int[] OPTIONS = {

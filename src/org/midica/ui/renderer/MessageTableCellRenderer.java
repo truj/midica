@@ -45,7 +45,7 @@ public class MessageTableCellRenderer extends MidicaTableCellRenderer {
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
 		Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
 		
-		if ( col != 5 )
+		if ( col != 6 )
 			return cell;
 		
 		// set the tooltip for the type column

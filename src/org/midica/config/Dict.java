@@ -569,6 +569,7 @@ public class Dict {
 	public static final String INFO_COL_MSG_TRACK          = "info_col_msg_track";
 	public static final String INFO_COL_MSG_CHANNEL        = "info_col_msg_channel";
 	public static final String INFO_COL_MSG_LENGTH         = "info_col_msg_length";
+	public static final String INFO_COL_MSG_SUMMARY        = "info_col_msg_summary";
 	public static final String INFO_COL_MSG_TYPE           = "info_col_msg_type";
 	public static final String INFO_COL_MSG_TT_STATUS      = "info_col_msg_tt_status";
 	public static final String INFO_COL_MSG_TT_TRACK       = "info_col_msg_tt_track";
@@ -955,6 +956,7 @@ public class Dict {
 	public static final String MSG_DESC_E_HALF_TONE        = "msg_desc_e_half_tone";
 	public static final String MSG_DESC_F_TEMPO_MPQ        = "msg_desc_f_tempo_mpq";
 	public static final String MSG_DESC_F_TEMPO_BPM        = "msg_desc_f_tempo_bpm";
+	public static final String MSG_DESC_F_BPM              = "msg_desc_f_bpm";
 	public static final String MSG_DESC_F_KEY_SIG_SHARPS   = "msg_desc_f_key_sig_sharps";
 	public static final String MSG_DESC_F_KEY_SIG_FLATS    = "msg_desc_f_key_sig_flats";
 	public static final String MSG_DESC_F_KEY_SIG_NONE     = "msg_desc_f_key_sig_none";
@@ -1397,6 +1399,7 @@ public class Dict {
 		set( INFO_COL_MSG_TRACK,                     "Tr"                            );
 		set( INFO_COL_MSG_CHANNEL,                   "Ch"                            );
 		set( INFO_COL_MSG_LENGTH,                    "Len"                           );
+		set( INFO_COL_MSG_SUMMARY,                   "Summary"                       );
 		set( INFO_COL_MSG_TYPE,                      "Type"                          );
 		set( INFO_COL_MSG_TT_STATUS,                 "Status Byte"                   );
 		set( INFO_COL_MSG_TT_TRACK,                  "Track Number"                  );
@@ -1852,6 +1855,7 @@ public class Dict {
 		set( MSG_DESC_E_HALF_TONE,        "Resulting half tones: "                         );
 		set( MSG_DESC_F_TEMPO_MPQ,        "MPQ (milliseconds per quarter note)"            );
 		set( MSG_DESC_F_TEMPO_BPM,        "BPM (beats/quarter notes per minute)"           );
+		set( MSG_DESC_F_BPM,              "bpm"                                            );
 		set( MSG_DESC_F_KEY_SIG_SHARPS,   "Sharps (♯)"                                     );
 		set( MSG_DESC_F_KEY_SIG_FLATS,    "Flats (♭)"                                      );
 		set( MSG_DESC_F_KEY_SIG_NONE,     "Sharps (♯) or Flats (♭)"                        );

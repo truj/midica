@@ -59,13 +59,14 @@ public class MessageTableModel extends MidicaTableModel {
 		msgCountVisible = visibleMessages.size();
 		
 		// table header
-		columnNames = new String[ 6 ];
+		columnNames = new String[ 7 ];
 		columnNames[ 0 ] = Dict.get( Dict.INFO_COL_MSG_TICK        );
 		columnNames[ 1 ] = Dict.get( Dict.INFO_COL_MSG_STATUS_BYTE );
 		columnNames[ 2 ] = Dict.get( Dict.INFO_COL_MSG_TRACK       );
 		columnNames[ 3 ] = Dict.get( Dict.INFO_COL_MSG_CHANNEL     );
 		columnNames[ 4 ] = Dict.get( Dict.INFO_COL_MSG_LENGTH      );
-		columnNames[ 5 ] = Dict.get( Dict.INFO_COL_MSG_TYPE        );
+		columnNames[ 5 ] = Dict.get( Dict.INFO_COL_MSG_SUMMARY     );
+		columnNames[ 6 ] = Dict.get( Dict.INFO_COL_MSG_TYPE        );
 		
 		// tooltips for the table header
 		setHeaderToolTip( 1, Dict.get(Dict.INFO_COL_MSG_TT_STATUS)  );
@@ -137,8 +138,13 @@ public class MessageTableModel extends MidicaTableModel {
 			return singleMessage.getOption( IMessageType.OPT_LENGTH );
 		}
 		
-		// type
+		// summary
 		else if ( 5 == colIndex ) {
+			return singleMessage.getOption( IMessageType.OPT_SUMMARY );
+		}
+		
+		// type
+		else if ( 6 == colIndex ) {
 			return singleMessage.getType();
 		}
 		

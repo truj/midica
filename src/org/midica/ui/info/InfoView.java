@@ -119,6 +119,7 @@ public class InfoView extends JDialog {
 	private static final int COL_WIDTH_MSG_TRACK         =  25;
 	private static final int COL_WIDTH_MSG_CHANNEL       =  25;
 	private static final int COL_WIDTH_MSG_LENGTH        =  35;
+	private static final int COL_WIDTH_MSG_SUMMARY       = 120;
 	private static final int COL_WIDTH_MSG_TYPE          = 500;
 	private static final int TABLE_HEIGHT                = 400;
 	private static final int MSG_TABLE_PREF_HEIGHT       = 150;
@@ -213,9 +214,10 @@ public class InfoView extends JDialog {
 		int sfResourceWidth = COL_WIDTH_SF_RES_INDEX  + COL_WIDTH_SF_RES_TYPE
 		                    + COL_WIDTH_SF_RES_NAME   + COL_WIDTH_SF_RES_FRAMES
 		                    + COL_WIDTH_SF_RES_FORMAT + COL_WIDTH_SF_RES_CLASS;
-		int msgTableWidth   = COL_WIDTH_MSG_TICK    + COL_WIDTH_MSG_STATUS
-		                    + COL_WIDTH_MSG_LENGTH  + COL_WIDTH_MSG_TRACK
-		                    + COL_WIDTH_MSG_CHANNEL + COL_WIDTH_MSG_TYPE;
+		int msgTableWidth   = COL_WIDTH_MSG_TICK   + COL_WIDTH_MSG_STATUS
+		                    + COL_WIDTH_MSG_TRACK  + COL_WIDTH_MSG_CHANNEL
+		                    + COL_WIDTH_MSG_LENGTH + COL_WIDTH_MSG_SUMMARY
+		                    + COL_WIDTH_MSG_TYPE;
 		noteTableDim       = new Dimension( noteWidth,       TABLE_HEIGHT          );
 		percTableDim       = new Dimension( percWidth,       TABLE_HEIGHT          );
 		syntaxTableDim     = new Dimension( syntaxWidth,     TABLE_HEIGHT          );
@@ -1610,7 +1612,8 @@ public class InfoView extends JDialog {
 		msgTable.getColumnModel().getColumn( 2 ).setPreferredWidth( COL_WIDTH_MSG_TRACK   );
 		msgTable.getColumnModel().getColumn( 3 ).setPreferredWidth( COL_WIDTH_MSG_CHANNEL );
 		msgTable.getColumnModel().getColumn( 4 ).setPreferredWidth( COL_WIDTH_MSG_LENGTH  );
-		msgTable.getColumnModel().getColumn( 5 ).setPreferredWidth( COL_WIDTH_MSG_TYPE    );
+		msgTable.getColumnModel().getColumn( 5 ).setPreferredWidth( COL_WIDTH_MSG_SUMMARY );
+		msgTable.getColumnModel().getColumn( 6 ).setPreferredWidth( COL_WIDTH_MSG_TYPE    );
 		MessageTableCellRenderer renderer = new MessageTableCellRenderer( model, Config.MSG_TABLE_COLOR );
 		msgTable.setDefaultRenderer( Object.class, renderer );
 		
@@ -2530,7 +2533,7 @@ public class InfoView extends JDialog {
 		}
 		
 		// message description
-		String description = MessageClassifier.getDescription(messageSource);
+		String description = MessageClassifier.getDescription(messageSource)[0];
 		if (description != null) {
 
 			// label

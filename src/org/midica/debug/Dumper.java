@@ -7,11 +7,14 @@
 
 package org.midica.debug;
 
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
+//import com.thoughtworks.xstream.XStream;
+//import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
 
 /**
  * Contains a method to dump the content of a complex data structure as a JSON string.
+ * 
+ * This class requires third-party software and is only used for debugging purposes.
+ * So in order to avoid compile problems it's deactivated.
  * 
  * Requires XStream:
  * http://x-stream.github.io/download.html
@@ -20,36 +23,36 @@ import com.thoughtworks.xstream.io.json.JsonHierarchicalStreamDriver;
  */
 public class Dumper {
 	
-	/**
-	 * Returns a JSON string from the given data structure.
-	 * 
-	 * @param o  The data structure to be dumped.
-	 * 
-	 * @return the JSON string.
-	 */
-	public static String dump( Object o ) {
-		if ( null == o )
-			return "null";
-		
-		XStream dumper = new XStream( new JsonHierarchicalStreamDriver() );
-		return dumper.toXML( o );
-	}
+//	/**
+//	 * Returns a JSON string from the given data structure.
+//	 * 
+//	 * @param o  The data structure to be dumped.
+//	 * 
+//	 * @return the JSON string.
+//	 */
+//	public static final String dump( Object o ) {
+//		if ( null == o )
+//			return "null";
+//		
+//		XStream dumper = new XStream( new JsonHierarchicalStreamDriver() );
+//		return dumper.toXML( o );
+//	}
 	
-	/**
-	 * Prints a JSON string from the given data structure to STDOUT.
-	 * 
-	 * @param o  The data structure to be dumped.
-	 */
-	public static void print( Object o ) {
-		System.out.println( dump(o) );
-	}
+//	/**
+//	 * Prints a JSON string from the given data structure to STDOUT.
+//	 * 
+//	 * @param o  The data structure to be dumped.
+//	 */
+//	public static final void print( Object o ) {
+//		System.out.println( dump(o) );
+//	}
 	
-	/**
-	 * Prints the given object (or it's toString() result) to STDOUT.
-	 * 
-	 * @param o  The data structure to be dumped.
-	 */
-	public static void printString( Object o ) {
-		System.out.println( o );
-	}
+//	/**
+//	 * Prints the given object (or it's toString() result) to STDOUT.
+//	 * 
+//	 * @param o  The data structure to be dumped.
+//	 */
+//	public static final void printString( Object o ) {
+//		System.out.println( o );
+//	}
 }
