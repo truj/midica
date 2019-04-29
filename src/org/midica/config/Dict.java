@@ -2299,7 +2299,7 @@ public class Dict {
 		noteIntToName = new HashMap<Integer, String>();
 		
 		// initialize the octave according to the configuration
-		if ( Config.CBX_OCTAVE_PLUS_MINUS.equals(configuredOctave) ) {
+		if ( Config.CBX_OCTAVE_PLUS_MINUS_N.equals(configuredOctave) ) {
 			initOctavesPlusMinusN();
 		}
 		else if ( Config.CBX_OCTAVE_PLUS_MINUS.equals(configuredOctave) ) {
@@ -2819,7 +2819,7 @@ public class Dict {
 			if (1 == octave)
 				postfix = "+";
 			if (octave > 1)
-				postfix = "+" + (octave - 1);
+				postfix = "+" + octave;
 			int increment = octave * 12;
 			for (NamedInteger name : noteNames) {
 				String newName  = name.name  + postfix;
