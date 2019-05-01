@@ -646,18 +646,27 @@ public class Dict {
 	public static final String MSG_DETAILS_DESCRIPTION     = "msg_details_description";
 	
 	// MIDI messages for InfoView - level 1
-	public static final String MSG1_VOICE               = "msg1_voice";             // MSG2_V_*
+	public static final String MSG1_CH_VOICE            = "msg1_ch_voice";          // MSG2_CV_*
+	public static final String MSG1_CH_MODE             = "msg1_ch_mode";           // MSG2_CM_*
 	public static final String MSG1_SYSTEM_COMMON       = "msg1_system_common";     // MSG2_SC_*
 	public static final String MSG1_SYSTEM_REALTIME     = "msg1_system_realtime";   // MSG2_SR_*
 	public static final String MSG1_META                = "msg1_meta";              // MSG2_M_*
 	// MIDI messages for InfoView - level 2
-	public static final String MSG2_V_NOTE_OFF          = "msg2_v_note_off";
-	public static final String MSG2_V_NOTE_ON           = "msg2_v_note_on";
-	public static final String MSG2_V_POLY_PRESSURE     = "msg2_v_poly_pressure";
-	public static final String MSG2_V_CONTROL_CHANGE    = "msg2_v_control_change";  // MSG3_C_*
-	public static final String MSG2_V_PROGRAM_CHANGE    = "msg2_v_program_change";
-	public static final String MSG2_V_CHANNEL_PRESSURE  = "msg2_v_channel_pressure";
-	public static final String MSG2_V_PITCH_BEND        = "msg2_v_pitch_band";
+	public static final String MSG2_CV_NOTE_OFF         = "msg2_cv_note_off";
+	public static final String MSG2_CV_NOTE_ON          = "msg2_cv_note_on";
+	public static final String MSG2_CV_POLY_PRESSURE    = "msg2_cv_poly_pressure";
+	public static final String MSG2_CV_CONTROL_CHANGE   = "msg2_cv_control_change";  // MSG3_C_*
+	public static final String MSG2_CV_PROGRAM_CHANGE   = "msg2_cv_program_change";
+	public static final String MSG2_CV_CHANNEL_PRESSURE = "msg2_cv_channel_pressure";
+	public static final String MSG2_CV_PITCH_BEND       = "msg2_cv_pitch_band";
+	public static final String MSG2_CM_ALL_SOUND_OFF    = "msg3_cm_all_sound_off";
+	public static final String MSG2_CM_ALL_CTRLS_OFF    = "msg3_cm_all_ctrls_off";
+	public static final String MSG2_CM_LOCAL_CTRL       = "msg3_cm_local_ctrl";
+	public static final String MSG2_CM_ALL_NOTES_OFF    = "msg3_cm_all_notes_off";
+	public static final String MSG2_CM_OMNI_MODE_OFF    = "msg3_cm_omni_mode_on";
+	public static final String MSG2_CM_OMNI_MODE_ON     = "msg3_cm_omni_mode_off";
+	public static final String MSG2_CM_MONO_NOTES_OFF   = "msg3_cm_mono_notes_off";
+	public static final String MSG2_CM_POLY_NOTES_OFF   = "msg3_cm_poly_notes_off";
 	public static final String MSG2_SC_SYSEX            = "msg2_sc_sysex";          // MSG3_SX_*
 	public static final String MSG2_SC_MIDI_TIME_CODE   = "msg2_sc_midi_time_code";
 	public static final String MSG2_SC_SONG_POS_POINTER = "msg2_sc_song_pos_pointer";
@@ -679,6 +688,7 @@ public class Dict {
 	public static final String MSG2_M_MARKER            = "msg2_m_marker";
 	public static final String MSG2_M_CUE_POINT         = "msg2_m_cue_point";
 	public static final String MSG2_M_CHANNEL_PREFIX    = "msg2_m_channel_prefix";
+	public static final String MSG2_M_MIDI_PORT         = "msg2_m_midi_port";
 	public static final String MSG2_M_END_OF_SEQUENCE   = "msg2_m_end_of_sequence";
 	public static final String MSG2_M_SET_TEMPO         = "msg2_m_set_tempo";
 	public static final String MSG2_M_SMPTE_OFFSET      = "msg2_m_smpte_offset";
@@ -733,14 +743,6 @@ public class Dict {
 	public static final String MSG3_C_DATA_BUTTON_DECR   = "msg3_c_data_button_decr"; // MSG4_(N)RPN_*
 	public static final String MSG3_C_NRPN               = "msg3_c_nrpn";             // ..._[MSB|LSB]
 	public static final String MSG3_C_RPN                = "msg3_c_rpn";              // ..._[MSB|LSB]
-	public static final String MSG3_C_ALL_SOUND_OFF      = "msg3_c_all_sound_off";
-	public static final String MSG3_C_ALL_CTRLS_OFF      = "msg3_c_all_ctrls_off";
-	public static final String MSG3_C_LOCAL_CTRL         = "msg3_c_local_ctrl";
-	public static final String MSG3_C_ALL_NOTES_OFF      = "msg3_c_all_notes_off";
-	public static final String MSG3_C_OMNI_MODE_OFF      = "msg3_c_omni_mode_on";
-	public static final String MSG3_C_OMNI_MODE_ON       = "msg3_c_omni_mode_off";
-	public static final String MSG3_C_MONO_NOTES_OFF     = "msg3_c_mono_notes_off";
-	public static final String MSG3_C_POLY_NOTES_OFF     = "msg3_c_poly_notes_off";
 	public static final String MSG3_SX_NON_RT_UNIVERSAL  = "msg3_sx_non_rt_universal"; // MSG4_SX_NU_*
 	public static final String MSG3_SX_RT_UNIVERSAL      = "msg3_sx_rt_universal";     // MSG4_SX_RU_*
 	public static final String MSG3_SX_EDUCATIONAL       = "msg3_sx_educational";
@@ -1551,17 +1553,26 @@ public class Dict {
 		set( SYNTAX_DURATION_PLUS,    "duration addition symbol"                         );
 		
 		// messages for InfoView
-		set( MSG1_VOICE,                  "Voice Messages"                                 );
+		set( MSG1_CH_VOICE,               "Channel Voice Messages"                         );
+		set( MSG1_CH_MODE,                "Channel Mode Messages"                          );
 		set( MSG1_SYSTEM_COMMON,          "System Common Messages"                         );
 		set( MSG1_SYSTEM_REALTIME,        "System Realtime Messages"                       );
 		set( MSG1_META,                   "Meta Messages"                                  );
-		set( MSG2_V_NOTE_OFF,             "Note Off"                                       );
-		set( MSG2_V_NOTE_ON,              "Note On"                                        );
-		set( MSG2_V_POLY_PRESSURE,        "Polyphonic Key Pressure (Aftertouch)"           );
-		set( MSG2_V_CONTROL_CHANGE,       "Control Change"                                 );
-		set( MSG2_V_PROGRAM_CHANGE,       "Program Change"                                 );
-		set( MSG2_V_CHANNEL_PRESSURE,     "Channel Pressure (Aftertouch)"                  );
-		set( MSG2_V_PITCH_BEND,           "Pitch Bend"                                     );
+		set( MSG2_CV_NOTE_OFF,            "Note Off"                                       );
+		set( MSG2_CV_NOTE_ON,             "Note On"                                        );
+		set( MSG2_CV_POLY_PRESSURE,       "Polyphonic Key Pressure (Aftertouch)"           );
+		set( MSG2_CV_CONTROL_CHANGE,      "Control Change"                                 );
+		set( MSG2_CV_PROGRAM_CHANGE,      "Program Change"                                 );
+		set( MSG2_CV_CHANNEL_PRESSURE,    "Channel Pressure (Aftertouch)"                  );
+		set( MSG2_CV_PITCH_BEND,          "Pitch Bend"                                     );
+		set( MSG2_CM_ALL_SOUND_OFF,       "All Sound Off"                                  );
+		set( MSG2_CM_ALL_CTRLS_OFF,       "All Controllers Off"                            );
+		set( MSG2_CM_LOCAL_CTRL,          "Local Control"                                  );
+		set( MSG2_CM_ALL_NOTES_OFF,       "All Notes Off"                                  );
+		set( MSG2_CM_OMNI_MODE_OFF,       "Omni Mode Off"                                  );
+		set( MSG2_CM_OMNI_MODE_ON,        "Omni Mode On"                                   );
+		set( MSG2_CM_MONO_NOTES_OFF,      "Mono Operation & All Notes Off"                 );
+		set( MSG2_CM_POLY_NOTES_OFF,      "Poly Operation & All Notes Off"                 );
 		set( MSG2_SC_SYSEX,               "SysEx (System Exclusive)"                       );
 		set( MSG2_SC_MIDI_TIME_CODE,      "MIDI Time Code (Quarter Frame)"                 );
 		set( MSG2_SC_SONG_POS_POINTER,    "Song Position Pointer"                          );
@@ -1583,6 +1594,7 @@ public class Dict {
 		set( MSG2_M_MARKER,               "Marker"                                         );
 		set( MSG2_M_CUE_POINT,            "Cue Point"                                      );
 		set( MSG2_M_CHANNEL_PREFIX,       "Channel Prefix"                                 );
+		set( MSG2_M_MIDI_PORT,            "MIDI Port"                                      );
 		set( MSG2_M_END_OF_SEQUENCE,      "End of Sequence"                                );
 		set( MSG2_M_SET_TEMPO,            "Set Tempo"                                      );
 		set( MSG2_M_SMPTE_OFFSET,         "SMPTE Offset"                                   );
@@ -1636,14 +1648,6 @@ public class Dict {
 		set( MSG3_C_DATA_BUTTON_DECR,     "Data Button Decrement"                          );
 		set( MSG3_C_NRPN,                 "NRPN (Non-Registered Parameter)"                );
 		set( MSG3_C_RPN,                  "RPN (Registered Parameter)"                     );
-		set( MSG3_C_ALL_SOUND_OFF,        "All Sound Off"                                  );
-		set( MSG3_C_ALL_CTRLS_OFF,        "All Controllers Off"                            );
-		set( MSG3_C_LOCAL_CTRL,           "Local Control"                                  );
-		set( MSG3_C_ALL_NOTES_OFF,        "All Notes Off"                                  );
-		set( MSG3_C_OMNI_MODE_OFF,        "Omni Mode Off"                                  );
-		set( MSG3_C_OMNI_MODE_ON,         "Omni Mode On"                                   );
-		set( MSG3_C_MONO_NOTES_OFF,       "Mono Operation & All Notes Off"                 );
-		set( MSG3_C_POLY_NOTES_OFF,       "Poly Operation & All Notes Off"                 );
 		set( MSG3_SX_NON_RT_UNIVERSAL,    "Universal, Non Real Time"                       );
 		set( MSG3_SX_RT_UNIVERSAL,        "Universal, Real Time"                           );
 		set( MSG3_SX_VENDOR,              "Manufacturer Specific"                          );

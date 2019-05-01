@@ -40,6 +40,7 @@ public class MidiListener implements MetaEventListener {
 	public static final int META_MARKER             =   6;
 	public static final int META_CUE_POINT          =   7;
 	public static final int META_CHANNEL_PREFIX     =  32;
+	public static final int META_MIDI_PORT          =  33;
 	public static final int META_END_OF_SEQUENCE    =  47;
 	public static final int META_SET_TEMPO          =  81;
 	public static final int META_SMPTE_OFFSET       =  84;
@@ -54,9 +55,6 @@ public class MidiListener implements MetaEventListener {
 	public static final byte MARKER_BITMASK_INSTRUMENT = (byte) 0b0001_0000;
 	public static final byte MARKER_BITMASK_CHANNEL    = (byte) 0b0000_1111;
 	
-	
-	private static final HashMap<Integer, String> metaEventTypeName = new HashMap<Integer, String>();
-	
 	/**
 	 * Creates a new meta event listener object.
 	 * 
@@ -64,22 +62,6 @@ public class MidiListener implements MetaEventListener {
 	 */
 	public MidiListener( PlayerController controller ) {
 		playerControler = controller;
-		
-		metaEventTypeName.put( META_SEQUENCE_NUMBER,    "SEQUENCE NUMBER"    );
-		metaEventTypeName.put( META_TEXT,               "TEXT"               );
-		metaEventTypeName.put( META_COPYRIGHT,          "COPYRIGHT"          );
-		metaEventTypeName.put( META_TRACK_NAME,         "TRACK NAME"         );
-		metaEventTypeName.put( META_INSTRUMENT_NAME,    "INSTRUMENT NAME"    );
-		metaEventTypeName.put( META_LYRICS,             "LYRICS"             );
-		metaEventTypeName.put( META_MARKER,             "MARKER"             );
-		metaEventTypeName.put( META_CUE_POINT,          "CUE POINT"          );
-		metaEventTypeName.put( META_CHANNEL_PREFIX,     "CHANNEL PREFIX"     );
-		metaEventTypeName.put( META_END_OF_SEQUENCE,    "END OF SEQUENCE"    );
-		metaEventTypeName.put( META_SET_TEMPO,          "SET TEMPO"          );
-		metaEventTypeName.put( META_SMPTE_OFFSET,       "SMPTE OFFSET"       );
-		metaEventTypeName.put( META_TIME_SIGNATURE,     "TIME SIGNATURE"     );
-		metaEventTypeName.put( META_KEY_SIGNATURE,      "KEY SIGNATURE"      );
-		metaEventTypeName.put( META_SEQUENCER_SPECIFIC, "SEQUENCER SPECIFIC" );
 	}
 	
 	/**

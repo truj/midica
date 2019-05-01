@@ -32,10 +32,11 @@ import com.sun.media.sound.MidiUtils;
 public class MessageClassifier {
 	
 	// node sorting
-	private static final String MSG_LVL_1_SORT_VOICE   = "1";
-	private static final String MSG_LVL_1_SORT_SYS_COM = "2";
-	private static final String MSG_LVL_1_SORT_SYS_RT  = "3";
-	private static final String MSG_LVL_1_SORT_META    = "4";
+	private static final String MSG_LVL_1_SORT_CH_VOICE = "1";
+	private static final String MSG_LVL_1_SORT_CH_MODE  = "2";
+	private static final String MSG_LVL_1_SORT_SYS_COM  = "3";
+	private static final String MSG_LVL_1_SORT_SYS_RT   = "4";
+	private static final String MSG_LVL_1_SORT_META     = "5";
 	
 	/**
 	 * Private constructor because this class is only used statically.
@@ -83,7 +84,7 @@ public class MessageClassifier {
 				else
 					description.append("\n" + Dict.get(Dict.MSG_DESC_89A_VELOCITY) + value);
 				if ('9' == statusNibble1 && 0 == value)
-					description.append("\n" + Dict.get(Dict.MSG_DESC_MEANING) + Dict.get(Dict.MSG2_V_NOTE_OFF));
+					description.append("\n" + Dict.get(Dict.MSG_DESC_MEANING) + Dict.get(Dict.MSG2_CV_NOTE_OFF));
 				shortDesc = note + " / " + value;
 			}
 		}
@@ -403,6 +404,7 @@ public class MessageClassifier {
 		byte    statusByte    = (byte) statusInt;
 		byte    statusBitmask = (byte) 0b1111_1000;
 		boolean isSystemMsg   = false;
+		boolean isChModeMsg   = false;
 		if (((byte) 0b1111_1000) == (statusByte & statusBitmask)) {
 			
 			// system realtime: 1111_1XXX
@@ -417,9 +419,16 @@ public class MessageClassifier {
 			String[] msgLvl1 = { MSG_LVL_1_SORT_SYS_COM, Dict.get(Dict.MSG1_SYSTEM_COMMON), null };
 			path.add( msgLvl1 );
 		}
+		else if (0xB0 == cmd && data1 >= 0x78 && data1 <= 0x7F) {
+			
+			// channel mode
+			isChModeMsg      = true;
+			String[] msgLvl1 = { MSG_LVL_1_SORT_CH_MODE, Dict.get(Dict.MSG1_CH_MODE), null };
+			path.add( msgLvl1 );
+		}
 		else {
-			// voice
-			String[] msgLvl1 = { MSG_LVL_1_SORT_VOICE, Dict.get(Dict.MSG1_VOICE), null };
+			// channel voice
+			String[] msgLvl1 = { MSG_LVL_1_SORT_CH_VOICE, Dict.get(Dict.MSG1_CH_VOICE), null };
 			path.add( msgLvl1 );
 		}
 		
@@ -432,7 +441,17 @@ public class MessageClassifier {
 			path.add( msgLvl2 );
 		}
 		
-		// level 2 and 3 nodes for voice messages
+		// level 2 for channel mode messages
+		else if (isChModeMsg) {
+			String   commandID   = String.format( "%02X", data1 );
+			String   commandStr  = data1 + "";
+			String   commandText = getLvl2ModeMsgTxtByData1(data1);
+			String[] msgLvl2     = { commandID, commandText, commandStr };
+			path.add( msgLvl2 );
+			details.put( IMessageType.OPT_CONTROLLER, (byte) data1 );
+		}
+		
+		// level 2 and 3 nodes for channel voice messages
 		else {
 			String   commandID   = String.format( "%02X", cmd );
 			String   commandStr  = cmd + "";
@@ -478,7 +497,7 @@ public class MessageClassifier {
 				}
 				byte     ctrlPart = (byte) ( data1Byte & ctrlBitmask ); // same like the MSB
 				String   ctrlID   = String.format( "%02X", ctrlPart );
-				String[] ctrlTxt  = getLvl34ControllerMsgTxtByData1( data1 );
+				String[] ctrlTxt  = getLvl34ControllerMsgTxtByData1(data1);
 				String   ctrlNum  = null;
 				if (null == ctrlTxt[1]) {
 					// no MSB/LSB or unknown
@@ -959,6 +978,8 @@ public class MessageClassifier {
 			return Dict.get( Dict.MSG2_M_CUE_POINT );
 		if (0x20 == type)
 			return Dict.get( Dict.MSG2_M_CHANNEL_PREFIX );
+		if (0x21 == type)
+			return Dict.get( Dict.MSG2_M_MIDI_PORT );
 		if (0x2F == type)
 			return Dict.get( Dict.MSG2_M_END_OF_SEQUENCE );
 		if (0x51 == type)
@@ -988,22 +1009,52 @@ public class MessageClassifier {
 	private static final String getLvl2VoiceMsgTxtByCommand(int cmd) {
 		
 		if (0x80 == cmd)
-			return Dict.get( Dict.MSG2_V_NOTE_OFF );
+			return Dict.get( Dict.MSG2_CV_NOTE_OFF );
 		else if (0x90 == cmd)
-			return Dict.get( Dict.MSG2_V_NOTE_ON );
+			return Dict.get( Dict.MSG2_CV_NOTE_ON );
 		else if (0xA0 == cmd)
-			return Dict.get( Dict.MSG2_V_POLY_PRESSURE );
+			return Dict.get( Dict.MSG2_CV_POLY_PRESSURE );
 		else if (0xB0 == cmd)
-			return Dict.get( Dict.MSG2_V_CONTROL_CHANGE );
+			return Dict.get( Dict.MSG2_CV_CONTROL_CHANGE );
 		else if (0xC0 == cmd)
-			return Dict.get( Dict.MSG2_V_PROGRAM_CHANGE );
+			return Dict.get( Dict.MSG2_CV_PROGRAM_CHANGE );
 		else if (0xD0 == cmd)
-			return Dict.get( Dict.MSG2_V_CHANNEL_PRESSURE );
+			return Dict.get( Dict.MSG2_CV_CHANNEL_PRESSURE );
 		else if (0xE0 == cmd)
-			return Dict.get( Dict.MSG2_V_PITCH_BEND );
+			return Dict.get( Dict.MSG2_CV_PITCH_BEND );
 		
 		// fallback
 		else
+			return Dict.get( Dict.UNKNOWN );
+	}
+	
+	/**
+	 * Returns the level 2 command of a channel mode message.
+	 * The status is the same as a channel voice / control change message.
+	 * So this has to be determined by the (given) first data value.
+	 * 
+	 * @param val  First data byte of the message.
+	 * @return level 2 text.
+	 */
+	private static final String getLvl2ModeMsgTxtByData1(int val) {
+		if (0x78 == val)
+			return Dict.get( Dict.MSG2_CM_ALL_SOUND_OFF );
+		else if (0x79 == val)
+			return Dict.get( Dict.MSG2_CM_ALL_CTRLS_OFF );
+		else if (0x7A == val)
+			return Dict.get( Dict.MSG2_CM_LOCAL_CTRL );
+		else if (0x7B == val)
+			return Dict.get( Dict.MSG2_CM_ALL_NOTES_OFF );
+		else if (0x7C == val)
+			return Dict.get( Dict.MSG2_CM_OMNI_MODE_OFF );
+		else if (0x7D == val)
+			return Dict.get( Dict.MSG2_CM_OMNI_MODE_ON );
+		else if (0x7E == val)
+			return Dict.get( Dict.MSG2_CM_MONO_NOTES_OFF );
+		else if (0x7F == val)
+			return Dict.get( Dict.MSG2_CM_POLY_NOTES_OFF );
+		else
+			// fallback
 			return Dict.get( Dict.UNKNOWN );
 	}
 	
@@ -1262,32 +1313,6 @@ public class MessageClassifier {
 		else if (0x65 == val) {
 			result[ 0 ] = Dict.get( Dict.MSG3_C_RPN );
 			result[ 1 ] = Dict.get( Dict.MSG5_C_RPN_MSB );
-		}
-		
-		// more controllers without MSB / LSB
-		else if (0x78 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_ALL_SOUND_OFF );
-		}
-		else if (0x79 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_ALL_CTRLS_OFF );
-		}
-		else if (0x7A == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_LOCAL_CTRL );
-		}
-		else if (0x7B == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_ALL_NOTES_OFF );
-		}
-		else if (0x7C == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_OMNI_MODE_OFF );
-		}
-		else if (0x7D == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_OMNI_MODE_ON );
-		}
-		else if (0x7E == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_MONO_NOTES_OFF );
-		}
-		else if (0x7F == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_POLY_NOTES_OFF );
 		}
 		
 		// fallback
