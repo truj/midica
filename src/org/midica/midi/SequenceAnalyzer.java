@@ -125,8 +125,11 @@ public class SequenceAnalyzer {
 	/**                    channel   --  tick -- 0=RPN MSB, 1=RPN LSB, 2=NRPN MSB, 3=NRPN LSB, 4=1(RPN)|0(NRPN)|-1(unknown) */
 	private static TreeMap<Byte, TreeMap<Long, Byte[]>> channelParamHistory = null;
 	
-	/**                    channel   --  tick -- 0=MSB, 1=LSB */
-	private static TreeMap<Byte, TreeMap<Long, Byte>> pitchBendSensHistory = null;
+	/**                    channel   --  tick -- MSB */
+	private static TreeMap<Byte, TreeMap<Long, Byte>> pitchBendSensMsbHistory = null;
+	
+	/**                    channel   --  tick -- LSB */
+	private static TreeMap<Byte, TreeMap<Long, Byte>> pitchBendSensLsbHistory = null;
 	
 	/**        line begin tick -- syllable tick -- syllable */
 	private static TreeMap<Long, TreeMap<Long, String>> lyrics = null;
@@ -287,11 +290,15 @@ public class SequenceAnalyzer {
 			Byte[] conf0 = { 127, 127, 127, 127, -1 }; // MSB=LSB=127 (no parameter set), -1: neither RPN nor NRPN is active
 			paramHistory.put( 0L, conf0 );
 		}
-		pitchBendSensHistory = new TreeMap<>();
+		pitchBendSensMsbHistory = new TreeMap<>();
+		pitchBendSensLsbHistory = new TreeMap<>();
 		for (byte channel = 0; channel < 16; channel++) {
-			TreeMap<Long, Byte> historyEntry = new TreeMap<>();
-			historyEntry.put(0L, (byte) 2); // default: 2 half tone steps
-			pitchBendSensHistory.put(channel, historyEntry);
+			TreeMap<Long, Byte> msbHistoryEntry = new TreeMap<>();
+			TreeMap<Long, Byte> lsbHistoryEntry = new TreeMap<>();
+			msbHistoryEntry.put(0L, (byte) 2); // default: 2 half tone steps
+			lsbHistoryEntry.put(0L, (byte) 0);
+			pitchBendSensMsbHistory.put(channel, msbHistoryEntry);
+			pitchBendSensLsbHistory.put(channel, lsbHistoryEntry);
 		}
 		
 		// initialize data structures for karaoke
@@ -537,16 +544,26 @@ public class SequenceAnalyzer {
 				
 				// data change for pitch bend sensitivity?
 				if (0 == msb && 0 == lsb && 1 == type) {
-					byte currentValue = getPitchBendSensitivity(channel, tick);
-					byte newValue     = currentValue;
+					boolean mustChangeBoth = false;
+					float   currentValue = getPitchBendSensitivity(channel, tick);
 					if (0x06 == controller)         // data entry MSB
-						newValue = (byte) value;
-					else if (0x26 == controller) {} // data entry LSB (ignore)
-					else if (0x60 == controller)    // data button increment
-						newValue++;
-					else if (0x61 == controller)    // data button decrement
-						newValue--;
-					pitchBendSensHistory.get( channel ).put(tick, newValue);
+						pitchBendSensMsbHistory.get( channel ).put(tick, (byte) value);
+					else if (0x26 == controller)    // data entry LSB (ignore)
+						pitchBendSensLsbHistory.get( channel ).put(tick, (byte) value);
+					else if (0x60 == controller) {  // data button increment
+						mustChangeBoth = true;
+						currentValue += ( 1f / 128f );
+					}
+					else if (0x61 == controller) {  // data button decrement
+						mustChangeBoth = true;
+						currentValue -= ( 1f / 128f );
+					}
+					if (mustChangeBoth) {
+						byte newMsb = (byte) currentValue;
+						byte newLsb = (byte) Math.round(128 * (currentValue - (float) newMsb));
+						pitchBendSensMsbHistory.get( channel ).put(tick, (byte) newMsb);
+						pitchBendSensLsbHistory.get( channel ).put(tick, (byte) newLsb);
+					}
 				}
 			}
 		}
@@ -1804,9 +1821,12 @@ public class SequenceAnalyzer {
 	 * @param tick     tickstamp of the sequence
 	 * @return         pitch bend sensitivity
 	 */
-	public static byte getPitchBendSensitivity(byte channel, long tick) {
-		Entry<Long, Byte> entry = pitchBendSensHistory.get( channel ).floorEntry( tick );
-		return entry.getValue();
+	public static final float getPitchBendSensitivity(byte channel, long tick) {
+		Entry<Long, Byte> msbEntry = pitchBendSensMsbHistory.get( channel ).floorEntry( tick );
+		Entry<Long, Byte> lsbEntry = pitchBendSensLsbHistory.get( channel ).floorEntry( tick );
+		float msb = msbEntry.getValue();
+		float lsb = lsbEntry.getValue();
+		return msb + (lsb / 128f);
 	}
 	
 	/**

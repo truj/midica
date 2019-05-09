@@ -7,8 +7,6 @@
 
 package org.midica.midi;
 
-import java.util.HashMap;
-
 import javax.sound.midi.MetaEventListener;
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiUnavailableException;

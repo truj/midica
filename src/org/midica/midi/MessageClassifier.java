@@ -193,6 +193,13 @@ public class MessageClassifier {
 						shortDesc = Dict.get(Dict.UNKNOWN);
 					description.append("\n" + Dict.get(Dict.MSG_DESC_MEANING) + shortDesc);
 				}
+				
+				// portamento controller
+				if (0x54 == controller) {
+					String note = getNoteString(value, channel);
+					description.append("\n" + Dict.get(Dict.MSG_DESC_B_START_NOTE) + note);
+					shortDesc = note;
+				}
 			}
 		}
 		
@@ -228,10 +235,10 @@ public class MessageClassifier {
 				byte   lsb         = msg[1];
 				byte   msb         = msg[2];
 				int    neutral     = 0x2000;
-				byte   sens        = SequenceAnalyzer.getPitchBendSensitivity((byte) (int) channel, tick);
+				float  sens        = SequenceAnalyzer.getPitchBendSensitivity((byte) (int) channel, tick);
 				int    value       = msb * 128 + lsb - neutral;
 				int    maxVal      = (value > 0) ? 0x2000 - 1 : 0x2000;
-				float  halfTones   = ((float) sens) * ((float) value) / ((float) maxVal);
+				float  halfTones   = sens * ((float) value) / ((float) maxVal);
 				String halfToneStr = (value > 0) ? "+" + halfTones : "" + halfTones;
 				description.append("\n" + Dict.get(Dict.MSG_DESC_VALUE) + value);
 				description.append("\n" + Dict.get(Dict.MSG_DESC_E_CURRENT_SENS) + sens);

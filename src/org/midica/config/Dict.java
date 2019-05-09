@@ -950,6 +950,7 @@ public class Dict {
 	public static final String MSG_DESC_B_RPN_LSB_07       = "msg_desc_b_rpm_lsb_07";
 	public static final String MSG_DESC_B_RPN_LSB_08       = "msg_desc_b_rpm_lsb_08";
 	public static final String MSG_DESC_B_RPN_NRPN_7F      = "msg_desc_b_rpm_nrpn_7f";
+	public static final String MSG_DESC_B_START_NOTE       = "msg_desc_b_start_note";
 	public static final String MSG_DESC_C_PROGRAM          = "msg_desc_c_program";
 	public static final String MSG_DESC_C_INSTRUMENT       = "msg_desc_c_instrument";
 	public static final String MSG_DESC_C_DRUMKIT          = "msg_desc_c_drumkit";
@@ -1851,6 +1852,7 @@ public class Dict {
 		set( MSG_DESC_B_RPN_LSB_07,       "3D: Pan spread angle"                                                     );
 		set( MSG_DESC_B_RPN_LSB_08,       "3D: Roll angle"                                                           );
 		set( MSG_DESC_B_RPN_NRPN_7F,      "Null Function Number (Reset)"                   );
+		set( MSG_DESC_B_START_NOTE,       "Start Note: "                                   );
 		set( MSG_DESC_C_PROGRAM,          "Program: "                                      );
 		set( MSG_DESC_C_INSTRUMENT,       "Instrument: "                                   );
 		set( MSG_DESC_C_DRUMKIT,          "Drumkit: "                                      );

@@ -310,6 +310,125 @@ public class SequenceAnalyzerTest {
 	}
 	
 	/**
+	 * Tests for analyzing pitch bend related messages.
+	 * This includes:
+	 * 
+	 * - pitch bend sensitivity (RPN, Data Entry / Increment / Decrement)
+	 * - pitch bend change
+	 * 
+	 * @throws InvalidMidiDataException if something went wrong.
+	 * @throws ParseException if something went wrong.
+	 * @throws IOException if something went wrong.
+	 */
+	@Test
+	void testPitchBend() throws InvalidMidiDataException, IOException, ParseException {
+		String                  filename = "pitch-bend";
+		ArrayList<List<Number>> events   = new ArrayList<>();
+		int  track = 0;
+		long tick  = 10;
+
+		// pitch bend
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x00, 0x00) ); // minimum
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x00, 0x40) ); // neutral
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x7F, 0x7F) ); // maximum
+		
+		// pitch bend sensitivity --> 0x03 0x7F
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x65, 0x00) ); // RPN MSB
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x64, 0x00) ); // RPN LSB
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x06, 0x03) ); // Data Entry MSB
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x26, 0x7F) ); // Data Entry LSB
+		
+		// pitch bend
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x00, 0x00) ); // minimum
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x00, 0x40) ); // neutral
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x7F, 0x7F) ); // maximum
+		
+		// sensitivity increment
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x60, 0x00) );
+		
+		// pitch bend
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x00, 0x00) ); // minimum
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x00, 0x40) ); // neutral
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x7F, 0x7F) ); // maximum
+		
+		// sensitivity increment
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x60, 0x00) );
+		
+		// pitch bend
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x00, 0x00) ); // minimum
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x00, 0x40) ); // neutral
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x7F, 0x7F) ); // maximum
+		
+		// sensitivity decrement
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x61, 0x00) );
+		
+		// pitch bend
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x00, 0x00) ); // minimum
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x00, 0x40) ); // neutral
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x7F, 0x7F) ); // maximum
+		
+		// sensitivity decrement
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xB0, 0x61, 0x00) );
+		
+		// pitch bend
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x00, 0x00) ); // minimum
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x00, 0x40) ); // neutral
+		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x7F, 0x7F) ); // maximum
+		
+		
+		ArrayList<SingleMessage> messages = parseMidiFile(filename, events);
+		int i = 0;
+		
+		// pitch bend (using a default range of +/- 2.0)
+		assertEquals( "-2.0", getMsgSummary(messages, i++) ); // 0x0000
+		assertEquals( "0.0",  getMsgSummary(messages, i++) ); // 0x4000
+		assertEquals( "+2.0", getMsgSummary(messages, i++) ); // 0x7F7F
+		
+		// pitch bend sensitivity
+		assertEquals(   "0", getMsgSummary(messages, i++) ); // RPN MSB
+		assertEquals(   "0", getMsgSummary(messages, i++) ); // RPN LSB
+		assertEquals(   "3", getMsgSummary(messages, i++) ); // Data Entry MSB
+		assertEquals( "127", getMsgSummary(messages, i++) ); // Data Entry LSB
+		
+		// pitch bend (using a range of +/- 4.0 minus 1 cent)
+		assertEquals( "-3.9921875", getMsgSummary(messages, i++) ); // 0x0000
+		assertEquals( "0.0",        getMsgSummary(messages, i++) ); // 0x4000
+		assertEquals( "+3.9921875", getMsgSummary(messages, i++) ); // 0x7F7F
+		
+		// sensitivity increment
+		assertEquals( null, getMsgSummary(messages, i++) );
+		
+		// pitch bend (using a range of +/- 4.0)
+		assertEquals( "-4.0", getMsgSummary(messages, i++) ); // 0x0000
+		assertEquals( "0.0",  getMsgSummary(messages, i++) ); // 0x4000
+		assertEquals( "+4.0", getMsgSummary(messages, i++) ); // 0x7F7F
+		
+		// sensitivity increment
+		assertEquals( null, getMsgSummary(messages, i++) );
+		
+		// pitch bend (using a range of +/- 4.0 plus 1 cent)
+		assertEquals( "-4.0078125", getMsgSummary(messages, i++) ); // 0x0000
+		assertEquals( "0.0",        getMsgSummary(messages, i++) ); // 0x4000
+		assertEquals( "+4.0078125", getMsgSummary(messages, i++) ); // 0x7F7F
+		
+		// sensitivity decrement
+		assertEquals( null, getMsgSummary(messages, i++) );
+		
+		// pitch bend (using a range of +/- 4.0)
+		assertEquals( "-4.0", getMsgSummary(messages, i++) ); // 0x0000
+		assertEquals( "0.0",  getMsgSummary(messages, i++) ); // 0x4000
+		assertEquals( "+4.0", getMsgSummary(messages, i++) ); // 0x7F7F
+		
+		// sensitivity decrement
+		assertEquals( null, getMsgSummary(messages, i++) );
+		
+		// pitch bend (using a range of +/- 4.0 minus 1 cent)
+		assertEquals( "-3.9921875", getMsgSummary(messages, i++) ); // 0x0000
+		assertEquals( "0.0",        getMsgSummary(messages, i++) ); // 0x4000
+		assertEquals( "+3.9921875", getMsgSummary(messages, i++) ); // 0x7F7F
+	}
+	
+	/**
 	 * Parses the file, or creates and parses it, if requested.
 	 * 
 	 * @param name      File name without directory and extension.
@@ -410,5 +529,16 @@ public class SequenceAnalyzerTest {
 			text = "[" + currentNode.getNumber() + "] " + currentNode.getName();
 		
 		return text;
+	}
+	
+	/**
+	 * Searches and returns a message summary.
+	 * 
+	 * @param messages    MIDI message list as created by the SequenceAnalyzer.
+	 * @param index       The index of the message we are interested in.
+	 * @return summary text.
+	 */
+	private static String getMsgSummary(ArrayList<SingleMessage> messages, int index) {
+		return (String) messages.get( index ).getOption( IMessageType.OPT_SUMMARY );
 	}
 }
