@@ -9,6 +9,7 @@ package org.midica;
 
 import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.config.Laf;
 import org.midica.ui.UiController;
 
 /**
@@ -22,7 +23,7 @@ public class Midica {
 	public static final int VERSION_MAJOR = 0;
 	
 	/** Minor version number. This is intended to be incremented automatically by precommit.pl. */
-	public static final int VERSION_MINOR = 1557419416;
+	public static final int VERSION_MINOR = 1563022520;
 	
 	/** Full version string. */
 	public static final String VERSION = VERSION_MAJOR + "." + VERSION_MINOR;
@@ -57,6 +58,9 @@ public class Midica {
 		
 		// init config
 		Config.init();
+		
+		// init look and feel
+		Laf.init();
 		
 		// initialize dictionaries
 		Dict.init();

@@ -9,12 +9,15 @@ package org.midica.ui.widget;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.event.ActionListener;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.SortedMap;
 
+import javax.swing.AbstractButton;
 import javax.swing.Box.Filler;
 import javax.swing.BoxLayout;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -22,6 +25,7 @@ import javax.swing.JPanel;
 
 import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.config.Laf;
 import org.midica.ui.FileSelector;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
@@ -32,6 +36,8 @@ import org.midica.ui.model.ConfigComboboxModel;
  * 
  * It can add a charset combobox and a description to the inherited
  * {@link JFileChooser}.
+ * 
+ * Moreover this class also adjusts the look and feel of buttons for nimbus.
  * 
  * @author Jan Trukenmüller
  */
@@ -70,6 +76,9 @@ public class MidicaFileChooser extends JFileChooser {
 		
 		this.type    = type;
 		this.purpose = purpose;
+		
+		if (Laf.isNimbus)
+			changeButtonColors();
 		
 		// insert the charset combobox
 		if (charsetSel) {
@@ -239,5 +248,85 @@ public class MidicaFileChooser extends JFileChooser {
 		fileAttrArea.add( fillerB,              5 ); // cloned filler
 		fileAttrArea.add( charsetArea,          6 ); // charset label and combobox
 		fileAttrArea.add( componentList.get(3), 7 ); // open and cancel buttons
+	}
+	
+	/**
+	 * Adjusts the colors of buttons for the nimbus look and feel.
+	 * 
+	 * The buttons to be adjusted are:
+	 * 
+	 * - the buttons and toggle buttons with icons in the top right corner
+	 * - the open and close buttons
+	 * 
+	 * The buttons with icons are adjusted directly.
+	 * 
+	 * The open and close buttons are replaced by custom buttons with the same functionality.
+	 * That's necessary because directly applying the changes is somehow not enough to
+	 * make them look like other buttons in the application.
+	 */
+	private void changeButtonColors() {
+		
+		// Get the component containing the icon buttons
+		Container firstArea      = (Container) getComponent( 0 );
+		Container iconButtonArea = (Container) firstArea.getComponent( 0 );
+		
+		// from this container, change all buttons and toggle buttons
+		for ( Component c : iconButtonArea.getComponents() ) {
+			if (c instanceof AbstractButton) {
+				AbstractButton button = (AbstractButton) c;
+				Laf.applyLafToButton(button, false);
+			}
+		}
+		
+		// Get the component containing:
+		// - file name label and text field  (index 0)
+		// - a javax.swing.Box.Filler        (index 1)
+		// - file type label and combobox    (index 2)
+		// - open and cancel buttons         (index 3)
+		Container fileAttrArea = (Container) getComponent( 3 );
+		
+		// From this component:
+		// get the button container
+		Container buttonArea = (Container) fileAttrArea.getComponent( 3 );
+		
+		// get the buttons
+		JButton openButton  = (JButton) buttonArea.getComponent( 0 );
+		JButton closeButton = (JButton) buttonArea.getComponent( 1 );
+		openButton.setContentAreaFilled(true);
+		
+		// create new buttons
+		MidicaButton newOpenButton = new MidicaButton(openButton.getText(), true);
+		MidicaButton newCloseButton = new MidicaButton(closeButton.getText());
+		transferButtonProperties(openButton, newOpenButton);
+		transferButtonProperties(closeButton, newCloseButton);
+		
+		// remove old buttons
+		buttonArea.remove(openButton);
+		buttonArea.remove(closeButton);
+		
+		// add new buttons
+		buttonArea.add(newOpenButton);
+		buttonArea.add(newCloseButton);
+	}
+	
+	/**
+	 * Transfers properties from a default file chooser button to a self-created button with
+	 * different look and feel.
+	 * 
+	 * @param source  the default button.
+	 * @param target  the new button.
+	 */
+	void transferButtonProperties(JButton source, MidicaButton target) {
+		
+		// tooltips and action commands
+		target.setToolTipText(source.getToolTipText());
+		target.setActionCommand(source.getActionCommand());
+		
+		// transfer action listeners
+		ActionListener[] listeners = source.getActionListeners();
+		for (ActionListener listener : listeners) {
+			target.addActionListener(listener);
+			source.removeActionListener(listener);
+		}
 	}
 }

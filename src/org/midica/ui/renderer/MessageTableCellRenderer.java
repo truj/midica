@@ -7,20 +7,20 @@
 
 package org.midica.ui.renderer;
 
-import java.awt.Color;
 import java.awt.Component;
 
 import javax.swing.JComponent;
 import javax.swing.JTable;
 
 import org.midica.ui.model.SingleMessage;
+import org.midica.config.Laf;
 import org.midica.ui.model.MessageTableModel;
 
 /**
  * Cell renderer for the message table in the **MIDI Sequence** > **MIDI Message**
  * tab of the info window.
  * 
- * The background color can be defined in the constructor.
+ * The background color is different from other tables.
  * 
  * The tooltip for cells in the **type** column is different from their
  * content.
@@ -36,14 +36,23 @@ public class MessageTableCellRenderer extends MidicaTableCellRenderer {
 	/**
 	 * Creates a cell renderer for the MIDI messages table.
 	 */
-	public MessageTableCellRenderer(MessageTableModel model, Color bgColor) {
+	public MessageTableCellRenderer(MessageTableModel model) {
 		this.model = model;
-		setBackground(bgColor);
 	}
 	
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col) {
 		Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, col);
+		
+		// background color
+		if (isSelected) {
+			cell.setBackground( Laf.COLOR_MSG_TABLE_SELECTED     );
+			cell.setForeground( Laf.COLOR_MSG_TABLE_SELECTED_TXT );
+		}
+		else {
+			cell.setBackground( Laf.COLOR_MSG_TABLE );
+			cell.setForeground( null );
+		}
 		
 		if ( col != 6 )
 			return cell;

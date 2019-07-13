@@ -13,7 +13,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.KeyEventPostProcessor;
 import java.awt.KeyboardFocusManager;
 import java.awt.Rectangle;
@@ -22,24 +21,24 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
 
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JScrollPane;
-import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 
-import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.config.Laf;
 import org.midica.file.NamedInteger;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.SliderHelper;
 import org.midica.ui.player.PlayerView;
+import org.midica.ui.widget.MidicaButton;
+import org.midica.ui.widget.MidicaSlider;
 import org.midica.ui.widget.MidicaTable;
 
 /**
@@ -62,32 +61,33 @@ public class SoundcheckView extends JDialog {
 	public static final String NAME_VELOCITY    = "name_velocity";
 	public static final String NAME_DURATION    = "name_duration";
 	
-	private static final Dimension DIM_TEXT_FIELD        = new Dimension( 60, 20 );
-	private static final int       WIDTH_COL_PROG        =    35;
-	private static final int       WIDTH_COL_BANK        =    50;
-	private static final int       WIDTH_COL_NAME_SF     =   200;
-	private static final int       WIDTH_COL_NAME_SYNTAX =   200;
-	private static final int       HEIGHT_TABLE_INSTR    =   200;
-	private static final int       HEIGHT_LIST_NOTE      =   150;
-	private static final int       VOL_OR_VEL_LABEL_SKIP =    30;
-	private static final int       DEFAULT_DURATION      =   300;
-	private static final String    LIST_FONT_NAME        = "monospaced";
-	private static final int       LIST_FONT_STYLE       = Font.BOLD;
-	private static final int       LIST_FONT_SIZE        = 12;
+	private static final int    TEXT_FIELD_WIDTH      =  60;
+	private static final int    WIDTH_COL_PROG        =  40;
+	private static final int    WIDTH_COL_BANK        =  50;
+	private static final int    WIDTH_COL_NAME_SF     = 200;
+	private static final int    WIDTH_COL_NAME_SYNTAX = 200;
+	private static final int    HEIGHT_TABLE_INSTR    = 200;
+	private static final int    HEIGHT_LIST_NOTE      = 150;
+	private static final int    VOL_OR_VEL_LABEL_SKIP =  30;
+	private static final int    DEFAULT_DURATION      = 300;
+	private static final int    LIST_FONT_SIZE        =  12;
+	private static final String LIST_FONT_NAME        = "monospaced";
+	private static final int    LIST_FONT_STYLE       = Font.BOLD;
 	
-	private Dimension dimTblInstr = null;
-	private Dimension dimListNote = null;
+	private Dimension dimTblInstr  = null;
+	private Dimension dimListNote  = null;
+	private Dimension dimTextField = null;
 	
 	private JComboBox<NamedInteger> cbxChannel    = null;
 	private MidicaTable             tblInstrument = null;
 	private JList<NamedInteger>     lstNote       = null;
 	private JTextField              fldVolume     = null;
 	private JTextField              fldVelocity   = null;
-	private JSlider                 sldVolume     = null;
-	private JSlider                 sldVelocity   = null;
+	private MidicaSlider            sldVolume     = null;
+	private MidicaSlider            sldVelocity   = null;
 	private JTextField              fldDuration   = null;
 	private JCheckBox               cbxKeep       = null;
-	private JButton                 btnPlay       = null;
+	private MidicaButton            btnPlay       = null;
 	
 	private        KeyEventPostProcessor     keyProcessor   = null;
 	private static SoundcheckView            soundcheckView = null;
@@ -105,8 +105,9 @@ public class SoundcheckView extends JDialog {
 	private SoundcheckView( JDialog owner ) {
 		super( owner );
 		setTitle( Dict.get(Dict.TITLE_SOUNDCHECK) );
-		noteModel  = new SoundcheckNoteModel();
-		instrModel = new SoundcheckInstrumentModel();
+		noteModel    = new SoundcheckNoteModel();
+		instrModel   = new SoundcheckInstrumentModel();
+		dimTextField = new Dimension(TEXT_FIELD_WIDTH, Laf.textFieldHeight);
 		
 		// size of instruments table and notes list
 		int widthInstr = WIDTH_COL_PROG + WIDTH_COL_BANK + WIDTH_COL_NAME_SF + WIDTH_COL_NAME_SYNTAX;
@@ -134,7 +135,7 @@ public class SoundcheckView extends JDialog {
 		GridBagConstraints constrLeft = new GridBagConstraints();
 		constrLeft.anchor     = GridBagConstraints.WEST;
 		constrLeft.fill       = GridBagConstraints.NONE;
-		constrLeft.insets     = new Insets( 2, 2, 2, 2 );
+		constrLeft.insets     = Laf.INSETS_NW;
 		constrLeft.gridx      = 0;
 		constrLeft.gridy      = 0;
 		constrLeft.gridheight = 1;
@@ -143,12 +144,14 @@ public class SoundcheckView extends JDialog {
 		constrLeft.weighty    = 0;
 		GridBagConstraints constrRight = (GridBagConstraints) constrLeft.clone();
 		constrRight.fill      = GridBagConstraints.HORIZONTAL;
+		constrRight.insets    = Laf.INSETS_NE;
 		constrRight.weightx   = 1;
 		constrRight.gridwidth = 2;
 		constrRight.gridx++;
 		
 		// channel label
 		JLabel lblChannel = new JLabel( Dict.get(Dict.SNDCHK_CHANNEL) );
+		Laf.makeBold(lblChannel);
 		content.add( lblChannel, constrLeft );
 		
 		// channel checkbox
@@ -158,12 +161,15 @@ public class SoundcheckView extends JDialog {
 		content.add( cbxChannel, constrRight );
 		
 		// instrument label
+		constrLeft.insets = Laf.INSETS_W;
 		constrLeft.gridy++;
 		JLabel lblInstr = new JLabel( Dict.get(Dict.SNDCHK_INSTRUMENT) );
+		Laf.makeBold(lblInstr);
 		content.add( lblInstr, constrLeft );
 		
 		// instrument list
 		constrRight.gridy++;
+		constrRight.insets  = Laf.INSETS_E;
 		constrRight.fill    = GridBagConstraints.BOTH;
 		constrRight.weighty = 1;
 		SoundcheckInstrumentTableCellRenderer instrRenderer = new SoundcheckInstrumentTableCellRenderer( instrModel );
@@ -183,6 +189,7 @@ public class SoundcheckView extends JDialog {
 		// note label
 		constrLeft.gridy++;
 		JLabel lblNote = new JLabel( Dict.get(Dict.SNDCHK_NOTE) );
+		Laf.makeBold(lblNote);
 		content.add( lblNote, constrLeft );
 		
 		// note list
@@ -202,6 +209,7 @@ public class SoundcheckView extends JDialog {
 		constrLeft.gridheight = 2;
 		constrLeft.anchor     = GridBagConstraints.NORTHWEST;
 		JLabel lblVolume = new JLabel( Dict.get(Dict.SNDCHK_VOLUME) );
+		Laf.makeBold(lblVolume);
 		lblVolume.setVerticalAlignment( SwingConstants.TOP );
 		content.add( lblVolume, constrLeft );
 		
@@ -215,7 +223,7 @@ public class SoundcheckView extends JDialog {
 		fldVolume.getDocument().putProperty( "name", NAME_VOLUME );
 		fldVolume.getDocument().addDocumentListener( controller );
 		fldVolume.addActionListener( controller );
-		fldVolume.setPreferredSize( DIM_TEXT_FIELD );
+		fldVolume.setPreferredSize(dimTextField);
 		content.add( fldVolume, constrRight );
 		
 		// volume slider
@@ -230,6 +238,7 @@ public class SoundcheckView extends JDialog {
 		// velocity label
 		constrLeft.gridy  += 2;
 		JLabel lblVelocity = new JLabel( Dict.get(Dict.SNDCHK_VELOCITY) );
+		Laf.makeBold(lblVelocity);
 		lblVelocity.setVerticalAlignment( SwingConstants.TOP );
 		content.add( lblVelocity, constrLeft );
 		
@@ -243,7 +252,7 @@ public class SoundcheckView extends JDialog {
 		fldVelocity.getDocument().putProperty( "name", NAME_VELOCITY );
 		fldVelocity.getDocument().addDocumentListener( controller );
 		fldVelocity.addActionListener( controller );
-		fldVelocity.setPreferredSize( DIM_TEXT_FIELD );
+		fldVelocity.setPreferredSize(dimTextField);
 		content.add( fldVelocity, constrRight );
 		
 		// velocity slider
@@ -261,6 +270,7 @@ public class SoundcheckView extends JDialog {
 		constrLeft.anchor     = GridBagConstraints.WEST;
 		constrLeft.gridheight = 1;
 		JLabel lblDuration    = new JLabel( Dict.get(Dict.SNDCHK_DURATION) );
+		Laf.makeBold(lblDuration);
 		content.add( lblDuration, constrLeft );
 		
 		// duration text field
@@ -273,12 +283,13 @@ public class SoundcheckView extends JDialog {
 		fldDuration.getDocument().putProperty( "name", NAME_DURATION );
 		fldDuration.getDocument().addDocumentListener( controller );
 		fldDuration.addActionListener( controller );
-		fldDuration.setPreferredSize( DIM_TEXT_FIELD );
+		fldDuration.setPreferredSize(dimTextField);
 		content.add( fldDuration, constrRight );
 		
 		// keep settings label
 		constrLeft.gridy++;
 		JLabel lblKeep = new JLabel( Dict.get(Dict.SNDCHK_KEEP_SETTINGS) );
+		Laf.makeBold(lblKeep);
 		content.add( lblKeep, constrLeft );
 		
 		// keep settings checkbox
@@ -291,8 +302,9 @@ public class SoundcheckView extends JDialog {
 		// play button
 		constrLeft.gridy++;
 		constrLeft.gridwidth = 3;
+		constrLeft.insets    = Laf.INSETS_SWE;
 		constrLeft.fill      = GridBagConstraints.HORIZONTAL;
-		btnPlay = new JButton( Dict.get(Dict.SNDCHK_PLAY) );
+		btnPlay = new MidicaButton( Dict.get(Dict.SNDCHK_PLAY), true );
 		btnPlay.setActionCommand( CMD_PLAY );
 		btnPlay.addActionListener( SoundcheckController.getController() );
 		content.add( btnPlay, constrLeft );
@@ -307,14 +319,10 @@ public class SoundcheckView extends JDialog {
 	 * @param controller The event listener object for the soundcheck.
 	 * @return the volume or velocity slider.
 	 */
-	private JSlider createVolOrVelSlider( SoundcheckController controller ) {
-		JSlider slider = new JSlider( JSlider.HORIZONTAL );
+	private MidicaSlider createVolOrVelSlider( SoundcheckController controller ) {
+		MidicaSlider slider = new MidicaSlider( MidicaSlider.HORIZONTAL );
 		slider.addChangeListener( controller );
 		slider.addMouseWheelListener( controller );
-		slider.setUI( SliderHelper.createSliderUi() );
-		slider.setPaintTicks( true );
-		slider.setPaintLabels( true );
-		slider.setPaintTrack( true );
 		// labels
 		slider.setMinimum( PlayerView.VOL_MIN );
 		slider.setMaximum( PlayerView.VOL_MAX );
@@ -377,7 +385,7 @@ public class SoundcheckView extends JDialog {
 		fldVolume.getDocument().removeDocumentListener( controller );
 		fldVolume.setText( Byte.toString(volume) );
 		fldVolume.getDocument().addDocumentListener( controller );
-		setTextFieldColor( fldVolume.getName(), Config.COLOR_NORMAL );
+		setTextFieldColor( fldVolume.getName(), Laf.COLOR_NORMAL );
 	}
 	
 	/**
@@ -395,7 +403,7 @@ public class SoundcheckView extends JDialog {
 		fldVelocity.getDocument().removeDocumentListener( controller );
 		fldVelocity.setText( Byte.toString(velocity) );
 		fldVelocity.getDocument().addDocumentListener( controller );
-		setTextFieldColor( fldVelocity.getName(), Config.COLOR_NORMAL );
+		setTextFieldColor( fldVelocity.getName(), Laf.COLOR_NORMAL );
 	}
 	
 	/**

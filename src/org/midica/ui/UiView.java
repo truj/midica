@@ -7,13 +7,11 @@
 
 package org.midica.ui;
 
-import java.awt.Color;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
-import java.awt.Insets;
 import java.awt.KeyEventPostProcessor;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionListener;
@@ -22,7 +20,6 @@ import java.awt.event.WindowListener;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
@@ -31,15 +28,17 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
+import javax.swing.plaf.SeparatorUI;
 
 import org.midica.Midica;
 import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.config.Laf;
 import org.midica.file.SequenceParser;
 import org.midica.file.SoundfontParser;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
-
+import org.midica.ui.widget.MidicaButton;
 
 /**
  * This class provides the main window containing configuration area, player button
@@ -73,9 +72,6 @@ public class UiView extends JFrame {
 	public static final String CMD_EXPORT_MIDICAPL     = "cmd_export_midicapl";
 	public static final String CMD_OPEN_FCT_NOT_READY  = "cmd_open_fct_not_ready";
 	
-	public static final Color  COLOR_TRANSPOSE_DEFAULT = new Color(  50, 100, 255 );
-	public static final Color  COLOR_TRANSPOSE_CHANGED = new Color( 255,   0,   0 );
-	
 	// application icons
 	private static final String inactiveAppIconPath = "org/midica/resources/app-icon-inactive.png";
 	private static final String activeAppIconPath   = "org/midica/resources/app-icon-active.png";
@@ -99,13 +95,13 @@ public class UiView extends JFrame {
 	private JComboBox<ComboboxStringOption> cbxPercussion          = null;
 	private JComboBox<ComboboxStringOption> cbxInstrument          = null;
 	private JLabel                          lblTranspose           = null;
-	private JButton                         btnInfo                = null;
-	private JButton                         btnPlayer              = null;
-	private JButton                         btnSelectMidicaPL      = null;
-	private JButton                         btnSelectMidi          = null;
-	private JButton                         btnSelectSoundfont     = null;
-	private JButton                         btnExportMidi          = null;
-	private JButton                         btnExportMidicaPL      = null;
+	private MidicaButton                    btnInfo                = null;
+	private MidicaButton                    btnPlayer              = null;
+	private MidicaButton                    btnSelectMidicaPL      = null;
+	private MidicaButton                    btnSelectMidi          = null;
+	private MidicaButton                    btnSelectSoundfont     = null;
+	private MidicaButton                    btnExportMidi          = null;
+	private MidicaButton                    btnExportMidicaPL      = null;
 	private JCheckBox                       cbxRememberSf          = null;
 	private JCheckBox                       cbxRememberMidicapl    = null;
 	private JCheckBox                       cbxRememberMidi        = null;
@@ -166,7 +162,7 @@ public class UiView extends JFrame {
 		content.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.NONE;
-		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.insets     = Laf.INSETS_WNS;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -176,6 +172,7 @@ public class UiView extends JFrame {
 		content.add( createLeftArea(), constraints );
 		
 		// right area (import and export)
+		constraints.insets = Laf.INSETS_ENS;
 		constraints.gridx++;
 		content.add( createRightArea(), constraints );
 	}
@@ -196,7 +193,7 @@ public class UiView extends JFrame {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
-		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.insets     = Laf.INSETS_IN;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -226,7 +223,7 @@ public class UiView extends JFrame {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
-		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.insets     = Laf.INSETS_IN;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -257,7 +254,7 @@ public class UiView extends JFrame {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
-		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.insets     = Laf.INSETS_IN;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -265,6 +262,7 @@ public class UiView extends JFrame {
 		
 		// gui language label
 		JLabel lblLanguage = new JLabel( Dict.get(Dict.LANGUAGE) );
+		Laf.makeBold(lblLanguage);
 		area.add( lblLanguage, constraints );
 		
 		// gui language selection
@@ -279,6 +277,7 @@ public class UiView extends JFrame {
 		constraints.gridx = 0;
 		constraints.gridy++;
 		JLabel lblNoteSys = new JLabel( Dict.get(Dict.NOTE_SYSTEM) );
+		Laf.makeBold(lblNoteSys);
 		area.add( lblNoteSys, constraints );
 		
 		// note system selection
@@ -294,6 +293,7 @@ public class UiView extends JFrame {
 		constraints.gridx = 0;
 		constraints.gridy++;
 		JLabel lblHalfTone = new JLabel( Dict.get(Dict.HALF_TONE_SYMBOL) );
+		Laf.makeBold(lblHalfTone);
 		area.add( lblHalfTone, constraints );
 		
 		// half tone selection
@@ -309,6 +309,7 @@ public class UiView extends JFrame {
 		constraints.gridx = 0;
 		constraints.gridy++;
 		JLabel lblOctave = new JLabel( Dict.get(Dict.OCTAVE_NAMING) );
+		Laf.makeBold(lblOctave);
 		area.add( lblOctave, constraints );
 		
 		// octave selection
@@ -324,6 +325,7 @@ public class UiView extends JFrame {
 		constraints.gridx = 0;
 		constraints.gridy++;
 		JLabel lblSyntax = new JLabel( Dict.get(Dict.SYNTAX) );
+		Laf.makeBold(lblSyntax);
 		area.add( lblSyntax, constraints );
 		
 		// syntax selection
@@ -339,6 +341,7 @@ public class UiView extends JFrame {
 		constraints.gridx = 0;
 		constraints.gridy++;
 		JLabel lblPercussion = new JLabel( Dict.get(Dict.PERCUSSION) );
+		Laf.makeBold(lblPercussion);
 		area.add( lblPercussion, constraints );
 		
 		// percussion selection
@@ -354,6 +357,7 @@ public class UiView extends JFrame {
 		constraints.gridx = 0;
 		constraints.gridy++;
 		JLabel lblInstrument = new JLabel( Dict.get(Dict.INSTRUMENT_IDS) );
+		Laf.makeBold(lblInstrument);
 		area.add( lblInstrument, constraints );
 		
 		// instrument naming selection
@@ -369,7 +373,7 @@ public class UiView extends JFrame {
 		constraints.gridx = 1;
 		constraints.gridy++;
 		constraints.gridwidth = 1;
-		btnInfo = new JButton( Dict.get(Dict.SHOW_INFO) );
+		btnInfo = new MidicaButton( Dict.get(Dict.SHOW_INFO) );
 		btnInfo.setActionCommand( CMD_SHOW_INFO_WINDOW );
 		btnInfo.addActionListener( controller );
 		
@@ -392,7 +396,7 @@ public class UiView extends JFrame {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
-		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.insets     = Laf.INSETS_IN;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -402,7 +406,7 @@ public class UiView extends JFrame {
 		constraints.gridy++;
 		constraints.gridx   = 0;
 		constraints.weightx = 1;
-		btnPlayer = new JButton( Dict.get(Dict.PLAYER_BUTTON) );
+		btnPlayer = new MidicaButton( Dict.get(Dict.PLAYER_BUTTON), true );
 		btnPlayer.setActionCommand( CMD_START_PLAYER );
 		btnPlayer.addActionListener( controller );
 		area.add( btnPlayer, constraints );
@@ -429,7 +433,7 @@ public class UiView extends JFrame {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
-		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.insets     = Laf.INSETS_IN;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -437,22 +441,23 @@ public class UiView extends JFrame {
 		constraints.weightx    = 0.5;
 		
 		// MidicaPL label
-		constraints.insets = new Insets( 0, 2, 0, 2 );
+		constraints.insets = Laf.INSETS_LBL_IMPORT_EXPORT;
 		JLabel lblMidicaPL = new JLabel( Dict.get(Dict.MIDICAPL_FILE) );
+		Laf.makeBold(lblMidicaPL);
 		area.add( lblMidicaPL, constraints );
-		constraints.insets = new Insets( 2, 2, 2, 2 );
+		constraints.insets = Laf.INSETS_IN;
 		
 		// file selector button
 		constraints.gridx++;
 		constraints.gridheight = 2;
-		btnSelectMidicaPL = new JButton( Dict.get(Dict.CHOOSE_FILE) );
+		btnSelectMidicaPL = new MidicaButton( Dict.get(Dict.CHOOSE_FILE) );
 		btnSelectMidicaPL.setActionCommand( CMD_OPEN_MIDICAPL_FILE );
 		btnSelectMidicaPL.addActionListener( controller );
 		area.add( btnSelectMidicaPL, constraints );
 		
 		// remember midicapl checkbox
-		constraints.insets = new Insets( 0, 2, 0, 2 );
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_LBL_IMPORT_EXPORT;
+		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.gridheight = 1;
 		cbxRememberMidicapl = new JCheckBox( Dict.get(Dict.REMEMBER_MPL) );
@@ -464,7 +469,7 @@ public class UiView extends JFrame {
 		}
 		cbxRememberMidicapl.setName( NAME_REMEMBER_MIDICAPL );
 		area.add( cbxRememberMidicapl, constraints );
-		constraints.insets = new Insets( 2, 2, 2, 2 );
+		constraints.insets = Laf.INSETS_IN;
 		
 		// chosen MidicaPL file name
 		constraints.gridy++;
@@ -480,28 +485,28 @@ public class UiView extends JFrame {
 		
 		// line
 		constraints.gridy++;
-		area.add( new JSeparator(JSeparator.HORIZONTAL), constraints );
-		
+		area.add( createSeparator(), constraints );
 		
 		// midi label
-		constraints.insets = new Insets( 0, 2, 0, 2 );
+		constraints.insets = Laf.INSETS_LBL_IMPORT_EXPORT;
 		constraints.gridy++;
 		constraints.gridwidth = 1;
 		JLabel lblMidi = new JLabel( Dict.get(Dict.MIDI_FILE) );
+		Laf.makeBold(lblMidi);
 		area.add( lblMidi, constraints );
-		constraints.insets = new Insets( 2, 2, 2, 2 );
+		constraints.insets = Laf.INSETS_IN;
 		
 		// file selector button
 		constraints.gridx++;
 		constraints.gridheight = 2;
-		btnSelectMidi = new JButton( Dict.get(Dict.CHOOSE_FILE) );
+		btnSelectMidi = new MidicaButton( Dict.get(Dict.CHOOSE_FILE) );
 		btnSelectMidi.setActionCommand( CMD_OPEN_MIDI_FILE );
 		btnSelectMidi.addActionListener( controller );
 		area.add( btnSelectMidi, constraints );
 		
 		// remember midicapl checkbox
-		constraints.insets = new Insets( 0, 2, 0, 2 );
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_LBL_IMPORT_EXPORT;
+		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.gridheight = 1;
 		cbxRememberMidi = new JCheckBox( Dict.get(Dict.REMEMBER_MID) );
@@ -513,7 +518,7 @@ public class UiView extends JFrame {
 		}
 		cbxRememberMidi.setName( NAME_REMEMBER_MIDI );
 		area.add( cbxRememberMidi, constraints );
-		constraints.insets = new Insets( 2, 2, 2, 2 );
+		constraints.insets = Laf.INSETS_IN;
 		
 		// chosen midi file name
 		constraints.gridx = 0;
@@ -528,28 +533,28 @@ public class UiView extends JFrame {
 		
 		// line
 		constraints.gridy++;
-		area.add( new JSeparator(JSeparator.HORIZONTAL), constraints );
-		
+		area.add( createSeparator(), constraints );
 		
 		// soundfont label
-		constraints.insets = new Insets( 0, 2, 0, 2 );
+		constraints.insets = Laf.INSETS_LBL_IMPORT_EXPORT;
 		constraints.gridy++;
 		constraints.gridwidth = 1;
-		JLabel lblSndBnk = new JLabel( Dict.get(Dict.SOUNDFONT) );
-		area.add( lblSndBnk, constraints );
-		constraints.insets = new Insets( 2, 2, 2, 2 );
+		JLabel lblSndFont = new JLabel( Dict.get(Dict.SOUNDFONT) );
+		Laf.makeBold(lblSndFont);
+		area.add( lblSndFont, constraints );
+		constraints.insets = Laf.INSETS_IN;
 		
 		// file selector button
 		constraints.gridx++;
 		constraints.gridheight = 2;
-		btnSelectSoundfont = new JButton( Dict.get(Dict.CHOOSE_FILE) );
+		btnSelectSoundfont = new MidicaButton( Dict.get(Dict.CHOOSE_FILE) );
 		btnSelectSoundfont.setActionCommand( CMD_OPEN_SNDFNT_FILE );
 		btnSelectSoundfont.addActionListener( controller );
 		area.add( btnSelectSoundfont, constraints );
 		
 		// remember soundfont checkbox
-		constraints.insets = new Insets( 0, 2, 0, 2 );
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_LBL_IMPORT_EXPORT;
+		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.gridheight = 1;
 		cbxRememberSf = new JCheckBox( Dict.get(Dict.REMEMBER_SF) );
@@ -561,7 +566,7 @@ public class UiView extends JFrame {
 		}
 		cbxRememberSf.setName( NAME_REMEMBER_SF );
 		area.add( cbxRememberSf, constraints );
-		constraints.insets = new Insets( 2, 2, 2, 2 );
+		constraints.insets = Laf.INSETS_IN;
 		
 		// chosen soundfont file name
 		constraints.gridy++;
@@ -591,7 +596,7 @@ public class UiView extends JFrame {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
-		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.insets     = Laf.INSETS_IN;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -604,6 +609,7 @@ public class UiView extends JFrame {
 		// transpose level
 		constraints.gridx++;
 		lblTranspose = new JLabel();
+		Laf.makeBold(lblTranspose);
 		setTransposeLevel( 0 );
 		area.add( lblTranspose, constraints );
 		
@@ -611,17 +617,18 @@ public class UiView extends JFrame {
 		constraints.gridx = 0;
 		constraints.gridy++;
 		constraints.gridwidth = 2;
-		area.add( new JSeparator(JSeparator.HORIZONTAL), constraints );
+		area.add( createSeparator(), constraints );
 		
 		// midi label
 		constraints.gridx = 0;
 		constraints.gridy++;
 		JLabel lblMidi = new JLabel( Dict.get(Dict.MIDI_EXPORT) );
+		Laf.makeBold(lblMidi);
 		area.add( lblMidi, constraints );
 		
 		// file selector button
 		constraints.gridx++;
-		btnExportMidi = new JButton( Dict.get(Dict.CHOOSE_FILE_EXPORT) );
+		btnExportMidi = new MidicaButton( Dict.get(Dict.CHOOSE_FILE_EXPORT) );
 		btnExportMidi.setActionCommand( CMD_EXPORT_MIDI );
 		btnExportMidi.addActionListener( controller );
 		area.add( btnExportMidi, constraints );
@@ -630,17 +637,18 @@ public class UiView extends JFrame {
 		constraints.gridx = 0;
 		constraints.gridy++;
 		constraints.gridwidth = 2;
-		area.add( new JSeparator(JSeparator.HORIZONTAL), constraints );
+		area.add( createSeparator(), constraints );
 		
 		// MidicaPL label
 		constraints.gridwidth = 1;
 		constraints.gridy++;
 		JLabel lblMidicaPL = new JLabel( Dict.get(Dict.MIDICAPL_EXPORT) );
+		Laf.makeBold(lblMidicaPL);
 		area.add( lblMidicaPL, constraints );
 		
 		// file selector button
 		constraints.gridx++;
-		btnExportMidicaPL = new JButton( Dict.get(Dict.CHOOSE_FILE_EXPORT) );
+		btnExportMidicaPL = new MidicaButton( Dict.get(Dict.CHOOSE_FILE_EXPORT) );
 		btnExportMidicaPL.setActionCommand( CMD_EXPORT_MIDICAPL );
 		btnExportMidicaPL.setActionCommand( CMD_OPEN_FCT_NOT_READY ); // TODO: delete when implemented
 		btnExportMidicaPL.addActionListener( controller );
@@ -688,15 +696,38 @@ public class UiView extends JFrame {
 	 * @param title    Label for the border.
 	 * @return         Titled and etched border.
 	 */
-	private Border createTitledBorder( String title ) {
-		Border etchedBorder = BorderFactory.createEtchedBorder();
+	private Border createTitledBorder(String title) {
+		Border lineBorder = BorderFactory.createLineBorder(Laf.COLOR_BORDER);
 		Border titledBorder = BorderFactory.createTitledBorder(
-			etchedBorder,
+			lineBorder,
 			title,
 			TitledBorder.RIGHT,
 			TitledBorder.TOP
 		);
 		return titledBorder;
+	}
+	
+	/**
+	 * Creates and returns a horizontal separator with a fitting color.
+	 * 
+	 * @return the separator.
+	 */
+	private JSeparator createSeparator() {
+		JSeparator sep = new JSeparator(JSeparator.HORIZONTAL);
+		sep.setOpaque(true);
+		if (Laf.isNimbus) {
+			sep.setForeground(Laf.COLOR_PANEL);
+			sep.setBackground(Laf.COLOR_BORDER);
+			
+			// replace nimbus UI by a default UI that respects the colors
+			sep.setUI(new SeparatorUI() {});
+		}
+		else {
+			sep.setForeground(Laf.COLOR_BORDER);
+			sep.setBackground(Laf.COLOR_PANEL);
+		}
+		
+		return sep;
 	}
 	
 	/**
@@ -733,9 +764,9 @@ public class UiView extends JFrame {
 	public void setTransposeLevel( int level ) {
 		lblTranspose.setText( Integer.toString(level) );
 		if ( 0 == level )
-			lblTranspose.setForeground( COLOR_TRANSPOSE_DEFAULT );
+			lblTranspose.setForeground( Laf.COLOR_TRANSPOSE_DEFAULT );
 		else
-			lblTranspose.setForeground( COLOR_TRANSPOSE_CHANGED );
+			lblTranspose.setForeground( Laf.COLOR_TRANSPOSE_CHANGED );
 	}
 	
 	/**

@@ -536,6 +536,7 @@ public class Dict {
 	public static final String AUTHOR                      = "author";
 	public static final String SOURCE_URL                  = "source_url";
 	public static final String WEBSITE                     = "website";
+	public static final String LINK_TOOLTIP                = "link_tooltip";
 	public static final String TIMESTAMP_FORMAT            = "timestamp_format";
 	public static final String NAME                        = "name";
 	public static final String FILE                        = "file";
@@ -1282,8 +1283,8 @@ public class Dict {
 		set( SF_LOADED_BY_SOURCE,          "[loaded by MidicaPL file]"     );
 		set( CHOOSE_FILE,                  "select file"                   );
 		set( CHOOSE_FILE_EXPORT,           "select file"                   );
-		set( MIDI_EXPORT,                  "export as midi"                );
-		set( MIDICAPL_EXPORT,              "export as score"               );
+		set( MIDI_EXPORT,                  "Midi file"                     );
+		set( MIDICAPL_EXPORT,              "MidicaPL file"                 );
 		set( CONF_ERROR_OK,                "Configuration OK"              );
 		set( CONF_ERROR_HALFTONE_SYNTAX,   "Chosen half tone symbol incompatible with chosen syntax" );
 		set( ERROR_NOT_YET_IMPLEMENTED,    "This functionality is not yet implemented" );
@@ -1369,6 +1370,7 @@ public class Dict {
 		set( AUTHOR,                                 "Author"                        );
 		set( SOURCE_URL,                             "Source"                        );
 		set( WEBSITE,                                "Website"                       );
+		set( LINK_TOOLTIP,                           "(Click to open in Browser)"    );
 		set( TIMESTAMP_FORMAT,                       "yyyy-MM-dd HH:mm:ss"           );
 		set( NAME,                                   "Name"                          );
 		set( FILE,                                   "File"                          );

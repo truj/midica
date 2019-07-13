@@ -819,7 +819,7 @@ public final class MidiDevices {
 			bankNum += Dict.getSyntax( Dict.SYNTAX_BANK_SEP ) + Byte.toString( bankLSB );
 		
 		// full bank number = MSB * 128 + LSB
-		int fullBankNum = bankMSB << 7 + bankLSB;
+		int fullBankNum = (bankMSB << 7) + bankLSB;
 		String fullBankNumStr = Integer.toString( fullBankNum );
 		
 		// bank number tooltip

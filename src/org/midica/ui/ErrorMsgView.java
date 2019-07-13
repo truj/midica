@@ -10,16 +10,15 @@ package org.midica.ui;
 import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ActionListener;
 
-import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 import org.midica.config.Dict;
-
+import org.midica.config.Laf;
+import org.midica.ui.widget.MidicaButton;
 
 /**
  * This class provides a window for error messages.
@@ -72,10 +71,10 @@ public class ErrorMsgView extends MessageView {
 		GridBagLayout layout = new GridBagLayout();
 		content.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.BOTH;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
-		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.insets     = Laf.INSETS_NWE;
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 0;
@@ -86,8 +85,9 @@ public class ErrorMsgView extends MessageView {
 		content.add( label, constraints );
 		
 		// close button
+		constraints.insets = Laf.INSETS_SWE;
 		constraints.gridy++;
-		closeButton = new JButton( Dict.get(Dict.CLOSE) );
+		closeButton = new MidicaButton( Dict.get(Dict.CLOSE) );
 		closeButton.setActionCommand( MessageView.CMD_CLOSE );
 		closeButton.addActionListener( controller );
 		closeButton.requestFocusInWindow();

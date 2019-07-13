@@ -14,8 +14,8 @@ import java.util.HashMap;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 
-import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.config.Laf;
 import org.midica.file.SoundfontParser;
 
 /**
@@ -53,10 +53,16 @@ public class SoundfontInstrumentTableCellRenderer extends MidicaTableCellRendere
 		HashMap<String, String> instrument = instruments.get( row );
 		boolean isCategory = instrument.get("category") != null;
 		if (isCategory) {
-			cell.setBackground( Config.TABLE_CELL_CATEGORY_COLOR );
+			if (isSelected)
+				cell.setBackground( Laf.COLOR_TABLE_CELL_CAT_SELECTED );
+			else
+				cell.setBackground( Laf.COLOR_TABLE_CELL_CATEGORY );
 		}
 		else {
-			cell.setBackground( Config.TABLE_CELL_DEFAULT_COLOR );
+			if (isSelected)
+				cell.setBackground( Laf.COLOR_TABLE_CELL_SELECTED );
+			else
+				cell.setBackground( null );
 		}
 		
 		// bank tooltip

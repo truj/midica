@@ -7,7 +7,6 @@
 
 package org.midica.config;
 
-import java.awt.Color;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -19,8 +18,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
-
-import javax.swing.UIManager;
 
 import org.midica.Midica;
 import org.midica.ui.model.ComboboxStringOption;
@@ -68,22 +65,6 @@ public class Config {
 	public static final String CHARSET_MID        = "charset_mid";
 	public static final String CHARSET_EXPORT_MPL = "charset_export_mpl";
 	public static final String CHARSET_EXPORT_MID = "charset_export_mid";
-	
-	
-	// table header and column colors
-	public static final Color  TABLE_HEADER_COLOR        = new Color( 200, 230, 255 );
-	public static final Color  TABLE_CELL_DEFAULT_COLOR  = new Color( 255, 255, 255 );
-	public static final Color  TABLE_CELL_CATEGORY_COLOR = new Color( 200, 255, 200 );
-	public static final Color  TABLE_CELL_FUTURE_COLOR   = new Color( 255, 255, 150 ); // future notes for the note history
-	public static final Color  TABLE_CELL_SELECTED_COLOR = new Color( 200, 200, 255 ); // table row is currently selected
-	public static final Color  MSG_TABLE_COLOR           = new Color( 255, 255, 200 );
-	public static final Color  MSG_TREE_COLOR            = new Color( 240, 220, 255 );
-	public static final Color  MSG_DEFAULT_COLOR         = UIManager.getColor( "Panel.background" );
-	
-	// text field background colors
-	public static final Color  COLOR_NORMAL = new Color( 255, 255, 255 );
-	public static final Color  COLOR_OK     = new Color( 200, 255, 200 );
-	public static final Color  COLOR_ERROR  = new Color( 255, 150, 150 );
 	
 	// language combobox
 	public static final String CBX_LANG_ENGLISH = "English";
@@ -190,6 +171,7 @@ public class Config {
 	 * - Initializing the config comboboxes in the GUI
 	 */
 	public static void init() {
+		
 		String homeDir  = System.getProperty( "user.home" );
 		String fileName = ".midica.conf";
 		if (Midica.useLocalConfig) {

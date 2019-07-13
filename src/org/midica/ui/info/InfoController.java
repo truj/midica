@@ -24,7 +24,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.DefaultListSelectionModel;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -44,13 +43,14 @@ import javax.swing.text.Position;
 import javax.swing.text.Segment;
 import javax.swing.tree.TreePath;
 
-import org.midica.config.Config;
+import org.midica.config.Laf;
 import org.midica.midi.SequenceAnalyzer;
 import org.midica.ui.model.MessageTableModel;
 import org.midica.ui.model.IMessageType;
 import org.midica.ui.model.SingleMessage;
 import org.midica.ui.model.MessageTreeNode;
 import org.midica.ui.model.MidicaTreeModel;
+import org.midica.ui.widget.MidicaButton;
 import org.midica.ui.widget.MidicaTable;
 import org.midica.ui.widget.MidicaTree;
 
@@ -120,9 +120,9 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 	 */
 	@Override
 	public void actionPerformed( ActionEvent e ) {
-		String  cmd  = e.getActionCommand();
-		JButton btn  = (JButton) e.getSource();
-		String  name = btn.getName();
+		String       cmd  = e.getActionCommand();
+		MidicaButton btn  = (MidicaButton) e.getSource();
+		String       name = btn.getName();
 		
 		// collapse or expand all nodes of a tree
 		if ( CMD_COLLAPSE.equals(cmd) || CMD_EXPAND.equals(cmd) ) {
@@ -291,20 +291,20 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 			JTextField txtTo   = (JTextField) widgets.get( InfoView.FILTER_TXT_TO_TICKS   );
 			if (isChecked) {
 				// activate text fields
-				txtFrom.setEnabled( true );
-				txtTo.setEnabled( true );
+				txtFrom.setEnabled(true);
+				txtTo.setEnabled(true);
 				
 				// adjust text field colors
 				checkTextFields( createFakeTxtFieldChange() );
 			}
 			else {
 				// deactivate text fields
-				txtFrom.setEnabled( false );
-				txtTo.setEnabled( false );
+				txtFrom.setEnabled(false);
+				txtTo.setEnabled(false);
 				
 				// neutralize text field colors
-				txtFrom.setBackground( Config.COLOR_NORMAL );
-				txtTo.setBackground( Config.COLOR_NORMAL );
+				txtFrom.setBackground( Laf.COLOR_NORMAL );
+				txtTo.setBackground( Laf.COLOR_NORMAL );
 			}
 		}
 		
@@ -323,7 +323,7 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 				txtTrack.setEnabled( false );
 				
 				// neutralize text field colors
-				txtTrack.setBackground( Config.COLOR_NORMAL );
+				txtTrack.setBackground( Laf.COLOR_NORMAL );
 			}
 		}
 		
@@ -538,11 +538,11 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 		if (checkTicks) {
 			fromTicks = checkTickTextField( docFrom, maxTicks );
 			if ( fromTicks < 0 ) {
-				txtFrom.setBackground( Config.COLOR_ERROR );
+				txtFrom.setBackground( Laf.COLOR_ERROR );
 				result = false;
 			}
 			else {
-				txtFrom.setBackground( Config.COLOR_NORMAL );
+				txtFrom.setBackground( Laf.COLOR_NORMAL );
 			}
 		}
 		
@@ -551,11 +551,11 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 		if (checkTicks) {
 			toTicks = checkTickTextField( docTo, maxTicks );
 			if ( toTicks < 0 ) {
-				txtTo.setBackground( Config.COLOR_ERROR );
+				txtTo.setBackground( Laf.COLOR_ERROR );
 				result = false;
 			}
 			else {
-				txtTo.setBackground( Config.COLOR_NORMAL );
+				txtTo.setBackground( Laf.COLOR_NORMAL );
 			}
 		}
 		
@@ -564,11 +564,11 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 		if (checkTracks) {
 			tracks = getTracksFromTextField( docTracks );
 			if ( null == tracks ) {
-				txtTracks.setBackground( Config.COLOR_ERROR );
+				txtTracks.setBackground( Laf.COLOR_ERROR );
 				result = false;
 			}
 			else {
-				txtTracks.setBackground( Config.COLOR_NORMAL );
+				txtTracks.setBackground( Laf.COLOR_NORMAL );
 			}
 		}
 		
@@ -581,13 +581,13 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 		else if ( InfoView.FILTER_TXT_TRACKS.equals(name) && tracks != null )
 			makeGreen = true;
 		if (makeGreen)
-			widgets.get( name ).setBackground( Config.COLOR_OK );
+			widgets.get( name ).setBackground( Laf.COLOR_OK );
 		
 		// from > to?
 		if ( checkTicks && fromTicks >= 0 && toTicks >= 0 ) {
 			if ( fromTicks > toTicks ) {
-				txtFrom.setBackground( Config.COLOR_ERROR );
-				txtTo.setBackground( Config.COLOR_ERROR );
+				txtFrom.setBackground( Laf.COLOR_ERROR );
+				txtTo.setBackground( Laf.COLOR_ERROR );
 				result = false;
 			}
 		}
@@ -776,7 +776,7 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 		boolean   isAutoShow  = cbxAutoShow.isSelected();
 		
 		// activate or deactivate the button
-		JButton button = (JButton) widgets.get( InfoView.FILTER_BTN_SHOW_TREE );
+		MidicaButton button = (MidicaButton) widgets.get( InfoView.FILTER_BTN_SHOW_TREE );
 		if ( isMsgSelected && ! isAutoShow ) {
 			button.setEnabled( true );
 		}

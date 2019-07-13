@@ -11,19 +11,19 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ActionListener;
 
-import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 
 import org.midica.config.Dict;
+import org.midica.config.Laf;
 import org.midica.file.ExportResult;
 import org.midica.ui.model.ExportResultTableModel;
 import org.midica.ui.renderer.MidicaTableCellRenderer;
+import org.midica.ui.widget.MidicaButton;
 import org.midica.ui.widget.MidicaTable;
 
 
@@ -87,8 +87,8 @@ public class ExportResultView extends MessageView {
 		GridBagLayout layout = new GridBagLayout();
 		content.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.BOTH;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
+		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.insets     = Laf.INSETS_NWE;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -130,7 +130,8 @@ public class ExportResultView extends MessageView {
 		
 		// close button
 		constraints.gridy++;
-		closeButton = new JButton( Dict.get(Dict.CLOSE) );
+		constraints.insets = Laf.INSETS_SWE;
+		closeButton = new MidicaButton( Dict.get(Dict.CLOSE) );
 		closeButton.setActionCommand( MessageView.CMD_CLOSE );
 		closeButton.addActionListener( controller );
 		closeButton.requestFocusInWindow();

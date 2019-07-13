@@ -16,6 +16,8 @@ import javax.swing.JTextArea;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 
+import org.midica.config.Laf;
+
 /**
  * This class provides a replacement for a {@link JLabel} that enables smoother
  * word wrapping of long texts and scrollbars when needed.
@@ -56,6 +58,12 @@ public class FlowLabel extends JScrollPane {
 		this.charsPerLine   = charsPerLine;
 		this.preferredWidth = prefWidth;
 		this.label          = new JTextArea( content );
+		
+		// background color for nimbus
+		if (Laf.isNimbus) {
+			this.label.setMargin( Laf.INSETS_FLOW_LBL_NIMBUS );
+			this.setBackground( Laf.COLOR_PANEL );
+		}
 		
 		// Make it look like a label.
 		label.setOpaque( false );
@@ -170,6 +178,15 @@ public class FlowLabel extends JScrollPane {
 	@Override
 	public void setBorder( Border border ) {
 		// nothing to do
+	}
+	
+	/**
+	 * Sets the given text in the label.
+	 * 
+	 * @param text The text to be displayed.
+	 */
+	public void setText( String text ) {
+		label.setText( text );
 	}
 	
 	/**

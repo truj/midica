@@ -15,7 +15,7 @@ import javax.swing.event.TableColumnModelListener;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
 
-import org.midica.config.Config;
+import org.midica.config.Laf;
 import org.midica.ui.model.MidicaTableModel;
 
 /**
@@ -40,7 +40,8 @@ public class MidicaTableHeader extends JTableHeader implements TableColumnModelL
 	 */
 	public MidicaTableHeader( TableColumnModel colModel ) {
 		columnModel = colModel;
-		setBackground( Config.TABLE_HEADER_COLOR );
+		setBackground( Laf.COLOR_TABLE_HEADER_BG );
+		setForeground( Laf.COLOR_TABLE_HEADER_TXT );
 	}
 	
 	/**

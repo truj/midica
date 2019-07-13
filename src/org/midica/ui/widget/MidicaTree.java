@@ -21,11 +21,16 @@ import org.midica.ui.model.MidicaTreeNode;
  * 
  * These trees support tooltips in their nodes.
  * 
+ * They can also indicate if they are message trees. This will be evaluated from the Laf class,
+ * when nimbus is used.
+ * 
  * @author Jan Trukenmüller
  */
 public class MidicaTree extends JTree {
 	
 	private static final long serialVersionUID = 1L;
+	
+	private boolean isMsgTree = false;
 	
 	/**
 	 * Creates a new tree supporting tooltips in the nodes.
@@ -59,6 +64,22 @@ public class MidicaTree extends JTree {
 	 */
 	private void prepareToolTips() {
 		ToolTipManager.sharedInstance().registerComponent( this );
+	}
+	
+	/**
+	 * Marks this tree as a message tree.
+	 */
+	public void setMsgTreeFlag() {
+		isMsgTree = true;
+	}
+	
+	/**
+	 * Indicates if this tree is a message tree or not.
+	 * 
+	 * @return  **true**, if it's a message tree, otherwise: **false**.
+	 */
+	public boolean isMsgTree() {
+		return isMsgTree;
 	}
 	
 	/**

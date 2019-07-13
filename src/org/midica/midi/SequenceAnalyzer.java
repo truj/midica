@@ -33,6 +33,7 @@ import javax.sound.midi.SysexMessage;
 import javax.sound.midi.Track;
 
 import org.midica.config.Dict;
+import org.midica.config.Laf;
 import org.midica.file.CharsetUtils;
 import org.midica.file.MidicaPLExporter;
 import org.midica.file.ParseException;
@@ -1661,13 +1662,13 @@ public class SequenceAnalyzer {
 		StringBuilder text = new StringBuilder(
 			  "<html><head><style>"
 			+ "body {"
-			+     "width: "     + PlayerView.KAR_WIDTH        + "; " // "width: 100%" doesn't work
-			+     "font-size: " + PlayerView.KAR_FONT_SIZE    + "; "
-			+     "color: #"    + PlayerView.KAR_COLOR_1_PAST + "; "
+			+     "width: "     + PlayerView.KAR_WIDTH     + "; " // "width: 100%" doesn't work
+			+     "font-size: " + PlayerView.KAR_FONT_SIZE + "; "
+			+     "color: #"    + Laf.COLOR_KAR_1_PAST  + "; "
 			+ "}"
-			+ ".future { color: #"        + PlayerView.KAR_COLOR_1_FUTURE + "; } "
-			+ ".second { color: #"        + PlayerView.KAR_COLOR_2_PAST   + "; } "
-			+ ".future_second { color: #" + PlayerView.KAR_COLOR_2_FUTURE + "; } "
+			+ ".future { color: #"        + Laf.COLOR_KAR_1_FUTURE + "; } "
+			+ ".second { color: #"        + Laf.COLOR_KAR_2_PAST   + "; } "
+			+ ".future_second { color: #" + Laf.COLOR_KAR_2_FUTURE + "; } "
 			+ "</style></head><body>"
 		);
 		

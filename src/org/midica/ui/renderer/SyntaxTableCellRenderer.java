@@ -12,8 +12,8 @@ import java.util.ArrayList;
 
 import javax.swing.JTable;
 
-import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.config.Laf;
 import org.midica.ui.info.SyntaxElement;
 
 /**
@@ -42,10 +42,16 @@ public class SyntaxTableCellRenderer extends MidicaTableCellRenderer {
 	public Component getTableCellRendererComponent( JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col ) {
 		Component cell = super.getTableCellRendererComponent( table, value, isSelected, hasFocus, row, col );
 		if ( syntaxList.get(row).isCategory() ) {
-			cell.setBackground( Config.TABLE_CELL_CATEGORY_COLOR );
+			if (isSelected)
+				cell.setBackground( Laf.COLOR_TABLE_CELL_CAT_SELECTED );
+			else
+				cell.setBackground( Laf.COLOR_TABLE_CELL_CATEGORY );
 		}
 		else {
-			cell.setBackground( Config.TABLE_CELL_DEFAULT_COLOR );
+			if (isSelected)
+				cell.setBackground( Laf.COLOR_TABLE_CELL_SELECTED );
+			else
+				cell.setBackground( null );
 		}
 		return cell;
 	}

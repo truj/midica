@@ -12,9 +12,10 @@ import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowListener;
 
-import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
+
+import org.midica.ui.widget.MidicaButton;
 
 /**
  * This class provides a modal window belonging to a parent window.
@@ -38,7 +39,7 @@ public abstract class MessageView extends JDialog {
 	
 	public static final String CMD_CLOSE = "close_message";
 	
-	protected JButton               closeButton  = null;
+	protected MidicaButton          closeButton  = null;
 	private   KeyEventPostProcessor keyProcessor = null;
 	
 	/**

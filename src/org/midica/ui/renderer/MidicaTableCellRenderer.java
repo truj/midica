@@ -13,10 +13,14 @@ import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 
+import org.midica.config.Laf;
+
 /**
  * Cell renderer for Midica tables.
  * 
  * Shows cell contents also as a tooltip text.
+ * 
+ * Changes the background color of selected rows.
  * 
  * @author Jan Trukenmüller
  */
@@ -35,6 +39,12 @@ public class MidicaTableCellRenderer extends DefaultTableCellRenderer {
 			if ( element != null )
 				jCell.setToolTipText( element.toString() );
 		}
+		
+		// different background color for selected rows
+		if (isSelected)
+			cell.setBackground( Laf.COLOR_TABLE_CELL_SELECTED );
+		else
+			cell.setBackground( null );
 		
 		return cell;
 	}

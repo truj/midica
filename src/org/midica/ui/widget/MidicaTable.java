@@ -8,7 +8,6 @@
 package org.midica.ui.widget;
 
 import javax.swing.JTable;
-import javax.swing.table.JTableHeader;
 
 import org.midica.ui.model.MidicaTableModel;
 
@@ -22,6 +21,7 @@ import org.midica.ui.model.MidicaTableModel;
 public class MidicaTable extends JTable {
 	
 	private static final long serialVersionUID = 1L;
+	private MidicaTableHeader tableHeader = null;
 	
 	/**
 	 * Creates a new table supporting tooltips in the table header.
@@ -57,14 +57,14 @@ public class MidicaTable extends JTable {
 	 * @return the created table header.
 	 */
 	@Override
-	protected JTableHeader createDefaultTableHeader() {
+	public MidicaTableHeader createDefaultTableHeader() {
 		
 		// create the header - that is a listener for column resizes
-		MidicaTableHeader header = new MidicaTableHeader( columnModel );
+		tableHeader = new MidicaTableHeader( columnModel );
 		
 		// let the header listen to column size changes
-		columnModel.addColumnModelListener( header );
+		columnModel.addColumnModelListener( tableHeader );
 		
-		return header;
+		return tableHeader;
 	}
 }

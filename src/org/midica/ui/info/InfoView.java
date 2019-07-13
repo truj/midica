@@ -12,7 +12,6 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.KeyEventPostProcessor;
 import java.awt.KeyboardFocusManager;
 import java.awt.Window;
@@ -22,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 
-import javax.swing.JButton;
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -36,8 +35,8 @@ import javax.swing.ListSelectionModel;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import org.midica.Midica;
-import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.config.Laf;
 import org.midica.file.SequenceParser;
 import org.midica.file.SoundfontParser;
 import org.midica.midi.MessageClassifier;
@@ -61,8 +60,11 @@ import org.midica.ui.renderer.SoundfontInstrumentTableCellRenderer;
 import org.midica.ui.renderer.SoundfontResourceTableCellRenderer;
 import org.midica.ui.renderer.SyntaxTableCellRenderer;
 import org.midica.ui.widget.FlowLabel;
+import org.midica.ui.widget.LinkLabel;
+import org.midica.ui.widget.MidicaButton;
 import org.midica.ui.widget.MidicaSplitPane;
 import org.midica.ui.widget.MidicaTable;
+import org.midica.ui.widget.MidicaTableHeader;
 import org.midica.ui.widget.MidicaTree;
 
 /**
@@ -91,19 +93,19 @@ public class InfoView extends JDialog {
 	private static final long serialVersionUID = 1L;
 	
 	// widths and heights, used for dimensions
-	private static final int COL_WIDTH_NOTE_NUM          =  60;
+	private static final int COL_WIDTH_NOTE_NUM          =  80;
 	private static final int COL_WIDTH_NOTE_NAME         = 240;
-	private static final int COL_WIDTH_PERC_NUM          =  60;
+	private static final int COL_WIDTH_PERC_NUM          =  80;
 	private static final int COL_WIDTH_PERC_ID_SHORT     =  80;
 	private static final int COL_WIDTH_PERC_ID_LONG      = 250;
 	private static final int COL_WIDTH_SYNTAX_NAME       = 180;
 	private static final int COL_WIDTH_SYNTAX_DESC       = 230;
 	private static final int COL_WIDTH_SYNTAX_KEYWORD    = 130;
-	private static final int COL_WIDTH_INSTR_NUM         =  60;
+	private static final int COL_WIDTH_INSTR_NUM         =  80;
 	private static final int COL_WIDTH_INSTR_NAME        = 300;
-	private static final int COL_WIDTH_DRUMKIT_NUM       =  60;
-	private static final int COL_WIDTH_DRUMKIT_NAME      = 200;
-	private static final int COL_WIDTH_SF_INSTR_PROGRAM  =  60;
+	private static final int COL_WIDTH_DRUMKIT_NUM       =  80;
+	private static final int COL_WIDTH_DRUMKIT_NAME      = 300;
+	private static final int COL_WIDTH_SF_INSTR_PROGRAM  =  80;
 	private static final int COL_WIDTH_SF_INSTR_BANK     =  80;
 	private static final int COL_WIDTH_SF_INSTR_NAME     = 300;
 	private static final int COL_WIDTH_SF_INSTR_CHANNELS = 100;
@@ -116,9 +118,9 @@ public class InfoView extends JDialog {
 	private static final int COL_WIDTH_SF_RES_CLASS      = 130;
 	private static final int COL_WIDTH_MSG_TICK          =  80;
 	private static final int COL_WIDTH_MSG_STATUS        =  40;
-	private static final int COL_WIDTH_MSG_TRACK         =  25;
-	private static final int COL_WIDTH_MSG_CHANNEL       =  25;
-	private static final int COL_WIDTH_MSG_LENGTH        =  35;
+	private static final int COL_WIDTH_MSG_TRACK         =  30;
+	private static final int COL_WIDTH_MSG_CHANNEL       =  30;
+	private static final int COL_WIDTH_MSG_LENGTH        =  40;
 	private static final int COL_WIDTH_MSG_SUMMARY       = 120;
 	private static final int COL_WIDTH_MSG_TYPE          = 500;
 	private static final int TABLE_HEIGHT                = 400;
@@ -127,7 +129,7 @@ public class InfoView extends JDialog {
 	private static final int COLLAPSE_EXPAND_HEIGHT      =  25;
 	private static final int TICK_RANGE_FILTER_WIDTH     =  70; // tick text fields in the message filter
 	private static final int TRACK_RANGE_FILTER_WIDTH    =  90; // track text fields in the message filter
-	private static final int FILTER_BUTTON_HEIGHT        =  15;
+	private static final int FILTER_BUTTON_HEIGHT        = Laf.isNimbus ? 19 : 15;
 	
 	// Fake widths and heights, used for dimensions. The real sizes are
 	// determined by the layout manager. But for some reasons,
@@ -142,8 +144,10 @@ public class InfoView extends JDialog {
 	private static final int CPL_MIDI_INFO             =  73; // CPL: characters per line
 	private static final int CPL_SOUNDFONT_INFO        =  73;
 	private static final int CPL_MSG_DETAILS           =  28;
+	private static final int CPL_ABOUT                 =  35;
 	private static final int PWIDTH_GENERAL_INFO_VALUE = 500; // PWIDTH: preferred width
 	private static final int PWIDTH_MSG_DETAIL_CONTENT = 170;
+	private static final int PWIDTH_ABOUT              = 200;
 	private static final int MAX_HEIGHT_SOUNDFONT_DESC = 155; // max height
 	private static final int MAX_HEIGHT_KARAOKE_INFO   =  45; // max height
 	
@@ -190,6 +194,8 @@ public class InfoView extends JDialog {
 	private JPanel                      msgDetails    = null;
 	private MidicaTable                 msgTable      = null;
 	private HashMap<String, JComponent> filterWidgets = null;
+	
+	private static final String logoPath = "org/midica/resources/logo.png";
 	
 	/**
 	 * Creates a new info view window and sets the given owner Dialog.
@@ -244,6 +250,7 @@ public class InfoView extends JDialog {
 	 * Initializes the content of all the tabs inside the info view.
 	 */
 	private void init() {
+		
 		// content
 		content = new JTabbedPane( JTabbedPane.LEFT );
 		getContentPane().add( content );
@@ -343,10 +350,10 @@ public class InfoView extends JDialog {
 		GridBagLayout layout = new GridBagLayout();
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.NONE;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
-		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.fill       = GridBagConstraints.NONE;
+		constraints.insets     = Laf.INSETS_NWE;
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 1;
@@ -354,9 +361,11 @@ public class InfoView extends JDialog {
 		
 		// label
 		JLabel label = new JLabel( Dict.get(Dict.TAB_NOTE_DETAILS) );
-		area.add( label, constraints );
+		Laf.makeBold(label);
+		area.add(label, constraints);
 		
 		// table
+		constraints.insets  = Laf.INSETS_SWE;
 		constraints.fill    = GridBagConstraints.VERTICAL;
 		constraints.weighty = 1;
 		constraints.gridy++;
@@ -389,10 +398,10 @@ public class InfoView extends JDialog {
 		GridBagLayout layout = new GridBagLayout();
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.NONE;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
-		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.fill       = GridBagConstraints.NONE;
+		constraints.insets     = Laf.INSETS_NWE;
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 1;
@@ -400,9 +409,11 @@ public class InfoView extends JDialog {
 		
 		// label
 		JLabel label = new JLabel( Dict.get(Dict.TAB_PERCUSSION_DETAILS) );
-		area.add( label, constraints );
+		Laf.makeBold(label);
+		area.add(label, constraints);
 		
 		// table
+		constraints.insets  = Laf.INSETS_SWE;
 		constraints.fill    = GridBagConstraints.VERTICAL;
 		constraints.weighty = 1;
 		constraints.gridy++;
@@ -434,10 +445,10 @@ public class InfoView extends JDialog {
 		GridBagLayout layout = new GridBagLayout();
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.NONE;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
-		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.fill       = GridBagConstraints.NONE;
+		constraints.insets     = Laf.INSETS_NWE;
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 1;
@@ -445,9 +456,11 @@ public class InfoView extends JDialog {
 		
 		// label
 		JLabel label = new JLabel( Dict.get(Dict.SYNTAX) );
-		area.add( label, constraints );
+		Laf.makeBold(label);
+		area.add(label, constraints);
 		
 		// table
+		constraints.insets  = Laf.INSETS_SWE;
 		constraints.fill    = GridBagConstraints.BOTH;
 		constraints.weighty = 1;
 		constraints.gridy++;
@@ -481,7 +494,7 @@ public class InfoView extends JDialog {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill   = GridBagConstraints.NONE;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
+		constraints.insets = Laf.INSETS_NWE;
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		constraints.gridheight = 1;
@@ -491,9 +504,11 @@ public class InfoView extends JDialog {
 		
 		// label
 		JLabel label = new JLabel( Dict.get(Dict.INSTRUMENT_IDS) );
-		area.add( label, constraints );
+		Laf.makeBold(label);
+		area.add(label, constraints);
 		
 		// table
+		constraints.insets  = Laf.INSETS_SWE;
 		constraints.fill    = GridBagConstraints.VERTICAL;
 		constraints.weighty = 1;
 		constraints.gridy++;
@@ -526,7 +541,7 @@ public class InfoView extends JDialog {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill   = GridBagConstraints.NONE;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
+		constraints.insets = Laf.INSETS_NWE;
 		constraints.gridx = 0;
 		constraints.gridy = 0;
 		constraints.gridheight = 1;
@@ -536,9 +551,11 @@ public class InfoView extends JDialog {
 		
 		// label
 		JLabel label = new JLabel( Dict.get(Dict.DRUMKIT_IDS) );
-		area.add( label, constraints );
+		Laf.makeBold(label);
+		area.add(label, constraints);
 		
 		// table
+		constraints.insets  = Laf.INSETS_SWE;
 		constraints.fill    = GridBagConstraints.VERTICAL;
 		constraints.weighty = 1;
 		constraints.gridy++;
@@ -570,7 +587,6 @@ public class InfoView extends JDialog {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.NONE;
-		constraints.insets     = new Insets( 2, 2, 2, 2 );
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -582,11 +598,14 @@ public class InfoView extends JDialog {
 		HashMap<String, String> soundfontInfo = SoundfontParser.getSoundfontInfo();
 		
 		// file translation
+		constraints.insets = Laf.INSETS_NW;
 		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblFile     = new JLabel( Dict.get(Dict.FILE) + ": " );
-		area.add( lblFile, constraints );
+		Laf.makeBold(lblFile);
+		area.add(lblFile, constraints);
 		
 		// file name
+		constraints.insets = Laf.INSETS_NE;
 		constraints.gridx++;
 		constraints.anchor  = GridBagConstraints.NORTHWEST;
 		constraints.weightx = 1;
@@ -601,116 +620,142 @@ public class InfoView extends JDialog {
 		area.add( lblFileContent, constraints );
 		
 		// name translation
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_W;
+		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.weightx = 0;
 		constraints.anchor  = GridBagConstraints.NORTHEAST;
-		JLabel lblname      = new JLabel( Dict.get(Dict.NAME) + ": " );
-		area.add( lblname, constraints );
+		JLabel lblName      = new JLabel( Dict.get(Dict.NAME) + ": " );
+		Laf.makeBold(lblName);
+		area.add(lblName, constraints);
 		
 		// name content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor       = GridBagConstraints.NORTHWEST;
 		FlowLabel lblNameContent = new FlowLabel( soundfontInfo.get("name"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblNameContent, constraints );
 		
 		// version translation
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_W;
+		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblVersion  = new JLabel( Dict.get(Dict.VERSION) + ": " );
-		area.add( lblVersion, constraints );
+		Laf.makeBold(lblVersion);
+		area.add(lblVersion, constraints);
 		
 		// version content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		FlowLabel lblVersionContent = new FlowLabel( soundfontInfo.get("version"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblVersionContent, constraints );
 		
 		// vendor translation
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_W;
+		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblVendor  = new JLabel( Dict.get(Dict.SOUNDFONT_VENDOR) + ": " );
-		area.add( lblVendor, constraints );
+		Laf.makeBold(lblVendor);
+		area.add(lblVendor, constraints);
 		
 		// vendor content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		FlowLabel lblVendorContent = new FlowLabel( soundfontInfo.get("vendor"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblVendorContent, constraints );
 		
 		// creation date translation
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_W;
+		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.anchor     = GridBagConstraints.NORTHEAST;
 		JLabel lblCreationDate = new JLabel( Dict.get(Dict.SOUNDFONT_CREA_DATE) + ": " );
-		area.add( lblCreationDate, constraints );
+		Laf.makeBold(lblCreationDate);
+		area.add(lblCreationDate, constraints);
 		
 		// creation date content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		FlowLabel lblCreationDateContent = new FlowLabel( soundfontInfo.get("creation_date"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
-		area.add( lblCreationDateContent, constraints );
+		area.add(lblCreationDateContent, constraints);
 		
 		// creation tools translation
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_W;
+		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblTools    = new JLabel( Dict.get(Dict.SOUNDFONT_CREA_TOOLS) + ": " );
-		area.add( lblTools, constraints );
+		Laf.makeBold(lblTools);
+		area.add(lblTools, constraints);
 		
 		// version content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		FlowLabel lblToolsContent = new FlowLabel( soundfontInfo.get("tools"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblToolsContent, constraints );
 		
 		// product translation
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_W;
+		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblProduct  = new JLabel( Dict.get(Dict.SOUNDFONT_PRODUCT) + ": " );
-		area.add( lblProduct, constraints );
+		Laf.makeBold(lblProduct);
+		area.add(lblProduct, constraints);
 		
 		// version content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		FlowLabel lblProductContent = new FlowLabel( soundfontInfo.get("product"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblProductContent, constraints );
 		
 		// target engine translation
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_W;
+		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.anchor     = GridBagConstraints.NORTHEAST;
 		JLabel lblTargetEngine = new JLabel( Dict.get(Dict.SOUNDFONT_TARGET_ENGINE) + ": " );
-		area.add( lblTargetEngine, constraints );
+		Laf.makeBold(lblTargetEngine);
+		area.add(lblTargetEngine, constraints);
 		
 		// version content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		FlowLabel lblTargetEngineContent = new FlowLabel( soundfontInfo.get("target_engine"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblTargetEngineContent, constraints );
 		
 		// chromatic instruments translation
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_W;
+		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblChromatic  = new JLabel( Dict.get(Dict.SF_INSTR_CAT_CHROMATIC) + ": " );
-		area.add( lblChromatic, constraints );
+		Laf.makeBold(lblChromatic);
+		area.add(lblChromatic, constraints);
 		
 		// chromatic instruments content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		FlowLabel lblChromaticContent = new FlowLabel( soundfontInfo.get("chromatic_count"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblChromaticContent, constraints );
 		
 		// drum kits translation
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_W;
+		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.anchor       = GridBagConstraints.NORTHEAST;
 		JLabel lblDrumkitsSingle = new JLabel( Dict.get(Dict.SOUNDFONT_DRUMKITS) + ": " );
-		area.add( lblDrumkitsSingle, constraints );
+		Laf.makeBold(lblDrumkitsSingle);
+		area.add(lblDrumkitsSingle, constraints);
 		
 		// drum kits content
 		int drumSingle = Integer.parseInt( soundfontInfo.get("drumkit_single_count") );
@@ -719,17 +764,20 @@ public class InfoView extends JDialog {
 		String drumkitsContent = drumTotal  + " ("
 		                       + drumSingle + " " + Dict.get( Dict.SINGLE_CHANNEL ) + ", "
 		                       + drumMulti  + " " + Dict.get( Dict.MULTI_CHANNEL  ) + ")";
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		FlowLabel lblDrumkitsSingleContent = new FlowLabel( drumkitsContent, CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblDrumkitsSingleContent, constraints );
 		
 		// resources translation
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_W;
+		constraints.gridx  = 0;
 		constraints.gridy++;
-		constraints.anchor = GridBagConstraints.NORTHEAST;
-		JLabel lblLayers  = new JLabel( Dict.get(Dict.TAB_SOUNDFONT_RESOURCES) + ": " );
-		area.add( lblLayers, constraints );
+		constraints.anchor  = GridBagConstraints.NORTHEAST;
+		JLabel lblResources = new JLabel( Dict.get(Dict.TAB_SOUNDFONT_RESOURCES) + ": " );
+		Laf.makeBold(lblResources);
+		area.add(lblResources, constraints);
 		
 		// resources content
 		int resLayer   = Integer.parseInt( soundfontInfo.get("layer_count")            );
@@ -739,19 +787,23 @@ public class InfoView extends JDialog {
 		String resourcesContent = resourcesTotal + " ("
 		             + resLayer   + " " + Dict.get( Dict.SF_RESOURCE_CAT_LAYER  ) + ", "
 		             + resSample  + " " + Dict.get( Dict.SF_RESOURCE_CAT_SAMPLE ) + ")";
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		FlowLabel lblLayersContent = new FlowLabel( resourcesContent, CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblLayersContent, constraints );
 		
 		// total length translation
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_W;
+		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblTotal    = new JLabel( Dict.get(Dict.SAMPLES_TOTAL) + ": " );
-		area.add( lblTotal, constraints );
+		Laf.makeBold(lblTotal);
+		area.add(lblTotal, constraints);
 		
 		// total length content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor  = GridBagConstraints.NORTHWEST;
 		String totalContent = soundfontInfo.get( "frames_count" )  + " " + Dict.get( Dict.FRAMES ) + ", "
@@ -761,13 +813,16 @@ public class InfoView extends JDialog {
 		area.add( lblTotalContent, constraints );
 		
 		// average length translation
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_W;
+		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblAverage  = new JLabel( Dict.get(Dict.SAMPLES_AVERAGE) + ": " );
-		area.add( lblAverage, constraints );
+		Laf.makeBold(lblAverage);
+		area.add(lblAverage, constraints);
 		
 		// average length content
+		constraints.insets = Laf.INSETS_W;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		String avgContent  = soundfontInfo.get( "frames_avg"  ) + " " + Dict.get( Dict.FRAMES ) + ", "
@@ -777,13 +832,16 @@ public class InfoView extends JDialog {
 		area.add( lblAverageContent, constraints );
 		
 		// description translation
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_SW;
+		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.anchor    = GridBagConstraints.NORTHEAST;
 		JLabel lblDescription = new JLabel( Dict.get(Dict.DESCRIPTION) + ": " );
-		area.add( lblDescription, constraints );
+		Laf.makeBold(lblDescription);
+		area.add(lblDescription, constraints);
 		
 		// description content
+		constraints.insets = Laf.INSETS_SE;
 		constraints.gridx++;
 		constraints.anchor  = GridBagConstraints.NORTHWEST;
 		constraints.weighty = 1;
@@ -808,7 +866,6 @@ public class InfoView extends JDialog {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.NONE;
-		constraints.insets     = new Insets( 2, 2, 2, 2 );
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -820,11 +877,14 @@ public class InfoView extends JDialog {
 		HashMap<String, Object> sequenceInfo = SequenceAnalyzer.getSequenceInfo();
 		
 		// file translation
+		constraints.insets = Laf.INSETS_NW;
 		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblFile     = new JLabel( Dict.get(Dict.FILE) + ": " );
-		area.add( lblFile, constraints );
+		Laf.makeBold(lblFile);
+		area.add(lblFile, constraints);
 		
 		// file name
+		constraints.insets = Laf.INSETS_NE;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		String filename    = SequenceParser.getFileName();
@@ -835,13 +895,16 @@ public class InfoView extends JDialog {
 		area.add( lblFileContent, constraints );
 		
 		// copyright translation
+		constraints.insets = Laf.INSETS_W;
 		constraints.gridy++;
 		constraints.gridx  = 0;
 		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblCopy     = new JLabel( Dict.get(Dict.COPYRIGHT) + ": " );
-		area.add( lblCopy, constraints );
+		Laf.makeBold(lblCopy);
+		area.add(lblCopy, constraints);
 		
 		// copyright content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		String copyright                 = "-";
@@ -855,13 +918,16 @@ public class InfoView extends JDialog {
 		area.add( lblCopyContent, constraints );
 		
 		// software translation
+		constraints.insets = Laf.INSETS_W;
 		constraints.gridy++;
 		constraints.gridx  = 0;
 		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblSoftware = new JLabel( Dict.get(Dict.SOFTWARE_VERSION) + ": " );
-		area.add( lblSoftware, constraints );
+		Laf.makeBold(lblSoftware);
+		area.add(lblSoftware, constraints);
 		
 		// software content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor  = GridBagConstraints.NORTHWEST;
 		String software     = "-";
@@ -876,13 +942,16 @@ public class InfoView extends JDialog {
 		area.add( lblSoftwareContent, constraints );
 		
 		// ticks translation
+		constraints.insets = Laf.INSETS_W;
 		constraints.gridy++;
 		constraints.gridx  = 0;
 		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblTicks    = new JLabel( Dict.get(Dict.TICK_LENGTH) + ": " );
-		area.add( lblTicks, constraints );
+		Laf.makeBold(lblTicks);
+		area.add(lblTicks, constraints);
 		
 		// ticks content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		String lenghStr = "-";
@@ -893,13 +962,16 @@ public class InfoView extends JDialog {
 		area.add( lblTicksContent, constraints );
 		
 		// time translation
+		constraints.insets = Laf.INSETS_W;
 		constraints.gridy++;
 		constraints.gridx  = 0;
 		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblTime     = new JLabel( Dict.get(Dict.TIME_LENGTH) + ": " );
-		area.add( lblTime, constraints );
+		Laf.makeBold(lblTime);
+		area.add(lblTime, constraints);
 		
 		// time content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		lenghStr = "-";
@@ -910,13 +982,16 @@ public class InfoView extends JDialog {
 		area.add( lblTimeContent, constraints );
 		
 		// resolution translation
+		constraints.insets = Laf.INSETS_W;
 		constraints.gridy++;
 		constraints.gridx    = 0;
 		constraints.anchor   = GridBagConstraints.NORTHEAST;
 		JLabel lblResolution = new JLabel( Dict.get(Dict.RESOLUTION) + ": " );
-		area.add( lblResolution, constraints );
+		Laf.makeBold(lblResolution);
+		area.add(lblResolution, constraints);
 		
 		// resolution content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		String resolution  = "-";
@@ -926,13 +1001,16 @@ public class InfoView extends JDialog {
 		area.add( lblResolutionContent, constraints );
 		
 		// number of tracks translation
+		constraints.insets = Laf.INSETS_W;
 		constraints.gridy++;
-		constraints.gridx    = 0;
-		constraints.anchor   = GridBagConstraints.NORTHEAST;
-		JLabel lblNumTracks  = new JLabel( Dict.get(Dict.NUMBER_OF_TRACKS) + ": " );
-		area.add( lblNumTracks, constraints );
+		constraints.gridx   = 0;
+		constraints.anchor  = GridBagConstraints.NORTHEAST;
+		JLabel lblNumTracks = new JLabel( Dict.get(Dict.NUMBER_OF_TRACKS) + ": " );
+		Laf.makeBold(lblNumTracks);
+		area.add(lblNumTracks, constraints);
 		
 		// number of tracks content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		String numTracks   = "-";
@@ -950,22 +1028,27 @@ public class InfoView extends JDialog {
 		area.add( spacerLine1, constraints );
 		
 		// tempo BPM headline
+		constraints.insets = Laf.INSETS_WE;
 		constraints.gridwidth = 2; // colspan
 		constraints.gridy++;
 		constraints.gridx    = 0;
 		constraints.anchor   = GridBagConstraints.NORTHWEST;
 		JLabel lblTempoBpmHeadline = new JLabel( Dict.get(Dict.TEMPO_BPM) );
-		area.add( lblTempoBpmHeadline, constraints );
+		Laf.makeBold(lblTempoBpmHeadline);
+		area.add(lblTempoBpmHeadline, constraints);
 		constraints.gridwidth = 1; // end of colspan
 		
 		// BPM average translation
+		constraints.insets = Laf.INSETS_W;
 		constraints.gridy++;
 		constraints.gridx    = 0;
 		constraints.anchor   = GridBagConstraints.NORTHEAST;
 		JLabel lblBpmAvg = new JLabel( Dict.get(Dict.AVERAGE) + ": " );
-		area.add( lblBpmAvg, constraints );
+		Laf.makeBold(lblBpmAvg);
+		area.add(lblBpmAvg, constraints);
 		
 		// BPM average content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		String tempoStr = "-";
@@ -976,13 +1059,16 @@ public class InfoView extends JDialog {
 		area.add( lblBpmAvgContent, constraints );
 		
 		// BPM min translation
+		constraints.insets = Laf.INSETS_W;
 		constraints.gridy++;
 		constraints.gridx    = 0;
 		constraints.anchor   = GridBagConstraints.NORTHEAST;
 		JLabel lblBpmMin = new JLabel( Dict.get(Dict.MIN) + ": " );
-		area.add( lblBpmMin, constraints );
+		Laf.makeBold(lblBpmMin);
+		area.add(lblBpmMin, constraints);
 		
 		// BPM min content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		tempoObj           = sequenceInfo.get("tempo_bpm_min");
@@ -992,13 +1078,16 @@ public class InfoView extends JDialog {
 		area.add( lblBpmMinContent, constraints );
 		
 		// BPM max translation
+		constraints.insets = Laf.INSETS_W;
 		constraints.gridy++;
 		constraints.gridx    = 0;
 		constraints.anchor   = GridBagConstraints.NORTHEAST;
 		JLabel lblBpmMax = new JLabel( Dict.get(Dict.MAX) + ": " );
-		area.add( lblBpmMax, constraints );
+		Laf.makeBold(lblBpmMax);
+		area.add(lblBpmMax, constraints);
 		
 		// BPM max content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		tempoObj           = sequenceInfo.get("tempo_bpm_max");
@@ -1014,22 +1103,27 @@ public class InfoView extends JDialog {
 		area.add( spacerLine2, constraints );
 		
 		// tempo MPQ headline
+		constraints.insets = Laf.INSETS_WE;
 		constraints.gridwidth = 2; // colspan
 		constraints.gridy++;
 		constraints.gridx    = 0;
 		constraints.anchor   = GridBagConstraints.NORTHWEST;
 		JLabel lblTempoMpqHeadline = new JLabel( Dict.get(Dict.TEMPO_MPQ) );
-		area.add( lblTempoMpqHeadline, constraints );
+		Laf.makeBold(lblTempoMpqHeadline);
+		area.add(lblTempoMpqHeadline, constraints);
 		constraints.gridwidth = 1; // end of colspan
 		
 		// MPQ average translation
+		constraints.insets = Laf.INSETS_W;
 		constraints.gridy++;
 		constraints.gridx    = 0;
 		constraints.anchor   = GridBagConstraints.NORTHEAST;
 		JLabel lblMpqAvg = new JLabel( Dict.get(Dict.AVERAGE) + ": " );
-		area.add( lblMpqAvg, constraints );
+		Laf.makeBold(lblMpqAvg);
+		area.add(lblMpqAvg, constraints);
 		
 		// MPQ average content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		tempoObj           = sequenceInfo.get("tempo_mpq_avg");
@@ -1039,13 +1133,16 @@ public class InfoView extends JDialog {
 		area.add( lblMpqAvgContent, constraints );
 		
 		// MPQ min translation
+		constraints.insets = Laf.INSETS_W;
 		constraints.gridy++;
 		constraints.gridx    = 0;
 		constraints.anchor   = GridBagConstraints.NORTHEAST;
 		JLabel lblMpqMin = new JLabel( Dict.get(Dict.MIN) + ": " );
-		area.add( lblMpqMin, constraints );
+		Laf.makeBold(lblMpqMin);
+		area.add(lblMpqMin, constraints);
 		
 		// MPQ min content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		tempoObj           = sequenceInfo.get("tempo_mpq_min");
@@ -1055,13 +1152,17 @@ public class InfoView extends JDialog {
 		area.add( lblMpqMinContent, constraints );
 		
 		// MPQ max translation
+		constraints.insets = Laf.INSETS_SW;
 		constraints.gridy++;
 		constraints.gridx    = 0;
 		constraints.anchor   = GridBagConstraints.NORTHEAST;
 		JLabel lblMpqMax = new JLabel( Dict.get(Dict.MAX) + ": " );
-		area.add( lblMpqMax, constraints );
+		Laf.makeBold(lblMpqMax);
+		area.add(lblMpqMax, constraints);
 		
 		// MPQ max content
+		constraints.insets  = Laf.INSETS_SE;
+		constraints.weighty = 1;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
 		tempoObj           = sequenceInfo.get("tempo_mpq_max");
@@ -1069,13 +1170,6 @@ public class InfoView extends JDialog {
 			tempoStr = (String) tempoObj;
 		FlowLabel lblMpqMaxContent = new FlowLabel( tempoStr, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
 		area.add( lblMpqMaxContent, constraints );
-		
-		// spacer
-		constraints.gridy++;
-		constraints.gridx   = 0;
-		constraints.weighty = 1;
-		JLabel spacer = new JLabel( " " );
-		area.add( spacer, constraints );
 		
 		return area;
 	}
@@ -1095,7 +1189,7 @@ public class InfoView extends JDialog {
 		area.setLayout( layout );
 		GridBagConstraints constrLeft = new GridBagConstraints();
 		constrLeft.fill       = GridBagConstraints.NONE;
-		constrLeft.insets     = new Insets( 2, 2, 2, 2 );
+		constrLeft.insets     = Laf.INSETS_NW;
 		constrLeft.gridx      = 0;
 		constrLeft.gridy      = 0;
 		constrLeft.gridheight = 1;
@@ -1105,6 +1199,7 @@ public class InfoView extends JDialog {
 		constrLeft.anchor     = GridBagConstraints.NORTHEAST;
 		GridBagConstraints constrRight = (GridBagConstraints) constrLeft.clone();
 		constrRight.gridx++;
+		constrRight.insets  = Laf.INSETS_NE;
 		constrRight.weightx = 1;
 		constrRight.fill    = GridBagConstraints.HORIZONTAL;
 		constrRight.anchor  = GridBagConstraints.NORTHWEST;
@@ -1117,7 +1212,8 @@ public class InfoView extends JDialog {
 		
 		// karaoke type
 		JLabel lblKarType = new JLabel( Dict.get(Dict.KARAOKE_TYPE) + ": " );
-		area.add( lblKarType, constrLeft );
+		Laf.makeBold(lblKarType);
+		area.add(lblKarType, constrLeft);
 		
 		// karaoke type content
 		String karType = "-";
@@ -1127,11 +1223,14 @@ public class InfoView extends JDialog {
 		area.add( lblKarTypeContent, constrRight );
 		
 		// version
+		constrLeft.insets = Laf.INSETS_W;
 		constrLeft.gridy++;
 		JLabel lblVersion  = new JLabel( Dict.get(Dict.VERSION) + ": " );
-		area.add( lblVersion, constrLeft );
+		Laf.makeBold(lblVersion);
+		area.add(lblVersion, constrLeft);
 		
 		// version content
+		constrRight.insets = Laf.INSETS_E;
 		constrRight.gridy++;
 		String version = "-";
 		if ( null != karaokeInfo.get("version") )
@@ -1142,7 +1241,8 @@ public class InfoView extends JDialog {
 		// title
 		constrLeft.gridy++;
 		JLabel lblTitle = new JLabel( Dict.get(Dict.SONG_TITLE) + ": " );
-		area.add( lblTitle, constrLeft );
+		Laf.makeBold(lblTitle);
+		area.add(lblTitle, constrLeft);
 		
 		// title content
 		constrRight.gridy++;
@@ -1155,7 +1255,8 @@ public class InfoView extends JDialog {
 		// author
 		constrLeft.gridy++;
 		JLabel lblAuthor = new JLabel( Dict.get(Dict.AUTHOR) + ": " );
-		area.add( lblAuthor, constrLeft );
+		Laf.makeBold(lblAuthor);
+		area.add(lblAuthor, constrLeft);
 		
 		// author content
 		constrRight.gridy++;
@@ -1168,7 +1269,8 @@ public class InfoView extends JDialog {
 		// composer
 		constrLeft.gridy++;
 		JLabel lblComposer = new JLabel( Dict.get(Dict.COMPOSER) + ": " );
-		area.add( lblComposer, constrLeft );
+		Laf.makeBold(lblComposer);
+		area.add(lblComposer, constrLeft);
 		
 		// composer content
 		constrRight.gridy++;
@@ -1181,7 +1283,8 @@ public class InfoView extends JDialog {
 		// lyricist
 		constrLeft.gridy++;
 		JLabel lblLyricist = new JLabel( Dict.get(Dict.LYRICIST) + ": " );
-		area.add( lblLyricist, constrLeft );
+		Laf.makeBold(lblLyricist);
+		area.add(lblLyricist, constrLeft);
 		
 		// lyricist content
 		constrRight.gridy++;
@@ -1194,7 +1297,8 @@ public class InfoView extends JDialog {
 		// artist
 		constrLeft.gridy++;
 		JLabel lblArtist = new JLabel( Dict.get(Dict.ARTIST) + ": " );
-		area.add( lblArtist, constrLeft );
+		Laf.makeBold(lblArtist);
+		area.add(lblArtist, constrLeft);
 		
 		// artist content
 		constrRight.gridy++;
@@ -1207,7 +1311,8 @@ public class InfoView extends JDialog {
 		// copyright
 		constrLeft.gridy++;
 		JLabel lblCopyright = new JLabel( Dict.get(Dict.KARAOKE_COPYRIGHT) + ": " );
-		area.add( lblCopyright, constrLeft );
+		Laf.makeBold(lblCopyright);
+		area.add(lblCopyright, constrLeft);
 		
 		// copyright content
 		constrRight.gridy++;
@@ -1220,7 +1325,8 @@ public class InfoView extends JDialog {
 		// language
 		constrLeft.gridy++;
 		JLabel lblLanguage = new JLabel( Dict.get(Dict.LANGUAGE) + ": " );
-		area.add( lblLanguage, constrLeft );
+		Laf.makeBold(lblLanguage);
+		area.add(lblLanguage, constrLeft);
 		
 		// language content
 		constrRight.gridy++;
@@ -1233,7 +1339,8 @@ public class InfoView extends JDialog {
 		// info
 		constrLeft.gridy++;
 		JLabel lblInfo = new JLabel( Dict.get(Dict.KARAOKE_INFO) + ": " );
-		area.add( lblInfo, constrLeft );
+		Laf.makeBold(lblInfo);
+		area.add(lblInfo, constrLeft);
 		
 		// info content
 		constrRight.gridy++;
@@ -1245,11 +1352,14 @@ public class InfoView extends JDialog {
 		area.add( lblInfoContent, constrRight );
 		
 		// lyrics translation
+		constrLeft.insets = Laf.INSETS_SW;
 		constrLeft.gridy++;
 		JLabel lblLyrics = new JLabel( Dict.get(Dict.LYRICS) + ": " );
-		area.add( lblLyrics, constrLeft );
+		Laf.makeBold(lblLyrics);
+		area.add(lblLyrics, constrLeft);
 		
 		// lyrics content
+		constrRight.insets = Laf.INSETS_SE;
 		constrRight.gridy++;
 		constrRight.weighty = 1;
 		constrRight.fill    = GridBagConstraints.BOTH;
@@ -1310,7 +1420,7 @@ public class InfoView extends JDialog {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
-		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.insets     = inTotal ? Laf.INSETS_NW : Laf.INSETS_NE;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -1337,6 +1447,7 @@ public class InfoView extends JDialog {
 		area.add( head, constraints );
 		
 		// tree
+		constraints.insets = inTotal ? Laf.INSETS_SW : Laf.INSETS_SE;
 		constraints.gridy++;
 		constraints.weighty = 1;
 		MidicaTree  tree    = new MidicaTree( model );
@@ -1364,7 +1475,7 @@ public class InfoView extends JDialog {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.NONE;
-		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.insets     = Laf.INSETS_IN;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -1375,20 +1486,20 @@ public class InfoView extends JDialog {
 		
 		// headline translation
 		JLabel lblHeadline = new JLabel( headline );
-		area.add( lblHeadline, constraints );
+		Laf.makeBold(lblHeadline);
+		area.add(lblHeadline, constraints);
 		
 		// spacer
 		constraints.gridx++;
-		JLabel spacer1 = new JLabel( "<html>&nbsp;" );
+		JLabel spacer1 = new JLabel(" ");
 		area.add( spacer1, constraints );
 		
 		// collapse button
 		constraints.gridx++;
-		Insets buttonInsets = new Insets( 0, 0, 0, 0 );
-		JButton btnCollapse = new JButton( Dict.get(Dict.COLLAPSE_BUTTON) );
+		MidicaButton btnCollapse = new MidicaButton( Dict.get(Dict.COLLAPSE_BUTTON) );
 		btnCollapse.setToolTipText( Dict.get(Dict.COLLAPSE_TOOLTIP) );
 		btnCollapse.setPreferredSize( collapseExpandDim );
-		btnCollapse.setMargin( buttonInsets );
+		btnCollapse.setMargin( Laf.INSETS_BTN_EXPAND_COLLAPSE );
 		btnCollapse.setName( btnName );
 		btnCollapse.setActionCommand( InfoController.CMD_COLLAPSE );
 		btnCollapse.addActionListener( controller );
@@ -1401,10 +1512,10 @@ public class InfoView extends JDialog {
 		
 		// expand button
 		constraints.gridx++;
-		JButton btnExpand = new JButton( Dict.get(Dict.EXPAND_BUTTON) );
+		MidicaButton btnExpand = new MidicaButton( Dict.get(Dict.EXPAND_BUTTON) );
 		btnExpand.setToolTipText( Dict.get(Dict.EXPAND_TOOLTIP) );
 		btnExpand.setPreferredSize( collapseExpandDim );
-		btnExpand.setMargin( buttonInsets );
+		btnExpand.setMargin( Laf.INSETS_BTN_EXPAND_COLLAPSE );
 		btnExpand.setName( btnName );
 		btnExpand.setActionCommand( InfoController.CMD_EXPAND );
 		btnExpand.addActionListener( controller );
@@ -1455,7 +1566,7 @@ public class InfoView extends JDialog {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
-		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.insets     = Laf.INSETS_NW;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -1490,6 +1601,7 @@ public class InfoView extends JDialog {
 		area.add( head, constraints );
 		
 		// message tree
+		constraints.insets = Laf.INSETS_W;
 		constraints.gridy++;
 		constraints.weightx = 1;
 		constraints.weighty = 1;
@@ -1497,9 +1609,14 @@ public class InfoView extends JDialog {
 		msgTree.setName( InfoController.NAME_TREE_MESSAGES );
 		msgTree.addTreeSelectionListener( controller );
 		msgTree.addFocusListener( controller );
-		msgTree.setBackground( Config.MSG_TREE_COLOR );
+		msgTree.setBackground( Laf.COLOR_MSG_TREE );
+		msgTree.setMsgTreeFlag();
+		
+		// use the tree's background color also for the nodes - important for metal look and feel
 		DefaultTreeCellRenderer renderer = (DefaultTreeCellRenderer) msgTree.getCellRenderer();
-		renderer.setBackgroundNonSelectionColor( null ); // use the tree's color also for the nodes
+		renderer.setBackgroundNonSelectionColor(null);
+		
+		// add tree to area
 		JScrollPane msgScroll = new JScrollPane( msgTree );
 		model.setTree( msgTree );
 		msgScroll.setPreferredSize( msgTreeDim );
@@ -1522,7 +1639,7 @@ public class InfoView extends JDialog {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.NONE;
-		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.insets     = Laf.INSETS_NE;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -1533,7 +1650,8 @@ public class InfoView extends JDialog {
 		
 		// details headline
 		JLabel lblDetails = new JLabel( Dict.get(Dict.DETAILS) );
-		area.add( lblDetails, constraints );
+		Laf.makeBold(lblDetails);
+		area.add(lblDetails, constraints);
 		
 		// synchronize with the tree headline from the other
 		// half of the split pane
@@ -1542,13 +1660,14 @@ public class InfoView extends JDialog {
 		lblDetails.setPreferredSize( headlineDim );
 		
 		// details content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridy++;
 		constraints.weightx = 1;
 		constraints.weighty = 1;
 		constraints.fill    = GridBagConstraints.BOTH;
 		msgDetails = new JPanel();
 		msgDetails.setLayout( layout );
-		msgDetails.setBackground( Config.MSG_DEFAULT_COLOR );
+		msgDetails.setBackground( Laf.COLOR_MSG_DEFAULT );
 		JScrollPane detailsScroll = new JScrollPane( msgDetails );
 		detailsScroll.setPreferredSize( msgDetailsDim );
 		area.add( detailsScroll, constraints );
@@ -1570,7 +1689,7 @@ public class InfoView extends JDialog {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
-		constraints.insets     = new Insets( 0, 0, 0, 0 );
+		constraints.insets     = Laf.INSETS_WE;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -1598,6 +1717,7 @@ public class InfoView extends JDialog {
 		area.add( filter, constraints );
 		
 		// message table
+		constraints.insets = Laf.INSETS_SWE;
 		constraints.gridy++;
 		constraints.weightx     = 1;
 		constraints.weighty     = 1;
@@ -1614,8 +1734,12 @@ public class InfoView extends JDialog {
 		msgTable.getColumnModel().getColumn( 4 ).setPreferredWidth( COL_WIDTH_MSG_LENGTH  );
 		msgTable.getColumnModel().getColumn( 5 ).setPreferredWidth( COL_WIDTH_MSG_SUMMARY );
 		msgTable.getColumnModel().getColumn( 6 ).setPreferredWidth( COL_WIDTH_MSG_TYPE    );
-		MessageTableCellRenderer renderer = new MessageTableCellRenderer( model, Config.MSG_TABLE_COLOR );
+		MessageTableCellRenderer renderer = new MessageTableCellRenderer( model );
 		msgTable.setDefaultRenderer( Object.class, renderer );
+		MidicaTableHeader header = (MidicaTableHeader) msgTable.getTableHeader();
+		header.setBackground( Laf.COLOR_MSG_TABLE_HEADER_BG );
+		header.setForeground( Laf.COLOR_MSG_TABLE_HEADER_TXT );
+		msgTable.setGridColor( Laf.COLOR_MSG_TABLE_GRID );
 		
 		JScrollPane scroll = new JScrollPane( msgTable );
 		scroll.setPreferredSize( msgTableDim );
@@ -1646,7 +1770,7 @@ public class InfoView extends JDialog {
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.anchor     = GridBagConstraints.WEST;
 		constraints.fill       = GridBagConstraints.NONE;
-		constraints.insets     = new Insets( 0, 0, 0, 0 );
+		constraints.insets     = Laf.INSETS_ZERO;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -1666,6 +1790,7 @@ public class InfoView extends JDialog {
 		filterWidgets.put( FILTER_CBX_CHAN_INDEP, cbxChannelIndep );
 		
 		// checkbox to filter selected tree nodes
+		constraints.insets = Laf.INSETS_MSG_FILTER_CBX_LBL;
 		constraints.gridx++;
 		JCheckBox cbxFilterNodes = new JCheckBox( Dict.get(Dict.MSG_FILTER_SELECTED_NODES) );
 		cbxFilterNodes.setToolTipText( Dict.get(Dict.MSG_FLTR_TT_SELECTED_NODES) );
@@ -1674,8 +1799,17 @@ public class InfoView extends JDialog {
 		area.add( cbxFilterNodes, constraints );
 		filterWidgets.put( FILTER_CBX_NODE, cbxFilterNodes );
 		
+		// spacer
+		constraints.gridx++;
+		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.weightx    = 1;
+		JLabel spacerNodesTicks = new JLabel("");
+		area.add( spacerNodesTicks, constraints );
+		
 		// checkbox to limit ticks
 		constraints.gridx++;
+		constraints.fill    = GridBagConstraints.NONE;
+		constraints.weightx = 0;
 		JCheckBox cbxLimitTicks = new JCheckBox( Dict.get(Dict.MSG_FILTER_LIMIT_TICKS) );
 		cbxLimitTicks.setToolTipText( Dict.get(Dict.MSG_FLTR_TT_LIMIT_TICKS) );
 		cbxLimitTicks.addItemListener( controller );
@@ -1685,57 +1819,56 @@ public class InfoView extends JDialog {
 		
 		// spacer
 		constraints.gridx++;
-		constraints.fill       = GridBagConstraints.BOTH;
-		constraints.weightx    = 1;
-		JLabel spacerTickRange = new JLabel( "<html>&nbsp;&nbsp;&nbsp;" );
+		JLabel spacerTickRange = new JLabel(" ");
 		area.add( spacerTickRange, constraints );
 		
 		// ticks: "from" label
 		constraints.gridx++;
-		constraints.fill    = GridBagConstraints.NONE;
-		constraints.weightx = 0;
+		constraints.insets  = Laf.INSETS_MSG_FILTER_FROM_TO_LBL;
 		JLabel lblFromTicks = new JLabel( Dict.get(Dict.MSG_FILTER_TICK_FROM) + ": " );
 		area.add( lblFromTicks, constraints );
 		
 		// dimension for text fields
-		int defaultHeight      = ( new JTextField() ).getHeight();
-		Dimension dimTicksFld  = new Dimension( TICK_RANGE_FILTER_WIDTH,  defaultHeight );
-		Dimension dimTracksFld = new Dimension( TRACK_RANGE_FILTER_WIDTH, defaultHeight );
+		Dimension dimTicksFld  = new Dimension( TICK_RANGE_FILTER_WIDTH,  Laf.textFieldHeight );
+		Dimension dimTracksFld = new Dimension( TRACK_RANGE_FILTER_WIDTH, Laf.textFieldHeight );
 		
 		// ticks: "from" textfield
+		constraints.insets = Laf.INSETS_MSG_FILTER_CBX_LBL;
 		constraints.gridx++;
-		constraints.fill        = GridBagConstraints.VERTICAL;
 		JTextField txtFromTicks = new JTextField( minTick + "" );
 		txtFromTicks.setPreferredSize( dimTicksFld );
 		txtFromTicks.setName( FILTER_TXT_FROM_TICKS );
 		txtFromTicks.setEnabled( false );
 		txtFromTicks.getDocument().putProperty( "name", FILTER_TXT_FROM_TICKS );
 		txtFromTicks.getDocument().addDocumentListener( controller );
-		txtFromTicks.setBackground( Config.COLOR_NORMAL );
+		txtFromTicks.setBackground( Laf.COLOR_NORMAL );
 		area.add( txtFromTicks, constraints );
 		filterWidgets.put( FILTER_TXT_FROM_TICKS, txtFromTicks );
 		
 		// spacer
-		constraints.gridx++;
-		constraints.fill    = GridBagConstraints.NONE;
-		JLabel spacerFromTo = new JLabel( " " );
-		area.add( spacerFromTo, constraints );
+		if (Laf.isMetal) {
+			constraints.gridx++;
+			constraints.fill    = GridBagConstraints.NONE;
+			JLabel spacerFromTo = new JLabel(" ");
+			area.add( spacerFromTo, constraints );
+		}
 		
 		// ticks: "to" label
 		constraints.gridx++;
-		JLabel lblToTicks = new JLabel( Dict.get(Dict.MSG_FILTER_TICK_TO) + ": " );
+		constraints.insets = Laf.INSETS_MSG_FILTER_FROM_TO_LBL;
+		JLabel lblToTicks  = new JLabel( Dict.get(Dict.MSG_FILTER_TICK_TO) + ": " );
 		area.add( lblToTicks, constraints );
 		
 		// ticks: "to" textfield
+		constraints.insets = Laf.INSETS_MSG_FILTER_CBX_LBL;
 		constraints.gridx++;
-		constraints.fill      = GridBagConstraints.VERTICAL;
 		JTextField txtToTicks = new JTextField( maxTick + "" );
 		txtToTicks.setPreferredSize( dimTicksFld );
 		txtToTicks.setName( FILTER_TXT_TO_TICKS );
 		txtToTicks.setEnabled( false );
 		txtToTicks.getDocument().putProperty( "name", FILTER_TXT_TO_TICKS );
 		txtToTicks.getDocument().addDocumentListener( controller );
-		txtToTicks.setBackground( Config.COLOR_NORMAL );
+		txtToTicks.setBackground( Laf.COLOR_NORMAL );
 		area.add( txtToTicks, constraints );
 		filterWidgets.put( FILTER_TXT_TO_TICKS, txtToTicks );
 		
@@ -1743,7 +1876,7 @@ public class InfoView extends JDialog {
 		constraints.gridx++;
 		constraints.weightx    = 1;
 		constraints.fill       = GridBagConstraints.BOTH;
-		JLabel spacerTickTrack = new JLabel( "<html>&nbsp;&nbsp;&nbsp;" );
+		JLabel spacerTickTrack = new JLabel("");
 		area.add( spacerTickTrack, constraints );
 		
 		// checkbox to limit tracks
@@ -1756,11 +1889,6 @@ public class InfoView extends JDialog {
 		cbxTracks.setName( FILTER_CBX_LIMIT_TRACKS );
 		area.add( cbxTracks, constraints );
 		filterWidgets.put( FILTER_CBX_LIMIT_TRACKS, cbxTracks );
-		
-		// spacer
-		constraints.gridx++;
-		JLabel spacerTrack = new JLabel( "<html>&nbsp;" );
-		area.add( spacerTrack, constraints );
 		
 		// get max track number
 		int maxTrack = 0;
@@ -1780,7 +1908,7 @@ public class InfoView extends JDialog {
 		txtTracks.setEnabled( false );
 		txtTracks.getDocument().putProperty( "name", FILTER_TXT_TRACKS );
 		txtTracks.getDocument().addDocumentListener( controller );
-		txtTracks.setBackground( Config.COLOR_NORMAL );
+		txtTracks.setBackground( Laf.COLOR_NORMAL );
 		txtTracks.setToolTipText( Dict.get(Dict.MSG_FLTR_TT_TRACKS) );
 		area.add( txtTracks, constraints );
 		filterWidgets.put( FILTER_TXT_TRACKS, txtTracks );
@@ -1788,6 +1916,7 @@ public class InfoView extends JDialog {
 		// line 2
 		
 		// checkbox to filter channel messages
+		constraints.insets = Laf.INSETS_ZERO;
 		constraints.gridy++;
 		constraints.gridx       = 0;
 		constraints.fill        = GridBagConstraints.NONE;
@@ -1832,7 +1961,7 @@ public class InfoView extends JDialog {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.HORIZONTAL;
-		constraints.insets     = new Insets( 0, 0, 0, 0 );
+		constraints.insets     = Laf.INSETS_MSG_FILTER_CBX_LBL;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -1854,6 +1983,7 @@ public class InfoView extends JDialog {
 		}
 		
 		// spacer
+		constraints.insets = Laf.INSETS_ZERO;
 		constraints.gridx++;
 		constraints.weightx    = 1;
 		constraints.fill       = GridBagConstraints.HORIZONTAL;
@@ -1881,7 +2011,7 @@ public class InfoView extends JDialog {
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.anchor     = GridBagConstraints.WEST;
 		constraints.fill       = GridBagConstraints.NONE;
-		constraints.insets     = new Insets( 0, 0, 0, 0 );
+		constraints.insets     = Laf.INSETS_ZERO;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -1890,7 +2020,7 @@ public class InfoView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// button: show in tree
-		JButton btnShowInTree = new JButton( Dict.get(Dict.MSG_FILTER_SHOW_IN_TREE) );
+		MidicaButton btnShowInTree = new MidicaButton( Dict.get(Dict.MSG_FILTER_SHOW_IN_TREE) );
 		btnShowInTree.setToolTipText( Dict.get(Dict.MSG_FLTR_TT_SHOW_IN_TREE) );
 		btnShowInTree.setActionCommand( FILTER_BTN_SHOW_TREE );
 		btnShowInTree.setName( FILTER_BTN_SHOW_TREE );
@@ -1930,7 +2060,7 @@ public class InfoView extends JDialog {
 		
 		// label: /
 		constraints.gridx++;
-		JLabel lblSlash = new JLabel( "<html>&nbsp;&nbsp;/&nbsp;&nbsp;" );
+		JLabel lblSlash = new JLabel( "  /  " );
 		area.add( lblSlash, constraints );
 		
 		// label: total messages
@@ -1957,7 +2087,7 @@ public class InfoView extends JDialog {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.NONE;
-		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.insets     = Laf.INSETS_NWE;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -1968,9 +2098,11 @@ public class InfoView extends JDialog {
 		
 		// label
 		JLabel label = new JLabel( Dict.get(Dict.TAB_SOUNDFONT_INSTRUMENTS) );
-		area.add( label, constraints );
+		Laf.makeBold(label);
+		area.add(label, constraints);
 
 		// table
+		constraints.insets  = Laf.INSETS_SWE;
 		constraints.fill    = GridBagConstraints.VERTICAL;
 		constraints.weighty = 1;
 		constraints.gridy++;
@@ -2004,10 +2136,10 @@ public class InfoView extends JDialog {
 		GridBagLayout layout = new GridBagLayout();
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.NONE;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
-		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.fill       = GridBagConstraints.NONE;
+		constraints.insets     = Laf.INSETS_NWE;
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 1;
@@ -2015,9 +2147,11 @@ public class InfoView extends JDialog {
 		
 		// label
 		JLabel label = new JLabel( Dict.get(Dict.TAB_SOUNDFONT_RESOURCES) );
-		area.add( label, constraints );
+		Laf.makeBold(label);
+		area.add(label, constraints);
 		
 		// table
+		constraints.insets  = Laf.INSETS_SWE;
 		constraints.fill    = GridBagConstraints.BOTH;
 		constraints.weighty = 1;
 		constraints.gridy++;
@@ -2053,91 +2187,112 @@ public class InfoView extends JDialog {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.NONE;
-		constraints.insets     = new Insets( 2, 2, 2, 2 );
+		constraints.insets     = Laf.INSETS_NWE;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
-		constraints.gridwidth  = 1;
+		constraints.gridwidth  = 2;
 		constraints.weightx    = 0;
 		constraints.weighty    = 0;
 		
 		// spacer
-		JLabel spacerTop = new JLabel( "<html><br><br><br>" );
+		JLabel spacerTop = new JLabel("<html><br><br><br>");
 		area.add( spacerTop, constraints );
 		
-		// version translation
+		// logo
+		ImageIcon logoIcon = new ImageIcon( ClassLoader.getSystemResource(logoPath) );
+		JLabel    logoLbl  = new JLabel(logoIcon);
+		constraints.insets = Laf.INSETS_WE;
 		constraints.gridy++;
-		constraints.gridx  = 0;
-		constraints.anchor = GridBagConstraints.EAST;
+		area.add( logoLbl, constraints );
+		
+		// add spacer
+		constraints.gridwidth = 1;
+		constraints.gridy++;
+		JLabel spacerLogo = new JLabel(" ");
+		area.add( spacerLogo, constraints );
+		
+		// version translation
+		constraints.insets = Laf.INSETS_W;
+		constraints.gridy++;
+		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblVersion  = new JLabel( Dict.get(Dict.VERSION) + ": " );
-		area.add( lblVersion, constraints );
+		Laf.makeBold(lblVersion);
+		area.add(lblVersion, constraints);
 		
 		// version content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
-		constraints.anchor = GridBagConstraints.WEST;
-		JLabel lblVersionContent = new JLabel( Midica.VERSION );
+		constraints.anchor = GridBagConstraints.NORTHWEST;
+		FlowLabel lblVersionContent = new FlowLabel(Midica.VERSION, CPL_ABOUT, PWIDTH_ABOUT);
 		area.add( lblVersionContent, constraints );
 		
 		// timestamp translation
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_W;
+		constraints.gridx  = 0;
 		constraints.gridy++;
-		constraints.anchor = GridBagConstraints.EAST;
+		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblTimestamp = new JLabel( Dict.get(Dict.DATE) + ": " );
-		area.add( lblTimestamp, constraints );
+		Laf.makeBold(lblTimestamp);
+		area.add(lblTimestamp, constraints);
 		
 		// timestamp content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
-		constraints.anchor = GridBagConstraints.WEST;
+		constraints.anchor = GridBagConstraints.NORTHWEST;
 		Date             timestamp = new Date( Midica.VERSION_MINOR * 1000L );
 		SimpleDateFormat formatter = new SimpleDateFormat( Dict.get(Dict.TIMESTAMP_FORMAT) );
-		JLabel lblTimestampContent = new JLabel( formatter.format(timestamp) );
+		FlowLabel lblTimestampContent = new FlowLabel(formatter.format(timestamp), CPL_ABOUT, PWIDTH_ABOUT);
 		area.add( lblTimestampContent, constraints );
 		
 		// author translation
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_W;
+		constraints.gridx  = 0;
 		constraints.gridy++;
-		constraints.anchor = GridBagConstraints.EAST;
+		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblAuthor   = new JLabel( Dict.get(Dict.AUTHOR) + ": " );
-		area.add( lblAuthor, constraints );
+		Laf.makeBold(lblAuthor);
+		area.add(lblAuthor, constraints);
 		
 		// author content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
-		constraints.anchor      = GridBagConstraints.WEST;
-		JLabel lblAuthorContent = new JLabel( Midica.AUTHOR );
+		constraints.anchor      = GridBagConstraints.NORTHWEST;
+		FlowLabel lblAuthorContent = new FlowLabel(Midica.AUTHOR, CPL_ABOUT, PWIDTH_ABOUT);
 		area.add( lblAuthorContent, constraints );
 		
 		// source URL translation
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_W;
+		constraints.gridx  = 0;
 		constraints.gridy++;
-		constraints.anchor = GridBagConstraints.EAST;
+		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblSource   = new JLabel( Dict.get(Dict.SOURCE_URL) + ": " );
-		area.add( lblSource, constraints );
+		Laf.makeBold(lblSource);
+		area.add(lblSource, constraints);
 		
 		// source URL content
+		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
-		constraints.anchor      = GridBagConstraints.WEST;
-		JLabel lblSourceContent = new JLabel( Midica.SOURCE_URL );
+		constraints.anchor      = GridBagConstraints.NORTHWEST;
+		LinkLabel lblSourceContent = new LinkLabel(Midica.SOURCE_URL);
 		area.add( lblSourceContent, constraints );
 		
 		// website translation
-		constraints.gridx = 0;
+		constraints.insets = Laf.INSETS_SW;
+		constraints.gridx  = 0;
 		constraints.gridy++;
-		constraints.anchor = GridBagConstraints.EAST;
+		constraints.anchor = GridBagConstraints.NORTHEAST;
 		JLabel lblWebsite  = new JLabel( Dict.get(Dict.WEBSITE) + ": " );
-		area.add( lblWebsite, constraints );
+		Laf.makeBold(lblWebsite);
+		area.add(lblWebsite, constraints);
 		
 		// website content
-		constraints.gridx++;
-		constraints.anchor       = GridBagConstraints.WEST;
-		JLabel lblWebsiteContent = new JLabel( Midica.URL );
-		area.add( lblWebsiteContent, constraints );
-		
-		// spacer
-		constraints.gridy++;
-		constraints.gridx   = 0;
+		constraints.insets  = Laf.INSETS_SE;
 		constraints.weighty = 1;
-		JLabel spacer = new JLabel( " " );
-		area.add( spacer, constraints );
+		constraints.gridx++;
+		constraints.anchor       = GridBagConstraints.NORTHWEST;
+		LinkLabel lblWebsiteContent = new LinkLabel(Midica.URL);
+		area.add( lblWebsiteContent, constraints );
 		
 		return area;
 	}
@@ -2195,7 +2350,7 @@ public class InfoView extends JDialog {
 	 */
 	public void cleanMsgDetails() {
 		msgDetails.removeAll();
-		msgDetails.setBackground( Config.MSG_DEFAULT_COLOR );
+		msgDetails.setBackground( Laf.COLOR_MSG_DEFAULT );
 		msgDetails.revalidate();
 		msgDetails.repaint();
 	}
@@ -2219,9 +2374,9 @@ public class InfoView extends JDialog {
 		}
 		
 		// adjust background color
-		Color bgColor = Config.MSG_TREE_COLOR;
+		Color bgColor = Laf.COLOR_MSG_TREE;
 		if (fromTable) {
-			bgColor = Config.MSG_TABLE_COLOR;
+			bgColor = Laf.COLOR_MSG_TABLE;
 		}
 		msgDetails.setBackground(bgColor);
 		
@@ -2246,7 +2401,7 @@ public class InfoView extends JDialog {
 		// layout
 		GridBagConstraints constrLeft = new GridBagConstraints();
 		constrLeft.fill       = GridBagConstraints.NONE;
-		constrLeft.insets     = new Insets( 2, 2, 2, 2 );
+		constrLeft.insets     = Laf.INSETS_IN;
 		constrLeft.gridx      = 0;
 		constrLeft.gridy      = 0;
 		constrLeft.gridheight = 1;

@@ -14,7 +14,7 @@ import java.util.HashMap;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 
-import org.midica.config.Config;
+import org.midica.config.Laf;
 import org.midica.file.SoundfontParser;
 
 /**
@@ -51,10 +51,16 @@ public class SoundfontResourceTableCellRenderer extends MidicaTableCellRenderer 
 		HashMap<String, Object> resource = resources.get( row );
 		boolean isCategory = resource.get("category") != null;
 		if (isCategory) {
-			cell.setBackground( Config.TABLE_CELL_CATEGORY_COLOR );
+			if (isSelected)
+				cell.setBackground( Laf.COLOR_TABLE_CELL_CAT_SELECTED );
+			else
+				cell.setBackground( Laf.COLOR_TABLE_CELL_CATEGORY );
 		}
 		else {
-			cell.setBackground( Config.TABLE_CELL_DEFAULT_COLOR );
+			if (isSelected)
+				cell.setBackground( Laf.COLOR_TABLE_CELL_SELECTED );
+			else
+				cell.setBackground( null );
 		}
 		
 		// change the frames tooltip

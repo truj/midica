@@ -12,8 +12,8 @@ import java.awt.Component;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 
-import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.config.Laf;
 import org.midica.ui.renderer.MidicaTableCellRenderer;
 
 /**
@@ -48,10 +48,10 @@ public class NoteHistoryTableCellRenderer extends MidicaTableCellRenderer {
 		
 		// set background color
 		if ( model.isFuture(row) ) {
-			cell.setBackground( Config.TABLE_CELL_FUTURE_COLOR );
+			cell.setBackground( Laf.COLOR_TABLE_CELL_FUTURE );
 		}
 		else {
-			cell.setBackground( Config.TABLE_CELL_DEFAULT_COLOR );
+			cell.setBackground( Laf.COLOR_TABLE_CELL_PAST );
 		}
 		
 		// set tooltip for percussion IDs

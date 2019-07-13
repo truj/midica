@@ -11,13 +11,13 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.Window;
 
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 
 import org.midica.config.Dict;
+import org.midica.config.Laf;
 
 
 /**
@@ -66,10 +66,10 @@ public class WaitView extends JDialog {
 		GridBagLayout layout = new GridBagLayout();
 		content.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill   = GridBagConstraints.BOTH;
-		constraints.insets = new Insets( 2, 2, 2, 2 );
-		constraints.gridx = 0;
-		constraints.gridy = 0;
+		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.insets     = Laf.INSETS_ALL;
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 0;

@@ -20,7 +20,6 @@ import java.util.TreeMap;
 
 import javax.swing.DefaultListSelectionModel;
 import javax.swing.JList;
-import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -31,9 +30,10 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
-import org.midica.config.Config;
+import org.midica.config.Laf;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.player.PlayerView;
+import org.midica.ui.widget.MidicaSlider;
 
 /**
  * This class provides the controller and event listener for the soundcheck
@@ -225,7 +225,7 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 		int duration = view.getDurationFromField(); // throws NumberFormatException
 		if ( duration < SoundcheckView.MIN_DURATION || duration > SoundcheckView.MAX_DURATION )
 			throw new NumberFormatException();
-		view.setTextFieldColor( SoundcheckView.NAME_DURATION, Config.COLOR_NORMAL );
+		view.setTextFieldColor( SoundcheckView.NAME_DURATION, Laf.COLOR_NORMAL );
 	}
 	
 	/**
@@ -244,7 +244,7 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 			// only react if it's moved manually
 			if ( ! view.isVolumeSliderAdjusting() )
 				return;
-			byte volume = (byte) ( (JSlider) e.getSource() ).getValue();
+			byte volume = (byte) ( (MidicaSlider) e.getSource() ).getValue();
 			view.setVolume(volume);
 		}
 		
@@ -254,7 +254,7 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 			// only react if it's moved manually
 			if ( ! view.isVelocitySliderAdjusting() )
 				return;
-			byte velocity = (byte) ( (JSlider) e.getSource() ).getValue();
+			byte velocity = (byte) ( (MidicaSlider) e.getSource() ).getValue();
 			view.setVelocity(velocity);
 		}
 	}
@@ -269,7 +269,7 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 	public void mouseWheelMoved( MouseWheelEvent e ) {
 		String name     = ( (Component) e.getSource() ).getName();
 		int amount      = e.getWheelRotation();
-		int sliderTicks = ( (JSlider) e.getSource() ).getValue();
+		int sliderTicks = ( (MidicaSlider) e.getSource() ).getValue();
 		sliderTicks    -= amount * PlayerView.VOL_SCROLL;
 		
 		// check new slider state
@@ -352,10 +352,10 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 			}
 			
 			// no exception yet, so the field input is ok
-			view.setTextFieldColor( name, Config.COLOR_OK );
+			view.setTextFieldColor( name, Laf.COLOR_OK );
 		}
 		catch ( NumberFormatException ex ) {
-			view.setTextFieldColor( name, Config.COLOR_ERROR );
+			view.setTextFieldColor( name, Laf.COLOR_ERROR );
 		}
 		catch ( BadLocationException ex ) {
 		}

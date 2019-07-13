@@ -22,7 +22,6 @@ import java.util.concurrent.ExecutionException;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiUnavailableException;
 import javax.swing.JCheckBox;
-import javax.swing.JSlider;
 import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -32,14 +31,15 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 import org.midica.Midica;
-import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.config.Laf;
 import org.midica.file.ParseException;
 import org.midica.file.SequenceParser;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.ErrorMsgView;
 import org.midica.ui.info.InfoView;
 import org.midica.ui.player.soundcheck.SoundcheckView;
+import org.midica.ui.widget.MidicaSlider;
 import org.midica.worker.DeviceWorker;
 import org.midica.worker.ParsingWorker;
 import org.midica.worker.WaitView;
@@ -110,7 +110,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			try {
 				long pos = Long.parseLong( memory );
 				MidiDevices.setTickPosition( pos );
-				view.setTextFieldColor( PlayerView.NAME_JUMP, Config.COLOR_NORMAL );
+				view.setTextFieldColor( PlayerView.NAME_JUMP, Laf.COLOR_NORMAL );
 			}
 			catch( NumberFormatException ex ) {
 			}
@@ -193,7 +193,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 				}
 				
 				// no exception yet, so the field has been set successfully
-				view.setTextFieldColor( name, Config.COLOR_NORMAL );
+				view.setTextFieldColor( name, Laf.COLOR_NORMAL );
 			}
 			catch ( NumberFormatException ex ) {
 			}
@@ -442,7 +442,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			// only react if it's moved manually
 			if ( ! view.isProgressSliderAdjusting() )
 				return;
-			MidiDevices.setTickPosition( ((JSlider)e.getSource()).getValue() );
+			MidiDevices.setTickPosition( ((MidicaSlider) e.getSource()).getValue() );
 		}
 		
 		// handle volume slider changes
@@ -451,7 +451,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			// only react if it's moved manually
 			if ( ! view.isVolumeSliderAdjusting() )
 				return;
-			byte volume = (byte) ((JSlider) e.getSource()).getValue();
+			byte volume = (byte) ((MidicaSlider) e.getSource()).getValue();
 			view.setVolumeField(volume);
 			MidiDevices.setVolume(volume);
 		}
@@ -462,7 +462,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			// only react if it's moved manually
 			if ( ! view.isTempoSliderAdjusting() )
 				return;
-			int value = ( (JSlider) e.getSource() ).getValue();
+			int value = ( (MidicaSlider) e.getSource() ).getValue();
 			float tempo = ( (float) value ) / PlayerView.TEMPO_DEFAULT;
 			view.setTempoField( tempo );
 			MidiDevices.setTempo( tempo );
@@ -473,7 +473,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			// only react if it's moved manually
 			if ( ! view.isTransposeSliderAdjusting() )
 				return;
-			byte level = (byte) ( (JSlider) e.getSource() ).getValue();
+			byte level = (byte) ( (MidicaSlider) e.getSource() ).getValue();
 			view.setTransposeField( level );
 			SequenceParser.setTransposeLevel( level );
 			reparse();
@@ -486,14 +486,14 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			// only react if it's moved manually
 			if ( ! view.isChVolSliderAdjusting(channel) )
 				return;
-			byte volume = (byte) ((JSlider) e.getSource()).getValue();
+			byte volume = (byte) ((MidicaSlider) e.getSource()).getValue();
 			view.setChannelVolumeField(channel, volume);
 			MidiDevices.setChannelVolume(channel, (byte) volume);
 		}
 	}
 	
 	/**
-	 * Handles mouse wheel scrolling over a {@link JSlider}.
+	 * Handles mouse wheel scrolling over a {@link MidicaSlider}.
 	 * Sets the slider to the new position, if possible, or otherwise to the minimum
 	 * or maximum of the slider's range.
 	 * 
@@ -511,7 +511,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	public void mouseWheelMoved( MouseWheelEvent e ) {
 		String name     = ((Component) e.getSource()).getName();
 		int amount      = e.getWheelRotation();
-		int sliderTicks = ( (JSlider) e.getSource() ).getValue();
+		int sliderTicks = ( (MidicaSlider) e.getSource() ).getValue();
 		
 		// process slider scrolls
 		if ( PlayerView.NAME_PROGRESS.equals(name) ) {
@@ -657,10 +657,10 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			}
 			
 			// no exception yet, so the field input is ok
-			view.setTextFieldColor( name, Config.COLOR_OK );
+			view.setTextFieldColor( name, Laf.COLOR_OK );
 		}
 		catch ( NumberFormatException ex ) {
-			view.setTextFieldColor( name, Config.COLOR_ERROR );
+			view.setTextFieldColor( name, Laf.COLOR_ERROR );
 		}
 		catch ( BadLocationException ex ) {
 		}

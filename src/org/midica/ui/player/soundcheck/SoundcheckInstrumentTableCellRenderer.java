@@ -14,8 +14,8 @@ import java.util.HashMap;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 
-import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.config.Laf;
 import org.midica.ui.renderer.MidicaTableCellRenderer;
 
 /**
@@ -51,21 +51,24 @@ public class SoundcheckInstrumentTableCellRenderer extends MidicaTableCellRender
 			// sub category: colorize only the cell containing the name
 			if ( "sub".equals(entry.get("category")) ) {
 				if ( 3 == col ) {
-					cell.setBackground( Config.TABLE_CELL_CATEGORY_COLOR );
+					if (isSelected)
+						cell.setBackground( Laf.COLOR_TABLE_CELL_CAT_SELECTED );
+					else
+						cell.setBackground( Laf.COLOR_TABLE_CELL_CATEGORY );
 				}
 				else {
 					if (isSelected)
-						cell.setBackground( Config.TABLE_CELL_SELECTED_COLOR );
+						cell.setBackground( Laf.COLOR_TABLE_CELL_SELECTED );
 					else
-						cell.setBackground( Config.TABLE_CELL_DEFAULT_COLOR );
+						cell.setBackground( null );
 				}
 			}
 			
 			// main category: same background in the whole row
 			else {
-				cell.setBackground( Config.TABLE_CELL_CATEGORY_COLOR );
-				if ( isSelected && col != 2 )
-					cell.setBackground( Config.TABLE_CELL_SELECTED_COLOR );
+				cell.setBackground( Laf.COLOR_TABLE_CELL_CATEGORY );
+				if ( isSelected )
+					cell.setBackground( Laf.COLOR_TABLE_CELL_CAT_SELECTED );
 			}
 		}
 		else {
@@ -73,9 +76,9 @@ public class SoundcheckInstrumentTableCellRenderer extends MidicaTableCellRender
 			
 			// background color
 			if (isSelected)
-				cell.setBackground( Config.TABLE_CELL_SELECTED_COLOR );
+				cell.setBackground( Laf.COLOR_TABLE_CELL_SELECTED );
 			else
-				cell.setBackground( Config.TABLE_CELL_DEFAULT_COLOR );
+				cell.setBackground( null );
 			
 			// bank tooltip
 			if ( 1 == col && cell instanceof JComponent ) {
