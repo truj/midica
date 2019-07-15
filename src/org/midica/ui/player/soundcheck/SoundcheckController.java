@@ -171,7 +171,7 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 			
 			int     channel  = view.getChannel();
 			int     note     = view.getNote();
-			int     volume   = view.getVolume();
+			byte    volume   = view.getVolume();
 			int     velocity = view.getVelocity();
 			int     duration = view.getDurationFromField(); // throws NumberFormatException
 			int[]   instr    = view.getInstrument();
@@ -206,7 +206,7 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 			value = view.getVolumeFromField(); // throws NumberFormatException
 		else
 			value = view.getVeloctiyFromField(); // throws NumberFormatException
-		if ( value < PlayerView.VOL_MIN || value > PlayerView.VOL_MAX )
+		if ( value < PlayerView.CH_VOL_MIN || value > PlayerView.CH_VOL_MAX )
 			throw new NumberFormatException();
 		
 		// set slider
@@ -270,13 +270,13 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 		String name     = ( (Component) e.getSource() ).getName();
 		int amount      = e.getWheelRotation();
 		int sliderTicks = ( (MidicaSlider) e.getSource() ).getValue();
-		sliderTicks    -= amount * PlayerView.VOL_SCROLL;
+		sliderTicks    -= amount * PlayerView.CH_VOL_SCROLL;
 		
 		// check new slider state
-		if ( sliderTicks < PlayerView.VOL_MIN )
-			sliderTicks = PlayerView.VOL_MIN;
-		else if ( sliderTicks > PlayerView.VOL_MAX )
-			sliderTicks = PlayerView.VOL_MAX;
+		if ( sliderTicks < PlayerView.CH_VOL_MIN )
+			sliderTicks = PlayerView.CH_VOL_MIN;
+		else if ( sliderTicks > PlayerView.CH_VOL_MAX )
+			sliderTicks = PlayerView.CH_VOL_MAX;
 		
 		// set new slider state and update text field
 		if ( SoundcheckView.NAME_VOLUME.equals(name) )
@@ -342,7 +342,7 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 			// volume or velocity field changed
 			if ( SoundcheckView.NAME_VOLUME.equals(name) || SoundcheckView.NAME_VELOCITY.equals(name) ) {
 				byte value = Byte.parseByte( text );
-				if ( value < PlayerView.VOL_MIN || value > PlayerView.VOL_MAX )
+				if ( value < PlayerView.CH_VOL_MIN || value > PlayerView.CH_VOL_MAX )
 					throw new NumberFormatException();
 			}
 			else if ( SoundcheckView.NAME_DURATION.equals(name) ) {

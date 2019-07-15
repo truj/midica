@@ -153,13 +153,13 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 					view.pressJumpButton();
 				}
 				
-				// volume field
-				else if ( PlayerView.NAME_VOL.equals(name) ) {
+				// master volume field
+				else if ( PlayerView.NAME_MASTER_VOL.equals(name) ) {
 					byte volume = view.getVolumeFromField(); // throws NumberFormatException
 					if ( volume < 0 || volume > 127 )
 						throw new NumberFormatException();
-					MidiDevices.setVolume( volume );
-					view.setVolumeSlider( volume );
+					MidiDevices.setMasterVolume(volume, volume);
+					view.setMasterVolumeSlider(volume);
 				}
 				
 				// tempo field
@@ -189,7 +189,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 					if ( volume < -127 || volume > 127 )
 						throw new NumberFormatException();
 					view.setChannelVolumeSlider( channel, volume );
-					MidiDevices.setChannelVolume( channel, volume );
+					MidiDevices.setChannelVolume(channel, volume, volume);
 				}
 				
 				// no exception yet, so the field has been set successfully
@@ -292,7 +292,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 		// init tick labels and progress slider
 		view.setTickAndTimeLength( MidiDevices.getTickLength(), MidiDevices.getTimeLength() );
 		view.initProgressSlider();
-		view.setGlobalSlidersAndFields( MidiDevices.getVolume(), MidiDevices.getTempo(), SequenceParser.getTransposeLevel() );
+		view.setGlobalSlidersAndFields( MidiDevices.getMasterVolume(), MidiDevices.getTempo(), SequenceParser.getTransposeLevel() );
 		
 		// restore the channel based widgets in the view
 		for ( byte channel = 0; channel < MidiDevices.NUMBER_OF_CHANNELS; channel++ ) {
@@ -421,9 +421,9 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * 
 	 * Channel-independent actions:
 	 * 
-	 * - Adjusts the sequencer state according to the mannually changed process slider state.
+	 * - Adjusts the sequencer state according to the mannually changed progress slider state.
 	 * - Adjusts the sequencer state according to the mannually changed tempo slider state.
-	 * - Adjusts the synthesizer state according to the mannually changed volume slider state.
+	 * - Adjusts the synthesizer state according to the mannually changed master volume slider state.
 	 * - Adjusts the transpose level according to the manually changed transpose slider.
 	 * 
 	 * Channel-dependent actions:
@@ -445,15 +445,15 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			MidiDevices.setTickPosition( ((MidicaSlider) e.getSource()).getValue() );
 		}
 		
-		// handle volume slider changes
-		else if ( PlayerView.NAME_VOL.equals(name) ) {
+		// handle master volume slider changes
+		else if ( PlayerView.NAME_MASTER_VOL.equals(name) ) {
 			
 			// only react if it's moved manually
-			if ( ! view.isVolumeSliderAdjusting() )
+			if ( ! view.isMasterVolumeSliderAdjusting() )
 				return;
 			byte volume = (byte) ((MidicaSlider) e.getSource()).getValue();
-			view.setVolumeField(volume);
-			MidiDevices.setVolume(volume);
+			view.setMasterVolumeField(volume);
+			MidiDevices.setMasterVolume(volume, volume);
 		}
 		
 		// handle tempo slider changes
@@ -488,7 +488,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 				return;
 			byte volume = (byte) ((MidicaSlider) e.getSource()).getValue();
 			view.setChannelVolumeField(channel, volume);
-			MidiDevices.setChannelVolume(channel, (byte) volume);
+			MidiDevices.setChannelVolume(channel, volume, volume);
 		}
 	}
 	
@@ -499,8 +499,8 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * 
 	 * The following sliders are supported by this method:
 	 * 
-	 * - process slider
-	 * - volume slider
+	 * - progress slider
+	 * - master volume slider
 	 * - tempo slider
 	 * - transpose slider
 	 * - channel volume slider
@@ -513,7 +513,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 		int amount      = e.getWheelRotation();
 		int sliderTicks = ( (MidicaSlider) e.getSource() ).getValue();
 		
-		// process slider scrolls
+		// progress slider scrolls
 		if ( PlayerView.NAME_PROGRESS.equals(name) ) {
 			// get and check new slider state
 			sliderTicks -= ( amount * PlayerView.PROGRESS_SCROLL );
@@ -528,19 +528,19 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			view.setProgressSlider( sliderTicks );
 		}
 		
-		// volume slider scrolls
-		else if ( PlayerView.NAME_VOL.equals(name) ) {
+		// master volume slider scrolls
+		else if ( PlayerView.NAME_MASTER_VOL.equals(name) ) {
 			// get and check new slider state
-			sliderTicks -= amount * PlayerView.VOL_SCROLL;
-			if ( sliderTicks < PlayerView.VOL_MIN )
-				sliderTicks = PlayerView.VOL_MIN;
-			else if ( sliderTicks > PlayerView.VOL_MAX )
-				sliderTicks = PlayerView.VOL_MAX;
+			sliderTicks -= amount * PlayerView.MASTER_VOL_SCROLL;
+			if ( sliderTicks < PlayerView.MASTER_VOL_MIN )
+				sliderTicks = PlayerView.MASTER_VOL_MIN;
+			else if ( sliderTicks > PlayerView.MASTER_VOL_MAX )
+				sliderTicks = PlayerView.MASTER_VOL_MAX;
 			
 			// set new slider state and apply the resulting actions
-			view.setVolumeSlider( (byte) sliderTicks );
-			view.setVolumeField( (byte) sliderTicks );
-			MidiDevices.setVolume( (byte) sliderTicks );
+			view.setMasterVolumeSlider( (byte) sliderTicks );
+			view.setMasterVolumeField( (byte) sliderTicks );
+			MidiDevices.setMasterVolume( (byte) sliderTicks, (byte) sliderTicks );
 		}
 		
 		// tempo slider scrolls
@@ -593,7 +593,8 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			// set new slider state and apply the resulting actions
 			view.setChannelVolumeSlider( channel, (byte) sliderTicks );
 			view.setChannelVolumeField( channel, (byte) sliderTicks );
-			MidiDevices.setChannelVolume( channel, (byte) sliderTicks );
+			byte chVol = (byte) sliderTicks;
+			MidiDevices.setChannelVolume(channel, chVol, chVol);
 		}
 	}
 	
@@ -607,10 +608,10 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * The following text fields are handled by this method:
 	 * 
 	 * - The jump field (must be between 0 and the total number of ticks).
-	 * - The volume field (must be between 0 and 127)
+	 * - The master volume field (must be between 0 and 127)
 	 * - The tempo field (must be a float greater or equal than 0)
 	 * - The transpose field (must be between -30 and 30)
-	 * - The channel volume fields (must be between -127 and 127)
+	 * - The channel volume fields (must be between 0 and 127)
 	 * 
 	 * @param e    Event object.
 	 */
@@ -628,8 +629,8 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 					throw new NumberFormatException();
 			}
 			
-			// volume field changed
-			else if ( PlayerView.NAME_VOL.equals(name) ) {
+			// master volume field changed
+			else if ( PlayerView.NAME_MASTER_VOL.equals(name) ) {
 				byte volume = Byte.parseByte( text );
 				if ( volume < 0 || volume > 127 )
 					throw new NumberFormatException();
@@ -652,7 +653,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			// channel volume field changed
 			else if ( name.startsWith(PlayerView.NAME_CH_VOL) ) {
 				byte volume = Byte.parseByte( text );
-				if ( volume < -127 || volume > 127 )
+				if ( volume < 0 || volume > 127 )
 					throw new NumberFormatException();
 			}
 			

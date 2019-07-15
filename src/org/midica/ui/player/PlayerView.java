@@ -75,12 +75,12 @@ public class PlayerView extends JDialog {
 	public static final int    TEMPO_FRACT       =    2; // number of digits after the decimal point
 	public static final int    TEMPO_SCROLL      =    2; // scroll factor
 	// volume slider
-	public static final int    VOL_MIN           =    0;
-	public static final int    VOL_MAX           =  127;
-	public static final int    VOL_LABEL         =   10;
-	public static final int    VOL_MAJOR         =    5;
-	public static final int    VOL_MINOR         =    1;
-	public static final int    VOL_SCROLL        =    1; // scroll factor
+	public static final int    MASTER_VOL_MIN    =    0;
+	public static final int    MASTER_VOL_MAX    =  127;
+	public static final int    MASTER_VOL_LABEL  =   10;
+	public static final int    MASTER_VOL_MAJOR  =    5;
+	public static final int    MASTER_VOL_MINOR  =    1;
+	public static final int    MASTER_VOL_SCROLL =    1; // scroll factor
 	// transpose slider
 	public static final int    TRANSPOSE_DEFAULT =    0;
 	public static final int    TRANSPOSE_MIN     =  -30;
@@ -90,10 +90,9 @@ public class PlayerView extends JDialog {
 	public static final int    TRANSPOSE_MINOR   =    1;
 	public static final int    TRANSPOSE_SCROLL  =    1; // scroll factor
 	// channel volume slider
-	public static final int    CH_VOL_DEFAULT    =     0;
-	public static final int    CH_VOL_MIN        =  -130; // for the display - has to be different from CH_VOL_MIN_VAL
-	public static final int    CH_VOL_MAX        =   130; // in order to have a major tick at '0'
-	public static final int    CH_VOL_MIN_VAL    =  -127;
+	public static final int    CH_VOL_MIN        =     0; // for the display - has to be different from CH_VOL_MIN_VAL
+	public static final int    CH_VOL_MAX        =   127; // in order to have a major tick at '0'
+	public static final int    CH_VOL_MIN_VAL    =     0;
 	public static final int    CH_VOL_MAX_VAL    =   127;
 	public static final int    CH_VOL_SKIP       =    50;
 	public static final int    CH_VOL_MAJOR      =    10;
@@ -103,7 +102,7 @@ public class PlayerView extends JDialog {
 	// Constants for text fields
 	public static final String NAME_JUMP        = "name_jump";
 	public static final String NAME_SHOW_LYRICS = "name_show_lyrics";
-	public static final String NAME_VOL         = "name_volume";
+	public static final String NAME_MASTER_VOL  = "name_master_volume";
 	public static final String NAME_TEMPO       = "name_tempo";
 	public static final String NAME_TRANSPOSE   = "name_transpose";
 	public static final String NAME_CH_VOL      = "name_channel_volume_";
@@ -151,10 +150,10 @@ public class PlayerView extends JDialog {
 	private JCheckBox cbxLyrics = null;
 	private JLabel    lblLyrics = null;
 	
-	private MidicaSlider progressSlider  = null;
-	private MidicaSlider volumeSlider    = null;
-	private MidicaSlider tempoSlider     = null;
-	private MidicaSlider transposeSlider = null;
+	private MidicaSlider progressSlider     = null;
+	private MidicaSlider masterVolumeSlider = null;
+	private MidicaSlider tempoSlider        = null;
+	private MidicaSlider transposeSlider    = null;
 	
 	private MidicaButton btnPlayPause  = null;
 	private MidicaButton btnReparse    = null;
@@ -488,7 +487,7 @@ public class PlayerView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// volume label
-		JLabel lblVol = new JLabel( Dict.get(Dict.SLIDER_VOL) );
+		JLabel lblVol = new JLabel( Dict.get(Dict.SLIDER_MASTER_VOL) );
 		area.add( lblVol, constraints );
 		
 		// tempo label
@@ -505,7 +504,7 @@ public class PlayerView extends JDialog {
 		constraints.gridy++;
 		constraints.gridx   = 0;
 		constraints.weighty = 1;
-		area.add( createVolumeSlider(), constraints );
+		area.add( createMasterVolumeSlider(), constraints );
 		
 		// tempo slider
 		constraints.gridx++;
@@ -520,8 +519,8 @@ public class PlayerView extends JDialog {
 		constraints.gridx   = 0;
 		constraints.weighty = 0;
 		fldVol = new JTextField();
-		fldVol.setName( NAME_VOL );
-		fldVol.getDocument().putProperty( "name", NAME_VOL );
+		fldVol.setName( NAME_MASTER_VOL );
+		fldVol.getDocument().putProperty( "name", NAME_MASTER_VOL );
 		fldVol.getDocument().addDocumentListener( controller );
 		fldVol.addActionListener( controller );
 		setTextFieldColor( fldVol.getName(), Laf.COLOR_NORMAL );
@@ -574,24 +573,24 @@ public class PlayerView extends JDialog {
 	 * 
 	 * @return The created volume slider.
 	 */
-	private MidicaSlider createVolumeSlider() {
-		volumeSlider = new MidicaSlider( MidicaSlider.VERTICAL );
-		volumeSlider.setName( NAME_VOL );
-		volumeSlider.addChangeListener( controller );
-		volumeSlider.addMouseWheelListener( controller );
-		volumeSlider.setValue( 0 );
+	private MidicaSlider createMasterVolumeSlider() {
+		masterVolumeSlider = new MidicaSlider( MidicaSlider.VERTICAL );
+		masterVolumeSlider.setName( NAME_MASTER_VOL );
+		masterVolumeSlider.addChangeListener( controller );
+		masterVolumeSlider.addMouseWheelListener( controller );
+		masterVolumeSlider.setValue( 0 );
 		// labels
-		volumeSlider.setMinimum( VOL_MIN );
-		volumeSlider.setMaximum( VOL_MAX );
-		volumeSlider.setMajorTickSpacing( VOL_MAJOR );
-		volumeSlider.setMinorTickSpacing( VOL_MINOR );
+		masterVolumeSlider.setMinimum( MASTER_VOL_MIN );
+		masterVolumeSlider.setMaximum( MASTER_VOL_MAX );
+		masterVolumeSlider.setMajorTickSpacing( MASTER_VOL_MAJOR );
+		masterVolumeSlider.setMinorTickSpacing( MASTER_VOL_MINOR );
 		Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
-		for ( int i = VOL_MIN; i <= VOL_MAX; i += VOL_LABEL ) {
+		for ( int i = MASTER_VOL_MIN; i <= MASTER_VOL_MAX; i += MASTER_VOL_LABEL ) {
 			int display = i;
 			labelTable.put( i, new JLabel(Integer.toString(display)) );
 		}
-		volumeSlider.setLabelTable( labelTable );
-		return volumeSlider;
+		masterVolumeSlider.setLabelTable( labelTable );
+		return masterVolumeSlider;
 	}
 	
 	/**
@@ -1174,11 +1173,11 @@ public class PlayerView extends JDialog {
 	}
 	
 	/**
-	 * Sets the volume text field under the global volume slider to the given value.
+	 * Sets the master volume text field under the master volume slider to the given value.
 	 * 
 	 * @param volume  Value to set.
 	 */
-	public void setVolumeField( byte volume ) {
+	public void setMasterVolumeField( byte volume ) {
 		if ( null == fldVol )
 			return;
 		fldVol.getDocument().removeDocumentListener( controller );
@@ -1314,7 +1313,7 @@ public class PlayerView extends JDialog {
 	}
 	
 	/**
-	 * Sets the volume slider to the given value.
+	 * Sets the master volume slider to the given value.
 	 * 
 	 * This is called:
 	 * - after scrolling with the mouse over the slider;
@@ -1323,8 +1322,8 @@ public class PlayerView extends JDialog {
 	 * 
 	 * @param volume  Value to be set.
 	 */
-	public void setVolumeSlider( byte volume ) {
-		volumeSlider.setValue( volume );
+	public void setMasterVolumeSlider( byte volume ) {
+		masterVolumeSlider.setValue( volume );
 	}
 	
 	/**
@@ -1384,15 +1383,15 @@ public class PlayerView extends JDialog {
 	}
 	
 	/**
-	 * Shows if the global volume slider is being changed via mouse click in the moment.
+	 * Shows if the master volume slider is being changed via mouse click in the moment.
 	 * 
 	 * Returns true, if a mouse click on the slider has been started (mouse down) but
 	 * is not yet finished (mouse up).
 	 * 
 	 * @return **true**, if the slider is being changed. Otherwise: **false**.
 	 */
-	public boolean isVolumeSliderAdjusting() {
-		return volumeSlider.getValueIsAdjusting();
+	public boolean isMasterVolumeSliderAdjusting() {
+		return masterVolumeSlider.getValueIsAdjusting();
 	}
 	
 	/**
@@ -1475,10 +1474,10 @@ public class PlayerView extends JDialog {
 	 * @param level   Value for the transpose slider.
 	 */
 	public void setGlobalSlidersAndFields( byte volume, float tempo, byte level ) {
-		setVolumeSlider( volume );
+		setMasterVolumeSlider( volume );
 		setTempoSlider( tempo );
 		setTransposeSlider( level );
-		setVolumeField( volume );
+		setMasterVolumeField( volume );
 		setTempoField( tempo );
 		setTransposeField( level );
 	}
@@ -1550,7 +1549,7 @@ public class PlayerView extends JDialog {
 	public void setTextFieldColor( String name, Color color ) {
 		if ( NAME_JUMP.equals(name) )
 			fldJump.setBackground( color );
-		else if ( NAME_VOL.equals(name) )
+		else if ( NAME_MASTER_VOL.equals(name) )
 			fldVol.setBackground( color );
 		else if ( NAME_TEMPO.equals(name) )
 			fldTempo.setBackground( color );

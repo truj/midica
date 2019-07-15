@@ -10,7 +10,6 @@ package org.midica.midi;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.TreeMap;
 
 import javax.sound.midi.InvalidMidiDataException;
@@ -23,11 +22,11 @@ import javax.sound.midi.Sequencer;
 import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Soundbank;
 import javax.sound.midi.Synthesizer;
+import javax.sound.midi.SysexMessage;
 import javax.sound.midi.Transmitter;
 import javax.swing.table.AbstractTableModel;
 
 import org.midica.config.Dict;
-import org.midica.file.MidiParser;
 import org.midica.file.SoundfontParser;
 import org.midica.ui.info.InstrumentElement;
 import org.midica.ui.player.PlayerController;
@@ -51,25 +50,40 @@ public final class MidiDevices {
 	
 	// constants
 	public static final int  WAITING_TIME_BEFORE_REMEMBER =        2; // milliseconds
-	public static final int  DEFAULT_VOLUME               =      100; // default according to https://midi.org/articles/about-midi-part-4-midi-files
+	public static final byte DEFAULT_MASTER_VOL_MSB       =       64;
+	public static final byte DEFAULT_MASTER_VOL_LSB       =       64;
+	public static final int  DEFAULT_CHANNEL_VOL_MSB      =      100; // default according to https://midi.org/articles/about-midi-part-4-midi-files
+	public static final int  DEFAULT_CHANNEL_VOL_LSB      =      100; // real default is probably 0 but we keep MSB and LSB synchronized
 	public static final int  DEFAULT_TEMPO_BPM            =      120; // beats per minute
 	public static final int  DEFAULT_TEMPO_MPQ            = 60000000; // microseconds per quarter note
 	public static final int  NUMBER_OF_CHANNELS           =       16;
 	
 	private static PlayerController playerController = null;
-	private static float            tempoFactor      =   1;
-	private static byte             volume           = DEFAULT_VOLUME;
-	private static Sequence         seq;
-	private static Sequencer        sequencer;
-	private static Synthesizer      synthesizer;
-	private static Receiver         receiver;
+	private static float       tempoFactor           = 1;
+	private static byte        masterVolumeMsb       = DEFAULT_MASTER_VOL_MSB;
+	private static byte        masterVolumeLsb       = DEFAULT_MASTER_VOL_LSB;
+	private static Sequence    seq;
+	private static Sequencer   sequencer;
+	private static Synthesizer synthesizer;
+	private static Receiver    receiver;
 	// number of bars to skip on forward/rewind
-	private static int              skipQuarters      = 4;  //  4 quarter notes = 1 bar
-	private static int              skipFastQuarters  = 16; // 16 quarter notes = 4 bars
-	private static Soundbank        selectedSoundfont = null;
-	private static byte[]           channelVolume     = new byte[ NUMBER_OF_CHANNELS ];
-	private static boolean[]        channelMute       = new boolean[ NUMBER_OF_CHANNELS ];
-	private static boolean[]        channelSolo       = new boolean[ NUMBER_OF_CHANNELS ];
+	private static int         skipQuarters      = 4;  //  4 quarter notes = 1 bar
+	private static int         skipFastQuarters  = 16; // 16 quarter notes = 4 bars
+	private static Soundbank   selectedSoundfont = null;
+	private static boolean[]   channelMute       = new boolean[ NUMBER_OF_CHANNELS ];
+	private static boolean[]   channelSolo       = new boolean[ NUMBER_OF_CHANNELS ];
+	private static byte[]      channelVolumeMsb  = {
+		DEFAULT_CHANNEL_VOL_MSB, DEFAULT_CHANNEL_VOL_MSB, DEFAULT_CHANNEL_VOL_MSB, DEFAULT_CHANNEL_VOL_MSB,
+		DEFAULT_CHANNEL_VOL_MSB, DEFAULT_CHANNEL_VOL_MSB, DEFAULT_CHANNEL_VOL_MSB, DEFAULT_CHANNEL_VOL_MSB,
+		DEFAULT_CHANNEL_VOL_MSB, DEFAULT_CHANNEL_VOL_MSB, DEFAULT_CHANNEL_VOL_MSB, DEFAULT_CHANNEL_VOL_MSB,
+		DEFAULT_CHANNEL_VOL_MSB, DEFAULT_CHANNEL_VOL_MSB, DEFAULT_CHANNEL_VOL_MSB, DEFAULT_CHANNEL_VOL_MSB,
+	};
+	private static byte[]      channelVolumeLsb  = {
+		DEFAULT_CHANNEL_VOL_LSB, DEFAULT_CHANNEL_VOL_LSB, DEFAULT_CHANNEL_VOL_LSB, DEFAULT_CHANNEL_VOL_LSB,
+		DEFAULT_CHANNEL_VOL_LSB, DEFAULT_CHANNEL_VOL_LSB, DEFAULT_CHANNEL_VOL_LSB, DEFAULT_CHANNEL_VOL_LSB,
+		DEFAULT_CHANNEL_VOL_LSB, DEFAULT_CHANNEL_VOL_LSB, DEFAULT_CHANNEL_VOL_LSB, DEFAULT_CHANNEL_VOL_LSB,
+		DEFAULT_CHANNEL_VOL_LSB, DEFAULT_CHANNEL_VOL_LSB, DEFAULT_CHANNEL_VOL_LSB, DEFAULT_CHANNEL_VOL_LSB,
+	};
 	
 	/**   channel  --  program * 2^14 + bankMSB * 2^7 + bankLSB  --  instrument name */
 	private static TreeMap<Byte, TreeMap<Integer, String>> instruments = null;
@@ -125,7 +139,7 @@ public final class MidiDevices {
 	 *                                     no music file has been parsed successfully.
 	 * @throws IOException                 on I/O problems.
 	 */
-	public static void setupDevices( PlayerController controller ) throws InvalidMidiDataException, MidiUnavailableException, SequenceNotSetException, IOException {
+	public static void setupDevices(PlayerController controller) throws InvalidMidiDataException, MidiUnavailableException, SequenceNotSetException, IOException {
 		
 		playerController = controller;
 		
@@ -140,7 +154,8 @@ public final class MidiDevices {
 		
 		// initialize or restore user changes in the player
 		sequencer.setTempoFactor( tempoFactor );
-		setVolume( volume );
+		setMasterVolume();
+		setAllChannelVolumes();
 		for ( int i = 0; i < NUMBER_OF_CHANNELS; i++ ) {
 			setMute( i, channelMute[i] );
 			setSolo( i, channelSolo[i] );
@@ -605,7 +620,8 @@ public final class MidiDevices {
 		}
 		catch ( InterruptedException e ) {
 		}
-		setVolume( volume );
+		setMasterVolume();
+		setAllChannelVolumes();
 	}
 	
 	/**
@@ -643,67 +659,113 @@ public final class MidiDevices {
 	}
 	
 	/**
-	 * Returns the current global (channel-independent) volume.
+	 * Returns the current master volume MSB.
 	 * 
-	 * @return    volume
+	 * @return    master volume MSB.
 	 */
-	public static byte getVolume() {
-		return volume;
+	public static byte getMasterVolume() {
+		return masterVolumeMsb;
 	}
 	
 	/**
-	 * Sets the global (channel-independent) volume.
-	 * Calculates and sets the new volume for each channel.
-	 * Each channel volume is calculated by the global volume and the channel volume.
-	 * 
-	 * @param vol    New global volume.
+	 * Sets the channel volume of every channel to the currently configured value.
 	 */
-	public static void setVolume( byte vol ) {
-		volume = vol;
+	private static void setAllChannelVolumes() {
+		if (null != synthesizer)
+			for (int i=0; i< synthesizer.getChannels().length; i++)
+				sendChangeChannelVolumeMsg(i, channelVolumeMsb[i], channelVolumeLsb[i]);
+	}
+	
+	/**
+	 * Sets the master volume configuration to the given values.
+	 * Changes the master volume accordingly.
+	 * 
+	 * @param volMsb    Most significant byte of the master volume.
+	 * @param volLsb    Most significant byte of the master volume.
+	 */
+	public static void setMasterVolume(byte volMsb, byte volLsb) {
 		
-		if ( null != synthesizer )
-			for (  int i=0; i< synthesizer.getChannels().length; i++ )
-				setChannelVolume( i, channelVolume[i] );
+		masterVolumeMsb = volMsb;
+		masterVolumeLsb = volLsb;
+		
+		setMasterVolume();
 	}
 	
 	/**
-	 * Sets the volume of a channel relative to the global volume.
+	 * Sets the master volume to the currently configured value by sending an according SysEx message.
+	 */
+	private static void setMasterVolume() {
+		try {
+			
+			// create message
+			SysexMessage msg = new SysexMessage();
+			byte[] data = {
+				(byte) 0xF0, // status byte for sysex
+				0x7F, // universal realtime
+				0x7F, // sysex channel (0x7F = all devices)
+				0x04, // sub ID: device control
+				0x01, // sub ID 2: master volume
+				masterVolumeLsb,
+				masterVolumeMsb
+			};
+			msg.setMessage(data, data.length);
+			
+			// send message
+			if (receiver != null) {
+				receiver.send(msg, -1);
+			}
+			else {
+				synthesizer.getReceiver().send(msg, -1);
+			}
+		}
+		catch(InvalidMidiDataException | MidiUnavailableException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Sets the volume of a channel.
+	 * Sets the configuration and sends according message for MSB and LSB.
 	 * 
 	 * @param channelNumber    Channel number from 0 to 15.
-	 * @param channelVol       Number from -127 to +127. This is added to the global
-	 *                         volume value for this channel.
+	 * @param volMsb           Most significant byte of the channel volume (0-127).
+	 * @param volLsb           Most significant byte of the channel volume (0-127).
 	 */
-	public static void setChannelVolume( int channelNumber, byte channelVol ) {
+	public static void setChannelVolume(int channelNumber, byte volMsb, byte volLsb) {
+		
 		// store the new value
-		channelVolume[ channelNumber ] = channelVol;
+		channelVolumeMsb[ channelNumber ] = volMsb;
+		channelVolumeLsb[ channelNumber ] = volLsb;
 		
-		// get total (resulting) channel volume
-		int resultingVolume = volume + channelVol;
-		if ( resultingVolume < 0 )
-			resultingVolume = 0;
-		else if ( resultingVolume > 127 )
-			resultingVolume = 127;
-		
-		setChannelVolumeAbsolute( channelNumber, resultingVolume );
+		sendChangeChannelVolumeMsg(channelNumber, volMsb, volLsb);
 	}
 	
 	/**
-	 * Sets the absolute volume of a channel.
+	 * Changes the volume of a channel by sending according MIDI messages.
 	 * 
 	 * @param channelNumber    Channel number from 0 to 15.
-	 * @param channelVol       Number from 0 to 127.
+	 * @param volMsb           Most significant byte (number from 0 to 127).
+	 * @param volLsb           Least significant byte (number from 0 to 127).
 	 */
-	private static void setChannelVolumeAbsolute( int channelNumber, int channelVol ) {
+	private static void sendChangeChannelVolumeMsg(int channelNumber, byte volMsb, byte volLsb) {
 		if ( null != receiver ) {
 			try {
-				ShortMessage volMessage = new ShortMessage();
-				volMessage.setMessage(
+				ShortMessage msbMessage = new ShortMessage();
+				msbMessage.setMessage(
 					ShortMessage.CONTROL_CHANGE,
 					channelNumber,
-					MidiParser.CTRL_CHANGE_VOLUME,
-					channelVol
+					0x07,
+					volMsb
 				);
-				receiver.send( volMessage, -1 );
+				receiver.send(msbMessage, -1);
+				ShortMessage lsbMessage = new ShortMessage();
+				lsbMessage.setMessage(
+					ShortMessage.CONTROL_CHANGE,
+					channelNumber,
+					0x27,
+					volLsb
+				);
+				receiver.send(lsbMessage, -1);
 			}
 			catch ( InvalidMidiDataException e ) {
 				e.printStackTrace();
@@ -711,18 +773,19 @@ public final class MidiDevices {
 		}
 		else if ( null != synthesizer ) {
 			MidiChannel channel = synthesizer.getChannels()[ channelNumber ];
-			channel.controlChange( MidiParser.CTRL_CHANGE_VOLUME, channelVol );
+			channel.controlChange(0x07, volMsb);
+			channel.controlChange(0x27, volLsb);
 		}
 	}
 	
 	/**
-	 * Returns the current relative volume of the given channel.
+	 * Returns the current volume MSB of the given channel.
 	 * 
 	 * @param channel    Channel number from 0 to 15.
-	 * @return           Relative channel number from -127 to +127.
+	 * @return           the MSB of the channel volume (0 to +127).
 	 */
-	public static byte getChannelVolume( byte channel ) {
-		return channelVolume[ channel ];
+	public static byte getChannelVolume(byte channel) {
+		return channelVolumeMsb[ channel ];
 	}
 	
 	/**
@@ -732,7 +795,7 @@ public final class MidiDevices {
 	 * @param channel    Channel number from 0 to 15.
 	 * @param mute       **true**: muted; **false**: not muted.
 	 */
-	public static void setMute( int channel, boolean mute ) {
+	public static void setMute(int channel, boolean mute) {
 		channelMute[ channel ] = mute;
 		if ( null == synthesizer )
 			return;
@@ -917,7 +980,7 @@ public final class MidiDevices {
 	 * @param keep        **true** to keep the settings after playing the note, **false**
 	 *                    to restore the channel's state.
 	 */
-	public static void doSoundcheck( int channel, int[] instr, int note, int volume, int velocity, int duration, boolean keep ) {
+	public static void doSoundcheck( int channel, int[] instr, int note, byte volume, int velocity, int duration, boolean keep ) {
 		if ( null == synthesizer )
 			return;
 		
@@ -931,7 +994,7 @@ public final class MidiDevices {
 		midiChannel.controlChange( 0x00, bankMSB );
 		midiChannel.controlChange( 0x20, bankLSB );
 		midiChannel.programChange( program );
-		setChannelVolumeAbsolute( channel, volume );
+		sendChangeChannelVolumeMsg(channel, volume, volume);
 		
 		// note on
 		midiChannel.noteOn( note, velocity );
@@ -949,7 +1012,7 @@ public final class MidiDevices {
 		// keep or restore bank, instrument and volume
 		if (keep)
 			return;
-		restoreChannelAfterSoundcheck( channel );
+		restoreChannelAfterSoundcheck(channel);
 	}
 	
 	/**
@@ -962,7 +1025,7 @@ public final class MidiDevices {
 	 * 
 	 * @param channel Channel number.
 	 */
-	public static void restoreChannelAfterSoundcheck( int channel ) {
+	public static void restoreChannelAfterSoundcheck(int channel) {
 		
 		// restore bank
 		MidiChannel midiChannel = synthesizer.getChannels()[ channel ];
@@ -974,9 +1037,9 @@ public final class MidiDevices {
 		midiChannel.controlChange( 0x20, oldBankLSB );
 		
 		// restore program (instrument)
-		midiChannel.programChange( oldProgram );
+		midiChannel.programChange(oldProgram);
 		
 		// restore volume
-		setChannelVolume( channel, channelVolume[channel] );
+		sendChangeChannelVolumeMsg(channel, channelVolumeMsb[channel], channelVolumeLsb[channel]);
 	}
 }

@@ -218,7 +218,7 @@ public class SoundcheckView extends JDialog {
 		constrRight.gridwidth = 1;
 		constrRight.fill      = GridBagConstraints.NONE;
 		constrRight.weighty   = 0;
-		fldVolume = new JTextField( Integer.toString(MidiDevices.DEFAULT_VOLUME) );
+		fldVolume = new JTextField( Integer.toString(MidiDevices.DEFAULT_CHANNEL_VOL_MSB) );
 		fldVolume.setName( NAME_VOLUME );
 		fldVolume.getDocument().putProperty( "name", NAME_VOLUME );
 		fldVolume.getDocument().addDocumentListener( controller );
@@ -232,7 +232,7 @@ public class SoundcheckView extends JDialog {
 		constrRight.fill      = GridBagConstraints.HORIZONTAL;
 		sldVolume = createVolOrVelSlider( controller );
 		sldVolume.setName( NAME_VOLUME );
-		sldVolume.setValue( MidiDevices.DEFAULT_VOLUME );
+		sldVolume.setValue( MidiDevices.DEFAULT_CHANNEL_VOL_MSB );
 		content.add( sldVolume, constrRight );
 		
 		// velocity label
@@ -324,12 +324,12 @@ public class SoundcheckView extends JDialog {
 		slider.addChangeListener( controller );
 		slider.addMouseWheelListener( controller );
 		// labels
-		slider.setMinimum( PlayerView.VOL_MIN );
-		slider.setMaximum( PlayerView.VOL_MAX );
-		slider.setMajorTickSpacing( PlayerView.VOL_MAJOR );
-		slider.setMinorTickSpacing( PlayerView.VOL_MINOR );
+		slider.setMinimum( PlayerView.CH_VOL_MIN );
+		slider.setMaximum( PlayerView.CH_VOL_MAX );
+		slider.setMajorTickSpacing( PlayerView.CH_VOL_MAJOR );
+		slider.setMinorTickSpacing( PlayerView.CH_VOL_MINOR );
 		Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
-		for ( int i = PlayerView.VOL_MIN; i <= PlayerView.VOL_MAX; i += VOL_OR_VEL_LABEL_SKIP ) {
+		for ( int i = PlayerView.CH_VOL_MIN; i <= PlayerView.CH_VOL_MAX; i += VOL_OR_VEL_LABEL_SKIP ) {
 			int display = i;
 			labelTable.put( i, new JLabel(Integer.toString(display)) );
 		}
@@ -375,7 +375,7 @@ public class SoundcheckView extends JDialog {
 	 * 
 	 * @param volume  The volume value to set.
 	 */
-	public void setVolume( byte volume ) {
+	public void setVolume(byte volume) {
 		
 		// set slider
 		sldVolume.setValue( volume );
@@ -685,8 +685,8 @@ public class SoundcheckView extends JDialog {
 	 * 
 	 * @return Volume value from the slider.
 	 */
-	public int getVolume() {
-		return sldVolume.getValue();
+	public byte getVolume() {
+		return (byte) sldVolume.getValue();
 	}
 	
 	/**

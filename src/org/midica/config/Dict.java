@@ -1116,7 +1116,7 @@ public class Dict {
 	public static final String JUMP                             = "jump";
 	public static final String SHOW_LYRICS                      = "show_lyrics";
 	public static final String TIME_INFO_UNAVAILABLE            = "time_info_unavailable";
-	public static final String SLIDER_VOL                       = "slider_vol";
+	public static final String SLIDER_MASTER_VOL                = "slider_master_vol";
 	public static final String SLIDER_TEMPO                     = "slider_tempo";
 	public static final String SLIDER_TRANSPOSE                 = "slider_transpose";
 	public static final String ACTIVITY_ACTIVE                  = "activity_active";
@@ -2025,7 +2025,7 @@ public class Dict {
 		set( JUMP,                                "Go"                         );
 		set( SHOW_LYRICS,                         "Show Lyrics"                );
 		set( TIME_INFO_UNAVAILABLE,               "-"                          );
-		set( SLIDER_VOL,                          "Vol"                        );
+		set( SLIDER_MASTER_VOL,                   "Vol"                        );
 		set( SLIDER_TEMPO,                        "Tempo"                      );
 		set( SLIDER_TRANSPOSE,                    "Transpose"                  );
 		set( CTRL_BTN_STOP,                       "Stop"                       );
