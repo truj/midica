@@ -11,7 +11,6 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.Image;
 import java.awt.KeyEventPostProcessor;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionListener;
@@ -73,10 +72,8 @@ public class UiView extends JFrame {
 	public static final String CMD_OPEN_FCT_NOT_READY  = "cmd_open_fct_not_ready";
 	
 	// application icons
-	private static final String inactiveAppIconPath = "org/midica/resources/app-icon-inactive.png";
-	private static final String activeAppIconPath   = "org/midica/resources/app-icon-active.png";
-	private static Image inactiveIcon = null;
-	private static Image activeIcon   = null;
+	private static final String    APP_ICON_PATH = "org/midica/resources/app-icon.png";
+	private static       ImageIcon appIcon       = null;
 	
 	// make file names in the import section as small as possible
 	private static final Dimension MAX_FILE_NAME_DIM = new Dimension(0, new JLabel(" ").getPreferredSize().height);
@@ -117,6 +114,10 @@ public class UiView extends JFrame {
 		super( Dict.get(Dict.TITLE_MAIN_WINDOW) );
 		this.controller = controller;
 		addWindowListener( controller );
+		
+		if (!Midica.isCliMode)
+			appIcon = new ImageIcon( ClassLoader.getSystemResource(APP_ICON_PATH) );
+		
 		init();
 		
 		// don't show the window in CLI mode
@@ -124,27 +125,11 @@ public class UiView extends JFrame {
 			return;
 		}
 		
-		// initialize icons
-		ImageIcon icon = new ImageIcon( ClassLoader.getSystemResource(inactiveAppIconPath) );
-		inactiveIcon   = icon.getImage();
-		icon           = new ImageIcon( ClassLoader.getSystemResource(activeAppIconPath) );
-		activeIcon     = icon.getImage();
-		setAppIcon(false);
+		// set app icon
+		setIconImage( appIcon.getImage() );
 		
 		pack();
 		setVisible(true);
-	}
-	
-	/**
-	 * Sets the application icon indicating if a sequence has been loaded.
-	 * 
-	 * @param active    **true** to set the active icon, **false** for setting the inactive icon
-	 */
-	public void setAppIcon(boolean active) {
-		if (active)
-			setIconImage(activeIcon);
-		else
-			setIconImage(inactiveIcon);
 	}
 	
 	/**

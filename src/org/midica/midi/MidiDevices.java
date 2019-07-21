@@ -14,6 +14,7 @@ import java.util.TreeMap;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiChannel;
+import javax.sound.midi.MidiMessage;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Receiver;
@@ -696,7 +697,6 @@ public final class MidiDevices {
 	 */
 	private static void setMasterVolume() {
 		try {
-			
 			// create message
 			SysexMessage msg = new SysexMessage();
 			byte[] data = {
@@ -711,15 +711,33 @@ public final class MidiDevices {
 			msg.setMessage(data, data.length);
 			
 			// send message
-			if (receiver != null) {
-				receiver.send(msg, -1);
+			sendMessage(msg);
+		}
+		catch(InvalidMidiDataException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Sends the given MIDI message immediately to the receiver, if possible.
+	 * 
+	 * @param msg  MIDI message.
+	 */
+	private static void sendMessage(MidiMessage msg) {
+		
+		// find the right receiver
+		Receiver rec = receiver;
+		if (rec == null && synthesizer != null) {
+			try {
+				rec = synthesizer.getReceiver();
 			}
-			else {
-				synthesizer.getReceiver().send(msg, -1);
+			catch (MidiUnavailableException e) {
 			}
 		}
-		catch(InvalidMidiDataException | MidiUnavailableException e) {
-			e.printStackTrace();
+		
+		// send the message
+		if (rec != null) {
+			rec.send(msg, -1);
 		}
 	}
 	

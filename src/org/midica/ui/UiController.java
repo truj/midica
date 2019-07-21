@@ -376,13 +376,6 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		// close file selector
 		selector.setVisible( false );
 		
-		// Set icon inactive BEFORE parsing a sequence.
-		// This makes sure that the window of an error message already has the right icon.
-		if ( FileSelector.FILE_TYPE_MPL.equals(type)
-		  || FileSelector.FILE_TYPE_MIDI.equals(type) ) {
-			view.setAppIcon(false);
-		}
-		
 		// start file parsing in the background and show the wait window
 		ParsingWorker worker = new ParsingWorker( waitView, parser, file );
 		worker.execute();
@@ -449,17 +442,22 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			}
 			showErrorMessage( msg );
 			ex.printStackTrace();
-			
-			// reset sequence (but not if a soundfont has been parsed)
-			if ( FileSelector.FILE_TYPE_MPL.equals(type)
-			  || FileSelector.FILE_TYPE_MIDI.equals(type) ) {
-				MidiDevices.setSequence(null);
-			}
 		}
 		
 		// re-draw everything because the file name to be displayed can be longer or shorter
 		// and therefore the container sizes need to be adjusted
 		view.pack();
+	}
+	
+	/**
+	 * Updates the parsed file label after the player has been closed.
+	 * This is necessary because a reparse from the player could have failed.
+	 * Then the label must not display the file name any more.
+	 */
+	public void updateAfterPlayerClosed() {
+		if (null == SequenceParser.getFileName()) {
+			displayFilename( currentFileType, Dict.get(Dict.UNCHOSEN_FILE) );
+		}
 	}
 	
 	/**

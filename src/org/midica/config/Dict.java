@@ -1148,6 +1148,8 @@ public class Dict {
 	public static final String COLUMN_NUMBER                    = "column_number";
 	public static final String COLUMN_NAME                      = "column_name";
 	public static final String COLUMN_TICK                      = "column_tick";
+	public static final String TIP_PARSE_SUCCESS                = "tip_parse_success";
+	public static final String TIP_PARSE_FAILED                 = "tip_parse_failed";
 	
 	// SoundcheckView
 	public static final String TITLE_SOUNDCHECK                 = "title_soundcheck";
@@ -2057,6 +2059,8 @@ public class Dict {
 		set( COLUMN_NUMBER,                       "Number"                     );
 		set( COLUMN_NAME,                         "Name"                       );
 		set( COLUMN_TICK,                         "Tick"                       );
+		set( TIP_PARSE_SUCCESS,                   "Parsing successful"         );
+		set( TIP_PARSE_FAILED,                    "Parsing failed"             );
 		
 		// SoundcheckView
 		set( TITLE_SOUNDCHECK,               "Midica Soundcheck"               );

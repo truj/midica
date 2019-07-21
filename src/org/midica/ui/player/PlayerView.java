@@ -127,8 +127,10 @@ public class PlayerView extends JDialog {
 	public static final String CMD_FAST_FWD  = "cmd_fast_forward";
 	
 	// for activity control
-	public static final ImageIcon AC_ICON_INACTIVE  = new ImageIcon( ClassLoader.getSystemResource("org/midica/resources/channel-inactive.png") );
-	public static final ImageIcon AC_ICON_ACTIVE    = new ImageIcon( ClassLoader.getSystemResource("org/midica/resources/channel-active.png") );
+	public static final ImageIcon AC_ICON_INACTIVE   = new ImageIcon( ClassLoader.getSystemResource("org/midica/resources/channel-inactive.png") );
+	public static final ImageIcon AC_ICON_ACTIVE     = new ImageIcon( ClassLoader.getSystemResource("org/midica/resources/channel-active.png") );
+	public static final ImageIcon PARSE_SUCCESS_ICON = new ImageIcon( ClassLoader.getSystemResource("org/midica/resources/parse-success.png") );
+	public static final ImageIcon PARSE_FAILURE_ICON = new ImageIcon( ClassLoader.getSystemResource("org/midica/resources/parse-failure.png") );
 	
 	// for channel details
 	private static final int   NOTE_HISTORY_COL_WIDTH_NUMBER   =  70;
@@ -140,6 +142,7 @@ public class PlayerView extends JDialog {
 	private static final int   NOTE_HISTORY_HEIGHT             = 155;
 	
 	private PlayerController      controller        = null;
+	private File                  currentFile       = null;
 	private KeyEventPostProcessor keyProcessor      = null;
 	private Container             content           = null;
 	private Container             channelLyricsArea = null;
@@ -147,8 +150,9 @@ public class PlayerView extends JDialog {
 	private Container             lyricsArea        = null;
 	
 	// UI
-	private JCheckBox cbxLyrics = null;
-	private JLabel    lblLyrics = null;
+	private JCheckBox cbxLyrics      = null;
+	private JLabel    lblLyrics      = null;
+	private JLabel    lblParseStatus = null;
 	
 	private MidicaSlider progressSlider     = null;
 	private MidicaSlider masterVolumeSlider = null;
@@ -199,6 +203,7 @@ public class PlayerView extends JDialog {
 	public PlayerView( UiView view, SequenceParser parser, File currentFile ) {
 		super( view, Dict.get(Dict.TITLE_PLAYER), true );
 		
+		this.currentFile = currentFile;
 		if ( null != currentFile ) {
 			setTitle( Dict.get(Dict.TITLE_PLAYER) + " - " + currentFile.getName() );
 		}
@@ -335,6 +340,17 @@ public class PlayerView extends JDialog {
 		
 		// spacer
 		constraints.gridx++;
+		JLabel spacer3 = new JLabel("   ");
+		area.add( spacer3, constraints );
+		
+		// parsing status icon
+		constraints.gridx++;
+		lblParseStatus = new JLabel();
+		area.add(lblParseStatus, constraints);
+		updateParseStatusIcon();
+		
+		// spacer
+		constraints.gridx++;
 		constraints.weightx = 1;
 		JLabel spacer2 = new JLabel( " " );
 		area.add( spacer2, constraints );
@@ -345,6 +361,30 @@ public class PlayerView extends JDialog {
 		area.add( createTimeArea(), constraints );
 		
 		return area;
+	}
+	
+	/**
+	 * Sets the image and tooltip of the parse status label.
+	 * If a file could be parsed, the image is different.
+	 */
+	public void updateParseStatusIcon() {
+		if (null == lblParseStatus)
+			return;
+		
+		ImageIcon statusIcon;
+		String    toolTip = "<html>";
+		String fileName = SequenceParser.getFileName();
+		if (null == fileName) {
+			statusIcon = PARSE_FAILURE_ICON;
+			toolTip   += Dict.get( Dict.TIP_PARSE_FAILED );
+		}
+		else {
+			statusIcon = PARSE_SUCCESS_ICON;
+			toolTip   += Dict.get( Dict.TIP_PARSE_SUCCESS );
+		}
+		toolTip += "<br>" + currentFile.getAbsolutePath();
+		lblParseStatus.setToolTipText(toolTip);
+		lblParseStatus.setIcon(statusIcon);
 	}
 	
 	/**

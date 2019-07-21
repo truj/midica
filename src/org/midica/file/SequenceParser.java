@@ -11,7 +11,6 @@ import java.io.File;
 
 import javax.sound.midi.Sequence;
 
-import org.midica.Midica;
 import org.midica.config.Dict;
 import org.midica.midi.MidiDevices;
 import org.midica.midi.SequenceAnalyzer;
@@ -111,6 +110,7 @@ public abstract class SequenceParser implements IParser {
 		sequenceFile = null;
 		currentFile  = file;
 		SequenceAnalyzer.reset();
+		MidiDevices.setSequence(null);
 	}
 	
 	/**
@@ -138,12 +138,9 @@ public abstract class SequenceParser implements IParser {
 		// analyze sequence and add marker events
 		SequenceAnalyzer.analyze( seq, charset );
 		
-		// mark the current file as successfully parsed
+		// publich successfully parsed file
 		sequenceFile = currentFile;
 		fileType     = type;
-		Midica.uiController.getView().setAppIcon(true);
-		
-		// publish
 		MidiDevices.setSequence( SequenceCreator.getSequence() );
 	}
 	

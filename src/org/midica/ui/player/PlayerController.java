@@ -229,6 +229,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			refresher.die();
 			MidiDevices.stop();
 			MidiDevices.destroyDevices();
+			Midica.uiController.updateAfterPlayerClosed();
 		}
 		catch ( MidiUnavailableException ex ) {
 			showErrorMessage( ex );
@@ -766,9 +767,6 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			boolean  isPlaying    = MidiDevices.isPlaying();
 			WaitView waitView     = new WaitView( view );
 			
-			// reset icon to inactive - in case parsing fails
-			Midica.uiController.getView().setAppIcon(false);
-			
 			// start file parsing in the background and show the wait window
 			ParsingWorker worker = new ParsingWorker( waitView, parser, currentFile );
 			MidiDevices.destroyDevices();
@@ -778,6 +776,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			// wait until the file is parsed and than evaluate the parsing result
 			try {
 				ParseException parseException = (ParseException) worker.get();
+				view.updateParseStatusIcon();
 				if ( parseException != null ) {
 					throw parseException;
 				}
