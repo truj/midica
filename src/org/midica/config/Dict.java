@@ -116,6 +116,8 @@ public class Dict {
 	public static final String SYNTAX_LYRICS_LF          = "LYRICS_LF";
 	public static final String SYNTAX_TUPLET             = "TUPLET";
 	public static final String SYNTAX_T                  = "TUPLET_SHORT";
+	public static final String SYNTAX_TREMOLO            = "TREMOLO";
+	public static final String SYNTAX_TR                 = "TREMOLO_SHORT";
 	public static final String SYNTAX_REST               = "REST";
 	public static final String SYNTAX_CHORD              = "CHORD";
 	public static final String SYNTAX_INLINE_CHORD_SEP   = "INLINE_CHORD_SEP";
@@ -1533,6 +1535,8 @@ public class Dict {
 		set( SYNTAX_LYRICS_LF,          "placeholder for a new paragraph inside of a syllable" );
 		set( SYNTAX_TUPLET,             "tuplet option (long)"                             );
 		set( SYNTAX_T,                  "tuplet option (short)"                            );
+		set( SYNTAX_TREMOLO,            "tremolo option (long)"                            );
+		set( SYNTAX_TR,                 "tremolo option (short)"                           );
 		set( SYNTAX_REST,               "rest character"                                   );
 		set( SYNTAX_CHORD,              "chord definition"                                 );
 		set( SYNTAX_INLINE_CHORD_SEP,   "inline chord separator"                           );
@@ -2397,6 +2401,8 @@ public class Dict {
 		setSyntax( SYNTAX_LYRICS_LF,          "\\n"          );
 		setSyntax( SYNTAX_TUPLET,             "tuplet"       );
 		setSyntax( SYNTAX_T,                  "t"            );
+		setSyntax( SYNTAX_TREMOLO,            "tremolo"      );
+		setSyntax( SYNTAX_TR,                 "tr"           );
 		setSyntax( SYNTAX_REST,               "-"            );
 		setSyntax( SYNTAX_CHORD,              "CHORD"        );
 		setSyntax( SYNTAX_INLINE_CHORD_SEP,   ","            );
@@ -2498,6 +2504,8 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_LYRICS_LF        );
 		addSyntaxForInfoView( SYNTAX_TUPLET           );
 		addSyntaxForInfoView( SYNTAX_T                );
+		addSyntaxForInfoView( SYNTAX_TREMOLO          );
+		addSyntaxForInfoView( SYNTAX_TR               );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_NOTE_LENGTH) );
 		addSyntaxForInfoView( SYNTAX_32            );

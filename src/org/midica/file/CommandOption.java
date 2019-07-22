@@ -49,6 +49,9 @@ public class CommandOption {
 		else if (MidicaPLParser.OPT_TUPLET.equals(name)) {
 			this.value = (String) value;
 		}
+		else if (MidicaPLParser.OPT_TREMOLO.equals(name)) {
+			this.value = (Integer) value;
+		}
 		else {
 			// should never happen
 			throw new ParseException("Invalid option name: " + name + ". Please report.");
@@ -101,5 +104,13 @@ public class CommandOption {
 	 */
 	public String getTuplet() {
 		return (String) value;
+	}
+	
+	/**
+	 * Returns a tremolo modifier.
+	 * @return tremolo modifier.
+	 */
+	public int getTremolo() {
+		return (Integer) value;
 	}
 }

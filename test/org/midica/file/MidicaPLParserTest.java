@@ -22,6 +22,7 @@ import org.midica.Midica;
 import org.midica.TestUtil;
 import org.midica.midi.SequenceAnalyzer;
 import org.midica.midi.SequenceCreator;
+import org.midica.ui.model.MidicaTreeModel;
 
 /**
  * This is the test class for {@link org.midica.file.MidicaPLParser}.
@@ -183,6 +184,11 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		parse(getWorkingFile("drum-only-with-multiple"));
 		assertEquals( 0, instruments.get(9).getCurrentTicks() );
+		
+		parse(getWorkingFile("tremolo"));
+		assertEquals( 11520, instruments.get(0).getCurrentTicks() );
+		String rootString = ((MidicaTreeModel)SequenceAnalyzer.getSequenceInfo().get("banks_total")).getRoot().toString();
+		assertEquals( "Total (33)", rootString );
 	}
 	
 	/**

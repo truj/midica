@@ -52,6 +52,7 @@ public class MidicaPLParser extends SequenceParser {
 	public static final String OPT_QUANTITY = "quantity";
 	public static final String OPT_LYRICS   = "lyrics";
 	public static final String OPT_TUPLET   = "tuplet";
+	public static final String OPT_TREMOLO  = "tremolo";
 	
 	private static final int MODE_DEFAULT     = 0;
 	private static final int MODE_INSTRUMENTS = 1;
@@ -125,6 +126,8 @@ public class MidicaPLParser extends SequenceParser {
 	public static String D                  = null;
 	public static String DURATION           = null;
 	public static String DURATION_PERCENT   = null;
+	public static String TR                 = null;
+	public static String TREMOLO            = null;
 	public static String T                  = null;
 	public static String TUPLET             = null;
 	public static String V                  = null;
@@ -263,6 +266,8 @@ public class MidicaPLParser extends SequenceParser {
 		D                  = Dict.getSyntax( Dict.SYNTAX_D                  );
 		DURATION           = Dict.getSyntax( Dict.SYNTAX_DURATION           );
 		DURATION_PERCENT   = Dict.getSyntax( Dict.SYNTAX_DURATION_PERCENT   );
+		TR                 = Dict.getSyntax( Dict.SYNTAX_TR                 );
+		TREMOLO            = Dict.getSyntax( Dict.SYNTAX_TREMOLO            );
 		T                  = Dict.getSyntax( Dict.SYNTAX_T                  );
 		TUPLET             = Dict.getSyntax( Dict.SYNTAX_TUPLET             );
 		V                  = Dict.getSyntax( Dict.SYNTAX_V                  );
@@ -1771,6 +1776,8 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_D.equals(cmdId)                  ) D                  = cmdName;
 		else if ( Dict.SYNTAX_DURATION.equals(cmdId)           ) DURATION           = cmdName;
 		else if ( Dict.SYNTAX_DURATION_PERCENT.equals(cmdId)   ) DURATION_PERCENT   = cmdName;
+		else if ( Dict.SYNTAX_TR.equals(cmdId)                 ) TR                 = cmdName;
+		else if ( Dict.SYNTAX_TREMOLO.equals(cmdId)            ) TREMOLO            = cmdName;
 		else if ( Dict.SYNTAX_T.equals(cmdId)                  ) T                  = cmdName;
 		else if ( Dict.SYNTAX_TUPLET.equals(cmdId)             ) TUPLET             = cmdName;
 		else if ( Dict.SYNTAX_V.equals(cmdId)                  ) V                  = cmdName;
@@ -2069,6 +2076,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// process options
 		boolean multiple = false;
+		int     tremolo  = duration;
 		int     quantity = 1;
 		String  syllable = null;
 		if (2 == subTokens.length) {
@@ -2096,6 +2104,9 @@ public class MidicaPLParser extends SequenceParser {
 				else if (OPT_LYRICS.equals(optName)) {
 					syllable = opt.getLyrics();
 				}
+				else if (OPT_TREMOLO.equals(optName)) {
+					tremolo = opt.getTremolo();
+				}
 			}
 		}
 		
@@ -2119,7 +2130,9 @@ public class MidicaPLParser extends SequenceParser {
 		try {
 			NOTE_QUANTITY:
 			for (int i = 0; i < quantity; i++) {
-				long startTicks = instr.getCurrentTicks();
+				int  currentDuration = duration;
+				int  currentTremolo  = tremolo;
+				long startTicks      = instr.getCurrentTicks();
 				if (! isFake && syllable != null) {
 					syllable = syllable.replaceAll(Pattern.quote(LYRICS_SPACE), " ");
 					syllable = syllable.replaceAll(Pattern.quote(LYRICS_CR), "\r");
@@ -2137,12 +2150,31 @@ public class MidicaPLParser extends SequenceParser {
 					return;
 				}
 				else {
-					// get end ticks of the current note
-					long endTicks = instr.addNote( duration );
 					
-					// create and add messages
-					int newNote = transpose( note, channel );
-					SequenceCreator.addMessageKeystroke( channel, newNote, startTicks, endTicks, velocity );
+					TREMOLO_PART:
+					while (currentDuration > 0) {
+						startTicks = instr.getCurrentTicks();
+						
+						// handle tremolo
+						if (tremolo == currentDuration) {
+							currentDuration = 0; // normal note (or last, dividable tremolo note)
+						}
+						else if (currentDuration > tremolo) {
+							currentDuration -= tremolo; // tremolo note
+						}
+						else {
+							// last rest of a tremolo note
+							currentTremolo  = currentDuration;
+							currentDuration = 0;
+						}
+						
+						// get end ticks of the current note
+						long endTicks = instr.addNote( currentTremolo );
+						
+						// create and add messages
+						int newNote = transpose( note, channel );
+						SequenceCreator.addMessageKeystroke( channel, newNote, startTicks, endTicks, velocity );
+					}
 				}
 			}
 		}
@@ -2202,7 +2234,7 @@ public class MidicaPLParser extends SequenceParser {
 			}
 			else if (Q.equals(optName) || QUANTITY.equals(optName)) {
 				optName = OPT_QUANTITY;
-				optValue.set( optName, toInt(optParts[1], false) );
+				optValue.set( optName, toInt(optParts[1], true) );
 			}
 			else if (M.equals(optName) || MULTIPLE.equals(optName)) {
 				optName = OPT_MULTIPLE;
@@ -2228,6 +2260,10 @@ public class MidicaPLParser extends SequenceParser {
 						throw new ParseException( Dict.get(Dict.ERROR_TUPLET_INVALID) + optParts[1] );
 					}
 				}
+			}
+			else if (TR.equals(optName) || TREMOLO.equals(optName)) {
+				optName = OPT_TREMOLO;
+				optValue.set( optName, parseDuration(optParts[1]) );
 			}
 			else {
 				throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_OPTION) + optName );

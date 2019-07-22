@@ -1,0 +1,18 @@
+INCLUDE_FILE inc/instruments.midica
+
+// note length dividable by tremolo value
+0 c /1  tremolo=/4              // 1920 ticks, 4 notes
+
+// note length NOT dividable by tremolo value
+0 c /1  tr /4t11:7              // 1920 ticks, 7 notes
+
+// dividable, with quantity
+0 c /1  tr=/4, q=2              // 3840 ticks, 8 notes
+
+// NOT dividable, with quantity
+0 c /1  tr=/4t11:7, q=2         // 3840 ticks, 14 notes
+
+
+
+// total ticks: 1920 + 1920 + 3840 + 3840 = 11520
+// total notes: 4 + 7 + 8 + 14 = 33
