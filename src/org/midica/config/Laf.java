@@ -110,6 +110,7 @@ public class Laf {
 	
 	// table header and column colors
 	public  static final Color COLOR_TABLE_HEADER_BG         = COLOR_SECONDARY;
+	public  static final Color COLOR_TABLE_HEADER_SORTED_BG  = new Color( 120, 60, 0 );
 	public  static final Color COLOR_TABLE_HEADER_TXT        = COLOR_BLACK;
 	public  static final Color COLOR_TABLE_CELL_SELECTED     = COLOR_SECONDARY_LIGHT;      // table row is currently selected
 	public  static final Color COLOR_TABLE_CELL_CATEGORY     = COLOR_PRIMARY_LIGHT;
@@ -293,7 +294,7 @@ public class Laf {
 		// 1. Create a temporary config
 		// 2. Save the painters
 		// repeat 1.-2. as often as needed
-		// 3. Create the real config (and use the saved painters there)
+		// 3. Create the final config (and use the saved painters there)
 		
 		// 1. create temporary config (for table headers)
 		custom.put( "nimbusBase",     COLOR_CHECKBOX        );
@@ -317,7 +318,7 @@ public class Laf {
 		Object cbxSelPainter         = UIManager.get("CheckBox[Selected].iconPainter");
 		
 		// 1. create temporary config (for table headers)
-		recreateNimbusConfig(COLOR_NIMBUS_BASE, COLOR_TABLE_HEADER_BG);
+		recreateNimbusConfig(COLOR_TABLE_HEADER_SORTED_BG, COLOR_TABLE_HEADER_BG);
 		applyCustomDefaults();
 		
 		// 2. save painters (table header and checkbox)
@@ -350,6 +351,28 @@ public class Laf {
 		Object treeEnColIconPainter = UIManager.get("Tree[Enabled].collapsedIconPainter");
 		Object treeEnSelIconPainter = UIManager.get("Tree[Enabled].expandedIconPainter");
 		
+		// 1. create temporary config (for tree collapse/expand icons)
+		recreateNimbusConfig(COLOR_NIMBUS_BASE, COLOR_TREE_COLLAPSE_EXPAND);
+		applyCustomDefaults();
+		
+		// 2. save painters
+		Object menuDisArrPainter              = UIManager.get("Menu[Disabled].arrowIconPainter");
+		Object menuEnSelArrPainter            = UIManager.get("Menu[Enabled+Selected].arrowIconPainter");
+		Object menuEnArrPainter               = UIManager.get("Menu[Enabled].arrowIconPainter");
+		Object menuEnSelBgPainter             = UIManager.get("Menu[Enabled+Selected].backgroundPainter");
+		Object menBarMenSelBgPainter          = UIManager.get("MenuBar:Menu[Selected].backgroundPainter");
+		Object menBarEnBgPainter              = UIManager.get("MenuBar[Enabled].backgroundPainter");
+		Object menBarEnBorderPainter          = UIManager.get("MenuBar[Enabled].borderPainter");
+		Object popMenDisBgPainter             = UIManager.get("PopupMenu[Disabled].backgroundPainter");
+		Object popMenEnBgPainter              = UIManager.get("PopupMenu[Enabled].backgroundPainter");
+		Object radioMenItDisSelChkIconPainter = UIManager.get("RadioButtonMenuItem[Disabled+Selected].checkIconPainter");
+		Object radioMenItEnSelChkIconPainter  = UIManager.get("RadioButtonMenuItem[Enabled+Selected].checkIconPainter");
+		Object radioMenItMoSelBgPainter       = UIManager.get("RadioButtonMenuItem[MouseOver+Selected].backgroundPainter");
+		Object radioMenItMoSelChkIconPainter  = UIManager.get("RadioButtonMenuItem[MouseOver+Selected].checkIconPainter");
+		Object radioMenItMoBgPainter          = UIManager.get("RadioButtonMenuItem[MouseOver].backgroundPainter");
+		Object chkBxMenItMoBgPainter          = UIManager.get("CheckBoxMenuItem[MouseOver].backgroundPainter");
+		Object menItMoBgPainter               = UIManager.get("MenuItem[MouseOver].backgroundPainter");
+		
 		// 1. create temporary config (for scroll bar background)
 		recreateNimbusConfig(COLOR_NIMBUS_BASE, COLOR_SCROLLBAR_TRACK);
 		applyCustomDefaults();
@@ -368,13 +391,31 @@ public class Laf {
 		Object dividerEnFgPainter     = UIManager.get("SplitPane:SplitPaneDivider[Enabled].foregroundPainter");
 		Object dividerFocBgPainter    = UIManager.get("SplitPane:SplitPaneDivider[Focused].backgroundPainter");
 		
-		// 3. create real config
+		// 3. create final config
 		recreateNimbusConfig(COLOR_NIMBUS_BASE, COLOR_PANEL);
 		custom.put( "control",        COLOR_PANEL       );
 		custom.put( "nimbusFocus",    COLOR_FOCUS       );
 		
 		// tooltip background
 		custom.put( "info", COLOR_TOOLTIP_BACKGROUND );
+		
+		// menu (right click in a file chooser)
+		custom.put( "Menu[Disabled].arrowIconPainter",                           menuDisArrPainter              );
+		custom.put( "Menu[Enabled+Selected].arrowIconPainter",                   menuEnSelArrPainter            );
+		custom.put( "Menu[Enabled].arrowIconPainter",                            menuEnArrPainter               );
+		custom.put( "Menu[Enabled+Selected].backgroundPainter",                  menuEnSelBgPainter             );
+		custom.put( "MenuBar:Menu[Selected].backgroundPainter",                  menBarMenSelBgPainter          );
+		custom.put( "MenuBar[Enabled].backgroundPainter",                        menBarEnBgPainter              );
+		custom.put( "MenuBar[Enabled].borderPainter",                            menBarEnBorderPainter          );
+		custom.put( "PopupMenu[Disabled].backgroundPainter",                     popMenDisBgPainter             );
+		custom.put( "PopupMenu[Enabled].backgroundPainter",                      popMenEnBgPainter              );
+		custom.put( "RadioButtonMenuItem[Disabled+Selected].checkIconPainter",   radioMenItDisSelChkIconPainter );
+		custom.put( "RadioButtonMenuItem[Enabled+Selected].checkIconPainter",    radioMenItEnSelChkIconPainter  );
+		custom.put( "RadioButtonMenuItem[MouseOver+Selected].backgroundPainter", radioMenItMoSelBgPainter       );
+		custom.put( "RadioButtonMenuItem[MouseOver+Selected].checkIconPainter",  radioMenItMoSelChkIconPainter  );
+		custom.put( "RadioButtonMenuItem[MouseOver].backgroundPainter",          radioMenItMoBgPainter          );
+		custom.put( "CheckBoxMenuItem[MouseOver].backgroundPainter",             chkBxMenItMoBgPainter          );
+		custom.put( "MenuItem[MouseOver].backgroundPainter",                     menItMoBgPainter               );
 		
 		// selections
 		custom.put( "nimbusSelectedText",                     COLOR_BLACK                 );

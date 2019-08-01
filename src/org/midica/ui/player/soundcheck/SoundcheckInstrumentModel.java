@@ -14,6 +14,8 @@ import java.util.TreeMap;
 import org.midica.config.Dict;
 import org.midica.file.SoundfontParser;
 import org.midica.ui.model.MidicaTableModel;
+import org.midica.ui.sorter.BankNumber;
+import org.midica.ui.sorter.OptionalNumber;
 
 /**
  * This class provides the model for the instruments table in the soundcheck
@@ -47,6 +49,12 @@ public class SoundcheckInstrumentModel extends MidicaTableModel {
 		columnNames[ 1 ] = Dict.get( Dict.SNDCHK_COL_BANK        );
 		columnNames[ 2 ] = Dict.get( Dict.SNDCHK_COL_NAME_SF     );
 		columnNames[ 3 ] = Dict.get( Dict.SNDCHK_COL_NAME_SYNTAX );
+		
+		columnClasses = new Class[ 4 ];
+		columnClasses[ 0 ] = OptionalNumber.class;
+		columnClasses[ 1 ] = BankNumber.class;
+		columnClasses[ 2 ] = String.class;
+		columnClasses[ 3 ] = String.class;
 		
 		// init sub categories for chromatic instruments
 		initSubCategories();
@@ -155,8 +163,16 @@ public class SoundcheckInstrumentModel extends MidicaTableModel {
 		// category?
 		if ( rowObj.containsKey("category") ) {
 			
+			if (0 == col) {
+				return new OptionalNumber("");
+			}
+			
+			else if (1 == col) {
+				return new BankNumber(-1, "");
+			}
+			
 			// display sub category in the syntax column
-			if ( 3 == col ) {
+			else if ( 3 == col ) {
 				if ( "sub".equals(rowObj.get("category")) )
 					return rowObj.get("name");
 			}
@@ -172,11 +188,13 @@ public class SoundcheckInstrumentModel extends MidicaTableModel {
 		// instrument or drumkit
 		if ( 0 == col ) {
 			// program
-			return rowObj.get("program");
+			return new OptionalNumber( rowObj.get("program") );
 		}
 		else if ( 1 == col ) {
 			// bank
-			return rowObj.get("bank_msb") + Dict.getSyntax( Dict.SYNTAX_BANK_SEP ) + rowObj.get("bank_lsb");
+			int    fullBankNum = Integer.parseInt( rowObj.get("bank") );
+			String display     = rowObj.get("bank_msb") + Dict.getSyntax( Dict.SYNTAX_BANK_SEP ) + rowObj.get("bank_lsb");
+			return new BankNumber(fullBankNum, display);
 		}
 		else if ( 2 == col ) {
 			// soundfont name
@@ -198,6 +216,11 @@ public class SoundcheckInstrumentModel extends MidicaTableModel {
 		
 		// fallback
 		return "";
+	}
+	
+	@Override
+	public ArrayList<HashMap<String, ?>> getCategorizedHashMapRows() {
+		return new ArrayList<HashMap<String, ?>>(instrumentList);
 	}
 	
 	/**

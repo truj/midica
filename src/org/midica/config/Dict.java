@@ -327,7 +327,7 @@ public class Dict {
 	public static final String INSTR_CELLO                 = "instr_42";
 	public static final String INSTR_CONTRABASS            = "instr_43";
 	public static final String INSTR_TREMOLO_STRINGS       = "instr_44";
-	public static final String INSTR_PIZZACATO_STRINGS     = "instr_45";
+	public static final String INSTR_PIZZICATO_STRINGS     = "instr_45";
 	public static final String INSTR_ORCHESTRAL_HARP       = "instr_46";
 	public static final String INSTR_TIMPANI               = "instr_47";
 	public static final String INSTR_STRING_ENSEMBLE_1     = "instr_48";  // 48-55: Ensemble
@@ -3385,7 +3385,7 @@ public class Dict {
 		setInstrument( 42,  "CELLO"                 );
 		setInstrument( 43,  "CONTRABASS"            );
 		setInstrument( 44,  "TREMOLO_STRINGS"       );
-		setInstrument( 45,  "PIZZACATO_STRINGS"     );
+		setInstrument( 45,  "PIZZICATO_STRINGS"     );
 		setInstrument( 46,  "ORCHESTRAL_HARP"       );
 		setInstrument( 47,  "TIMPANI"               );
 		
@@ -3580,7 +3580,7 @@ public class Dict {
 		setInstrument( 42,  "CELLO"                 );
 		setInstrument( 43,  "CONTRABASS"            );
 		setInstrument( 44,  "TREMOLO_STRINGS"       );
-		setInstrument( 45,  "PIZZACATO_STRINGS"     );
+		setInstrument( 45,  "PIZZICATO_STRINGS"     );
 		setInstrument( 46,  "ORCHESTRAL_HARP"       );
 		setInstrument( 47,  "TIMPANI"               );
 		

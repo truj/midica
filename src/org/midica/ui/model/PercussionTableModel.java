@@ -39,6 +39,12 @@ public class PercussionTableModel extends MidicaTableModel {
 		columnNames[ 1 ] = Dict.get( Dict.INFO_COL_PERC_ID_SHORT );
 		columnNames[ 2 ] = Dict.get( Dict.INFO_COL_PERC_ID_LONG  );
 		
+		// column classes, used for sorting
+		columnClasses = new Class[ 3 ];
+		columnClasses[ 0 ] = Integer.class;
+		columnClasses[ 1 ] = String.class;
+		columnClasses[ 2 ] = String.class;
+		
 		for ( int instrNum : Dict.getPercussionNotes() ) {
 			instrumentNumbers.add( instrNum );
 		}

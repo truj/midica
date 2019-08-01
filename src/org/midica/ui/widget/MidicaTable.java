@@ -10,6 +10,7 @@ package org.midica.ui.widget;
 import javax.swing.JTable;
 
 import org.midica.ui.model.MidicaTableModel;
+import org.midica.ui.sorter.MidicaSorter;
 
 /**
  * Class for Midica tables.
@@ -35,8 +36,9 @@ public class MidicaTable extends JTable {
 	 * 
 	 * @param model  The table model
 	 */
-	public MidicaTable( MidicaTableModel model ) {
-		super( model );
+	public MidicaTable(MidicaTableModel model) {
+		super(model);
+		enableSorting(model);
 	}
 	
 	/**
@@ -44,8 +46,30 @@ public class MidicaTable extends JTable {
 	 * 
 	 * @param model  The table model
 	 */
-	public void setModel( MidicaTableModel model ) {
-		super.setModel( model );
+	public void setModel(MidicaTableModel model) {
+		super.setModel(model);
+		enableSorting(model);
+	}
+	
+	/**
+	 * Creates and adds a sorter for the table so that it can be sorted by column.
+	 * Applies the sortability of each column that is defined in the derived model.
+	 * 
+	 * @param model  the table model.
+	 */
+	private void enableSorting(MidicaTableModel model) {
+		
+		// create sorter and connect it with the model
+		MidicaSorter<MidicaTableModel> sorter = new MidicaSorter<>();
+		sorter.setModel(model);
+		
+		// apply sortability
+		for (int i = 0; i < model.getColumnCount(); i++) {
+			sorter.setSortable( i, model.isSortable(i) );
+		}
+		
+		// connect sorter with table
+		super.setRowSorter(sorter);
 	}
 	
 	/**

@@ -36,6 +36,11 @@ public class DrumkitTableModel extends MidicaTableModel {
 		columnNames[ 0 ] = Dict.get( Dict.INFO_COL_DRUMKIT_NUM  );
 		columnNames[ 1 ] = Dict.get( Dict.INFO_COL_DRUMKIT_NAME );
 		
+		// column classes, used for sorting
+		columnClasses = new Class[ 2 ];
+		columnClasses[ 0 ] = Integer.class;
+		columnClasses[ 1 ] = String.class;
+		
 		drumkitList = Dict.getDrumkitList();
 	}
 	

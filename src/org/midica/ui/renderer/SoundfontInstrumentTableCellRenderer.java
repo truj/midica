@@ -48,6 +48,7 @@ public class SoundfontInstrumentTableCellRenderer extends MidicaTableCellRendere
 	@Override
 	public Component getTableCellRendererComponent( JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col ) {
 		Component cell = super.getTableCellRendererComponent( table, value, isSelected, hasFocus, row, col );
+		row = table.convertRowIndexToModel(row);
 		
 		// category entries have an element with key=category and value=category
 		HashMap<String, String> instrument = instruments.get( row );

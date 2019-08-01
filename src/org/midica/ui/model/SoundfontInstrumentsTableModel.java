@@ -12,6 +12,7 @@ import java.util.HashMap;
 
 import org.midica.config.Dict;
 import org.midica.file.SoundfontParser;
+import org.midica.ui.sorter.OptionalNumber;
 
 /**
  * This class represents the data model of the soundfont instruments and drumkits table
@@ -54,6 +55,14 @@ public class SoundfontInstrumentsTableModel extends MidicaTableModel {
 		columnNames[ 3 ] = Dict.get( Dict.INFO_COL_SF_INSTR_CHANNELS );
 		columnNames[ 4 ] = Dict.get( Dict.INFO_COL_SF_INSTR_KEYS     );
 		
+		// column classes, used for sorting
+		columnClasses = new Class[ 5 ];
+		columnClasses[ 0 ] = OptionalNumber.class;
+		columnClasses[ 1 ] = OptionalNumber.class;
+		columnClasses[ 2 ] = String.class;
+		columnClasses[ 3 ] = String.class;
+		columnClasses[ 4 ] = String.class;
+		
 		// get soundfont instruments
 		instruments = SoundfontParser.getSoundfontInstruments();
 	}
@@ -83,7 +92,8 @@ public class SoundfontInstrumentsTableModel extends MidicaTableModel {
 		
 		// program number
 		if ( 0 == colIndex ) {
-			return instruments.get( rowIndex ).get( "program" );
+			Object value = instruments.get( rowIndex ).get( "program" );
+			return new OptionalNumber(value);
 		}
 		
 		// bank number
@@ -92,17 +102,18 @@ public class SoundfontInstrumentsTableModel extends MidicaTableModel {
 			// Don't show the bank number if it's a category.
 			boolean isCategory = instruments.get( rowIndex ).get("category") != null;
 			if (isCategory)
-				return "";
+				return new OptionalNumber("");
 			
 			// if the LSB is 0, only show the MSB
-			String lsb = instruments.get( rowIndex ).get( "bank_lsb" );
+			String lsb = instruments.get(rowIndex).get("bank_lsb");
 			if ( lsb.equals("0") )
-				return instruments.get( rowIndex ).get( "bank_msb" );
+				return new OptionalNumber( instruments.get(rowIndex).get("bank_msb") );
 			
 			// show MSB and LSB, separated according to the configured syntax
-			return instruments.get( rowIndex ).get( "bank_msb" )
+			String display = instruments.get( rowIndex ).get( "bank_msb" )
 			     + Dict.getSyntax( Dict.SYNTAX_BANK_SEP )
 			     + instruments.get( rowIndex ).get( "bank_lsb" );
+			return new OptionalNumber(display);
 		}
 		
 		// name
@@ -122,6 +133,11 @@ public class SoundfontInstrumentsTableModel extends MidicaTableModel {
 		
 		// default
 		return "";
+	}
+	
+	@Override
+	public ArrayList<HashMap<String, ?>> getCategorizedHashMapRows() {
+		return new ArrayList<HashMap<String, ?>>(instruments);
 	}
 }
 

@@ -10,6 +10,7 @@ package org.midica.ui.model;
 import java.util.ArrayList;
 
 import org.midica.config.Dict;
+import org.midica.ui.info.CategorizedElement;
 import org.midica.ui.info.SyntaxElement;
 
 
@@ -39,6 +40,12 @@ public class SyntaxTableModel extends MidicaTableModel {
 		columnNames[ 0 ] = Dict.get( Dict.INFO_COL_SYNTAX_NAME     );
 		columnNames[ 1 ] = Dict.get( Dict.INFO_COL_SYNTAX_SHORTCUT );
 		columnNames[ 2 ] = Dict.get( Dict.INFO_COL_SYNTAX_DESC     );
+		
+		// column classes, used for sorting
+		columnClasses = new Class[ 3 ];
+		columnClasses[ 0 ] = String.class;
+		columnClasses[ 1 ] = String.class;
+		columnClasses[ 2 ] = String.class;
 		
 		syntaxList = Dict.getSyntaxList();
 	}
@@ -83,6 +90,9 @@ public class SyntaxTableModel extends MidicaTableModel {
 		// default
 		return Dict.get( Dict.UNKNOWN_SYNTAX );
 	}
+	
+	@Override
+	public ArrayList<CategorizedElement> getCategorizedRows() {
+		return new ArrayList<CategorizedElement>(syntaxList);
+	}
 }
-
-

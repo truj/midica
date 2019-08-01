@@ -51,6 +51,20 @@ public class NoteHistoryTableModel extends MidicaTableModel {
 		columnNames[ 2 ] = Dict.get( Dict.COLUMN_VELOCITY );
 		columnNames[ 3 ] = Dict.get( Dict.COLUMN_TICK     );
 		
+		// column classes, used for sorting
+		columnClasses = new Class[ 4 ];
+		columnClasses[ 0 ] = Integer.class;
+		columnClasses[ 1 ] = String.class;
+		columnClasses[ 2 ] = Integer.class;
+		columnClasses[ 3 ] = Long.class;
+		
+		// allow sorting only for the tick column
+		sortableColumns = new Boolean[ 4 ];
+		sortableColumns[ 0 ] = false;
+		sortableColumns[ 1 ] = false;
+		sortableColumns[ 2 ] = false;
+		sortableColumns[ 3 ] = true;
+		
 		// observe the midi channel
 		if ( 0 == channel )
 			MidiDevices.resetNoteHistoryObservers();
@@ -167,5 +181,3 @@ public class NoteHistoryTableModel extends MidicaTableModel {
 		return this.channel;
 	}
 }
-
-

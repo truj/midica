@@ -43,6 +43,7 @@ public class SoundcheckInstrumentTableCellRenderer extends MidicaTableCellRender
 	@Override
 	public Component getTableCellRendererComponent( JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col ) {
 		Component cell = super.getTableCellRendererComponent( table, value, isSelected, hasFocus, row, col );
+		row = table.convertRowIndexToModel(row);
 		HashMap<String, String> entry = instruments.get( row );
 		
 		// category

@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 import org.midica.config.Dict;
 import org.midica.file.SoundfontParser;
-import org.midica.ui.info.SyntaxElement;
+import org.midica.ui.sorter.OptionalNumber;
 
 
 /**
@@ -51,6 +51,15 @@ public class SoundfontResourceTableModel extends MidicaTableModel {
 		columnNames[ 4 ] = Dict.get( Dict.INFO_COL_SF_RES_FORMAT      );
 		columnNames[ 5 ] = Dict.get( Dict.INFO_COL_SF_RES_CLASS       );
 		
+		// column classes, used for sorting
+		columnClasses = new Class[ 6 ];
+		columnClasses[ 0 ] = OptionalNumber.class;
+		columnClasses[ 1 ] = String.class;
+		columnClasses[ 2 ] = String.class;
+		columnClasses[ 3 ] = OptionalNumber.class;
+		columnClasses[ 4 ] = String.class;
+		columnClasses[ 5 ] = String.class;
+		
 		// get soundfont instruments
 		resources = SoundfontParser.getSoundfontResources();
 	}
@@ -80,7 +89,7 @@ public class SoundfontResourceTableModel extends MidicaTableModel {
 		
 		// index
 		if ( 0 == colIndex ) {
-			return resources.get( rowIndex ).get( "index" );
+			return new OptionalNumber( resources.get(rowIndex).get("index") );
 		}
 		
 		// type
@@ -102,7 +111,7 @@ public class SoundfontResourceTableModel extends MidicaTableModel {
 		
 		// frames
 		else if ( 3 == colIndex ) {
-			return resources.get( rowIndex ).get( "frame_length" );
+			return new OptionalNumber( resources.get(rowIndex).get("frame_length") );
 		}
 		
 		// format
@@ -118,6 +127,9 @@ public class SoundfontResourceTableModel extends MidicaTableModel {
 		// default
 		return "";
 	}
+	
+	@Override
+	public ArrayList<HashMap<String, ?>> getCategorizedHashMapRows() {
+		return new ArrayList<HashMap<String, ?>>(resources);
+	}
 }
-
-

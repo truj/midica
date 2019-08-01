@@ -13,6 +13,7 @@ import java.util.HashSet;
 
 import org.midica.config.Dict;
 import org.midica.ui.info.InfoView;
+import org.midica.ui.sorter.OptionalNumber;
 
 /**
  * This class represents the data model of the messages table in the
@@ -73,6 +74,16 @@ public class MessageTableModel extends MidicaTableModel {
 		setHeaderToolTip( 2, Dict.get(Dict.INFO_COL_MSG_TT_TRACK)   );
 		setHeaderToolTip( 3, Dict.get(Dict.INFO_COL_MSG_TT_CHANNEL) );
 		setHeaderToolTip( 4, Dict.get(Dict.INFO_COL_MSG_TT_LENGTH)  );
+		
+		// column classes, used for sorting
+		columnClasses = new Class[ 7 ];
+		columnClasses[ 0 ] = Long.class;
+		columnClasses[ 1 ] = String.class;
+		columnClasses[ 2 ] = Integer.class;
+		columnClasses[ 3 ] = OptionalNumber.class;
+		columnClasses[ 4 ] = Integer.class;
+		columnClasses[ 5 ] = String.class;
+		columnClasses[ 6 ] = String.class;
 	}
 	
 	/**
@@ -127,10 +138,11 @@ public class MessageTableModel extends MidicaTableModel {
 		else if ( 3 == colIndex ) {
 			Object channelObj = singleMessage.getOption( IMessageType.OPT_CHANNEL );
 			if ( null == channelObj ) {
-				return "-";
+				channelObj = "-";
 			}
+			channelObj = new OptionalNumber(channelObj);
 			
-			return singleMessage.getOption( IMessageType.OPT_CHANNEL );
+			return channelObj;
 		}
 		
 		// length

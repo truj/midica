@@ -7,9 +7,13 @@
 
 package org.midica.ui.model;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.TreeMap;
 
 import javax.swing.table.DefaultTableModel;
+
+import org.midica.ui.info.CategorizedElement;
 
 /**
  * This class represents the data model of most tables used in this project.
@@ -29,8 +33,10 @@ public abstract class MidicaTableModel extends DefaultTableModel {
 	private static final long serialVersionUID = 1L;
     
 	// table header
-	protected String[]                 columnNames    = new String[ 0 ];
-	private   TreeMap<Integer, String> headerTooltips = new TreeMap<Integer, String>();
+	protected String[]                 columnNames     = new String[ 0 ];
+	protected Class<?>[]               columnClasses   = new Class[ 0 ];
+	protected Boolean[]                sortableColumns = new Boolean[ 0 ];
+	private   TreeMap<Integer, String> headerTooltips  = new TreeMap<Integer, String>();
 	
 	/**
 	 * Creates a new table model.
@@ -125,7 +131,61 @@ public abstract class MidicaTableModel extends DefaultTableModel {
 	 * @return    Table cell value.
 	 */
 	@Override
-	public abstract Object getValueAt( int rowIndex, int colIndex );
+	public abstract Object getValueAt(int rowIndex, int colIndex);
+	
+	/**
+	 * Returns the class of the column's content.
+	 * Used for sorting.
+	 * 
+	 * @param colIndex    Column index.
+	 * @return column class.
+	 */
+	@Override
+	public Class<?> getColumnClass(int colIndex) {
+		if (columnClasses.length > 0)
+			return columnClasses[ colIndex ];
+		
+		// fallback
+		return Object.class;
+	}
+	
+	/**
+	 * Indicates if the given column is sortable or not.
+	 * By default all columns are sortable.
+	 * This can be changed if the field **sortableColumns** is changed by a derived model class.
+	 * 
+	 * @param colIndex    Column index.
+	 * @return **true**, if the column is sortable, or otherwise **false**.
+	 */
+	public boolean isSortable(int colIndex) {
+		if (sortableColumns.length > 0)
+			return sortableColumns[ colIndex ];
+		return true;
+	}
+	
+	/**
+	 * Returns **null**, if not overridden by a child model class.
+	 * Can be overridden to return the underlying data list, if it contains categorized data.
+	 * That's needed for the sorter to be able to hide categories, if the sorting is different
+	 * from the model's default sorting.
+	 * 
+	 * @return **null**, if not overridden.
+	 */
+	public ArrayList<CategorizedElement> getCategorizedRows() {
+		return null;
+	}
+	
+	/**
+	 * Returns **null**, if not overridden by a child model class.
+	 * Can be overridden to return the underlying data list, if it contains categorized data.
+	 * That's needed for the sorter to be able to hide categories, if the sorting is different
+	 * from the model's default sorting.
+	 * 
+	 * @return **null**, if not overridden.
+	 */
+	public ArrayList<HashMap<String, ?>> getCategorizedHashMapRows() {
+		return null;
+	}
 }
 
 

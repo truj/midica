@@ -41,6 +41,7 @@ public class SyntaxTableCellRenderer extends MidicaTableCellRenderer {
 	@Override
 	public Component getTableCellRendererComponent( JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int col ) {
 		Component cell = super.getTableCellRendererComponent( table, value, isSelected, hasFocus, row, col );
+		row = table.convertRowIndexToModel(row);
 		if ( syntaxList.get(row).isCategory() ) {
 			if (isSelected)
 				cell.setBackground( Laf.COLOR_TABLE_CELL_CAT_SELECTED );

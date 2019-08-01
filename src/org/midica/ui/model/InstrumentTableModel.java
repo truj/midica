@@ -10,7 +10,9 @@ package org.midica.ui.model;
 import java.util.ArrayList;
 
 import org.midica.config.Dict;
+import org.midica.ui.info.CategorizedElement;
 import org.midica.ui.info.InstrumentElement;
+import org.midica.ui.sorter.OptionalNumber;
 
 
 /**
@@ -37,6 +39,11 @@ public class InstrumentTableModel extends MidicaTableModel {
 		columnNames = new String[ 2 ];
 		columnNames[ 0 ] = Dict.get( Dict.INFO_COL_INSTR_NUM  );
 		columnNames[ 1 ] = Dict.get( Dict.INFO_COL_INSTR_NAME );
+		
+		// column classes, used for sorting
+		columnClasses = new Class[ 2 ];
+		columnClasses[ 0 ] = OptionalNumber.class;
+		columnClasses[ 1 ] = String.class;
 		
 		instrumentList = Dict.getInstrumentList();
 	}
@@ -66,9 +73,9 @@ public class InstrumentTableModel extends MidicaTableModel {
 		// number
 		if ( 0 == colIndex )
 			if ( instrumentList.get(rowIndex).isCategory() )
-				return "";
+				return new OptionalNumber("");
 			else
-				return instrumentList.get( rowIndex ).instrNum;
+				return new OptionalNumber( instrumentList.get( rowIndex ).instrNum );
 		
 		// name
 		else if ( 1 == colIndex ) {
@@ -77,6 +84,11 @@ public class InstrumentTableModel extends MidicaTableModel {
 		
 		// default
 		return Dict.get( Dict.UNKNOWN_INSTRUMENT );
+	}
+	
+	@Override
+	public ArrayList<CategorizedElement> getCategorizedRows() {
+		return new ArrayList<CategorizedElement>(instrumentList);
 	}
 }
 
