@@ -13,7 +13,7 @@ import java.util.HashSet;
 
 import org.midica.config.Dict;
 import org.midica.ui.info.InfoView;
-import org.midica.ui.sorter.OptionalNumber;
+import org.midica.ui.tablesorter.OptionalNumber;
 
 /**
  * This class represents the data model of the messages table in the

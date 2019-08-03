@@ -5,7 +5,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.midica.ui.sorter;
+package org.midica.ui.tablesorter;
 
 /**
  * This class provides table row sorting for columns that normally contain a number but

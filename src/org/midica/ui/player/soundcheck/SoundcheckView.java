@@ -37,6 +37,7 @@ import org.midica.file.NamedInteger;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.SliderHelper;
 import org.midica.ui.player.PlayerView;
+import org.midica.ui.tablefilter.FilterIconWithLabel;
 import org.midica.ui.widget.MidicaButton;
 import org.midica.ui.widget.MidicaSlider;
 import org.midica.ui.widget.MidicaTable;
@@ -163,9 +164,8 @@ public class SoundcheckView extends JDialog {
 		// instrument label
 		constrLeft.insets = Laf.INSETS_W;
 		constrLeft.gridy++;
-		JLabel lblInstr = new JLabel( Dict.get(Dict.SNDCHK_INSTRUMENT) );
-		Laf.makeBold(lblInstr);
-		content.add( lblInstr, constrLeft );
+		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel( Dict.get(Dict.SNDCHK_INSTRUMENT), this, true );
+		content.add(labelWithFilter, constrLeft);
 		
 		// instrument list
 		constrRight.gridy++;
@@ -184,6 +184,7 @@ public class SoundcheckView extends JDialog {
 		tblInstrument.getSelectionModel().addListSelectionListener( controller );
 		JScrollPane scrollInstr = new JScrollPane( tblInstrument );
 		scrollInstr.setPreferredSize( dimTblInstr );
+		labelWithFilter.setTable(tblInstrument);
 		content.add( scrollInstr, constrRight );
 		
 		// note label

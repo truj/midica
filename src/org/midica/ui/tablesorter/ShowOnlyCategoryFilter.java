@@ -5,21 +5,21 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.midica.ui.sorter;
+package org.midica.ui.tablesorter;
 
 import javax.swing.RowFilter;
 
 import org.midica.ui.model.MidicaTableModel;
 
 /**
- * Row filter for categorized tables that hides the categories.
- * This is used, if the user changes the sorting.
- * In this case, the categories are cannot be placed correctly any more, so they need to be hidden.
+ * Row filter for categorized tables that shows the categories.
+ * This is used, if the user uses a string filter but keeps the default sorting.
+ * In this case, the categories are still shown, even if they don't match the string filter.
  * 
  * @author Jan Trukenmüller
  * @param <M> type of the model (MidicaTableModel)
  */
-public class HideCategoryFilter<M> extends RowFilter<M, Integer> {
+public class ShowOnlyCategoryFilter<M> extends RowFilter<M, Integer> {
 	
 	@Override
 	public boolean include(Entry<? extends M, ? extends Integer> entry) {
@@ -31,10 +31,10 @@ public class HideCategoryFilter<M> extends RowFilter<M, Integer> {
 			
 			// category
 			if ( model.getCategorizedRows().get(row).isCategory() )
-				return false;
+				return true;
 			
 			// normal entry
-			return true;
+			return false;
 			
 		}
 		
@@ -44,13 +44,13 @@ public class HideCategoryFilter<M> extends RowFilter<M, Integer> {
 			
 			// category
 			if ( model.getCategorizedHashMapRows().get(row).get("category") != null )
-				return false;
+				return true;
 			
 			// normal entry
-			return true;
+			return false;
 		}
 		
 		// not categorized
-		return true;
+		return false;
 	}
 }

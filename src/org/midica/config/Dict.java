@@ -147,7 +147,7 @@ public class Dict {
 	public static final String DRUMKIT_ROOM       = "drumkit_8";
 	public static final String DRUMKIT_POWER      = "drumkit_16";
 	public static final String DRUMKIT_ELECTRONIC = "drumkit_24";
-	public static final String DRUMKIT_TR808      = "drumkit_25";
+	public static final String DRUMKIT_TR808      = "drumkit_25"; // TODO: rename to ANALOG (see gm, page 33)
 	public static final String DRUMKIT_JAZZ       = "drumkit_32";
 	public static final String DRUMKIT_BRUSH      = "drumkit_40";
 	public static final String DRUMKIT_ORCHESTRA  = "drumkit_48";
@@ -1168,6 +1168,13 @@ public class Dict {
 	public static final String SNDCHK_COL_NAME_SF               = "sndchk_col_name_sf";
 	public static final String SNDCHK_COL_NAME_SYNTAX           = "sndchk_col_name_syntax";
 	
+	// string filter for tables
+	public static final String FILTER_ICON_TOOLTIP              = "filter_icon_tooltip";
+	public static final String FILTER_ICON_TOOLTIP_ACTIVE       = "filter_icon_tooltip_active";
+	public static final String FILTER_ICON_TOOLTIP_EMPTY        = "filter_icon_tooltip_empty";
+	public static final String FILTER_LAYER_LABEL               = "filter_layer_label";
+	public static final String FILTER_LAYER_CLEAR               = "filter_layer_clear";
+	
 	/**
 	 * This class is only used statically so a public constructor is not needed.
 	 */
@@ -2080,6 +2087,11 @@ public class Dict {
 		set( SNDCHK_COL_BANK,                "Bank"                            );
 		set( SNDCHK_COL_NAME_SF,             "Soundfont Name"                  );
 		set( SNDCHK_COL_NAME_SYNTAX,         "Syntax"                          );
+		set( FILTER_ICON_TOOLTIP,            "Table Filter"                    );
+		set( FILTER_ICON_TOOLTIP_ACTIVE,     "Currently filtering"             );
+		set( FILTER_ICON_TOOLTIP_EMPTY,      "Currently empty"                 );
+		set( FILTER_LAYER_LABEL,             "Table Filter"                    );
+		set( FILTER_LAYER_CLEAR,             "Clear Filter"                    );
 	}
 	
 	/**

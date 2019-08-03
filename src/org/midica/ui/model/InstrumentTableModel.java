@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import org.midica.config.Dict;
 import org.midica.ui.info.CategorizedElement;
 import org.midica.ui.info.InstrumentElement;
-import org.midica.ui.sorter.OptionalNumber;
+import org.midica.ui.tablesorter.OptionalNumber;
 
 
 /**

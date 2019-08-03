@@ -79,6 +79,8 @@ public class Laf {
 	public static       Insets INSETS_MSG_FILTER_CBX_LBL     = new Insets(  0,  0,  0,  0 );
 	public static       Insets INSETS_MSG_FILTER_FROM_TO_LBL = new Insets(  0,  0,  0,  0 );
 	public static final Insets INSETS_ZERO                   = new Insets(  0,  0,  0,  0 );
+	public static final Insets INSETS_FILTER_ICON_W_LBL_H    = new Insets(  0,  0,  0, 15 );
+	public static final Insets INSETS_FILTER_ICON_W_LBL_V    = new Insets(  0,  0, 15,  0 );
 	
 	public static int PLAYER_CH_LBL_INSTR_WIDTH   = 110;
 	public static int PLAYER_CH_LBL_COMMENT_WIDTH = 180;
@@ -130,6 +132,13 @@ public class Laf {
 	private static final Color COLOR_MSG_TREE_SELECTED_TXT   = COLOR_BLACK;
 	public  static final Color COLOR_MSG_DEFAULT             = UIManager.getColor( "Panel.background" );
 	public  static final Color COLOR_MSG_TABLE_GRID          = COLOR_SECONDARY;
+	
+	// string filter layer for tables
+	public static final Color COLOR_TBL_FILTER_LAYER_BACKGROUND       = COLOR_SECONDARY_LIGHT;
+	public static final Color COLOR_TBL_FILTER_ICON_BORDER_INACTIVE   = COLOR_BORDER;
+	public static final Color COLOR_TBL_FILTER_ICON_BORDER_ACTIVE     = COLOR_ALERT;
+	public static final Color COLOR_TBL_FILTER_ICON_HOVER_BG_INACTIVE = COLOR_SECONDARY;
+	public static final Color COLOR_TBL_FILTER_ICON_HOVER_BG_ACTIVE   = COLOR_PRIMARY_DARK;
 	
 	// tooltip colors
 	private static final Color COLOR_TOOLTIP_FOREGROUND = COLOR_BLACK;

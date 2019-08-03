@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 import org.midica.config.Dict;
 import org.midica.file.SoundfontParser;
-import org.midica.ui.sorter.OptionalNumber;
+import org.midica.ui.tablesorter.OptionalNumber;
 
 
 /**

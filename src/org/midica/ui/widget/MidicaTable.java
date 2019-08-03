@@ -10,7 +10,7 @@ package org.midica.ui.widget;
 import javax.swing.JTable;
 
 import org.midica.ui.model.MidicaTableModel;
-import org.midica.ui.sorter.MidicaSorter;
+import org.midica.ui.tablesorter.MidicaSorter;
 
 /**
  * Class for Midica tables.

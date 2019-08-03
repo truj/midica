@@ -59,6 +59,8 @@ import org.midica.ui.renderer.MidicaTableCellRenderer;
 import org.midica.ui.renderer.SoundfontInstrumentTableCellRenderer;
 import org.midica.ui.renderer.SoundfontResourceTableCellRenderer;
 import org.midica.ui.renderer.SyntaxTableCellRenderer;
+import org.midica.ui.tablefilter.FilterIcon;
+import org.midica.ui.tablefilter.FilterIconWithLabel;
 import org.midica.ui.widget.FlowLabel;
 import org.midica.ui.widget.LinkLabel;
 import org.midica.ui.widget.MidicaButton;
@@ -165,6 +167,7 @@ public class InfoView extends JDialog {
 	public static final String FILTER_BTN_SHOW_TREE    = "filter_btn_show_tree";
 	public static final String FILTER_LBL_VISIBLE      = "filter_lbl_visible";
 	public static final String FILTER_LBL_TOTAL        = "filter_lbl_total";
+	public static final String FILTER_ICON             = "filter_icon";
 	
 	// dimensions (defined later)
 	private static Dimension noteTableDim       = null;
@@ -360,9 +363,8 @@ public class InfoView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// label
-		JLabel label = new JLabel( Dict.get(Dict.TAB_NOTE_DETAILS) );
-		Laf.makeBold(label);
-		area.add(label, constraints);
+		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel( Dict.get(Dict.TAB_NOTE_DETAILS), this );
+		area.add(labelWithFilter, constraints);
 		
 		// table
 		constraints.insets  = Laf.INSETS_SWE;
@@ -372,8 +374,9 @@ public class InfoView extends JDialog {
 		MidicaTable table = new MidicaTable();
 		table.setModel( new NoteTableModel() );
 		table.setDefaultRenderer( Object.class, new MidicaTableCellRenderer() );
-		JScrollPane scroll = new JScrollPane( table );
-		scroll.setPreferredSize( noteTableDim );
+		JScrollPane scroll = new JScrollPane(table);
+		scroll.setPreferredSize(noteTableDim);
+		labelWithFilter.setTable(table);
 		area.add( scroll, constraints );
 		
 		// set column sizes and colors
@@ -408,9 +411,8 @@ public class InfoView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// label
-		JLabel label = new JLabel( Dict.get(Dict.TAB_PERCUSSION_DETAILS) );
-		Laf.makeBold(label);
-		area.add(label, constraints);
+		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel( Dict.get(Dict.TAB_PERCUSSION_DETAILS), this );
+		area.add(labelWithFilter, constraints);
 		
 		// table
 		constraints.insets  = Laf.INSETS_SWE;
@@ -420,8 +422,9 @@ public class InfoView extends JDialog {
 		MidicaTable table = new MidicaTable();
 		table.setModel( new PercussionTableModel() );
 		table.setDefaultRenderer( Object.class, new MidicaTableCellRenderer() );
-		JScrollPane scroll = new JScrollPane( table );
-		scroll.setPreferredSize( percTableDim );
+		JScrollPane scroll = new JScrollPane(table);
+		scroll.setPreferredSize(percTableDim);
+		labelWithFilter.setTable(table);
 		area.add( scroll, constraints );
 		
 		// set column sizes
@@ -455,9 +458,8 @@ public class InfoView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// label
-		JLabel label = new JLabel( Dict.get(Dict.SYNTAX) );
-		Laf.makeBold(label);
-		area.add(label, constraints);
+		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel( Dict.get(Dict.SYNTAX), this );
+		area.add(labelWithFilter, constraints);
 		
 		// table
 		constraints.insets  = Laf.INSETS_SWE;
@@ -467,8 +469,9 @@ public class InfoView extends JDialog {
 		MidicaTable table = new MidicaTable();
 		table.setModel( new SyntaxTableModel() );
 		table.setDefaultRenderer( Object.class, new SyntaxTableCellRenderer() );
-		JScrollPane scroll = new JScrollPane( table );
-		scroll.setPreferredSize( syntaxTableDim );
+		JScrollPane scroll = new JScrollPane(table);
+		scroll.setPreferredSize(syntaxTableDim);
+		labelWithFilter.setTable(table);
 		area.add( scroll, constraints );
 		
 		// set column sizes
@@ -503,9 +506,8 @@ public class InfoView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// label
-		JLabel label = new JLabel( Dict.get(Dict.INSTRUMENT_IDS) );
-		Laf.makeBold(label);
-		area.add(label, constraints);
+		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel( Dict.get(Dict.INSTRUMENT_IDS), this );
+		area.add(labelWithFilter, constraints);
 		
 		// table
 		constraints.insets  = Laf.INSETS_SWE;
@@ -515,8 +517,9 @@ public class InfoView extends JDialog {
 		MidicaTable table = new MidicaTable();
 		table.setModel( new InstrumentTableModel() );
 		table.setDefaultRenderer( Object.class, new InstrumentTableCellRenderer() );
-		JScrollPane scroll = new JScrollPane( table );
-		scroll.setPreferredSize( instrTableDim );
+		JScrollPane scroll = new JScrollPane(table);
+		scroll.setPreferredSize(instrTableDim);
+		labelWithFilter.setTable(table);
 		area.add( scroll, constraints );
 		
 		// set column sizes
@@ -550,9 +553,8 @@ public class InfoView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// label
-		JLabel label = new JLabel( Dict.get(Dict.DRUMKIT_IDS) );
-		Laf.makeBold(label);
-		area.add(label, constraints);
+		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel( Dict.get(Dict.DRUMKIT_IDS), this );
+		area.add(labelWithFilter, constraints);
 		
 		// table
 		constraints.insets  = Laf.INSETS_SWE;
@@ -562,9 +564,10 @@ public class InfoView extends JDialog {
 		MidicaTable table = new MidicaTable();
 		table.setModel( new DrumkitTableModel() );
 		table.setDefaultRenderer( Object.class, new MidicaTableCellRenderer() );
-		JScrollPane scroll = new JScrollPane( table );
-		scroll.setPreferredSize( drumkitTableDim );
-		area.add( scroll, constraints );
+		JScrollPane scroll = new JScrollPane(table);
+		scroll.setPreferredSize(drumkitTableDim);
+		labelWithFilter.setTable(table);
+		area.add(scroll, constraints);
 		
 		// set column sizes
 		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_DRUMKIT_NUM  );
@@ -1740,6 +1743,7 @@ public class InfoView extends JDialog {
 		header.setBackground( Laf.COLOR_MSG_TABLE_HEADER_BG );
 		header.setForeground( Laf.COLOR_MSG_TABLE_HEADER_TXT );
 		msgTable.setGridColor( Laf.COLOR_MSG_TABLE_GRID );
+		((FilterIcon) filterWidgets.get(FILTER_ICON)).setTable(msgTable);
 		
 		JScrollPane scroll = new JScrollPane( msgTable );
 		scroll.setPreferredSize( msgTableDim );
@@ -1932,8 +1936,17 @@ public class InfoView extends JDialog {
 		constraints.gridx++;
 		constraints.fill      = GridBagConstraints.HORIZONTAL;
 		constraints.weightx   = 1;
-		constraints.gridwidth = 12;
+		constraints.gridwidth = 10;
 		area.add( createMsgFilterChannelCheckboxes(), constraints );
+		
+		// string filter
+		constraints.gridx++;
+		constraints.weightx   = 0;
+		constraints.fill      = GridBagConstraints.NONE;
+		constraints.anchor    = GridBagConstraints.EAST;
+		FilterIcon filterIcon = new FilterIcon(this);
+		area.add(filterIcon, constraints);
+		filterWidgets.put(FILTER_ICON, filterIcon);
 		
 		// line 3
 		
@@ -1942,6 +1955,7 @@ public class InfoView extends JDialog {
 		constraints.gridx     = 0;
 		constraints.weightx   = 0;
 		constraints.gridwidth = 13;
+		constraints.fill      = GridBagConstraints.HORIZONTAL;
 		area.add( createMsgFilterLine3(), constraints );
 		
 		return area;
@@ -1960,7 +1974,7 @@ public class InfoView extends JDialog {
 		GridBagLayout layout = new GridBagLayout();
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill       = GridBagConstraints.HORIZONTAL;
+		constraints.fill       = GridBagConstraints.NONE;
 		constraints.insets     = Laf.INSETS_MSG_FILTER_CBX_LBL;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
@@ -1986,9 +2000,9 @@ public class InfoView extends JDialog {
 		constraints.insets = Laf.INSETS_ZERO;
 		constraints.gridx++;
 		constraints.weightx    = 1;
-		constraints.fill       = GridBagConstraints.HORIZONTAL;
-		JLabel spacerTickRange = new JLabel( "" );
-		area.add( spacerTickRange, constraints );
+		constraints.fill       = GridBagConstraints.NONE;
+		JLabel spacerTickRange = new JLabel("");
+		area.add(spacerTickRange, constraints);
 		
 		return area;
 	}
@@ -2050,6 +2064,7 @@ public class InfoView extends JDialog {
 		area.add( spacerRight, constraints );
 		
 		// label: visible messages
+		constraints.anchor   = GridBagConstraints.EAST;
 		constraints.gridx++;
 		constraints.fill     = GridBagConstraints.NONE;
 		constraints.weightx  = 0;
@@ -2097,10 +2112,9 @@ public class InfoView extends JDialog {
 		constraints.anchor     = GridBagConstraints.NORTH;
 		
 		// label
-		JLabel label = new JLabel( Dict.get(Dict.TAB_SOUNDFONT_INSTRUMENTS) );
-		Laf.makeBold(label);
-		area.add(label, constraints);
-
+		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel( Dict.get(Dict.TAB_SOUNDFONT_INSTRUMENTS), this );
+		area.add(labelWithFilter, constraints);
+		
 		// table
 		constraints.insets  = Laf.INSETS_SWE;
 		constraints.fill    = GridBagConstraints.VERTICAL;
@@ -2109,9 +2123,10 @@ public class InfoView extends JDialog {
 		MidicaTable table = new MidicaTable();
 		table.setModel( new SoundfontInstrumentsTableModel() );
 		table.setDefaultRenderer( Object.class, new SoundfontInstrumentTableCellRenderer() );
-		JScrollPane scroll = new JScrollPane( table );
-		scroll.setPreferredSize( sfInstrTableDim );
-		area.add( scroll, constraints );
+		JScrollPane scroll = new JScrollPane(table);
+		scroll.setPreferredSize(sfInstrTableDim);
+		labelWithFilter.setTable(table);
+		area.add(scroll, constraints);
 		
 		// set column sizes and colors
 		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_SF_INSTR_PROGRAM  );
@@ -2146,9 +2161,8 @@ public class InfoView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// label
-		JLabel label = new JLabel( Dict.get(Dict.TAB_SOUNDFONT_RESOURCES) );
-		Laf.makeBold(label);
-		area.add(label, constraints);
+		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel( Dict.get(Dict.TAB_SOUNDFONT_RESOURCES), this );
+		area.add(labelWithFilter, constraints);
 		
 		// table
 		constraints.insets  = Laf.INSETS_SWE;
@@ -2158,9 +2172,10 @@ public class InfoView extends JDialog {
 		MidicaTable table = new MidicaTable();
 		table.setModel( new SoundfontResourceTableModel() );
 		table.setDefaultRenderer( Object.class, new SoundfontResourceTableCellRenderer() );
-		JScrollPane scroll = new JScrollPane( table );
-		scroll.setPreferredSize( sfResourceTableDim );
-		area.add( scroll, constraints );
+		JScrollPane scroll = new JScrollPane(table);
+		scroll.setPreferredSize(sfResourceTableDim);
+		labelWithFilter.setTable(table);
+		area.add(scroll, constraints);
 		
 		// set column sizes and colors
 		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_SF_RES_INDEX  );
