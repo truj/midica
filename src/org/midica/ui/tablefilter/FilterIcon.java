@@ -14,6 +14,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
+import javax.swing.event.RowSorterListener;
 
 import org.midica.config.Dict;
 import org.midica.config.Laf;
@@ -111,5 +112,14 @@ public class FilterIcon extends JLabel {
 			setBorder(borderInactive);
 		}
 		setToolTipText(tooltip);
+	}
+	
+	/**
+	 * Adds a {@link RowSorterListener} to the row sorter.
+	 * 
+	 * @param listener  The listener to be added.
+	 */
+	public void addRowSorterListener(RowSorterListener listener) {
+		layer.addRowSorterListener(listener);
 	}
 }

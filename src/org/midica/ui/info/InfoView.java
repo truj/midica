@@ -1744,6 +1744,7 @@ public class InfoView extends JDialog {
 		header.setForeground( Laf.COLOR_MSG_TABLE_HEADER_TXT );
 		msgTable.setGridColor( Laf.COLOR_MSG_TABLE_GRID );
 		((FilterIcon) filterWidgets.get(FILTER_ICON)).setTable(msgTable);
+		((FilterIcon) filterWidgets.get(FILTER_ICON)).addRowSorterListener(controller);
 		
 		JScrollPane scroll = new JScrollPane( msgTable );
 		scroll.setPreferredSize( msgTableDim );

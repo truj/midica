@@ -32,6 +32,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.RowSorterEvent;
+import javax.swing.event.RowSorterListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.event.UndoableEditListener;
@@ -63,7 +65,7 @@ import org.midica.ui.widget.MidicaTree;
  * @author Jan Trukenmüller
  */
 public class InfoController implements WindowListener, ActionListener, TreeSelectionListener,
-	ListSelectionListener, ItemListener, DocumentListener, FocusListener {
+	ListSelectionListener, ItemListener, DocumentListener, FocusListener, RowSorterListener {
 	
 	public static final String CMD_COLLAPSE                = "cmd_collapse";
 	public static final String CMD_EXPAND                  = "cmd_expand";
@@ -426,6 +428,11 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 	@Override
 	public void focusLost( FocusEvent e ) {
 		// nothing more to do
+	}
+	
+	@Override
+	public void sorterChanged(RowSorterEvent e) {
+		updateVisibleTotalLabels();
 	}
 	
 	/**
@@ -796,7 +803,7 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 		JLabel lblTotal   = (JLabel) widgets.get( InfoView.FILTER_LBL_TOTAL   );
 		
 		// get content
-		String countVisible = MessageTableModel.msgCountVisible + "";
+		String countVisible = view.getMsgTable().getRowCount()  + "";
 		String countTotal   = MessageTableModel.msgCountTotal   + "";
 		
 		// update labels

@@ -27,6 +27,7 @@ import javax.swing.JRootPane;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.event.RowSorterListener;
 
 import org.midica.config.Dict;
 import org.midica.config.Laf;
@@ -196,6 +197,15 @@ public class StringFilterLayer extends JDialog implements WindowListener, Window
 			icon.setActive(true);
 		}
 		((MidicaSorter) table.getRowSorter()).setStringFilter(text);
+	}
+	
+	/**
+	 * Adds a {@link RowSorterListener} to the row sorter.
+	 * 
+	 * @param listener  The listener to be added.
+	 */
+	public void addRowSorterListener(RowSorterListener listener) {
+		table.getRowSorter().addRowSorterListener(listener);
 	}
 	
 	@Override

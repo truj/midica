@@ -27,8 +27,8 @@ import org.midica.ui.tablesorter.OptionalNumber;
  */
 public class MessageTableModel extends MidicaTableModel {
 	
-	public static long msgCountTotal   = 0;
-	public static long msgCountVisible = 0;
+	public  static long msgCountTotal   = 0;
+	private static long msgCountVisible = 0; // remaining count after the message filter - but still ignoring the table string filter
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -272,9 +272,9 @@ public class MessageTableModel extends MidicaTableModel {
 			// the message has passed the filter successfully
 			visibleMessages.add( msg );
 		}
+		msgCountVisible = visibleMessages.size();
 		
 		// update GUI
-		msgCountVisible = visibleMessages.size();
 		this.fireTableDataChanged();
 	}
 	
