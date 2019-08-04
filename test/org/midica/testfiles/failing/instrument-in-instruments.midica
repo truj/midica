@@ -1,0 +1,13 @@
+INSTRUMENTS
+	2	0 test
+	10	0 test
+	INSTRUMENT 1 0 test
+END
+
+INSTRUMENTS
+	2	0 test
+	10	0 test
+	INSTRUMENT 1 0 test
+END
+
+1 c /4

@@ -80,6 +80,7 @@ public class Dict {
 	public static final String SYNTAX_BLOCK_CLOSE        = "BLOCK_CLOSE";
 	public static final String SYNTAX_MACRO              = "MACRO";
 	public static final String SYNTAX_INCLUDE            = "INCLUDE";
+	public static final String SYNTAX_INSTRUMENT         = "INSTRUMENT";
 	public static final String SYNTAX_INSTRUMENTS        = "INSTRUMENTS";
 	public static final String SYNTAX_META               = "META";
 	public static final String SYNTAX_META_COPYRIGHT     = "META_COPYRIGHT";
@@ -981,6 +982,7 @@ public class Dict {
 	public static final String ERROR_NOT_A_FLOAT                = "error_not_a_float";
 	public static final String ERROR_INSTRUMENTS_NOT_DEFINED    = "error_instruments_not_defined";
 	public static final String ERROR_GLOBALS_IN_INSTR_DEF       = "error_globals_in_instr_def";
+	public static final String ERROR_SINGLE_INSTR_IN_INSTR_DEF  = "error_single_instr_in_instr_def";
 	public static final String ERROR_UNKNOWN_CMD                = "error_unknown_cmd";
 	public static final String ERROR_CMD_END_WITHOUT_BEGIN      = "error_cmd_end_without_begin";
 	public static final String ERROR_BLOCK_INVALID_ARG          = "error_block_invalid_arg";
@@ -1029,6 +1031,7 @@ public class Dict {
 	public static final String ERROR_EMPTY_DURATION_SUMMAND     = "error_empty_duration_summand";
 	public static final String ERROR_UNKNOWN_MACRO_CMD          = "error_unknown_macro_cmd";
 	public static final String ERROR_INSTR_NUM_OF_ARGS          = "error_num_of_args";
+	public static final String ERROR_INSTR_NUM_OF_ARGS_SINGLE   = "error_num_of_args_single";
 	public static final String ERROR_INSTR_BANK                 = "error_instr_bank";
 	public static final String ERROR_GLOBAL_NUM_OF_ARGS         = "error_global_num_of_args";
 	public static final String ERROR_UNKNOWN_GLOBAL_CMD         = "error_unknown_global_cmd: ";
@@ -1506,6 +1509,7 @@ public class Dict {
 		set( SYNTAX_BLOCK_CLOSE,        "closes a nestable block"                          );
 		set( SYNTAX_MACRO,              "macro definition"                                 );
 		set( SYNTAX_INCLUDE,            "macro execution"                                  );
+		set( SYNTAX_INSTRUMENT,         "instrument switch for one single channel"         );
 		set( SYNTAX_INSTRUMENTS,        "definition of instruments"                        );
 		set( SYNTAX_META,               "meta information block definition"                );
 		set( SYNTAX_META_COPYRIGHT,     "copyright information"                            );
@@ -1897,6 +1901,7 @@ public class Dict {
 		// MidicaPLParser
 		set( ERROR_INSTRUMENTS_NOT_DEFINED,       "no instruments have been defined yet"                              );
 		set( ERROR_GLOBALS_IN_INSTR_DEF,          "global commands are not allowed inside an instrument definition"   );
+		set( ERROR_SINGLE_INSTR_IN_INSTR_DEF,     "instrument commands are not allowed inside an instrument definition block" );
 		set( ERROR_UNKNOWN_CMD,                   "unknown command: "                                                 );
 		set( ERROR_CMD_END_WITHOUT_BEGIN,         "there is no open block to be closed"                               );
 		set( ERROR_BLOCK_INVALID_ARG,             "invalid block argument: "                                          );
@@ -1945,6 +1950,7 @@ public class Dict {
 		set( ERROR_EMPTY_DURATION_SUMMAND,        "empty summand in duration string: "                                );
 		set( ERROR_UNKNOWN_MACRO_CMD,             "unknown macro command: "                                           );
 		set( ERROR_INSTR_NUM_OF_ARGS,             "wrong number of arguments in instrument command"                   );
+		set( ERROR_INSTR_NUM_OF_ARGS_SINGLE,      "wrong number of arguments in single line instrument command"       );
 		set( ERROR_INSTR_BANK,                    "Instrument and/or Bank definition erroneous"                       );
 		set( ERROR_GLOBAL_NUM_OF_ARGS,            "wrong number of arguments in global command"                       );
 		set( ERROR_UNKNOWN_GLOBAL_CMD,            "unknown global command: "                                          );
@@ -2377,6 +2383,7 @@ public class Dict {
 		setSyntax( SYNTAX_BLOCK_CLOSE,       ")"             );
 		setSyntax( SYNTAX_MACRO,             "MACRO"         );
 		setSyntax( SYNTAX_INCLUDE,           "INCLUDE"       );
+		setSyntax( SYNTAX_INSTRUMENT,        "INSTRUMENT"    );
 		setSyntax( SYNTAX_INSTRUMENTS,       "INSTRUMENTS"   );
 		setSyntax( SYNTAX_META,              "META"          );
 		setSyntax( SYNTAX_META_COPYRIGHT,    "copyright"     );
@@ -2457,6 +2464,7 @@ public class Dict {
 		
 		addSyntaxCategory( get(SYNTAX_CAT_DEFINITION) );
 		addSyntaxForInfoView( SYNTAX_DEFINE      );
+		addSyntaxForInfoView( SYNTAX_INSTRUMENT  );
 		addSyntaxForInfoView( SYNTAX_INSTRUMENTS );
 		addSyntaxForInfoView( SYNTAX_META        );
 		addSyntaxForInfoView( SYNTAX_CHORD       );

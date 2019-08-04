@@ -151,6 +151,17 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 0, instruments.get(15).getBankMSB()     );
 		assertEquals( 0, instruments.get(15).getBankLSB()     );
 		
+		parse(getWorkingFile("instruments-single-line"));
+		assertEquals(  40, instruments.get(1).instrumentNumber  );
+		assertEquals(   0, instruments.get(1).getBankMSB()      );
+		assertEquals(   0, instruments.get(1).getBankLSB()      );
+		assertEquals(  30, instruments.get(2).instrumentNumber  );
+		assertEquals(   0, instruments.get(2).getBankMSB()      );
+		assertEquals(   0, instruments.get(2).getBankLSB()      );
+		assertEquals(  22, instruments.get(10).instrumentNumber );
+		assertEquals( 120, instruments.get(10).getBankMSB()     );
+		assertEquals(   0, instruments.get(10).getBankLSB()     );
+		
 		parse(getWorkingFile("meta"));
 		assertEquals(
 			"(c) test\r\n2nd line",
@@ -356,6 +367,10 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("channel-cmd-missing-param")) );
 		assertEquals( 3, e.getLineNumber() );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instrument-in-instruments")) );
+		assertEquals( 4, e.getLineNumber() );
+		
 		
 		// System.out.println(e.getMessage() + "\n" + e.getFileName());
 	}

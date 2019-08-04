@@ -89,6 +89,7 @@ public class MidicaPLParser extends SequenceParser {
 	public static String INCLUDE            = null;
 	public static String INCLUDE_FILE       = null;
 	public static String SOUNDFONT          = null;
+	public static String INSTRUMENT         = null;
 	public static String INSTRUMENTS        = null;
 	public static String META               = null;
 	public static String META_COPYRIGHT     = null;
@@ -229,6 +230,7 @@ public class MidicaPLParser extends SequenceParser {
 		INCLUDE            = Dict.getSyntax( Dict.SYNTAX_INCLUDE            );
 		INCLUDE_FILE       = Dict.getSyntax( Dict.SYNTAX_INCLUDE_FILE       );
 		SOUNDFONT          = Dict.getSyntax( Dict.SYNTAX_SOUNDFONT          );
+		INSTRUMENT         = Dict.getSyntax( Dict.SYNTAX_INSTRUMENT         );
 		INSTRUMENTS        = Dict.getSyntax( Dict.SYNTAX_INSTRUMENTS        );
 		META               = Dict.getSyntax( Dict.SYNTAX_META               );
 		META_COPYRIGHT     = Dict.getSyntax( Dict.SYNTAX_META_COPYRIGHT     );
@@ -582,7 +584,7 @@ public class MidicaPLParser extends SequenceParser {
 			// instruments command
 			if (MODE_INSTRUMENTS == currentMode) {
 				// we are inside an instruments definition block
-				parseInstrumentCmd(tokens);
+				parseInstrumentCmd(tokens, isFake);
 				return;
 			}
 			
@@ -599,6 +601,22 @@ public class MidicaPLParser extends SequenceParser {
 			
 			// apply or fake command
 			parseChannelCmd(tokens, isFake);
+		}
+		
+		// (single line) instrument switch
+		else if (INSTRUMENT.equals(tokens[0])) {
+			if (!isFake)
+				checkInstrumentsParsed();
+			if (MODE_INSTRUMENTS == currentMode)
+				throw new ParseException( Dict.get(Dict.ERROR_SINGLE_INSTR_IN_INSTR_DEF) );
+			
+			// only remember the line?
+			if (isMacro)
+				currentMacro.add(String.join(" ", tokens)); // add to macro
+			else if (isBlock)
+				nestableBlkStack.peek().add(tokens); // add to block
+			
+			parseSingleLineInstrumentSwitch(tokens, isFake);
 		}
 		
 		// include a macro
@@ -683,6 +701,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( INCLUDE_FILE.equals(cmd)          ) {}
 		else if ( SOUNDFONT.equals(cmd)             ) {}
 		else if ( DEFINE.equals(cmd)                ) {}
+		else if ( INSTRUMENT.equals(cmd)            ) {}
 		else if ( INSTRUMENTS.equals(cmd)           ) {}
 		else if ( META.equals(cmd)                  ) {}
 		else if ( META_COPYRIGHT.equals(cmd)        ) {}
@@ -1739,6 +1758,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_INCLUDE.equals(cmdId)            ) INCLUDE            = cmdName;
 		else if ( Dict.SYNTAX_INCLUDE_FILE.equals(cmdId)       ) INCLUDE_FILE       = cmdName;
 		else if ( Dict.SYNTAX_SOUNDFONT.equals(cmdId)          ) SOUNDFONT          = cmdName;
+		else if ( Dict.SYNTAX_INSTRUMENT.equals(cmdId)         ) INSTRUMENT         = cmdName;
 		else if ( Dict.SYNTAX_INSTRUMENTS.equals(cmdId)        ) INSTRUMENTS        = cmdName;
 		else if ( Dict.SYNTAX_META.equals(cmdId)               ) META               = cmdName;
 		else if ( Dict.SYNTAX_META_COPYRIGHT.equals(cmdId)     ) META_COPYRIGHT     = cmdName;
@@ -1792,16 +1812,53 @@ public class MidicaPLParser extends SequenceParser {
 	}
 	
 	/**
-	 * Parses an instrument command inside an INSTRUMENTS block.
+	 * Parses a single line instrument switch command (outside of an instruments bock).
+	 * 
+	 * @param tokens             Token array.
+	 * @param isFake             **true**, if this is called inside a macro definition or block
+	 * @throws ParseException    If the command cannot be parsed.
+	 */
+	private void parseSingleLineInstrumentSwitch(String[] tokens, boolean isFake) throws ParseException {
+		
+		// not enough arguments?
+		if (tokens.length < 3) {
+			throw new ParseException( Dict.get(Dict.ERROR_INSTR_NUM_OF_ARGS_SINGLE) );
+		}
+		
+		// add channel to new command
+		StringBuilder command = new StringBuilder( tokens[1] + " " );
+		int channel = toChannel(tokens[1]);
+		
+		// add instrument number
+		String[] instrAndDesc = tokens[2].split("\\s", 2);
+		command.append(instrAndDesc[0] + " ");
+		
+		// add description
+		if (1 == instrAndDesc.length) {
+			String description = instruments.get(channel).instrumentName;
+			command.append(description);
+		}
+		else {
+			command.append(instrAndDesc[1]);
+		}
+		
+		// parse the resulting command
+		String[] newTokens = command.toString().split("\\s+", 3);
+		parseInstrumentCmd(newTokens, isFake);
+	}
+	
+	/**
+	 * Parses an instrument command inside an INSTRUMENTS block or a single line INSTRUMENT change.
 	 * This command assigns a certain instrument to a certain channel.
 	 * A bank number can also be assigned for the channel.
 	 * 
 	 * TODO: test soundfonts with bankLSB > 0
 	 * 
 	 * @param tokens             Token array.
+	 * @param isFake             **true**, if this is called inside a macro definition or block
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
-	private void parseInstrumentCmd(String[] tokens) throws ParseException {
+	private void parseInstrumentCmd(String[] tokens, boolean isFake) throws ParseException {
 		if (3 != tokens.length) {
 			throw new ParseException( Dict.get(Dict.ERROR_INSTR_NUM_OF_ARGS) );
 		}
@@ -1860,6 +1917,9 @@ public class MidicaPLParser extends SequenceParser {
 			
 			boolean[] isChanged = instr.setBank( bankMSB, bankLSB );
 			
+			if (isFake)
+				return;
+			
 			try {
 				// calculate tick for bank select
 				long bankTick = tick - TICK_BANK_BEFORE_PROGRAM;
@@ -1890,6 +1950,9 @@ public class MidicaPLParser extends SequenceParser {
 					);
 				}
 			}
+			
+			if (isFake)
+				return;
 			
 			// create and add instrument
 			Instrument instr = new Instrument(
