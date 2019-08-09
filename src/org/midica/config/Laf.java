@@ -82,8 +82,10 @@ public class Laf {
 	public static final Insets INSETS_FILTER_ICON_W_LBL_H    = new Insets(  0,  0,  0, 15 );
 	public static final Insets INSETS_FILTER_ICON_W_LBL_V    = new Insets(  0,  0, 15,  0 );
 	
-	public static int PLAYER_CH_LBL_INSTR_WIDTH   = 110;
-	public static int PLAYER_CH_LBL_COMMENT_WIDTH = 180;
+	// widths and heights
+	public static final int TABLE_ROW_HEIGHT            =  17; // needed for nimbus to keep underscores visible when using grid
+	public static       int PLAYER_CH_LBL_INSTR_WIDTH   = 110;
+	public static       int PLAYER_CH_LBL_COMMENT_WIDTH = 180;
 	
 	// c o l o r s
 	private static final Color COLOR_NIMBUS_BASE     = new Color(  0,  142,  36 );
@@ -460,6 +462,7 @@ public class Laf {
 		// tables
 		custom.put("Table.showGrid",          true);
 		custom.put("Table.gridColor",         COLOR_TABLE_GRID);
+		custom.put("Table.rowHeight",         TABLE_ROW_HEIGHT);
 		custom.put("Table.alternateRowColor", COLOR_PANEL);
 		custom.put("TableHeader:\"TableHeader.renderer\"[Enabled].backgroundPainter",                tblRenEnBgPainter);
 		custom.put("TableHeader:\"TableHeader.renderer\"[Disabled].backgroundPainter",               tblRenDisBgPainter);

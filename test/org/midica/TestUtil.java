@@ -8,6 +8,9 @@
 package org.midica;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+
+import javax.swing.SwingUtilities;
 
 /**
  * This class provides static methods that can be used by other test classes.
@@ -20,8 +23,11 @@ public class TestUtil {
 	
 	/**
 	 * Initializes and stores midica in test mode, if not yet done.
+	 * 
+	 * @throws InterruptedException       on interruptions while waiting for the event dispatching thread.
+	 * @throws InvocationTargetException  on exceptions.
 	 */
-	public static void initMidica() {
+	public static void initMidica() throws InvocationTargetException, InterruptedException {
 		
 		if (isMidicaInitialized)
 			return;
@@ -32,6 +38,14 @@ public class TestUtil {
 			"--ignore-local-config",
 		};
 		Midica.main(args);
+		
+		// wait until the swing-based components are ready
+		SwingUtilities.invokeAndWait(new Runnable() {
+			@Override
+			public void run() {
+				// nothing more to be done here
+			}
+		});
 		
 		isMidicaInitialized = true;
 	}

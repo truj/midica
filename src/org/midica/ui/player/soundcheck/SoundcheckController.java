@@ -27,6 +27,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
+import javax.swing.event.RowSorterEvent;
+import javax.swing.event.RowSorterListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
@@ -41,7 +43,8 @@ import org.midica.ui.widget.MidicaSlider;
  * 
  * @author Jan Trukenmüller
  */
-public class SoundcheckController implements ActionListener, ListSelectionListener, ItemListener, ChangeListener, MouseWheelListener, DocumentListener, WindowListener {
+public class SoundcheckController implements ActionListener, ListSelectionListener, ItemListener, ChangeListener,
+		MouseWheelListener, DocumentListener, WindowListener, RowSorterListener {
 	
 	private static final int DEFAULT_NOTE_INDEX       = 48; // MIDI num 48 (chromatic instrumends start at 0)
 	private static final int DEFAULT_PERCUSSION_INDEX = 11; // MIDI num 38 (percussion starts at 27)
@@ -50,7 +53,7 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 	private static SoundcheckView            view                  = null;
 	private static SoundcheckNoteModel       noteModel             = null;
 	private static SoundcheckInstrumentModel instrumentModel       = null;
-	private static TreeMap<Integer, Integer> selectedInstrumentRow = null;
+	private static TreeMap<Integer, Integer> selectedInstrumentRow = null; // maps channel to instrument table model index
 	private static TreeMap<Boolean, Integer> selectedNoteIndex     = null;
 	
 	/**
@@ -160,6 +163,27 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 	}
 	
 	/**
+	 * Scrolls to the currently selected instruments table row, if possible.
+	 * Called when the table string filter or sorter has been changed.
+	 * 
+	 * @param e   the row sorter event
+	 */
+	@Override
+	public void sorterChanged(RowSorterEvent e) {
+		view.scrollInstrumentTable();
+	}
+	
+	/**
+	 * Returns the last (remembered) selected table model index of the given channel.
+	 * 
+	 * @param channel  The requested channel.
+	 * @return last selected table (model) row.
+	 */
+	public static int getLastSelectedTableRow(int channel) {
+		return selectedInstrumentRow.get(channel);
+	}
+	
+	/**
 	 * Plays the customized sound.
 	 */
 	private void play() {
@@ -183,7 +207,13 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 				return;
 			
 			// play the note
-			MidiDevices.doSoundcheck( channel, instr, note, volume, velocity, duration, mustKeep );
+			Thread playThread = new Thread() {
+				@Override
+				public void run() {
+					MidiDevices.doSoundcheck( channel, instr, note, volume, velocity, duration, mustKeep );
+				}
+			};
+			playThread.start();
 		}
 		catch( NumberFormatException e ) {
 		}
@@ -436,14 +466,20 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 		if ( event.getValueIsAdjusting() )
 			return;
 		
+		// prevent to play the note, while the string table filter is shown
+		// otherwise the play button would be pushed for each keyboard press
+		if ( view.isFilterLayerOpen() )
+			return;
+		
 		// instrument or drumkit selected?
 		Object source = event.getSource();
 		if ( source instanceof DefaultListSelectionModel ) {
 			
-			// remember the selected row for the current channel
+			// remember the (last) selected row for the current channel
 			int channel  = view.getChannel();
 			int instrRow = view.getSelectedInstrumentRow();
-			selectedInstrumentRow.put( channel, instrRow );
+			if (instrRow >= 0)
+				selectedInstrumentRow.put( channel, instrRow );
 			
 			// refill the note/percussion list
 			fillNoteList();
@@ -486,7 +522,7 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 		instrumentModel.initList();                       // rebuild options
 		view.setSelectedInstrumentRow( lastSelectedRow ); // select row
 		view.toggleInstrumentSelectionListener( true );   // add listener
-		view.scrollInstrumentTable( lastSelectedRow );    // scroll to selection
+		view.scrollInstrumentTable();                     // scroll to selection
 	}
 	
 	/**

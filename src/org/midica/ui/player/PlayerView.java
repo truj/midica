@@ -94,7 +94,7 @@ public class PlayerView extends JDialog {
 	public static final int    CH_VOL_MAX        =   127; // in order to have a major tick at '0'
 	public static final int    CH_VOL_MIN_VAL    =     0;
 	public static final int    CH_VOL_MAX_VAL    =   127;
-	public static final int    CH_VOL_SKIP       =    50;
+	public static final int    CH_VOL_SKIP       =    20;
 	public static final int    CH_VOL_MAJOR      =    10;
 	public static final int    CH_VOL_MINOR      =     5;
 	public static final int    CH_VOL_SCROLL     =     1; // scroll factor for the channel volume slider
@@ -667,12 +667,7 @@ public class PlayerView extends JDialog {
 		for ( int i = 0; i <= CH_VOL_MAX; i += CH_VOL_SKIP ) {
 			int display = i;
 			String text = Integer.toString( display );
-			if ( 0 == i)
-				labelTable.put( i, new JLabel(text) );
-			else {
-				labelTable.put( -i, new JLabel("-" + text) );
-				labelTable.put(  i, new JLabel("+" + text) );
-			}
+			labelTable.put( i, new JLabel(text) );
 		}
 		volSlider.setLabelTable( labelTable );
 		return volSlider;

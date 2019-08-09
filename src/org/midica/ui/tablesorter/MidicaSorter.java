@@ -38,11 +38,11 @@ public class MidicaSorter<M> extends TableRowSorter {
 	private static final HideCategoryFilter     hideCatFilter     = new HideCategoryFilter<>();
 	private static final ShowOnlyCategoryFilter showOnlyCatFilter = new ShowOnlyCategoryFilter<>();
 	
-	private boolean showCategories = true;
-	private String  filterStr      = "";
+	private   boolean showCategories = true;
+	protected String  filterStr      = "";
 	
-	private RowFilter<MidicaTableModel, String>            stringFilter = null;
-	private ArrayList<RowFilter<MidicaTableModel, String>> filters      = new ArrayList<>();
+	private RowFilter<MidicaTableModel, Integer>            stringFilter = null;
+	private ArrayList<RowFilter<MidicaTableModel, Integer>> filters      = new ArrayList<>();
 	
 	@Override
 	public void toggleSortOrder(int column) {

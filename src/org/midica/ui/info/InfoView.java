@@ -63,6 +63,7 @@ import org.midica.ui.tablefilter.FilterIcon;
 import org.midica.ui.tablefilter.FilterIconWithLabel;
 import org.midica.ui.widget.FlowLabel;
 import org.midica.ui.widget.LinkLabel;
+import org.midica.ui.widget.MessageTable;
 import org.midica.ui.widget.MidicaButton;
 import org.midica.ui.widget.MidicaSplitPane;
 import org.midica.ui.widget.MidicaTable;
@@ -1726,7 +1727,7 @@ public class InfoView extends JDialog {
 		constraints.weighty     = 1;
 		constraints.fill        = GridBagConstraints.BOTH;
 		MessageTableModel model = new MessageTableModel(messages);
-		msgTable                = new MidicaTable(model);
+		msgTable                = new MessageTable(model);
 		msgTable.setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
 		msgTable.getSelectionModel().addListSelectionListener( controller );
 		msgTable.addFocusListener( controller );

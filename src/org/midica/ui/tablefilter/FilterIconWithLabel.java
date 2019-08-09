@@ -12,6 +12,7 @@ import java.awt.Window;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.event.RowSorterListener;
 
 import org.midica.config.Laf;
 import org.midica.ui.widget.MidicaTable;
@@ -99,5 +100,23 @@ public class FilterIconWithLabel extends JPanel {
 	 */
 	public void setTable(MidicaTable table) {
 		filterIcon.setTable(table);
+	}
+	
+	/**
+	 * Adds a {@link RowSorterListener} to the row sorter.
+	 * 
+	 * @param listener  The listener to be added.
+	 */
+	public void addRowSorterListener(RowSorterListener listener) {
+		filterIcon.addRowSorterListener(listener);
+	}
+	
+	/**
+	 * Indicates, if the string filter layer is currently open or not.
+	 * 
+	 * @return  **true**, if the layer is open, otherwise **false**;
+	 */
+	public boolean isFilterLayerOpen() {
+		return filterIcon.isFilterLayerOpen();
 	}
 }

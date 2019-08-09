@@ -122,4 +122,13 @@ public class FilterIcon extends JLabel {
 	public void addRowSorterListener(RowSorterListener listener) {
 		layer.addRowSorterListener(listener);
 	}
+	
+	/**
+	 * Indicates, if the string filter layer is currently open or not.
+	 * 
+	 * @return  **true**, if the layer is open, otherwise **false**;
+	 */
+	public boolean isFilterLayerOpen() {
+		return layer.isFilterLayerOpen();
+	}
 }

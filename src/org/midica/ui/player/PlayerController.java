@@ -781,7 +781,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 					throw parseException;
 				}
 			}
-			catch( InterruptedException | ExecutionException workerException ) {
+			catch ( InterruptedException | ExecutionException workerException ) {
 				throw new ParseException( workerException.getMessage() );
 			}
 			

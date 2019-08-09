@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -52,9 +53,12 @@ public class SequenceAnalyzerTest {
 	
 	/**
 	 * Initializes midica in test mode.
+	 * 
+	 * @throws InterruptedException       on interruptions while waiting for the event dispatching thread.
+	 * @throws InvocationTargetException  on exceptions.
 	 */
 	@BeforeAll
-	static void setUpBeforeClass() {
+	static void setUpBeforeClass() throws InvocationTargetException, InterruptedException {
 		TestUtil.initMidica();
 	}
 	

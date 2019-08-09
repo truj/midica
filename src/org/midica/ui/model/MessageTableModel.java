@@ -8,11 +8,8 @@
 package org.midica.ui.model;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 
 import org.midica.config.Dict;
-import org.midica.ui.info.InfoView;
 import org.midica.ui.tablesorter.OptionalNumber;
 
 /**
@@ -20,20 +17,18 @@ import org.midica.ui.tablesorter.OptionalNumber;
  * MIDI sequence > MIDI messages tab of the info window.
  * 
  * Each row represents a single MIDI message that occurred at a certain tick.
- * (So to be picky it represents a MIDI event, because an event is a message
+ * (To be picky it represents a MIDI event, because an event is a message
  * occurring at a certain tick.)
  * 
  * @author Jan Trukenmüller
  */
 public class MessageTableModel extends MidicaTableModel {
 	
-	public  static long msgCountTotal   = 0;
-	private static long msgCountVisible = 0; // remaining count after the message filter - but still ignoring the table string filter
+	public  static long msgCount = 0;
 	
 	private static final long serialVersionUID = 1L;
 	
-	private ArrayList<SingleMessage> allMessages     = null;
-	private ArrayList<SingleMessage> visibleMessages = new ArrayList<>();
+	private ArrayList<SingleMessage> messages = null;
     
 	/**
 	 * Creates a new instance of the message table data model.
@@ -49,15 +44,11 @@ public class MessageTableModel extends MidicaTableModel {
 	public MessageTableModel(ArrayList<SingleMessage> messages) {
 		
 		// store messages
-		allMessages = messages;
-		if ( null == allMessages ) {
-			allMessages = new ArrayList<>();
+		this.messages = messages;
+		if ( null == this.messages ) {
+			this.messages = new ArrayList<>();
 		}
-		visibleMessages = (ArrayList<SingleMessage>) allMessages.clone();
-		
-		// save counts
-		msgCountTotal   = allMessages.size();
-		msgCountVisible = visibleMessages.size();
+		msgCount = messages.size();
 		
 		// table header
 		columnNames = new String[ 7 ];
@@ -88,17 +79,15 @@ public class MessageTableModel extends MidicaTableModel {
 	
 	/**
 	 * Returns the number of rows in the table - same as the sum of all
-	 * messages that have not currently been filtered out.
+	 * messages.
 	 * 
-	 * @return    Number of rows (notes).
+	 * @return    Number of rows (messages).
 	 */
 	@Override
 	public int getRowCount() {
-		
-		if ( null == visibleMessages )
+		if (null == messages)
 			return 0;
-		
-		return (int) msgCountVisible;
+		return messages.size();
 	}
 	
 	/**
@@ -112,12 +101,12 @@ public class MessageTableModel extends MidicaTableModel {
 	public Object getValueAt( int rowIndex, int colIndex ) {
 		
 		// avoid exceptions
-		if ( null == visibleMessages )
+		if ( null == messages )
 			return "";
-		if ( rowIndex < 0 || visibleMessages.size() < rowIndex + 1 )
+		if ( rowIndex < 0 || messages.size() < rowIndex + 1 )
 			return "";
 		
-		SingleMessage singleMessage = visibleMessages.get(rowIndex);
+		SingleMessage singleMessage = messages.get(rowIndex);
 		
 		// tick
 		if ( 0 == colIndex ) {
@@ -172,121 +161,19 @@ public class MessageTableModel extends MidicaTableModel {
 	public SingleMessage getMsg(int row) {
 		
 		// invalid row?
-		if ( row < 0 || row > visibleMessages.size() - 1 )
+		if ( row < 0 || row > messages.size() - 1 )
 			return null;
 		
-		return visibleMessages.get(row);
+		return messages.get(row);
 	}
 	
 	/**
-	 * Applies the given message filters to the messages shown in the table.
-	 * 
-	 * @param filterBoolean  Contains checkbox filters.
-	 * @param filterNodes    The selected nodes from the message tree.
-	 * @param filterFrom     Minimum tick number.
-	 * @param filterTo       Maximum tick number.
-	 * @param filterTracks   The tracks to be shown.
-	 */
-	public void filterMessages( HashMap<String, Boolean>   filterBoolean,
-	                            ArrayList<MessageTreeNode> filterNodes,
-	                            long filterFrom, long filterTo, HashSet<Integer> filterTracks ) {
-		
-		// unpack filter elements
-		boolean          limitTicks      = filterBoolean.get( InfoView.FILTER_CBX_LIMIT_TICKS  );
-		boolean          limitTracks     = filterBoolean.get( InfoView.FILTER_CBX_LIMIT_TRACKS );
-		boolean          mustFilterNodes = filterBoolean.get( InfoView.FILTER_CBX_NODE         );
-		HashSet<Integer> fltrChannel     = new HashSet<>();
-		for ( int channel = 0; channel < 16; channel++ ) {
-			String name             = InfoView.FILTER_CBX_CHAN_PREFIX + channel;
-			boolean mustShowChannel = filterBoolean.get( name );
-			if (mustShowChannel) {
-				fltrChannel.add( channel );
-			}
-		}
-		boolean isFltrIndep = filterBoolean.get( InfoView.FILTER_CBX_CHAN_INDEP );
-		if (isFltrIndep) {
-			fltrChannel.add( -1 );
-		}
-		
-		// reset visible messages
-		visibleMessages.clear();
-		
-		// refill visible messages
-		MESSAGE:
-		for (SingleMessage msg : allMessages) {
-			
-			// get channel (-1 = channel independent)
-			Object channelObj = msg.getOption( IMessageType.OPT_CHANNEL );
-			int    channel    = -1;
-			if ( channelObj instanceof Integer ) {
-				channel = (int) channelObj;
-			}
-			
-			// apply channel filters (channel independent / channel number)
-			if ( ! fltrChannel.contains(channel) ) {
-				continue MESSAGE;
-			}
-			
-			// apply limit-ticks filter
-			if (limitTicks) {
-				Object tickObj = msg.getOption( IMessageType.OPT_TICK );
-				if ( tickObj instanceof Long ) {
-					long tick = (long) tickObj;
-					if ( tick < filterFrom || tick > filterTo ) {
-						continue MESSAGE;
-					}
-				}
-			}
-			
-			// apply limit-tracks filter
-			if (limitTracks) {
-				Object trackObj = msg.getOption( IMessageType.OPT_TRACK );
-				if ( trackObj instanceof Integer ) {
-					int track = (int) trackObj;
-					if ( ! filterTracks.contains(track) ) {
-						continue MESSAGE;
-					}
-				}
-			}
-			
-			// apply node filter
-			if (mustFilterNodes) {
-				
-				// get the leaf node of the message
-				MessageTreeNode leaf = (MessageTreeNode) msg.getOption( IMessageType.OPT_LEAF_NODE );
-				
-				// check if the leaf node is a descendant of one of the selected nodes
-				boolean matches = false;
-				SELECTED_NODE:
-				for ( MessageTreeNode node : filterNodes ) {
-					matches = leaf.isNodeAncestor( node );
-					if (matches) {
-						break SELECTED_NODE;
-					}
-				}
-				if ( ! matches ) {
-					continue MESSAGE;
-				}
-			}
-			
-			// the message has passed the filter successfully
-			visibleMessages.add( msg );
-		}
-		msgCountVisible = visibleMessages.size();
-		
-		// update GUI
-		this.fireTableDataChanged();
-	}
-	
-	/**
-	 * Returns the row index of the given message in the table.
+	 * Returns the row index (model) of the given message in the table.
 	 * 
 	 * @param  singleMessage  The message representing a table row.
 	 * @return the row index, or **-1**, if the row is not visible.
 	 */
 	public int getTableRow(SingleMessage singleMessage) {
-		return visibleMessages.indexOf(singleMessage);
+		return messages.indexOf(singleMessage);
 	}
 }
-
-

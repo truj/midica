@@ -7,6 +7,8 @@
 
 package org.midica;
 
+import javax.swing.SwingUtilities;
+
 import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.config.Laf;
@@ -23,7 +25,7 @@ public class Midica {
 	public static final int VERSION_MAJOR = 0;
 	
 	/** Minor version number. This is intended to be incremented automatically by precommit.pl. */
-	public static final int VERSION_MINOR = 1564934830;
+	public static final int VERSION_MINOR = 1565375840;
 	
 	/** Full version string. */
 	public static final String VERSION = VERSION_MAJOR + "." + VERSION_MINOR;
@@ -65,10 +67,15 @@ public class Midica {
 		// initialize dictionaries
 		Dict.init();
 		
-		// start the GUI
-		synchronized(UiController.class) {
-			uiController = new UiController();
-		}
+		// start the GUI (inside of the event dispatching thread)
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				synchronized(UiController.class) {
+					uiController = new UiController();
+				}
+			}
+		});
 	}
 	
 	/**

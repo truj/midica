@@ -28,6 +28,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.event.ListSelectionEvent;
@@ -50,6 +51,7 @@ import org.midica.midi.SequenceAnalyzer;
 import org.midica.ui.model.MessageTableModel;
 import org.midica.ui.model.IMessageType;
 import org.midica.ui.model.SingleMessage;
+import org.midica.ui.tablesorter.MessageTableSorter;
 import org.midica.ui.model.MessageTreeNode;
 import org.midica.ui.model.MidicaTreeModel;
 import org.midica.ui.widget.MidicaButton;
@@ -432,7 +434,7 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 	
 	@Override
 	public void sorterChanged(RowSorterEvent e) {
-		updateVisibleTotalLabels();
+		filterMessages();
 	}
 	
 	/**
@@ -747,12 +749,14 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 		
 		// get selected row index
 		int row = table.getSelectedRow();
-		if ( -1 == row )
+		
+		// nothing selected or selection not visible?
+		if (-1 == row)
 			return null;
 		
 		// get row object
 		MessageTableModel model         = (MessageTableModel) table.getModel();
-		SingleMessage     singleMessage = model.getMsg( row );
+		SingleMessage     singleMessage = model.getMsg( table.convertRowIndexToModel(row) );
 		
 		return singleMessage;
 	}
@@ -804,7 +808,7 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 		
 		// get content
 		String countVisible = view.getMsgTable().getRowCount()  + "";
-		String countTotal   = MessageTableModel.msgCountTotal   + "";
+		String countTotal   = MessageTableModel.msgCount        + "";
 		
 		// update labels
 		lblVisible.setText( countVisible );
@@ -877,34 +881,38 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 			return;
 		}
 		
-		// remember the currently selected message
-		SingleMessage selectedMsg = getSelectedMessage();
-		
 		// apply filter
-		MidicaTable       table = view.getMsgTable();
-		MessageTableModel model = (MessageTableModel) table.getModel();
-		model.filterMessages( filterBoolean, filterNode, filterFrom, filterTo, filterTracks );
+		MidicaTable           table = view.getMsgTable();
+		MessageTableSorter<?> rowSorter = (MessageTableSorter<?>) table.getRowSorter();
+		rowSorter.removeRowSorterListener(this);
+		rowSorter.setMessageFilters(filterBoolean, filterNode, filterFrom, filterTo, filterTracks);
+		rowSorter.filter();
+		rowSorter.addRowSorterListener(this);
 		
 		// update UI
 		updateVisibleTotalLabels();
 		
-		// was a message selected before?
-		if ( selectedMsg != null ) {
-			
-			// get the new row of the message
-			int row = model.getTableRow( selectedMsg );
-			
-			// message still visible?
-			if ( row != -1 ) {
-				
-				// restore the selection (re-select the row)
-				table.getSelectionModel().setSelectionInterval( row, row );
-				
-				// scroll to the selected row
-				Rectangle cell = table.getCellRect( row, 0, true );
-				table.scrollRectToVisible( cell );
+		// scroll to the currently selected message, if possible
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				SingleMessage selectedMsg = getSelectedMessage();
+				if (selectedMsg != null) {
+					
+					// get the new row of the message
+					int modelRow = ((MessageTableModel) table.getModel()).getTableRow(selectedMsg);
+					int viewRow  = table.convertRowIndexToView(modelRow);
+					
+					// message (still) visible?
+					if ( viewRow != -1 ) {
+						
+						// scroll to the selected row
+						Rectangle cell = table.getCellRect( viewRow, 0, true );
+						table.scrollRectToVisible( cell );
+					}
+				}
 			}
-		}
+		});
 	}
 	
 	/**

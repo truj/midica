@@ -10,6 +10,7 @@ package org.midica.file;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 
 import javax.sound.midi.MetaMessage;
@@ -37,9 +38,12 @@ class MidicaPLParserTest extends MidicaPLParser {
 
 	/**
 	 * Initializes midica in test mode.
+	 * 
+	 * @throws InterruptedException       on interruptions while waiting for the event dispatching thread.
+	 * @throws InvocationTargetException  on exceptions.
 	 */
 	@BeforeAll
-	static void setUpBeforeClass() {
+	static void setUpBeforeClass() throws InvocationTargetException, InterruptedException {
 		TestUtil.initMidica();
 	}
 	

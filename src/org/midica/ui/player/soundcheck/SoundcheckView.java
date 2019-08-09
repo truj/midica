@@ -30,6 +30,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 
 import org.midica.config.Dict;
 import org.midica.config.Laf;
@@ -79,16 +80,17 @@ public class SoundcheckView extends JDialog {
 	private Dimension dimListNote  = null;
 	private Dimension dimTextField = null;
 	
-	private JComboBox<NamedInteger> cbxChannel    = null;
-	private MidicaTable             tblInstrument = null;
-	private JList<NamedInteger>     lstNote       = null;
-	private JTextField              fldVolume     = null;
-	private JTextField              fldVelocity   = null;
-	private MidicaSlider            sldVolume     = null;
-	private MidicaSlider            sldVelocity   = null;
-	private JTextField              fldDuration   = null;
-	private JCheckBox               cbxKeep       = null;
-	private MidicaButton            btnPlay       = null;
+	private JComboBox<NamedInteger> cbxChannel      = null;
+	private MidicaTable             tblInstrument   = null;
+	private FilterIconWithLabel     labelWithFilter = null;
+	private JList<NamedInteger>     lstNote         = null;
+	private JTextField              fldVolume       = null;
+	private JTextField              fldVelocity     = null;
+	private MidicaSlider            sldVolume       = null;
+	private MidicaSlider            sldVelocity     = null;
+	private JTextField              fldDuration     = null;
+	private JCheckBox               cbxKeep         = null;
+	private MidicaButton            btnPlay         = null;
 	
 	private        KeyEventPostProcessor     keyProcessor   = null;
 	private static SoundcheckView            soundcheckView = null;
@@ -164,7 +166,7 @@ public class SoundcheckView extends JDialog {
 		// instrument label
 		constrLeft.insets = Laf.INSETS_W;
 		constrLeft.gridy++;
-		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel( Dict.get(Dict.SNDCHK_INSTRUMENT), this, true );
+		labelWithFilter = new FilterIconWithLabel( Dict.get(Dict.SNDCHK_INSTRUMENT), this, true );
 		content.add(labelWithFilter, constrLeft);
 		
 		// instrument list
@@ -185,6 +187,7 @@ public class SoundcheckView extends JDialog {
 		JScrollPane scrollInstr = new JScrollPane( tblInstrument );
 		scrollInstr.setPreferredSize( dimTblInstr );
 		labelWithFilter.setTable(tblInstrument);
+		labelWithFilter.addRowSorterListener(controller);
 		content.add( scrollInstr, constrRight );
 		
 		// note label
@@ -487,7 +490,16 @@ public class SoundcheckView extends JDialog {
 	}
 	
 	/**
-	 * Determines the currently selected row index of the instrument table.
+	 * Indicates, if the string filter layer is currently open or not.
+	 * 
+	 * @return  **true**, if the layer is open, otherwise **false**;
+	 */
+	public boolean isFilterLayerOpen() {
+		return labelWithFilter.isFilterLayerOpen();
+	}
+	
+	/**
+	 * Determines the currently selected row index of the instrument table (model).
 	 * 
 	 * @return selected row or **-1** if no row is selected.
 	 */
@@ -495,24 +507,29 @@ public class SoundcheckView extends JDialog {
 		int row = tblInstrument.getSelectedRow();
 		if ( row < 0 )
 			return -1;
-		return row;
+		return tblInstrument.convertRowIndexToModel(row);
 	}
 	
 	/**
-	 * Selects the given row of the instruments table.
+	 * Selects the given row of the instruments table, if possible.
 	 * 
-	 * @param i row index to be selected
+	 * @param i  row index (model index) to be selected
 	 */
 	public void setSelectedInstrumentRow( int i ) {
 		
-		// handle edge cases
+		if (i < 0)
+			return;
+		
+		// convert row (model --> view)
+		i = tblInstrument.convertRowIndexToView(i);
+		if (i < 0)
+			return;
+		
 		int rowCount = tblInstrument.getRowCount();
 		if ( i > rowCount - 1 )
-			i = rowCount - 1;
-		if ( i < 0 )
-			i = 0;
+			return;
 		
-		// select the row
+		// select the row (in the view)
 		tblInstrument.setRowSelectionInterval( i, i );
 	}
 	
@@ -538,13 +555,23 @@ public class SoundcheckView extends JDialog {
 	}
 	
 	/**
-	 * Scrolls the instrument table so that the given (selected) row is visible.
-	 * 
-	 * @param row selected row to be made visible
+	 * Scrolls the instrument table so that the selected row is visible.
 	 */
-	public void scrollInstrumentTable( int row ) {
-		Rectangle cell = tblInstrument.getCellRect( row, 0, true );
-		tblInstrument.scrollRectToVisible( cell );
+	public void scrollInstrumentTable() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				
+				// get selected (view) row
+				int row = tblInstrument.getSelectedRow();
+				if (row < 0)
+					return;
+				
+				// scroll
+				Rectangle cell = tblInstrument.getCellRect( row, 0, true );
+				tblInstrument.scrollRectToVisible( cell );
+			}
+		});
 	}
 	
 	/**
@@ -576,8 +603,9 @@ public class SoundcheckView extends JDialog {
 		
 		int[] result = { -1, -1, -1 };
 		
-		// get table row
-		int row = getSelectedInstrumentRow();
+		// get last selected table row
+		int row = SoundcheckController.getLastSelectedTableRow( getChannel() );
+		
 		if ( -1 == row )
 			return result;
 		ArrayList<HashMap<String, String>> instruments = instrModel.getInstruments();
@@ -606,7 +634,7 @@ public class SoundcheckView extends JDialog {
 		if ( row < 0 )
 			return false;
 		ArrayList<HashMap<String, String>> instruments = instrModel.getInstruments();
-		HashMap<String, String> instr = instruments.get( row );
+		HashMap<String, String> instr = instruments.get( tblInstrument.convertRowIndexToModel(row) );
 		
 		// main or sub category
 		if ( instr.containsKey("category") ) {

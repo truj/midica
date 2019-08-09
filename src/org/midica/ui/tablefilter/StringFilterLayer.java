@@ -186,6 +186,15 @@ public class StringFilterLayer extends JDialog implements WindowListener, Window
 	}
 	
 	/**
+	 * Indicates, if the string filter layer is currently open or not.
+	 * 
+	 * @return  **true**, if the layer is open, otherwise **false**;
+	 */
+	public boolean isFilterLayerOpen() {
+		return isVisible();
+	}
+	
+	/**
 	 * Handles changes to the filter text field.
 	 */
 	private void filterUpdated() {
