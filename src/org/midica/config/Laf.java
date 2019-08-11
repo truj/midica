@@ -135,12 +135,12 @@ public class Laf {
 	public  static final Color COLOR_MSG_DEFAULT             = UIManager.getColor( "Panel.background" );
 	public  static final Color COLOR_MSG_TABLE_GRID          = COLOR_SECONDARY;
 	
-	// string filter layer for tables
-	public static final Color COLOR_TBL_FILTER_LAYER_BACKGROUND       = COLOR_SECONDARY_LIGHT;
-	public static final Color COLOR_TBL_FILTER_ICON_BORDER_INACTIVE   = COLOR_BORDER;
-	public static final Color COLOR_TBL_FILTER_ICON_BORDER_ACTIVE     = COLOR_ALERT;
-	public static final Color COLOR_TBL_FILTER_ICON_HOVER_BG_INACTIVE = COLOR_SECONDARY;
-	public static final Color COLOR_TBL_FILTER_ICON_HOVER_BG_ACTIVE   = COLOR_PRIMARY_DARK;
+	// string filter for tables
+	public static final Color COLOR_TBL_FILTER_LAYER_BACKGROUND     = COLOR_SECONDARY_LIGHT;
+	public static final Color COLOR_TBL_FILTER_ICON_BORDER_EMPTY    = COLOR_BORDER;
+	public static final Color COLOR_TBL_FILTER_ICON_BORDER_ACTIVE   = COLOR_ALERT;
+	public static final Color COLOR_TBL_FILTER_ICON_HOVER_BG_EMPTY  = COLOR_SECONDARY;
+	public static final Color COLOR_TBL_FILTER_ICON_HOVER_BG_ACTIVE = COLOR_SECONDARY;
 	
 	// tooltip colors
 	private static final Color COLOR_TOOLTIP_FOREGROUND = COLOR_BLACK;

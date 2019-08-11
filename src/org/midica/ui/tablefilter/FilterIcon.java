@@ -32,14 +32,14 @@ public class FilterIcon extends JLabel {
 	
 	private boolean isActive = false;
 	
-	private static final String pathFilterActive   = "org/midica/resources/filter-active.png";
-	private static final String pathFilterInactive = "org/midica/resources/filter-inactive.png";
+	private static final String pathFilterActive = "org/midica/resources/filter-active.png";
+	private static final String pathFilterEmpty  = "org/midica/resources/filter-empty.png";
 	
-	private ImageIcon iconActive   = null;
-	private ImageIcon iconInactive = null;
+	private ImageIcon iconActive = null;
+	private ImageIcon iconEmpty  = null;
 	
-	private static final Border borderActive   = new LineBorder(Laf.COLOR_TBL_FILTER_ICON_BORDER_ACTIVE,   1);
-	private static final Border borderInactive = new LineBorder(Laf.COLOR_TBL_FILTER_ICON_BORDER_INACTIVE, 1);
+	private static final Border borderActive = new LineBorder(Laf.COLOR_TBL_FILTER_ICON_BORDER_ACTIVE, 1);
+	private static final Border borderEmpty  = new LineBorder(Laf.COLOR_TBL_FILTER_ICON_BORDER_EMPTY,  1);
 	
 	private StringFilterLayer layer;
 	
@@ -49,11 +49,11 @@ public class FilterIcon extends JLabel {
 	 * @param owner  The window that contains the icon and the table.
 	 */
 	public FilterIcon(Window owner) {
-		iconActive   = new ImageIcon( ClassLoader.getSystemResource(pathFilterActive)   );
-		iconInactive = new ImageIcon( ClassLoader.getSystemResource(pathFilterInactive) );
-		layer        = new StringFilterLayer(this, owner);
+		iconActive = new ImageIcon( ClassLoader.getSystemResource(pathFilterActive) );
+		iconEmpty  = new ImageIcon( ClassLoader.getSystemResource(pathFilterEmpty)  );
+		layer      = new StringFilterLayer(this, owner);
 		
-		setIcon(iconInactive);
+		setIcon(iconEmpty);
 		setOpaque(true);
 		setActive(false);
 		setBackground(null);
@@ -69,7 +69,7 @@ public class FilterIcon extends JLabel {
 				if (isActive)
 					setBackground(Laf.COLOR_TBL_FILTER_ICON_HOVER_BG_ACTIVE);
 				else
-					setBackground(Laf.COLOR_TBL_FILTER_ICON_HOVER_BG_INACTIVE);
+					setBackground(Laf.COLOR_TBL_FILTER_ICON_HOVER_BG_EMPTY);
 			}
 			
 			@Override
@@ -107,9 +107,9 @@ public class FilterIcon extends JLabel {
 			setBorder(borderActive);
 		}
 		else {
-			setIcon(iconInactive);
+			setIcon(iconEmpty);
 			tooltip += Dict.get(Dict.FILTER_ICON_TOOLTIP_EMPTY);
-			setBorder(borderInactive);
+			setBorder(borderEmpty);
 		}
 		setToolTipText(tooltip);
 	}
