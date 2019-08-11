@@ -70,7 +70,7 @@ public class SoundcheckView extends JDialog {
 	private static final int    WIDTH_COL_NAME_SYNTAX = 200;
 	private static final int    HEIGHT_TABLE_INSTR    = 200;
 	private static final int    HEIGHT_LIST_NOTE      = 150;
-	private static final int    VOL_OR_VEL_LABEL_SKIP =  30;
+	private static final int    VOL_OR_VEL_LABEL_SKIP =  20;
 	private static final int    DEFAULT_DURATION      = 300;
 	private static final int    LIST_FONT_SIZE        =  12;
 	private static final String LIST_FONT_NAME        = "monospaced";

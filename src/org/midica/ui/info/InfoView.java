@@ -120,7 +120,7 @@ public class InfoView extends JDialog {
 	private static final int COL_WIDTH_SF_RES_FORMAT     = 260;
 	private static final int COL_WIDTH_SF_RES_CLASS      = 130;
 	private static final int COL_WIDTH_MSG_TICK          =  80;
-	private static final int COL_WIDTH_MSG_STATUS        =  40;
+	private static final int COL_WIDTH_MSG_STATUS        =  45;
 	private static final int COL_WIDTH_MSG_TRACK         =  30;
 	private static final int COL_WIDTH_MSG_CHANNEL       =  30;
 	private static final int COL_WIDTH_MSG_LENGTH        =  40;
