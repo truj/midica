@@ -1,0 +1,33 @@
+INCLUDE_FILE inc/instruments.midica
+
+CONST $forte = 120
+CONST $piano= 30
+CONST $mezzoforte =75
+CONST $staccato = duration=50%
+CONST $legato     duration=100%
+CONST $legato_forte    = $legato , v = $forte
+CONST $several_columns      c  /4  $staccato
+  CONST $complex_const = START $legato_forte MIDDLE $legato , v = $forte END // don't use it
+
+0  c  /4  v=$forte
+0  c  /4  $staccato
+
+MACRO test1
+	0  c  /4  v=$forte
+	0  c  /4  $staccato
+	(
+		0  c  /4  v=$forte
+		0  c  /4  v=$piano,$staccato
+		0  c  /4  v=$mezzoforte , $legato
+		0  c  /4  $staccato , v=$mezzoforte
+		0  c  /4  $legato,v=$forte
+		0  c  /4  $legato_forte
+		0  $several_columns
+	)
+END
+INCLUDE test1
+
+MACRO test2
+	INCLUDE test1
+END
+INCLUDE test2

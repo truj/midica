@@ -73,6 +73,9 @@ public class Dict {
 	// syntax
 	public static final String SYNTAX_DEFINE             = "DEFINE";
 	public static final String SYNTAX_COMMENT            = "COMMENT";
+	public static final String SYNTAX_CONST              = "CONST";
+	public static final String SYNTAX_VAR_SYMBOL         = "VAR_SYMBOL";
+	public static final String SYNTAX_VAR_ASSIGNER       = "VAR_ASSIGNER";
 	public static final String SYNTAX_GLOBAL             = "GLOBAL";
 	public static final String SYNTAX_P                  = "PERCUSSION_CHANNEL";
 	public static final String SYNTAX_END                = "END";
@@ -1000,6 +1003,9 @@ public class Dict {
 	public static final String ERROR_CHORD_CONTAINS_ALREADY     = "error_chord_contains_already";
 	public static final String ERROR_CHORD_DEF_NOT_ALLOWED_HERE = "error_chord_def_not_allowed_here";
 	public static final String ERROR_CHORD_NUM_OF_ARGS          = "error_chord_num_of_args";
+	public static final String ERROR_CONST_NUM_OF_ARGS          = "error_const_num_of_args";
+	public static final String ERROR_CONST_ALREADY_DEFINED      = "error_const_already_defined";
+	public static final String ERROR_CONST_NOT_DEFINED          = "error_const_not_defined";
 	public static final String ERROR_DEFINE_NUM_OF_ARGS         = "error_define_num_of_args";
 	public static final String ERROR_ALREADY_REDEFINED          = "error_already_redefined";
 	public static final String ERROR_FILE_NUM_OF_ARGS           = "error_file_num_of_args";
@@ -1502,6 +1508,9 @@ public class Dict {
 		// syntax for InfoView
 		set( SYNTAX_DEFINE,             "syntax element definition"                        );
 		set( SYNTAX_COMMENT,            "comment"                                          );
+		set( SYNTAX_CONST,              "constant definition"                              );
+		set( SYNTAX_VAR_SYMBOL,         "first character of a variable or constant"        );
+		set( SYNTAX_VAR_ASSIGNER,       "assign symbol between variable/constant and value" );
 		set( SYNTAX_GLOBAL,             "global command (all channels)"                    );
 		set( SYNTAX_P,                  "percussion channel"                               );
 		set( SYNTAX_END,                "end of a definition block"                        );
@@ -1916,6 +1925,9 @@ public class Dict {
 		set( ERROR_CHORD_CONTAINS_ALREADY,        "Note cannot be defined more than once in the same chord: "         );
 		set( ERROR_CHORD_DEF_NOT_ALLOWED_HERE,    "a chord definition is not allowed inside a block<br>maybe you forgot to close the block." );
 		set( ERROR_CHORD_NUM_OF_ARGS,             "wrong number of arguments in CHORD command"                        );
+		set( ERROR_CONST_NUM_OF_ARGS,             "wrong number of arguments in CONSTANT definition"                  );
+		set( ERROR_CONST_ALREADY_DEFINED,         "constant already defined: "                                        );
+		set( ERROR_CONST_NOT_DEFINED,             "constant undefined: "                                              );
 		set( ERROR_DEFINE_NUM_OF_ARGS,            "wrong number of arguments in DEFINE command"                       );
 		set( ERROR_ALREADY_REDEFINED,             "Command ID already redefined. Cannot be redefined again: "         );
 		set( ERROR_FILE_NUM_OF_ARGS,              "wrong number of arguments in INCLUDE_FILE command"                 );
@@ -2376,6 +2388,9 @@ public class Dict {
 		// set up default syntax
 		setSyntax( SYNTAX_DEFINE,            "DEFINE"        );
 		setSyntax( SYNTAX_COMMENT,           "//"            );
+		setSyntax( SYNTAX_CONST,             "CONST"         );
+		setSyntax( SYNTAX_VAR_SYMBOL,        "$"             );
+		setSyntax( SYNTAX_VAR_ASSIGNER,      "="             );
 		setSyntax( SYNTAX_GLOBAL,            "*"             );
 		setSyntax( SYNTAX_P,                 "p"             );
 		setSyntax( SYNTAX_END,               "END"           );
@@ -2464,6 +2479,7 @@ public class Dict {
 		
 		addSyntaxCategory( get(SYNTAX_CAT_DEFINITION) );
 		addSyntaxForInfoView( SYNTAX_DEFINE      );
+		addSyntaxForInfoView( SYNTAX_CONST       );
 		addSyntaxForInfoView( SYNTAX_INSTRUMENT  );
 		addSyntaxForInfoView( SYNTAX_INSTRUMENTS );
 		addSyntaxForInfoView( SYNTAX_META        );
@@ -2495,6 +2511,8 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_REST             );
 		addSyntaxForInfoView( SYNTAX_P                );
 		addSyntaxForInfoView( SYNTAX_INLINE_CHORD_SEP );
+		addSyntaxForInfoView( SYNTAX_VAR_SYMBOL       );
+		addSyntaxForInfoView( SYNTAX_VAR_ASSIGNER     );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_META) );
 		addSyntaxForInfoView( SYNTAX_META_COPYRIGHT );

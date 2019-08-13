@@ -204,6 +204,15 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 11520, instruments.get(0).getCurrentTicks() );
 		String rootString = ((MidicaTreeModel)SequenceAnalyzer.getSequenceInfo().get("banks_total")).getRoot().toString();
 		assertEquals( "Total (33)", rootString );
+		
+		parse(getWorkingFile("const"));
+		assertEquals( constants.get("$forte"),         "120"                                                              );
+		assertEquals( constants.get("$piano"),         "30"                                                               );
+		assertEquals( constants.get("$mezzoforte"),    "75"                                                               );
+		assertEquals( constants.get("$staccato"),      "duration=50%"                                                     );
+		assertEquals( constants.get("$legato"),        "duration=100%"                                                    );
+		assertEquals( constants.get("$legato_forte"),  "duration=100% , v = 120"                                          );
+		assertEquals( constants.get("$complex_const"), "START duration=100% , v = 120 MIDDLE duration=100% , v = 120 END" );
 	}
 	
 	/**
