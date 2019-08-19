@@ -807,7 +807,7 @@ public class PlayerView extends JDialog {
 		GridBagLayout layout = new GridBagLayout();
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.fill       = GridBagConstraints.NONE;
 		constraints.insets     = Laf.INSETS_IN;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
@@ -818,41 +818,50 @@ public class PlayerView extends JDialog {
 		
 		// headlines
 		JLabel c = new JLabel( Dict.get(Dict.ABBR_CH_NUM) );
+		Laf.makeBold(c);
 		c.setToolTipText( Dict.get(Dict.TIP_CH_NUM) );
 		area.add( c, constraints );
 		
 		constraints.gridx++;
 		JLabel m = new JLabel( Dict.get(Dict.ABBR_MUTE) );
+		Laf.makeBold(m);
 		m.setToolTipText( Dict.get(Dict.TIP_MUTE) );
 		area.add( m, constraints );
 		
 		constraints.gridx++;
 		JLabel s = new JLabel( Dict.get(Dict.ABBR_SOLO) );
+		Laf.makeBold(s);
 		s.setToolTipText( Dict.get(Dict.TIP_SOLO) );
 		area.add( s, constraints );
 		
 		constraints.gridx++;
 		JLabel a = new JLabel( Dict.get(Dict.ABBR_ACTIVITY) );
+		Laf.makeBold(a);
 		a.setToolTipText( Dict.get(Dict.TIP_ACTIVITY) );
 		area.add( a, constraints );
 		
 		constraints.gridx++;
 		JLabel p = new JLabel( Dict.get(Dict.ABBR_PROG_NUM) );
+		Laf.makeBold(p);
 		p.setToolTipText( Dict.get(Dict.TIP_PROG_NUM) );
 		area.add( p, constraints );
 		
 		constraints.gridx++;
 		JLabel b = new JLabel( Dict.get(Dict.ABBR_BANK_NUM) );
+		Laf.makeBold(b);
 		b.setToolTipText( Dict.get(Dict.TIP_BANK_NUM) );
 		area.add( b, constraints );
 		
 		constraints.gridx++;
+		constraints.fill = GridBagConstraints.BOTH;
 		JLabel in = new JLabel( Dict.get(Dict.CH_HEAD_INSTRUMENT) );
+		Laf.makeBold(in);
 		area.add( in, constraints );
 		
 		constraints.weightx = 1;
 		constraints.gridx++;
 		JLabel com = new JLabel( Dict.get(Dict.CH_HEAD_COMMENT) );
+		Laf.makeBold(com);
 		area.add( com, constraints );
 		
 		// size for the channel activity labels
