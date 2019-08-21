@@ -7,6 +7,8 @@ CONST $staccato = duration=50%
 CONST $legato     duration=100%
 CONST $legato_forte    = $legato , v = $forte
 CONST $several_columns      c  /4  $staccato
+CONST $cmd_with_columns     0  c  /4
+CONST $whole_line           0  c  /4  $staccato
   CONST $complex_const = START $legato_forte MIDDLE $legato , v = $forte END // don't use it
 
 0  c  /4  v=$forte
@@ -23,6 +25,8 @@ MACRO test1
 		0  c  /4  $legato,v=$forte
 		0  c  /4  $legato_forte
 		0  $several_columns
+		$cmd_with_columns $legato
+		$whole_line
 	)
 END
 INCLUDE test1
@@ -31,3 +35,6 @@ MACRO test2
 	INCLUDE test1
 END
 INCLUDE test2
+
+$cmd_with_columns $legato
+$whole_line

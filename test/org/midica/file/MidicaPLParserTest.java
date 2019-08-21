@@ -206,13 +206,16 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "Total (33)", rootString );
 		
 		parse(getWorkingFile("const"));
-		assertEquals( constants.get("$forte"),         "120"                                                              );
-		assertEquals( constants.get("$piano"),         "30"                                                               );
-		assertEquals( constants.get("$mezzoforte"),    "75"                                                               );
-		assertEquals( constants.get("$staccato"),      "duration=50%"                                                     );
-		assertEquals( constants.get("$legato"),        "duration=100%"                                                    );
-		assertEquals( constants.get("$legato_forte"),  "duration=100% , v = 120"                                          );
-		assertEquals( constants.get("$complex_const"), "START duration=100% , v = 120 MIDDLE duration=100% , v = 120 END" );
+		assertEquals( constants.get("$forte"),            "120"                                                              );
+		assertEquals( constants.get("$piano"),            "30"                                                               );
+		assertEquals( constants.get("$mezzoforte"),       "75"                                                               );
+		assertEquals( constants.get("$staccato"),         "duration=50%"                                                     );
+		assertEquals( constants.get("$legato"),           "duration=100%"                                                    );
+		assertEquals( constants.get("$legato_forte"),     "duration=100% , v = 120"                                          );
+		assertEquals( constants.get("$several_columns"),  "c  /4  duration=50%"                                              );
+		assertEquals( constants.get("$cmd_with_columns"), "0  c  /4"                                                         );
+		assertEquals( constants.get("$whole_line"),       "0  c  /4  duration=50%"                                           );
+		assertEquals( constants.get("$complex_const"),    "START duration=100% , v = 120 MIDDLE duration=100% , v = 120 END" );
 	}
 	
 	/**

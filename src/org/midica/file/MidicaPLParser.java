@@ -559,13 +559,13 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void parseTokens(String[] tokens) throws ParseException {
 		
-		checkIfCmdExists(tokens[0]);
-		
 		// continue or not - decide depending on parsing run and current mode
 		boolean mustIgnore = mustIgnore(tokens[0]);
 		if (mustIgnore) {
 			return;
 		}
+		
+		checkIfCmdExists(tokens[0]);
 		
 		// replace note, instrument, percussion and drumkit names
 		if (tokens.length > 2) {
