@@ -2271,6 +2271,11 @@ public class MidicaPLParser extends SequenceParser {
 		String durationStr = subTokens[0];
 		int duration = parseDuration(durationStr);
 		
+		// allow drum-only sequences without an INSTRUMENTS block
+		if (! instrumentsParsed) {
+			postprocessInstruments();
+		}
+		
 		// process options
 		boolean multiple = false;
 		int     tremolo  = duration;
@@ -2305,11 +2310,6 @@ public class MidicaPLParser extends SequenceParser {
 					tremolo = opt.getTremolo();
 				}
 			}
-		}
-		
-		// allow drum-only sequences without an INSTRUMENTS block
-		if (! instrumentsParsed) {
-			postprocessInstruments();
 		}
 		
 		// get instrument

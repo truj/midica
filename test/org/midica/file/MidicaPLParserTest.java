@@ -200,6 +200,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 		parse(getWorkingFile("drum-only-with-multiple"));
 		assertEquals( 0, instruments.get(9).getCurrentTicks() );
 		
+		parse(getWorkingFile("drum-only-with-channel-options"));
+		assertEquals( 1920, instruments.get(9).getCurrentTicks() );
+		
 		parse(getWorkingFile("tremolo"));
 		assertEquals( 11520, instruments.get(0).getCurrentTicks() );
 		String rootString = ((MidicaTreeModel)SequenceAnalyzer.getSequenceInfo().get("banks_total")).getRoot().toString();
