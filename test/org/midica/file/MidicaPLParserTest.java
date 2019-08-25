@@ -116,8 +116,8 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 13440, instruments.get(0).getCurrentTicks() );
 		
 		parse(getWorkingFile("define"));
-		assertEquals( 2400, instruments.get(0).getCurrentTicks() );
-		assertEquals( 1920, instruments.get(9).getCurrentTicks() );
+		assertEquals( 3120, instruments.get(0).getCurrentTicks() );
+		assertEquals( 2160, instruments.get(9).getCurrentTicks() );
 		
 		parse(getWorkingFile("using-unknown-drumkit"));
 		assertEquals(       123, instruments.get(9).instrumentNumber );

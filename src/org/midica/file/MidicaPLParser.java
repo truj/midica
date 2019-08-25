@@ -143,11 +143,13 @@ public class MidicaPLParser extends SequenceParser {
 	
 	public static String ORIGINAL_DEFINE       = null;
 	public static String ORIGINAL_INCLUDE_FILE = null;
+	public static String ORIGINAL_COMMENT      = null;
 	
 	protected static ArrayList<Instrument> instruments = null;
 	
 	private static LyricUtil lyricUtil = LyricUtil.getInstance();
 	
+	private   static HashMap<String, ArrayList<String>> fileCache         = null;
 	private   static HashMap<String, ArrayList<String>> macros            = null;
 	private   static HashMap<String, HashSet<Integer>>  chords            = null;
 	private   static boolean                            instrumentsParsed = false;
@@ -292,6 +294,7 @@ public class MidicaPLParser extends SequenceParser {
 		// Needed to redefine them without getting an error in the following parsing runs.
 		ORIGINAL_DEFINE       = DEFINE;
 		ORIGINAL_INCLUDE_FILE = INCLUDE_FILE;
+		ORIGINAL_COMMENT      = COMMENT;
 	}
 	
 	/**
@@ -313,31 +316,39 @@ public class MidicaPLParser extends SequenceParser {
 		Charset charset = Charset.forName( chosenCharset );
 		
 		try {
-			// open file for reading
-			FileInputStream   fis = new FileInputStream(file);
-			InputStreamReader ir  = new InputStreamReader(fis, charset);
-			BufferedReader    br  = new BufferedReader(ir);
-			String            rawLine;
+			String            filePath = file.getCanonicalPath();
+			ArrayList<String> lines    = fileCache.get(filePath);
 			
-			// get lines from file
-			ArrayList<String> lines = new ArrayList<>();
-			while (null != (rawLine = br.readLine())) {
+			// file not yet cached?
+			if (null == lines) {
 				
-				// cut away comments
-				String cleanedLine = rawLine.split( Pattern.quote(COMMENT) + "|$", 2 )[ 0 ];
+				// open file for reading
+				FileInputStream   fis = new FileInputStream(file);
+				InputStreamReader ir  = new InputStreamReader(fis, charset);
+				BufferedReader    br  = new BufferedReader(ir);
+				String            line;
 				
-				// eliminate leading and trailing whitespaces
-				cleanedLine = clean(cleanedLine);
+				// get lines from file
+				lines = new ArrayList<>();
+				while (null != (line = br.readLine())) {
+					lines.add(line);
+				}
+				br.close();
 				
-				lines.add(cleanedLine);
+				// cache file (not neccessary for the root parser)
+				if ( ! isRootParser ) {
+					fileCache.put(filePath, lines);
+				}
 			}
-			br.close();
 			
 			if (isRootParser) {
 				// look for define commands
 				isDefineParsRun = true;
 				parsingRun(lines);
 				isDefineParsRun = false;
+				
+				// now the comment symbol cannot change any more.
+				cleanLines(lines);
 				
 				// prepare constant replacing
 				constPattern = Pattern.compile( "(" + Pattern.quote(VAR_SYMBOL) + "\\w+)" );
@@ -375,6 +386,13 @@ public class MidicaPLParser extends SequenceParser {
 				// This is called for each INCLUDE_FILE command and parsing run.
 				// So the parsing run has to be executed only once here.
 				// For which run it's called is obvious because the according fields are static.
+				
+				if (isConstParsRun) {
+					// The comment symbol cannot change any more.
+					// Clean the lines for all following parsing runs.
+					cleanLines(lines);
+				}
+				
 				parsingRun(lines);
 			}
 		}
@@ -508,7 +526,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * Parses all MidicaPL source lines for a specific purpose.
 	 * E.g. find definition commands, chords, macros, and so on.
 	 * 
-	 * @param lines           All pre-cleaned lines of the MidicaPL source.
+	 * @param lines           All lines of the MidicaPL source.
 	 * @throws ParseException if one of the lines cannot be parsed.
 	 * @throws IOException    if the file path cannot be calculated.
 	 */
@@ -517,6 +535,13 @@ public class MidicaPLParser extends SequenceParser {
 		try {
 			for (String line : lines) {
 				lineNumber++;
+				
+				// In the define parsing run, the lines are not yet cleaned because
+				// the comment symbol may change any time. So we need to do that here.
+				if (isDefineParsRun) {
+					line = cleanLine(line);
+				}
+				
 				parseLine(line);
 			}
 			
@@ -1768,18 +1793,20 @@ public class MidicaPLParser extends SequenceParser {
 			throw new ParseException( Dict.get(Dict.ERROR_DEFINE_NUM_OF_ARGS) );
 		}
 		
+		// Further checks would fail in the default run, if the COMMENT command has
+		// been redefined.
+		if (isDefaultParsRun) {
+			return;
+		}
+		
 		// split definition string by OPT_ASSIGNER (e,g, "=") and/or whitespace(s)
 		String[] defParts = def.split( "[" + Pattern.quote(OPT_ASSIGNER) + "\\s]+", 2 );
 		if (defParts.length < 2)
 			throw new ParseException( Dict.get(Dict.ERROR_DEFINE_NUM_OF_ARGS) );
 		String cmdId      = clean( defParts[0] );
 		String cmdName    = clean( defParts[1] );
-		if (cmdName.matches("\\s"))
+		if ( ! cmdName.matches("^\\S+$") )
 			throw new ParseException( Dict.get(Dict.ERROR_DEFINE_NUM_OF_ARGS) );
-		
-		if (isDefaultParsRun) {
-			return;
-		}
 		
 		// only one redefinition allowed per command
 		if (redefinitions.contains(cmdId)) {
@@ -2855,10 +2882,41 @@ public class MidicaPLParser extends SequenceParser {
 	 * @param input    The string to be cleaned.
 	 * @return         Resulting string without leading or trailing whitespaces.
 	 */
-	private String clean( String input ) {
+	private String clean(String input) {
 		input = input.replaceFirst( "^\\s+", "" ); // eliminate leading whitespaces
 		input = input.replaceFirst( "\\s+$", "" ); // eliminate trailing whitespaces
 		return input;
+	}
+	
+	/**
+	 * Removes comments and leding and trailing whitespaces from a source code line.
+	 * 
+	 * @param line  The source code line.
+	 * @return  the cleaned line.
+	 */
+	private String cleanLine(String line) {
+		
+		// cut away comments
+		String cleanedLine = line.split( Pattern.quote(COMMENT) + "|" + Pattern.quote(ORIGINAL_COMMENT) + "|$", 2 )[ 0 ];
+		
+		// eliminate leading and trailing whitespaces
+		cleanedLine = clean(cleanedLine);
+		
+		return cleanedLine;
+	}
+	
+	/**
+	 * Removes comments and leding and trailing whitespaces from a whole list of
+	 * source code lines.
+	 * 
+	 * @param lines  The source code lines to be cleaned.
+	 */
+	private void cleanLines(ArrayList<String> lines) {
+		for (int i = 0; i < lines.size(); i++) {
+			String line = lines.get(i);
+			line = cleanLine(line);
+			lines.set(i, line);
+		}
 	}
 	
 	/**
@@ -2890,6 +2948,7 @@ public class MidicaPLParser extends SequenceParser {
 			isDefaultParsRun    = false;
 			instruments         = new ArrayList<>();
 			definedMacroNames   = new HashSet<>();
+			fileCache           = new HashMap<>();
 			macros              = new HashMap<>();
 			chords              = new HashMap<>();
 			nestableBlkDepth    = 0;
