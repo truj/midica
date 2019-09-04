@@ -1954,7 +1954,7 @@ public class MidicaPLParser extends SequenceParser {
 				String constValue = constants.get(constName);
 				
 				// constant undefined?
-				if (null == constName) {
+				if (null == constValue) {
 					throw new ParseException( Dict.get(Dict.ERROR_CONST_NOT_DEFINED) + constName );
 				}
 				

@@ -1710,12 +1710,13 @@ public class InfoView extends JDialog {
 		// filter
 		long minTick = 0;
 		long maxTick = 0;
-		if (null != messages) {
-			int last = messages.size() - 1;
-			if ( last > 0 ) {
-				minTick = (long) messages.get( 0    ).getOption( IMessageType.OPT_TICK );
-				maxTick = (long) messages.get( last ).getOption( IMessageType.OPT_TICK );
-			}
+		if (null == messages) {
+			messages = new ArrayList<>();
+		}
+		int last = messages.size() - 1;
+		if ( last > 0 ) {
+			minTick = (long) messages.get( 0    ).getOption( IMessageType.OPT_TICK );
+			maxTick = (long) messages.get( last ).getOption( IMessageType.OPT_TICK );
 		}
 		Container filter = createMsgFilterArea( minTick, maxTick );
 		area.add( filter, constraints );
