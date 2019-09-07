@@ -7,24 +7,20 @@
 
 package org.midica.ui;
 
-import java.awt.KeyEventPostProcessor;
-import java.awt.KeyboardFocusManager;
-import java.awt.event.KeyEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 
+import org.midica.config.Dict;
+import org.midica.config.KeyBindingManager;
 import org.midica.ui.widget.MidicaButton;
 
 /**
  * This class provides a modal window belonging to a parent window.
  * 
- * It provides the following key bindings that can be used to close the window:
- * 
- * - Enter
- * - ESC
- * - Space
+ * It provides key bindings that can be used to close the window.
  * 
  * Sub classes are:
  * 
@@ -39,8 +35,9 @@ public abstract class MessageView extends JDialog {
 	
 	public static final String CMD_CLOSE = "close_message";
 	
-	protected MidicaButton          closeButton  = null;
-	private   KeyEventPostProcessor keyProcessor = null;
+	protected ActionListener    controller        = null;
+	private   MidicaButton      closeButton       = null;
+	private   KeyBindingManager keyBindingManager = null;
 	
 	/**
 	 * Creates a new modal message window.
@@ -51,19 +48,18 @@ public abstract class MessageView extends JDialog {
 	 */
 	public MessageView(JDialog view, String title) {
 		super(view, title, true);
-		addWindowListener( new MessageController(this) );
+		controller = new MessageController(this);
 	}
 	
 	/**
 	 * Creates a new modal message window.
-	 * Creates a new {@link MessageController} object and adds it as a {@link WindowListener}.
 	 * 
 	 * @param view     Parent window (main window).
 	 * @param title    Window title.
 	 */
 	public MessageView(JFrame view, String title) {
 		super(view, title, true);
-		addWindowListener( new MessageController(this) );
+		controller = new MessageController(this);
 	}
 	
 	/**
@@ -75,52 +71,31 @@ public abstract class MessageView extends JDialog {
 	}
 	
 	/**
-	 * Adds the key bindings that can be used to close the window:
-	 * 
-	 * - Enter
-	 * - ESC
-	 * - Space
-	 * 
-	 * This is called when the window is activated.
+	 * Adds the key bindings that can be used to close the window.
 	 */
 	public void addKeyBindings() {
 		
-		if ( null == keyProcessor ) {
-			keyProcessor = new KeyEventPostProcessor() {
-				public boolean postProcessKeyEvent( KeyEvent e ) {
-					if ( KeyEvent.KEY_PRESSED == e.getID() ) {
-						switch ( e.getKeyCode() ) {
-						
-						case KeyEvent.VK_ENTER:
-							closeButton.doClick();
-							break;
-							
-						case KeyEvent.VK_ESCAPE:
-							closeButton.doClick();
-							break;
-							
-						case KeyEvent.VK_SPACE:
-							closeButton.doClick();
-							break;
-							
-						default:
-							break;
-						}
-					}
-					return e.isConsumed();
-				}
-			};
-		}
+		// reset everything
+		keyBindingManager = new KeyBindingManager(this, this.getRootPane());
 		
-		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventPostProcessor( keyProcessor );
+		// add key bindings to normal buttons
+		keyBindingManager.addBindingsForButton( this.closeButton, Dict.KEY_MSG_CLOSE );
+		
+		// set input and action maps
+		keyBindingManager.postprocess();
 	}
 	
 	/**
-	 * Removes all key bindings.
+	 * Creates and returns a close button for the view and connects it with the action controller.
 	 * 
-	 * This is called when the window is closed.
+	 * @return the created close button.
 	 */
-	public void removeKeyBindings() {
-		KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventPostProcessor( keyProcessor );
+	protected MidicaButton createCloseButton() {
+		closeButton = new MidicaButton( Dict.get(Dict.CLOSE) );
+		closeButton.setActionCommand( MessageView.CMD_CLOSE );
+		closeButton.addActionListener( controller );
+		closeButton.requestFocusInWindow();
+		
+		return closeButton;
 	}
 }

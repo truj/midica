@@ -391,44 +391,20 @@ public class SoundcheckController implements ActionListener, ListSelectionListen
 		}
 	}
 	
-	/**
-	 * Adds key bindings to the soundcheck window.
-	 * 
-	 * @param e event
-	 */
 	@Override
 	public void windowActivated( WindowEvent e ) {
-		view.addKeyBindings();
 	}
 	
-	/**
-	 * Removes key bindings from the soundcheck window.
-	 * 
-	 * @param e event
-	 */
 	@Override
 	public void windowClosed( WindowEvent e ) {
-		view.removeKeyBindings();
 	}
 	
-	/**
-	 * Removes key bindings from the soundcheck window.
-	 * 
-	 * @param e event
-	 */
 	@Override
 	public void windowClosing( WindowEvent e ) {
-		view.removeKeyBindings();
 	}
 	
-	/**
-	 * Removes key bindings from the soundcheck window.
-	 * 
-	 * @param e event
-	 */
 	@Override
 	public void windowDeactivated( WindowEvent e ) {
-		view.removeKeyBindings();
 	}
 	
 	@Override

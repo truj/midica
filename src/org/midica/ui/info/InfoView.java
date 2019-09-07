@@ -12,10 +12,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.KeyEventPostProcessor;
-import java.awt.KeyboardFocusManager;
 import java.awt.Window;
-import java.awt.event.KeyEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,6 +33,7 @@ import javax.swing.tree.DefaultTreeCellRenderer;
 
 import org.midica.Midica;
 import org.midica.config.Dict;
+import org.midica.config.KeyBindingManager;
 import org.midica.config.Laf;
 import org.midica.file.SequenceParser;
 import org.midica.file.SoundfontParser;
@@ -187,17 +185,23 @@ public class InfoView extends JDialog {
 	
 	private static InfoView infoView = null;
 	
-	private InfoController        controller       = null;
-	private KeyEventPostProcessor keyProcessor     = null;
-	private JTabbedPane           content          = null;
-	private JTabbedPane           contentConfig    = null;
-	private JTabbedPane           contentSoundfont = null;
+	private InfoController        controller        = null;
+	private KeyBindingManager     keyBindingManager = null;
+	private JTabbedPane           content           = null;
+	private JTabbedPane           contentConfig     = null;
+	private JTabbedPane           contentSoundfont  = null;
+	private JTabbedPane           contentMidi       = null;
 	
 	// widgets
-	private MidicaTree                  msgTree       = null;
-	private JPanel                      msgDetails    = null;
-	private MidicaTable                 msgTable      = null;
-	private HashMap<String, JComponent> filterWidgets = null;
+	private MidicaTree                  bankTotalTree         = null;
+	private MidicaTree                  bankChannelTree       = null;
+	private MidicaTree                  msgTree               = null;
+	private JPanel                      msgDetails            = null;
+	private MidicaTable                 msgTable              = null;
+	private HashMap<String, JComponent> filterWidgets         = null;
+	private ArrayList<MidicaButton>     expandCollapseButtons = null;
+	
+	private HashMap<String, JComponent> tableStringFilterIcons = null;
 	
 	private static final String logoPath = "org/midica/resources/logo.png";
 	
@@ -242,8 +246,11 @@ public class InfoView extends JDialog {
 		msgDetailsDim     = new Dimension( MSG_DETAILS_PREF_WIDTH, MSG_DETAILS_PREF_HEIGHT );
 		collapseExpandDim = new Dimension( COLLAPSE_EXPAND_WIDTH,  COLLAPSE_EXPAND_HEIGHT  );
 		
+		expandCollapseButtons = new ArrayList<>();
+		
 		// create content
 		init();
+		addKeyBindings();
 		
 		// show everything
 		pack();
@@ -264,6 +271,7 @@ public class InfoView extends JDialog {
 		addWindowListener( this.controller );
 		
 		// add tabs
+		tableStringFilterIcons = new HashMap<>();
 		content.addTab( Dict.get(Dict.TAB_CONFIG),        createConfigArea()       );
 		content.addTab( Dict.get(Dict.TAB_SOUNDFONT),     createSoundfontArea()    );
 		content.addTab( Dict.get(Dict.TAB_MIDI_SEQUENCE), createMidiSequenceArea() );
@@ -329,15 +337,15 @@ public class InfoView extends JDialog {
 	 */
 	private Container createMidiSequenceArea() {
 		// content
-		contentSoundfont = new JTabbedPane( JTabbedPane.TOP );
+		contentMidi = new JTabbedPane( JTabbedPane.TOP );
 		
 		// add tabs
-		contentSoundfont.addTab( Dict.get(Dict.TAB_MIDI_SEQUENCE_INFO), createMidiSequenceInfoArea() );
-		contentSoundfont.addTab( Dict.get(Dict.TAB_MIDI_KARAOKE),       createKaraokeArea()          );
-		contentSoundfont.addTab( Dict.get(Dict.TAB_BANK_INSTR_NOTE),    createBankInstrNoteArea()    );
-		contentSoundfont.addTab( Dict.get(Dict.TAB_MESSAGES),           createMsgArea()              );
+		contentMidi.addTab( Dict.get(Dict.TAB_MIDI_SEQUENCE_INFO), createMidiSequenceInfoArea() );
+		contentMidi.addTab( Dict.get(Dict.TAB_MIDI_KARAOKE),       createKaraokeArea()          );
+		contentMidi.addTab( Dict.get(Dict.TAB_BANK_INSTR_NOTE),    createBankInstrNoteArea()    );
+		contentMidi.addTab( Dict.get(Dict.TAB_MESSAGES),           createMsgArea()              );
 		
-		return contentSoundfont;
+		return contentMidi;
 	}
 	
 	/**
@@ -366,6 +374,7 @@ public class InfoView extends JDialog {
 		// label
 		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel( Dict.get(Dict.TAB_NOTE_DETAILS), this );
 		area.add(labelWithFilter, constraints);
+		tableStringFilterIcons.put(Dict.KEY_INFO_CONF_NOTE_FILTER, labelWithFilter);
 		
 		// table
 		constraints.insets  = Laf.INSETS_SWE;
@@ -414,6 +423,7 @@ public class InfoView extends JDialog {
 		// label
 		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel( Dict.get(Dict.TAB_PERCUSSION_DETAILS), this );
 		area.add(labelWithFilter, constraints);
+		tableStringFilterIcons.put(Dict.KEY_INFO_CONF_PERC_FILTER, labelWithFilter);
 		
 		// table
 		constraints.insets  = Laf.INSETS_SWE;
@@ -461,6 +471,7 @@ public class InfoView extends JDialog {
 		// label
 		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel( Dict.get(Dict.SYNTAX), this );
 		area.add(labelWithFilter, constraints);
+		tableStringFilterIcons.put(Dict.KEY_INFO_CONF_SYNTAX_FILTER, labelWithFilter);
 		
 		// table
 		constraints.insets  = Laf.INSETS_SWE;
@@ -509,6 +520,7 @@ public class InfoView extends JDialog {
 		// label
 		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel( Dict.get(Dict.INSTRUMENT_IDS), this );
 		area.add(labelWithFilter, constraints);
+		tableStringFilterIcons.put(Dict.KEY_INFO_CONF_INSTR_FILTER, labelWithFilter);
 		
 		// table
 		constraints.insets  = Laf.INSETS_SWE;
@@ -556,6 +568,7 @@ public class InfoView extends JDialog {
 		// label
 		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel( Dict.get(Dict.DRUMKIT_IDS), this );
 		area.add(labelWithFilter, constraints);
+		tableStringFilterIcons.put(Dict.KEY_INFO_CONF_DRUMKIT_FILTER, labelWithFilter);
 		
 		// table
 		constraints.insets  = Laf.INSETS_SWE;
@@ -1401,11 +1414,11 @@ public class InfoView extends JDialog {
 	 * Creates the area for banks, instruments and notes used by the loaded
 	 * MIDI sequence, either **in total** or **per channel**.
 	 * 
-	 * @param inTotal  **true** for creating the total usage tree area.
+	 * @param isTotal  **true** for creating the total usage tree area.
 	 *                 **false** for the per channel area.
 	 * @return the created area.
 	 */
-	private Container createBankInstrNoteAreaHalf( boolean inTotal ) {
+	private Container createBankInstrNoteAreaHalf( boolean isTotal ) {
 		// content
 		JPanel area = new JPanel();
 		
@@ -1413,7 +1426,7 @@ public class InfoView extends JDialog {
 		String keyName  = "banks_per_channel";
 		String headline = Dict.get( Dict.PER_CHANNEL );
 		String btnName  = InfoController.NAME_TREE_BANKS_PER_CHANNEL;
-		if (inTotal) {
+		if (isTotal) {
 			keyName  = "banks_total";
 			headline = Dict.get( Dict.TOTAL );
 			btnName  = InfoController.NAME_TREE_BANKS_TOTAL;
@@ -1424,7 +1437,7 @@ public class InfoView extends JDialog {
 		area.setLayout( layout );
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
-		constraints.insets     = inTotal ? Laf.INSETS_NW : Laf.INSETS_NE;
+		constraints.insets     = isTotal ? Laf.INSETS_NW : Laf.INSETS_NE;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
@@ -1451,13 +1464,17 @@ public class InfoView extends JDialog {
 		area.add( head, constraints );
 		
 		// tree
-		constraints.insets = inTotal ? Laf.INSETS_SW : Laf.INSETS_SE;
+		constraints.insets = isTotal ? Laf.INSETS_SW : Laf.INSETS_SE;
 		constraints.gridy++;
 		constraints.weighty = 1;
 		MidicaTree  tree    = new MidicaTree( model );
 		JScrollPane scroll  = new JScrollPane( tree );
 		model.setTree( tree );
 		area.add( scroll, constraints );
+		if (isTotal)
+			bankTotalTree = tree;
+		else
+			bankChannelTree = tree;
 		
 		return area;
 	}
@@ -1508,6 +1525,7 @@ public class InfoView extends JDialog {
 		btnCollapse.setActionCommand( InfoController.CMD_COLLAPSE );
 		btnCollapse.addActionListener( controller );
 		area.add( btnCollapse, constraints );
+		expandCollapseButtons.add(btnCollapse);
 		
 		// spacer
 		constraints.gridx++;
@@ -1524,6 +1542,7 @@ public class InfoView extends JDialog {
 		btnExpand.setActionCommand( InfoController.CMD_EXPAND );
 		btnExpand.addActionListener( controller );
 		area.add( btnExpand, constraints );
+		expandCollapseButtons.add(btnExpand);
 		
 		return area;
 	}
@@ -2117,6 +2136,7 @@ public class InfoView extends JDialog {
 		// label
 		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel( Dict.get(Dict.TAB_SOUNDFONT_INSTRUMENTS), this );
 		area.add(labelWithFilter, constraints);
+		tableStringFilterIcons.put(Dict.KEY_INFO_SF_INSTR_FILTER, labelWithFilter);
 		
 		// table
 		constraints.insets  = Laf.INSETS_SWE;
@@ -2166,6 +2186,7 @@ public class InfoView extends JDialog {
 		// label
 		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel( Dict.get(Dict.TAB_SOUNDFONT_RESOURCES), this );
 		area.add(labelWithFilter, constraints);
+		tableStringFilterIcons.put(Dict.KEY_INFO_SF_RES_FILTER, labelWithFilter);
 		
 		// table
 		constraints.insets  = Laf.INSETS_SWE;
@@ -2741,68 +2762,94 @@ public class InfoView extends JDialog {
 		infoView = null;
 	}
 	
-	// TODO: add key bindings for nested tabs
 	/**
-	 * Creates key bindings for the info view and adds them
-	 * to the {@link java.awt.KeyboardFocusManager}.
-	 * The following key bindings are created:
-	 * 
-	 * - **ESC** -- close the window
-	 * - **N**   -- switch to the note names translation tab
-	 * - **P**   -- switch to the percussion shortcut translation tab
-	 * - **S**   -- switch to the syntax keyword definition tab
-	 * - **I**   -- switch to the instrument shortcut translation tab
+	 * Adds key bindings to the info window.
 	 */
 	public void addKeyBindings() {
 		
-		if ( null == keyProcessor ) {
-			keyProcessor = new KeyEventPostProcessor() {
-				public boolean postProcessKeyEvent( KeyEvent e ) {
-					
-					if ( KeyEvent.KEY_PRESSED == e.getID() ) {
-						
-						// don't handle already consumed shortcuts any more
-						if ( e.isConsumed() )
-							return true;
-						
-						if ( KeyEvent.VK_ESCAPE == e.getKeyCode() ) {
-							close();
-							return true;
-						}
-						
-						else if ( KeyEvent.VK_N == e.getKeyCode() ) {
-							content.setSelectedIndex( 0 );
-							contentConfig.setSelectedIndex( 0 );
-						}
-						
-						else if ( KeyEvent.VK_P == e.getKeyCode() ) {
-							content.setSelectedIndex( 0 );
-							contentConfig.setSelectedIndex( 1 );
-						}
-						
-						else if ( KeyEvent.VK_S == e.getKeyCode() ) {
-							content.setSelectedIndex( 0 );
-							contentConfig.setSelectedIndex( 2 );
-						}
-						
-						else if ( KeyEvent.VK_I == e.getKeyCode() ) {
-							content.setSelectedIndex( 0 );
-							contentConfig.setSelectedIndex( 3 );
-						}
-					}
-					return e.isConsumed();
-				}
-			};
-		}
+		// reset everything
+		keyBindingManager = new KeyBindingManager(this, this.getRootPane());
 		
-		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventPostProcessor( keyProcessor );
-	}
-	
-	/**
-	 * Removes the key bindings for the info view
-	 * from the {@link java.awt.KeyboardFocusManager}.
-	 */
-	public void removeKeyBindings() {
-		KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventPostProcessor( keyProcessor );
+		// close bindings
+		keyBindingManager.addBindingsForClose( Dict.KEY_INFO_CLOSE );
+		
+		// level-1 tabs
+		keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_INFO_CONF,  0 );
+		keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_INFO_SF,    1 );
+		keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_INFO_MIDI,  2 );
+		keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_INFO_ABOUT, 3 );
+		
+		// level-2 tabs (config)
+		keyBindingManager.addBindingsForTabLevel2( contentConfig, Dict.KEY_INFO_CONF_NOTE,    0, 0 );
+		keyBindingManager.addBindingsForTabLevel2( contentConfig, Dict.KEY_INFO_CONF_PERC,    0, 1 );
+		keyBindingManager.addBindingsForTabLevel2( contentConfig, Dict.KEY_INFO_CONF_SYNTAX,  0, 2 );
+		keyBindingManager.addBindingsForTabLevel2( contentConfig, Dict.KEY_INFO_CONF_INSTR,   0, 3 );
+		keyBindingManager.addBindingsForTabLevel2( contentConfig, Dict.KEY_INFO_CONF_DRUMKIT, 0, 4 );
+		
+		// level-2 tabs (soundfont)
+		keyBindingManager.addBindingsForTabLevel2( contentSoundfont, Dict.KEY_INFO_SF_GENERAL, 1, 0 );
+		keyBindingManager.addBindingsForTabLevel2( contentSoundfont, Dict.KEY_INFO_SF_INSTR,   1, 1 );
+		keyBindingManager.addBindingsForTabLevel2( contentSoundfont, Dict.KEY_INFO_SF_RES,     1, 2 );
+		
+		// level-2 tabs (midi)
+		keyBindingManager.addBindingsForTabLevel2( contentMidi, Dict.KEY_INFO_MIDI_GENERAL, 2, 0 );
+		keyBindingManager.addBindingsForTabLevel2( contentMidi, Dict.KEY_INFO_MIDI_KARAOKE, 2, 1 );
+		keyBindingManager.addBindingsForTabLevel2( contentMidi, Dict.KEY_INFO_MIDI_BANKS,   2, 2 );
+		keyBindingManager.addBindingsForTabLevel2( contentMidi, Dict.KEY_INFO_MIDI_MSG,     2, 3 );
+		
+		// level-3: config tables / string filters
+		keyBindingManager.addBindingsForTabLevel3( tableStringFilterIcons.get(Dict.KEY_INFO_CONF_NOTE_FILTER),    Dict.KEY_INFO_CONF_NOTE_FILTER    );
+		keyBindingManager.addBindingsForTabLevel3( tableStringFilterIcons.get(Dict.KEY_INFO_CONF_PERC_FILTER),    Dict.KEY_INFO_CONF_PERC_FILTER    );
+		keyBindingManager.addBindingsForTabLevel3( tableStringFilterIcons.get(Dict.KEY_INFO_CONF_SYNTAX_FILTER),  Dict.KEY_INFO_CONF_SYNTAX_FILTER  );
+		keyBindingManager.addBindingsForTabLevel3( tableStringFilterIcons.get(Dict.KEY_INFO_CONF_INSTR_FILTER),   Dict.KEY_INFO_CONF_INSTR_FILTER   );
+		keyBindingManager.addBindingsForTabLevel3( tableStringFilterIcons.get(Dict.KEY_INFO_CONF_DRUMKIT_FILTER), Dict.KEY_INFO_CONF_DRUMKIT_FILTER );
+		
+		// level-3: soundfont tables / string filters
+		keyBindingManager.addBindingsForTabLevel3( tableStringFilterIcons.get(Dict.KEY_INFO_SF_INSTR_FILTER), Dict.KEY_INFO_SF_INSTR_FILTER );
+		keyBindingManager.addBindingsForTabLevel3( tableStringFilterIcons.get(Dict.KEY_INFO_SF_RES_FILTER),   Dict.KEY_INFO_SF_RES_FILTER   );
+		
+		// level-3: midi / banks
+		keyBindingManager.addBindingsForTabLevel3( expandCollapseButtons.get(0), Dict.KEY_INFO_MIDI_BANKS_TOT_MIN  );
+		keyBindingManager.addBindingsForTabLevel3( expandCollapseButtons.get(1), Dict.KEY_INFO_MIDI_BANKS_TOT_PL   );
+		keyBindingManager.addBindingsForTabLevel3( bankTotalTree,                Dict.KEY_INFO_MIDI_BANKS_TOT_TREE );
+		keyBindingManager.addBindingsForTabLevel3( expandCollapseButtons.get(2), Dict.KEY_INFO_MIDI_BANKS_CH_MIN   );
+		keyBindingManager.addBindingsForTabLevel3( expandCollapseButtons.get(3), Dict.KEY_INFO_MIDI_BANKS_CH_PL    );
+		keyBindingManager.addBindingsForTabLevel3( bankChannelTree,              Dict.KEY_INFO_MIDI_BANKS_CH_TREE  );
+		
+		// level-3: midi / messages
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_ICON),                 Dict.KEY_INFO_MIDI_MSG_FILTER     );
+		keyBindingManager.addBindingsForTabLevel3( expandCollapseButtons.get(4),                   Dict.KEY_INFO_MIDI_MSG_MIN        );
+		keyBindingManager.addBindingsForTabLevel3( expandCollapseButtons.get(5),                   Dict.KEY_INFO_MIDI_MSG_PL         );
+		keyBindingManager.addBindingsForTabLevel3( msgTree,                                        Dict.KEY_INFO_MIDI_MSG_TREE       );
+		keyBindingManager.addBindingsForTabLevel3( msgTable,                                       Dict.KEY_INFO_MIDI_MSG_TABLE      );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_INDEP),       Dict.KEY_INFO_MIDI_MSG_CH_INDEP   );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_DEP),         Dict.KEY_INFO_MIDI_MSG_CH_DEP     );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_NODE),             Dict.KEY_INFO_MIDI_MSG_SEL_NOD    );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_LIMIT_TICKS),      Dict.KEY_INFO_MIDI_MSG_LIM_TCK    );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_TXT_FROM_TICKS),       Dict.KEY_INFO_MIDI_MSG_TICK_FROM  );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_TXT_TO_TICKS),         Dict.KEY_INFO_MIDI_MSG_TICK_TO    );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_LIMIT_TRACKS),     Dict.KEY_INFO_MIDI_MSG_LIM_TRK    );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_TXT_TRACKS),           Dict.KEY_INFO_MIDI_MSG_TRACKS_TXT );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_BTN_SHOW_TREE),        Dict.KEY_INFO_MIDI_MSG_SHOW_IN_TR );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_AUTO_SHOW),        Dict.KEY_INFO_MIDI_MSG_SHOW_AUTO  );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  0), Dict.KEY_INFO_MIDI_MSG_CH_0       );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  1), Dict.KEY_INFO_MIDI_MSG_CH_1       );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  2), Dict.KEY_INFO_MIDI_MSG_CH_2       );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  3), Dict.KEY_INFO_MIDI_MSG_CH_3       );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  4), Dict.KEY_INFO_MIDI_MSG_CH_4       );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  5), Dict.KEY_INFO_MIDI_MSG_CH_5       );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  6), Dict.KEY_INFO_MIDI_MSG_CH_6       );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  7), Dict.KEY_INFO_MIDI_MSG_CH_7       );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  8), Dict.KEY_INFO_MIDI_MSG_CH_8       );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  9), Dict.KEY_INFO_MIDI_MSG_CH_9       );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX + 10), Dict.KEY_INFO_MIDI_MSG_CH_10      );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX + 11), Dict.KEY_INFO_MIDI_MSG_CH_11      );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX + 12), Dict.KEY_INFO_MIDI_MSG_CH_12      );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX + 13), Dict.KEY_INFO_MIDI_MSG_CH_13      );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX + 14), Dict.KEY_INFO_MIDI_MSG_CH_14      );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX + 15), Dict.KEY_INFO_MIDI_MSG_CH_15      );
+		
+		// set input and action maps
+		keyBindingManager.postprocess();
 	}
 }

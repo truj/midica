@@ -60,9 +60,7 @@ import org.midica.ui.widget.MidicaTree;
 
 /**
  * Controller for the info window.
- * 
- * - Adds and removes key bindings to/from the info view.
- * - Collapses or expands a tree after a button has been clicked.
+ * Acts as a listener to events that occur in the info window.
  * 
  * @author Jan Trukenmüller
  */
@@ -963,40 +961,16 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 		return widgets;
 	}
 	
-	/**
-	 * Adds info view specific key bindings.
-	 * 
-	 * @param e    The event to be handled.
-	 */
 	public void windowActivated( WindowEvent e ) {
-		view.addKeyBindings();
 	}
 	
-	/**
-	 * Removes info view specific key bindings.
-	 * 
-	 * @param e    The event to be handled.
-	 */
 	public void windowClosed( WindowEvent e ) {
-		view.removeKeyBindings();
 	}
 	
-	/**
-	 * Removes info view specific key bindings.
-	 * 
-	 * @param e    The event to be handled.
-	 */
 	public void windowClosing( WindowEvent e ) {
-		view.removeKeyBindings();
 	}
 	
-	/**
-	 * Removes info view specific key bindings.
-	 * 
-	 * @param e    The event to be handled.
-	 */
 	public void windowDeactivated( WindowEvent e ) {
-		view.removeKeyBindings();
 	}
 	
 	@Override

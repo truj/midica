@@ -7,15 +7,15 @@
 
 package org.midica.ui;
 
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
- * This class is used as a {@link WindowListener} for a {@link MessageView} window.
+ * This class is used as an {@link ActionListener} for a {@link MessageView} window.
  * 
  * @author Jan Trukenmüller
  */
-public class MessageController implements WindowListener {
+public class MessageController implements ActionListener {
 	
 	private MessageView view = null;
 	
@@ -28,49 +28,12 @@ public class MessageController implements WindowListener {
 		this.view = view;
 	}
 	
-	/**
-	 * Adds key bindings in the window.
-	 */
-	public void windowActivated( WindowEvent e ) {
-		view.addKeyBindings();
-	}
-	
-	/**
-	 * Removes key bindings in the window.
-	 */
-	public void windowClosed( WindowEvent e ) {
-		view.removeKeyBindings();
-	}
-	
-	/**
-	 * Removes key bindings in the window.
-	 */
-	public void windowClosing( WindowEvent e ) {
-		view.removeKeyBindings();
-	}
-	
-	/**
-	 * Removes key bindings in the window.
-	 */
-	public void windowDeactivated( WindowEvent e ) {
-		view.removeKeyBindings();
-	}
-	
-	/**
-	 * Does nothing.
-	 */
-	public void windowDeiconified( WindowEvent e ) {
-	}
-	
-	/**
-	 * Does nothing.
-	 */
-	public void windowIconified( WindowEvent e ) {
-	}
-	
-	/**
-	 * Does nothing.
-	 */
-	public void windowOpened( WindowEvent e ) {
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		String cmd = e.getActionCommand();
+		
+		if (MessageView.CMD_CLOSE.equals(cmd)) {
+			view.close();
+		}
 	}
 }

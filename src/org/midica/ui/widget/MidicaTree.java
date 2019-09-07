@@ -83,21 +83,33 @@ public class MidicaTree extends JTree {
 	}
 	
 	/**
-	 * Returns the tooltip text according to the tree node hovered
-	 * by the mouse pointer.
+	 * Returns a tooltip text according to the mouse pointer position.
+	 * 
+	 * If the mouse pointer hovers a tree node, returns the node text.
+	 * 
+	 * Otherwise: displays the general tree tooltip, if available.
 	 * 
 	 * @param e  the mouseover event
 	 * @return   the tooltip text for the node hovered by the mouse pointer
 	 */
 	@Override
-	public String getToolTipText( MouseEvent e ) {
+	public String getToolTipText(MouseEvent e) {
 		
-		// mouse hovers a valid tree row?
+		// get mouse position
 		int rowLocation = getRowForLocation( e.getX(), e.getY() );
-		if ( rowLocation < 0 )
-			return null;
 		
-		// get the node hovered by the mouse
+		// mouse doesn't hover a specific tree row?
+		if (rowLocation < 0) {
+			
+			// show general tree tool tip text, if available
+			String tt = getToolTipText();
+			if (tt != null) {
+				return tt;
+			}
+			return null;
+		}
+		
+		// mouse hovers a valid tree row - get the node hovered by the mouse
 		TreePath       curPath = getPathForLocation( e.getX(), e.getY() );
 		MidicaTreeNode node    = (MidicaTreeNode) curPath.getLastPathComponent();
 		

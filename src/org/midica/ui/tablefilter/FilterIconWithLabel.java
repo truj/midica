@@ -119,4 +119,37 @@ public class FilterIconWithLabel extends JPanel {
 	public boolean isFilterLayerOpen() {
 		return filterIcon.isFilterLayerOpen();
 	}
+	
+	/**
+	 * Delegates the method call to the {@link FilterIcon}.
+	 * 
+	 * @param keyBindingId  the key binding id
+	 * @param ttType        the key binding type id
+	 */
+	public void rememberKeyBindingId(String keyBindingId, String ttType) {
+		filterIcon.rememberKeyBindingId(keyBindingId, ttType);
+	}
+	
+	/**
+	 * Delegates the call to the {@link FilterIcon}.
+	 */
+	public String getToolTipText() {
+		return filterIcon.getToolTipText();
+	}
+	
+	/**
+	 * Delegates the call to the {@link FilterIcon}.
+	 * 
+	 * @param tt  tool tip text
+	 */
+	public void setToolTipText(String tt) {
+		filterIcon.setToolTipText(tt);
+	}
+	
+	/**
+	 * Opens the associated string filter layer.
+	 */
+	public void open() {
+		filterIcon.open();
+	}
 }

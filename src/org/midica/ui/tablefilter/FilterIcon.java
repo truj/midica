@@ -17,6 +17,7 @@ import javax.swing.border.LineBorder;
 import javax.swing.event.RowSorterListener;
 
 import org.midica.config.Dict;
+import org.midica.config.KeyBindingManager;
 import org.midica.config.Laf;
 import org.midica.ui.widget.MidicaTable;
 
@@ -40,6 +41,9 @@ public class FilterIcon extends JLabel {
 	
 	private static final Border borderActive = new LineBorder(Laf.COLOR_TBL_FILTER_ICON_BORDER_ACTIVE, 1);
 	private static final Border borderEmpty  = new LineBorder(Laf.COLOR_TBL_FILTER_ICON_BORDER_EMPTY,  1);
+	
+	private String keyBindingId     = null;
+	private String keyBindingTypeId = null;
 	
 	private StringFilterLayer layer;
 	
@@ -100,7 +104,7 @@ public class FilterIcon extends JLabel {
 		setBackground(null);
 		
 		// icon and tooltip
-		String tooltip = "<html>" + Dict.get(Dict.FILTER_ICON_TOOLTIP) + "<br>\n";
+		String tooltip = "<html><b>" + Dict.get(Dict.FILTER_ICON_TOOLTIP) + "</b><br>\n";
 		if (active) {
 			setIcon(iconActive);
 			tooltip += Dict.get(Dict.FILTER_ICON_TOOLTIP_ACTIVE);
@@ -112,6 +116,24 @@ public class FilterIcon extends JLabel {
 			setBorder(borderEmpty);
 		}
 		setToolTipText(tooltip);
+		
+		// add the key binding related part of the tooltip, if available
+		if (keyBindingId != null && keyBindingTypeId != null) {
+			KeyBindingManager.addTooltip(this, keyBindingId, keyBindingTypeId);
+		}
+	}
+	
+	/**
+	 * Stores key binding related IDs.
+	 * These IDs are needed to be able to restore the key binding specific part of
+	 * the tool tip after the basic tool tip has been changed due to filter changes.
+	 * 
+	 * @param keyBindingId  the key binding id
+	 * @param ttType        the key binding type id
+	 */
+	public void rememberKeyBindingId(String keyBindingId, String ttType) {
+		this.keyBindingId     = keyBindingId;
+		this.keyBindingTypeId = ttType;
 	}
 	
 	/**
@@ -130,5 +152,12 @@ public class FilterIcon extends JLabel {
 	 */
 	public boolean isFilterLayerOpen() {
 		return layer.isFilterLayerOpen();
+	}
+	
+	/**
+	 * Opens the associated string filter layer.
+	 */
+	public void open() {
+		layer.open();
 	}
 }

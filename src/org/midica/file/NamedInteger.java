@@ -44,6 +44,10 @@ public class NamedInteger {
 	 * This is needed if this class is used for combobox or list entries.
 	 */
 	public String toString() {
-		return value + " : " + name;
+		
+		// \u00a0 is a non-breaking space.
+		// reason: avoid key binding conflicts in the soundcheck view
+		// (list is focused and number is pressed)
+		return "\u00a0" + value + " : " + name;
 	}
 }

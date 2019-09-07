@@ -13,9 +13,6 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.KeyEventPostProcessor;
-import java.awt.KeyboardFocusManager;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.EventListener;
@@ -32,9 +29,10 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import org.midica.config.Dict;
+import org.midica.config.KeyBindingManager;
 import org.midica.config.Laf;
 import org.midica.file.SequenceParser;
-import org.midica.ui.SliderHelper;
+import org.midica.midi.SequenceCreator;
 import org.midica.ui.UiView;
 import org.midica.ui.widget.FixedLabel;
 import org.midica.ui.widget.MidicaButton;
@@ -141,13 +139,13 @@ public class PlayerView extends JDialog {
 	private static       int   NOTE_HISTORY_WIDTH              =   0; // will be set later
 	private static final int   NOTE_HISTORY_HEIGHT             = 155;
 	
-	private PlayerController      controller        = null;
-	private File                  currentFile       = null;
-	private KeyEventPostProcessor keyProcessor      = null;
-	private Container             content           = null;
-	private Container             channelLyricsArea = null;
-	private Container             channelArea       = null;
-	private Container             lyricsArea        = null;
+	private PlayerController  controller        = null;
+	private File              currentFile       = null;
+	private KeyBindingManager keyBindingManager = null;
+	private Container         content           = null;
+	private Container         channelLyricsArea = null;
+	private Container         channelArea       = null;
+	private Container         lyricsArea        = null;
 	
 	// UI
 	private JCheckBox cbxLyrics      = null;
@@ -181,6 +179,7 @@ public class PlayerView extends JDialog {
 	private JLabel lblTotalTicks   = null;
 	private JLabel lblTotalTime    = null;
 	
+	private ArrayList<MidicaButton> channelButtons        = null;
 	private ArrayList<JCheckBox>    muteCbx               = null;
 	private ArrayList<JCheckBox>    soloCbx               = null;
 	private ArrayList<Container>    channelDetails        = null;
@@ -218,6 +217,7 @@ public class PlayerView extends JDialog {
 		addWindowListener( controller );
 		
 		init();
+		addKeyBindings();
 		pack();
 		setVisible( true );
 	}
@@ -790,6 +790,7 @@ public class PlayerView extends JDialog {
 	 * @return The created area.
 	 */
 	private Container createChannelArea() {
+		channelButtons        = new ArrayList<>();
 		muteCbx               = new ArrayList<>();
 		soloCbx               = new ArrayList<>();
 		channelActivityLEDs   = new ArrayList<>();
@@ -878,6 +879,7 @@ public class PlayerView extends JDialog {
 			showHideButton.addActionListener( controller );
 			showHideButton.setMargin( Laf.INSETS_CHANNEL_BUTTON );
 			area.add( showHideButton, constraints );
+			channelButtons.add(showHideButton);
 			
 			// mute checkbox
 			constraints.gridx++;
@@ -1151,35 +1153,6 @@ public class PlayerView extends JDialog {
 		}
 	}
 	
-//	public void pressReparseButton() {
-//		btnReparse.doClick();
-//	}
-//	
-//	public void pressSoundcheckButton() {
-//		btnSoundcheck.doClick();
-//	}
-//	
-//	public void pressInfoButton() {
-//		btnInfo.doClick();
-//	}
-//	
-//	public void pressForwardButton() {
-//		btnForw.doClick();
-//	}
-//	
-//	public void pressRewindButton() {
-//		btnRew.doClick();
-//	}
-//	
-//	public void pressStopButton() {
-//		btnStop.doClick();
-//	}
-//	
-//	public void pressMemorizeButton() {
-//		btnMemorize.doClick();
-//	}
-//
-	
 	/**
 	 * Clicks the jump button.
 	 * This is called if ENTER is pressed while the jump text field is focused.
@@ -1187,10 +1160,6 @@ public class PlayerView extends JDialog {
 	public void pressJumpButton() {
 		btnJump.doClick();
 	}
-	
-//	public void focusJumpField() {
-//		fldJump.requestFocus();
-//	}
 	
 	/**
 	 * Fills the memory text field with the given value (current tick).
@@ -1668,93 +1637,117 @@ public class PlayerView extends JDialog {
 	}
 	
 	/**
-	 * Adds key bindings to the player window by creating a {@link KeyEventPostProcessor}
-	 * (if not yet done) and adding it to the {@link KeyboardFocusManager}.
+	 * Adds key bindings to the player window using the {@link KeyBindingManager}.
 	 * 
-	 * This is called whenever the player window is focused.
+	 * Called when opening the player.
 	 */
-	public void addKeyBindings() {
+	private void addKeyBindings() {
 		
-		if ( null == keyProcessor ) {
-			keyProcessor = new KeyEventPostProcessor() {
-				public boolean postProcessKeyEvent( KeyEvent e ) {
-					
-					if ( KeyEvent.KEY_PRESSED == e.getID() ) {
-						
-						// handle slider adjustments via keyboard
-						SliderHelper.handleSliderAdjustmentViaKey( e );
-						
-						// don't handle already consumed shortcuts any more
-						if ( e.isConsumed() )
-							return true;
-						
-						if ( KeyEvent.VK_ESCAPE == e.getKeyCode() ) {
-							btnStop.doClick();
-							return true;
-						}
-						
-						// Unfortunately the postprocessing takes place before
-						// any text field input. So we have to check if a textfield is focused.
-						if ( isTextfieldFocussed() ) {
-							return false;
-						}
-						
-						switch ( e.getKeyCode() ) {
-							case KeyEvent.VK_SPACE:
-								btnPlayPause.doClick();
-								break;
-							case KeyEvent.VK_C:
-								btnPlayPause.doClick();
-								break;
-							case KeyEvent.VK_P:
-								btnPlayPause.doClick();
-								break;
-							case KeyEvent.VK_LEFT:
-								btnRew.doClick();
-								break;
-							case KeyEvent.VK_RIGHT:
-								btnForw.doClick();
-								break;
-							case KeyEvent.VK_DOWN:
-								btnFastRew.doClick();
-								break;
-							case KeyEvent.VK_UP:
-								btnFastForw.doClick();
-								break;
-							case KeyEvent.VK_ENTER:
-								pressJumpButton();
-								break;
-							case KeyEvent.VK_M:
-								btnMemorize.doClick();
-								break;
-							case KeyEvent.VK_G:
-								btnJump.doClick();
-								break;
-							case KeyEvent.VK_F:
-								fldJump.requestFocus();
-								break;
-							case KeyEvent.VK_F5:
-								btnReparse.doClick();
-								break;
-							default:
-								break;
-						}
-					}
-					return e.isConsumed();
-				}
-			};
-		}
+		// reset everything
+		keyBindingManager = new KeyBindingManager( this, this.getRootPane() );
 		
-		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventPostProcessor( keyProcessor );
+		// allow to use SPACE as a window-wide key binding for the play button
+		keyBindingManager.globalizeSpace();
+		
+		// add close bindings
+		keyBindingManager.addBindingsForClose( Dict.KEY_PLAYER_CLOSE );
+		
+		// add key bindings to normal buttons
+		keyBindingManager.addBindingsForButton( this.btnPlayPause,  Dict.KEY_PLAYER_PLAY         );
+		keyBindingManager.addBindingsForButton( this.btnReparse,    Dict.KEY_PLAYER_REPARSE      );
+		keyBindingManager.addBindingsForButton( this.btnInfo,       Dict.KEY_PLAYER_INFO         );
+		keyBindingManager.addBindingsForButton( this.btnSoundcheck, Dict.KEY_PLAYER_SOUNDCHECK   );
+		keyBindingManager.addBindingsForButton( this.btnMemorize,   Dict.KEY_PLAYER_MEMORIZE     );
+		keyBindingManager.addBindingsForButton( this.btnJump,       Dict.KEY_PLAYER_GO           );
+		keyBindingManager.addBindingsForButton( this.btnStop,       Dict.KEY_PLAYER_STOP         );
+		keyBindingManager.addBindingsForButton( this.btnFastForw,   Dict.KEY_PLAYER_FAST_FORWARD );
+		keyBindingManager.addBindingsForButton( this.btnForw,       Dict.KEY_PLAYER_FORWARD      );
+		keyBindingManager.addBindingsForButton( this.btnRew,        Dict.KEY_PLAYER_REWIND       );
+		keyBindingManager.addBindingsForButton( this.btnFastRew,    Dict.KEY_PLAYER_FAST_REWIND  );
+		
+		// add key bindings to channel-dependent widgets
+		keyBindingManager.addBindingsForButton( this.channelButtons.get(0),  Dict.KEY_PLAYER_CH_0  );
+		keyBindingManager.addBindingsForButton( this.channelButtons.get(1),  Dict.KEY_PLAYER_CH_1  );
+		keyBindingManager.addBindingsForButton( this.channelButtons.get(2),  Dict.KEY_PLAYER_CH_2  );
+		keyBindingManager.addBindingsForButton( this.channelButtons.get(3),  Dict.KEY_PLAYER_CH_3  );
+		keyBindingManager.addBindingsForButton( this.channelButtons.get(4),  Dict.KEY_PLAYER_CH_4  );
+		keyBindingManager.addBindingsForButton( this.channelButtons.get(5),  Dict.KEY_PLAYER_CH_5  );
+		keyBindingManager.addBindingsForButton( this.channelButtons.get(6),  Dict.KEY_PLAYER_CH_6  );
+		keyBindingManager.addBindingsForButton( this.channelButtons.get(7),  Dict.KEY_PLAYER_CH_7  );
+		keyBindingManager.addBindingsForButton( this.channelButtons.get(8),  Dict.KEY_PLAYER_CH_8  );
+		keyBindingManager.addBindingsForButton( this.channelButtons.get(9),  Dict.KEY_PLAYER_CH_9  );
+		keyBindingManager.addBindingsForButton( this.channelButtons.get(10), Dict.KEY_PLAYER_CH_10 );
+		keyBindingManager.addBindingsForButton( this.channelButtons.get(11), Dict.KEY_PLAYER_CH_11 );
+		keyBindingManager.addBindingsForButton( this.channelButtons.get(12), Dict.KEY_PLAYER_CH_12 );
+		keyBindingManager.addBindingsForButton( this.channelButtons.get(13), Dict.KEY_PLAYER_CH_13 );
+		keyBindingManager.addBindingsForButton( this.channelButtons.get(14), Dict.KEY_PLAYER_CH_14 );
+		keyBindingManager.addBindingsForButton( this.channelButtons.get(15), Dict.KEY_PLAYER_CH_15 );
+		
+		keyBindingManager.addBindingsForCheckbox( this.muteCbx.get(0),  Dict.KEY_PLAYER_CH_0_M  );
+		keyBindingManager.addBindingsForCheckbox( this.muteCbx.get(1),  Dict.KEY_PLAYER_CH_1_M  );
+		keyBindingManager.addBindingsForCheckbox( this.muteCbx.get(2),  Dict.KEY_PLAYER_CH_2_M  );
+		keyBindingManager.addBindingsForCheckbox( this.muteCbx.get(3),  Dict.KEY_PLAYER_CH_3_M  );
+		keyBindingManager.addBindingsForCheckbox( this.muteCbx.get(4),  Dict.KEY_PLAYER_CH_4_M  );
+		keyBindingManager.addBindingsForCheckbox( this.muteCbx.get(5),  Dict.KEY_PLAYER_CH_5_M  );
+		keyBindingManager.addBindingsForCheckbox( this.muteCbx.get(6),  Dict.KEY_PLAYER_CH_6_M  );
+		keyBindingManager.addBindingsForCheckbox( this.muteCbx.get(7),  Dict.KEY_PLAYER_CH_7_M  );
+		keyBindingManager.addBindingsForCheckbox( this.muteCbx.get(8),  Dict.KEY_PLAYER_CH_8_M  );
+		keyBindingManager.addBindingsForCheckbox( this.muteCbx.get(9),  Dict.KEY_PLAYER_CH_9_M  );
+		keyBindingManager.addBindingsForCheckbox( this.muteCbx.get(10), Dict.KEY_PLAYER_CH_10_M );
+		keyBindingManager.addBindingsForCheckbox( this.muteCbx.get(11), Dict.KEY_PLAYER_CH_11_M );
+		keyBindingManager.addBindingsForCheckbox( this.muteCbx.get(12), Dict.KEY_PLAYER_CH_12_M );
+		keyBindingManager.addBindingsForCheckbox( this.muteCbx.get(13), Dict.KEY_PLAYER_CH_13_M );
+		keyBindingManager.addBindingsForCheckbox( this.muteCbx.get(14), Dict.KEY_PLAYER_CH_14_M );
+		keyBindingManager.addBindingsForCheckbox( this.muteCbx.get(15), Dict.KEY_PLAYER_CH_15_M );
+
+		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(0),  Dict.KEY_PLAYER_CH_0_S  );
+		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(1),  Dict.KEY_PLAYER_CH_1_S  );
+		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(2),  Dict.KEY_PLAYER_CH_2_S  );
+		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(3),  Dict.KEY_PLAYER_CH_3_S  );
+		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(4),  Dict.KEY_PLAYER_CH_4_S  );
+		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(5),  Dict.KEY_PLAYER_CH_5_S  );
+		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(6),  Dict.KEY_PLAYER_CH_6_S  );
+		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(7),  Dict.KEY_PLAYER_CH_7_S  );
+		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(8),  Dict.KEY_PLAYER_CH_8_S  );
+		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(9),  Dict.KEY_PLAYER_CH_9_S  );
+		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(10), Dict.KEY_PLAYER_CH_10_S );
+		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(11), Dict.KEY_PLAYER_CH_11_S );
+		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(12), Dict.KEY_PLAYER_CH_12_S );
+		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(13), Dict.KEY_PLAYER_CH_13_S );
+		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(14), Dict.KEY_PLAYER_CH_14_S );
+		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(15), Dict.KEY_PLAYER_CH_15_S );
+		
+		keyBindingManager.addBindingsForFocusOfVisibleChannel( this.channelVolumeFields,  Dict.KEY_PLAYER_CH_VOL_FLD );
+		keyBindingManager.addBindingsForFocusOfVisibleChannel( this.channelVolumeSliders, Dict.KEY_PLAYER_CH_VOL_SLD );
+		
+		// add key bindings for the lyrics checkbox
+		keyBindingManager.addBindingsForCheckbox( this.cbxLyrics, Dict.KEY_PLAYER_LYRICS );
+		
+		// add key bindings to request the focus
+		keyBindingManager.addBindingsForFocus( this.fldJump,            Dict.KEY_PLAYER_JUMP_FIELD    );
+		keyBindingManager.addBindingsForFocus( this.fldVol,             Dict.KEY_PLAYER_VOL_FLD       );
+		keyBindingManager.addBindingsForFocus( this.masterVolumeSlider, Dict.KEY_PLAYER_VOL_SLD       );
+		keyBindingManager.addBindingsForFocus( this.fldTempo,           Dict.KEY_PLAYER_TEMPO_FLD     );
+		keyBindingManager.addBindingsForFocus( this.tempoSlider,        Dict.KEY_PLAYER_TEMPO_SLD     );
+		keyBindingManager.addBindingsForFocus( this.fldTranspose,       Dict.KEY_PLAYER_TRANSPOSE_FLD );
+		keyBindingManager.addBindingsForFocus( this.transposeSlider,    Dict.KEY_PLAYER_TRANSPOSE_SLD );
+		
+		// add bindings to set the progress bar to the start or end tick
+		keyBindingManager.addBindingsForSliderSet( this.progressSlider, Dict.KEY_PLAYER_BEGIN, 0 );
+		addKeyBindingsToSetProgressSliderToEnd();
+		
+		// set input and action maps
+		keyBindingManager.postprocess();
 	}
 	
 	/**
-	 * Removes the key bindings from the player window by removing the according
-	 * {@link KeyEventPostProcessor} from the {@link KeyboardFocusManager}.
+	 * Adds the key bindings to set the progress slider to the end of the sequence.
+	 * This must be available as a public method because the sequence length (and so the end tick) may
+	 * have changed after reparsing the sequence.
 	 * 
-	 * This is called if the player window is closed.
+	 * Called when the player is opened and after reparsing the sequence.
 	 */
-	public void removeKeyBindings() {
-		KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventPostProcessor( keyProcessor );
+	public void addKeyBindingsToSetProgressSliderToEnd() {
+		keyBindingManager.addBindingsForSliderSet( this.progressSlider, Dict.KEY_PLAYER_END, (int) SequenceCreator.getSequence().getTickLength() );
 	}
 }

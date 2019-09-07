@@ -13,10 +13,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.KeyEventPostProcessor;
-import java.awt.KeyboardFocusManager;
 import java.awt.Rectangle;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -33,10 +30,10 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import org.midica.config.Dict;
+import org.midica.config.KeyBindingManager;
 import org.midica.config.Laf;
 import org.midica.file.NamedInteger;
 import org.midica.midi.MidiDevices;
-import org.midica.ui.SliderHelper;
 import org.midica.ui.player.PlayerView;
 import org.midica.ui.tablefilter.FilterIconWithLabel;
 import org.midica.ui.widget.MidicaButton;
@@ -92,11 +89,11 @@ public class SoundcheckView extends JDialog {
 	private JCheckBox               cbxKeep         = null;
 	private MidicaButton            btnPlay         = null;
 	
-	private        KeyEventPostProcessor     keyProcessor   = null;
-	private static SoundcheckView            soundcheckView = null;
-	private        Container                 content        = null;
-	private        SoundcheckNoteModel       noteModel      = null;
-	private        SoundcheckInstrumentModel instrModel     = null;
+	private        KeyBindingManager         keyBindingManager = null;
+	private static SoundcheckView            soundcheckView    = null;
+	private        Container                 content           = null;
+	private        SoundcheckNoteModel       noteModel         = null;
+	private        SoundcheckInstrumentModel instrModel        = null;
 	
 	/**
 	 * Creates the soundcheck window.
@@ -118,6 +115,7 @@ public class SoundcheckView extends JDialog {
 		dimListNote    = new Dimension( widthInstr, HEIGHT_LIST_NOTE   );
 		
 		init();
+		addKeyBindings();
 		
 		pack();
 		setVisible( true );
@@ -739,82 +737,65 @@ public class SoundcheckView extends JDialog {
 	}
 	
 	/**
-	 * Adds key bindings for the soundcheck window.
-	 * 
-	 * This is done by creating a new {@link KeyEventPostProcessor} object (if
-	 * not yet done) and adding it to the keyboard focus manager.
-	 * 
-	 * This is called if the soundcheck window is opened.
-	 */
-	public void addKeyBindings() {
-		
-		if ( null == keyProcessor ) {
-			keyProcessor = new KeyEventPostProcessor() {
-				public boolean postProcessKeyEvent( KeyEvent e ) {
-					
-					if ( KeyEvent.KEY_PRESSED == e.getID() ) {
-						
-						// handle slider adjustments via keyboard
-						SliderHelper.handleSliderAdjustmentViaKey( e );
-						
-						// don't handle already consumed shortcuts any more
-						if ( e.isConsumed() )
-							return true;
-						
-						if ( KeyEvent.VK_ESCAPE == e.getKeyCode() ) {
-							setVisible( false );
-							return true;
-						}
-						
-						// Unfortunately the postprocessing takes place before
-						// any text field input. So we have to check if a textfield is focused.
-						if ( isTextfieldFocussed() ) {
-							return false;
-						}
-						
-						if (   KeyEvent.VK_P     == e.getKeyCode()
-							|| KeyEvent.VK_ENTER == e.getKeyCode()
-							|| KeyEvent.VK_SPACE == e.getKeyCode() ) {
-								btnPlay.doClick();
-								e.consume();
-						}
-					}
-					return e.isConsumed();
-				}
-			};
-		}
-		
-		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventPostProcessor( keyProcessor );
-	}
-	
-	/**
-	 * Removes the key bindings from the soundcheck window.
-	 * 
-	 * This is called if the soundcheck window is closed.
-	 */
-	public void removeKeyBindings() {
-		KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventPostProcessor( keyProcessor );
-	}
-	
-	/**
-	 * Determines if one of the text fields in the soundcheck window has
-	 * the focus.
-	 * 
-	 * @return **true** if a text field has the focus. Otherwise: returns **false**.
-	 */
-	private boolean isTextfieldFocussed() {
-		if ( fldDuration.hasFocus() || fldVolume.hasFocus() || fldVelocity.hasFocus() )
-			return true;
-		
-		return false;
-	}
-	
-	/**
 	 * Determins if the 'keep settings' checkbox is checked or not.
 	 * 
 	 * @return **true** if the checkbox is checked. Otherwise: returns **false**.
 	 */
 	public boolean mustKeepSettings() {
 		return cbxKeep.isSelected();
+	}
+	
+	/**
+	 * Adds key bindings to the soundcheck window using the {@link KeyBindingManager}.
+	 */
+	private void addKeyBindings() {
+		
+		// reset everything
+		keyBindingManager = new KeyBindingManager( this, this.getRootPane() );
+		
+		// allow to use SPACE as a window-wide key binding for the play button
+		keyBindingManager.globalizeSpace();
+		
+		// add key bindings for closing the window
+		keyBindingManager.addBindingsForClose( Dict.KEY_SOUNDCHECK_CLOSE );
+		
+		// add key bindings to buttons
+		keyBindingManager.addBindingsForButton( this.btnPlay, Dict.KEY_SOUNDCHECK_PLAY );
+		
+		// add bindings for table filters
+		keyBindingManager.addBindingsForTableFilter( this.labelWithFilter, Dict.KEY_SOUNDCHECK_FILTER_INSTR );
+		
+		// add focus bindings
+		keyBindingManager.addBindingsForFocus( this.tblInstrument, Dict.KEY_SOUNDCHECK_INSTR    );
+		keyBindingManager.addBindingsForFocus( this.lstNote,       Dict.KEY_SOUNDCHECK_NOTE     );
+		keyBindingManager.addBindingsForFocus( this.fldVolume,     Dict.KEY_SOUNDCHECK_VOL_FLD  );
+		keyBindingManager.addBindingsForFocus( this.sldVolume,     Dict.KEY_SOUNDCHECK_VOL_SLD  );
+		keyBindingManager.addBindingsForFocus( this.fldVelocity,   Dict.KEY_SOUNDCHECK_VEL_FLD  );
+		keyBindingManager.addBindingsForFocus( this.sldVelocity,   Dict.KEY_SOUNDCHECK_VEL_SLD  );
+		keyBindingManager.addBindingsForFocus( this.fldDuration,   Dict.KEY_SOUNDCHECK_DURATION );
+		
+		// add checkbox bindings
+		keyBindingManager.addBindingsForCheckbox( this.cbxKeep, Dict.KEY_SOUNDCHECK_KEEP );
+		
+		// add key bindings for switching the channel
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_0,  0  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_1,  1  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_2,  2  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_3,  3  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_4,  4  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_5,  5  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_6,  6  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_7,  7  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_8,  8  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_9,  9  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_10, 10 );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_11, 11 );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_12, 12 );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_13, 13 );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_14, 14 );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_15, 15 );
+		
+		// commit key bindings
+		keyBindingManager.postprocess();
 	}
 }

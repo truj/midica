@@ -130,11 +130,6 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			InfoView.showInfoWindow( view );
 		}
 		
-		// button pushed to close the error message window
-		else if ( ErrorMsgView.CMD_CLOSE.equals(cmd) ) {
-			errorMsg.close();
-		}
-		
 		// butto pushed to show/hide the details of a channel
 		else if ( cmd.startsWith(PlayerView.CMD_SHOW_HIDE) ) {
 			cmd = cmd.replaceFirst( PlayerView.CMD_SHOW_HIDE, "" );
@@ -200,21 +195,14 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 		}
 	}
 	
-	/**
-	 * Adds the key bindings - called when the window is focused.
-	 * 
-	 * @param e    Window activation event.
-	 */
 	@Override
 	public void windowActivated( WindowEvent e ) {
-		view.addKeyBindings();
 	}
 	
 	/**
-	 * Removes key bindings and stops and closes player-related resources and
+	 * Stops and closes player-related resources and
 	 * windows - called, if the window is going to be closed.
 	 * 
-	 * - removes the key bindings
 	 * - closes the soundcheck window
 	 * - stops the {@link RefresherThread} to refresh the progress slider
 	 * - stops and destroys the MIDI devices
@@ -223,7 +211,6 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 */
 	@Override
 	public void windowClosing( WindowEvent e ) {
-		view.removeKeyBindings();
 		try {
 			SoundcheckView.close();
 			refresher.die();
@@ -236,35 +223,18 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 		}
 	}
 	
-	/**
-	 * Removes key bindings - called, if the window is closed.
-	 * 
-	 * @param e    Window closed event.
-	 */
 	@Override
 	public void windowClosed( WindowEvent e ) {
-		view.removeKeyBindings();
 	}
 	
-	/**
-	 * Removes key bindings - called, if the window is deactivated.
-	 * 
-	 * @param e    Window deactivated event.
-	 */
 	@Override
 	public void windowDeactivated( WindowEvent e ) {
-		view.removeKeyBindings();
 	}
 	
 	@Override
 	public void windowDeiconified( WindowEvent e ) {
 	}
 	
-	/**
-	 * Does nothing - called, if the window is iconified.
-	 * 
-	 * @param e    Window deactivated event.
-	 */
 	@Override
 	public void windowIconified( WindowEvent e ) {
 	}
@@ -815,6 +785,10 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 		catch ( Exception ex ) {
 			showErrorMessage( ex );
 		}
+		
+		// The sequence length could have changed.
+		// So the key binding to set the progress slider to the end of the sequence must be recalculated.
+		view.addKeyBindingsToSetProgressSliderToEnd();
 	}
 	
 	/**
@@ -823,7 +797,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * @param e    Exception containing the error message to be shown.
 	 */
 	private void showErrorMessage( Exception e ) {
-		errorMsg = new ErrorMsgView( view, this );
+		errorMsg = new ErrorMsgView(view);
 		errorMsg.init( e.getMessage() );
 	}
 	
@@ -834,8 +808,8 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * @param message    Error message.
 	 */
 	public void showErrorMessage( String message ) {
-		errorMsg = new ErrorMsgView( view, this );
-		errorMsg.init( message );
+		errorMsg = new ErrorMsgView(view);
+		errorMsg.init(message);
 	}
 	
 	/**

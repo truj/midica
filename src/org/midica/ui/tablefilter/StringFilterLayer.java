@@ -10,12 +10,9 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.KeyEventPostProcessor;
-import java.awt.KeyboardFocusManager;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowFocusListener;
 import java.awt.event.WindowListener;
@@ -30,6 +27,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.event.RowSorterListener;
 
 import org.midica.config.Dict;
+import org.midica.config.KeyBindingManager;
 import org.midica.config.Laf;
 import org.midica.ui.tablesorter.MidicaSorter;
 import org.midica.ui.widget.MidicaButton;
@@ -53,11 +51,11 @@ public class StringFilterLayer extends JDialog implements WindowListener, Window
 	private static final int ARC_WIDTH         =  10;
 	private static final int ARC_HEIGHT        =  10;
 	
-	private MidicaTable           table;
-	private FilterIcon            icon;
-	private JTextField            textfield;
-	private MidicaButton          clearBtn;
-	private KeyEventPostProcessor keyProcessor = null;
+	private MidicaTable       table;
+	private FilterIcon        icon;
+	private JTextField        textfield;
+	private MidicaButton      clearBtn;
+	private KeyBindingManager keyBindingManager;
 	
 	/**
 	 * Creates a filter layer for filtering a string-based table filter.
@@ -77,6 +75,7 @@ public class StringFilterLayer extends JDialog implements WindowListener, Window
 		
 		// fill the content
 		init();
+		addKeyBindings();
 		
 		// make it draggable
 		DragListener drag = new DragListener();
@@ -219,7 +218,7 @@ public class StringFilterLayer extends JDialog implements WindowListener, Window
 	
 	@Override
 	public void windowActivated(WindowEvent e) {
-		addKeyBindings();
+		this.textfield.requestFocus();
 	}
 	
 	@Override
@@ -228,12 +227,10 @@ public class StringFilterLayer extends JDialog implements WindowListener, Window
 	
 	@Override
 	public void windowClosing(WindowEvent e) {
-		removeKeyBindings();
 	}
 	
 	@Override
 	public void windowClosed(WindowEvent e) {
-		removeKeyBindings();
 	}
 	
 	@Override
@@ -246,7 +243,6 @@ public class StringFilterLayer extends JDialog implements WindowListener, Window
 	
 	@Override
 	public void windowDeactivated(WindowEvent e) {
-		removeKeyBindings();
 	}
 	
 	@Override
@@ -261,42 +257,19 @@ public class StringFilterLayer extends JDialog implements WindowListener, Window
 	
 	/**
 	 * Adds filter layer specific key bindings.
-	 * 
-	 * The following key bindings are created:
-	 * 
-	 * - **ESC** -- close the layer
-	 * 
-	 * @param e    The event to be handled.
 	 */
 	private void addKeyBindings() {
-		if ( null == keyProcessor ) {
-			keyProcessor = new KeyEventPostProcessor() {
-
-				@Override
-				public boolean postProcessKeyEvent(KeyEvent e) {
-					if (KeyEvent.KEY_PRESSED == e.getID()) {
-						
-						// don't handle already consumed shortcuts any more
-						if (e.isConsumed())
-							return true;
-						
-						if (KeyEvent.VK_ESCAPE == e.getKeyCode()) {
-							close();
-							return true;
-						}
-					}
-					return e.isConsumed();
-				}
-			};
-		}
 		
-		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventPostProcessor( keyProcessor );
-	}
-	
-	/**
-	 * Removes the key bindings.
-	 */
-	private void removeKeyBindings() {
-		KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventPostProcessor( keyProcessor );
+		// reset everything
+		keyBindingManager = new KeyBindingManager(this, this.getRootPane());
+		
+		// add close bindings
+		keyBindingManager.addBindingsForClose( Dict.KEY_STRING_FILTER_CLOSE );
+		
+		// add key bindings for the clear button
+		keyBindingManager.addBindingsForButton( this.clearBtn, Dict.KEY_STRING_FILTER_CLEAR );
+		
+		// postprocess
+		keyBindingManager.postprocess();
 	}
 }

@@ -11,7 +11,6 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionListener;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -23,7 +22,6 @@ import org.midica.config.Laf;
 import org.midica.file.ExportResult;
 import org.midica.ui.model.ExportResultTableModel;
 import org.midica.ui.renderer.MidicaTableCellRenderer;
-import org.midica.ui.widget.MidicaButton;
 import org.midica.ui.widget.MidicaTable;
 
 
@@ -44,34 +42,27 @@ public class ExportResultView extends MessageView {
 	private static final int COL_WIDTH_MSG     = 500;
 	private static final int TABLE_HEIGHT      = 400;
 	
-	private ActionListener controller = null;
-	private Container      content    = null;
-	private Dimension      tableDim   = null;
+	private Container content  = null;
+	private Dimension tableDim = null;
 	
 	/**
 	 * Creates a new export result window.
 	 * The window is not visible by default and must be initialized and set visible via init().
 	 * 
-	 * @param owner         The parent window (Player).
-	 * @param controller    The controller that acts as an {@link ActionListener} for this
-	 *                      window.
+	 * @param owner    The parent window (Player).
 	 */
-	public ExportResultView(JDialog owner, ActionListener controller) {
+	public ExportResultView(JDialog owner) {
 		super( owner, Dict.get(Dict.TITLE_EXPORT_RESULT) );
-		this.controller = controller;
 	}
 	
 	/**
 	 * Creates a new export result window.
 	 * The window is not visible by default and must be initialized and set visible via init().
 	 * 
-	 * @param owner         The parent window (main window).
-	 * @param controller    The controller that acts as an {@link ActionListener} for this
-	 *                      window.
+	 * @param owner    The parent window (main window).
 	 */
-	public ExportResultView(JFrame owner, ActionListener controller) {
+	public ExportResultView(JFrame owner) {
 		super( owner, Dict.get(Dict.TITLE_EXPORT_RESULT) );
-		this.controller = controller;
 	}
 	
 	/**
@@ -131,11 +122,8 @@ public class ExportResultView extends MessageView {
 		// close button
 		constraints.gridy++;
 		constraints.insets = Laf.INSETS_SWE;
-		closeButton = new MidicaButton( Dict.get(Dict.CLOSE) );
-		closeButton.setActionCommand( MessageView.CMD_CLOSE );
-		closeButton.addActionListener( controller );
-		closeButton.requestFocusInWindow();
-		content.add( closeButton, constraints );
+		content.add( createCloseButton(), constraints );
+		super.addKeyBindings();
 		
 		pack();
 		setVisible( true );

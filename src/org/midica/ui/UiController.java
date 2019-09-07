@@ -58,21 +58,19 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	public static final String FILE_PURPOSE_PARSE   = "parse";
 	public static final String FILE_PURPOSE_EXPORT  = "export";
 	
-	private UiView           view               = null;
-	private FileSelector     mplSelector        = null;
-	private FileSelector     midiSelector       = null;
-	private FileSelector     soundfontSelector  = null;
-	private FileSelector     midiExportSelector = null;
-	private FileSelector     mplExportSelector  = null;
-	private MidicaPLParser   mplParser          = null;
-	private MidiParser       midiParser         = null;
-	private SoundfontParser  soundfontParser    = null;
-	private ErrorMsgView     errorMsg           = null;
-	private ExportResultView warningView        = null;
-	private PlayerView       player             = null;
-	private File             currentFile        = null;
-	private String           currentFileType    = null;
-	private String           currentFilePurpose = FILE_PURPOSE_PARSE;
+	private UiView          view               = null;
+	private FileSelector    mplSelector        = null;
+	private FileSelector    midiSelector       = null;
+	private FileSelector    soundfontSelector  = null;
+	private FileSelector    midiExportSelector = null;
+	private FileSelector    mplExportSelector  = null;
+	private MidicaPLParser  mplParser          = null;
+	private MidiParser      midiParser         = null;
+	private SoundfontParser soundfontParser    = null;
+	private PlayerView      player             = null;
+	private File            currentFile        = null;
+	private String          currentFileType    = null;
+	private String          currentFilePurpose = FILE_PURPOSE_PARSE;
 	
 	/**
 	 * Sets up the UI of the main window by initializing the {@link UiView}
@@ -155,9 +153,9 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		
 		// combobox changes
 		if ( CMD_COMBOBOX_CHANGED.equals(cmd) ) {
-			JComboBox<String> cbx               = (JComboBox<String>) e.getSource();
+			JComboBox<?> cbx                    = (JComboBox<?>) e.getSource();
 			String name                         = cbx.getName();
-			DefaultComboBoxModel<String> model  = (DefaultComboBoxModel<String>) cbx.getModel();
+			DefaultComboBoxModel<?> model       = (DefaultComboBoxModel<?>) cbx.getModel();
 			ComboboxStringOption selectedOption = (ComboboxStringOption) model.getSelectedItem();
 			String selectedId                   = selectedOption.getIdentifier();
 			
@@ -212,15 +210,6 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			soundfontSelector.setVisible( false );
 			midiExportSelector.setVisible( false );
 			mplExportSelector.setVisible( false );
-		}
-		
-		// close button pressed in the the error or warning message window
-		// or ESC/Enter/Space pressed to close the window
-		else if ( MessageView.CMD_CLOSE.equals(cmd) ) {
-			if ( null != errorMsg )
-				errorMsg.close();
-			if ( null != warningView )
-				warningView.close();
 		}
 		
 		// button pressed: start player
@@ -524,8 +513,8 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		// The solution is to call setVisible() from 'errorMsg.init(..)' and
 		// to call 'errorMsg.init(..)' separately after 'new' has returned and therefore
 		// errorMsg is not null any more.
-		errorMsg = new ErrorMsgView( view, this );
-		errorMsg.init( message );
+		ErrorMsgView errorMsg = new ErrorMsgView(view);
+		errorMsg.init(message);
 	}
 	
 	/**
@@ -535,7 +524,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	 */
 	private void showExportResult ( ExportResult result ) {
 		// same problem like in showErrorMessage()
-		warningView = new ExportResultView( view, this );
+		ExportResultView warningView = new ExportResultView(view);
 		warningView.init( result );
 	}
 	
@@ -571,36 +560,32 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	 */
 	public void windowActivated( WindowEvent e ) {
 		view.setTransposeLevel( SequenceParser.getTransposeLevel() );
-		view.addKeyBindings();
 	}
 	
 	/**
-	 * Removes all key bindings.
+	 * Does nothing.
 	 * 
 	 * @param e    Window event.
 	 */
 	public void windowClosed( WindowEvent e ) {
-		view.removeKeyBindings();
 	}
 	
 	/**
-	 * Removes all key bindings, writes the current config to the config file, and exits.
+	 * Writes the current config to the config file, and exits.
 	 * 
 	 * @param e    Window event.
 	 */
 	public void windowClosing( WindowEvent e ) {
-		view.removeKeyBindings();
 		Config.writeConfigFile();
 		System.exit( 0 );
 	}
 	
 	/**
-	 * Removes all key bindings.
+	 * Does nothing.
 	 * 
 	 * @param e    Window event.
 	 */
 	public void windowDeactivated( WindowEvent e ) {
-		view.removeKeyBindings();
 	}
 	
 	/**
@@ -693,6 +678,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 				// update gui
 				view.close();
 				Dict.init();
+				Config.initLocale();
 				initView();
 			}
 		}

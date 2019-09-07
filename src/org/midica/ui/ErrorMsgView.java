@@ -10,7 +10,6 @@ package org.midica.ui;
 import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionListener;
 
 import javax.swing.JDialog;
 import javax.swing.JFrame;
@@ -18,7 +17,6 @@ import javax.swing.JLabel;
 
 import org.midica.config.Dict;
 import org.midica.config.Laf;
-import org.midica.ui.widget.MidicaButton;
 
 /**
  * This class provides a window for error messages.
@@ -29,33 +27,26 @@ public class ErrorMsgView extends MessageView {
 
 	private static final long serialVersionUID = 1L;
 	
-	private ActionListener controller  = null;
-	private Container      content     = null;
+	private Container content = null;
 	
 	/**
 	 * Creates a new error message window.
 	 * The window is not visible by default and must be initialized and set visible via init().
 	 * 
-	 * @param owner         The parent window (Player).
-	 * @param controller    The controller that acts as an {@link ActionListener} for this
-	 *                      window.
+	 * @param owner    The parent window (Player).
 	 */
-	public ErrorMsgView(JDialog owner, ActionListener controller) {
+	public ErrorMsgView(JDialog owner) {
 		super( owner, Dict.get(Dict.TITLE_ERROR) );
-		this.controller = controller;
 	}
 	
 	/**
 	 * Creates a new error message window.
 	 * The window is not visible by default and must be initialized and set visible via init().
 	 * 
-	 * @param owner         The parent window (main window).
-	 * @param controller    The controller that acts as an {@link ActionListener} for this
-	 *                      window.
+	 * @param owner    The parent window (main window).
 	 */
-	public ErrorMsgView(JFrame owner, ActionListener controller) {
+	public ErrorMsgView(JFrame owner) {
 		super( owner, Dict.get(Dict.TITLE_ERROR) );
-		this.controller = controller;
 	}
 	
 	/**
@@ -63,7 +54,7 @@ public class ErrorMsgView extends MessageView {
 	 * 
 	 * @param msg    Error message.
 	 */
-	public void init( String msg ) {
+	public void init(String msg) {
 		// content
 		content = getContentPane();
 		
@@ -81,19 +72,16 @@ public class ErrorMsgView extends MessageView {
 		constraints.weighty    = 0;
 		
 		// error message
-		JLabel label = new JLabel( msg );
+		JLabel label = new JLabel(msg);
 		content.add( label, constraints );
 		
 		// close button
 		constraints.insets = Laf.INSETS_SWE;
 		constraints.gridy++;
-		closeButton = new MidicaButton( Dict.get(Dict.CLOSE) );
-		closeButton.setActionCommand( MessageView.CMD_CLOSE );
-		closeButton.addActionListener( controller );
-		closeButton.requestFocusInWindow();
-		content.add( closeButton, constraints );
+		content.add( createCloseButton(), constraints );
+		super.addKeyBindings();
 		
 		pack();
-		setVisible( true );
+		setVisible(true);
 	}
 }

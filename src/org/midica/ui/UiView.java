@@ -11,10 +11,7 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.KeyEventPostProcessor;
-import java.awt.KeyboardFocusManager;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.awt.event.WindowListener;
 
 import javax.swing.BorderFactory;
@@ -32,6 +29,7 @@ import javax.swing.plaf.SeparatorUI;
 import org.midica.Midica;
 import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.config.KeyBindingManager;
 import org.midica.config.Laf;
 import org.midica.file.SequenceParser;
 import org.midica.file.SoundfontParser;
@@ -78,7 +76,7 @@ public class UiView extends JFrame {
 	// make file names in the import section as small as possible
 	private static final Dimension MAX_FILE_NAME_DIM = new Dimension(0, new JLabel(" ").getPreferredSize().height);
 	
-	private KeyEventPostProcessor           keyProcessor           = null;
+	private KeyBindingManager               keyBindingManager      = null;
 	private Container                       content                = null;
 	private UiController                    controller             = null;
 	private JLabel                          lblChosenMidicaPLFile  = null;
@@ -119,6 +117,7 @@ public class UiView extends JFrame {
 			appIcon = new ImageIcon( ClassLoader.getSystemResource(APP_ICON_PATH) );
 		
 		init();
+		addKeyBindings();
 		
 		// don't show the window in CLI mode
 		if (Midica.isCliMode) {
@@ -756,53 +755,32 @@ public class UiView extends JFrame {
 	
 	/**
 	 * Adds key bindings to the window.
-	 * 
-	 * The following bindings are added:
-	 * 
-	 * - I: Open info window.
-	 * - P: Open the player.
 	 */
-	public void addKeyBindings() {
+	private void addKeyBindings() {
 		
-		if ( null == keyProcessor ) {
-			keyProcessor = new KeyEventPostProcessor() {
-				public boolean postProcessKeyEvent( KeyEvent e ) {
-					
-					if ( KeyEvent.KEY_PRESSED == e.getID() ) {
-						
-						// don't handle already consumed shortcuts any more
-						if ( e.isConsumed() )
-							return true;
-						
-						if ( KeyEvent.VK_ESCAPE == e.getKeyCode() ) {
-							setVisible( false );
-							return true;
-						}
-						
-						switch ( e.getKeyCode() ) {
-							case KeyEvent.VK_I:
-								btnInfo.doClick();
-								break;
-							case KeyEvent.VK_P:
-								btnPlayer.doClick();
-								break;
-							default:
-								break;
-						}
-					}
-					return e.isConsumed();
-				}
-			};
-		}
+		// reset everything
+		keyBindingManager = new KeyBindingManager( this, this.getRootPane() );
 		
-		KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventPostProcessor( keyProcessor );
-	}
-	
-	/**
-	 * Removes all key bindings from the window.
-	 */
-	public void removeKeyBindings() {
-		KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventPostProcessor( keyProcessor );
+		// add key bindings to buttons
+		keyBindingManager.addBindingsForButton( this.btnInfo,            Dict.KEY_MAIN_INFO       );
+		keyBindingManager.addBindingsForButton( this.btnPlayer,          Dict.KEY_MAIN_PLAYER     );
+		keyBindingManager.addBindingsForButton( this.btnSelectMidicaPL,  Dict.KEY_MAIN_IMPORT_MPL );
+		keyBindingManager.addBindingsForButton( this.btnSelectMidi,      Dict.KEY_MAIN_IMPORT_MID );
+		keyBindingManager.addBindingsForButton( this.btnSelectSoundfont, Dict.KEY_MAIN_IMPORT_SF  );
+		keyBindingManager.addBindingsForButton( this.btnExportMidi,      Dict.KEY_MAIN_EXPORT_MID );
+		keyBindingManager.addBindingsForButton( this.btnExportMidicaPL,  Dict.KEY_MAIN_EXPORT_MPL );
+		
+		// add key bindings to focus comboboxes
+		keyBindingManager.addBindingsForComboboxOpen( this.cbxGuiLang,    Dict.KEY_MAIN_CBX_LANGUAGE   );
+		keyBindingManager.addBindingsForComboboxOpen( this.cbxNoteSys,    Dict.KEY_MAIN_CBX_NOTE       );
+		keyBindingManager.addBindingsForComboboxOpen( this.cbxHalfTone,   Dict.KEY_MAIN_CBX_HALFTONE   );
+		keyBindingManager.addBindingsForComboboxOpen( this.cbxOctave,     Dict.KEY_MAIN_CBX_OCTAVE     );
+		keyBindingManager.addBindingsForComboboxOpen( this.cbxSyntax,     Dict.KEY_MAIN_CBX_SYNTAX     );
+		keyBindingManager.addBindingsForComboboxOpen( this.cbxPercussion, Dict.KEY_MAIN_CBX_PERCUSSION );
+		keyBindingManager.addBindingsForComboboxOpen( this.cbxInstrument, Dict.KEY_MAIN_CBX_INSTRUMENT );
+		
+		// postprocess key bindings
+		keyBindingManager.postprocess();
 	}
 }
 

@@ -1011,7 +1011,7 @@ public class MidicaPLExporter extends Exporter {
 	private String createTickComment( long tick ) {
 		return (
 			  MidicaPLParser.COMMENT + " "
-			+ Dict.get( Dict.TICK )  + " "
+			+ Dict.get( Dict.EXPORTER_TICK )  + " "
 			+ tick + NEW_LINE
 		);
 	}
