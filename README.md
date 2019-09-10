@@ -84,30 +84,30 @@ In this Readme one short example shall be enough:
 	    1  ACOUSTIC_GRAND_PIANO  Piano (Left Hand)
 	END
 	
-	*  key    d/min             // key signature
-	*  time   3/4               // time signature
-	*  tempo  170               // tempo in beats per minute
+	*  key    d/min            // key signature
+	*  time   3/4              // time signature
+	*  tempo  170              // tempo in beats per minute
 	
-	( q=2                       // outer block to be repeated twice
-	    ( q=3                   // inner block to be repeated 3 times
-	        1  d-2  /8  v=70    // channel 1: play D2 as an 8th note, using mezzo piano
-	        0  d    /8  v=70    // channel 0: play D4 and switch to mezzo piano
-	        0  -    /8          // play a rest
-	        0  d    /8
-	        0  d#   /8
-	        0  d    /8
-	        0  d#   /8
+	( q=2                      // outer block to be repeated twice
+	    ( q=3                  // inner block to be repeated 3 times
+	        1  d-  /8  v=70    // channel 1: play D3 as an 8th note, using mezzo piano
+	        0  d   /8  v=70    // channel 0: play D4 and switch to mezzo piano
+	        0  -   /8          // play a rest
+	        0  d   /8
+	        0  d#  /8
+	        0  d   /8
+	        0  d#  /8
 	        *                   // synchronize: bring all channels to the same time
 	    )
-	    1  d-2  /4
-	    1  f-2  /4
-	    1  c-2  /4
-	    0  d    /8
-	    0  -    /8
-	    0  d    /8
-	    0  d#   /8
-	    0  f    /8
-	    0  d#   /8
+	    1  d-  /4
+	    1  f-  /4
+	    1  c-  /4
+	    0  d   /8
+	    0  -   /8
+	    0  d   /8
+	    0  d#  /8
+	    0  f   /8
+	    0  d#  /8
 	)
 
 This results in a MIDI sequence like this:
