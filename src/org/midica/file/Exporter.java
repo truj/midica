@@ -12,6 +12,7 @@ import java.io.IOException;
 
 import javax.swing.JOptionPane;
 
+import org.midica.Midica;
 import org.midica.config.Dict;
 
 /**
@@ -39,7 +40,11 @@ public abstract class Exporter {
     		
 			// file exists already?
     		if ( ! file.createNewFile() ) {
-    			int mayOverwrite = JOptionPane.showConfirmDialog( null, Dict.get(Dict.OVERWRITE_FILE), Dict.get(Dict.TITLE_CONFIRMATION), JOptionPane.YES_NO_OPTION );
+    			int mayOverwrite = ConfirmDialog.confirm(
+    				Midica.uiController.getView(),
+    				Dict.get(Dict.OVERWRITE_FILE),
+    				Dict.get(Dict.TITLE_CONFIRMATION)
+    			);
     			if ( JOptionPane.YES_OPTION != mayOverwrite )
     				return false;
     		}

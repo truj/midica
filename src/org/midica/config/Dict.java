@@ -1275,6 +1275,8 @@ public class Dict {
 	public static final String ERROR_FILE_NOT_WRITABLE          = "error_file_not_writable";
 	public static final String OVERWRITE_FILE                   = "overwrite_file";
 	public static final String EXPORTER_TICK                    = "exporter_tick";
+	public static final String CONFIRM_DIALOG_YES               = "confirm_dialog_yes";
+	public static final String CONFIRM_DIALOG_NO                = "confirm_dialog_no";
 	
 	// ExportResultView
 	public static final String TITLE_EXPORT_RESULT              = "title_export_result";
@@ -2394,6 +2396,8 @@ public class Dict {
 		set( ERROR_FILE_NOT_WRITABLE,             "File not writable"                                                 );
 		set( OVERWRITE_FILE,                      "Overwrite the file?"                                               );
 		set( EXPORTER_TICK,                       "Tick"                                                              );
+		set( CONFIRM_DIALOG_YES,                  "Yes"                                                               );
+		set( CONFIRM_DIALOG_NO,                   "No"                                                                );
 		
 		// ExportResultView
 		set( TITLE_EXPORT_RESULT,                 "Export Result"                                                     );
