@@ -1,0 +1,4326 @@
+// This example file provides the finale of the "William Tell Overture" by Gioachino Rossini.
+// It comprises the measures 226 until the end (measure 477).
+// 
+// However the measure naming here (in macro names and code comments) begins with number 1.
+// So you have to add 225 to get the original measure number.
+// 
+// This file assumes standard program configuration:
+// - Note System:      International: c, d, e, ... (lower case)
+// - Half Tone Symbol: # (c#, d#, e#, ...)
+// - Octave Naming:    +n/-n
+// - Syntax:           Mixed Case Syntax
+// 
+// Macro naming conventions used in this example file:
+// - Macros related to a certain measure start with 'm', followed by the measure number.
+//   If a measure is reused, the measure number points to the measure where it's first included.
+// - Macros starting with 'i_' contain an instrument switch.
+// - Macros starting with 'd_all_' switch all channels to a certain duration mode (staccato or legato)
+// - Macros starting with 'v_all_' switch all channels to a certain velocity mode (piano, forte, ...)
+
+// define constants
+CONST $staccato    = d=50%
+CONST $legato      = d=100%
+CONST $pp          = v=33    // pianissimo
+CONST $p           = v=49    // piano
+CONST $p_marcato   = v=58    // piano with accent
+CONST $f           = v=96    // forte
+CONST $ff          = v=112   // fortissimo
+CONST $sf          = v=120   // sforzato
+CONST $sf_accent   = v=125   // sforzato with accent
+CONST $tutta_forza = v=127   // tutta forza
+
+// init channels with instruments
+INSTRUMENTS
+	0   PICCOLO        Piccolo
+	1   FLUTE          Flute
+	2   OBOE           Oboe
+	3   CLARINET       Clarinet in A
+	4   BASSOON        Bassoon
+	5   FRENCH_HORN    Horn in G
+	6   ENGLISH_HORN   Horn in E
+	7   TRUMPET        Trumpet in E
+	8   TROMBONE       Trombone
+	9   STANDARD       Triangle, Bass Drum, Cymbal
+	10  TIMPANI        Timpani
+	11  VIOLIN         Violin I
+	12  VIOLIN         Violin II
+	13  VIOLA          Viola
+	14  CELLO          Violoncello
+	15  CONTRABASS     Double Bass
+END
+
+// set key signature, time signature and tempo
+*  key    e/maj
+*  time   2/4
+*  tempo  152
+
+// init channel defaults
+INCLUDE  d_all_staccato
+INCLUDE  v_all_ff
+
+// measure 1-2
+MACRO m1
+	7  b  /4.
+	7  b  /16  q=2
+END
+INCLUDE m1  q=2
+
+// m. 3-6
+MACRO m3_4
+	7  b   /8
+	7  g#  /8
+	7  e   /8
+	7  g#  /8
+	7  b   /8
+	7  g#  /8
+	7  b   /8
+	7  e+  /8
+END
+INCLUDE m3_4
+*
+INCLUDE m3_4
+( q=2
+	6  e,g# /4.
+	6  e,g# /16  q=2
+)
+
+// m. 7-8
+*
+6  e,g#   /8
+6  b-,f#  /8
+6  g#-,e  /8
+6  b-,f#  /8
+6  e,g#   /8
+6  g#,b   /8
+6  f#,a   /8
+6  e,g#   /8
+INCLUDE m1  q=2
+
+// m. 9-10
+*
+INCLUDE m1  q=2
+( q=2
+	5  b-,b  /4.
+	5  b-,b  /16  q=2
+)
+6  b-,f#  /8
+6  e,g#   /8
+6  b-,f#  /8
+6  f#,a   /8
+6  e,g#   /8
+6  b-,f#  /8
+6  g#-,e  /8
+6  e,g#   /8
+*
+
+// m. 11-14
+( q=4
+	5  b-,b   /8
+	5  b-,b   /16  q=2
+	5  b-,b   /8   q=2
+	6  b-,f#  /8
+	6  b-,f#  /16  q=2
+	6  b-,f#  /8   q=2
+	7  b      /8
+	7  b      /16  q=2
+	7  b      /8   q=2
+	10 b-2    /8
+	10 b-2    /16  q=2
+	10 b-2    /8   q=2
+)
+
+// m. 15-17
+*
+INCLUDE  v_all_sf
+INCLUDE  d_all_legato
+4	b-2,d#    /1+/8
+5   b-,b      /1+/8
+6   d#,f#     /1+/8
+7   b         /1+/8
+8   b-,d#,f#  /1+/8
+10  b-2       /2     q=2, tr=/32
+10  b-2       /8
+10  -         /4.
+
+// m. 18
+*
+INCLUDE  d_all_staccato
+10  -  /4.
+*
+INCLUDE v_all_pp
+( q=2
+	3   b-      /16
+	4   e-      /16
+	6   b-,g#-  /16
+	11  b-      /16  $p
+	12  g#-     /16  $p
+	13  e-      /16  $p
+	14  e-      /16  $p
+)
+
+// m. 19
+*
+MACRO m19_half_high
+	3   b-      /8
+	3   b-      /16  q=2
+	11  b-      /8
+	11  b-      /16  q=2
+	12  g#-     /8
+	12  g#-     /16  q=2
+	13  e-      /8
+	13  e-      /16  q=2
+END
+MACRO m19_half_low
+	4   e-      /8
+	4   e-      /16  q=2
+	6   b-,g#-  /8
+	6   b-,g#-  /16  q=2
+	10  b-2     /8
+	10  -       /8
+	14  e-      /8
+	14  e-      /16  q=2
+END
+MACRO m19
+	INCLUDE  m19_half_high  q=2
+	INCLUDE  m19_half_low   q=2
+END
+INCLUDE m19
+
+// m. 20
+*
+MACRO m20_1
+	3   e       /8
+	3   f#      /8
+	3   g#      /8
+	4   e-      /8   q=3
+	6   b-,g#-  /8   q=3
+	10  e-      /8   q=3
+	11  e       /8
+	11  f#      /8
+	11  g#      /8
+	12  b-      /8   q=3
+	13  g#-,e-  /8   q=3
+	14  e-      /8   q=3
+END
+MACRO m20_2_low
+	4   e-      /16  q=2
+	6   b-,g#-  /16  q=2
+	10  -       /8
+	14  e-      /16  q=2
+END
+MACRO m20
+	INCLUDE m20_1
+	INCLUDE m20_2_low
+	(
+		3   b-      /16  q=2
+		11  b-      /16  q=2
+		12  g#-     /16  q=2
+		13  e-      /16  q=2
+	)
+END
+INCLUDE  m20
+
+// m. 21
+*
+MACRO m21
+	INCLUDE  m19_half_low   q=2
+	INCLUDE  m19_half_high
+	(
+		3   e       /8
+		3   g#      /16  q=2
+		11  e       /8
+		11  g#      /16  q=2
+		12  b-      /8
+		12  b-      /16  q=2
+		13  e-,g#-  /8
+		13  e-,g#-  /16  q=2
+	)
+END
+INCLUDE  m21
+
+// m. 22
+*
+MACRO m22
+	3   f        /8
+	3   d#       /8
+	3   b-       /8
+	3   b-       /16  q=2
+	4   b-2,b-   /8
+	4   b-2,f#-  /8
+	4   e-       /16  q=2
+	6   b-2,d#   /8   q=3
+	6   b-,g#-   /16  q=2
+	10  b-2      /8   q=3
+	10  -        /8
+	11  f#       /8
+	11  d#       /8
+	11  b-       /8
+	11  b-       /16  q=2
+	12  b-       /8   q=3
+	12  g#-      /16  q=2
+	13  d#-,f#-  /8   q=3
+	13  e-       /16  q=2
+	14  b-       /8   q=3
+	14  e-       /16  q=2
+END
+INCLUDE  m22
+
+// m. 23
+*
+INCLUDE  m19
+
+// m. 24
+*
+MACRO m24
+	INCLUDE m20_1
+	INCLUDE v_all_ff
+	INCLUDE m20_2_low
+	(
+		3   e       /16
+		3   g#      /16
+		11  e       /16
+		11  g#      /16
+		12  e       /16  q=2
+		13  g#-,b-  /16  q=2
+	)
+END
+INCLUDE  m24
+
+// m. 25
+*
+MACRO m25
+	3   b       /4+/16   $legato
+	3   a       /16      $staccato
+	3   g#      /16
+	3   f#      /16
+	11  b       /4+/16   $legato
+	11  a       /16      $staccato
+	11  g#      /16
+	11  f#      /16
+	( q=2
+		4   f#-,a-  /8
+		4   f#-,a-  /16  q=2
+		6   b-2,d#  /8
+		6   b-2,d#  /16  q=2
+		10  b-2     /8
+		10  -       /8
+		12  d#      /8
+		12  d#      /16  q=2
+		13  a-,f#-  /8
+		13  a-,f#-  /16  q=2
+		14  b-2     /8
+		14  b-2     /16  q=2
+		15  b-3     /8
+		15  b-3     /16  q=2
+	)
+END
+INCLUDE  m25
+
+// m. 26
+*
+MACRO m26_1
+	3   e       /8
+	3   g#      /8
+	3   e       /8
+	4   e-,g#-  /8
+	4   e-,b-   /8  q=2
+	6   g#-,e-  /8  q=3
+	10  e-      /8  q=3
+	11  e       /8
+	11  g#      /8
+	11  e       /8
+	12  e       /8  q=3
+	13  b-,g#-  /8  q=3
+	14  e-      /8  q=3
+	15  e-2     /8  q=3
+END
+MACRO m26_2
+	0   b+      /16  q=2
+	1   b+      /16  q=2
+	2   g#,b    /16  q=2
+	3   b-,b    /16  q=2
+	4   c-,b-   /16  q=2
+	5   b-      /16  q=2
+	6   g#-,e   /16  q=2
+	7   e,g#    /16  q=2
+	11  b-      /16  q=2
+	12  g#-     /16  q=2
+	13  e-      /16  q=2
+	14  e-      /16  q=2
+	15  e-2     /16  q=2
+END
+MACRO m26
+	INCLUDE  m26_1
+	*
+	INCLUDE v_all_pp
+	INCLUDE m26_2
+END
+INCLUDE m26
+
+// m. 27
+*
+MACRO m27_half_high
+	0  b+     /8
+	0  b+     /16  q=2
+	1  b+     /8
+	1  b+     /16  q=2
+	2  g#,b   /8
+	2  g#,b   /16  q=2
+	3  b-,b   /8
+	3  b-,b   /16  q=2
+	11 b-     /8
+	11 b-     /16  q=2
+	12 g#-    /8
+	12 g#-    /16  q=2
+	13 e-     /8
+	13 e-     /16  q=2
+END
+MACRO m27_half_low
+	4  e-,b-  /8
+	4  e-,b-  /16  q=2
+	5  b-     /8
+	5  b-     /16  q=2
+	6  g#-,e  /8
+	6  g#-,e  /16  q=2
+	7  e,g#   /8
+	7  e,g#   /16  q=2
+	8  e-     /8
+	8  -      /8
+	10 e-     /8       tr=/32
+	10 -      /8
+	14 e-     /8
+	14 e-     /16  q=2
+	15 e-2    /8
+	15 e-2    /16  q=2
+END
+INCLUDE  m27_half_high  q=2
+INCLUDE  m27_half_low   q=2
+
+// m. 28
+*
+MACRO m28_1
+	0  e+2    /8
+	0  f#+2   /8
+	0  g#+2   /8
+	1  e+2    /8
+	1  f#+2   /8
+	1  g#+2   /8
+	2  g#     /8  q=3, m
+	2  e+     /8
+	2  f#+    /8
+	2  g#+    /8
+	3  e,e+   /8
+	3  f#,f#+ /8
+	3  g#,g#+ /8
+	4  e-,b-  /8  q=3
+	5  b-     /8  q=3
+	6  g#-,e  /8  q=3
+	7  e,g#   /8  q=3
+	8  e-     /8  q=3
+	10 e-     /8  q=3
+	11 e      /8
+	11 f#     /8
+	11 g#     /8
+	12 b-     /8  q=3
+	13 e-,g#- /8  q=3
+	14 e-     /8  q=3
+	15 e-2    /8  q=3
+END
+INCLUDE  m28_1
+*
+INCLUDE  m26_2
+
+// m. 29
+*
+MACRO m29
+	INCLUDE m27_half_low  q=2
+	INCLUDE m27_half_high
+	(
+		0  e+2    /8
+		0  g#+2   /16  q=2
+		1  e+2    /8
+		1  g#+2   /16  q=2
+		2  g#,e+  /8
+		2  e+,g#+ /16  q=2
+		3  b-,b   /8
+		3  g#,g#+ /16  q=2
+		11 e      /8
+		11 g#     /16  q=2
+		12 b-     /8
+		12 b-     /16  q=2
+		13 e-,g#- /8
+		13 e-,g#- /16  q=2
+	)
+END
+INCLUDE  m29
+
+// m. 30
+*
+MACRO m30
+	0  f#+2     /8
+	0  d#+2     /8
+	0  b+       /8
+	1  f#+2     /8
+	1  d#+2     /8
+	1  b+       /8
+	2  d#+,f#+  /8
+	2  b,d#+    /8
+	2  b        /8
+	3  f#,f#+   /8
+	3  d#,d#+   /8
+	3  b-,b     /8
+	4  b-2,f#-  /8  q=3
+	5  b-       /8  q=3
+	6  b-2,d#   /8  q=3
+	7  b-,b     /8  q=3
+	8  b-2      /8  q=3
+	10 b-2      /8  q=3
+	11 f#       /8
+	11 d#       /8
+	11 b-       /8
+	12 b-       /8  q=3
+	13 d#-,f#-  /8  q=3
+	14 b-2      /8  q=3
+	15 b-3      /8  q=3
+	*
+	INCLUDE m26_2
+END
+INCLUDE  m30
+
+// m. 31
+*
+INCLUDE  m27_half_high  q=2
+INCLUDE  m27_half_low   q=2
+
+// m. 32
+*
+INCLUDE  m28_1
+*
+MACRO m32_2
+	INCLUDE  v_all_ff
+	0  e+2    /16
+	0  g#+2   /16
+	1  e+     /16
+	1  g#+    /16
+	2  e+     /16
+	2  g#+    /16
+	3  e      /16
+	3  g#     /16
+	4  e-,b-  /16  q=2
+	5  b-     /16  q=2
+	6  g#-,e  /16  q=2
+	7  e,g#   /16  q=2
+	11 e      /16
+	11 g#     /16
+	12 e      /16  q=2
+	13 b-,g#- /16  q=2
+	14 e-     /16  q=2
+	15 e-2    /16  q=2
+END
+INCLUDE  m32_2
+
+// m. 33
+8 - /4  m, $f   // set trombone to forte instead of fortissimo - but only this time (not in measure 73)
+*
+MACRO m33
+	0  b+2    /4+/16      $legato
+	0  a+2    /16         $staccato
+	0  g#+2   /16
+	0  f#+2   /16
+	1  b+     /4+/16      $legato
+	1  a+     /16         $staccato
+	1  g#+    /16
+	1  f#+    /16
+	2  b+     /4+/16      $legato
+	2  a+     /16         $staccato
+	2  g#+    /16
+	2  f#+    /16
+	3  b      /4+/16      $legato
+	3  a      /16         $staccato
+	3  g#     /16
+	3  f#     /16
+	11 b      /4+/16      $legato
+	11 a      /16         $staccato
+	11 g#     /16
+	11 f#     /16
+	( q=2
+		4  b-2,d# /8
+		4  b-2,d# /16  q=2
+		5  b-     /8
+		5  b-     /16  q=2
+		6  b-2,d# /8
+		6  b-2,d# /16  q=2
+		7  b-,b   /8
+		7  b-,b   /16  q=2
+		8  b-2    /8
+		8  -      /8
+		10 b-2    /8
+		10 -      /8
+		12 d#     /8
+		12 d#     /16  q=2
+		13 f#-,a- /8
+		13 f#-,a- /16  q=2
+		14 b-2    /8
+		14 b-2    /16  q=2
+		15 b-3    /8
+		15 b-3    /16  q=2
+	)
+END
+INCLUDE  m33
+
+// m. 34
+*
+MACRO m34_1
+	0  e+2    /8
+	0  g#+2   /8
+	0  e+2    /8
+	1  e+     /8
+	1  g#+    /8
+	1  e+     /8
+	2  e+     /8
+	2  g#+    /8
+	2  e+     /8
+	3  e      /8
+	3  g#     /8
+	3  e      /8
+	4  e-,e   /8
+	4  e-,b-  /8  q=2
+	5  b-     /8  q=3
+	6  g#-,e  /8  q=3
+	7  e,g#   /8  q=3
+	8  e-     /8  q=3
+	
+	10 e-     /8  q=3
+	11 e      /8
+	11 g#     /8
+	11 e      /8
+	12 e      /8  q=3
+	13 g#-,b  /8  q=3
+	14 e-     /8  q=3
+	15 e-2    /8  q=3
+END
+INCLUDE  m34_1
+*
+MACRO m34_2
+	0  g#+2   /16  q=2
+	1  e+2    /16  q=2
+	2  e+,g#+ /16  q=2
+	3  e+,g#+ /16  q=2
+	4  c#-,c# /16  q=2
+	5  g#     /16  q=2
+	6  e,g#   /16  q=2
+	7  g#,e+  /16  q=2
+	10 e-     /16  q=2
+	11 g#+    /16  q=2
+	12 e+     /16  q=2
+	13 e,g#   /16  q=2
+END
+
+
+// m. 35-41 (only definitions)
+// m. 35 (definition)
+MACRO m35_half
+	*
+	0  g#+2   /8
+	0  g#+2   /16  q=2
+	1  e+2    /8
+	1  e+2    /16  q=2
+	2  e+,g#+ /8
+	2  e+,g#+ /16  q=2
+	3  e+,g#+ /8
+	3  e+,g#+ /16  q=2
+	4  c#-,c# /8
+	4  c#-,c# /16  q=2
+	5  g#     /8
+	5  g#     /16  q=2
+	6  e,g#   /8
+	6  e,g#   /16  q=2
+	7  g#,e+  /8
+	7  g#,e+  /16  q=2
+	8  c#-,c# /8
+	8  -      /8
+	p  bd2,cc2,to /8
+	p  -          /8
+	10 e-     /8
+	10 e-     /16  q=2
+	11 g#+    /8
+	11 g#+    /16  q=2
+	12 e+     /8
+	12 e+     /16  q=2
+	13 e,g#   /8
+	13 e,g#   /16  q=2
+	14 c#-    /8
+	14 -      /8
+	15 c#-2   /8
+	15 -      /8
+	*
+END
+
+// m. 36-37 (definition)
+*
+MACRO m36_1st8th_high
+	0  g#+2       /8
+	1  e+2        /8
+	2  e+,g#+     /8
+	3  e+,g#+     /8
+	4  c#-,c#     /8
+	5  g#         /8
+	6  e,g#       /8
+	7  g#,e+      /8
+	8  c#-,c#     /8
+	11 g#+        /8
+	12 e+         /8
+	13 e,g#       /8
+END
+MACRO m36_2nd8th_high
+	0  c#+3       /8
+	1  c#+2       /8
+	2  c#+,c#+2   /8
+	3  c#+        /8
+	11 c#+2       /8
+	12 c#+        /8
+	13 c#,c#+     /8
+	*  3-8
+END
+MACRO m36_1st8th_low
+	p  bd2,cc2,to /8
+	10 e-         /8
+	14 c#-        /8
+	15 c#-2       /8
+END
+MACRO m36_2nd8th_low
+	10 e-         /8
+	*  p,10,14-15
+END
+MACRO m36_half_high
+	INCLUDE m36_1st8th_high
+	INCLUDE m36_2nd8th_high
+END
+MACRO m36_half_low
+	INCLUDE m36_1st8th_low
+	INCLUDE m36_2nd8th_low
+END
+MACRO m36_half
+	INCLUDE  m36_half_high
+	INCLUDE  m36_half_low
+END
+MACRO m36_37
+	INCLUDE  m36_half q=3
+	INCLUDE  m36_1st8th_high
+	INCLUDE  m36_1st8th_low
+	*
+	0  f#+2     /8
+	1  d#+2     /8
+	2  d#+,f#+  /8
+	3  c+       /8
+	4  g#-2,g#- /8
+	5  f#       /8
+	6  g#-,g#   /8
+	7  g#,f#+   /8
+	8  g#-2,g#- /8
+	10 e-       /8
+	11 f#+      /8
+	12 d#+      /8
+	13 d#,f#    /8
+	14 g#-2     /8
+	15 g#-3     /8
+END
+
+// m. 38 (definition)
+MACRO m38
+	*
+	0  e+2        /8
+	0  d#+2       /8
+	0  c#+2       /8
+	1  c#+2       /8
+	1  c+2        /8
+	1  c#+2       /8
+	2  c#+,e+     /8
+	2  c+,d#+     /8
+	2  c#+        /8
+	3  c#+        /8
+	3  c+,d#+     /8
+	3  c#+        /8
+	4  c#-,c#     /8  q=3
+	5  g#         /8
+	5  f#         /8
+	5  e          /8
+	6  g#-,g#     /8
+	6  g#-,f#     /8
+	6  g#-,e      /8
+	7  g#,e+      /8  q=3
+	8  c#-,c#     /8  q=3
+	p  bd2,cc2,to /8  q=3
+	10 e-         /8  q=3
+	11 e+         /8
+	11 d#+        /8
+	11 c#+        /8
+	12 c#+        /8
+	12 f#         /8
+	12 e          /8
+	13 c#,e       /8
+	13 a          /8
+	13 g#         /8
+	14 c#-        /8  q=3
+	15 c#-2       /8  q=3
+	*
+	INCLUDE  m34_2
+	*
+END
+
+// m. 41_2 (definition)
+MACRO m41_2
+	*
+	0  b+2        /8
+	0  a#+2       /8
+	1  d#+2       /8
+	1  c#+2       /8
+	2  d#+,b+     /8
+	2  c#+,a#+    /8
+	3  d#+,f#+    /8
+	3  c#+,e+     /8
+	4  f#-2,f#    /8  q=2
+	5  f#         /8  q=2
+	6  b-,f#      /8
+	6  e,f#       /8
+	7  b          /8
+	7  e          /8
+	8  f#-2,f#-   /8  q=2
+	p  bd2,cc2,to /8
+	10 b-2        /8
+	10 e-         /8
+	11 e+         /8
+	11 a#+        /8
+	12 f#+        /8
+	12 e+         /8
+	13 f#         /8
+	13 c#+        /8
+	14 f#-        /8
+	14 f#-2       /8
+	15 f#-2       /8
+	15 f#-3       /8
+	*
+END
+
+// m. 42_1 (definition)
+MACRO m42_1
+	*
+	0  b+2        /8
+	0  a#+2       /8
+	0  b+2        /8
+	1  b+         /8
+	1  a#+        /8
+	1  b+         /8
+	2  d#+,b+     /8
+	2  e+,a#+     /8
+	2  d#+,b+     /8
+	3  b,d#+      /8
+	3  a#,c#+     /8
+	3  b          /8
+	4  b-2,b      /8  q=3
+	5  b          /8
+	5  g          /8
+	5  f#         /8
+	6  b-,f#      /8
+	6  e,g        /8
+	6  b-,f#      /8
+	7  b          /8
+	7  e          /8
+	7  b          /8
+	8  b-2,b      /8  q=3
+	p  bd2,cc2,to /8  q=3
+	10 b-2        /8  q=3
+	11 b+         /8
+	11 a#+        /8
+	11 b+         /8
+	12 d#+        /8
+	12 e+         /8
+	12 d#+        /8
+	13 f#         /8
+	13 g          /8
+	13 f#         /8
+	14 b-2        /8  q=3
+	15 b-3        /8  q=3
+	*
+END
+
+// m. 34_2 - 41
+MACRO m34_2_to_41
+	INCLUDE  m34_2
+	INCLUDE  m35_half  q=2   // 35
+	INCLUDE  m36_37          // 36 - 37
+	INCLUDE  m38             // 38
+	INCLUDE  m35_half  q=2   // 39
+	INCLUDE  m36_half  q=3   // 40 - 41_1
+	INCLUDE  m41_2           // 41_2
+END
+INCLUDE  m34_2_to_41
+
+// m. 42 - 49
+INCLUDE  m42_1
+INCLUDE  m34_2_to_41
+
+// m. 50
+*
+MACRO  m50_violin1
+	( q=2
+		11 b+     /16
+		11 a#+    /16       $p
+		11 c#+2   /16
+		11 a#+    /16
+	)
+END
+MACRO  m50_trumpet
+	7  b          /8
+	7  -          /4        $p
+	7  b          /16  q=2
+END
+MACRO m50
+	INCLUDE  m50_trumpet
+	INCLUDE  m50_violin1
+	0  b+2        /8
+	1  b+         /8
+	2  d#+,b+     /8
+	3  b,d#+      /8
+	4  b-2,b-     /8
+	5  b          /8
+	6  b-,f#      /8
+	8  b-2,b-     /8
+	p  bd2,cc2,to /8
+	10 b-2        /8
+	12 d#+        /8
+	13 f#         /8
+	14 b-2        /8
+	15 b-3        /8
+	INCLUDE  v_all_p
+	3  -          /4
+	3  b-,f#      /16  q=2
+	6  -          /4
+	6  b-,f#      /16  q=2
+END
+INCLUDE  m50
+
+// m. 51
+MACRO m51
+	3  b-,f#  /8
+	3  b-,f#  /16  q=2
+	3  b-,f#  /8
+	3  e,g#   /8
+	6  b-,f#  /8
+	6  b-,f#  /16  q=2
+	6  b-,f#  /8
+	6  e,g#   /8
+	INCLUDE  m50_trumpet
+	INCLUDE  m50_violin1
+END
+INCLUDE  m51
+
+// m. 52
+*
+MACRO m52
+	INCLUDE  i_pizzicato_14    // switch violoncello 14 to pizzicato mode
+	3  f#,a   /8
+	3  b-,f#  /4          $p_marcato
+	3  f#,a   /8          $p
+	4  -      /8
+	4  b-2    /8
+	4  c#-    /8
+	4  d#-    /8
+	6  f#,a   /8
+	6  b-,f#  /4          $p_marcato
+	6  f#,a   /8          $p
+	INCLUDE  m50_trumpet
+	INCLUDE  m50_violin1
+	14 -      /8          $pp
+	14 b-2    /8
+	14 c#-    /8
+	14 d#-    /8
+END
+INCLUDE  m52
+
+// m. 53
+*
+MACRO  m53_without_trumpet
+	3  e,g#    /8
+	3  g#-,e   /4          $p_marcato
+	3  e,g#    /8          $p
+	4  e-      /8
+	4  f#-     /8
+	4  g#-     /8
+	4  a-      /8
+	6  e,g#    /8
+	6  f#-,g#- /8          $p_marcato
+	6  e,g#    /8          $p
+	INCLUDE  m50_violin1
+	14 e-      /8
+	14 f#-     /8
+	14 g#-     /8
+	14 a-      /8
+END
+INCLUDE  m53_without_trumpet
+INCLUDE  m50_trumpet
+
+// m. 54
+*
+MACRO m54_violin2
+	( q=2
+		12 b   /16  $pp
+		12 a#  /16
+		12 c#+ /16
+		12 a#  /16
+	)
+END
+MACRO m54
+	2  -       /4.
+	2  b,f#+   /16  q=2
+	3  d#,f#   /8   q=3
+	3  b-,f#   /16  q=2
+	4  b-      /8
+	4  b-2     /8
+	4  b-      /8
+	5  -       /4.         $pp
+	5  b-,b    /16  q=2
+	6  b-,f#   /8
+	6  b-2,b-  /8   q=2
+	6  b-,f#   /16  q=2
+	7  b       /8
+	INCLUDE  m50_violin1
+	INCLUDE  m54_violin2
+	14 b-      /8
+	14 b-2     /8
+	14 b-      /8
+END
+INCLUDE  m54
+
+// m. 55
+*
+MACRO m55_horn_g
+	5  b-,b    /8
+	5  -       /4
+	5  b-,b    /16  q=2
+END
+MACRO m55
+	2  b,f#+   /8
+	2  b,f#+   /16  q=2
+	2  b,f#+   /8
+	2  e+,g#+  /8
+	3  b-,f#   /8
+	3  b-,f#   /16  q=2
+	3  b-,f#   /8
+	3  e,g#    /8
+	INCLUDE  m55_horn_g
+	6  b-,f#   /8
+	6  b-,f#   /16  q=2
+	6  b-,f#   /8
+	6  e,g#    /8
+	INCLUDE  m50_violin1
+	INCLUDE  m54_violin2
+END
+INCLUDE  m55
+
+// m. 56
+*
+MACRO m56
+	2  f#+,a+   /8
+	2  b,f#+    /4          $p_marcato
+	2  f#+,a+   /8          $p
+	3  f#,a     /8
+	3  b-,f#    /4          $p_marcato
+	3  f#,a     /8          $p
+	6  f#,a     /8
+	6  b-,f#    /4          $p_marcato
+	6  f#,a     /8          $p
+	4  -        /8
+	4  b-2      /8
+	4  c#-      /8
+	4  d#-      /8
+	INCLUDE  m55_horn_g
+	INCLUDE  m50_violin1
+	INCLUDE  m54_violin2
+	14 -      /8
+	14 b-2    /8
+	14 c#-    /8
+	14 d#-    /8
+END
+INCLUDE  m56
+
+// m. 57
+*
+MACRO m57
+	2  e+,g#+  /8
+	2  g#,e+   /4          $p_marcato
+	2  e+,g#+  /8          $p
+	INCLUDE  m53_without_trumpet
+	INCLUDE  m55_horn_g
+	INCLUDE  m54_violin2
+END
+INCLUDE  m57
+
+// m. 58
+*
+MACRO m58
+	2  d#+,f#+  /8
+	3  d#,f#    /8
+	4  b-       /8
+	5  b-,b     /8
+	6  d#,f#    /8
+	11 b+       /8
+	11 b        /16  q=2
+	11 b        /8
+	12 b        /8
+	14 b-       /8
+	INCLUDE  i_arco_14    // switch violoncello 14 back to arco mode
+	INCLUDE  v_all_pp
+	3  -        /4
+	3  b-       /16  q=2
+	4  -        /4
+	4  e-       /16  q=2
+	6  -        /4
+	6  g#-,b-   /16  q=2
+	11 b-       /16  q=2
+	12 -        /4
+	12 g#-      /16  q=2
+	13 -        /4.
+	13 e-       /16  q=2
+	14 -        /4
+	14 e-       /16  q=2
+	15 -        /4.
+	15 e-2      /16  q=2
+END
+INCLUDE  m58
+
+// m. 59
+*
+MACRO m59_contrabass
+	( q=2
+		15 e-2  /8
+		15 e-2  /16  q=2
+	)
+END
+INCLUDE  m19
+INCLUDE  m59_contrabass
+
+// m. 60
+*
+MACRO m60_contrabass
+	15 e-2  /8   q=3
+	15 e-2  /16  q=2
+END
+INCLUDE  m20
+INCLUDE  m60_contrabass
+
+// m. 61
+*
+INCLUDE  m21
+INCLUDE  m59_contrabass
+
+// m. 62
+*
+MACRO m62
+	INCLUDE  m22
+	15 b-3  /8   q=3
+	15 e-2  /16  q=2
+END
+INCLUDE m62
+
+// m. 63
+*
+INCLUDE  m19
+INCLUDE  m59_contrabass
+
+// m. 64
+*
+MACRO m64_contrabass
+	15 e-2  /8   q=3,  $pp
+	15 e-2  /16  q=2,  $ff
+END
+INCLUDE  m24
+INCLUDE  m64_contrabass
+
+// m. 65
+*
+INCLUDE  m25
+
+// m. 66
+*
+INCLUDE  m26
+
+// m. 67
+*
+INCLUDE  m27_half_high  q=2
+INCLUDE  m27_half_low   q=2
+
+// m. 68
+*
+INCLUDE  m28_1
+*
+INCLUDE  m26_2
+
+// m. 69
+*
+INCLUDE  m29
+
+// m. 70
+*
+INCLUDE  m30
+
+// m. 71
+*
+INCLUDE  m27_half_high  q=2
+INCLUDE  m27_half_low   q=2
+
+// m. 72
+*
+INCLUDE  m28_1
+*
+INCLUDE  v_all_ff
+INCLUDE  m32_2
+
+// m. 73
+*
+INCLUDE  m33
+
+// m. 74
+*
+INCLUDE  m34_1
+*
+INCLUDE  v_all_tutta_forza
+INCLUDE  d_all_legato
+(  t=7:4
+	0  e+2   /32
+	0  f#+2  /32
+	0  g#+2  /32
+	0  a+2   /32
+	0  b+2   /32
+	0  c#+3  /32
+	0  d#+3  /32
+	1  e+    /32
+	1  f#+   /32
+	1  g#+   /32
+	1  a+    /32
+	1  b+    /32
+	1  c#+2  /32
+	1  d#+2  /32
+	11 e+    /32
+	11 f#+   /32
+	11 g#+   /32
+	11 a+    /32
+	11 b+    /32
+	11 c#+2  /32
+	11 d#+2  /32
+	12 e     /32
+	12 f#    /32
+	12 g#    /32
+	12 a     /32
+	12 b     /32
+	12 c#+   /32
+	12 d#+   /32
+)
+INCLUDE  d_all_staccato
+
+// m. 75-77
+*
+MACRO m75_77_without_viola_in_77
+	INCLUDE  d_all_staccato
+	0  e+3     /8
+	0  e+3     /16  q=2
+	0  e+3     /8   q=2
+	0  g#+3    /4
+	0  f#+3    /4
+	0  e+3     /8
+	0  d#+3    /8
+	0  e+3     /8
+	0  c#+3    /8
+	1  e+2     /8
+	1  e+2     /16  q=2
+	1  e+2     /8   q=2
+	1  g#+2    /4
+	1  f#+2    /4
+	1  e+2     /8
+	1  d#+2    /8
+	1  e+2     /8
+	1  c#+2    /8
+	2  b,e+    /2           $legato
+	2  c+      /2   m
+	2  g#+     /4.
+	2  f#+     /8
+	2  c#+,e+  /8
+	2  c+,d#+  /8
+	2  c#+,e+  /8
+	2  a,c#+   /8
+	3  b,e+    /2           $legato
+	3  c+      /2   m
+	3  g#+     /4.
+	3  f#+     /8
+	3  c#+,e+  /8
+	3  c+,d#+  /8
+	3  c#+,e+  /8
+	3  a,c#+   /8
+	4  b-      /2           $legato
+	4  c       /2
+	4  c#      /8
+	4  c       /8
+	4  c#      /8
+	4  a-      /8
+	5  b-,b    /2           $legato
+	5  g#      /2
+	5  a       /2
+	6  e-,g#   /2   q=2,    $legato
+	6  e-,e    /2
+	7  e,e+    /8
+	7  e,e+    /16  q=2
+	7  e,e+    /8   q=2
+	7  e,e+    /2
+	7  e,e+    /8   q=4
+	8  e-,e    *1.          $legato
+	p  to      /2   q=3, m, tr=/32
+	p  bd2,cc2 /4   q=6
+	10 e-      /2   q=3,    tr=/32
+	10 -       /4        m
+	11 e+2     /8
+	11 e+2     /16  q=2
+	11 e+2     /8   q=2
+	11 g#+2    /4           tr=/16
+	11 f#+2    /8   q=2
+	11 e+2     /16  q=2
+	11 d#+2    /16  q=2
+	11 e+2     /16  q=2
+	11 c#+2    /16  q=2
+	12 e+      /8
+	12 e+      /16  q=2
+	12 e+      /8   q=2
+	12 g#+     /4           tr=/16
+	12 f#+     /8   q=2
+	12 e+      /16  q=2
+	12 d#+     /16  q=2
+	12 e+      /16  q=2
+	12 c#+     /16  q=2
+	13 b-,b    /2           tr=/16
+	13 c,c+    /2           tr=/16
+	14 e-      /2   q=3,    tr=/16
+	15 e-2     /8   q=12
+	INCLUDE  d_all_staccato
+END
+MACRO m77_viola
+	13 c#,c#+  /16  q=2,    $legato
+	13 c,c+    /16  q=2
+	13 c#,c#+  /16  q=2
+	13 a-,a    /16  q=2
+END
+INCLUDE  m75_77_without_viola_in_77
+INCLUDE  m77_viola
+INCLUDE  v_all_ff
+
+// m. 78
+*
+INCLUDE  d_all_staccato
+MACRO m78
+	( q=2
+		0  b+2        /8
+		0  -          /8
+		5  b          /8
+		5  -          /8
+		7  e,e+       /8
+		7  -          /8
+		8  e-,e       /8
+		8  -          /8
+		p  bd2,cc2,to /8
+		p  -          /8
+		10 e-         /8
+		10 -          /8
+		13 g#-,g#     /8
+		13 -          /8
+		14 e-         /8
+		14 -          /8
+		15 e-2        /8
+		15 -          /8
+	)
+	1  b+      /8
+	1  -       /8
+	1  g#+2    /8
+	2  g#,e+   /8
+	2  -       /8
+	2  e+,g#+  /8
+	3  g#,b    /8
+	3  -       /8
+	3  g#,e+   /8
+	4  g#-,b-  /8
+	4  -       /8
+	4  e-2,e-  /8
+	6  e-,g#   /8
+	6  -       /8
+	6  g#-,e   /8
+	( q=3
+		11 b+   /16
+		11 c#+2 /16
+		12 b    /16
+		12 c#+  /16
+	)
+	11 d#+2     /16
+	11 e+2      /16
+	12 d#+      /16
+	12 e+       /16
+END
+INCLUDE  m78
+
+// m. 79
+*
+MACRO m79
+	( q=2
+		0  a+2        /8
+		0  -          /8
+		1  f#+2       /8
+		1  -          /8
+		2  f#+,a+     /8
+		2  -          /8
+		3  a,f#+      /8
+		3  -          /8
+		4  d#-2,d#    /8
+		4  -          /8
+		5  a          /8
+		5  -          /8
+		6  b-,f#      /8
+		6  -          /8
+		7  b-,b       /8
+		7  -          /8
+		8  d#-,d#     /8
+		8  -          /8
+		p  bd2,cc2,to /8
+		p  -          /8
+		10 b-2        /8
+		10 -          /8
+		13 f#,a       /8
+		13 -          /8
+		14 d#-        /8
+		14 -          /8
+		15 d#-2       /8
+		15 -          /8
+	)
+	( q=3
+		11 a+ /16
+		11 b+ /16
+		12 a  /16
+		12 b  /16
+	)
+	11 c#+2   /16
+	11 d#+2   /16
+	12 c#+    /16
+	12 d#+    /16
+END
+INCLUDE  m79
+
+// m. 80
+*
+MACRO m80
+	( q=2
+		0  g#+2       /8
+		0  -          /8
+		1  e+2        /8
+		1  -          /8
+		2  e+,g#+     /8
+		2  -          /8
+		3  g#,e+      /8
+		3  -          /8
+		4  e-2,e-     /8
+		4  -          /8
+		5  b          /8
+		5  -          /8
+		6  g#-,e      /8
+		6  -          /8
+		7  e,b        /8
+		7  -          /8
+		8  e-,e       /8
+		8  -          /8
+		p  bd2,cc2,to /8
+		p  -          /8
+		10 e-         /8
+		10 -          /8
+		13 b-,g#      /8
+		13 -          /8
+		14 e-         /8
+		14 -          /8
+		15 e-2        /8
+		15 -          /8
+	)
+	( q=3
+		11 g#+ /16
+		11 a+  /16
+		12 g#  /16
+		12 a   /16
+	)
+	11 b+      /16
+	11 c#+2    /16
+	12 b       /16
+	12 c#+     /16
+END
+INCLUDE  m80
+
+// m. 81
+*
+MACRO m81
+	( q=2
+		0  f#+2       /8
+		0  -          /8
+		3  f#,e+      /8
+		3  -          /8
+		4  a-2,a-     /8
+		4  -          /8
+		5  f#         /8
+		5  -          /8
+		6  e,f#       /8
+		6  -          /8
+		7  e,e+       /8
+		7  -          /8
+		8  a-2,a-     /8
+		8  -          /8
+		p  bd2,cc2,to /8
+		p  -          /8
+		10 e-         /8
+		10 -          /8
+		13 c#,e       /8
+		13 -          /8
+		14 e-         /8
+		14 -          /8
+		15 e-2        /8
+		15 -          /8
+	)
+	1  f#+2           /8
+	1  -              /8
+	1  e+2            /8
+	2  c#+,f#+        /8
+	2  -              /8
+	2  c#+,e+         /8
+	( q=4
+		11 f#+        /16
+		11 g#+        /16
+		12 f#         /16
+		12 g#         /16
+	)
+END
+INCLUDE  m81
+
+
+// m. 82
+*
+MACRO m82
+	0  f#+2       /8
+	0  -          /8.
+	0  b+2        /16
+	0  c#+3       /16
+	0  d#+3       /16
+	1  d#+2       /8
+	1  -          /8.
+	1  b+         /16
+	1  c#+2       /16
+	1  d#+2       /16
+	2  d#+        /8
+	3  d#+        /8
+	4  b-2,b-     /8
+	5  b-,b       /8
+	6  b-,f#      /8
+	7  b-,b       /8
+	8  b-2,b-     /8
+	p  bd2,cc2,to /8
+	10 b-2        /8
+	11 f#+        /16
+	11 g#+        /16
+	11 f#+        /16
+	11 d#+        /16
+	11 b          /16
+	11 b+         /16
+	11 c#+2       /16
+	11 d#+2       /16
+	12 f#         /16
+	12 g#         /16
+	12 f#         /16
+	12 d#         /16
+	12 b-         /16
+	12 b          /16
+	12 c#+        /16
+	12 d#+        /16
+	13 b-,d#      /8
+	13 -          /8
+	13 b-,d#      /8
+	14 b-2        /8
+	15 b-3        /8
+END
+INCLUDE  m82
+
+// m. 83-85
+*
+MACRO m85_viola
+	13 c#,c#+  /8   tr=/8
+	13 c,c+    /8   tr=/8
+	13 c#,c#+  /8   tr=/8
+	13 a-,a    /8   tr=/8
+END
+INCLUDE  m75_77_without_viola_in_77
+INCLUDE  m85_viola
+
+// m. 86-88
+*
+INCLUDE  d_all_staccato
+*
+INCLUDE  m78
+*
+INCLUDE  m79
+*
+INCLUDE  m80
+
+// m. 89
+*
+MACRO m89_1
+	0  f#+2       /8
+	1  c#+2       /8
+	2  c#+,f#+    /8
+	3  f#,e+      /8
+	4  a-2,a-     /8
+	5  f#         /8
+	6  e,f#       /8
+	7  e          /8
+	8  a-2,a-     /8
+	p  bd2,cc2,to /8
+	10 e-         /8
+	( q=2
+		11 f#+    /16
+		11 g#+    /16
+		12 f#     /16
+		12 g#     /16
+	)
+	13 c#,e       /8
+	14 e-         /8
+	15 e-2        /8
+END
+MACRO m89_2
+	0  b+2        /8
+	1  d#+2       /8
+	2  d#+,f#+    /8
+	3  f#,d#+     /8
+	4  b-2,b-     /8
+	5  b-         /8
+	6  b-,f#      /8
+	7  b          /8
+	7  b-2,b-     /8
+	p  bd2,cc2,to /8
+	10 b-2        /8
+	11 f#+        /16
+	11 a+         /16
+	11 g#+        /16
+	11 f#+        /16
+	12 f#         /16
+	12 a          /16
+	12 g#         /16
+	12 f#         /16
+	13 f#-,d#     /8
+	14 b-2        /8
+	15 b-3        /8
+END
+INCLUDE  m89_1
+*
+INCLUDE  m89_2
+
+// m. 90
+*
+(
+	0  e+2        /8
+	1  e+2        /8
+	2  e+         /8
+	3  g#,e+      /8
+	4  e-         /8
+	5  g#         /8
+	6  g#-,e      /8
+	7  e,b        /8
+	8  e-         /8
+	p  bd2,cc2,to /8
+	10 e-         /8
+	11 e+         /8
+	11 -          /8
+	11 c#+        /4+/16  m, $legato, $sf_accent
+	11 -          /4         $staccato
+	12 e          /8
+	13 g#-,e      /8
+	14 e-         /8
+	15 e-2        /8
+)
+INCLUDE  i_pizzicato_14
+INCLUDE  i_pizzicato_15
+
+// m. 91
+*
+INCLUDE  v_all_pp
+( m
+	11 -     /16
+	11 c+    /16
+	11 c#+   /16
+	11 c+    /16
+	11 d#+   /16
+	11 c#+   /16
+	11 b     /16
+	11 a     /16
+)
+MACRO m91_without_violin1
+	12 g#    /8
+	13 c#,e  /8
+	14 c#    /8
+	15 c#-   /8
+	15   -   /8
+	*  1-10,12-15
+	12 a     /8
+	13 c#,f# /8
+	14 f#-   /8
+	15 f#-2  /8
+	15   -   /8
+END
+INCLUDE  m91_without_violin1
+
+// m. 92
+*
+MACRO m92
+	(
+		4  c#     /2+/8  m, $legato
+		6  c+,e+  /2     m, $legato
+		11 a      /16
+		11 g#     /16
+		11 e      /16
+		11 c#     /16    q=3
+		12 g#     /8
+		13 c#,e   /8
+		14 c#-    /8
+		15 c#-2   /8
+	)
+	*
+	(
+		11 c#     /16    q=2
+		12 e      /8
+		13 g#-,c# /8
+		14 c#-    /8
+		15 c#-2   /8
+	)
+END
+INCLUDE  m92
+
+// m. 93
+*
+MACRO m93
+	(
+		4  g#-,c  /2   m
+		6  b,d    /2   m
+		11 e      /16
+		11 d#     /16
+		11 c      /16
+		11 g#-    /16  q=3
+		12 f#     /8
+		13 g#-,c# /8
+		14 g#-    /8
+		15 g#-2   /8
+	)
+	*
+	(
+		11 g#-    /16  q=2
+		12 d#     /8
+		13 g#-,d# /8
+		14 g#-2   /8
+		15 g#-3   /8
+	)
+END
+INCLUDE  m93
+
+// m. 94
+*
+( m
+	11 g#-    /16
+	11 c#     /16
+	11 e      /16
+	11 g#     /16
+	11 c#+    /16  q=4
+)
+MACRO m94_without_violin1
+	6  c+     /8
+	12 e      /8
+	13 g#-,c# /8
+	14 c#-    /8
+	15 c#-2   /8
+	15 -      /4.
+END
+INCLUDE  m94_without_violin1
+
+// m. 95
+*
+( m
+	( q=2
+		11 c#+ /16
+		11 c+  /16
+	)
+	11 d#+ /16
+	11 c#+ /16
+	11 b   /16
+	11 a   /16
+)
+INCLUDE  m91_without_violin1
+
+// m. 96
+*
+INCLUDE  m92
+
+// m. 97
+*
+INCLUDE  m93
+
+// m. 98
+*
+( m
+	11 g#-    /16
+	11 c#     /16
+	11 e      /16
+	11 g#     /16
+	11 c#+    /16
+	11 e+     /16
+	11 d#+    /16
+	11 c#+    /16
+)
+INCLUDE  m94_without_violin1
+
+// m. 99
+*
+(
+	3  g#+  /1+/4  m,   $legato
+)
+MACRO m99_without_clarinet
+	2  c+,d#+ /4.       $legato
+	2  c#+,e+ /8
+	11 d#+    /16
+	11 c+     /16
+	11 g#     /16  q=3
+	11 g#+    /16
+	11 e+     /16
+	11 c#+    /16
+	12 d#     /8
+	12 -      /4
+	12 e      /8
+	13 g#-,c  /8
+	13 -      /4
+	13 g#-,c# /8
+	14 g#-    /8
+	14 -      /4
+	14 g#-    /8
+	15 g#-2   /8
+	15 -      /4
+	15 g#-2   /8
+END
+INCLUDE  m99_without_clarinet
+
+// m. 100
+*
+INCLUDE  m99_without_clarinet
+
+// m. 101
+*
+(
+	2  b,d#+  /4
+	2  a#,c#+ /4
+	3  -      /4
+	3  g      /4
+	4  d#     /4
+	4  d#-    /4
+	11 d#+    /16
+	11 b      /16
+	11 g#     /16  q=2
+	11 a#     /16
+	11 g      /16
+	11 d#     /16  q=2
+	12 d#     /8
+	12 -      /8
+	12 c#     /8
+	13 g#-,b- /8
+	13 -      /8
+	13 g-,a#- /8
+	( q=2
+		14 d#-     /8
+		14 -       /8
+		15 d#-2    /8
+		15 -       /8
+	)
+)
+
+// m. 102
+*
+(
+	2  g#,b    /8
+	3  g#      /8
+	4  g#-     /8
+	11 g#      /16
+	11 g       /16
+	11 g#      /16
+	11 g       /16
+	11 g#      /16
+	11 a       /16
+	11 g#      /16
+	11 f#      /16
+	12 b-      /8
+	13 d#-,g#- /8
+	14 g#-     /8
+	15 g#-2    /8
+)
+
+// m. 103
+*
+MACRO m103
+	3  g#-,e  /4.
+	3  b-,f#  /8
+	11 e      /16
+	11 b-     /16
+	11 a#-    /16
+	11 b-     /16
+	11 e      /16
+	11 b-     /16
+	11 f#     /16
+	11 b-     /16
+	12 b-     /8
+	12 -      /8
+	12 g#-    /8
+	12 b-     /8
+	13 e-,g#- /8
+	14 e-     /8
+	15 e-2    /8
+END
+INCLUDE  m103
+
+// m. 104
+*
+(
+	13 g#-,b-  /8
+)
+MACRO m104_without_viola
+	3  e,g#   /4.
+	3  f#,a   /8
+	11 g#     /16
+	11 e      /16
+	11 d#     /16
+	11 e      /16
+	11 g#     /16
+	11 e      /16
+	11 a      /16
+	11 f#     /16
+	12 e      /8
+	12 -      /8
+	12 e      /8
+	12 f#     /8
+	( q=2
+		14 e-  /8
+		14 -   /8
+		15 e-2 /8
+		15 -   /8
+	)
+END
+INCLUDE  m104_without_viola
+
+// m. 105
+*
+(
+	6  c+     *2+/2+/8  m
+	11 b      /16
+	11 g#+    /16
+	11 f#+    /16
+	11 e+     /16
+	11 d#+    /16
+	11 f#+    /16
+	11 e+     /16
+	11 c#+    /16
+	13 g#-,b- /8
+	13 -      /8
+	13 g-,c#  /8
+)
+MACRO m105_low   // without E-horn, voilin1 and voila (without channels 6, 11, 13)
+	3  g#,b   /4
+	3  g,a#   /4
+	12 g#     /8
+	12 -      /8
+	12 a#     /8
+	( q=2
+		14 e-  /8
+		14 -   /8
+		15 e-2 /8
+		15 -   /8
+	)
+END
+INCLUDE  m105_low
+
+// m. 106
+*
+MACRO m106
+	3  g#,b   /2
+	11 b      /16
+	11 c#+    /16
+	11 b      /16
+	11 c#+    /16
+	11 d#+    /16
+	11 e+     /16
+	11 f#+    /16
+	11 g#+    /16
+	12 b      /8
+	12 -      /8
+	12 g#     /8
+	13 g#-,e  /8
+	13 -      /8
+	13 b-,e   /8
+	( q=2
+		14 e-  /8
+		14 -   /8
+		15 e-2 /8
+		15 -   /8
+	)
+END
+INCLUDE  m106
+
+// m. 107
+*
+MACRO m107
+	3  f#,a   /2
+	4  d#     /2
+	6  g      /2
+	11 a      /16
+	11 b      /16
+	11 a      /16
+	11 b      /16
+	11 c#+    /16
+	11 d#+    /16
+	11 e+     /16
+	11 f#+    /16
+	( q=2
+		12 a     /8
+		12 -     /8
+		13 b-,f# /8
+		13 -     /8
+		14 b-2   /8
+		14 -     /8
+		15 b-3   /8
+		15 -     /8
+	)
+END
+INCLUDE  m107
+
+// m. 108
+*
+(
+	3  e   /1  m
+	3  g#  /2
+	6  e   /1  m
+)
+MACRO m108_without_clarinet_and_g_horn
+	4  e   /2
+	11 g#  /16
+	11 a   /16
+	11 g#  /16
+	11 a   /16
+	11 b   /16
+	11 c#+ /16
+	11 d#+ /16
+	11 e+  /16
+	( q=2
+		12 g#   /8
+		12 -    /8
+		13 b-,e /8
+		13 -    /8
+		14 e-   /8
+		14 -    /8
+		15 e-2  /8
+		15 -    /8
+	)
+END
+INCLUDE  m108_without_clarinet_and_g_horn
+
+// m. 109
+*
+(
+	3  f#     /2
+	4  a-,c#  /2
+	( q=4
+		11 f# /16
+		11 g# /16
+	)
+	( q=2
+		12 f#    /8
+		12 -     /8
+		13 e-,c# /8
+		13 -     /8
+		14 a-2   /8
+		14 -     /8
+		15 a-3   /8
+		15 -     /8
+	)
+)
+
+// m. 110
+*
+(
+	3  d#,f#  /8
+	4  b-     /8
+	6  b-     /8
+	11 f#     /16
+	11 g#     /16
+	11 f#     /16
+	11 d#     /16
+	11 b-     /16
+	11 c      /16
+	11 c#     /16
+	11 d#     /16
+	12 f#     /8
+	13 f#-,d# /8
+	14 b-2    /8
+	15 b-3    /8
+)
+
+// m. 111
+*
+INCLUDE  m103
+
+// m. 112
+*
+(
+	13 e-,g#-  /8
+)
+INCLUDE  m104_without_viola
+
+// m. 113
+*
+(
+	6  c+     *2+/4  m
+	11 b      /16
+	11 g#+    /16
+	11 f#+    /16
+	11 e+     /16
+	11 d#+    /16
+	11 f#+    /16
+	11 e+     /16
+	11 d#+    /16
+	13 e-,g#- /8
+	13 -      /8
+	13 g-,c#  /8
+)
+INCLUDE  m105_low
+
+// m. 114-116
+*
+INCLUDE  m106
+*
+INCLUDE  m107
+*
+(
+	3  e   /2.  m
+	3  g#  /2
+	6  e   /2.  m
+)
+INCLUDE  m108_without_clarinet_and_g_horn
+
+// m. 117
+*
+(
+	3  f#     /2
+	4  a-,c#  /4
+	4  b-     /4
+	6  -      /4
+	6  b-     /4
+	11 f#     /16
+	11 c#+    /16
+	11 c+     /16
+	11 c#+    /16
+	11 d#+    /16
+	11 c#+    /16
+	11 a      /16
+	11 f#     /16
+	12 f#     /8
+	12 -      /8
+	12 d#     /8
+	13 c#,e   /8
+	13 -      /8
+	13 f#-,a- /8
+	14 a-2    /8
+	14 -      /8
+	14 b-2    /8
+	15 a-3    /8
+	15 -      /8
+	15 b-3    /8
+)
+
+// m. 118
+*
+(
+	0  -      /16
+	1  -      /16
+	3  e,g#   /8
+	4  e      /8
+	6  e      /8
+	11 e      /16
+	12 e      /16
+	13 e-,g#- /8
+	14 e-     /8
+	15 e-2    /8
+)
+INCLUDE  d_all_staccato
+INCLUDE  i_arco_14
+INCLUDE  i_arco_15
+INCLUDE  v_all_ff
+(
+	0  e+2   /16
+	0  f#+2  /16
+	0  g#+2  /16
+	0  a+2   /16
+	0  b+2   /16
+	0  c#+3  /16
+	0  d#+3  /16
+	1  e+    /16
+	1  f#+   /16
+	1  g#+   /16
+	1  a+    /16
+	1  b+    /16
+	1  c#+2  /16
+	1  d#+2  /16
+	11 e+    /16
+	11 f#+   /16
+	11 g#+   /16
+	11 a+    /16
+	11 b+    /16
+	11 c#+2  /16
+	11 d#+2  /16
+	12 e     /16
+	12 f#    /16
+	12 g#    /16
+	12 a     /16
+	12 b     /16
+	12 c#+   /16
+	12 d#+   /16
+)
+
+// m. 119-121
+*
+INCLUDE  m75_77_without_viola_in_77
+INCLUDE  m85_viola
+
+// m. 122-126
+*
+INCLUDE  d_all_staccato
+*
+INCLUDE  m78
+*
+INCLUDE  m79
+*
+INCLUDE  m80
+*
+INCLUDE  m81
+*
+INCLUDE  m82
+
+// m. 127-133
+*
+INCLUDE  m75_77_without_viola_in_77
+INCLUDE  m85_viola
+*
+INCLUDE  d_all_staccato
+*
+INCLUDE  m78
+*
+INCLUDE  m79
+*
+INCLUDE  m80
+*
+INCLUDE  m89_1
+*
+INCLUDE  m89_2
+
+// m. 134-141
+*
+(
+	0  e+2        /8
+	0  b+2        /8
+	0  e+2        /8
+	1  e+2        /8
+	1  b+         /8
+	1  e+2        /8
+	2  e+         /8  q=3
+	3  g#,e+      /8
+	3  g#,b       /8
+	3  g#,e+      /8
+	4  e-,b-      /8  q=3
+	5  b-,g#      /8  q=3
+	6  g#-,e      /8  q=3
+	7  e,b        /8  q=3
+	8  e-         /8  q=3
+	p  bd2,cc2,to /8  q=3
+	10 e-         /8  q=3
+	11 e+         /8
+	11 b          /8
+	11 e+         /8
+	12 e          /8
+	12 b-         /8
+	12 e          /8
+	13 g#-,e      /8  q=3
+	14 e-         /8  q=3
+	15 e-2        /8  q=3
+)
+*
+INCLUDE  v_all_ff
+INCLUDE  m34_2_to_41
+
+// m. 142-149
+*
+INCLUDE  m42_1
+INCLUDE  m34_2_to_41
+
+// m. 150-152
+*
+INCLUDE  m50
+*
+INCLUDE  m51
+*
+INCLUDE  m52
+
+// m. 153
+*
+INCLUDE  m53_without_trumpet
+INCLUDE  m50_trumpet
+
+// m. 154-158
+*
+INCLUDE  m54
+*
+INCLUDE  m55
+*
+INCLUDE  m56
+*
+INCLUDE  m57
+*
+INCLUDE  m58
+
+// m. 159-160
+*
+10 - /4  m, $p   // set timpani to piano instead of pianissimo
+INCLUDE  m19
+INCLUDE  m59_contrabass
+*
+INCLUDE  m20
+INCLUDE  m60_contrabass
+
+// m. 161
+*
+INCLUDE  m21
+INCLUDE  m59_contrabass
+
+// m. 162-164
+*
+INCLUDE  m62
+*
+INCLUDE  m19
+INCLUDE  m59_contrabass
+*
+INCLUDE  m24
+INCLUDE  m64_contrabass
+
+// m. 165
+*
+INCLUDE  m25
+
+// m. 166
+*
+INCLUDE  m26_1
+*
+INCLUDE  v_all_f
+MACRO m166_2
+	( q=2
+		0  b+2   /16
+		1  b+    /16
+		2  b     /16
+		3  b     /16
+		4  g#-,e /16
+		6  e,g#  /16
+		10 e-    /16
+		11 b     /16
+	)
+END
+INCLUDE  m166_2
+
+// m. 167
+*
+MACRO m167_drum
+	p  to      /2  m,   tr=/32
+	p  bd2,cc2 /4  q=2
+END
+MACRO m167_low
+	INCLUDE  m167_drum
+	12 b-,g# /2         tr=/16
+	13 e-,e  /2         tr=/16
+	( q=2
+		5  -     /8
+		5  b-,g# /8
+		7  -     /8
+		7  e,b   /8
+		8  e-,e  /8
+		8  -     /8
+		14 e-    /8
+		14 -     /8
+		15 e-2   /8
+		15 -     /8
+	)
+END
+MACRO m167_high_half
+	0  b+2     /8
+	0  b+2     /16  q=2
+	1  b+      /8
+	1  b+      /16  q=2
+	2  b       /8
+	2  b       /16  q=2
+	3  b       /8
+	3  b       /16  q=2
+	4  g#-,e   /8
+	4  g#-,e   /16  q=2
+	6  e,g#    /8
+	6  e,g#    /16  q=2
+	10 e-      /8
+	10 e-      /16  q=2
+	11 b       /8
+	11 b       /16  q=2
+END
+MACRO m167
+	INCLUDE  m167_low
+	INCLUDE  m167_high_half  q=2
+END
+INCLUDE  m167
+
+// m. 168
+*
+INCLUDE  m167_low  m
+MACRO m168_1_high
+	0  e+3   /8
+	0  f#+3  /8
+	0  g#+3  /8
+	1  e+2   /8
+	1  f#+2  /8
+	1  g#+2  /8
+	2  e+    /8
+	2  f#+   /8
+	2  g#+   /8
+	3  e+    /8
+	3  f#+   /8
+	3  g#+   /8
+	4  g#-,e /8  q=3
+	6  e,g#  /8  q=3
+	10 e-    /8  q=3
+	11 e+    /8
+	11 f#+   /8
+	11 g#+   /8
+END
+INCLUDE  m168_1_high
+*
+INCLUDE  m166_2
+
+// m. 169
+*
+INCLUDE  m167_low  m
+INCLUDE  m167_high_half
+*
+(
+	0  e+3   /8
+	0  g#+3  /16  q=2
+	1  e+2   /8
+	1  g#+2  /16  q=2
+	2  e+    /8
+	2  g#+   /16  q=2
+	3  e+    /8
+	3  g#+   /16  q=2
+	4  g#-,e /8
+	4  g#-,e /16  q=2
+	6  e,g#  /8
+	6  e,g#  /16  q=2
+	10 e-    /8
+	10 e-    /16  q=2
+	11 b     /8
+	11 b     /16  q=2
+)
+
+// m. 170
+*
+(
+	0  f#+3   /8
+	0  d#+3   /8
+	0  b+2    /8
+	0  b+2    /16  q=2
+	1  f#+2   /8
+	1  d#+2   /8
+	1  b+     /8
+	1  b+     /16  q=2
+	2  f#+    /8
+	2  d#+    /8
+	2  b      /8
+	2  b      /16  q=2
+	3  f#+    /8
+	3  d#+    /8
+	3  b      /8
+	3  b      /16  q=2
+	4  b-2,f# /8   q=3
+	4  b-     /16  q=2
+	6  b-,f#  /8   q=3
+	6  e,g#   /16  q=2
+	INCLUDE  m167_drum
+	10 b-2    /8   q=3
+	10 e-     /16  q=2
+	11 f#+    /8
+	11 d#+    /8
+	11 b      /8   q=2
+	12 b-,f#  /2        tr=/16
+	13 b-,d#  /2        tr=/16
+	( q=2
+		5  -      /8
+		5  b-,g#  /8
+		7  -      /8
+		7  b-,b   /8
+		8  b-2,b- /8
+		8  -      /8
+		14 b-2    /8
+		14 -      /8
+		15 b-3    /8
+		15 -      /8
+	)
+)
+
+// m. 171
+*
+INCLUDE  m167
+
+// m. 172
+*
+INCLUDE  m167_low  m
+INCLUDE  m168_1_high
+*
+(
+	0  e+2    /16
+	0  g#+2   /16
+	1  e+     /16
+	1  g#+    /16
+	2  e+     /16
+	2  g#+    /16
+	3  e,e+   /16
+	3  g#,g#+ /16
+	4  g#-,e  /16  q=2
+	6  e,g#-  /16  q=2
+	10 e-     /16  q=2
+	11 e+,g#+ /16  q=2
+)
+
+// m. 173
+*
+(
+	0  b+2    /4+/16    $legato
+	0  a+2    /16       $staccato
+	0  g#+2   /16
+	0  f#+2   /16
+	1  b+     /4+/16    $legato
+	1  a+     /16       $staccato
+	1  g#+    /16
+	1  f#+    /16
+	2  b+     /4+/16    $legato
+	2  a+     /16       $staccato
+	2  g#+    /16
+	2  f#+    /16
+	3  b,b+   /4+/16    $legato
+	3  a,a+   /16       $staccato
+	3  g#,g#+ /16
+	3  f#,f#+ /16
+	4  f#-,d# /8
+	4  f#-,d# /16  q=2
+	4  f#-,d# /8   q=2
+	6  b-,f#  /8
+	6  b-,f#  /16  q=2
+	6  b-,f#  /8   q=2
+	INCLUDE  m167_drum
+	10 b-2    /8
+	10 b-2    /16  q=2
+	10 b-2    /8   q=2
+	11 b+     /4+/16    $legato
+	11 a+     /16       $staccato
+	11 g#+    /16
+	11 f#+    /16
+	12 d#,b   /2                tr=/16
+	13 b-,f#  /2                tr=/16
+	( q=2
+		5  -      /8
+		5  b-,g#  /8
+		7  -      /8
+		7  b-,b   /8
+		8  b-,b-2 /8
+		8  -      /8
+		14 b-2    /8
+		14 -      /8
+		15 b-3    /8
+		15 -      /8
+	)
+)
+
+// m. 174
+*
+( m
+	8  e-     /2     m,  $legato
+	8  e      /2+/8
+)
+MACRO m174_without_trombone
+	INCLUDE d_all_legato
+	0  e+2    /8.
+	0  a+2    /16
+	0  g#+2   /8.
+	0  c#+3   /16
+	1  e+     /8.
+	1  a+     /16
+	1  g#+    /8.
+	1  c#+2   /16
+	2  e+,g#+ /1     m
+	3  g#,e+  /1     m
+	4  e-     /8.
+	4  e      /16
+	4  e      /4     m
+	5  b-,g#  /8.
+	5  b-,g#  /16
+	5  b-,g#  /8
+	6  e,g#   /8.
+	6  e,g#   /16
+	6  e,g#   /8
+	7  e,b    /8.
+	7  e,b    /16
+	7  e,b    /8
+	INCLUDE  m167_drum
+	10 e-     /2        tr=/32
+	10 -      /4     m
+	11 e+     /16
+	11 f#+    /16
+	11 g#+    /16
+	11 a+     /16
+	11 g#+    /16
+	11 a+     /16
+	11 b+     /16
+	11 c#+2   /16
+	12 e      /16
+	12 f#     /16
+	12 g#     /16
+	12 a      /16
+	12 g#     /16
+	12 a      /16
+	12 b      /16
+	12 c#+    /16
+	13 e,g#   /2        tr=/16
+	14 e-     /8.
+	14 e      /16
+	14 e      /8
+	15 e-2    /8.
+	15 e-     /16
+	15 e-     /8
+	INCLUDE d_all_staccato
+END
+INCLUDE  m174_without_trombone
+
+// m. 175
+*
+MACRO m175
+	0  b+2   /16     $legato
+	0  c#+3  /16
+	0  d#+3  /16
+	0  e+3   /16
+	0  d#+3  /16
+	0  e+3   /16
+	0  f#+3  /16
+	0  g#+3  /16
+	1  b+    /16     $legato
+	1  c#+2  /16
+	1  d#+2  /16
+	1  e+2   /16
+	1  d#+2  /16
+	1  e+2   /16
+	1  f#+2  /16
+	1  g#+2  /16
+	4  -     /8
+	4  b-    /8
+	4  g#-   /8
+	4  e-    /8
+	5  b-,g# /8   q=4
+	6  e,g#  /8   q=4
+	7  e,b   /8   q=4
+	8  -     /8
+	8  b-    /8
+	8  g#-   /8
+	8  e-    /8
+	INCLUDE  m167_drum
+	10 e-    /2      tr=/32
+	10 -     /4   m
+	11 b+    /16     $legato
+	11 c#+2  /16
+	11 d#+2  /16
+	11 e+2   /16
+	11 d#+2  /16
+	11 e+2   /16
+	11 f#+2  /16
+	11 g#+2  /16
+	12 b     /16     $legato
+	12 c#+   /16
+	12 d#+   /16
+	12 e+    /16
+	12 d#+   /16
+	12 e+    /16
+	12 f#+   /16
+	12 g#+   /16
+	13 e,g#  /2      tr=/16
+	14 -     /8
+	14 b-    /8
+	14 g#-   /8
+	14 e-    /8
+	15 -     /8
+	15 b-2   /8
+	15 g#-2  /8
+	15 e-2   /8
+	INCLUDE d_all_staccato
+END
+INCLUDE  m175
+
+// m. 176-177
+*
+MACRO m176_to_177
+	0  a+3        /1       $legato
+	1  a+2        /1       $legato
+	2  f#+,a+     /8
+	2  f#+,a+     /4  q=2
+	2  f#+,a+     /8
+	2  f#+,a+     /4
+	3  a,f#+      /8
+	3  a,f#+      /4  q=2
+	3  a,f#+      /8
+	3  a,f#+      /4
+	4  b-2        /8
+	4  c-         /8
+	4  c#-        /8
+	4  d-         /8
+	4  d#-        /8
+	4  f#-        /8
+	4  b-         /8
+	4  b-2        /8
+	5  a          /4  q=4
+	6  f#,a       /4  q=4
+	7  -          /8
+	7  f#+        /4  q=3
+	7  f#+        /8
+	8  b-2,b-     /8
+	8  c-,c       /8
+	8  c#-,c#     /8
+	8  d-,d       /8
+	8  d#-,d#     /8
+	8  f#-,f#     /8
+	8  b-2,b-     /8  q=2
+	p  to         /8
+	p  bd2,cc2,to /8  q=7
+	10 b-2        /8  q=8
+	11 a+2        /2  q=2, tr=/16
+	12 a+         /2  q=2, tr=/16
+	13 f#,f#+     /2  q=2, tr=/16
+	14 b-2        /8
+	14 c-         /8
+	14 c#-        /8
+	14 d-         /8
+	14 d#-        /8
+	14 f#-        /8
+	14 b-         /8
+	14 b-2        /8
+	15 b-3        /8
+	15 c-2        /8
+	15 c#-2       /8
+	15 d-2        /8
+	15 d#-2       /8
+	15 f#-2       /8
+	15 b-2        /8
+	15 b-3        /8
+	INCLUDE d_all_staccato
+END
+INCLUDE  m176_to_177
+
+// m. 178-179
+*
+( m
+	8  e-,e /8.   $legato
+	8  e    /16
+	8  e    /4.
+)
+INCLUDE  m174_without_trombone
+*
+INCLUDE  m175
+
+// m. 180-181
+*
+INCLUDE  m176_to_177
+
+// m. 182
+*
+MACRO m182
+	0  g#+3     /8
+	0  -        /8
+	0  d#+3     /8
+	1  g#+2     /8
+	1  -        /8
+	1  d#+2     /8
+	2  e+,g#+   /8
+	2  -        /8
+	2  c+,g#+   /8
+	3  g#,e+    /8
+	3  -        /8
+	3  c#,d#+   /8
+	4  e-,e     /8
+	4  -        /8
+	4  g#-2,g#- /8
+	6  e,g#     /8
+	6  -        /8
+	6  f#,g#    /8
+	7  e+       /8
+	7  -        /8
+	7  g#       /8
+	8  e-,e     /8
+	8  -        /8
+	8  g#-2,g#- /8
+	11 g#+2     /16  q=4
+	11 g#+2     /16       $legato
+	11 d#+2     /16  q=3, $staccato
+	12 g#+      /16  q=4
+	12 g#+      /16       $legato
+	12 d#+      /16  q=3, $staccato
+	13 e,e+     /8
+	13 -        /8
+	13 g#,c+    /8                tr=/16
+	14 e-       /8
+	14 -        /8
+	14 g#-2     /8
+	15 e-2      /8
+	15 -        /8
+	15 g#-3     /8
+	( q=2
+		5  g#         /8
+		5  -          /8
+		p  bd2,cc2,to /8
+		p  -          /8
+		10 e-         /8
+		10 -          /8
+	)
+	INCLUDE  d_all_staccato
+END
+INCLUDE  m182
+
+// m. 183
+*
+MACRO m183
+	0  e+3        /8
+	0  -          /8
+	0  f#+3       /8
+	1  e+2        /8
+	1  -          /8
+	1  f#+2       /8
+	2  c#+,e+     /8
+	2  -          /8
+	2  d#+,b+     /8
+	3  c#+,e+     /8
+	3  -          /8
+	3  d#+,f#+    /8
+	4  c#-,c#     /8
+	4  -          /8
+	4  b-2,b-     /8
+	5  g#         /8
+	5  -          /8
+	5  b          /8
+	6  e,g#       /8
+	6  -          /8
+	6  b-,f#      /8
+	7  e+         /8
+	7  -          /8
+	7  b          /8
+	8  c#-,c#     /8
+	8  -          /8
+	8  b-2,b-     /8
+	p  bd2,cc2,to /8
+	p  -          /8
+	p  bd2,cc2,to /8
+	10 e-         /8
+	10 -          /8
+	10 b-2        /8
+	11 d#+2       /16       $legato
+	11 e+2        /16  q=3, $staccato
+	11 e+2        /16       $legato
+	11 f#+2       /16  q=3, $staccato
+	12 d#+        /16       $legato
+	12 e+         /16  q=3, $staccato
+	12 e+         /16       $legato
+	12 f#+        /16  q=3, $staccato
+	13 e,c#+      /8
+	13 -          /8
+	13 d#,b       /8                tr=/16
+	14 c#-        /8
+	14 -          /8
+	14 b-2        /8
+	15 c#-2       /8
+	15 -          /8
+	15 b-3        /8
+	INCLUDE  d_all_staccato
+END
+INCLUDE  m183
+
+
+// m. 184-185
+*
+( m
+	7  g#  /8
+)
+INCLUDE  m182
+*
+INCLUDE  m183
+
+// m. 186-187
+*
+MACRO m186_187_drums
+	INCLUDE  v_all_sf
+	p  to         /2     m, tr=/32
+	p  bd2,cc2    /4
+	INCLUDE  v_all_f
+	p  -          /4
+	p  to,bd2,cc2 /8
+END
+MACRO m186_to_187
+	INCLUDE  m186_187_drums
+	INCLUDE  d_all_legato
+	INCLUDE  v_all_sf
+	0  g+3        /2+/8
+	1  g+2        /2+/8
+	2  c+,c+2     /2+/8
+	3  c+,g+      /2+/8
+	4  e-2,e-     /2+/8
+	5  g-,g       /2+/8
+	6  e-,e       /2+/8
+	7  e,e+       /2+/8
+	8  e-,e       /2+/8
+	10 e-         /2          tr=/32
+	11 g+2        /2          tr=/16
+	12 g+         /2          tr=/16
+	13 e,c+       /2          tr=/16
+	14 c          /2          tr=/16
+	15 e-2        /8
+	INCLUDE  d_all_staccato
+	INCLUDE  v_all_f
+	0  e+3        /16    q=2
+	0  c+3        /8
+	0  e+3        /8
+	1  e+2        /16    q=2
+	1  c+2        /8
+	1  e+2        /8
+	3  e+         /16    q=2
+	3  c+         /8
+	3  e+         /8
+	10 e-         /8
+	11 g+2        /16    q=2
+	11 e+2        /16    q=2
+	11 c+2        /16    q=2
+	11 e+2        /16    q=2
+	12 g+         /16    q=2
+	12 e+         /16    q=2
+	12 c+         /16    q=2
+	12 e+         /16    q=2
+	13 e,c+       /8
+	14 c          /8
+	15 e-2        /8     q=4
+END
+INCLUDE  m186_to_187
+
+// m. 188-189
+*
+MACRO m188_to_189
+	INCLUDE  m186_187_drums
+	INCLUDE  d_all_legato
+	INCLUDE  v_all_sf
+	0  g#+3       /2+/8
+	1  g#+2       /2+/8
+	2  e+,b+      /2+/8
+	3  g#+        /2+/8
+	4  e-2,e-     /2+/8
+	5  b-,b       /2+/8
+	6  e-,g#      /2+/8
+	7  g#,e+      /2+/8
+	8  e-,e       /2+/8
+	10 e-         /2          tr=/32
+	11 g#+2       /2          tr=/16
+	12 g#+        /2          tr=/16
+	13 e,b        /2          tr=/16
+	14 b-         /2          tr=/16
+	15 e-2        /8
+	INCLUDE  d_all_staccato
+	INCLUDE  v_all_f
+	0  e+3        /16    q=2
+	0  b+2        /8
+	0  e+3        /8
+	1  e+2        /16    q=2
+	1  b+         /8
+	1  e+2        /8
+	3  e+         /16    q=2
+	3  b          /8
+	3  e+         /8
+	10 e-         /8
+	11 g#+2       /16    q=2
+	11 e+2        /16    q=2
+	11 b+         /16    q=2
+	11 e+2        /16    q=2
+	12 g#+        /16    q=2
+	12 e+         /16    q=2
+	12 b          /16    q=2
+	12 e+         /16    q=2
+	13 e,b        /8
+	14 b-         /8
+	15 e-2        /8     q=4
+END
+INCLUDE  m188_to_189
+
+// m. 190-191
+*
+MACRO m190_to_191
+	INCLUDE  m186_187_drums
+	INCLUDE  d_all_legato
+	INCLUDE  v_all_sf
+	0  g#+3       /2+/8
+	1  g#+2       /2+/8
+	2  f+,g#+     /2+/8
+	3  g#+        /2+/8
+	4  c#-,c#     /2+/8
+	5  g#         /2+/8
+	6  f,g#       /2+/8
+	7  b          /2+/8
+	8  c#-,c#     /2+/8
+	10 e-         /2          tr=/32
+	11 g#+2       /2          tr=/16
+	12 g#+        /2          tr=/16
+	13 f,b        /2          tr=/16
+	14 c#         /2          tr=/16
+	15 c#-2       /8
+	INCLUDE  d_all_staccato
+	INCLUDE  v_all_f
+	0  f+3        /16    q=2
+	0  c#+3       /8
+	0  f+3        /8
+	1  f+2        /16    q=2
+	1  c#+2       /8
+	1  f+2        /8
+	3  f+         /16    q=2
+	3  c#+        /8
+	3  f+         /8
+	10 e-         /8
+	11 g#+2       /16    q=2
+	11 f+2        /16    q=2
+	11 c#+2       /16    q=2
+	11 f+2        /16    q=2
+	12 g#+        /16    q=2
+	12 f+         /16    q=2
+	12 c#+        /16    q=2
+	12 f+         /16    q=2
+	13 f,b        /8
+	14 c#         /8
+	15 c#-2       /8     q=4
+END
+INCLUDE  m190_to_191
+
+// m. 192-193
+*
+(
+	INCLUDE  v_all_sf
+	11 a#+2       /2   tr=/16
+	12 a#+        /2   tr=/16
+	INCLUDE  v_all_f
+	11 a#+2       /8   tr=/8
+	11 g+2        /8   tr=/8
+	11 e+2        /8   tr=/8
+	11 g+2        /8   tr=/8
+	12 a#+        /8   tr=/8
+	12 g+         /8   tr=/8
+	12 e+         /8   tr=/8
+	12 g+         /8   tr=/8
+)
+MACRO m192_to_193_without_violins
+	INCLUDE  m186_187_drums
+	INCLUDE  d_all_legato
+	INCLUDE  v_all_sf
+	0  a#+3       /2+/8
+	1  a#+2       /2+/8
+	2  g+,a#+     /2+/8
+	3  a#,a#+     /2+/8
+	4  c-,c       /2+/8
+	5  g          /2+/8
+	6  e-,e       /2+/8
+	7  e,e+       /2+/8
+	8  c-,c       /2+/8
+	10 e-         /2          tr=/32
+	13 g,e+       /2          tr=/16
+	14 c          /2          tr=/16
+	15 c-2        /8
+	INCLUDE  d_all_staccato
+	INCLUDE  v_all_f
+	0  g+3        /16    q=2
+	0  e+3        /8
+	0  g+3        /8
+	1  g+2        /16    q=2
+	1  e+2        /8
+	1  g+2        /8
+	3  g,g+       /16    q=2
+	3  e,e+       /8
+	3  g,g+       /8
+	10 e-         /8
+	13 g,e+       /8
+	14 c          /8
+	15 c-2        /8     q=4
+END
+INCLUDE  m192_to_193_without_violins
+
+// m. 194-195
+*
+MACRO m194_drums
+	p  to       /2       m, tr=/32
+	p  bd2,cc2  /4  q=2
+END
+(
+	11 b+2    /8   tr=/8
+	11 a#+2   /8   tr=/8
+	11 a+2    /8   tr=/8
+	11 g#+2   /8   tr=/8
+	11 f#+2   /8   tr=/8
+	11 e+2    /8   tr=/8
+	11 d#+2   /8   tr=/8
+	11 c#+2   /8   tr=/8
+	12 b+     /8   tr=/8
+	12 a#+    /8   tr=/8
+	12 a+     /8   tr=/8
+	12 g#+    /8   tr=/8
+	12 f#+    /8   tr=/8
+	12 e+     /8   tr=/8
+	12 d#+    /8   tr=/8
+	12 c#+    /8   tr=/8
+)
+MACRO m194_to_195_without_violins
+	INCLUDE  d_all_legato
+	0  b+3    /8         $staccato
+	0  a#+3   /8
+	0  a+3    /8
+	0  g#+3   /8
+	0  f#+3   /8
+	0  e+3    /8
+	0  d#+3   /8
+	0  c#+3   /8
+	1  b+2    /8         $staccato
+	1  a#+2   /8
+	1  a+2    /8
+	1  g#+2   /8
+	1  f#+2   /8
+	1  e+2    /8
+	1  d#+2   /8
+	1  c#+2   /8
+	2  g#+,b+ /2
+	2  e+,g#+ /2
+	3  b,e+   /1
+	4  b-2,b  /8  q=8,   $staccato
+	5  b-,b   /1
+	6  e,g#   /1
+	7  g#,e+  /1
+	8  b-2,b- /1
+	INCLUDE  m194_drums  q=2
+	10 b-2    /2  q=2,   tr=/32
+	10 -      /4       m
+	13 g#,e+  /2  q=2,   tr=/16
+	14 b-     /2  q=2,   tr=/16
+	15 b-3    /8  q=8,   $staccato
+	INCLUDE  d_all_staccato
+END
+INCLUDE  m194_to_195_without_violins
+
+// m. 196-197
+*
+(
+	11 b+      /8   tr=/8
+	11 a#+     /8   tr=/8
+	11 a+      /8   tr=/8
+	11 g#+     /8   tr=/8
+	11 f#+     /8   tr=/8
+	11 e+      /8   tr=/8
+	11 d#+     /8   tr=/8
+	11 f#+     /8   tr=/8
+	12 b       /8   tr=/8
+	12 a#      /8   tr=/8
+	12 a       /8   tr=/8
+	12 g#      /8   tr=/8
+	12 f#      /8   tr=/8
+	12 e       /8   tr=/8
+	12 d#      /8   tr=/8
+	12 f#      /8   tr=/8
+)
+MACRO m196_to_197_without_violins
+	INCLUDE  d_all_legato
+	0  b+3     /8          $staccato
+	0  a#+3    /8
+	0  a+3     /8
+	0  g#+3    /8
+	0  f#+3    /8
+	0  e+3     /8
+	0  d#+3    /8
+	0  f#+3    /8
+	1  b+2     /8          $staccato
+	1  a#+2    /8
+	1  a+2     /8
+	1  g#+2    /8
+	1  f#+2    /8
+	1  e+2     /8
+	1  d#+2    /8
+	1  f#+2    /8
+	2  f#+,a+  /2
+	2  d#+,f#+ /2
+	3  a,d#+   /1
+	4  b-2,b   /8  q=8,    $staccato
+	5  b-,a    /1
+	6  b-,f#   /1
+	7  b-,b    /1
+	8  b-2,b-  /1
+	INCLUDE  m194_drums  q=2
+	10 b-2     /2  q=2,    tr=/32
+	10 -       /4       m
+	13 d#,b    /2  q=2,    tr=/16
+	14 b-2     /2  q=2,    tr=/16
+	15 b-3     /8  q=8,    $staccato
+	INCLUDE  d_all_staccato
+END
+INCLUDE  m196_to_197_without_violins
+
+// m. 198-199
+*
+( m
+	8  e-     /2     m,  $legato
+	8  e      /2+/8
+)
+INCLUDE  m174_without_trombone
+*
+INCLUDE  m175
+
+// m. 200-201
+*
+INCLUDE  m176_to_177
+
+// m. 202-203
+*
+( m
+	8  e-,e /8.    $legato
+	8  e    /16
+	8  e    /4.
+)
+INCLUDE  m174_without_trombone
+*
+INCLUDE  m175
+
+// m. 204-205
+*
+INCLUDE  m176_to_177
+
+// m. 206-207
+*
+INCLUDE  m182
+*
+INCLUDE  m183
+
+// m. 208-209
+*
+( m
+	7  g#  /8
+)
+INCLUDE  m182
+*
+INCLUDE  m183
+
+// m. 210-211
+*
+INCLUDE  m186_to_187
+
+// m. 212-213
+*
+INCLUDE  m188_to_189
+
+// m. 214-215
+*
+INCLUDE  m190_to_191
+
+// m. 216-217
+*
+(
+	INCLUDE  v_all_sf
+	11 a#+2   /2        tr=/16
+	12 a#+    /2        tr=/16
+	INCLUDE  v_all_f
+	11 a#+2   /16  q=2
+	11 g+2    /16  q=2
+	11 e+2    /16  q=2
+	11 g+2    /16  q=2
+	12 a#+    /16  q=2
+	12 g+     /16  q=2
+	12 e+     /16  q=2
+	12 g+     /16  q=2
+)
+INCLUDE  m192_to_193_without_violins
+
+// m. 218-219
+*
+(
+	11 b+2    /16  q=2
+	11 a#+2   /16  q=2
+	11 a+2    /16  q=2
+	11 g#+2   /16  q=2
+	11 f#+2   /16  q=2
+	11 e+2    /16  q=2
+	11 d#+2   /16  q=2
+	11 c#+2   /16  q=2
+	12 b+     /16  q=2
+	12 a#+    /16  q=2
+	12 a+     /16  q=2
+	12 g#+    /16  q=2
+	12 f#+    /16  q=2
+	12 e+     /16  q=2
+	12 d#+    /16  q=2
+	12 c#+    /16  q=2
+)
+INCLUDE  m194_to_195_without_violins
+
+// m. 220-221
+*
+(
+	11 b+      /16  q=2
+	11 a#+     /16  q=2
+	11 a+      /16  q=2
+	11 g#+     /16  q=2
+	11 f#+     /16  q=2
+	11 e+      /16  q=2
+	11 d#+     /16  q=2
+	11 f#+     /16  q=2
+	12 b       /16  q=2
+	12 a#      /16  q=2
+	12 a       /16  q=2
+	12 g#      /16  q=2
+	12 f#      /16  q=2
+	12 e       /16  q=2
+	12 d#      /16  q=2
+	12 f#      /16  q=2
+)
+INCLUDE  m196_to_197_without_violins
+
+// m. 222
+*
+(
+	INCLUDE  d_all_legato
+	( q=2
+		0  e+3    /16
+		0  d#+3   /16
+		1  e+2    /16
+		1  d#+2   /16
+		11 e+     /16
+		11 d#+    /16
+		12 e      /16
+		12 d#     /16
+		14 e-     /16
+		14 d#-    /16
+	)
+	0  e+3        /8
+	1  e+2        /8
+	2  e+,g#+     /4.
+	3  g#,e+      /4.
+	4  e-         /4.
+	5  b-,g#      /4.
+	6  g#-,e      /4.
+	7  e,b        /4.
+	8  e-         /4.
+	p  to,bd2,cc2 /4
+	10 e-         /4   tr=/32
+	10 e-         /8
+	11 e+         /8
+	12 e          /8
+	13 e,g#       /4   tr=/16
+	13 e,g#       /8
+	14 e-         /8
+	15 e-2        /8
+	INCLUDE  d_all_staccato
+)
+*
+MACRO m222_2
+		0  b+2 /16  q=2
+		1  b+  /16  q=2
+		2  b   /16  q=2
+		3  b   /16  q=2
+		4  b-  /16  q=2
+		6  b-  /16  q=2
+END
+INCLUDE  m222_2
+
+// m. 223
+*
+MACRO m223_1
+	0  b+2 /8
+	1  b+  /8
+	2  b   /8
+	3  b   /8
+	4  b-  /8
+	6  b-  /8
+END
+MACRO m223
+	INCLUDE  m223_1
+	INCLUDE  m222_2
+	INCLUDE  m223_1
+	INCLUDE  m222_2
+END
+INCLUDE  m223
+
+// m. 224
+*
+MACRO m224_1
+	0  e+3  /8
+	0  f#+3 /8
+	0  g#+3 /8
+	1  e+3  /8
+	1  f#+3 /8
+	1  g#+3 /8
+	2  e+   /8
+	2  f#+  /8
+	2  g#+  /8
+	3  e+   /8
+	3  f#+  /8
+	3  g#+  /8
+	4  e    /8
+	4  f#   /8
+	4  g#   /8
+	6  e    /8
+	6  f#   /8
+	6  g#   /8
+END
+INCLUDE  m224_1
+*
+INCLUDE  v_all_ff
+MACRO m224_2
+	INCLUDE  m222_2
+	11 b    /16  q=2
+	12 b    /16  q=2
+	13 b-   /16  q=2
+	14 b-   /16  q=2
+END
+INCLUDE  m224_2
+
+// m. 225
+*
+MACRO m225_1
+	INCLUDE  m223_1
+	11 b    /8
+	12 b    /8
+	13 b-   /8
+	14 b-   /8
+END
+( q=2
+	INCLUDE  m225_1
+	INCLUDE  m224_2
+)
+
+// m. 226
+*
+(
+	0  g#+3 /8
+	0  a+3  /8
+	0  b+3  /8
+	0  -    /8
+	1  g#+2 /8
+	1  a+2  /8
+	1  b+2  /8
+	2  g#+  /8
+	2  a+   /8
+	2  b+   /8
+	3  g#+  /8
+	3  a+   /8
+	3  b+   /8
+	4  g#   /8
+	4  a    /8
+	4  b    /8
+	6  g#   /8
+	6  a    /8
+	6  b    /8
+	11 g#+  /8
+	11 a+   /8
+	11 b+   /8
+	12 g#+  /8
+	12 a+   /8
+	12 b+   /8
+	13 g#   /8
+	13 a    /8
+	13 b    /8
+	14 g#   /8
+	14 a    /8
+	14 b    /8
+)
+
+// m. 227
+*
+(
+	INCLUDE  m224_1
+	11 e    /8
+	11 f#   /8
+	11 g#   /8
+	12 e    /8
+	12 f#   /8
+	12 g#   /8
+	13 e    /8
+	13 f#   /8
+	13 g#   /8
+	14 e    /8
+	14 f#   /8
+	14 g#   /8
+	14 -    /8
+)
+
+// m. 228
+*
+(
+	0  g#+2 /8
+	0  a+2  /8
+	0  b+2  /8
+	1  g#+  /8
+	1  a+   /8
+	1  b+   /8
+	2  g#   /8
+	2  a    /8
+	2  b    /8
+	3  g#   /8
+	3  a    /8
+	3  b    /8
+	4  g#-  /8
+	4  a-   /8
+	4  b-   /8
+	6  g#-  /8
+	6  a-   /8
+	6  b-   /8
+	13 g#-  /8
+	13 a-   /8
+	13 b-   /8
+	14 g#-  /8
+	14 a-   /8
+	14 b-   /8
+	14 -    /8
+)
+
+// m. 229
+*
+0  -  /2
+
+// m. 230-231
+*
+(
+	INCLUDE  d_all_legato
+	INCLUDE  v_all_sf
+	0  d#+3    /1
+	1  d#+2    /1
+	2  d#+,b+  /1
+	3  d#+,f#+ /1
+	4  b-2,d#  /1
+	5  b-,b    /1
+	6  b-,f#   /1
+	7  b       /1
+	8  b-2,b-  /1
+	10 b-2     /2   q=2,    tr=/32
+	10 -       /4        m
+	11 b       /16
+	12 b-      /16
+	13 f#,a    /2           tr=/16
+	14 b-      /2           tr=/16
+	15 b-3     /8
+	INCLUDE  v_all_ff
+	INCLUDE  m167_drum
+	11 c+      /16          $staccato
+	11 c#+     /16
+	11 d+      /16
+	11 d#+     /16
+	11 e+      /16
+	11 f+      /16
+	11 f#+     /16
+	11 g+      /16
+	11 g#+     /16
+	11 a+      /16
+	11 a#+     /16
+	11 b+      /16
+	11 c+2     /16
+	11 c#+2    /16
+	11 d#+2    /16
+	12 c       /16          $staccato
+	12 c#      /16
+	12 d       /16
+	12 d#      /16
+	12 e       /16
+	12 f       /16
+	12 f#      /16
+	12 g       /16
+	12 g#      /16
+	12 a       /16
+	12 a#      /16
+	12 b       /16
+	12 c+      /16
+	12 c#+     /16
+	12 d#+     /16
+	13 f#,a    /2           tr=/16
+	14 b-      /2           tr=/16
+	15 b-3     /8   q=7,    $staccato
+)
+
+// m. 232-235
+*
+INCLUDE  d_all_staccato
+( q=4
+	( q=2
+		0  e+3     /8
+		0  d#+3    /8
+		1  e+3     /8
+		1  d#+3    /8
+		2  e+,g#+  /8
+		2  d#+,b+  /8
+		3  e+,g#+  /8
+		3  d#+,a+  /8
+		4  e-,e    /8
+		4  b-2,b-  /8
+		5  b-,b    /8  q=2
+		6  e,g#    /8
+		6  b-,f#   /8
+		7  e       /8
+		7  b       /8
+		8  e-,e    /8
+		8  b-2,b-  /8
+		10 e-      /8
+		10 b-2     /8
+		11 e+2     /16
+		11 d#+2    /16
+		11 f#+2    /16
+		11 d#+2    /16
+		12 e+      /16
+		12 d#+     /16
+		12 f#+     /16
+		12 d#+     /16
+		13 e,g#    /8
+		13 f#,a    /8
+		14 e-      /8
+		14 b-2     /8
+		15 e-2     /8
+		15 b-3     /8
+	)
+	p  to      /2       m, tr=/32
+	p  bd2,cc2 /8   q=4
+)
+
+// m. 236
+*
+MACRO m236_low_ch5_10
+	5  -       /8          $staccato
+	5  b-,b    /4.
+	6  -       /8          $staccato
+	6  e-,g#   /4.
+	7  -       /8          $staccato
+	7  g#,e+   /4.
+	p  to      /2     m,   tr=/32
+	p  bd2,cc2 /4
+	10 e-      /2          tr=/32
+	10 -       /4     m
+END
+MACRO m236_low_ch12_15
+	12 g#,e+   /2          tr=/16,  $legato
+	13 e,b     /2          tr=/16,  $legato
+	14 e-      /2          tr=/16,  $legato
+	15 e-2     /8     q=4,          $staccato
+END
+(
+	0  e+3     /8
+	0  e+3     /16    q=2
+	0  e+3     /8     q=2
+	1  e+2     /8
+	1  e+2     /16    q=2
+	1  e+2     /8     q=2
+	2  e+,g#+  *4+/8  m,            $legato
+	3  b,g#+   *4+/8  m,            $legato
+	4  e-2,e-  *2     m,            $legato
+	8  e-,e    *2     m,            $legato
+	11 e+2     /8
+	11 e+2     /16    q=2
+	11 e+2     /4          tr=/16
+	INCLUDE  m236_low_ch5_10
+	INCLUDE  m236_low_ch12_15
+)
+
+// m. 237
+*
+(
+	0  e+3  /8
+	0  b+2  /16  q=2
+	0  b+2  /8   q=2
+	1  e+2  /8
+	1  b+   /16  q=2
+	1  b+   /8   q=2
+	INCLUDE  m236_low_ch5_10
+	11 e+2  /8
+	11 b+   /16  q=2
+	11 b+   /4          tr=/16
+	INCLUDE  m236_low_ch12_15
+)
+
+// m. 238
+*
+(
+	0  b+2  /8
+	0  g#+2 /16  q=2
+	0  g#+2 /8   q=2
+	1  b+   /8
+	1  g#+  /16  q=2
+	1  g#+  /8   q=2
+	INCLUDE  m236_low_ch5_10
+	11 b+   /8
+	11 g#+  /16  q=2
+	11 g#+  /4          tr=/16
+	INCLUDE  m236_low_ch12_15
+)
+
+// m. 239
+*
+(
+	0  g#+2 /8
+	0  e+2  /16  q=2
+	0  e+2  /8   q=2
+	1  g#+  /8
+	1  e+   /16  q=2
+	1  e+   /8   q=2
+	INCLUDE  m236_low_ch5_10
+	11 g#+  /8
+	11 e+   /16  q=2
+	11 e+   /4          tr=/16
+	INCLUDE  m236_low_ch12_15
+)
+
+// m. 240
+*
+(
+	0  e+2    /8
+	0  e+3    /16  q=2
+	0  e+3    /8   q=2
+	1  e+     /8
+	1  e+2    /16  q=2
+	1  e+2    /8   q=2
+	4  e-2,e- /8
+	4  e-,e   /2        m
+	INCLUDE  m236_low_ch5_10
+	8  -      /8
+	8  e-,e   /4.
+	11 e+     /8
+	11 e+     /16  q=2
+	11 e+     /4          tr=/16
+	12 b-,g#  /2          tr=/16
+	13 e-,e   /2          tr=/16
+	14 e-     /8          $staccato
+	14 e      /8   q=3
+	15 e-2    /8          $staccato
+	15 e-     /8   q=3
+)
+
+// m. 241
+*
+(
+	0  e+3    /8
+	0  b+2    /16  q=2
+	0  b+2    /8   q=2
+	1  e+2    /8
+	1  b+     /16  q=2
+	1  b+     /8   q=2
+	4  -      /8
+	4  b-2,b- /2   m
+	INCLUDE  m236_low_ch5_10
+	8  -      /8
+	8  b-2,b- /4.
+	11 e+     /8
+	11 b      /16  q=2
+	11 b      /4          tr=/16
+	12 b-,g#  /2          tr=/16
+	13 e-,e   /2          tr=/16
+	14 e      /8
+	14 b-     /8   q=3
+	15 e-     /8
+	15 b-2    /8   q=3
+)
+
+// m. 242
+*
+(
+	0  b+2      /8
+	0  g#+2     /16  q=2
+	0  g#+2     /8   q=2
+	1  b+       /8
+	1  g#+      /16  q=2
+	1  g#+      /8   q=2
+	4  -        /8
+	4  g#-2,g#- /2   m
+	INCLUDE  m236_low_ch5_10
+	8  -      /8
+	8  g#-2,g#- /4.
+	11 b      /8
+	11 g#     /16  q=2
+	11 g#     /4          tr=/16
+	12 b-,g#  /2          tr=/16
+	13 e-,e   /2          tr=/16
+	14 b-     /8
+	14 g#-    /8   q=3
+	15 b-2    /8
+	15 g#-2   /8   q=3
+)
+
+// m. 243
+*
+(
+	0  g#+2     /8
+	0  e+2      /16  q=2
+	0  e+2      /8   q=2
+	1  g#+      /8
+	1  e+       /16  q=2
+	1  e+       /8   q=2
+	4  -        /8
+	4  e-2,e-   /2   m
+	INCLUDE  m236_low_ch5_10
+	8  -        /8
+	8  e-       /2   m
+	11 g#       /8
+	11 e        /16  q=2
+	11 e        /4          tr=/16
+	12 b-,g#    /2          tr=/16
+	13 e-,e     /2          tr=/16
+	14 g#-      /8
+	14 e-       /8   q=3
+	15 g#-2     /8
+	15 e-2      /8   q=3
+)
+
+// m. 244
+*
+(
+	INCLUDE  d_all_staccato
+	0  e+2        /8
+	1  e+         /8
+	3  -          /8
+	3  b-         /8
+	3  e          /8
+	3  b-         /8
+	4  -          /8
+	4  b-2        /8
+	4  e-         /8
+	4  b-2        /8
+	6  -          /8
+	6  b-         /8
+	6  e          /8
+	6  b-         /8
+	7  -          /8
+	7  b-         /8
+	7  e          /8
+	7  b-         /8
+	p  to,bd2,cc2 /8
+	10 e-         /8
+	11 e          /8
+	11 b-         /16  q=2
+	11 e          /16  q=2
+	11 b-         /16  q=2
+	12 b-,g#      /8
+	12 b-         /16  q=2
+	12 e          /16  q=2
+	12 b-         /16  q=2
+	13 e-,e       /8
+	13 b-         /16  q=2
+	13 e          /16  q=2
+	13 b-         /16  q=2
+	14 e-         /8
+	15 e-2        /8
+)
+
+// m. 245
+*
+(
+	3  g#   /8
+	3  e    /8
+	3  b    /8
+	3  g#   /8
+	4  g#-  /8
+	4  e-   /8
+	4  b-   /8
+	4  g#-  /8
+	6  g#   /8
+	6  e    /8
+	6  b    /8
+	6  g#   /8
+	7  g#   /8
+	7  e    /8
+	7  b    /8
+	7  g#   /8
+	11 g#   /16  q=2
+	11 e    /16  q=2
+	11 b    /16  q=2
+	11 g#   /16  q=2
+	12 g#   /16  q=2
+	12 e    /16  q=2
+	12 b    /16  q=2
+	12 g#   /16  q=2
+	13 g#   /16  q=2
+	13 e    /16  q=2
+	13 b    /16  q=2
+	13 g#   /16  q=2
+)
+
+// m. 246
+*
+(
+	0  -    /8
+	0  b+   /8
+	0  e+2  /8
+	0  b+   /8
+	1  -    /8
+	1  b    /8
+	1  e+   /8
+	1  b    /8
+	2  -    /8
+	2  b    /8
+	2  e+   /8
+	2  b    /8
+	4  e    /8
+	4  b-2  /8
+	4  e-   /8
+	4  b-2  /8
+	7  e    /8
+	7  b    /8
+	7  e+   /8
+	7  b    /8
+	8  -    /8
+	8  b-2  /8
+	8  e-   /8
+	8  b-2  /8
+	10 -    /8
+	10 b-2  /8   q=3
+	11 e+   /8
+	11 b    /16  q=2
+	11 e+   /16  q=2
+	11 b    /16  q=2
+	12 e+   /8
+	12 b    /16  q=2
+	12 e+   /16  q=2
+	12 b    /16  q=2
+	13 e+   /8
+	13 b-   /16  q=2
+	13 e    /16  q=2
+	13 b-   /16  q=2
+	14 -    /8
+	14 b-2  /8
+	14 e-   /8
+	14 b-2  /8
+	15 -    /8
+	15 b-3  /8
+	15 e-2  /8
+	15 b-3  /8
+	( q=2
+		3  e+ /8
+		3  b  /8
+		6  e  /8
+		6  b- /8
+	)
+)
+
+// m. 247
+*
+(
+	0  g#+2  /8
+	0  e+2   /8
+	0  b+2   /8
+	0  g#+2  /8
+	1  g#+   /8
+	1  e+    /8
+	1  b+    /8
+	1  g#+   /8
+	2  g#+   /8
+	2  e+    /8
+	2  b+    /8
+	2  g#+   /8
+	3  g#+   /8
+	3  e+    /8
+	3  b+    /8
+	3  g#+   /8
+	4  g#-   /8
+	4  e-    /8
+	4  b-    /8
+	4  g#-   /8
+	6  g#    /8
+	6  e     /8
+	6  b     /8
+	6  g#    /8
+	7  g#+   /8
+	7  e+    /8
+	7  b     /8
+	7  g#    /8
+	8  g#-   /8
+	8  e-    /8
+	8  b-    /8
+	8  g#-   /8
+	10 b-2   /8   q=4
+	11 g#+   /16  q=2
+	11 e+    /16  q=2
+	11 b+    /16  q=2
+	11 g#+   /16  q=2
+	12 g#+   /16  q=2
+	12 e+    /16  q=2
+	12 b+    /16  q=2
+	12 g#+   /16  q=2
+	13 g#    /16  q=2
+	13 e     /16  q=2
+	13 b     /16  q=2
+	13 g#    /16  q=2
+	14 g#-   /8
+	14 e-    /8
+	14 b-    /8
+	14 g#-   /8
+	15 g#-2  /8
+	15 e-2   /8
+	15 b-2   /8
+	15 g#-2  /8
+)
+
+// m. 248
+*
+(
+	0  e+3    /4
+	1  e+2    /4
+	2  e+     /4
+	3  e+     /4
+	4  e      /4
+	6  e      /4
+	7  e      /4
+	8  e      /4
+	10 e-     /4
+	11 e+2    /4
+	12 e+2    /4
+	13 e+     /4
+	14 e      /4
+	15 e-     /4
+	15 -      /8
+)
+*
+(
+	0  e+3    /16  q=2
+	1  e+2    /16  q=2
+	2  g#+,b+ /16  q=2
+	3  b,g#+  /16  q=2
+	10 e-     /16  q=2
+	11 e+2    /16  q=2
+	12 b,g#+  /16  q=2
+	13 g#,e+  /16  q=2
+	14 e      /16  q=2
+	15 e-     /16  q=2
+)
+
+// m. 249
+*
+(
+	0  e+3    /8   q=4
+	1  e+2    /8   q=4
+	2  g#+,b+ /8   q=4
+	3  b,g#+  /8   q=4
+	4  e      /8
+	4  b-     /8
+	4  g#-    /8
+	4  b-     /8
+	5  b-,b   /8   q=4
+	6  e,g#   /8   q=4
+	7  g#,e+  /8   q=4
+	8  e      /8
+	8  b-     /8
+	8  g#-    /8
+	8  b-     /8
+	INCLUDE  m167_drum
+	10 e-     /8   q=4
+	11 e+2    /8   q=4
+	12 b,g#+  /8   q=4
+	13 g#,e+  /8   q=4
+	14 e      /8
+	14 b-     /8
+	14 g#-    /8
+	14 b-     /8
+	15 e-     /8
+	15 b-2    /8
+	15 g#-2   /8
+	15 b-2    /8
+)
+
+// m. 250
+*
+(
+	0  e+3        /4
+	1  e+2        /4
+	2  g#+,b+     /4
+	3  b,g#+      /4
+	4  e-         /4
+	5  b-,b       /4
+	6  e,g#       /4
+	7  g#,e+      /4
+	8  e-         /4
+	p  to,bd2,cc2 /4
+	10 e-         /4
+	11 e+2        /4
+	12 b,g#+      /4
+	13 g#,e+      /4
+	14 e-         /4
+	15 e-2        /4
+	15 -          /8.
+)
+*
+(
+	0  e+3    /16
+	1  e+2    /16
+	2  e+,g#+ /16
+	3  g#+,e+ /16
+	4  e-2,e- /16
+	5  b-,b   /16
+	6  e,g#   /16
+	7  g#,e+  /16
+	8  e-,e   /16
+	10 e-     /16
+	11 e+2    /16
+	12 b,g#+  /16
+	13 e,b    /16
+	14 e-     /16
+	15 e-2    /16
+)
+
+// m. 251
+*
+(
+	0  e+3        /4
+	1  e+2        /4
+	2  e+,g#+     /4
+	3  g#,e+      /4
+	4  e-2,e-     /4
+	5  b-,b       /4
+	6  e,g#       /4
+	7  g#,e+      /4
+	8  e-,e       /4
+	p  to,bd2,cc2 /4
+	10 e-         /4
+	11 e+2        /4
+	12 b,g#+      /4
+	13 e,b        /4
+	14 e-         /4
+	15 e-2        /4
+	15 -          /8.
+)
+*
+(
+	0  e+2        /16
+	1  e+         /16
+	2  g#,e+      /16
+	3  g#,e+      /16
+	4  e-2,e-     /16
+	5  b-         /16
+	6  g#-,e      /16
+	7  e,b        /16
+	8  e-         /16
+	10 e-         /16
+	11 g#-,e      /16
+	12 b-         /16
+	13 g#-,e      /16
+	14 e-         /16
+	15 e-2        /16
+)
+
+// m. 252
+*  tempo  60
+(
+	INCLUDE  d_all_legato
+	0  e+2        /2
+	1  e+         /2
+	2  g#,e+      /2
+	3  g#,e+      /2
+	4  e-2,e-     /2
+	5  b-         /2
+	6  g#-,e      /2
+	7  e,b        /2
+	8  e-         /2
+	p  to,bd2,cc2 /2
+	10 e-         /2  tr=/32
+	11 g#-,e      /2
+	12 b-         /2
+	13 g#-,e      /2
+	14 e-         /2
+	15 e-2        /2
+)
+
+////////////////////////////////////////////////////////
+// HELPER MACROS
+////////////////////////////////////////////////////////
+
+// macros to switch instruments between arco and pizzicato
+MACRO i_arco_14
+	INSTRUMENT  14  CELLO              Violoncello
+END
+
+MACRO i_pizzicato_14
+	INSTRUMENT  14  PIZZICATO_STRINGS  Violoncello
+END
+
+MACRO i_arco_15
+	INSTRUMENT  15  CONTRABASS         Double Bass
+END
+
+MACRO i_pizzicato_15
+	INSTRUMENT  15  PIZZICATO_STRINGS  Double Bass
+END
+
+// macros for setting all channels to staccato or legato
+MACRO d_all_staccato
+	0  - /4  m, $staccato
+	1  - /4  m, $staccato
+	2  - /4  m, $staccato
+	3  - /4  m, $staccato
+	4  - /4  m, $staccato
+	5  - /4  m, $staccato
+	6  - /4  m, $staccato
+	7  - /4  m, $staccato
+	8  - /4  m, $staccato
+	p  - /4  m, $staccato
+	10 - /4  m, $staccato
+	11 - /4  m, $staccato
+	12 - /4  m, $staccato
+	13 - /4  m, $staccato
+	14 - /4  m, $staccato
+	15 - /4  m, $staccato
+END
+
+MACRO d_all_legato
+	0  - /4  m, $legato
+	1  - /4  m, $legato
+	2  - /4  m, $legato
+	3  - /4  m, $legato
+	4  - /4  m, $legato
+	5  - /4  m, $legato
+	6  - /4  m, $legato
+	7  - /4  m, $legato
+	8  - /4  m, $legato
+	p  - /4  m, $legato
+	10 - /4  m, $legato
+	11 - /4  m, $legato
+	12 - /4  m, $legato
+	13 - /4  m, $legato
+	14 - /4  m, $legato
+	15 - /4  m, $legato
+END
+
+// macros for setting velocities in all channels
+MACRO v_all_tutta_forza
+	0  - /4  m, $tutta_forza
+	1  - /4  m, $tutta_forza
+	2  - /4  m, $tutta_forza
+	3  - /4  m, $tutta_forza
+	4  - /4  m, $tutta_forza
+	5  - /4  m, $tutta_forza
+	6  - /4  m, $tutta_forza
+	7  - /4  m, $tutta_forza
+	8  - /4  m, $tutta_forza
+	p  - /4  m, $tutta_forza
+	10 - /4  m, $tutta_forza
+	11 - /4  m, $tutta_forza
+	12 - /4  m, $tutta_forza
+	13 - /4  m, $tutta_forza
+	14 - /4  m, $tutta_forza
+	15 - /4  m, $tutta_forza
+END
+
+MACRO v_all_sf
+	0  - /4  m, $sf
+	1  - /4  m, $sf
+	2  - /4  m, $sf
+	3  - /4  m, $sf
+	4  - /4  m, $sf
+	5  - /4  m, $sf
+	6  - /4  m, $sf
+	7  - /4  m, $sf
+	8  - /4  m, $sf
+	p  - /4  m, $sf
+	10 - /4  m, $sf
+	11 - /4  m, $sf
+	12 - /4  m, $sf
+	13 - /4  m, $sf
+	14 - /4  m, $sf
+	15 - /4  m, $sf
+END
+
+MACRO v_all_ff
+	0  - /4  m, $ff
+	1  - /4  m, $ff
+	2  - /4  m, $ff
+	3  - /4  m, $ff
+	4  - /4  m, $ff
+	5  - /4  m, $ff
+	6  - /4  m, $ff
+	7  - /4  m, $ff
+	8  - /4  m, $ff
+	p  - /4  m, $ff
+	10 - /4  m, $ff
+	11 - /4  m, $ff
+	12 - /4  m, $ff
+	13 - /4  m, $ff
+	14 - /4  m, $ff
+	15 - /4  m, $ff
+END
+
+MACRO v_all_f
+	0  - /4  m, $f
+	1  - /4  m, $f
+	2  - /4  m, $f
+	3  - /4  m, $f
+	4  - /4  m, $f
+	5  - /4  m, $f
+	6  - /4  m, $f
+	7  - /4  m, $f
+	8  - /4  m, $f
+	p  - /4  m, $f
+	10 - /4  m, $f
+	11 - /4  m, $f
+	12 - /4  m, $f
+	13 - /4  m, $f
+	14 - /4  m, $f
+	15 - /4  m, $f
+END
+
+MACRO v_all_p
+	0  - /4  m, $p
+	1  - /4  m, $p
+	2  - /4  m, $p
+	3  - /4  m, $p
+	4  - /4  m, $p
+	5  - /4  m, $p
+	6  - /4  m, $p
+	7  - /4  m, $p
+	8  - /4  m, $p
+	p  - /4  m, $p
+	10 - /4  m, $p
+	11 - /4  m, $p
+	12 - /4  m, $p
+	13 - /4  m, $p
+	14 - /4  m, $p
+	15 - /4  m, $p
+END
+
+MACRO v_all_pp
+	0  - /4  m, $pp
+	1  - /4  m, $pp
+	2  - /4  m, $pp
+	3  - /4  m, $pp
+	4  - /4  m, $pp
+	5  - /4  m, $pp
+	6  - /4  m, $pp
+	7  - /4  m, $pp
+	8  - /4  m, $pp
+	p  - /4  m, $pp
+	10 - /4  m, $pp
+	11 - /4  m, $pp
+	12 - /4  m, $pp
+	13 - /4  m, $pp
+	14 - /4  m, $pp
+	15 - /4  m, $pp
+END
