@@ -61,7 +61,7 @@ You can find a lot of screenshots here: http://www.midica.org/screenshots.html
 I will not repeat them all in this Readme. But at least here are two screenshots of
 the player. The first one shows the channel mode and the second one the Karaoke mode.
 
-<img align="right" src="img/player.png" title="Midica Player"><img align="right" src="img/karaoke.png" title="Karaoke Mode">
+<img src="img/player.png" title="Midica Player"><img src="img/karaoke.png" title="Karaoke Mode">
 
 # MidicaPL (Midica's Music programming language)
 
@@ -112,7 +112,7 @@ In this Readme one short example shall be enough:
 
 This results in a MIDI sequence like this:
 
-<img align="right" src="img/example-score.svg" title="Example Score">
+<img src="img/example-score.svg" title="Example Score">
 
 # Contributing
 
