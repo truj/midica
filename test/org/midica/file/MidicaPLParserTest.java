@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.sound.midi.MetaMessage;
@@ -21,9 +22,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.midica.Midica;
 import org.midica.TestUtil;
+import org.midica.config.Dict;
 import org.midica.midi.SequenceAnalyzer;
 import org.midica.midi.SequenceCreator;
+import org.midica.ui.model.IMessageType;
 import org.midica.ui.model.MidicaTreeModel;
+import org.midica.ui.model.SingleMessage;
 
 /**
  * This is the test class for {@link org.midica.file.MidicaPLParser}.
@@ -219,6 +223,78 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( constants.get("$cmd_with_columns"), "0  c  /4"                                                         );
 		assertEquals( constants.get("$whole_line"),       "0  c  /4  duration=50%"                                           );
 		assertEquals( constants.get("$complex_const"),    "START duration=100% , v = 120 MIDDLE duration=100% , v = 120 END" );
+		
+		parse(getWorkingFile("var"));
+		assertEquals( "cent", constants.get("$cent")            );
+		assertEquals( "123",  variables.get("$forte")           );
+		assertEquals( "30",   variables.get("$piano")           );
+		assertEquals( "80",   variables.get("$mezzoforte")      );
+		assertEquals( "50%",  variables.get("$staccato")        );
+		assertEquals( "100",  variables.get("$legato")          );
+		assertEquals( "75%",  variables.get("$medium_duration") );
+		assertEquals( "1",    variables.get("$c")               );
+		assertEquals( "c",    variables.get("$n")               );
+		assertEquals( "d",    variables.get("$n2")              );
+		assertEquals( "/2",   variables.get("$l")               );
+		assertEquals( "3",    variables.get("$q")               );
+		// channel 0:
+		ArrayList<SingleMessage> messages = getMessagesByChannel(0);
+		{
+			int i = 0;
+			assertEquals( "0/0/90/c / 30",     messages.get(++i).toString() );  // c piano
+			assertEquals( "240/0/80/c / 0",    messages.get(++i).toString() );  //   staccato=240 ticks
+			assertEquals( "480/0/90/c / 30",   messages.get(++i).toString() );  // c
+			assertEquals( "960/0/80/c / 0",    messages.get(++i).toString() );  //   legato=480 ticks
+			assertEquals( "960/0/90/c / 123",  messages.get(++i).toString() );  // c forte   (INCLUDE test1)
+			assertEquals( "1440/0/80/c / 0",   messages.get(++i).toString() );  //   legato=480 ticks
+			assertEquals( "1440/0/90/c / 123", messages.get(++i).toString() );  // c         (INCLUDE test2)
+			assertEquals( "1920/0/80/c / 0",   messages.get(++i).toString() );  //   legato=480 ticks
+		}
+		// channel 1:
+		messages = getMessagesByChannel(1);
+		{
+			int i = 0;
+			// macro test1, plain
+			assertEquals( "0/1/91/c / 123",     messages.get(++i).toString() );  // c forte
+			assertEquals( "456/1/81/c / 0",     messages.get(++i).toString() );  //   default duration: 456 ticks
+			assertEquals( "480/1/91/c / 123",   messages.get(++i).toString() );  // c forte
+			assertEquals( "720/1/81/c / 0",     messages.get(++i).toString() );  //   staccato=240 ticks
+			// macro test1, block
+			assertEquals( "960/1/91/c / 80",   messages.get(++i).toString()  );  // c mezzoforte
+			assertEquals( "1200/1/81/c / 0",   messages.get(++i).toString()  );  //   staccato=240 ticks
+			assertEquals( "1440/1/91/c / 80",  messages.get(++i).toString()  );  // c mezzoforte
+			assertEquals( "1440/1/91/c+ / 80", messages.get(++i).toString()  );  // c+ mezzoforte
+			assertEquals( "1800/1/81/c / 0",   messages.get(++i).toString()  );  //   medium_duration=360 ticks
+			assertEquals( "1800/1/81/c+ / 0",  messages.get(++i).toString() );  //   medium_duration=360 ticks
+		}
+		// INLUDE test2
+		assertEquals( 21, messages.size() ); // 1x program change, 10x note-on, 10x note-off
+		
+		parse(getWorkingFile("shift"));
+		messages = getMessagesByStatus("90");
+		assertEquals( 19, messages.size() );
+		{
+			int i = 0;
+			assertEquals( "0/0/90/d / 64",      messages.get(i++).toString() ); // before all macros
+			assertEquals( "480/0/90/e / 64",    messages.get(i++).toString() );
+			assertEquals( "960/0/90/c / 64",    messages.get(i++).toString() );
+			assertEquals( "1440/0/90/a#- / 64", messages.get(i++).toString() );
+			assertEquals( "1920/0/90/c / 64",   messages.get(i++).toString() );
+			assertEquals( "2400/0/90/c / 64",   messages.get(i++).toString() ); // INCLUDE test1
+			assertEquals( "2880/0/90/c / 64",   messages.get(i++).toString() );
+			assertEquals( "3360/0/90/c / 64",   messages.get(i++).toString() );     // c (chord)
+			assertEquals( "3360/0/90/d / 64",   messages.get(i++).toString() );     // d (chord)
+			assertEquals( "3840/0/90/a#- / 64", messages.get(i++).toString() );
+			assertEquals( "4320/0/90/a#- / 64", messages.get(i++).toString() );     // a#- (chord)
+			assertEquals( "4320/0/90/c / 64",   messages.get(i++).toString() );     // c (chord)
+			assertEquals( "4800/0/90/c+ / 64",  messages.get(i++).toString() ); // INCLUDE test1  s=12
+			assertEquals( "5280/0/90/c+ / 64",  messages.get(i++).toString() );
+			assertEquals( "5760/0/90/c+ / 64",  messages.get(i++).toString() );     // c+ (chord)
+			assertEquals( "5760/0/90/d+ / 64",  messages.get(i++).toString() );     // d+ (chord)
+			assertEquals( "6240/0/90/a# / 64",  messages.get(i++).toString() );
+			assertEquals( "6720/0/90/a# / 64",  messages.get(i++).toString() );     // a# (chord)
+			assertEquals( "6720/0/90/c+ / 64",  messages.get(i++).toString() );     // c+ (chord)
+		}
 	}
 	
 	/**
@@ -390,6 +466,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instrument-in-instruments")) );
 		assertEquals( 4, e.getLineNumber() );
 		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("var-in-instruments")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertEquals( true, e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_NOT_ALLOWED)) );
 		
 		// System.out.println(e.getMessage() + "\n" + e.getFileName());
 	}
@@ -437,5 +516,41 @@ class MidicaPLParserTest extends MidicaPLParser {
 		String      text = CharsetUtils.getTextFromBytes(data, "UTF-8", null);
 		
 		return text;
+	}
+	
+	/**
+	 * Returns the message list, filtered by the given channel.
+	 * 
+	 * @param channel  MIDI channel
+	 * @return all messages with the given channel.
+	 */
+	private static ArrayList<SingleMessage> getMessagesByChannel(int channel) {
+		ArrayList<SingleMessage> allMessages = (ArrayList<SingleMessage>) SequenceAnalyzer.getSequenceInfo().get("messages");
+		ArrayList<SingleMessage> messages = new ArrayList<>();
+		for (SingleMessage msg : allMessages) {
+			Integer ch = (Integer) msg.getOption(IMessageType.OPT_CHANNEL);
+			if (ch != null && ch == channel)
+				messages.add(msg);
+		}
+		
+		return messages;
+	}
+	
+	/**
+	 * Returns the message list, filtered by the given status byte.
+	 * 
+	 * @param statusByte  status byte (first byte of the message)
+	 * @return all messages with the given channel.
+	 */
+	private static ArrayList<SingleMessage> getMessagesByStatus(String statusByte) {
+		ArrayList<SingleMessage> allMessages = (ArrayList<SingleMessage>) SequenceAnalyzer.getSequenceInfo().get("messages");
+		ArrayList<SingleMessage> messages = new ArrayList<>();
+		for (SingleMessage msg : allMessages) {
+			String status = (String) msg.getOption(IMessageType.OPT_STATUS_BYTE);
+			if (status.equals(statusByte))
+				messages.add(msg);
+		}
+		
+		return messages;
 	}
 }

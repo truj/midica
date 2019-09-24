@@ -51,8 +51,8 @@ public final class MidiDevices {
 	
 	// constants
 	public static final int  WAITING_TIME_BEFORE_REMEMBER =        2; // milliseconds
-	public static final byte DEFAULT_MASTER_VOL_MSB       =       64;
-	public static final byte DEFAULT_MASTER_VOL_LSB       =       64;
+	public static final byte DEFAULT_MASTER_VOL_MSB       =      100;
+	public static final byte DEFAULT_MASTER_VOL_LSB       =      100;
 	public static final int  DEFAULT_CHANNEL_VOL_MSB      =      100; // default according to https://midi.org/articles/about-midi-part-4-midi-files
 	public static final int  DEFAULT_CHANNEL_VOL_LSB      =      100; // real default is probably 0 but we keep MSB and LSB synchronized
 	public static final int  DEFAULT_TEMPO_BPM            =      120; // beats per minute

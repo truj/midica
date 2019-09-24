@@ -1,6 +1,5 @@
-<img align="right" src="img/logo.png" title="Midica Logo">
+<img src="img/logo.svg" title="Midica Logo" width="300">
 
-# Introduction
 Midica is an interpreter for a Music Programming Language.
 It translates source code to MIDI.
 
@@ -12,15 +11,18 @@ You can use the same techniques like in regular programming, like:
 - Copy & Paste
 - Macros
 - Modules for code re-use
-- Self-defined constants
+- Variables and Constants
 - Code Comments
 
 You write your songs in plain text files using the text editor of your choice. Midica transforms these files into MIDI.
 
-# Install And Run
+# Get started
 - Install Java Runtume Environment (JRE) version 1.7 or higher.
 - Download the file `midica-VERSION.jar`.
 - Start Midica using the command: `java -jar midica-VERSION.jar`
+- Download one of the [example files](examples/) or create your own file and save it with the file extension `.midica`.
+- In the Midica application, load this file by pressing the upper right button `select file` and choose this file.
+- Press the button `Start Player` and play the sequence
 
 # Features of the Midica Application itself
 
@@ -58,10 +60,14 @@ You write your songs in plain text files using the text editor of your choice. M
 
 You can find a lot of screenshots here: http://www.midica.org/screenshots.html
 
-I will not repeat them all in this Readme. But at least here are two screenshots of
-the player. The first one shows the channel mode and the second one the Karaoke mode.
+I will not repeat them all in this Readme. But at least here are three screenshots.
+The first one shows the main window.
+The second one shows the player in default mode.
+The third one shows the player in Karaoke mode.
 
-<img src="img/player.png" title="Midica Player"><img src="img/karaoke.png" title="Karaoke Mode">
+<img src="img/main.png" title="Midica Player">
+<img src="img/player.png" title="Midica Player">
+<img src="img/karaoke.png" title="Karaoke Mode">
 
 # MidicaPL (Midica's Music programming language)
 
@@ -73,8 +79,8 @@ You can find a MidicaPL tutorial here:
 - [Chapter 3](http://www.midica.org/tutorial-3.html)
 - [Chapter 4](http://www.midica.org/tutorial-4.html)
 
-An example of a complete song can be found in the
-[examples directory](examples/). Maybe there will be more in the future.
+A first example of a complete song can be found in the
+[examples directory](examples/). There will be more in the future.
 
 In this Readme one short example shall be enough:
 

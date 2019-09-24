@@ -8,6 +8,7 @@
 package org.midica.file;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.midica.config.Dict;
@@ -25,11 +26,13 @@ public class NestableBlock {
 	private boolean           multiple = false;
 	private int               quantity = 1;
 	private String            tuplet   = null;
+	private int               shift    = 0;
 	private ArrayList<Object> elements = null;
 	
 	private boolean isMultipleSet = false;
 	private boolean isQuantitySet = false;
 	private boolean isTupletSet   = false;
+	private boolean isShiftSet    = false;
 	
 	/**
 	 * Creates a new nestable block.
@@ -92,7 +95,7 @@ public class NestableBlock {
 	 * This modifier shortens all notes of this block according to the tuplet value.
 	 * This applies for notes and rests as well as for child blocks.
 	 * 
-	 * @param tuplet
+	 * @param tuplet          the tuplet value
 	 * @param optId           option ID (only needed for the exception description)
 	 * @throws ParseException if this option has already been set for this block.
 	 */
@@ -108,51 +111,88 @@ public class NestableBlock {
 	}
 	
 	/**
-	 * Applies tuplets to all child elements.
+	 * Sets the shift modifier.
+	 * This modifier applies a transposition of the block by the shift value.
+	 * This applies for notes and chords as well as for child blocks.
 	 * 
-	 * @param parentTuplets    The tuplet modifiers from all (grand)parents to be applied as well.
+	 * @param shift           the shift value (a positive or negative number of half tone steps)
+	 * @param optId           option ID (only needed for the exception description)
+	 * @throws ParseException if this option has already been set for this block.
 	 */
-	public void applyTuplets(String parentTuplets) {
+	public void setShift(int shift, String optId) throws ParseException {
 		
-		if (null == plus)
-			plus = Pattern.compile( Pattern.quote(MidicaPLParser.DURATION_PLUS) );
+		// already set?
+		if (isShiftSet) {
+			throw new ParseException( Dict.get(Dict.ERROR_BLOCK_ARG_ALREADY_SET) + optId );
+		}
 		
-		String resultingTuplet = tuplet;
-		if (resultingTuplet == null) {
-			resultingTuplet = parentTuplets;
+		this.shift += shift;
+		isShiftSet = true;
+	}
+	
+	/**
+	 * Applies tuplets and shifts to all child blocks.
+	 * 
+	 * @param parentTuplets  The tuplet modifiers from all (grand)parents to be applied as well.
+	 * @param parentShifts   The sum of all shift modifiers from all (grand)parents to be applied as well.
+	 */
+	public void applyTupletsAndShifts(String parentTuplets, int parentShifts) {
+		
+		// apply to this block
+		shift += parentShifts;
+		if (tuplet == null) {
+			tuplet = parentTuplets;
 		}
 		else if (parentTuplets != null) {
-			resultingTuplet += parentTuplets;
+			tuplet += parentTuplets;
 		}
 		
 		// apply to children
 		for (Object element : elements) {
 			if (element instanceof NestableBlock) {
-				((NestableBlock) element).applyTuplets(resultingTuplet);
-			}
-			else if (resultingTuplet != null && element instanceof String[]) {
-				String[] tokens = (String[]) element;
-				if (tokens.length >= 3) {
-					try {
-						// channel command?
-						parser.toChannel(tokens[0]);
-						
-						// no exception - channel command
-						// add tuplet to all summands inside of the duration column
-						// e.g. *1+/8 --> *1t4:3+/8t4:3
-						String[] atoms = plus.split(tokens[2], -1);
-						for (int i=0; i < atoms.length; i++) {
-							atoms[i] += resultingTuplet;
-						}
-						tokens[2] = String.join(MidicaPLParser.DURATION_PLUS, atoms);
-					}
-					catch (ParseException e) {
-						// not a channel command - probably an include
-					}
-				}
+				((NestableBlock) element).applyTupletsAndShifts(tuplet, shift);
 			}
 		}
 	}
+	
+	/**
+	 * Adds the tuplets to the duration column of a channel command.
+	 * 
+	 * @param tokens  command tokens
+	 * @return resulting command tokens.
+	 */
+	private String[] addTuplets(String[] tokens) {
+		
+		if (tokens.length < 3)
+			return tokens;
+		
+		try {
+			// channel command?
+			parser.toChannel(tokens[0]);
+			
+			// no exception - channel command
+			
+			if (null == plus)
+				plus = Pattern.compile( Pattern.quote(MidicaPLParser.DURATION_PLUS) );
+			
+			// add tuplet to all summands inside of the duration column
+			// e.g. *1+/8 --> *1t4:3+/8t4:3
+			if (tuplet != null) {
+				String[] atoms = plus.split(tokens[2], -1);
+				for (int j=0; j < atoms.length; j++) {
+					atoms[j] += tuplet;
+				}
+				tokens[2] = String.join(MidicaPLParser.DURATION_PLUS, atoms);
+			}
+		}
+		catch (ParseException e) {
+			// not a channel command - probably an include
+		}
+		
+		return tokens;
+	}
+	
+	
 	
 	/**
 	 * Adds a new content element to this block.
@@ -169,6 +209,7 @@ public class NestableBlock {
 	
 	/**
 	 * Executes the content of the block.
+	 * Adds all resulting shifts and tuplets to channel or include commands before execution.
 	 * 
 	 * @throws ParseException if one of the content lines cannot be parsed.
 	 */
@@ -187,10 +228,25 @@ public class NestableBlock {
 					((NestableBlock) element).play();
 				}
 				else if (element instanceof String[]) {
-					parser.parseLine( String.join(" ", (String[]) element) );
+					String[] tokens = (String[]) element;
+					String line;
+					if (shift != 0 || tuplet != null) {
+						if ( ! MidicaPLParser.VAR.equals(tokens[0]) ) {
+							line = String.join(" ", tokens);
+							line = parser.replaceVariables(line);
+							tokens = line.split("\\s+", 3);
+						}
+					}
+					if (shift != 0) {
+						tokens = parser.addShiftToOptions(tokens, shift);
+					}
+					if (tuplet != null) {
+						tokens = addTuplets(tokens);
+					}
+					parser.parseLine( String.join(" ", tokens) );
 				}
 				else {
-					throw new ParseException("invalid block element class: " + element);
+					throw new ParseException("invalid block element class: " + element.getClass());
 				}
 			}
 		}

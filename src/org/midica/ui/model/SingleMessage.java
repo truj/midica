@@ -223,4 +223,16 @@ public class SingleMessage implements IMessageType, Comparable<SingleMessage> {
 		
 		return text.toString();
 	}
+	
+	/**
+	 * Used in unit tests.
+	 */
+	@Override
+	public String toString() {
+		return (Long) getOption(IMessageType.OPT_TICK)
+			+ "/" + (Integer) getOption(IMessageType.OPT_CHANNEL)
+			+ "/" + (String) getOption(IMessageType.OPT_STATUS_BYTE)
+			+ "/" + (String) getOption(IMessageType.OPT_SUMMARY)
+			;
+	}
 }

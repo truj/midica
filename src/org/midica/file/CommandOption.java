@@ -52,6 +52,9 @@ public class CommandOption {
 		else if (MidicaPLParser.OPT_TREMOLO.equals(name)) {
 			this.value = (Integer) value;
 		}
+		else if (MidicaPLParser.OPT_SHIFT.equals(name)) {
+			this.value = (Integer) value;
+		}
 		else {
 			// should never happen
 			throw new ParseException("Invalid option name: " + name + ". Please report.");
@@ -111,6 +114,14 @@ public class CommandOption {
 	 * @return tremolo modifier.
 	 */
 	public int getTremolo() {
+		return (Integer) value;
+	}
+	
+	/**
+	 * Returns a shift modifier.
+	 * @return shift modifier.
+	 */
+	public int getShift() {
 		return (Integer) value;
 	}
 }

@@ -76,6 +76,7 @@ public class Dict {
 	public static final String SYNTAX_DEFINE             = "DEFINE";
 	public static final String SYNTAX_COMMENT            = "COMMENT";
 	public static final String SYNTAX_CONST              = "CONST";
+	public static final String SYNTAX_VAR                = "VAR";
 	public static final String SYNTAX_VAR_SYMBOL         = "VAR_SYMBOL";
 	public static final String SYNTAX_VAR_ASSIGNER       = "VAR_ASSIGNER";
 	public static final String SYNTAX_GLOBAL             = "GLOBAL";
@@ -124,6 +125,8 @@ public class Dict {
 	public static final String SYNTAX_T                  = "TUPLET_SHORT";
 	public static final String SYNTAX_TREMOLO            = "TREMOLO";
 	public static final String SYNTAX_TR                 = "TREMOLO_SHORT";
+	public static final String SYNTAX_SHIFT              = "SHIFT";
+	public static final String SYNTAX_S                  = "SHIFT_SHORT";
 	public static final String SYNTAX_REST               = "REST";
 	public static final String SYNTAX_CHORD              = "CHORD";
 	public static final String SYNTAX_INLINE_CHORD_SEP   = "INLINE_CHORD_SEP";
@@ -1199,8 +1202,12 @@ public class Dict {
 	public static final String ERROR_CHORD_DEF_NOT_ALLOWED_HERE = "error_chord_def_not_allowed_here";
 	public static final String ERROR_CHORD_NUM_OF_ARGS          = "error_chord_num_of_args";
 	public static final String ERROR_CONST_NUM_OF_ARGS          = "error_const_num_of_args";
+	public static final String ERROR_VAR_NUM_OF_ARGS            = "error_var_num_of_args";
 	public static final String ERROR_CONST_ALREADY_DEFINED      = "error_const_already_defined";
-	public static final String ERROR_CONST_NOT_DEFINED          = "error_const_not_defined";
+	public static final String ERROR_VAR_ALREADY_DEF_AS_CONST   = "error_var_already_def_as_const";
+	public static final String ERROR_VAR_VAL_HAS_WHITESPACE     = "error_var_val_has_whitespace";
+	public static final String ERROR_VAR_NOT_DEFINED            = "error_var_not_defined";
+	public static final String ERROR_VAR_NOT_ALLOWED            = "error_var_not_allowed";
 	public static final String ERROR_DEFINE_NUM_OF_ARGS         = "error_define_num_of_args";
 	public static final String ERROR_ALREADY_REDEFINED          = "error_already_redefined";
 	public static final String ERROR_FILE_NUM_OF_ARGS           = "error_file_num_of_args";
@@ -1900,6 +1907,7 @@ public class Dict {
 		set( SYNTAX_DEFINE,             "syntax element definition"                        );
 		set( SYNTAX_COMMENT,            "comment"                                          );
 		set( SYNTAX_CONST,              "constant definition"                              );
+		set( SYNTAX_VAR,                "variable definition"                              );
 		set( SYNTAX_VAR_SYMBOL,         "first character of a variable or constant"        );
 		set( SYNTAX_VAR_ASSIGNER,       "assign symbol between variable/constant and value" );
 		set( SYNTAX_GLOBAL,             "global command (all channels)"                    );
@@ -1948,6 +1956,8 @@ public class Dict {
 		set( SYNTAX_T,                  "tuplet option (short)"                            );
 		set( SYNTAX_TREMOLO,            "tremolo option (long)"                            );
 		set( SYNTAX_TR,                 "tremolo option (short)"                           );
+		set( SYNTAX_SHIFT,              "shift option (long)"                              );
+		set( SYNTAX_S,                  "shift option (short)"                             );
 		set( SYNTAX_REST,               "rest character"                                   );
 		set( SYNTAX_CHORD,              "chord definition"                                 );
 		set( SYNTAX_INLINE_CHORD_SEP,   "inline chord separator"                           );
@@ -2317,8 +2327,12 @@ public class Dict {
 		set( ERROR_CHORD_DEF_NOT_ALLOWED_HERE,    "a chord definition is not allowed inside a block<br>maybe you forgot to close the block." );
 		set( ERROR_CHORD_NUM_OF_ARGS,             "wrong number of arguments in CHORD command"                        );
 		set( ERROR_CONST_NUM_OF_ARGS,             "wrong number of arguments in CONSTANT definition"                  );
+		set( ERROR_VAR_NUM_OF_ARGS,               "wrong number of arguments in VAR definition or assignment"         );
 		set( ERROR_CONST_ALREADY_DEFINED,         "constant already defined: "                                        );
-		set( ERROR_CONST_NOT_DEFINED,             "constant undefined: "                                              );
+		set( ERROR_VAR_ALREADY_DEF_AS_CONST,      "variable name already used for a constant: "                       );
+		set( ERROR_VAR_VAL_HAS_WHITESPACE,        "Variables must not contain a whitespace in the value: "            );
+		set( ERROR_VAR_NOT_DEFINED,               "variable undefined: "                                              );
+		set( ERROR_VAR_NOT_ALLOWED,               "variable not allowed here: "                                       );
 		set( ERROR_DEFINE_NUM_OF_ARGS,            "wrong number of arguments in DEFINE command"                       );
 		set( ERROR_ALREADY_REDEFINED,             "Command ID already redefined. Cannot be redefined again: "         );
 		set( ERROR_FILE_NUM_OF_ARGS,              "wrong number of arguments in INCLUDE_FILE command"                 );
@@ -2783,6 +2797,7 @@ public class Dict {
 		setSyntax( SYNTAX_DEFINE,            "DEFINE"        );
 		setSyntax( SYNTAX_COMMENT,           "//"            );
 		setSyntax( SYNTAX_CONST,             "CONST"         );
+		setSyntax( SYNTAX_VAR,               "VAR"           );
 		setSyntax( SYNTAX_VAR_SYMBOL,        "$"             );
 		setSyntax( SYNTAX_VAR_ASSIGNER,      "="             );
 		setSyntax( SYNTAX_GLOBAL,            "*"             );
@@ -2831,6 +2846,8 @@ public class Dict {
 		setSyntax( SYNTAX_T,                  "t"            );
 		setSyntax( SYNTAX_TREMOLO,            "tremolo"      );
 		setSyntax( SYNTAX_TR,                 "tr"           );
+		setSyntax( SYNTAX_SHIFT,              "shift"        );
+		setSyntax( SYNTAX_S,                  "s"            );
 		setSyntax( SYNTAX_REST,               "-"            );
 		setSyntax( SYNTAX_CHORD,              "CHORD"        );
 		setSyntax( SYNTAX_INLINE_CHORD_SEP,   ","            );
@@ -2874,6 +2891,7 @@ public class Dict {
 		addSyntaxCategory( get(SYNTAX_CAT_DEFINITION) );
 		addSyntaxForInfoView( SYNTAX_DEFINE      );
 		addSyntaxForInfoView( SYNTAX_CONST       );
+		addSyntaxForInfoView( SYNTAX_VAR         );
 		addSyntaxForInfoView( SYNTAX_INSTRUMENT  );
 		addSyntaxForInfoView( SYNTAX_INSTRUMENTS );
 		addSyntaxForInfoView( SYNTAX_META        );
@@ -2938,6 +2956,8 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_T                );
 		addSyntaxForInfoView( SYNTAX_TREMOLO          );
 		addSyntaxForInfoView( SYNTAX_TR               );
+		addSyntaxForInfoView( SYNTAX_SHIFT            );
+		addSyntaxForInfoView( SYNTAX_S                );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_NOTE_LENGTH) );
 		addSyntaxForInfoView( SYNTAX_32            );

@@ -1,0 +1,38 @@
+INCLUDE_FILE inc/instruments.midica
+
+0  c  /4  shift 2          // d
+0  c  /4  s=2, s=2         // e
+0  c  /4  s=2, s=-4, s=2   // c
+
+( s=-2, s=-2, s=2
+	0  c  /4               // a#-
+	0  c  /4  s=2          // c
+)
+
+INCLUDE test1
+INCLUDE test1  s=12
+
+MACRO test1
+	0  c  /4               // c  /  c+
+	INCLUDE  test2
+	( s=-2
+		INCLUDE  test2
+	)
+END
+
+MACRO test2
+	0  c    /4             // c    /  a#-    /  c+     /  a#
+	0  c,d  /4             // c,d  /  a#-,c  /  c+,d+  /  a#,c+
+END
+
+// EXPECTED NOTE-ON MESSAGES:
+//
+// before all macros: 
+// d  e  c  a#-  c
+// 
+// INCLUDE test1:
+// c  c  c,d  a#-  a#-,c
+// 
+// INCLUDE test1  s=12
+// c+  c+  c+,d+  a#  a#,c+
+// 

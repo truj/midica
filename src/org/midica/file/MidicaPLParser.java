@@ -53,6 +53,7 @@ public class MidicaPLParser extends SequenceParser {
 	public static final String OPT_LYRICS   = "lyrics";
 	public static final String OPT_TUPLET   = "tuplet";
 	public static final String OPT_TREMOLO  = "tremolo";
+	public static final String OPT_SHIFT    = "shift";
 	
 	private static final int MODE_DEFAULT     = 0;
 	private static final int MODE_INSTRUMENTS = 1;
@@ -81,6 +82,7 @@ public class MidicaPLParser extends SequenceParser {
 	public static String INLINE_CHORD_SEP   = null;
 	public static String COMMENT            = null;
 	public static String CONST              = null;
+	public static String VAR                = null;
 	public static String VAR_ASSIGNER       = null;
 	public static String VAR_SYMBOL         = null;
 	public static String DEFINE             = null;
@@ -124,6 +126,8 @@ public class MidicaPLParser extends SequenceParser {
 	public static String OPT_SEPARATOR      = null;
 	public static String P                  = null;
 	public static String REST               = null;
+	public static String S                  = null;
+	public static String SHIFT              = null;
 	public static String PROG_BANK_SEP      = null;
 	public static String Q                  = null;
 	public static String QUANTITY           = null;
@@ -149,6 +153,8 @@ public class MidicaPLParser extends SequenceParser {
 	
 	private static LyricUtil lyricUtil = LyricUtil.getInstance();
 	
+	private static Pattern whitespace = Pattern.compile("\\s+");
+	
 	private   static HashMap<String, ArrayList<String>> fileCache         = null;
 	private   static HashMap<String, ArrayList<String>> macros            = null;
 	private   static HashMap<String, HashSet<Integer>>  chords            = null;
@@ -162,7 +168,8 @@ public class MidicaPLParser extends SequenceParser {
 	private   static HashSet<String>                    redefinitions     = null;
 	private   static boolean                            soundfontParsed   = false;
 	protected static HashMap<String, String>            constants         = null;
-	private   static Pattern                            constPattern      = null;
+	protected static HashMap<String, String>            variables         = null;
+	private   static Pattern                            varPattern        = null;
 	
 	private static boolean isDefineParsRun     = false; // parsing run for define commands
 	private static boolean isConstParsRun      = false; // parsing run for constant definitions
@@ -230,6 +237,7 @@ public class MidicaPLParser extends SequenceParser {
 		INLINE_CHORD_SEP   = Dict.getSyntax( Dict.SYNTAX_INLINE_CHORD_SEP   );
 		COMMENT            = Dict.getSyntax( Dict.SYNTAX_COMMENT            );
 		CONST              = Dict.getSyntax( Dict.SYNTAX_CONST              );
+		VAR                = Dict.getSyntax( Dict.SYNTAX_VAR                );
 		VAR_ASSIGNER       = Dict.getSyntax( Dict.SYNTAX_VAR_ASSIGNER       );
 		VAR_SYMBOL         = Dict.getSyntax( Dict.SYNTAX_VAR_SYMBOL         );
 		DEFINE             = Dict.getSyntax( Dict.SYNTAX_DEFINE             );
@@ -281,6 +289,8 @@ public class MidicaPLParser extends SequenceParser {
 		DURATION_PERCENT   = Dict.getSyntax( Dict.SYNTAX_DURATION_PERCENT   );
 		TR                 = Dict.getSyntax( Dict.SYNTAX_TR                 );
 		TREMOLO            = Dict.getSyntax( Dict.SYNTAX_TREMOLO            );
+		S                  = Dict.getSyntax( Dict.SYNTAX_S                  );
+		SHIFT              = Dict.getSyntax( Dict.SYNTAX_SHIFT              );
 		T                  = Dict.getSyntax( Dict.SYNTAX_T                  );
 		TUPLET             = Dict.getSyntax( Dict.SYNTAX_TUPLET             );
 		V                  = Dict.getSyntax( Dict.SYNTAX_V                  );
@@ -350,8 +360,8 @@ public class MidicaPLParser extends SequenceParser {
 				// now the comment symbol cannot change any more.
 				cleanLines(lines);
 				
-				// prepare constant replacing
-				constPattern = Pattern.compile( "(" + Pattern.quote(VAR_SYMBOL) + "\\w+)" );
+				// prepare constant/variable replacing
+				varPattern = Pattern.compile( "(" + Pattern.quote(VAR_SYMBOL) + "\\w+)" );
 				
 				// look for constant definitions
 				isConstParsRun = true;
@@ -430,6 +440,19 @@ public class MidicaPLParser extends SequenceParser {
 			line = replaceConstants(line);
 		}
 		
+		// replace variables?
+		boolean mustReplaceVars = isDefaultParsRun             // only in the default run
+		                       && MODE_DEFAULT == currentMode  // not inside of macros
+		                       && 0 == nestableBlkDepth;       // not inside of a block
+		if (mustReplaceVars) {
+			String[] tokens = line.split("\\s+", 2);
+			
+			// inside of VAR definitions the replacement is done later
+			if ( ! VAR.equals(tokens[0]) ) {
+				line = replaceVariables(line);
+			}
+		}
+		
 		String[] tokens = line.split("\\s+", 3);
 		
 		if ("".equals(tokens[0])) {
@@ -442,8 +465,11 @@ public class MidicaPLParser extends SequenceParser {
 			tokens = line.split("\\s+", 2);
 		}
 		
-		// only 2 tokens for constant definitions
+		// only 2 tokens for constant or variable definitions
 		else if (isConstParsRun && CONST.equals(tokens[0])) {
+			tokens = line.split("\\s+", 2);
+		}
+		else if ((isDefaultParsRun || isMacroParsRun) && VAR.equals(tokens[0])) {
 			tokens = line.split("\\s+", 2);
 		}
 		
@@ -656,6 +682,26 @@ public class MidicaPLParser extends SequenceParser {
 			parseChannelCmd(tokens, isFake);
 		}
 		
+		// variable definition / assignment
+		else if (VAR.equals(tokens[0])) {
+			if (isMacro)
+				currentMacro.add(String.join(" ", tokens)); // add to macro
+			else if (isBlock)
+				nestableBlkStack.peek().add(tokens); // add to block
+			parseVAR(tokens, isFake);
+		}
+		
+		// line begins with variable?
+		// (Don't check this in the define parsing run, when varPattern is not yet initialized.)
+		else if (varPattern != null && varPattern.matcher(tokens[0]).matches()) {
+			if (isMacro)
+				currentMacro.add(String.join(" ", tokens)); // add to macro
+			else if (isBlock)
+				nestableBlkStack.peek().add(tokens); // add to block
+			else
+				throw new ParseException( Dict.get(Dict.ERROR_VAR_NOT_ALLOWED) + tokens[0] );
+		}
+		
 		// (single line) instrument switch
 		else if (INSTRUMENT.equals(tokens[0])) {
 			if (!isFake)
@@ -755,6 +801,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( SOUNDFONT.equals(cmd)             ) {}
 		else if ( DEFINE.equals(cmd)                ) {}
 		else if ( CONST.equals(cmd)                 ) {}
+		else if ( VAR.equals(cmd)                   ) {}
 		else if ( INSTRUMENT.equals(cmd)            ) {}
 		else if ( INSTRUMENTS.equals(cmd)           ) {}
 		else if ( META.equals(cmd)                  ) {}
@@ -768,6 +815,19 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( ORIGINAL_DEFINE.equals(cmd)       ) {}
 		else if ( ORIGINAL_INCLUDE_FILE.equals(cmd) ) {}
 		else if ( cmd.matches("^\\d+$")             ) {}
+		else if ( varPattern.matcher(cmd).matches() ) {
+			// Line begins with a variable - check only in the default run.
+			// And not inside of a block.
+			// However this should never happen because in the default run, either:
+			// - the variable should have been replaced already; or
+			// - an exception for an undefined variable should have been thrown already.
+			if (isDefaultParsRun && 0 == nestableBlkDepth && currentMode == MODE_DEFAULT) {
+				throw new ParseException(
+					Dict.get(Dict.ERROR_UNKNOWN_CMD) + cmd
+					+ "\n This should not happen. Please report."
+				);
+			}
+		}
 		else {
 			throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_CMD) + cmd );
 		}
@@ -832,6 +892,18 @@ public class MidicaPLParser extends SequenceParser {
 		// ignore CONST in later runs
 		if (CONST.equals(cmd)) {
 			return true;
+		}
+		
+		// handle variables only in the default and macro parsing run
+		if ( ! isDefaultParsRun && ! isMacroParsRun ) {
+			
+			// VAR - default run: parse, macro run: add, other run: ignore
+			if (VAR.equals(cmd))
+				return true;
+			
+			// lines beginning with a variable - default run: parse, macro run: add, other run: ignore
+			if ( varPattern.matcher(cmd).matches() )
+				return true;
 		}
 		
 		// from now on, always track INSTRUMENTS
@@ -1479,24 +1551,23 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// get options (quantity / multiple)
 		int     quantity = -1;
+		int     shift    =  0;
 		boolean multiple = false;
 		String  tuplet   = null;
 		if (optionsStr.length() > 0) {
-			ArrayList<CommandOption> options = parseOptions(optionsStr);
+			ArrayList<CommandOption> options = parseOptions(optionsStr, isFake);
 			for (CommandOption opt : options) {
 				String optName = opt.getName();
-				if (OPT_QUANTITY.equals(optName)) {
+				if (OPT_QUANTITY.equals(optName))
 					quantity = opt.getQuantity();
-				}
-				else if (OPT_MULTIPLE.equals(optName)) {
+				else if (OPT_MULTIPLE.equals(optName))
 					multiple = true;
-				}
-				else if (OPT_TUPLET.equals(optName)) {
+				else if (OPT_TUPLET.equals(optName))
 					tuplet = opt.getTuplet();
-				}
-				else {
+				else if (OPT_SHIFT.equals(optName))
+					shift += opt.getShift();
+				else
 					throw new ParseException( Dict.get(Dict.ERROR_BLOCK_INVALID_ARG) + optName );
-				}
 			}
 		}
 		
@@ -1527,6 +1598,8 @@ public class MidicaPLParser extends SequenceParser {
 		// apply options
 		if (multiple)
 			block.setMultiple(OPT_MULTIPLE);
+		if (shift != 0)
+			block.setShift(shift, OPT_SHIFT);
 		if (quantity != -1)
 			block.setQuantity(quantity, OPT_QUANTITY);
 		if (tuplet != null) {
@@ -1538,7 +1611,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// apply root block
 		if (BLOCK_CLOSE.equals(cmd) && nestableBlkDepth == 0) {
-			block.applyTuplets(null);
+			block.applyTupletsAndShifts(null, 0);
 			block.play();
 		}
 	}
@@ -1610,20 +1683,20 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// get options (quantity / multiple)
 		int     quantity = 1;
+		int     shift    = 0;
 		boolean multiple = false;
 		if (3 == tokens.length) {
-			ArrayList<CommandOption> options = parseOptions(tokens[2]);
+			ArrayList<CommandOption> options = parseOptions(tokens[2], isFake);
 			for (CommandOption opt : options) {
 				String optName = opt.getName();
-				if (OPT_QUANTITY.equals(optName)) {
+				if (OPT_QUANTITY.equals(optName))
 					quantity = opt.getQuantity();
-				}
-				else if (OPT_MULTIPLE.equals(optName)) {
+				else if (OPT_SHIFT.equals(optName))
+					shift += opt.getShift();
+				else if (OPT_MULTIPLE.equals(optName))
 					multiple = true;
-				}
-				else {
+				else
 					throw new ParseException( Dict.get(Dict.ERROR_INCLUDE_UNKNOWN_ARG) + optName );
-				}
 			}
 		}
 		
@@ -1651,6 +1724,17 @@ public class MidicaPLParser extends SequenceParser {
 			for (int m=0; m<quantity; m++) {
 				for (int i=0; i<macro.size(); i++) {
 					String macroLine = macro.get(i);
+					
+					// apply shift, if needed
+					if (shift != 0) {
+						if ( ! macroLine.startsWith(VAR) ) {
+							macroLine = replaceVariables(macroLine);
+							String[] macroTokens = macroLine.split("\\s+", 3);
+							macroTokens = addShiftToOptions(macroTokens, shift);
+							macroLine   = String.join(" ", macroTokens);
+						}
+					}
+					
 					parseLine(macroLine);
 				}
 			}
@@ -1663,6 +1747,53 @@ public class MidicaPLParser extends SequenceParser {
 		else {
 			throw new ParseException( Dict.get(Dict.ERROR_INCLUDE_NUM_OF_ARGS) );
 		}
+	}
+	
+	/**
+	 * Adds the shift option to the given command, if it's a note, chord or include command.
+	 * 
+	 * @param tokens  command tokens
+	 * @return the resulting command tokens.
+	 */
+	public String[] addShiftToOptions(String[] tokens, int shift) {
+		
+		String shiftOptionStr = MidicaPLParser.SHIFT + MidicaPLParser.OPT_ASSIGNER + shift;
+		String line           = String.join(" ", (String[]) tokens);
+		
+		// include command?
+		if (MidicaPLParser.INCLUDE.equals(tokens[0])) {
+			if (tokens.length < 3)
+				line += " " + shiftOptionStr;
+			else
+				line += MidicaPLParser.OPT_SEPARATOR + shiftOptionStr;
+			return line.split("\\s+", 3);
+		}
+		
+		// channel command?
+		try {
+			toChannel(tokens[0]);
+			
+			// no exception --> channel command
+			
+			// rest? - ignore
+			if ( MidicaPLParser.REST.equals(tokens[1]) ) {
+				return tokens;
+			}
+			
+			// note or chord
+			Matcher matcher = whitespace.matcher( tokens[2] );
+			if (matcher.find())
+				line += MidicaPLParser.OPT_SEPARATOR + shiftOptionStr;
+			else
+				line += " " + shiftOptionStr;
+			return line.split("\\s+", 3);
+				
+		}
+		catch (ParseException e) {
+			// not a channel command
+		}
+		
+		return tokens;
 	}
 	
 	/**
@@ -1828,6 +1959,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_INLINE_CHORD_SEP.equals(cmdId)   ) INLINE_CHORD_SEP   = cmdName;
 		else if ( Dict.SYNTAX_COMMENT.equals(cmdId)            ) COMMENT            = cmdName;
 		else if ( Dict.SYNTAX_CONST.equals(cmdId)              ) CONST              = cmdName;
+		else if ( Dict.SYNTAX_VAR.equals(cmdId)                ) VAR                = cmdName;
 		else if ( Dict.SYNTAX_VAR_ASSIGNER.equals(cmdId)       ) VAR_ASSIGNER       = cmdName;
 		else if ( Dict.SYNTAX_VAR_SYMBOL.equals(cmdId)         ) VAR_SYMBOL         = cmdName;
 		else if ( Dict.SYNTAX_DEFINE.equals(cmdId)             ) DEFINE             = cmdName;
@@ -1880,6 +2012,8 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_TR.equals(cmdId)                 ) TR                 = cmdName;
 		else if ( Dict.SYNTAX_TREMOLO.equals(cmdId)            ) TREMOLO            = cmdName;
 		else if ( Dict.SYNTAX_T.equals(cmdId)                  ) T                  = cmdName;
+		else if ( Dict.SYNTAX_SHIFT.equals(cmdId)              ) SHIFT              = cmdName;
+		else if ( Dict.SYNTAX_S.equals(cmdId)                  ) S                  = cmdName;
 		else if ( Dict.SYNTAX_TUPLET.equals(cmdId)             ) TUPLET             = cmdName;
 		else if ( Dict.SYNTAX_V.equals(cmdId)                  ) V                  = cmdName;
 		else if ( Dict.SYNTAX_VELOCITY.equals(cmdId)           ) VELOCITY           = cmdName;
@@ -1928,38 +2062,78 @@ public class MidicaPLParser extends SequenceParser {
 	}
 	
 	/**
+	 * Parses a VAR command.
+	 * A VAR command is used to define and/or (re)assign a variable.
+	 * 
+	 * @param tokens             Token array.
+	 * @param isFake             **true**, if this is called inside a macro definition or block
+	 * @throws ParseException    If the command cannot be parsed.
+	 */
+	private void parseVAR(String[] tokens, boolean isFake) throws ParseException {
+		
+		// VAR without name?
+		if (tokens.length < 2) {
+			throw new ParseException( Dict.get(Dict.ERROR_VAR_NUM_OF_ARGS) );
+		}
+		
+		// VAR with name but without value?
+		String[] assignParts = tokens[ 1 ].split("[" + Pattern.quote(VAR_ASSIGNER) + "\\s]+", 2); // var name and value can be separated by "=" and/or whitespace(s)
+		if (assignParts.length < 2) {
+			throw new ParseException( Dict.get(Dict.ERROR_VAR_NUM_OF_ARGS) );
+		}
+		
+		// name already defined as a constant?
+		String name  = assignParts[ 0 ];
+		String value = assignParts[ 1 ];
+		if (constants.containsKey(name)) {
+			throw new ParseException( Dict.get(Dict.ERROR_VAR_ALREADY_DEF_AS_CONST) + name );
+		}
+		
+		// no whitespace in variable values allowed!
+		Matcher matcher = whitespace.matcher(value);
+		if (matcher.find()) {
+			throw new ParseException( Dict.get(Dict.ERROR_VAR_VAL_HAS_WHITESPACE) + value );
+		}
+		
+		if (isFake)
+			return;
+		
+		// the value could contain other variables as well
+		value = replaceVariables(value);
+		
+		// store it
+		variables.put(name, value);
+	}
+	
+	/**
 	 * Replaces all constants in the given string by their values.
 	 * 
 	 * @param str  The string to be replaced.
 	 * @return     The resulting string.
-	 * @throws ParseException    if an undefined constant is found.
 	 */
-	private String replaceConstants(String str) throws ParseException {
+	private String replaceConstants(String str) {
 		
-		// no constant found?
-		if ( ! constPattern.matcher(str).find() ) {
+		// no constant/variable found?
+		if ( ! varPattern.matcher(str).find() ) {
 			return str;
 		}
 		
 		boolean mustSearchAgain = true;
 		while (mustSearchAgain) {
 			mustSearchAgain = false;
-			Matcher constMatcher = constPattern.matcher(str);
+			Matcher constMatcher = varPattern.matcher(str);
 			StringBuffer resultingLine = new StringBuffer();
 			
 			// find and replace the next constant
 			while (constMatcher.find()) {
-				mustSearchAgain   = true;
 				String constName  = constMatcher.group( 1 );
 				String constValue = constants.get(constName);
 				
-				// constant undefined?
-				if (null == constValue) {
-					throw new ParseException( Dict.get(Dict.ERROR_CONST_NOT_DEFINED) + constName );
+				// constant (not a variable)? - replace it
+				if (constValue != null) {
+					mustSearchAgain = true;
+					constMatcher.appendReplacement(resultingLine, Matcher.quoteReplacement(constValue));
 				}
-				
-				// replace
-				constMatcher.appendReplacement(resultingLine, Matcher.quoteReplacement(constValue));
 			}
 			
 			// replace, if necessary
@@ -1967,7 +2141,52 @@ public class MidicaPLParser extends SequenceParser {
 				constMatcher.appendTail(resultingLine);
 				str = resultingLine.toString();
 			}
-		};
+		}
+		
+		return str;
+	}
+	
+	/**
+	 * Replaces all variables in the given string by their values.
+	 * 
+	 * @param str  The string to be replaced.
+	 * @return     The resulting string.
+	 * @throws ParseException    if an undefined variable is found.
+	 */
+	public String replaceVariables(String str) throws ParseException {
+		
+		// no variable found?
+		if ( ! varPattern.matcher(str).find() ) {
+			return str;
+		}
+		
+		boolean mustSearchAgain = true;
+		while (mustSearchAgain) {
+			mustSearchAgain = false;
+			Matcher varMatcher = varPattern.matcher(str);
+			StringBuffer resultingLine = new StringBuffer();
+			
+			// find and replace the next variable
+			while (varMatcher.find()) {
+				mustSearchAgain = true;
+				String varName  = varMatcher.group( 1 );
+				String varValue = variables.get(varName);
+				
+				// variable undefined?
+				if (null == varValue) {
+					throw new ParseException( Dict.get(Dict.ERROR_VAR_NOT_DEFINED) + varName );
+				}
+				
+				// replace
+				varMatcher.appendReplacement(resultingLine, Matcher.quoteReplacement(varValue));
+			}
+			
+			// replace, if necessary
+			if (mustSearchAgain) {
+				varMatcher.appendTail(resultingLine);
+				str = resultingLine.toString();
+			}
+		}
 		
 		return str;
 	}
@@ -2274,7 +2493,7 @@ public class MidicaPLParser extends SequenceParser {
 	
 	/**
 	 * Parses a channel command.
-	 * A channel command is a channel-based command like a note or a pause.
+	 * A channel command is a channel-based command like a note or a rest.
 	 * 
 	 * @param tokens             Token array.
 	 * @param isFake             **true**, if this is called inside a macro definition or block
@@ -2307,9 +2526,10 @@ public class MidicaPLParser extends SequenceParser {
 		boolean multiple = false;
 		int     tremolo  = duration;
 		int     quantity = 1;
+		int     shift    = 0;
 		String  syllable = null;
 		if (2 == subTokens.length) {
-			ArrayList<CommandOption> options = parseOptions(subTokens[1]);
+			ArrayList<CommandOption> options = parseOptions(subTokens[1], isFake);
 			
 			for (CommandOption opt : options) {
 				String optName = opt.getName();
@@ -2336,8 +2556,15 @@ public class MidicaPLParser extends SequenceParser {
 				else if (OPT_TREMOLO.equals(optName)) {
 					tremolo = opt.getTremolo();
 				}
+				else if (OPT_SHIFT.equals(optName)) {
+					shift += opt.getShift();
+				}
 			}
 		}
+		
+		// transpose by source code
+		if (note != REST_VALUE)
+			note += shift;
 		
 		// get instrument
 		Instrument instr = instruments.get( channel );
@@ -2412,14 +2639,15 @@ public class MidicaPLParser extends SequenceParser {
 	}
 	
 	/**
-	 * Parses the options part of a channel command.
+	 * Parses the options part of a command.
 	 * 
 	 * @param optString    The options string of the channel command to be parsed.
+	 * @param isFake       **true**, if this is called inside a macro definition or block.
 	 * @return             All options and their values that have been found in the
 	 *                     provided options string.
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
-	private ArrayList<CommandOption> parseOptions(String optString) throws ParseException {
+	private ArrayList<CommandOption> parseOptions(String optString, boolean isFake) throws ParseException {
 		ArrayList<CommandOption> options = new ArrayList<>();
 		
 		String[] optTokens = optString.split(OPT_SEPARATOR, -1);
@@ -2428,6 +2656,11 @@ public class MidicaPLParser extends SequenceParser {
 			String[] optParts = opt.split("[" + Pattern.quote(OPT_ASSIGNER) + "\\s]+", -1); // name and value can be separated by OPT_ASSIGNER (e,g, "=") and/or whitespace(s)
 			if (optParts.length > 2)
 				throw new ParseException( Dict.get(Dict.ERROR_CANT_PARSE_OPTIONS) );
+			
+			// value is a variable? - don't check if this is fake
+			if (isFake && optParts.length > 1 && varPattern.matcher(optParts[1]).find())
+				return options;
+			
 			// construct name and value
 			String        optName  = optParts[0];
 			CommandOption optValue = new CommandOption();
@@ -2489,6 +2722,10 @@ public class MidicaPLParser extends SequenceParser {
 				optName = OPT_TREMOLO;
 				optValue.set( optName, parseDuration(optParts[1]) );
 			}
+			else if (S.equals(optName) || SHIFT.equals(optName)) {
+				optName = OPT_SHIFT;
+				optValue.set( optName, toInt(optParts[1], false) );
+			}
 			else {
 				throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_OPTION) + optName );
 			}
@@ -2514,7 +2751,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * @return MIDI note value of the given note
 	 * @throws ParseExceptionif the note or percussion name is unknown or the note value is out of the legal range for MIDI notes
 	 */
-	private int parseNote( String note, int channel ) throws ParseException {
+	private int parseNote(String note, int channel) throws ParseException {
 		if (note.equals(REST))
 			return REST_VALUE;
 		else if (note.matches("^\\d+$"))
@@ -2956,7 +3193,8 @@ public class MidicaPLParser extends SequenceParser {
 			redefinitions       = new HashSet<>();
 			soundfontParsed     = false;
 			constants           = new HashMap<>();
-			constPattern        = null;
+			variables           = new HashMap<>();
+			varPattern          = null;
 			refreshSyntax();
 			NestableBlock.reset();
 		}

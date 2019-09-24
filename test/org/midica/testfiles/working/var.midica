@@ -1,0 +1,57 @@
+INCLUDE_FILE inc/instruments.midica
+
+CONST $cent= cent
+VAR $fa = 1                         // 1
+VAR $fb = 2                         // 2
+VAR $fc = 3                         // 0
+VAR $fd = $fb$fc                    // 23
+VAR $forte = $fa$fd                 // 123
+VAR $piano= 30                      // 30
+VAR $mezzoforte =80                 // 80
+VAR $staccato =  50%                // 50%
+VAR $legato     =100                // 100
+VAR $percent %                      // %
+VAR $medium_duration = 75$per$cent  // 75%
+
+0  c  /4  v=$piano,d  $staccato
+0  c  /4  d=$legato$percent
+MACRO test1
+	$c $n /4  v=$forte
+	$c $n /4  d = $staccato
+	( q=$q
+		$c $n     $l  d $staccato , v=$mezzoforte
+		$c $n,$n2 $l  d $medium_duration
+	)
+	VAR $c = 0
+	$c $n /4  d= $legato%,v=$forte
+	(
+		VAR $c = 1
+	)
+END
+
+VAR $c  = 1     // 1   (channel)
+VAR $n  = c     // c   (first note)
+VAR $n2 = c+    // c+  (second note)
+VAR $l  = /4    // /4  (note length)
+VAR $q  = 1     // 1   (quantity)
+
+INCLUDE test1  q=$q
+
+MACRO test2
+	INCLUDE test1  q=$q
+END
+INCLUDE test2
+
+// assign some variables in a block and/or macro
+(
+	(
+		VAR $q = 3
+	)
+)
+INCLUDE test3
+MACRO test3
+	VAR $l = /2
+	(
+		VAR $n2 = d
+	)
+END
