@@ -79,13 +79,21 @@ public class Dict {
 	public static final String SYNTAX_VAR                = "VAR";
 	public static final String SYNTAX_VAR_SYMBOL         = "VAR_SYMBOL";
 	public static final String SYNTAX_VAR_ASSIGNER       = "VAR_ASSIGNER";
+	public static final String SYNTAX_PARAM_NAMED_OPEN   = "PARAM_NAMED_OPEN";
+	public static final String SYNTAX_PARAM_NAMED_CLOSE  = "PARAM_NAMED_CLOSE";
+	public static final String SYNTAX_PARAM_INDEX_OPEN   = "PARAM_INDEX_OPEN";
+	public static final String SYNTAX_PARAM_INDEX_CLOSE  = "PARAM_INDEX_CLOSE";
 	public static final String SYNTAX_GLOBAL             = "GLOBAL";
 	public static final String SYNTAX_P                  = "PERCUSSION_CHANNEL";
 	public static final String SYNTAX_END                = "END";
 	public static final String SYNTAX_BLOCK_OPEN         = "BLOCK_OPEN";
 	public static final String SYNTAX_BLOCK_CLOSE        = "BLOCK_CLOSE";
-	public static final String SYNTAX_MACRO              = "MACRO";
-	public static final String SYNTAX_INCLUDE            = "INCLUDE";
+	public static final String SYNTAX_FUNCTION           = "FUNCTION";
+	public static final String SYNTAX_PARAM_OPEN         = "PARAM_OPEN";
+	public static final String SYNTAX_PARAM_CLOSE        = "PARAM_CLOSE";
+	public static final String SYNTAX_PARAM_SEPARATOR    = "PARAM_SEPARATOR";
+	public static final String SYNTAX_PARAM_ASSIGNER     = "PARAM_ASSIGNER";
+	public static final String SYNTAX_CALL               = "CALL";
 	public static final String SYNTAX_INSTRUMENT         = "INSTRUMENT";
 	public static final String SYNTAX_INSTRUMENTS        = "INSTRUMENTS";
 	public static final String SYNTAX_META               = "META";
@@ -130,7 +138,7 @@ public class Dict {
 	public static final String SYNTAX_REST               = "REST";
 	public static final String SYNTAX_CHORD              = "CHORD";
 	public static final String SYNTAX_INLINE_CHORD_SEP   = "INLINE_CHORD_SEP";
-	public static final String SYNTAX_INCLUDE_FILE       = "INCLUDE_FILE";
+	public static final String SYNTAX_INCLUDE            = "INCLUDE";
 	public static final String SYNTAX_SOUNDFONT          = "SOUNDFONT";
 	public static final String SYNTAX_32                 = "LENGTH_32";
 	public static final String SYNTAX_16                 = "LENGTH_16";
@@ -784,7 +792,7 @@ public class Dict {
 	public static final String TOOLTIP_BANK_LSB            = "tooltip_bank_lsb";
 	public static final String TOOLTIP_BANK_FULL           = "tooltip_bank_full";
 	public static final String SYNTAX_CAT_DEFINITION       = "syntax_cat_definition";
-	public static final String SYNTAX_CAT_CALL             = "syntax_cat_call";
+	public static final String SYNTAX_CAT_EXECUTE          = "syntax_cat_execute";
 	public static final String SYNTAX_CAT_OPTION           = "syntax_cat_option";
 	public static final String SYNTAX_CAT_GLOBAL           = "syntax_cat_global";
 	public static final String SYNTAX_CAT_OTHER            = "syntax_cat_other";
@@ -1192,8 +1200,8 @@ public class Dict {
 	public static final String ERROR_NESTABLE_BLOCK_OPEN_AT_EOF = "error_nestable_block_open_at_eof";
 	public static final String ERROR_NAMED_BLOCK_OPEN_AT_EOF    = "error_named_block_open_at_eof";
 	public static final String ERROR_ARGS_NOT_ALLOWED           = "error_args_not_allowed";
-	public static final String ERROR_MACRO_ALREADY_DEFINED      = "error_macro_already_defined";
-	public static final String ERROR_MACRO_NOT_ALLOWED_HERE     = "error_macro_not_allowed_here";
+	public static final String ERROR_FUNCTION_ALREADY_DEFINED   = "error_function_already_defined";
+	public static final String ERROR_FUNCTION_NOT_ALLOWED_HERE  = "error_function_not_allowed_here";
 	public static final String ERROR_META_NOT_ALLOWED_HERE      = "error_meta_not_allowed_here";
 	public static final String ERROR_CHORD_ALREADY_DEFINED      = "error_chord_already_defined";
 	public static final String ERROR_CHORD_EQUALS_NOTE          = "error_chord_equals_note";
@@ -1202,12 +1210,17 @@ public class Dict {
 	public static final String ERROR_CHORD_DEF_NOT_ALLOWED_HERE = "error_chord_def_not_allowed_here";
 	public static final String ERROR_CHORD_NUM_OF_ARGS          = "error_chord_num_of_args";
 	public static final String ERROR_CONST_NUM_OF_ARGS          = "error_const_num_of_args";
-	public static final String ERROR_VAR_NUM_OF_ARGS            = "error_var_num_of_args";
 	public static final String ERROR_CONST_ALREADY_DEFINED      = "error_const_already_defined";
+	public static final String ERROR_VAR_NUM_OF_ARGS            = "error_var_num_of_args";
 	public static final String ERROR_VAR_ALREADY_DEF_AS_CONST   = "error_var_already_def_as_const";
 	public static final String ERROR_VAR_VAL_HAS_WHITESPACE     = "error_var_val_has_whitespace";
 	public static final String ERROR_VAR_NOT_DEFINED            = "error_var_not_defined";
 	public static final String ERROR_VAR_NOT_ALLOWED            = "error_var_not_allowed";
+	public static final String ERROR_PARAM_OUTSIDE_FUNCTION     = "error_param_outside_function";
+	public static final String ERROR_PARAM_NAMED_UNKNOWN        = "error_param_named_unknown";
+	public static final String ERROR_PARAM_INDEX_TOO_HIGH       = "error_param_index_too_high";
+	public static final String ERROR_PARAM_INDEX_UNDEFINED      = "error_param_index_undefined";
+	public static final String ERROR_PARAM_UNDEFINED            = "error_param_undefined";
 	public static final String ERROR_DEFINE_NUM_OF_ARGS         = "error_define_num_of_args";
 	public static final String ERROR_ALREADY_REDEFINED          = "error_already_redefined";
 	public static final String ERROR_FILE_NUM_OF_ARGS           = "error_file_num_of_args";
@@ -1218,13 +1231,20 @@ public class Dict {
 	public static final String ERROR_FILE_IO                    = "error_file_io";
 	public static final String ERROR_SOUNDFONT_IO               = "error_soundfont_io";
 	public static final String ERROR_SOUNDFONT_ALREADY_PARSED   = "error_soundfont_already_parsed";
-	public static final String ERROR_MACRO_NUM_OF_ARGS          = "error_macro_num_of_arts";
+	public static final String ERROR_FUNCTION_NUM_OF_ARGS       = "error_function_num_of_args";
 	public static final String ERROR_META_NUM_OF_ARGS           = "error_meta_num_of_arts";
 	public static final String ERROR_META_UNKNOWN_CMD           = "error_meta_unknown_cmd";
-	public static final String ERROR_MACRO_RECURSION            = "error_macro_recursion";
-	public static final String ERROR_MACRO_UNDEFINED            = "error_macro_undefined";
-	public static final String ERROR_INCLUDE_NUM_OF_ARGS        = "error_include_num_of_args";
-	public static final String ERROR_INCLUDE_UNKNOWN_ARG        = "error_include_unknown_arg";
+	public static final String ERROR_FUNCTION_RECURSION         = "error_function_recursion";
+	public static final String ERROR_FUNCTION_UNDEFINED         = "error_function_undefined";
+	public static final String ERROR_CALL_NUM_OF_ARGS           = "error_call_num_of_args";
+	public static final String ERROR_CALL_UNKNOWN_ARG           = "error_call_unknown_arg";
+	public static final String ERROR_CALL_SYNTAX                = "error_call_syntax";
+	public static final String ERROR_CALL_EMPTY_PARAM           = "error_call_empty_param";
+	public static final String ERROR_CALL_PARAM_NAME_EMPTY      = "error_call_param_name_empty";
+	public static final String ERROR_CALL_PARAM_VALUE_EMPTY     = "error_call_param_value_empty";
+	public static final String ERROR_CALL_PARAM_NAME_WITH_SPEC  = "error_call_param_name_with_spec";
+	public static final String ERROR_CALL_DUPLICATE_PARAM_NAME  = "error_call_duplicate_param_name";
+	public static final String ERROR_CALL_PARAM_MORE_ASSIGNERS  = "error_call_param_more_assigners";
 	public static final String ERROR_INVALID_TIME_DENOM         = "error_invalid_time_denom";
 	public static final String ERROR_INVALID_TIME_SIG           = "error_invalid_time_sig";
 	public static final String ERROR_INVALID_KEY_SIG            = "error_invalid_key_sig";
@@ -1237,7 +1257,7 @@ public class Dict {
 	public static final String ERROR_NOTE_TOO_SMALL             = "error_note_too_small";
 	public static final String ERROR_NOTE_LENGTH_INVALID        = "error_note_length_invalid";
 	public static final String ERROR_EMPTY_DURATION_SUMMAND     = "error_empty_duration_summand";
-	public static final String ERROR_UNKNOWN_MACRO_CMD          = "error_unknown_macro_cmd";
+	public static final String ERROR_UNKNOWN_FUNCTION_CMD       = "error_unknown_function_cmd";
 	public static final String ERROR_INSTR_NUM_OF_ARGS          = "error_num_of_args";
 	public static final String ERROR_INSTR_NUM_OF_ARGS_SINGLE   = "error_num_of_args_single";
 	public static final String ERROR_INSTR_BANK                 = "error_instr_bank";
@@ -1268,6 +1288,18 @@ public class Dict {
 	
 	// SequenceParser
 	public static final String ERROR_ANALYZE_POSTPROCESS        = "error_analyze_postprocess";
+	
+	// ParseException and StackTraceElement
+	public static final String EXCEPTION_CAUSED_BY_LINE         = "exception_caused_by_line";
+	public static final String STACK_TRACE_HEADER               = "stack_trace_header";
+	public static final String STACK_TRACE_INDENTATION          = "stack_trace_indentation";
+	public static final String STACK_TRACE_BLOCK                = "stack_trace_block";
+	public static final String STACK_TRACE_OPTIONS              = "stack_trace_options";
+	public static final String STACK_TRACE_PARAMS               = "stack_trace_params";
+	public static final String STACK_TRACE_LINE                 = "stack_trace_line";
+	public static final String STACK_TRACE_IN                   = "stack_trace_in";
+	public static final String STACK_TRACE_EXEC                 = "stack_trace_exec";
+	public static final String STACK_TRACE_FUNCTION             = "stack_trace_function";
 	
 	// WaitView
 	public static final String TITLE_WAIT                       = "title_wait";
@@ -1832,7 +1864,7 @@ public class Dict {
 		set( TOOLTIP_BANK_LSB,                       "LSB"                           );
 		set( TOOLTIP_BANK_FULL,                      "Bank Number"                   );
 		set( SYNTAX_CAT_DEFINITION,                  "Definition Commands"           );
-		set( SYNTAX_CAT_CALL,                        "Execution Commands"            );
+		set( SYNTAX_CAT_EXECUTE,                     "Execution Commands"            );
 		set( SYNTAX_CAT_OPTION,                      "Option Syntax"                 );
 		set( SYNTAX_CAT_GLOBAL,                      "Global Commands"               );
 		set( SYNTAX_CAT_OTHER,                       "Other Commands"                );
@@ -1910,13 +1942,21 @@ public class Dict {
 		set( SYNTAX_VAR,                "variable definition"                              );
 		set( SYNTAX_VAR_SYMBOL,         "first character of a variable or constant"        );
 		set( SYNTAX_VAR_ASSIGNER,       "assign symbol between variable/constant and value" );
+		set( SYNTAX_PARAM_NAMED_OPEN,   "opens a parameter name"                           );
+		set( SYNTAX_PARAM_NAMED_CLOSE,  "closes a parameter name"                          );
+		set( SYNTAX_PARAM_INDEX_OPEN,   "opens a parameter index"                          );
+		set( SYNTAX_PARAM_INDEX_CLOSE,  "opens a parameter index"                          );
 		set( SYNTAX_GLOBAL,             "global command (all channels)"                    );
 		set( SYNTAX_P,                  "percussion channel"                               );
 		set( SYNTAX_END,                "end of a definition block"                        );
 		set( SYNTAX_BLOCK_OPEN,         "opens a nestable block"                           );
 		set( SYNTAX_BLOCK_CLOSE,        "closes a nestable block"                          );
-		set( SYNTAX_MACRO,              "macro definition"                                 );
-		set( SYNTAX_INCLUDE,            "macro execution"                                  );
+		set( SYNTAX_FUNCTION,           "function definition"                              );
+		set( SYNTAX_PARAM_OPEN,         "opens a function parameter list"                  );
+		set( SYNTAX_PARAM_CLOSE,        "closes a function parameter list"                 );
+		set( SYNTAX_PARAM_SEPARATOR,    "separates parameters in a function call"          );
+		set( SYNTAX_PARAM_ASSIGNER,     "assignes named parameters in a function call"     );
+		set( SYNTAX_CALL,               "function execution"                               );
 		set( SYNTAX_INSTRUMENT,         "instrument switch for one single channel"         );
 		set( SYNTAX_INSTRUMENTS,        "definition of instruments"                        );
 		set( SYNTAX_META,               "meta information block definition"                );
@@ -1961,7 +2001,7 @@ public class Dict {
 		set( SYNTAX_REST,               "rest character"                                   );
 		set( SYNTAX_CHORD,              "chord definition"                                 );
 		set( SYNTAX_INLINE_CHORD_SEP,   "inline chord separator"                           );
-		set( SYNTAX_INCLUDE_FILE,       "including another file"                           );
+		set( SYNTAX_INCLUDE,            "including another file"                           );
 		set( SYNTAX_SOUNDFONT,          "including a soundfont file"                       );
 		
 		set( SYNTAX_32,               "32nd"                                             );
@@ -2327,15 +2367,20 @@ public class Dict {
 		set( ERROR_CHORD_DEF_NOT_ALLOWED_HERE,    "a chord definition is not allowed inside a block<br>maybe you forgot to close the block." );
 		set( ERROR_CHORD_NUM_OF_ARGS,             "wrong number of arguments in CHORD command"                        );
 		set( ERROR_CONST_NUM_OF_ARGS,             "wrong number of arguments in CONSTANT definition"                  );
-		set( ERROR_VAR_NUM_OF_ARGS,               "wrong number of arguments in VAR definition or assignment"         );
 		set( ERROR_CONST_ALREADY_DEFINED,         "constant already defined: "                                        );
+		set( ERROR_VAR_NUM_OF_ARGS,               "wrong number of arguments in VAR definition or assignment"         );
 		set( ERROR_VAR_ALREADY_DEF_AS_CONST,      "variable name already used for a constant: "                       );
 		set( ERROR_VAR_VAL_HAS_WHITESPACE,        "Variables must not contain a whitespace in the value: "            );
 		set( ERROR_VAR_NOT_DEFINED,               "variable undefined: "                                              );
 		set( ERROR_VAR_NOT_ALLOWED,               "variable not allowed here: "                                       );
+		set( ERROR_PARAM_OUTSIDE_FUNCTION,        "parameters cannot be used outside of a function"                   );
+		set( ERROR_PARAM_NAMED_UNKNOWN,           "unknown parameter name: "                                          );
+		set( ERROR_PARAM_INDEX_TOO_HIGH,          "parameter index too high: "                                        );
+		set( ERROR_PARAM_INDEX_UNDEFINED,         "parameter contains undefined index: "                              );
+		set( ERROR_PARAM_UNDEFINED,               "parameter undefined: "                                             );
 		set( ERROR_DEFINE_NUM_OF_ARGS,            "wrong number of arguments in DEFINE command"                       );
 		set( ERROR_ALREADY_REDEFINED,             "Command ID already redefined. Cannot be redefined again: "         );
-		set( ERROR_FILE_NUM_OF_ARGS,              "wrong number of arguments in INCLUDE_FILE command"                 );
+		set( ERROR_FILE_NUM_OF_ARGS,              "wrong number of arguments in INCLUDE command"                      );
 		set( ERROR_SOUNDFONT_NUM_OF_ARGS,         "wrong number of arguments in SOUNDFONT command"                    );
 		set( ERROR_FILE_EXISTS,                   "file does not exist:<br>"                                          );
 		set( ERROR_FILE_NORMAL,                   "not a normal file:<br>"                                            );
@@ -2343,16 +2388,23 @@ public class Dict {
 		set( ERROR_FILE_IO,                       "file cannot be parsed:<br>"                                        );
 		set( ERROR_SOUNDFONT_IO,                  "soundfont cannot be parsed:<br>"                                   );
 		set( ERROR_SOUNDFONT_ALREADY_PARSED,      "a soundfont can be included only once"                             );
-		set( ERROR_MACRO_NUM_OF_ARGS,             "wrong number of arguments in macro command"                        );
+		set( ERROR_FUNCTION_NUM_OF_ARGS,          "wrong number of arguments in function command"                     );
 		set( ERROR_META_NUM_OF_ARGS,              "no arguments allowed in meta command"                              );
 		set( ERROR_META_UNKNOWN_CMD,              "unknown meta command: "                                            );
-		set( ERROR_MACRO_RECURSION,               "Can't include the current macro in itself. Recursion not allowed." );
-		set( ERROR_MACRO_UNDEFINED,               "include failed. macro not yet defined."                            );
-		set( ERROR_MACRO_ALREADY_DEFINED,         "macro name has been already defined: "                             );
-		set( ERROR_MACRO_NOT_ALLOWED_HERE,        "a macro definition is not allowed inside a block<br>maybe you forgot to close the block." );
+		set( ERROR_FUNCTION_RECURSION,            "Can't call the current function in itself. Recursion not allowed." );
+		set( ERROR_FUNCTION_UNDEFINED,            "Call failed. Function not yet defined."                            );
+		set( ERROR_FUNCTION_ALREADY_DEFINED,      "function name has been already defined: "                          );
+		set( ERROR_FUNCTION_NOT_ALLOWED_HERE,     "a function definition is not allowed inside a block<br>maybe you forgot to close the block." );
 		set( ERROR_META_NOT_ALLOWED_HERE,         "a meta definition is not allowed inside a block<br>maybe you forgot to close the block." );
-		set( ERROR_INCLUDE_NUM_OF_ARGS,           "wrong number of arguments in macro command 'INCLUDE'"              );
-		set( ERROR_INCLUDE_UNKNOWN_ARG,           "unknown argument for 'INCLUDE': "                                  );
+		set( ERROR_CALL_NUM_OF_ARGS,              "wrong number of arguments in function call command"                );
+		set( ERROR_CALL_UNKNOWN_ARG,              "unknown argument for function call command: "                      );
+		set( ERROR_CALL_SYNTAX,                   "invalid syntax in call command"                                    );
+		set( ERROR_CALL_EMPTY_PARAM,              "empty call parameter in parameter list: "                          );
+		set( ERROR_CALL_PARAM_NAME_EMPTY,         "empty named call parameter in parameter list: "                    );
+		set( ERROR_CALL_PARAM_VALUE_EMPTY,        "value of named call parameter is empty: "                          );
+		set( ERROR_CALL_PARAM_NAME_WITH_SPEC,     "parameter name contains special characters: "                      );
+		set( ERROR_CALL_DUPLICATE_PARAM_NAME,     "duplicate parameter name: "                                        );
+		set( ERROR_CALL_PARAM_MORE_ASSIGNERS,     "named parameter must not contain more than one assign symbol: "    );
 		set( ERROR_INVALID_TIME_DENOM,            "invalid denominator in time signature: "                           );
 		set( ERROR_INVALID_TIME_SIG,              "invalid time signature argument: "                                 );
 		set( ERROR_INVALID_KEY_SIG,               "invalid key signature argument: "                                  );
@@ -2365,7 +2417,7 @@ public class Dict {
 		set( ERROR_NOTE_TOO_SMALL,                "note number too small: "                                           );
 		set( ERROR_NOTE_LENGTH_INVALID,           "invalid note length expression: "                                  );
 		set( ERROR_EMPTY_DURATION_SUMMAND,        "empty summand in duration string: "                                );
-		set( ERROR_UNKNOWN_MACRO_CMD,             "unknown macro command: "                                           );
+		set( ERROR_UNKNOWN_FUNCTION_CMD,          "unknown function command: "                                        ); // TODO: check
 		set( ERROR_INSTR_NUM_OF_ARGS,             "wrong number of arguments in instrument command"                   );
 		set( ERROR_INSTR_NUM_OF_ARGS_SINGLE,      "wrong number of arguments in single line instrument command"       );
 		set( ERROR_INSTR_BANK,                    "Instrument and/or Bank definition erroneous"                       );
@@ -2374,7 +2426,7 @@ public class Dict {
 		set( ERROR_UNKNOWN_COMMAND_ID,            "Unknown command ID: "                                              );
 		set( ERROR_MIDI_PROBLEM,                  "<html>Midi Problem!<br>"                                           );
 		set( ERROR_CH_CMD_NUM_OF_ARGS,            "wrong number of arguments in channel command"                      );
-		set( ERROR_CANT_PARSE_OPTIONS,            "cannot parse options"                                              );
+		set( ERROR_CANT_PARSE_OPTIONS,            "cannot parse options: "                                            );
 		set( ERROR_OPTION_NEEDS_VAL,              "option needs value: "                                              );
 		set( ERROR_OPTION_VAL_NOT_ALLOWED,        "no value allowed for option: "                                     );
 		set( ERROR_VEL_NOT_MORE_THAN_127,         "velocity cannot be set to more than 127"                           );
@@ -2396,6 +2448,18 @@ public class Dict {
 		
 		// SequenceParser
 		set( ERROR_ANALYZE_POSTPROCESS,           "Error while postprocessing the sequence"                           );
+		
+		// ParseException and StackTraceElement
+		set( EXCEPTION_CAUSED_BY_LINE,            "Caused by this line:"                                              );
+		set( STACK_TRACE_HEADER,                  "Stack Trace:"                                                      );
+		set( STACK_TRACE_INDENTATION,             "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"                  );
+		set( STACK_TRACE_BLOCK,                   "Nestable block"                                                    );
+		set( STACK_TRACE_OPTIONS,                 "options: "                                                         );
+		set( STACK_TRACE_PARAMS,                  "params: "                                                          );
+		set( STACK_TRACE_LINE,                    "line:"                                                             );
+		set( STACK_TRACE_IN,                      "in"                                                                );
+		set( STACK_TRACE_EXEC,                    "Executed:"                                                         );
+		set( STACK_TRACE_FUNCTION,                "Function "                                                         );
 		
 		// WaitView
 		set( TITLE_WAIT,                          "Please Wait"                                                       );
@@ -2800,13 +2864,21 @@ public class Dict {
 		setSyntax( SYNTAX_VAR,               "VAR"           );
 		setSyntax( SYNTAX_VAR_SYMBOL,        "$"             );
 		setSyntax( SYNTAX_VAR_ASSIGNER,      "="             );
+		setSyntax( SYNTAX_PARAM_NAMED_OPEN,  "{"             );
+		setSyntax( SYNTAX_PARAM_NAMED_CLOSE, "}"             );
+		setSyntax( SYNTAX_PARAM_INDEX_OPEN,  "["             );
+		setSyntax( SYNTAX_PARAM_INDEX_CLOSE, "]"             );
 		setSyntax( SYNTAX_GLOBAL,            "*"             );
 		setSyntax( SYNTAX_P,                 "p"             );
 		setSyntax( SYNTAX_END,               "END"           );
 		setSyntax( SYNTAX_BLOCK_OPEN,        "("             );
 		setSyntax( SYNTAX_BLOCK_CLOSE,       ")"             );
-		setSyntax( SYNTAX_MACRO,             "MACRO"         );
-		setSyntax( SYNTAX_INCLUDE,           "INCLUDE"       );
+		setSyntax( SYNTAX_FUNCTION,          "FUNCTION"      );
+		setSyntax( SYNTAX_PARAM_OPEN,        "("             );
+		setSyntax( SYNTAX_PARAM_CLOSE,       ")"             );
+		setSyntax( SYNTAX_PARAM_SEPARATOR,   ","             );
+		setSyntax( SYNTAX_PARAM_ASSIGNER,    "="             );
+		setSyntax( SYNTAX_CALL,              "CALL"          );
 		setSyntax( SYNTAX_INSTRUMENT,        "INSTRUMENT"    );
 		setSyntax( SYNTAX_INSTRUMENTS,       "INSTRUMENTS"   );
 		setSyntax( SYNTAX_META,              "META"          );
@@ -2851,7 +2923,7 @@ public class Dict {
 		setSyntax( SYNTAX_REST,               "-"            );
 		setSyntax( SYNTAX_CHORD,              "CHORD"        );
 		setSyntax( SYNTAX_INLINE_CHORD_SEP,   ","            );
-		setSyntax( SYNTAX_INCLUDE_FILE,       "INCLUDE_FILE" );
+		setSyntax( SYNTAX_INCLUDE,            "INCLUDE"      );
 		setSyntax( SYNTAX_SOUNDFONT,          "SOUNDFONT"    );
 		setSyntax( SYNTAX_32,                 "/32"          );
 		setSyntax( SYNTAX_16,                 "/16"          );
@@ -2896,15 +2968,19 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_INSTRUMENTS );
 		addSyntaxForInfoView( SYNTAX_META        );
 		addSyntaxForInfoView( SYNTAX_CHORD       );
-		addSyntaxForInfoView( SYNTAX_MACRO       );
+		addSyntaxForInfoView( SYNTAX_FUNCTION    );
 		addSyntaxForInfoView( SYNTAX_END         );
 		addSyntaxForInfoView( SYNTAX_BLOCK_OPEN  );
 		addSyntaxForInfoView( SYNTAX_BLOCK_CLOSE );
 		
-		addSyntaxCategory( get(SYNTAX_CAT_CALL) );
-		addSyntaxForInfoView( SYNTAX_INCLUDE      );
-		addSyntaxForInfoView( SYNTAX_INCLUDE_FILE );
-		addSyntaxForInfoView( SYNTAX_SOUNDFONT    );
+		addSyntaxCategory( get(SYNTAX_CAT_EXECUTE) );
+		addSyntaxForInfoView( SYNTAX_CALL            );
+		addSyntaxForInfoView( SYNTAX_PARAM_OPEN      );
+		addSyntaxForInfoView( SYNTAX_PARAM_CLOSE     );
+		addSyntaxForInfoView( SYNTAX_PARAM_SEPARATOR );
+		addSyntaxForInfoView( SYNTAX_PARAM_ASSIGNER  );
+		addSyntaxForInfoView( SYNTAX_INCLUDE         );
+		addSyntaxForInfoView( SYNTAX_SOUNDFONT       );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_GLOBAL) );
 		addSyntaxForInfoView( SYNTAX_GLOBAL             );
@@ -2919,12 +2995,16 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_PARTIAL_SYNC_SEP   );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_OTHER) );
-		addSyntaxForInfoView( SYNTAX_COMMENT          );
-		addSyntaxForInfoView( SYNTAX_REST             );
-		addSyntaxForInfoView( SYNTAX_P                );
-		addSyntaxForInfoView( SYNTAX_INLINE_CHORD_SEP );
-		addSyntaxForInfoView( SYNTAX_VAR_SYMBOL       );
-		addSyntaxForInfoView( SYNTAX_VAR_ASSIGNER     );
+		addSyntaxForInfoView( SYNTAX_COMMENT           );
+		addSyntaxForInfoView( SYNTAX_REST              );
+		addSyntaxForInfoView( SYNTAX_P                 );
+		addSyntaxForInfoView( SYNTAX_INLINE_CHORD_SEP  );
+		addSyntaxForInfoView( SYNTAX_VAR_SYMBOL        );
+		addSyntaxForInfoView( SYNTAX_VAR_ASSIGNER      );
+		addSyntaxForInfoView( SYNTAX_PARAM_NAMED_OPEN  );
+		addSyntaxForInfoView( SYNTAX_PARAM_NAMED_CLOSE );
+		addSyntaxForInfoView( SYNTAX_PARAM_INDEX_OPEN  );
+		addSyntaxForInfoView( SYNTAX_PARAM_INDEX_CLOSE );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_META) );
 		addSyntaxForInfoView( SYNTAX_META_COPYRIGHT );

@@ -1,7 +1,7 @@
-INCLUDE_FILE inc/instruments.midica
+INCLUDE inc/instruments.midica
 
 0 c /4
 
-MACRO test
+FUNCTION test
 	SOUNDFONT ../working/java-emergency-soundfont.sf2
 END

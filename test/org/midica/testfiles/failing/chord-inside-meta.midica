@@ -1,4 +1,4 @@
-INCLUDE_FILE inc/instruments.midica
+INCLUDE inc/instruments.midica
 
 META
 	CHORD testchord c d e

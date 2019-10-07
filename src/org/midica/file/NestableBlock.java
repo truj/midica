@@ -7,8 +7,9 @@
 
 package org.midica.file;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.regex.Matcher;
+import java.util.Deque;
 import java.util.regex.Pattern;
 
 import org.midica.config.Dict;
@@ -186,7 +187,7 @@ public class NestableBlock {
 			}
 		}
 		catch (ParseException e) {
-			// not a channel command - probably an include
+			// not a channel command - probably a call
 		}
 		
 		return tokens;
@@ -209,11 +210,35 @@ public class NestableBlock {
 	
 	/**
 	 * Executes the content of the block.
-	 * Adds all resulting shifts and tuplets to channel or include commands before execution.
+	 * Adds all resulting shifts and tuplets to channel or call commands before execution.
+	 * Also tracks the current line in the call stack.
 	 * 
+	 * For root blocks, the provided lineNumber is the line where the block is closed.
+	 * For other blocks it's the line where the block is opened.
+	 * 
+	 * @param callStack    the call stack of the parser.
+	 * @param isRootBlock  **true**, if this is the root block, otherwise **false**.
+	 * @param file         the file where the block is defined
+	 * @param lineNumber   first or last line number of the block
 	 * @throws ParseException if one of the content lines cannot be parsed.
 	 */
-	public void play() throws ParseException {
+	public void play(Deque<StackTraceElement> callStack, boolean isRootBlock, File file, int lineNumber) throws ParseException {
+		
+		// add call stack element
+		int lineNumberOpen  = lineNumber;
+		int lineNumberClose = lineNumber;
+		if (isRootBlock) {
+			lineNumberOpen = lineNumberOpen - getNumberOfLines();
+			lineNumberOpen++;
+		}
+		else {
+			lineNumberClose = lineNumberClose - 1 + getNumberOfLines();
+		}
+		lineNumber = lineNumberOpen;
+		StackTraceElement traceElem = new StackTraceElement(file, lineNumberOpen);
+		traceElem.setOptions(getOptionsForStackTrace());
+		traceElem.setNestableBlock(lineNumberOpen, lineNumberClose);
+		callStack.push(traceElem);
 		
 		// remember current tickstamps if needed
 		ArrayList<Long> tickstamps = null;
@@ -223,11 +248,34 @@ public class NestableBlock {
 		
 		// apply the block content
 		for (int i = 0; i < quantity; i++) {
+			
+			// reset line
+			lineNumber = lineNumberOpen;
+			traceElem.resetLine();
+			
 			for (Object element : elements) {
+				
+				// increment line
+				lineNumber++;
+				traceElem.incrementLine();
+				
 				if (element instanceof NestableBlock) {
-					((NestableBlock) element).play();
+					NestableBlock childBlock = (NestableBlock) element;
+					
+					// track line
+					int offsetLine = lineNumber;
+					int increment  = childBlock.getNumberOfLines() - 1;
+					traceElem.addToLine( increment );
+					lineNumber += increment;
+					
+					childBlock.play(callStack, false, file, offsetLine);
 				}
 				else if (element instanceof String[]) {
+					
+					// add line to call stack
+					StackTraceElement lineTraceElem = new StackTraceElement(file, lineNumber);
+					callStack.push(lineTraceElem);
+					
 					String[] tokens = (String[]) element;
 					String line;
 					if (shift != 0 || tuplet != null) {
@@ -244,6 +292,9 @@ public class NestableBlock {
 						tokens = addTuplets(tokens);
 					}
 					parser.parseLine( String.join(" ", tokens) );
+					
+					// remove line from call stack
+					callStack.pop();
 				}
 				else {
 					throw new ParseException("invalid block element class: " + element.getClass());
@@ -255,6 +306,53 @@ public class NestableBlock {
 		if (multiple) {
 			parser.restoreTickstamps(tickstamps);
 		}
+		
+		// remove call stack element
+		callStack.pop();
+	}
+	
+	/**
+	 * Returns the resulting options string for the current block so that it can
+	 * be used in a stack trace.
+	 * 
+	 * @return  options string
+	 */
+	private String getOptionsForStackTrace() {
+		ArrayList<String> options = new ArrayList<>();
+		if (quantity != 1) {
+			options.add(MidicaPLParser.Q + MidicaPLParser.OPT_ASSIGNER + quantity);
+		}
+		if (multiple) {
+			options.add(MidicaPLParser.M);
+		}
+		if (tuplet != null) {
+			options.add(MidicaPLParser.T + MidicaPLParser.OPT_ASSIGNER + tuplet);
+		}
+		if (shift != 0) {
+			options.add(MidicaPLParser.S + MidicaPLParser.OPT_ASSIGNER + shift);
+		}
+		
+		return String.join(MidicaPLParser.OPT_SEPARATOR + " ", options);
+	}
+	
+	/**
+	 * Recursively calculates the number of lines of this block.
+	 * 
+	 * @return the number of lines, including all sub blocks.
+	 */
+	public int getNumberOfLines() {
+		int count = 2; // opening and closing block
+		for (Object element : elements) {
+			
+			if (element instanceof NestableBlock) {
+				count += ((NestableBlock) element).getNumberOfLines();
+			}
+			else if (element instanceof String[]) {
+				count++;
+			}
+		}
+		
+		return count;
 	}
 	
 	/**

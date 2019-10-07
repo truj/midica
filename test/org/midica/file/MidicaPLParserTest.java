@@ -12,6 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Deque;
 import java.util.HashMap;
 
 import javax.sound.midi.MetaMessage;
@@ -113,7 +114,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		parse(getWorkingFile("nestable-block-with-m"));
 		assertEquals( 480, instruments.get(0).getCurrentTicks() );
 		
-		parse(getWorkingFile("macros-and-blocks"));
+		parse(getWorkingFile("functions-and-blocks"));
 		assertEquals( 11040, instruments.get(0).getCurrentTicks() );
 		
 		parse(getWorkingFile("chords"));
@@ -186,8 +187,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		);
 		
 		parse(getWorkingFile("lyrics"));
-		String lyricsFull = (String) ((HashMap<String, Object>)SequenceAnalyzer.getSequenceInfo().get("karaoke")).get("lyrics_full");
-		assertEquals( "happy birthday to you\nhappy birthday to you\n\nhappy", lyricsFull );
+		assertEquals( "happy birthday to you\nhappy birthday to you\n\nhappy", getLyrics() );
 		
 		parse(getWorkingFile("block-tuplets"));
 		assertEquals( 3668, instruments.get(0).getCurrentTicks() );
@@ -198,7 +198,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		parse(getWorkingFile("drum-only-with-empty-multiple-block"));
 		assertEquals( 0, instruments.get(9).getCurrentTicks() );
 		
-		parse(getWorkingFile("drum-only-with-empty-multiple-macro"));
+		parse(getWorkingFile("drum-only-with-empty-multiple-function"));
 		assertEquals( 0, instruments.get(9).getCurrentTicks() );
 		
 		parse(getWorkingFile("drum-only-with-multiple"));
@@ -245,27 +245,27 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "240/0/80/c / 0",    messages.get(++i).toString() );  //   staccato=240 ticks
 			assertEquals( "480/0/90/c / 30",   messages.get(++i).toString() );  // c
 			assertEquals( "960/0/80/c / 0",    messages.get(++i).toString() );  //   legato=480 ticks
-			assertEquals( "960/0/90/c / 123",  messages.get(++i).toString() );  // c forte   (INCLUDE test1)
+			assertEquals( "960/0/90/c / 123",  messages.get(++i).toString() );  // c forte   (CALL test1)
 			assertEquals( "1440/0/80/c / 0",   messages.get(++i).toString() );  //   legato=480 ticks
-			assertEquals( "1440/0/90/c / 123", messages.get(++i).toString() );  // c         (INCLUDE test2)
+			assertEquals( "1440/0/90/c / 123", messages.get(++i).toString() );  // c         (CALL test2)
 			assertEquals( "1920/0/80/c / 0",   messages.get(++i).toString() );  //   legato=480 ticks
 		}
 		// channel 1:
 		messages = getMessagesByChannel(1);
 		{
 			int i = 0;
-			// macro test1, plain
+			// function test1, plain
 			assertEquals( "0/1/91/c / 123",     messages.get(++i).toString() );  // c forte
 			assertEquals( "456/1/81/c / 0",     messages.get(++i).toString() );  //   default duration: 456 ticks
 			assertEquals( "480/1/91/c / 123",   messages.get(++i).toString() );  // c forte
 			assertEquals( "720/1/81/c / 0",     messages.get(++i).toString() );  //   staccato=240 ticks
-			// macro test1, block
+			// function test1, block
 			assertEquals( "960/1/91/c / 80",   messages.get(++i).toString()  );  // c mezzoforte
 			assertEquals( "1200/1/81/c / 0",   messages.get(++i).toString()  );  //   staccato=240 ticks
 			assertEquals( "1440/1/91/c / 80",  messages.get(++i).toString()  );  // c mezzoforte
 			assertEquals( "1440/1/91/c+ / 80", messages.get(++i).toString()  );  // c+ mezzoforte
 			assertEquals( "1800/1/81/c / 0",   messages.get(++i).toString()  );  //   medium_duration=360 ticks
-			assertEquals( "1800/1/81/c+ / 0",  messages.get(++i).toString() );  //   medium_duration=360 ticks
+			assertEquals( "1800/1/81/c+ / 0",  messages.get(++i).toString()  );  //   medium_duration=360 ticks
 		}
 		// INLUDE test2
 		assertEquals( 21, messages.size() ); // 1x program change, 10x note-on, 10x note-off
@@ -275,25 +275,44 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 19, messages.size() );
 		{
 			int i = 0;
-			assertEquals( "0/0/90/d / 64",      messages.get(i++).toString() ); // before all macros
+			assertEquals( "0/0/90/d / 64",      messages.get(i++).toString() ); // before all functions
 			assertEquals( "480/0/90/e / 64",    messages.get(i++).toString() );
 			assertEquals( "960/0/90/c / 64",    messages.get(i++).toString() );
 			assertEquals( "1440/0/90/a#- / 64", messages.get(i++).toString() );
 			assertEquals( "1920/0/90/c / 64",   messages.get(i++).toString() );
-			assertEquals( "2400/0/90/c / 64",   messages.get(i++).toString() ); // INCLUDE test1
+			assertEquals( "2400/0/90/c / 64",   messages.get(i++).toString() ); // CALL test1
 			assertEquals( "2880/0/90/c / 64",   messages.get(i++).toString() );
 			assertEquals( "3360/0/90/c / 64",   messages.get(i++).toString() );     // c (chord)
 			assertEquals( "3360/0/90/d / 64",   messages.get(i++).toString() );     // d (chord)
 			assertEquals( "3840/0/90/a#- / 64", messages.get(i++).toString() );
 			assertEquals( "4320/0/90/a#- / 64", messages.get(i++).toString() );     // a#- (chord)
 			assertEquals( "4320/0/90/c / 64",   messages.get(i++).toString() );     // c (chord)
-			assertEquals( "4800/0/90/c+ / 64",  messages.get(i++).toString() ); // INCLUDE test1  s=12
+			assertEquals( "4800/0/90/c+ / 64",  messages.get(i++).toString() ); // CALL test1  s=12
 			assertEquals( "5280/0/90/c+ / 64",  messages.get(i++).toString() );
 			assertEquals( "5760/0/90/c+ / 64",  messages.get(i++).toString() );     // c+ (chord)
 			assertEquals( "5760/0/90/d+ / 64",  messages.get(i++).toString() );     // d+ (chord)
 			assertEquals( "6240/0/90/a# / 64",  messages.get(i++).toString() );
 			assertEquals( "6720/0/90/a# / 64",  messages.get(i++).toString() );     // a# (chord)
 			assertEquals( "6720/0/90/c+ / 64",  messages.get(i++).toString() );     // c+ (chord)
+		}
+		
+		parse(getWorkingFile("functions"));
+		assertEquals( 14400, instruments.get(0).getCurrentTicks() );  // channel 0
+		assertEquals(  2880, instruments.get(1).getCurrentTicks() );  // channel 1
+		assertEquals(                                                 // channel 0
+			"abc... abc... abc... abc... abc... abc... xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd abc... abc... abc... abc... abc... abc... bbb?? bbb?? bbb?? bbb?? bbb?? bbb?? ",
+			getLyrics()
+		);
+		messages = getMessagesByStatus("91");                           // channel 1
+		assertEquals( 6, messages.size() );
+		{
+			int i = 0;
+			assertEquals( "0/1/91/b+ / 60",       messages.get(i++).toString() );
+			assertEquals( "480/1/91/c+2 / 63",    messages.get(i++).toString() );
+			assertEquals( "960/1/91/c#+ / 70",    messages.get(i++).toString() );
+			assertEquals( "1440/1/91/e+ / 80",    messages.get(i++).toString() );
+			assertEquals( "1920/1/91/c-2 / 90",   messages.get(i++).toString() );
+			assertEquals( "2400/1/91/c#-2 / 110", messages.get(i++).toString() );
 		}
 	}
 	
@@ -309,14 +328,14 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("nestable-block-open-at-eof")) );
 		assertEquals( 6, e.getLineNumber() );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("macro-open-at-eof")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("function-open-at-eof")) );
 		assertEquals( 6, e.getLineNumber() );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("file-that-does-not-exist")) );
 		assertTrue( e.getMessage().startsWith("java.io.FileNotFoundException:") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-failing-file")) );
-		assertTrue( e.getFileName().endsWith("instruments-with-nestable-block.midica") );
+		assertTrue( e.getFile().getName().equals("instruments-with-nestable-block.midica") );
 		assertEquals( 4, e.getLineNumber() );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-not-existing-file")) );
@@ -328,7 +347,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-in-block")) );
 		assertEquals( 5, e.getLineNumber() );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("macro-in-block")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("function-in-block")) );
 		assertEquals( 5, e.getLineNumber() );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("using-channel-without-instr-def")) );
@@ -352,13 +371,13 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("unmatched-close")) );
 		assertEquals( 6, e.getLineNumber() );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("macro-nested")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("function-nested")) );
 		assertEquals( 5, e.getLineNumber() );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("macro-redefined")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("function-redefined")) );
 		assertEquals( 8, e.getLineNumber() );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("macro-with-second-param")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("function-with-second-param")) );
 		assertEquals( 3, e.getLineNumber() );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-soundfont-twice")) );
@@ -367,7 +386,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-soundfont-inside-block")) );
 		assertEquals( 6, e.getLineNumber() );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-soundfont-inside-macro")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-soundfont-inside-function")) );
 		assertEquals( 6, e.getLineNumber() );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("unknown-cmd")) );
@@ -376,7 +395,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-param-invalid")) );
 		assertEquals( 5, e.getLineNumber() );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-inside-macro")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-inside-function")) );
 		assertEquals( 4, e.getLineNumber() );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-inside-instruments")) );
@@ -400,16 +419,16 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-with-duplicate-note")) );
 		assertEquals( 2, e.getLineNumber() );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-with-invalid-param")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-with-invalid-option")) );
 		assertEquals( 6, e.getLineNumber() );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-with-recursion")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-with-recursion")) );
 		assertEquals( 5, e.getLineNumber() );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-undefined-macro")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-undefined-function")) );
 		assertEquals( 3, e.getLineNumber() );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-without-param")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-without-name")) );
 		assertEquals( 3, e.getLineNumber() );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-more-instr-sep")) );
@@ -439,7 +458,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("meta-with-block")) );
 		assertEquals( 4, e.getLineNumber() );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("meta-in-macro")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("meta-in-function")) );
 		assertEquals( 5, e.getLineNumber() );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("meta-with-param")) );
@@ -470,7 +489,22 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 6, e.getLineNumber() );
 		assertEquals( true, e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_NOT_ALLOWED)) );
 		
-		// System.out.println(e.getMessage() + "\n" + e.getFileName());
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("stacktrace")) );
+		assertEquals( 10, e.getLineNumber() );
+		assertEquals( true, e.getMessage().startsWith(Dict.get(Dict.ERROR_NOTE_LENGTH_INVALID)) );
+		Deque<StackTraceElement> stackTrace = e.getStackTraceElements();
+		assertEquals( 9, stackTrace.size() );
+		assertEquals( "st-incl-2.midica/21",     stackTrace.pop().toString() ); // channel cmd
+		assertEquals( "st-incl-2.midica/19-23",  stackTrace.pop().toString() ); // block
+		assertEquals( "st-incl-2.midica/17-25",  stackTrace.pop().toString() ); // block
+		assertEquals( "st-incl-2.midica/25",     stackTrace.pop().toString() ); // in test2(...)
+		assertEquals( "st-incl-5.midica/12",     stackTrace.pop().toString() ); // CALL test2(...) from test5
+		assertEquals( "stacktrace.midica/40",    stackTrace.pop().toString() ); // CALL test5(...) from test6
+		assertEquals( "stacktrace.midica/38-42", stackTrace.pop().toString() ); // block
+		assertEquals( "stacktrace.midica/42",    stackTrace.pop().toString() ); // in test6(...)
+		assertEquals( "st-incl-1.midica/10",     stackTrace.pop().toString() ); // CALL test6(...) from root
+		
+//		 System.out.println(e.getMessage() + "\n" + e.getFile().getName());
 	}
 	
 	/**
@@ -552,5 +586,14 @@ class MidicaPLParserTest extends MidicaPLParser {
 		}
 		
 		return messages;
+	}
+	
+	/**
+	 * Returns the full lyrics of the sequence.
+	 * 
+	 * @return full lyrics.
+	 */
+	private static String getLyrics() {
+		return (String) ((HashMap<String, Object>)SequenceAnalyzer.getSequenceInfo().get("karaoke")).get("lyrics_full");
 	}
 }

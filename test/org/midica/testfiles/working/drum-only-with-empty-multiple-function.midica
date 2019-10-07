@@ -1,0 +1,4 @@
+CALL test
+
+FUNCTION test
+END

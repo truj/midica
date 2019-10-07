@@ -15,11 +15,11 @@ END
 *
 
 2 c /4
-INCLUDE switch
+CALL switch
 2 c /4
 *
 
-MACRO switch
+FUNCTION switch
 	INSTRUMENT  2  30,0/0
 END
 

@@ -1,14 +1,14 @@
-INCLUDE_FILE inc/instruments.midica
+INCLUDE inc/instruments.midica
 
 0 c /4
 *
 
 META
-	copyright	(c) test
-	copyright	2nd line
-	title		Title with tab	!
-	composer	Wolfgang Amadeus Mozart
-	composer	Haydn
-	lyrics		Some\One
-	artist		{Someone} [Else]
+	copyright   (c) test
+	copyright   2nd line
+	title       Title with tab	!
+	composer    Wolfgang Amadeus Mozart
+	composer    Haydn
+	lyrics      Some\One
+	artist      {Someone} [Else]
 END

@@ -9,7 +9,7 @@ You write music with the easy-to-learn programming language "MidicaPL".
 You can use the same techniques like in regular programming, like:
 
 - Copy & Paste
-- Macros
+- Functions
 - Modules for code re-use
 - Variables and Constants
 - Code Comments
@@ -49,9 +49,9 @@ You write your songs in plain text files using the text editor of your choice. M
     - As MidicaPL files (not yet implemented)
 - **Configuration** of
     - GUI language (currently English or German)
-    - Note System - International (C,D,E,F,G,A,B), German (C,D,E,F,G,A,H), Italian (Do,Re,Mi,Fa,Sol,La,Si)
+    - Note System - (6 different systems), e.g. International (C,D,E,F,G,A,B), German (C,D,E,F,G,A,H), Italian (Do,Re,Mi,Fa,Sol,La,Si)
     - Half Tone Symbols (6 different systems)
-    - Octave Naming - International (c0, c1, ...), German (C',C,c,c',c''...)
+    - Octave Naming - 4 different systems
     - Syntax (3 different sets of key words for the programming language) - not _that_ important as the syntax can be redefined in MidicaPL anyway
     - Percussion IDs (English or German)
     - Instrument IDs (English or German)

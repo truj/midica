@@ -1,0 +1,6 @@
+INCLUDE inc/instruments.midica
+
+FUNCTION test1 test2
+	0 c /4
+	0 c /4
+END

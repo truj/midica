@@ -769,21 +769,11 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			else
 				view.togglePlayPauseButton( PlayerView.CMD_PAUSE );
 		}
-		catch ( ParseException ex ) {
-			int    lineNumber = ex.getLineNumber();
-			String fileName   = ex.getFileName();
-			String msg = ex.getMessage();
-			if ( lineNumber > 0 && null != fileName ) {
-				msg = String.format(
-					Dict.get(Dict.ERROR_IN_LINE),
-					fileName,
-					lineNumber
-				) + msg;
-			}
-			showErrorMessage(msg);
+		catch (ParseException ex) {
+			showErrorMessage(ex.getFullMessage());
 		}
-		catch ( Exception ex ) {
-			showErrorMessage( ex );
+		catch (Exception ex) {
+			showErrorMessage(ex);
 		}
 		
 		// The sequence length could have changed.

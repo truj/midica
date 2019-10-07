@@ -1,12 +1,12 @@
-INCLUDE_FILE inc/instruments.midica
+INCLUDE inc/instruments.midica
 
-MACRO test1                    // 3840
+FUNCTION test1                 // 3840
 	0 c /4 q=4, m              // 0 ticks (because of m)
-	INCLUDE test2              // 1920
+	CALL test2                 // 1920
 	0 c+ /2 q=2, d=50%, v=120  // 1920 (2*960)
 END
 
-MACRO test2           // 1920
+FUNCTION test2        // 1920
 	0 d /2            // 960
 	( q=2             // 0 (because of m at the closing brace)
 		( m, q=5
@@ -15,22 +15,22 @@ MACRO test2           // 1920
 			* 0,1 
 		)
 		0 g /4
-		INCLUDE test4
+		CALL test4
 	) m
-	0 a /2            // 960
+	0 a /2         // 960
 END
-MACRO test4     // 480
+FUNCTION test4     // 480
 	0 c /4
 END
 
-MACRO test3        // 5760
-	INCLUDE test1  // 3840
-	INCLUDE test2  // 1920
+FUNCTION test3  // 5760
+	CALL test1  // 3840
+	CALL test2  // 1920
 END
 
-INCLUDE test1         // 3840
-INCLUDE test2 q=3, m  // 0
-INCLUDE test3         // 5760
+CALL test1         // 3840
+CALL test2 q=3, m  // 0
+CALL test3         // 5760
 
 0 c /4           // 480
 ( q=2            // 0

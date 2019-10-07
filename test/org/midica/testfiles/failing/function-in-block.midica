@@ -1,0 +1,9 @@
+INCLUDE inc/instruments.midica
+
+(
+
+	FUNCTION mac1
+		0 c /4
+	END
+
+)

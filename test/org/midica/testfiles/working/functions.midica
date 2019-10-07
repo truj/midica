@@ -1,0 +1,90 @@
+INCLUDE inc/instruments.midica
+
+////////////////////////////////////////////////////////////
+// channel 0:
+// test parameters for
+// - note length
+// - lyrics option
+////////////////////////////////////////////////////////////
+
+FUNCTION test1                                 // /4 ==> 2880; /2 ==> 3840
+	0 c  /4 q=4, m                             // 0 ticks (because of m)
+	CALL test2( dur = $[0] , l1 = abc, ... )   // /4 ==> 960;  /2 ==> 1920
+	0 c+ /2 q=2, d=50%, v=120                  // 1920 (2*960)
+END
+
+FUNCTION test2                                    // /4 ==> 960, /2 ==> 1920
+	0 d ${dur}                                    // /4 ==> 480, /2 ==> 960
+	( q=2                                         // 0 (because of m at the closing brace)
+		( q=3
+			0 e 128  l =${l1}
+			0 f 128  l =$[2]_
+		)
+		0 g /4
+		CALL test4
+	) m
+	0 a ${dur}        // /4 ==> 480, /2 ==> 960
+END
+FUNCTION test4
+	0 c /4
+END
+
+FUNCTION test3                         // 4800
+	CALL test1(/4)                     // 2880
+	CALL test2(dur=/2,l1=bbb,??)  // 1920
+END
+
+CALL test1(/2)                               // 3840   (abc..._) x 6
+CALL test2(dur=/4, l1=xyz, 3rd, 4th) q=3, m  // 0      (xyz3rd_) x 18
+0  -  *2.                                    // 5760
+CALL test3()                                 // 4800   (abc..._) x 6 (bbb??_) x 6
+
+// expected results for channel 0:
+// ticks:  3840 + 5760 + 4800 = 14400
+// lyrics: abc... abc... abc... abc... abc... abc... xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd abc... abc... abc... abc... abc... abc... bbb?? bbb?? bbb?? bbb?? bbb?? bbb?? 
+
+////////////////////////////////////////////////////////////
+// channel 1:
+// test parameters for:
+// - channel
+// - note value
+// - velocity option
+// - shift option
+////////////////////////////////////////////////////////////
+
+FUNCTION test5
+	${ch}  ${n1}${oct}  /4  v=${vel},s=${sft}  // 1  c+2  /4  v=60,s=-1  ==> b+  (60)
+	(
+		VAR ${vel}=63
+	)
+	${ch}  ${n2}+2      /4  v ${vel}           // 1  c+2  /4  v 63       ==> c+2 (63)
+END
+
+FUNCTION test6
+	$[2]  $[0]+ /4  s $[3] , v $[5]            // 1  c+ /4  s 1 , v 70  ==> c#+  (70)
+	VAR $[5] 80
+	$[2]  $[1]+ /4  s $[4],v=$[5]              // 1  d+ /4  s 2,v=5     ==> e+   (80)
+END
+
+FUNCTION test7
+	${ch}  $[1]- /4  v=$[4]                    // 1  c-  /4  v=90        ==> c-  --> CALL(...) s=-12 ==> c-2  (90)
+	(
+		VAR $[4] 110
+	)
+	${ch}  $[2]- /4  s=${sft},v=$[4]           // 1  d-  /4  s -1,v=110  ==> c#- --> CALL(...) s=-12 ==> c#-2 (110)
+END
+
+CALL test5( ch = 1 , n1 = c ,n2=c,oct=+2,sft=-1,vel=60)
+CALL test6(c,d,1 , 1 , 2 , 70 )
+CALL test7(ch=1,c,d,sft=-1,90) s=-12
+
+// expected results for channel 1:
+// ticks: 6*480 = 2880
+// notes:
+// - c+   (60)
+// - d+2  (63)
+// - c+2  (70)
+// - d+3  (80)
+// - c-2  (90)
+// - d-3  (110)
+

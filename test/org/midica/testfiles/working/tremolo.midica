@@ -1,4 +1,4 @@
-INCLUDE_FILE inc/instruments.midica
+INCLUDE inc/instruments.midica
 
 // note length dividable by tremolo value
 0 c /1  tremolo=/4              // 1920 ticks, 4 notes

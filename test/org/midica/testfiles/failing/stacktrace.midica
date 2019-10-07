@@ -1,0 +1,50 @@
+INCLUDE inc/instruments.midica
+
+// stack-trace
+// 
+// FILE: st-incl-1.midica
+// CALL test6() q=5
+//// FILE: callstack.midica
+//   - test6
+//     - block
+//       - CALL test5()
+////////// FILE: st-incl-5.midica
+//         - test5
+//           - CALL test2(dur=-2,l1=bbb,??) q=2, m
+////////////// FILE: st-incl-2
+//             - test2
+//               - block s=2
+//                 - block m
+//                   - execute
+
+
+
+
+VAR $v = -2
+(
+// 0 d $v
+)
+
+INCLUDE  inc/st-incl-1.midica
+INCLUDE  inc/st-incl-3.midica  // includes also st-incl-2.midica
+INCLUDE  inc/st-incl-5.midica
+
+FUNCTION test4
+	0 c /4
+END
+
+FUNCTION test6
+	
+	(
+		
+		CALL test5
+		
+	)
+	
+END
+
+CALL test1(/2)
+CALL test2(dur=/4, l1=xyz, 3rd, 4th) q=3, m
+0  -  *2.
+CALL test3()
+

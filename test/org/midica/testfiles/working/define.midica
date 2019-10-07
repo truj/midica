@@ -1,4 +1,4 @@
-INCLUDE_FILE inc/definitions.midica   // comment
+INCLUDE inc/definitions.midica   // comment
 
 // comment
 %  comment
@@ -11,7 +11,7 @@ instruments[                     %  comment
 0  /  /8              // ch0: 240, ch9: 0
 glob                  %  ch0: 240, ch9: 240
 
-macro[ test           %  comment
+procedure[ test       %  comment
 	perc hhc /4 q=4   // comment
 	0 c+2 /8 q=8      %  comment
 	glob              %  comment
@@ -23,9 +23,9 @@ DEFINE REST    /      %   using the new comment symbol
 def    CHORD   crd    //  using the old comment symbol
 
 
-inc           test                          // ch0: 2160, ch9: 2160
-incl_f        inc/channel-cmds.midica       %  ch0: 2640, ch9: 2160
-INCLUDE_FILE  inc/channel-cmds.midica       // ch0: 3120, ch9: 2160
-load_sf       java-emergency-soundfont.sf2  %  comment
+inc      test                          // ch0: 2160, ch9: 2160
+incl_f   inc/channel-cmds.midica       %  ch0: 2640, ch9: 2160
+INCLUDE  inc/channel-cmds.midica       // ch0: 3120, ch9: 2160
+load_sf  java-emergency-soundfont.sf2  %  comment
 
 

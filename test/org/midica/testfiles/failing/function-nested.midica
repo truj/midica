@@ -1,0 +1,9 @@
+INCLUDE inc/instruments.midica
+
+FUNCTION outer
+	0 c /4
+	FUNCTION inner
+		0 c /4
+	END
+	0 c /4
+END

@@ -1,0 +1,10 @@
+FUNCTION test1
+	
+	0 c  /4 q=4, m
+	CALL test2( dur = $[0] , l1 = abc, ... )
+	0 c+ /2 q=2, d=50%, v=120
+	
+END
+
+
+CALL test6  q=5

@@ -1,7 +1,7 @@
 // This example file provides the finale of the "William Tell Overture" by Gioachino Rossini.
 // It comprises the measures 226 until the end (measure 477).
 // 
-// However the measure naming here (in macro names and code comments) begins with number 1.
+// However the measure naming here (in function names and code comments) begins with number 1.
 // So you have to add 225 to get the original measure number.
 // 
 // This file assumes standard program configuration:
@@ -10,12 +10,12 @@
 // - Octave Naming:    +n/-n
 // - Syntax:           Mixed Case Syntax
 // 
-// Macro naming conventions used in this example file:
-// - Macros related to a certain measure start with 'm', followed by the measure number.
-//   If a measure is reused, the measure number points to the measure where it's first included.
-// - Macros starting with 'i_' contain an instrument switch.
-// - Macros starting with 'd_all_' switch all channels to a certain duration mode (staccato or legato)
-// - Macros starting with 'v_all_' switch all channels to a certain velocity mode (piano, forte, ...)
+// Function naming conventions used in this example file:
+// - Functions related to a certain measure start with 'm', followed by the measure number.
+//   If a measure is reused, the measure number relates to the measure where it's first called.
+// - Functions starting with 'i_' contain an instrument switch.
+// - Functions starting with 'd_all_' switch all channels to a certain duration mode (staccato or legato)
+// - Functions starting with 'v_all_' switch all channels to a certain velocity mode (piano, forte, ...)
 
 // define constants
 CONST $staccato    = d=50%
@@ -55,18 +55,18 @@ END
 *  tempo  152
 
 // init channel defaults
-INCLUDE  d_all_staccato
-INCLUDE  v_all_ff
+CALL  d_all_staccato
+CALL  v_all_ff
 
 // measure 1-2
-MACRO m1
+FUNCTION m1
 	7  b  /4.
 	7  b  /16  q=2
 END
-INCLUDE m1  q=2
+CALL  m1  q=2
 
 // m. 3-6
-MACRO m3_4
+FUNCTION m3_4
 	7  b   /8
 	7  g#  /8
 	7  e   /8
@@ -76,9 +76,9 @@ MACRO m3_4
 	7  b   /8
 	7  e+  /8
 END
-INCLUDE m3_4
+CALL  m3_4
 *
-INCLUDE m3_4
+CALL  m3_4
 ( q=2
 	6  e,g# /4.
 	6  e,g# /16  q=2
@@ -94,11 +94,11 @@ INCLUDE m3_4
 6  g#,b   /8
 6  f#,a   /8
 6  e,g#   /8
-INCLUDE m1  q=2
+CALL  m1  q=2
 
 // m. 9-10
 *
-INCLUDE m1  q=2
+CALL  m1  q=2
 ( q=2
 	5  b-,b  /4.
 	5  b-,b  /16  q=2
@@ -131,8 +131,8 @@ INCLUDE m1  q=2
 
 // m. 15-17
 *
-INCLUDE  v_all_sf
-INCLUDE  d_all_legato
+CALL  v_all_sf
+CALL  d_all_legato
 4	b-2,d#    /1+/8
 5   b-,b      /1+/8
 6   d#,f#     /1+/8
@@ -144,10 +144,10 @@ INCLUDE  d_all_legato
 
 // m. 18
 *
-INCLUDE  d_all_staccato
+CALL  d_all_staccato
 10  -  /4.
 *
-INCLUDE v_all_pp
+CALL  v_all_pp
 ( q=2
 	3   b-      /16
 	4   e-      /16
@@ -160,7 +160,7 @@ INCLUDE v_all_pp
 
 // m. 19
 *
-MACRO m19_half_high
+FUNCTION m19_half_high
 	3   b-      /8
 	3   b-      /16  q=2
 	11  b-      /8
@@ -170,7 +170,7 @@ MACRO m19_half_high
 	13  e-      /8
 	13  e-      /16  q=2
 END
-MACRO m19_half_low
+FUNCTION m19_half_low
 	4   e-      /8
 	4   e-      /16  q=2
 	6   b-,g#-  /8
@@ -180,15 +180,15 @@ MACRO m19_half_low
 	14  e-      /8
 	14  e-      /16  q=2
 END
-MACRO m19
-	INCLUDE  m19_half_high  q=2
-	INCLUDE  m19_half_low   q=2
+FUNCTION m19
+	CALL  m19_half_high  q=2
+	CALL  m19_half_low   q=2
 END
-INCLUDE m19
+CALL  m19
 
 // m. 20
 *
-MACRO m20_1
+FUNCTION m20_1
 	3   e       /8
 	3   f#      /8
 	3   g#      /8
@@ -202,15 +202,15 @@ MACRO m20_1
 	13  g#-,e-  /8   q=3
 	14  e-      /8   q=3
 END
-MACRO m20_2_low
+FUNCTION m20_2_low
 	4   e-      /16  q=2
 	6   b-,g#-  /16  q=2
 	10  -       /8
 	14  e-      /16  q=2
 END
-MACRO m20
-	INCLUDE m20_1
-	INCLUDE m20_2_low
+FUNCTION m20
+	CALL m20_1
+	CALL m20_2_low
 	(
 		3   b-      /16  q=2
 		11  b-      /16  q=2
@@ -218,13 +218,13 @@ MACRO m20
 		13  e-      /16  q=2
 	)
 END
-INCLUDE  m20
+CALL  m20
 
 // m. 21
 *
-MACRO m21
-	INCLUDE  m19_half_low   q=2
-	INCLUDE  m19_half_high
+FUNCTION m21
+	CALL  m19_half_low   q=2
+	CALL  m19_half_high
 	(
 		3   e       /8
 		3   g#      /16  q=2
@@ -236,11 +236,11 @@ MACRO m21
 		13  e-,g#-  /16  q=2
 	)
 END
-INCLUDE  m21
+CALL  m21
 
 // m. 22
 *
-MACRO m22
+FUNCTION m22
 	3   f        /8
 	3   d#       /8
 	3   b-       /8
@@ -263,18 +263,18 @@ MACRO m22
 	14  b-       /8   q=3
 	14  e-       /16  q=2
 END
-INCLUDE  m22
+CALL  m22
 
 // m. 23
 *
-INCLUDE  m19
+CALL  m19
 
 // m. 24
 *
-MACRO m24
-	INCLUDE m20_1
-	INCLUDE v_all_ff
-	INCLUDE m20_2_low
+FUNCTION m24
+	CALL m20_1
+	CALL v_all_ff
+	CALL m20_2_low
 	(
 		3   e       /16
 		3   g#      /16
@@ -284,11 +284,11 @@ MACRO m24
 		13  g#-,b-  /16  q=2
 	)
 END
-INCLUDE  m24
+CALL  m24
 
 // m. 25
 *
-MACRO m25
+FUNCTION m25
 	3   b       /4+/16   $legato
 	3   a       /16      $staccato
 	3   g#      /16
@@ -314,11 +314,11 @@ MACRO m25
 		15  b-3     /16  q=2
 	)
 END
-INCLUDE  m25
+CALL  m25
 
 // m. 26
 *
-MACRO m26_1
+FUNCTION m26_1
 	3   e       /8
 	3   g#      /8
 	3   e       /8
@@ -334,7 +334,7 @@ MACRO m26_1
 	14  e-      /8  q=3
 	15  e-2     /8  q=3
 END
-MACRO m26_2
+FUNCTION m26_2
 	0   b+      /16  q=2
 	1   b+      /16  q=2
 	2   g#,b    /16  q=2
@@ -349,17 +349,17 @@ MACRO m26_2
 	14  e-      /16  q=2
 	15  e-2     /16  q=2
 END
-MACRO m26
-	INCLUDE  m26_1
+FUNCTION m26
+	CALL  m26_1
 	*
-	INCLUDE v_all_pp
-	INCLUDE m26_2
+	CALL v_all_pp
+	CALL m26_2
 END
-INCLUDE m26
+CALL m26
 
 // m. 27
 *
-MACRO m27_half_high
+FUNCTION m27_half_high
 	0  b+     /8
 	0  b+     /16  q=2
 	1  b+     /8
@@ -375,7 +375,7 @@ MACRO m27_half_high
 	13 e-     /8
 	13 e-     /16  q=2
 END
-MACRO m27_half_low
+FUNCTION m27_half_low
 	4  e-,b-  /8
 	4  e-,b-  /16  q=2
 	5  b-     /8
@@ -393,12 +393,12 @@ MACRO m27_half_low
 	15 e-2    /8
 	15 e-2    /16  q=2
 END
-INCLUDE  m27_half_high  q=2
-INCLUDE  m27_half_low   q=2
+CALL  m27_half_high  q=2
+CALL  m27_half_low   q=2
 
 // m. 28
 *
-MACRO m28_1
+FUNCTION m28_1
 	0  e+2    /8
 	0  f#+2   /8
 	0  g#+2   /8
@@ -426,15 +426,15 @@ MACRO m28_1
 	14 e-     /8  q=3
 	15 e-2    /8  q=3
 END
-INCLUDE  m28_1
+CALL  m28_1
 *
-INCLUDE  m26_2
+CALL  m26_2
 
 // m. 29
 *
-MACRO m29
-	INCLUDE m27_half_low  q=2
-	INCLUDE m27_half_high
+FUNCTION m29
+	CALL m27_half_low  q=2
+	CALL m27_half_high
 	(
 		0  e+2    /8
 		0  g#+2   /16  q=2
@@ -452,11 +452,11 @@ MACRO m29
 		13 e-,g#- /16  q=2
 	)
 END
-INCLUDE  m29
+CALL  m29
 
 // m. 30
 *
-MACRO m30
+FUNCTION m30
 	0  f#+2     /8
 	0  d#+2     /8
 	0  b+       /8
@@ -483,21 +483,21 @@ MACRO m30
 	14 b-2      /8  q=3
 	15 b-3      /8  q=3
 	*
-	INCLUDE m26_2
+	CALL m26_2
 END
-INCLUDE  m30
+CALL  m30
 
 // m. 31
 *
-INCLUDE  m27_half_high  q=2
-INCLUDE  m27_half_low   q=2
+CALL  m27_half_high  q=2
+CALL  m27_half_low   q=2
 
 // m. 32
 *
-INCLUDE  m28_1
+CALL  m28_1
 *
-MACRO m32_2
-	INCLUDE  v_all_ff
+FUNCTION m32_2
+	CALL  v_all_ff
 	0  e+2    /16
 	0  g#+2   /16
 	1  e+     /16
@@ -517,12 +517,12 @@ MACRO m32_2
 	14 e-     /16  q=2
 	15 e-2    /16  q=2
 END
-INCLUDE  m32_2
+CALL  m32_2
 
 // m. 33
 8 - /4  m, $f   // set trombone to forte instead of fortissimo - but only this time (not in measure 73)
 *
-MACRO m33
+FUNCTION m33
 	0  b+2    /4+/16      $legato
 	0  a+2    /16         $staccato
 	0  g#+2   /16
@@ -566,11 +566,11 @@ MACRO m33
 		15 b-3    /16  q=2
 	)
 END
-INCLUDE  m33
+CALL  m33
 
 // m. 34
 *
-MACRO m34_1
+FUNCTION m34_1
 	0  e+2    /8
 	0  g#+2   /8
 	0  e+2    /8
@@ -599,9 +599,9 @@ MACRO m34_1
 	14 e-     /8  q=3
 	15 e-2    /8  q=3
 END
-INCLUDE  m34_1
+CALL  m34_1
 *
-MACRO m34_2
+FUNCTION m34_2
 	0  g#+2   /16  q=2
 	1  e+2    /16  q=2
 	2  e+,g#+ /16  q=2
@@ -619,7 +619,7 @@ END
 
 // m. 35-41 (only definitions)
 // m. 35 (definition)
-MACRO m35_half
+FUNCTION m35_half
 	*
 	0  g#+2   /8
 	0  g#+2   /16  q=2
@@ -658,7 +658,7 @@ END
 
 // m. 36-37 (definition)
 *
-MACRO m36_1st8th_high
+FUNCTION m36_1st8th_high
 	0  g#+2       /8
 	1  e+2        /8
 	2  e+,g#+     /8
@@ -672,7 +672,7 @@ MACRO m36_1st8th_high
 	12 e+         /8
 	13 e,g#       /8
 END
-MACRO m36_2nd8th_high
+FUNCTION m36_2nd8th_high
 	0  c#+3       /8
 	1  c#+2       /8
 	2  c#+,c#+2   /8
@@ -682,32 +682,32 @@ MACRO m36_2nd8th_high
 	13 c#,c#+     /8
 	*  3-8
 END
-MACRO m36_1st8th_low
+FUNCTION m36_1st8th_low
 	p  bd2,cc2,to /8
 	10 e-         /8
 	14 c#-        /8
 	15 c#-2       /8
 END
-MACRO m36_2nd8th_low
+FUNCTION m36_2nd8th_low
 	10 e-         /8
 	*  p,10,14-15
 END
-MACRO m36_half_high
-	INCLUDE m36_1st8th_high
-	INCLUDE m36_2nd8th_high
+FUNCTION m36_half_high
+	CALL m36_1st8th_high
+	CALL m36_2nd8th_high
 END
-MACRO m36_half_low
-	INCLUDE m36_1st8th_low
-	INCLUDE m36_2nd8th_low
+FUNCTION m36_half_low
+	CALL m36_1st8th_low
+	CALL m36_2nd8th_low
 END
-MACRO m36_half
-	INCLUDE  m36_half_high
-	INCLUDE  m36_half_low
+FUNCTION m36_half
+	CALL  m36_half_high
+	CALL  m36_half_low
 END
-MACRO m36_37
-	INCLUDE  m36_half q=3
-	INCLUDE  m36_1st8th_high
-	INCLUDE  m36_1st8th_low
+FUNCTION m36_37
+	CALL  m36_half q=3
+	CALL  m36_1st8th_high
+	CALL  m36_1st8th_low
 	*
 	0  f#+2     /8
 	1  d#+2     /8
@@ -727,7 +727,7 @@ MACRO m36_37
 END
 
 // m. 38 (definition)
-MACRO m38
+FUNCTION m38
 	*
 	0  e+2        /8
 	0  d#+2       /8
@@ -764,12 +764,12 @@ MACRO m38
 	14 c#-        /8  q=3
 	15 c#-2       /8  q=3
 	*
-	INCLUDE  m34_2
+	CALL  m34_2
 	*
 END
 
 // m. 41_2 (definition)
-MACRO m41_2
+FUNCTION m41_2
 	*
 	0  b+2        /8
 	0  a#+2       /8
@@ -803,7 +803,7 @@ MACRO m41_2
 END
 
 // m. 42_1 (definition)
-MACRO m42_1
+FUNCTION m42_1
 	*
 	0  b+2        /8
 	0  a#+2       /8
@@ -845,24 +845,24 @@ MACRO m42_1
 END
 
 // m. 34_2 - 41
-MACRO m34_2_to_41
-	INCLUDE  m34_2
-	INCLUDE  m35_half  q=2   // 35
-	INCLUDE  m36_37          // 36 - 37
-	INCLUDE  m38             // 38
-	INCLUDE  m35_half  q=2   // 39
-	INCLUDE  m36_half  q=3   // 40 - 41_1
-	INCLUDE  m41_2           // 41_2
+FUNCTION m34_2_to_41
+	CALL  m34_2
+	CALL  m35_half  q=2   // 35
+	CALL  m36_37          // 36 - 37
+	CALL  m38             // 38
+	CALL  m35_half  q=2   // 39
+	CALL  m36_half  q=3   // 40 - 41_1
+	CALL  m41_2           // 41_2
 END
-INCLUDE  m34_2_to_41
+CALL  m34_2_to_41
 
 // m. 42 - 49
-INCLUDE  m42_1
-INCLUDE  m34_2_to_41
+CALL  m42_1
+CALL  m34_2_to_41
 
 // m. 50
 *
-MACRO  m50_violin1
+FUNCTION m50_violin1
 	( q=2
 		11 b+     /16
 		11 a#+    /16       $p
@@ -870,14 +870,14 @@ MACRO  m50_violin1
 		11 a#+    /16
 	)
 END
-MACRO  m50_trumpet
+FUNCTION m50_trumpet
 	7  b          /8
 	7  -          /4        $p
 	7  b          /16  q=2
 END
-MACRO m50
-	INCLUDE  m50_trumpet
-	INCLUDE  m50_violin1
+FUNCTION m50
+	CALL  m50_trumpet
+	CALL  m50_violin1
 	0  b+2        /8
 	1  b+         /8
 	2  d#+,b+     /8
@@ -892,16 +892,16 @@ MACRO m50
 	13 f#         /8
 	14 b-2        /8
 	15 b-3        /8
-	INCLUDE  v_all_p
+	CALL  v_all_p
 	3  -          /4
 	3  b-,f#      /16  q=2
 	6  -          /4
 	6  b-,f#      /16  q=2
 END
-INCLUDE  m50
+CALL  m50
 
 // m. 51
-MACRO m51
+FUNCTION m51
 	3  b-,f#  /8
 	3  b-,f#  /16  q=2
 	3  b-,f#  /8
@@ -910,15 +910,15 @@ MACRO m51
 	6  b-,f#  /16  q=2
 	6  b-,f#  /8
 	6  e,g#   /8
-	INCLUDE  m50_trumpet
-	INCLUDE  m50_violin1
+	CALL  m50_trumpet
+	CALL  m50_violin1
 END
-INCLUDE  m51
+CALL  m51
 
 // m. 52
 *
-MACRO m52
-	INCLUDE  i_pizzicato_14    // switch violoncello 14 to pizzicato mode
+FUNCTION m52
+	CALL  i_pizzicato_14    // switch violoncello 14 to pizzicato mode
 	3  f#,a   /8
 	3  b-,f#  /4          $p_marcato
 	3  f#,a   /8          $p
@@ -929,18 +929,18 @@ MACRO m52
 	6  f#,a   /8
 	6  b-,f#  /4          $p_marcato
 	6  f#,a   /8          $p
-	INCLUDE  m50_trumpet
-	INCLUDE  m50_violin1
+	CALL  m50_trumpet
+	CALL  m50_violin1
 	14 -      /8          $pp
 	14 b-2    /8
 	14 c#-    /8
 	14 d#-    /8
 END
-INCLUDE  m52
+CALL  m52
 
 // m. 53
 *
-MACRO  m53_without_trumpet
+FUNCTION m53_without_trumpet
 	3  e,g#    /8
 	3  g#-,e   /4          $p_marcato
 	3  e,g#    /8          $p
@@ -951,18 +951,18 @@ MACRO  m53_without_trumpet
 	6  e,g#    /8
 	6  f#-,g#- /8          $p_marcato
 	6  e,g#    /8          $p
-	INCLUDE  m50_violin1
+	CALL  m50_violin1
 	14 e-      /8
 	14 f#-     /8
 	14 g#-     /8
 	14 a-      /8
 END
-INCLUDE  m53_without_trumpet
-INCLUDE  m50_trumpet
+CALL  m53_without_trumpet
+CALL  m50_trumpet
 
 // m. 54
 *
-MACRO m54_violin2
+FUNCTION m54_violin2
 	( q=2
 		12 b   /16  $pp
 		12 a#  /16
@@ -970,7 +970,7 @@ MACRO m54_violin2
 		12 a#  /16
 	)
 END
-MACRO m54
+FUNCTION m54
 	2  -       /4.
 	2  b,f#+   /16  q=2
 	3  d#,f#   /8   q=3
@@ -984,22 +984,22 @@ MACRO m54
 	6  b-2,b-  /8   q=2
 	6  b-,f#   /16  q=2
 	7  b       /8
-	INCLUDE  m50_violin1
-	INCLUDE  m54_violin2
+	CALL  m50_violin1
+	CALL  m54_violin2
 	14 b-      /8
 	14 b-2     /8
 	14 b-      /8
 END
-INCLUDE  m54
+CALL  m54
 
 // m. 55
 *
-MACRO m55_horn_g
+FUNCTION m55_horn_g
 	5  b-,b    /8
 	5  -       /4
 	5  b-,b    /16  q=2
 END
-MACRO m55
+FUNCTION m55
 	2  b,f#+   /8
 	2  b,f#+   /16  q=2
 	2  b,f#+   /8
@@ -1008,19 +1008,19 @@ MACRO m55
 	3  b-,f#   /16  q=2
 	3  b-,f#   /8
 	3  e,g#    /8
-	INCLUDE  m55_horn_g
+	CALL  m55_horn_g
 	6  b-,f#   /8
 	6  b-,f#   /16  q=2
 	6  b-,f#   /8
 	6  e,g#    /8
-	INCLUDE  m50_violin1
-	INCLUDE  m54_violin2
+	CALL  m50_violin1
+	CALL  m54_violin2
 END
-INCLUDE  m55
+CALL  m55
 
 // m. 56
 *
-MACRO m56
+FUNCTION m56
 	2  f#+,a+   /8
 	2  b,f#+    /4          $p_marcato
 	2  f#+,a+   /8          $p
@@ -1034,31 +1034,31 @@ MACRO m56
 	4  b-2      /8
 	4  c#-      /8
 	4  d#-      /8
-	INCLUDE  m55_horn_g
-	INCLUDE  m50_violin1
-	INCLUDE  m54_violin2
+	CALL  m55_horn_g
+	CALL  m50_violin1
+	CALL  m54_violin2
 	14 -      /8
 	14 b-2    /8
 	14 c#-    /8
 	14 d#-    /8
 END
-INCLUDE  m56
+CALL  m56
 
 // m. 57
 *
-MACRO m57
+FUNCTION m57
 	2  e+,g#+  /8
 	2  g#,e+   /4          $p_marcato
 	2  e+,g#+  /8          $p
-	INCLUDE  m53_without_trumpet
-	INCLUDE  m55_horn_g
-	INCLUDE  m54_violin2
+	CALL  m53_without_trumpet
+	CALL  m55_horn_g
+	CALL  m54_violin2
 END
-INCLUDE  m57
+CALL  m57
 
 // m. 58
 *
-MACRO m58
+FUNCTION m58
 	2  d#+,f#+  /8
 	3  d#,f#    /8
 	4  b-       /8
@@ -1069,8 +1069,8 @@ MACRO m58
 	11 b        /8
 	12 b        /8
 	14 b-       /8
-	INCLUDE  i_arco_14    // switch violoncello 14 back to arco mode
-	INCLUDE  v_all_pp
+	CALL  i_arco_14    // switch violoncello 14 back to arco mode
+	CALL  v_all_pp
 	3  -        /4
 	3  b-       /16  q=2
 	4  -        /4
@@ -1087,105 +1087,105 @@ MACRO m58
 	15 -        /4.
 	15 e-2      /16  q=2
 END
-INCLUDE  m58
+CALL  m58
 
 // m. 59
 *
-MACRO m59_contrabass
+FUNCTION m59_contrabass
 	( q=2
 		15 e-2  /8
 		15 e-2  /16  q=2
 	)
 END
-INCLUDE  m19
-INCLUDE  m59_contrabass
+CALL  m19
+CALL  m59_contrabass
 
 // m. 60
 *
-MACRO m60_contrabass
+FUNCTION m60_contrabass
 	15 e-2  /8   q=3
 	15 e-2  /16  q=2
 END
-INCLUDE  m20
-INCLUDE  m60_contrabass
+CALL  m20
+CALL  m60_contrabass
 
 // m. 61
 *
-INCLUDE  m21
-INCLUDE  m59_contrabass
+CALL  m21
+CALL  m59_contrabass
 
 // m. 62
 *
-MACRO m62
-	INCLUDE  m22
+FUNCTION m62
+	CALL  m22
 	15 b-3  /8   q=3
 	15 e-2  /16  q=2
 END
-INCLUDE m62
+CALL m62
 
 // m. 63
 *
-INCLUDE  m19
-INCLUDE  m59_contrabass
+CALL  m19
+CALL  m59_contrabass
 
 // m. 64
 *
-MACRO m64_contrabass
+FUNCTION m64_contrabass
 	15 e-2  /8   q=3,  $pp
 	15 e-2  /16  q=2,  $ff
 END
-INCLUDE  m24
-INCLUDE  m64_contrabass
+CALL  m24
+CALL  m64_contrabass
 
 // m. 65
 *
-INCLUDE  m25
+CALL  m25
 
 // m. 66
 *
-INCLUDE  m26
+CALL  m26
 
 // m. 67
 *
-INCLUDE  m27_half_high  q=2
-INCLUDE  m27_half_low   q=2
+CALL  m27_half_high  q=2
+CALL  m27_half_low   q=2
 
 // m. 68
 *
-INCLUDE  m28_1
+CALL  m28_1
 *
-INCLUDE  m26_2
+CALL  m26_2
 
 // m. 69
 *
-INCLUDE  m29
+CALL  m29
 
 // m. 70
 *
-INCLUDE  m30
+CALL  m30
 
 // m. 71
 *
-INCLUDE  m27_half_high  q=2
-INCLUDE  m27_half_low   q=2
+CALL  m27_half_high  q=2
+CALL  m27_half_low   q=2
 
 // m. 72
 *
-INCLUDE  m28_1
+CALL  m28_1
 *
-INCLUDE  v_all_ff
-INCLUDE  m32_2
+CALL  v_all_ff
+CALL  m32_2
 
 // m. 73
 *
-INCLUDE  m33
+CALL  m33
 
 // m. 74
 *
-INCLUDE  m34_1
+CALL  m34_1
 *
-INCLUDE  v_all_tutta_forza
-INCLUDE  d_all_legato
+CALL  v_all_tutta_forza
+CALL  d_all_legato
 (  t=7:4
 	0  e+2   /32
 	0  f#+2  /32
@@ -1216,12 +1216,12 @@ INCLUDE  d_all_legato
 	12 c#+   /32
 	12 d#+   /32
 )
-INCLUDE  d_all_staccato
+CALL  d_all_staccato
 
 // m. 75-77
 *
-MACRO m75_77_without_viola_in_77
-	INCLUDE  d_all_staccato
+FUNCTION m75_77_without_viola_in_77
+	CALL  d_all_staccato
 	0  e+3     /8
 	0  e+3     /16  q=2
 	0  e+3     /8   q=2
@@ -1299,22 +1299,22 @@ MACRO m75_77_without_viola_in_77
 	13 c,c+    /2           tr=/16
 	14 e-      /2   q=3,    tr=/16
 	15 e-2     /8   q=12
-	INCLUDE  d_all_staccato
+	CALL  d_all_staccato
 END
-MACRO m77_viola
+FUNCTION m77_viola
 	13 c#,c#+  /16  q=2,    $legato
 	13 c,c+    /16  q=2
 	13 c#,c#+  /16  q=2
 	13 a-,a    /16  q=2
 END
-INCLUDE  m75_77_without_viola_in_77
-INCLUDE  m77_viola
-INCLUDE  v_all_ff
+CALL  m75_77_without_viola_in_77
+CALL  m77_viola
+CALL  v_all_ff
 
 // m. 78
 *
-INCLUDE  d_all_staccato
-MACRO m78
+CALL  d_all_staccato
+FUNCTION m78
 	( q=2
 		0  b+2        /8
 		0  -          /8
@@ -1361,11 +1361,11 @@ MACRO m78
 	12 d#+      /16
 	12 e+       /16
 END
-INCLUDE  m78
+CALL  m78
 
 // m. 79
 *
-MACRO m79
+FUNCTION m79
 	( q=2
 		0  a+2        /8
 		0  -          /8
@@ -1407,11 +1407,11 @@ MACRO m79
 	12 c#+    /16
 	12 d#+    /16
 END
-INCLUDE  m79
+CALL  m79
 
 // m. 80
 *
-MACRO m80
+FUNCTION m80
 	( q=2
 		0  g#+2       /8
 		0  -          /8
@@ -1453,11 +1453,11 @@ MACRO m80
 	12 b       /16
 	12 c#+     /16
 END
-INCLUDE  m80
+CALL  m80
 
 // m. 81
 *
-MACRO m81
+FUNCTION m81
 	( q=2
 		0  f#+2       /8
 		0  -          /8
@@ -1497,12 +1497,12 @@ MACRO m81
 		12 g#         /16
 	)
 END
-INCLUDE  m81
+CALL  m81
 
 
 // m. 82
 *
-MACRO m82
+FUNCTION m82
 	0  f#+2       /8
 	0  -          /8.
 	0  b+2        /16
@@ -1544,32 +1544,32 @@ MACRO m82
 	14 b-2        /8
 	15 b-3        /8
 END
-INCLUDE  m82
+CALL  m82
 
 // m. 83-85
 *
-MACRO m85_viola
+FUNCTION m85_viola
 	13 c#,c#+  /8   tr=/8
 	13 c,c+    /8   tr=/8
 	13 c#,c#+  /8   tr=/8
 	13 a-,a    /8   tr=/8
 END
-INCLUDE  m75_77_without_viola_in_77
-INCLUDE  m85_viola
+CALL  m75_77_without_viola_in_77
+CALL  m85_viola
 
 // m. 86-88
 *
-INCLUDE  d_all_staccato
+CALL  d_all_staccato
 *
-INCLUDE  m78
+CALL  m78
 *
-INCLUDE  m79
+CALL  m79
 *
-INCLUDE  m80
+CALL  m80
 
 // m. 89
 *
-MACRO m89_1
+FUNCTION m89_1
 	0  f#+2       /8
 	1  c#+2       /8
 	2  c#+,f#+    /8
@@ -1591,7 +1591,7 @@ MACRO m89_1
 	14 e-         /8
 	15 e-2        /8
 END
-MACRO m89_2
+FUNCTION m89_2
 	0  b+2        /8
 	1  d#+2       /8
 	2  d#+,f#+    /8
@@ -1615,9 +1615,9 @@ MACRO m89_2
 	14 b-2        /8
 	15 b-3        /8
 END
-INCLUDE  m89_1
+CALL  m89_1
 *
-INCLUDE  m89_2
+CALL  m89_2
 
 // m. 90
 *
@@ -1642,12 +1642,12 @@ INCLUDE  m89_2
 	14 e-         /8
 	15 e-2        /8
 )
-INCLUDE  i_pizzicato_14
-INCLUDE  i_pizzicato_15
+CALL  i_pizzicato_14
+CALL  i_pizzicato_15
 
 // m. 91
 *
-INCLUDE  v_all_pp
+CALL  v_all_pp
 ( m
 	11 -     /16
 	11 c+    /16
@@ -1658,7 +1658,7 @@ INCLUDE  v_all_pp
 	11 b     /16
 	11 a     /16
 )
-MACRO m91_without_violin1
+FUNCTION m91_without_violin1
 	12 g#    /8
 	13 c#,e  /8
 	14 c#    /8
@@ -1671,11 +1671,11 @@ MACRO m91_without_violin1
 	15 f#-2  /8
 	15   -   /8
 END
-INCLUDE  m91_without_violin1
+CALL  m91_without_violin1
 
 // m. 92
 *
-MACRO m92
+FUNCTION m92
 	(
 		4  c#     /2+/8  m, $legato
 		6  c+,e+  /2     m, $legato
@@ -1697,11 +1697,11 @@ MACRO m92
 		15 c#-2   /8
 	)
 END
-INCLUDE  m92
+CALL  m92
 
 // m. 93
 *
-MACRO m93
+FUNCTION m93
 	(
 		4  g#-,c  /2   m
 		6  b,d    /2   m
@@ -1723,7 +1723,7 @@ MACRO m93
 		15 g#-3   /8
 	)
 END
-INCLUDE  m93
+CALL  m93
 
 // m. 94
 *
@@ -1734,7 +1734,7 @@ INCLUDE  m93
 	11 g#     /16
 	11 c#+    /16  q=4
 )
-MACRO m94_without_violin1
+FUNCTION m94_without_violin1
 	6  c+     /8
 	12 e      /8
 	13 g#-,c# /8
@@ -1742,7 +1742,7 @@ MACRO m94_without_violin1
 	15 c#-2   /8
 	15 -      /4.
 END
-INCLUDE  m94_without_violin1
+CALL  m94_without_violin1
 
 // m. 95
 *
@@ -1756,15 +1756,15 @@ INCLUDE  m94_without_violin1
 	11 b   /16
 	11 a   /16
 )
-INCLUDE  m91_without_violin1
+CALL  m91_without_violin1
 
 // m. 96
 *
-INCLUDE  m92
+CALL  m92
 
 // m. 97
 *
-INCLUDE  m93
+CALL  m93
 
 // m. 98
 *
@@ -1778,14 +1778,14 @@ INCLUDE  m93
 	11 d#+    /16
 	11 c#+    /16
 )
-INCLUDE  m94_without_violin1
+CALL  m94_without_violin1
 
 // m. 99
 *
 (
 	3  g#+  /1+/4  m,   $legato
 )
-MACRO m99_without_clarinet
+FUNCTION m99_without_clarinet
 	2  c+,d#+ /4.       $legato
 	2  c#+,e+ /8
 	11 d#+    /16
@@ -1807,11 +1807,11 @@ MACRO m99_without_clarinet
 	15 -      /4
 	15 g#-2   /8
 END
-INCLUDE  m99_without_clarinet
+CALL  m99_without_clarinet
 
 // m. 100
 *
-INCLUDE  m99_without_clarinet
+CALL  m99_without_clarinet
 
 // m. 101
 *
@@ -1864,7 +1864,7 @@ INCLUDE  m99_without_clarinet
 
 // m. 103
 *
-MACRO m103
+FUNCTION m103
 	3  g#-,e  /4.
 	3  b-,f#  /8
 	11 e      /16
@@ -1883,14 +1883,14 @@ MACRO m103
 	14 e-     /8
 	15 e-2    /8
 END
-INCLUDE  m103
+CALL  m103
 
 // m. 104
 *
 (
 	13 g#-,b-  /8
 )
-MACRO m104_without_viola
+FUNCTION m104_without_viola
 	3  e,g#   /4.
 	3  f#,a   /8
 	11 g#     /16
@@ -1912,7 +1912,7 @@ MACRO m104_without_viola
 		15 -   /8
 	)
 END
-INCLUDE  m104_without_viola
+CALL  m104_without_viola
 
 // m. 105
 *
@@ -1930,7 +1930,7 @@ INCLUDE  m104_without_viola
 	13 -      /8
 	13 g-,c#  /8
 )
-MACRO m105_low   // without E-horn, voilin1 and voila (without channels 6, 11, 13)
+FUNCTION m105_low   // without E-horn, voilin1 and voila (without channels 6, 11, 13)
 	3  g#,b   /4
 	3  g,a#   /4
 	12 g#     /8
@@ -1943,11 +1943,11 @@ MACRO m105_low   // without E-horn, voilin1 and voila (without channels 6, 11, 1
 		15 -   /8
 	)
 END
-INCLUDE  m105_low
+CALL  m105_low
 
 // m. 106
 *
-MACRO m106
+FUNCTION m106
 	3  g#,b   /2
 	11 b      /16
 	11 c#+    /16
@@ -1970,11 +1970,11 @@ MACRO m106
 		15 -   /8
 	)
 END
-INCLUDE  m106
+CALL  m106
 
 // m. 107
 *
-MACRO m107
+FUNCTION m107
 	3  f#,a   /2
 	4  d#     /2
 	6  g      /2
@@ -1997,7 +1997,7 @@ MACRO m107
 		15 -     /8
 	)
 END
-INCLUDE  m107
+CALL  m107
 
 // m. 108
 *
@@ -2006,7 +2006,7 @@ INCLUDE  m107
 	3  g#  /2
 	6  e   /1  m
 )
-MACRO m108_without_clarinet_and_g_horn
+FUNCTION m108_without_clarinet_and_g_horn
 	4  e   /2
 	11 g#  /16
 	11 a   /16
@@ -2027,7 +2027,7 @@ MACRO m108_without_clarinet_and_g_horn
 		15 -    /8
 	)
 END
-INCLUDE  m108_without_clarinet_and_g_horn
+CALL  m108_without_clarinet_and_g_horn
 
 // m. 109
 *
@@ -2072,14 +2072,14 @@ INCLUDE  m108_without_clarinet_and_g_horn
 
 // m. 111
 *
-INCLUDE  m103
+CALL  m103
 
 // m. 112
 *
 (
 	13 e-,g#-  /8
 )
-INCLUDE  m104_without_viola
+CALL  m104_without_viola
 
 // m. 113
 *
@@ -2097,20 +2097,20 @@ INCLUDE  m104_without_viola
 	13 -      /8
 	13 g-,c#  /8
 )
-INCLUDE  m105_low
+CALL  m105_low
 
 // m. 114-116
 *
-INCLUDE  m106
+CALL  m106
 *
-INCLUDE  m107
+CALL  m107
 *
 (
 	3  e   /2.  m
 	3  g#  /2
 	6  e   /2.  m
 )
-INCLUDE  m108_without_clarinet_and_g_horn
+CALL  m108_without_clarinet_and_g_horn
 
 // m. 117
 *
@@ -2156,10 +2156,10 @@ INCLUDE  m108_without_clarinet_and_g_horn
 	14 e-     /8
 	15 e-2    /8
 )
-INCLUDE  d_all_staccato
-INCLUDE  i_arco_14
-INCLUDE  i_arco_15
-INCLUDE  v_all_ff
+CALL  d_all_staccato
+CALL  i_arco_14
+CALL  i_arco_15
+CALL  v_all_ff
 (
 	0  e+2   /16
 	0  f#+2  /16
@@ -2193,39 +2193,39 @@ INCLUDE  v_all_ff
 
 // m. 119-121
 *
-INCLUDE  m75_77_without_viola_in_77
-INCLUDE  m85_viola
+CALL  m75_77_without_viola_in_77
+CALL  m85_viola
 
 // m. 122-126
 *
-INCLUDE  d_all_staccato
+CALL  d_all_staccato
 *
-INCLUDE  m78
+CALL  m78
 *
-INCLUDE  m79
+CALL  m79
 *
-INCLUDE  m80
+CALL  m80
 *
-INCLUDE  m81
+CALL  m81
 *
-INCLUDE  m82
+CALL  m82
 
 // m. 127-133
 *
-INCLUDE  m75_77_without_viola_in_77
-INCLUDE  m85_viola
+CALL  m75_77_without_viola_in_77
+CALL  m85_viola
 *
-INCLUDE  d_all_staccato
+CALL  d_all_staccato
 *
-INCLUDE  m78
+CALL  m78
 *
-INCLUDE  m79
+CALL  m79
 *
-INCLUDE  m80
+CALL  m80
 *
-INCLUDE  m89_1
+CALL  m89_1
 *
-INCLUDE  m89_2
+CALL  m89_2
 
 // m. 134-141
 *
@@ -2258,73 +2258,73 @@ INCLUDE  m89_2
 	15 e-2        /8  q=3
 )
 *
-INCLUDE  v_all_ff
-INCLUDE  m34_2_to_41
+CALL  v_all_ff
+CALL  m34_2_to_41
 
 // m. 142-149
 *
-INCLUDE  m42_1
-INCLUDE  m34_2_to_41
+CALL  m42_1
+CALL  m34_2_to_41
 
 // m. 150-152
 *
-INCLUDE  m50
+CALL  m50
 *
-INCLUDE  m51
+CALL  m51
 *
-INCLUDE  m52
+CALL  m52
 
 // m. 153
 *
-INCLUDE  m53_without_trumpet
-INCLUDE  m50_trumpet
+CALL  m53_without_trumpet
+CALL  m50_trumpet
 
 // m. 154-158
 *
-INCLUDE  m54
+CALL  m54
 *
-INCLUDE  m55
+CALL  m55
 *
-INCLUDE  m56
+CALL  m56
 *
-INCLUDE  m57
+CALL  m57
 *
-INCLUDE  m58
+CALL  m58
 
 // m. 159-160
 *
 10 - /4  m, $p   // set timpani to piano instead of pianissimo
-INCLUDE  m19
-INCLUDE  m59_contrabass
+CALL  m19
+CALL  m59_contrabass
 *
-INCLUDE  m20
-INCLUDE  m60_contrabass
+CALL  m20
+CALL  m60_contrabass
 
 // m. 161
 *
-INCLUDE  m21
-INCLUDE  m59_contrabass
+CALL  m21
+CALL  m59_contrabass
 
 // m. 162-164
 *
-INCLUDE  m62
+CALL  m62
 *
-INCLUDE  m19
-INCLUDE  m59_contrabass
+CALL  m19
+CALL  m59_contrabass
 *
-INCLUDE  m24
-INCLUDE  m64_contrabass
+CALL  m24
+CALL  m64_contrabass
 
 // m. 165
 *
-INCLUDE  m25
+CALL  m25
 
 // m. 166
 *
-INCLUDE  m26_1
+CALL  m26_1
 *
-INCLUDE  v_all_f
-MACRO m166_2
+CALL  v_all_f
+FUNCTION m166_2
 	( q=2
 		0  b+2   /16
 		1  b+    /16
@@ -2336,16 +2336,16 @@ MACRO m166_2
 		11 b     /16
 	)
 END
-INCLUDE  m166_2
+CALL  m166_2
 
 // m. 167
 *
-MACRO m167_drum
+FUNCTION m167_drum
 	p  to      /2  m,   tr=/32
 	p  bd2,cc2 /4  q=2
 END
-MACRO m167_low
-	INCLUDE  m167_drum
+FUNCTION m167_low
+	CALL  m167_drum
 	12 b-,g# /2         tr=/16
 	13 e-,e  /2         tr=/16
 	( q=2
@@ -2361,7 +2361,7 @@ MACRO m167_low
 		15 -     /8
 	)
 END
-MACRO m167_high_half
+FUNCTION m167_high_half
 	0  b+2     /8
 	0  b+2     /16  q=2
 	1  b+      /8
@@ -2379,16 +2379,16 @@ MACRO m167_high_half
 	11 b       /8
 	11 b       /16  q=2
 END
-MACRO m167
-	INCLUDE  m167_low
-	INCLUDE  m167_high_half  q=2
+FUNCTION m167
+	CALL  m167_low
+	CALL  m167_high_half  q=2
 END
-INCLUDE  m167
+CALL  m167
 
 // m. 168
 *
-INCLUDE  m167_low  m
-MACRO m168_1_high
+CALL  m167_low  m
+FUNCTION m168_1_high
 	0  e+3   /8
 	0  f#+3  /8
 	0  g#+3  /8
@@ -2408,14 +2408,14 @@ MACRO m168_1_high
 	11 f#+   /8
 	11 g#+   /8
 END
-INCLUDE  m168_1_high
+CALL  m168_1_high
 *
-INCLUDE  m166_2
+CALL  m166_2
 
 // m. 169
 *
-INCLUDE  m167_low  m
-INCLUDE  m167_high_half
+CALL  m167_low  m
+CALL  m167_high_half
 *
 (
 	0  e+3   /8
@@ -2459,7 +2459,7 @@ INCLUDE  m167_high_half
 	4  b-     /16  q=2
 	6  b-,f#  /8   q=3
 	6  e,g#   /16  q=2
-	INCLUDE  m167_drum
+	CALL  m167_drum
 	10 b-2    /8   q=3
 	10 e-     /16  q=2
 	11 f#+    /8
@@ -2483,12 +2483,12 @@ INCLUDE  m167_high_half
 
 // m. 171
 *
-INCLUDE  m167
+CALL  m167
 
 // m. 172
 *
-INCLUDE  m167_low  m
-INCLUDE  m168_1_high
+CALL  m167_low  m
+CALL  m168_1_high
 *
 (
 	0  e+2    /16
@@ -2530,7 +2530,7 @@ INCLUDE  m168_1_high
 	6  b-,f#  /8
 	6  b-,f#  /16  q=2
 	6  b-,f#  /8   q=2
-	INCLUDE  m167_drum
+	CALL  m167_drum
 	10 b-2    /8
 	10 b-2    /16  q=2
 	10 b-2    /8   q=2
@@ -2560,8 +2560,8 @@ INCLUDE  m168_1_high
 	8  e-     /2     m,  $legato
 	8  e      /2+/8
 )
-MACRO m174_without_trombone
-	INCLUDE d_all_legato
+FUNCTION m174_without_trombone
+	CALL d_all_legato
 	0  e+2    /8.
 	0  a+2    /16
 	0  g#+2   /8.
@@ -2584,7 +2584,7 @@ MACRO m174_without_trombone
 	7  e,b    /8.
 	7  e,b    /16
 	7  e,b    /8
-	INCLUDE  m167_drum
+	CALL  m167_drum
 	10 e-     /2        tr=/32
 	10 -      /4     m
 	11 e+     /16
@@ -2610,13 +2610,13 @@ MACRO m174_without_trombone
 	15 e-2    /8.
 	15 e-     /16
 	15 e-     /8
-	INCLUDE d_all_staccato
+	CALL d_all_staccato
 END
-INCLUDE  m174_without_trombone
+CALL  m174_without_trombone
 
 // m. 175
 *
-MACRO m175
+FUNCTION m175
 	0  b+2   /16     $legato
 	0  c#+3  /16
 	0  d#+3  /16
@@ -2644,7 +2644,7 @@ MACRO m175
 	8  b-    /8
 	8  g#-   /8
 	8  e-    /8
-	INCLUDE  m167_drum
+	CALL  m167_drum
 	10 e-    /2      tr=/32
 	10 -     /4   m
 	11 b+    /16     $legato
@@ -2672,13 +2672,13 @@ MACRO m175
 	15 b-2   /8
 	15 g#-2  /8
 	15 e-2   /8
-	INCLUDE d_all_staccato
+	CALL d_all_staccato
 END
-INCLUDE  m175
+CALL  m175
 
 // m. 176-177
 *
-MACRO m176_to_177
+FUNCTION m176_to_177
 	0  a+3        /1       $legato
 	1  a+2        /1       $legato
 	2  f#+,a+     /8
@@ -2731,9 +2731,9 @@ MACRO m176_to_177
 	15 f#-2       /8
 	15 b-2        /8
 	15 b-3        /8
-	INCLUDE d_all_staccato
+	CALL d_all_staccato
 END
-INCLUDE  m176_to_177
+CALL  m176_to_177
 
 // m. 178-179
 *
@@ -2742,17 +2742,17 @@ INCLUDE  m176_to_177
 	8  e    /16
 	8  e    /4.
 )
-INCLUDE  m174_without_trombone
+CALL  m174_without_trombone
 *
-INCLUDE  m175
+CALL  m175
 
 // m. 180-181
 *
-INCLUDE  m176_to_177
+CALL  m176_to_177
 
 // m. 182
 *
-MACRO m182
+FUNCTION m182
 	0  g#+3     /8
 	0  -        /8
 	0  d#+3     /8
@@ -2800,13 +2800,13 @@ MACRO m182
 		10 e-         /8
 		10 -          /8
 	)
-	INCLUDE  d_all_staccato
+	CALL  d_all_staccato
 END
-INCLUDE  m182
+CALL  m182
 
 // m. 183
 *
-MACRO m183
+FUNCTION m183
 	0  e+3        /8
 	0  -          /8
 	0  f#+3       /8
@@ -2857,9 +2857,9 @@ MACRO m183
 	15 c#-2       /8
 	15 -          /8
 	15 b-3        /8
-	INCLUDE  d_all_staccato
+	CALL  d_all_staccato
 END
-INCLUDE  m183
+CALL  m183
 
 
 // m. 184-185
@@ -2867,24 +2867,24 @@ INCLUDE  m183
 ( m
 	7  g#  /8
 )
-INCLUDE  m182
+CALL  m182
 *
-INCLUDE  m183
+CALL  m183
 
 // m. 186-187
 *
-MACRO m186_187_drums
-	INCLUDE  v_all_sf
+FUNCTION m186_187_drums
+	CALL  v_all_sf
 	p  to         /2     m, tr=/32
 	p  bd2,cc2    /4
-	INCLUDE  v_all_f
+	CALL  v_all_f
 	p  -          /4
 	p  to,bd2,cc2 /8
 END
-MACRO m186_to_187
-	INCLUDE  m186_187_drums
-	INCLUDE  d_all_legato
-	INCLUDE  v_all_sf
+FUNCTION m186_to_187
+	CALL  m186_187_drums
+	CALL  d_all_legato
+	CALL  v_all_sf
 	0  g+3        /2+/8
 	1  g+2        /2+/8
 	2  c+,c+2     /2+/8
@@ -2900,8 +2900,8 @@ MACRO m186_to_187
 	13 e,c+       /2          tr=/16
 	14 c          /2          tr=/16
 	15 e-2        /8
-	INCLUDE  d_all_staccato
-	INCLUDE  v_all_f
+	CALL  d_all_staccato
+	CALL  v_all_f
 	0  e+3        /16    q=2
 	0  c+3        /8
 	0  e+3        /8
@@ -2924,14 +2924,14 @@ MACRO m186_to_187
 	14 c          /8
 	15 e-2        /8     q=4
 END
-INCLUDE  m186_to_187
+CALL  m186_to_187
 
 // m. 188-189
 *
-MACRO m188_to_189
-	INCLUDE  m186_187_drums
-	INCLUDE  d_all_legato
-	INCLUDE  v_all_sf
+FUNCTION m188_to_189
+	CALL  m186_187_drums
+	CALL  d_all_legato
+	CALL  v_all_sf
 	0  g#+3       /2+/8
 	1  g#+2       /2+/8
 	2  e+,b+      /2+/8
@@ -2947,8 +2947,8 @@ MACRO m188_to_189
 	13 e,b        /2          tr=/16
 	14 b-         /2          tr=/16
 	15 e-2        /8
-	INCLUDE  d_all_staccato
-	INCLUDE  v_all_f
+	CALL  d_all_staccato
+	CALL  v_all_f
 	0  e+3        /16    q=2
 	0  b+2        /8
 	0  e+3        /8
@@ -2971,14 +2971,14 @@ MACRO m188_to_189
 	14 b-         /8
 	15 e-2        /8     q=4
 END
-INCLUDE  m188_to_189
+CALL  m188_to_189
 
 // m. 190-191
 *
-MACRO m190_to_191
-	INCLUDE  m186_187_drums
-	INCLUDE  d_all_legato
-	INCLUDE  v_all_sf
+FUNCTION m190_to_191
+	CALL  m186_187_drums
+	CALL  d_all_legato
+	CALL  v_all_sf
 	0  g#+3       /2+/8
 	1  g#+2       /2+/8
 	2  f+,g#+     /2+/8
@@ -2994,8 +2994,8 @@ MACRO m190_to_191
 	13 f,b        /2          tr=/16
 	14 c#         /2          tr=/16
 	15 c#-2       /8
-	INCLUDE  d_all_staccato
-	INCLUDE  v_all_f
+	CALL  d_all_staccato
+	CALL  v_all_f
 	0  f+3        /16    q=2
 	0  c#+3       /8
 	0  f+3        /8
@@ -3018,15 +3018,15 @@ MACRO m190_to_191
 	14 c#         /8
 	15 c#-2       /8     q=4
 END
-INCLUDE  m190_to_191
+CALL  m190_to_191
 
 // m. 192-193
 *
 (
-	INCLUDE  v_all_sf
+	CALL  v_all_sf
 	11 a#+2       /2   tr=/16
 	12 a#+        /2   tr=/16
-	INCLUDE  v_all_f
+	CALL  v_all_f
 	11 a#+2       /8   tr=/8
 	11 g+2        /8   tr=/8
 	11 e+2        /8   tr=/8
@@ -3036,10 +3036,10 @@ INCLUDE  m190_to_191
 	12 e+         /8   tr=/8
 	12 g+         /8   tr=/8
 )
-MACRO m192_to_193_without_violins
-	INCLUDE  m186_187_drums
-	INCLUDE  d_all_legato
-	INCLUDE  v_all_sf
+FUNCTION m192_to_193_without_violins
+	CALL  m186_187_drums
+	CALL  d_all_legato
+	CALL  v_all_sf
 	0  a#+3       /2+/8
 	1  a#+2       /2+/8
 	2  g+,a#+     /2+/8
@@ -3053,8 +3053,8 @@ MACRO m192_to_193_without_violins
 	13 g,e+       /2          tr=/16
 	14 c          /2          tr=/16
 	15 c-2        /8
-	INCLUDE  d_all_staccato
-	INCLUDE  v_all_f
+	CALL  d_all_staccato
+	CALL  v_all_f
 	0  g+3        /16    q=2
 	0  e+3        /8
 	0  g+3        /8
@@ -3069,11 +3069,11 @@ MACRO m192_to_193_without_violins
 	14 c          /8
 	15 c-2        /8     q=4
 END
-INCLUDE  m192_to_193_without_violins
+CALL  m192_to_193_without_violins
 
 // m. 194-195
 *
-MACRO m194_drums
+FUNCTION m194_drums
 	p  to       /2       m, tr=/32
 	p  bd2,cc2  /4  q=2
 END
@@ -3095,8 +3095,8 @@ END
 	12 d#+    /8   tr=/8
 	12 c#+    /8   tr=/8
 )
-MACRO m194_to_195_without_violins
-	INCLUDE  d_all_legato
+FUNCTION m194_to_195_without_violins
+	CALL  d_all_legato
 	0  b+3    /8         $staccato
 	0  a#+3   /8
 	0  a+3    /8
@@ -3121,15 +3121,15 @@ MACRO m194_to_195_without_violins
 	6  e,g#   /1
 	7  g#,e+  /1
 	8  b-2,b- /1
-	INCLUDE  m194_drums  q=2
+	CALL  m194_drums  q=2
 	10 b-2    /2  q=2,   tr=/32
 	10 -      /4       m
 	13 g#,e+  /2  q=2,   tr=/16
 	14 b-     /2  q=2,   tr=/16
 	15 b-3    /8  q=8,   $staccato
-	INCLUDE  d_all_staccato
+	CALL  d_all_staccato
 END
-INCLUDE  m194_to_195_without_violins
+CALL  m194_to_195_without_violins
 
 // m. 196-197
 *
@@ -3151,8 +3151,8 @@ INCLUDE  m194_to_195_without_violins
 	12 d#      /8   tr=/8
 	12 f#      /8   tr=/8
 )
-MACRO m196_to_197_without_violins
-	INCLUDE  d_all_legato
+FUNCTION m196_to_197_without_violins
+	CALL  d_all_legato
 	0  b+3     /8          $staccato
 	0  a#+3    /8
 	0  a+3     /8
@@ -3177,15 +3177,15 @@ MACRO m196_to_197_without_violins
 	6  b-,f#   /1
 	7  b-,b    /1
 	8  b-2,b-  /1
-	INCLUDE  m194_drums  q=2
+	CALL  m194_drums  q=2
 	10 b-2     /2  q=2,    tr=/32
 	10 -       /4       m
 	13 d#,b    /2  q=2,    tr=/16
 	14 b-2     /2  q=2,    tr=/16
 	15 b-3     /8  q=8,    $staccato
-	INCLUDE  d_all_staccato
+	CALL  d_all_staccato
 END
-INCLUDE  m196_to_197_without_violins
+CALL  m196_to_197_without_violins
 
 // m. 198-199
 *
@@ -3193,13 +3193,13 @@ INCLUDE  m196_to_197_without_violins
 	8  e-     /2     m,  $legato
 	8  e      /2+/8
 )
-INCLUDE  m174_without_trombone
+CALL  m174_without_trombone
 *
-INCLUDE  m175
+CALL  m175
 
 // m. 200-201
 *
-INCLUDE  m176_to_177
+CALL  m176_to_177
 
 // m. 202-203
 *
@@ -3208,48 +3208,48 @@ INCLUDE  m176_to_177
 	8  e    /16
 	8  e    /4.
 )
-INCLUDE  m174_without_trombone
+CALL  m174_without_trombone
 *
-INCLUDE  m175
+CALL  m175
 
 // m. 204-205
 *
-INCLUDE  m176_to_177
+CALL  m176_to_177
 
 // m. 206-207
 *
-INCLUDE  m182
+CALL  m182
 *
-INCLUDE  m183
+CALL  m183
 
 // m. 208-209
 *
 ( m
 	7  g#  /8
 )
-INCLUDE  m182
+CALL  m182
 *
-INCLUDE  m183
+CALL  m183
 
 // m. 210-211
 *
-INCLUDE  m186_to_187
+CALL  m186_to_187
 
 // m. 212-213
 *
-INCLUDE  m188_to_189
+CALL  m188_to_189
 
 // m. 214-215
 *
-INCLUDE  m190_to_191
+CALL  m190_to_191
 
 // m. 216-217
 *
 (
-	INCLUDE  v_all_sf
+	CALL  v_all_sf
 	11 a#+2   /2        tr=/16
 	12 a#+    /2        tr=/16
-	INCLUDE  v_all_f
+	CALL  v_all_f
 	11 a#+2   /16  q=2
 	11 g+2    /16  q=2
 	11 e+2    /16  q=2
@@ -3259,7 +3259,7 @@ INCLUDE  m190_to_191
 	12 e+     /16  q=2
 	12 g+     /16  q=2
 )
-INCLUDE  m192_to_193_without_violins
+CALL  m192_to_193_without_violins
 
 // m. 218-219
 *
@@ -3281,7 +3281,7 @@ INCLUDE  m192_to_193_without_violins
 	12 d#+    /16  q=2
 	12 c#+    /16  q=2
 )
-INCLUDE  m194_to_195_without_violins
+CALL  m194_to_195_without_violins
 
 // m. 220-221
 *
@@ -3303,12 +3303,12 @@ INCLUDE  m194_to_195_without_violins
 	12 d#      /16  q=2
 	12 f#      /16  q=2
 )
-INCLUDE  m196_to_197_without_violins
+CALL  m196_to_197_without_violins
 
 // m. 222
 *
 (
-	INCLUDE  d_all_legato
+	CALL  d_all_legato
 	( q=2
 		0  e+3    /16
 		0  d#+3   /16
@@ -3339,10 +3339,10 @@ INCLUDE  m196_to_197_without_violins
 	13 e,g#       /8
 	14 e-         /8
 	15 e-2        /8
-	INCLUDE  d_all_staccato
+	CALL  d_all_staccato
 )
 *
-MACRO m222_2
+FUNCTION m222_2
 		0  b+2 /16  q=2
 		1  b+  /16  q=2
 		2  b   /16  q=2
@@ -3350,11 +3350,11 @@ MACRO m222_2
 		4  b-  /16  q=2
 		6  b-  /16  q=2
 END
-INCLUDE  m222_2
+CALL  m222_2
 
 // m. 223
 *
-MACRO m223_1
+FUNCTION m223_1
 	0  b+2 /8
 	1  b+  /8
 	2  b   /8
@@ -3362,17 +3362,17 @@ MACRO m223_1
 	4  b-  /8
 	6  b-  /8
 END
-MACRO m223
-	INCLUDE  m223_1
-	INCLUDE  m222_2
-	INCLUDE  m223_1
-	INCLUDE  m222_2
+FUNCTION m223
+	CALL  m223_1
+	CALL  m222_2
+	CALL  m223_1
+	CALL  m222_2
 END
-INCLUDE  m223
+CALL  m223
 
 // m. 224
 *
-MACRO m224_1
+FUNCTION m224_1
 	0  e+3  /8
 	0  f#+3 /8
 	0  g#+3 /8
@@ -3392,30 +3392,30 @@ MACRO m224_1
 	6  f#   /8
 	6  g#   /8
 END
-INCLUDE  m224_1
+CALL  m224_1
 *
-INCLUDE  v_all_ff
-MACRO m224_2
-	INCLUDE  m222_2
+CALL  v_all_ff
+FUNCTION m224_2
+	CALL  m222_2
 	11 b    /16  q=2
 	12 b    /16  q=2
 	13 b-   /16  q=2
 	14 b-   /16  q=2
 END
-INCLUDE  m224_2
+CALL  m224_2
 
 // m. 225
 *
-MACRO m225_1
-	INCLUDE  m223_1
+FUNCTION m225_1
+	CALL  m223_1
 	11 b    /8
 	12 b    /8
 	13 b-   /8
 	14 b-   /8
 END
 ( q=2
-	INCLUDE  m225_1
-	INCLUDE  m224_2
+	CALL  m225_1
+	CALL  m224_2
 )
 
 // m. 226
@@ -3457,7 +3457,7 @@ END
 // m. 227
 *
 (
-	INCLUDE  m224_1
+	CALL  m224_1
 	11 e    /8
 	11 f#   /8
 	11 g#   /8
@@ -3510,8 +3510,8 @@ END
 // m. 230-231
 *
 (
-	INCLUDE  d_all_legato
-	INCLUDE  v_all_sf
+	CALL  d_all_legato
+	CALL  v_all_sf
 	0  d#+3    /1
 	1  d#+2    /1
 	2  d#+,b+  /1
@@ -3528,8 +3528,8 @@ END
 	13 f#,a    /2           tr=/16
 	14 b-      /2           tr=/16
 	15 b-3     /8
-	INCLUDE  v_all_ff
-	INCLUDE  m167_drum
+	CALL  v_all_ff
+	CALL  m167_drum
 	11 c+      /16          $staccato
 	11 c#+     /16
 	11 d+      /16
@@ -3567,7 +3567,7 @@ END
 
 // m. 232-235
 *
-INCLUDE  d_all_staccato
+CALL  d_all_staccato
 ( q=4
 	( q=2
 		0  e+3     /8
@@ -3610,7 +3610,7 @@ INCLUDE  d_all_staccato
 
 // m. 236
 *
-MACRO m236_low_ch5_10
+FUNCTION m236_low_ch5_10
 	5  -       /8          $staccato
 	5  b-,b    /4.
 	6  -       /8          $staccato
@@ -3622,7 +3622,7 @@ MACRO m236_low_ch5_10
 	10 e-      /2          tr=/32
 	10 -       /4     m
 END
-MACRO m236_low_ch12_15
+FUNCTION m236_low_ch12_15
 	12 g#,e+   /2          tr=/16,  $legato
 	13 e,b     /2          tr=/16,  $legato
 	14 e-      /2          tr=/16,  $legato
@@ -3642,8 +3642,8 @@ END
 	11 e+2     /8
 	11 e+2     /16    q=2
 	11 e+2     /4          tr=/16
-	INCLUDE  m236_low_ch5_10
-	INCLUDE  m236_low_ch12_15
+	CALL  m236_low_ch5_10
+	CALL  m236_low_ch12_15
 )
 
 // m. 237
@@ -3655,11 +3655,11 @@ END
 	1  e+2  /8
 	1  b+   /16  q=2
 	1  b+   /8   q=2
-	INCLUDE  m236_low_ch5_10
+	CALL  m236_low_ch5_10
 	11 e+2  /8
 	11 b+   /16  q=2
 	11 b+   /4          tr=/16
-	INCLUDE  m236_low_ch12_15
+	CALL  m236_low_ch12_15
 )
 
 // m. 238
@@ -3671,11 +3671,11 @@ END
 	1  b+   /8
 	1  g#+  /16  q=2
 	1  g#+  /8   q=2
-	INCLUDE  m236_low_ch5_10
+	CALL  m236_low_ch5_10
 	11 b+   /8
 	11 g#+  /16  q=2
 	11 g#+  /4          tr=/16
-	INCLUDE  m236_low_ch12_15
+	CALL  m236_low_ch12_15
 )
 
 // m. 239
@@ -3687,11 +3687,11 @@ END
 	1  g#+  /8
 	1  e+   /16  q=2
 	1  e+   /8   q=2
-	INCLUDE  m236_low_ch5_10
+	CALL  m236_low_ch5_10
 	11 g#+  /8
 	11 e+   /16  q=2
 	11 e+   /4          tr=/16
-	INCLUDE  m236_low_ch12_15
+	CALL  m236_low_ch12_15
 )
 
 // m. 240
@@ -3705,7 +3705,7 @@ END
 	1  e+2    /8   q=2
 	4  e-2,e- /8
 	4  e-,e   /2        m
-	INCLUDE  m236_low_ch5_10
+	CALL  m236_low_ch5_10
 	8  -      /8
 	8  e-,e   /4.
 	11 e+     /8
@@ -3730,7 +3730,7 @@ END
 	1  b+     /8   q=2
 	4  -      /8
 	4  b-2,b- /2   m
-	INCLUDE  m236_low_ch5_10
+	CALL  m236_low_ch5_10
 	8  -      /8
 	8  b-2,b- /4.
 	11 e+     /8
@@ -3755,7 +3755,7 @@ END
 	1  g#+      /8   q=2
 	4  -        /8
 	4  g#-2,g#- /2   m
-	INCLUDE  m236_low_ch5_10
+	CALL  m236_low_ch5_10
 	8  -      /8
 	8  g#-2,g#- /4.
 	11 b      /8
@@ -3780,7 +3780,7 @@ END
 	1  e+       /8   q=2
 	4  -        /8
 	4  e-2,e-   /2   m
-	INCLUDE  m236_low_ch5_10
+	CALL  m236_low_ch5_10
 	8  -        /8
 	8  e-       /2   m
 	11 g#       /8
@@ -3797,7 +3797,7 @@ END
 // m. 244
 *
 (
-	INCLUDE  d_all_staccato
+	CALL  d_all_staccato
 	0  e+2        /8
 	1  e+         /8
 	3  -          /8
@@ -4033,7 +4033,7 @@ END
 	8  b-     /8
 	8  g#-    /8
 	8  b-     /8
-	INCLUDE  m167_drum
+	CALL  m167_drum
 	10 e-     /8   q=4
 	11 e+2    /8   q=4
 	12 b,g#+  /8   q=4
@@ -4131,7 +4131,7 @@ END
 // m. 252
 *  tempo  60
 (
-	INCLUDE  d_all_legato
+	CALL  d_all_legato
 	0  e+2        /2
 	1  e+         /2
 	2  g#,e+      /2
@@ -4151,28 +4151,28 @@ END
 )
 
 ////////////////////////////////////////////////////////
-// HELPER MACROS
+// HELPER FUNCTIONS
 ////////////////////////////////////////////////////////
 
-// macros to switch instruments between arco and pizzicato
-MACRO i_arco_14
+// functions to switch instruments between arco and pizzicato
+FUNCTION i_arco_14
 	INSTRUMENT  14  CELLO              Violoncello
 END
 
-MACRO i_pizzicato_14
+FUNCTION i_pizzicato_14
 	INSTRUMENT  14  PIZZICATO_STRINGS  Violoncello
 END
 
-MACRO i_arco_15
+FUNCTION i_arco_15
 	INSTRUMENT  15  CONTRABASS         Double Bass
 END
 
-MACRO i_pizzicato_15
+FUNCTION i_pizzicato_15
 	INSTRUMENT  15  PIZZICATO_STRINGS  Double Bass
 END
 
-// macros for setting all channels to staccato or legato
-MACRO d_all_staccato
+// functions for setting all channels to staccato or legato
+FUNCTION d_all_staccato
 	0  - /4  m, $staccato
 	1  - /4  m, $staccato
 	2  - /4  m, $staccato
@@ -4191,7 +4191,7 @@ MACRO d_all_staccato
 	15 - /4  m, $staccato
 END
 
-MACRO d_all_legato
+FUNCTION d_all_legato
 	0  - /4  m, $legato
 	1  - /4  m, $legato
 	2  - /4  m, $legato
@@ -4210,8 +4210,8 @@ MACRO d_all_legato
 	15 - /4  m, $legato
 END
 
-// macros for setting velocities in all channels
-MACRO v_all_tutta_forza
+// functions for setting velocities in all channels
+FUNCTION v_all_tutta_forza
 	0  - /4  m, $tutta_forza
 	1  - /4  m, $tutta_forza
 	2  - /4  m, $tutta_forza
@@ -4230,7 +4230,7 @@ MACRO v_all_tutta_forza
 	15 - /4  m, $tutta_forza
 END
 
-MACRO v_all_sf
+FUNCTION v_all_sf
 	0  - /4  m, $sf
 	1  - /4  m, $sf
 	2  - /4  m, $sf
@@ -4249,7 +4249,7 @@ MACRO v_all_sf
 	15 - /4  m, $sf
 END
 
-MACRO v_all_ff
+FUNCTION v_all_ff
 	0  - /4  m, $ff
 	1  - /4  m, $ff
 	2  - /4  m, $ff
@@ -4268,7 +4268,7 @@ MACRO v_all_ff
 	15 - /4  m, $ff
 END
 
-MACRO v_all_f
+FUNCTION v_all_f
 	0  - /4  m, $f
 	1  - /4  m, $f
 	2  - /4  m, $f
@@ -4287,7 +4287,7 @@ MACRO v_all_f
 	15 - /4  m, $f
 END
 
-MACRO v_all_p
+FUNCTION v_all_p
 	0  - /4  m, $p
 	1  - /4  m, $p
 	2  - /4  m, $p
@@ -4306,7 +4306,7 @@ MACRO v_all_p
 	15 - /4  m, $p
 END
 
-MACRO v_all_pp
+FUNCTION v_all_pp
 	0  - /4  m, $pp
 	1  - /4  m, $pp
 	2  - /4  m, $pp

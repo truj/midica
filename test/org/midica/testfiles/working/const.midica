@@ -1,4 +1,4 @@
-INCLUDE_FILE inc/instruments.midica
+INCLUDE inc/instruments.midica
 
 CONST $forte = 120
 CONST $piano= 30
@@ -14,7 +14,7 @@ CONST $whole_line           0  c  /4  $staccato
 0  c  /4  v=$forte
 0  c  /4  $staccato
 
-MACRO test1
+FUNCTION test1
 	0  c  /4  v=$forte
 	0  c  /4  $staccato
 	(
@@ -29,12 +29,12 @@ MACRO test1
 		$whole_line
 	)
 END
-INCLUDE test1
+CALL test1
 
-MACRO test2
-	INCLUDE test1
+FUNCTION test2
+	CALL test1
 END
-INCLUDE test2
+CALL test2
 
 $cmd_with_columns $legato
 $whole_line

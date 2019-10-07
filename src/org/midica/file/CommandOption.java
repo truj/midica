@@ -12,7 +12,7 @@ package org.midica.file;
  * It can be:
  * 
  * - a channel option
- * - an option for an INCLUDE command
+ * - an option for n CALL command
  * - an option for an opening or closing brace of a nestable block
  * 
  * @author Jan Trukenmüller

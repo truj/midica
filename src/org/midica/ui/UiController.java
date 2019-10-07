@@ -418,18 +418,8 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			// set import directory in the config
 			selector.rememberDirectory();
 		}
-		catch ( ParseException ex ) {
-			int    lineNumber = ex.getLineNumber();
-			String fileName   = ex.getFileName();
-			String msg        = ex.getMessage();
-			if ( lineNumber > 0 && null != fileName ) {
-				msg = String.format(
-					Dict.get( Dict.ERROR_IN_LINE ),
-					fileName,
-					lineNumber
-				) + msg;
-			}
-			showErrorMessage( msg );
+		catch (ParseException ex) {
+			showErrorMessage(ex.getFullMessage());
 			ex.printStackTrace();
 		}
 		
