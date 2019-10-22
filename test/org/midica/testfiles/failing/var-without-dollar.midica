@@ -1,0 +1,6 @@
+INCLUDE inc/instruments.midica
+
+VAR x = c
+
+
+0  c  /4

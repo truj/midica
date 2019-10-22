@@ -1,0 +1,5 @@
+INCLUDE inc/instruments.midica
+
+* key c/inval
+
+0 c /4

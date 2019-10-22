@@ -24,11 +24,13 @@ public class ParseException extends Exception {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private int                      lineNumber  = 0;
-	private File                     file        = null;
-	private Deque<StackTraceElement> stackTrace  = null;
-	private String                   lineContent = null;
-	private boolean                  isLastAdded = false;
+	private int                      lineNumber         = 0;
+	private File                     file               = null;
+	private Deque<StackTraceElement> stackTrace         = null;
+	private String                   lineContent        = null;
+	private boolean                  isLastAdded        = false;
+	private boolean                  causedByBlockCond  = false;
+	private boolean                  causedByInvalidVar = false;
 	
 	/**
 	 * Throws a generic parse exception without a detail message.
@@ -77,6 +79,23 @@ public class ParseException extends Exception {
 	}
 	
 	/**
+	 * Marks this exeption as being caused by if/elsif/else conditions of a nestable block.
+	 */
+	public void setCausedByBlockConditions() {
+		causedByBlockCond = true;
+	}
+	
+	/**
+	 * Marks this exeption as being caused by an invalid variable or parameter name.
+	 * 
+	 * @param varName  the variable or parameter name causing the problem
+	 */
+	public void setCausedByInvalidVar(String varName) {
+		causedByInvalidVar = true;
+		lineContent        = varName;
+	}
+	
+	/**
 	 * Returns the parsed file.
 	 * 
 	 * @return  file name
@@ -114,9 +133,16 @@ public class ParseException extends Exception {
 		String msg = getMessage();
 		StringBuilder fullMsg = new StringBuilder("<html>" + msg + "<br>");
 		
-		if (lineContent != null) {
-			String lineStr = "<br>" + Dict.get(Dict.EXCEPTION_CAUSED_BY_LINE) + "<br>" + lineContent + "<br>";
-			msg = msg + "<br>" + lineStr;
+		String lineStr = "<br>";
+		if (causedByBlockCond)
+			lineStr += Dict.get(Dict.EXCEPTION_CAUSED_BY_BLK_COND);
+		else if (causedByInvalidVar)
+			lineStr += Dict.get(Dict.EXCEPTION_CAUSED_BY_INVALID_VAR) + "<br>" + lineContent;
+		else if (lineContent != null)
+			lineStr += Dict.get(Dict.EXCEPTION_CAUSED_BY_LINE) + "<br>" + lineContent;
+		if (causedByBlockCond || causedByInvalidVar || lineContent != null) {
+			lineStr += "<br>";
+			msg     += "<br>" + lineStr;
 			fullMsg.append(lineStr);
 		}
 		

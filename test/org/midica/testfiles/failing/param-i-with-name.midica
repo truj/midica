@@ -1,0 +1,6 @@
+INCLUDE inc/instruments.midica
+
+FUNCTION test
+	0  c  /4  l=$[x]
+END
+CALL test(x)

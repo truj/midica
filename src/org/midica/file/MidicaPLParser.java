@@ -16,10 +16,12 @@ import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -54,15 +56,27 @@ public class MidicaPLParser extends SequenceParser {
 	public static final String OPT_TUPLET   = "tuplet";
 	public static final String OPT_TREMOLO  = "tremolo";
 	public static final String OPT_SHIFT    = "shift";
+	public static final String OPT_IF       = "if";
+	public static final String OPT_ELSIF    = "elsif";
+	public static final String OPT_ELSE     = "else";
 	
 	private static final int MODE_DEFAULT     = 0;
 	private static final int MODE_INSTRUMENTS = 1;
 	private static final int MODE_FUNCTION    = 2;
 	private static final int MODE_META        = 3;
 	
+	public static final  int COND_TYPE_NONE   = 0;
+	public static final  int COND_TYPE_IF     = 1;
+	public static final  int COND_TYPE_ELSIF  = 2;
+	public static final  int COND_TYPE_ELSE   = 3;
+	
 	private static final int TICK_BANK_BEFORE_PROGRAM = 10; // how many ticks a bank select will be made before the program change
 	
 	private static final int REST_VALUE = -1;
+	
+	private static final int MAX_RECURSION_DEPTH_FUNCTION =   30;
+	private static final int MAX_RECURSION_DEPTH_CONST    = 1000;
+	private static final int MAX_RECURSION_DEPTH_VAR      = 1000;
 	
 	/* *****************
 	 * class fields
@@ -136,6 +150,18 @@ public class MidicaPLParser extends SequenceParser {
 	public static String REST               = null;
 	public static String S                  = null;
 	public static String SHIFT              = null;
+	public static String IF                 = null;
+	public static String ELSIF              = null;
+	public static String ELSE               = null;
+	public static String COND_EQ            = null;
+	public static String COND_NEQ           = null;
+	public static String COND_NDEF          = null;
+	public static String COND_LT            = null;
+	public static String COND_LE            = null;
+	public static String COND_GT            = null;
+	public static String COND_GE            = null;
+	public static String COND_IN            = null;
+	public static String COND_IN_SEP        = null;
 	public static String PROG_BANK_SEP      = null;
 	public static String Q                  = null;
 	public static String QUANTITY           = null;
@@ -186,12 +212,16 @@ public class MidicaPLParser extends SequenceParser {
 	protected static HashMap<String, String>            constants            = null;
 	protected static HashMap<String, String>            variables            = null;
 	private   static Pattern                            varPattern           = null;
+	private   static Pattern                            callPattern          = null;
+	private   static Pattern                            condPattern          = null;
+	private   static Pattern                            condInPattern        = null;
 	
 	private static boolean isDefineParsRun     = false; // parsing run for define commands
 	private static boolean isConstParsRun      = false; // parsing run for constant definitions
 	private static boolean isChInstMetaParsRun = false; // parsing run for chords, meta, instruments and block nesting
 	private static boolean isFuncNameParsRun   = false; // parsing run for defined function names
 	private static boolean isFuncParsRun       = false; // parsing run for functions
+	private static boolean isCondCheckParsRun  = false; // parsing run for pre-checks of if/elsif conditions
 	private static boolean isDefaultParsRun    = false; // final parsing run
 	
 	/* *******************
@@ -204,6 +234,8 @@ public class MidicaPLParser extends SequenceParser {
 	private int               currentMode         = MODE_DEFAULT;
 	private String            currentFunctionName = null;
 	private ArrayList<String> currentFunction     = null;
+	private boolean           condChainOpened     = false; // current / last block had an if or elsif
+	private boolean           condChainHit        = false; // if / elsif chain had a hit
 	
 	/**
 	 * Returns the absolute path of the successfully parsed MidicaPL file.
@@ -325,6 +357,18 @@ public class MidicaPLParser extends SequenceParser {
 		TUPLET_INTRO       = Dict.getSyntax( Dict.SYNTAX_TUPLET_INTRO       );
 		TUPLET_FOR         = Dict.getSyntax( Dict.SYNTAX_TUPLET_FOR         );
 		DURATION_PLUS      = Dict.getSyntax( Dict.SYNTAX_DURATION_PLUS      );
+		IF                 = Dict.getSyntax( Dict.SYNTAX_IF                 );
+		ELSIF              = Dict.getSyntax( Dict.SYNTAX_ELSIF              );
+		ELSE               = Dict.getSyntax( Dict.SYNTAX_ELSE               );
+		COND_EQ            = Dict.getSyntax( Dict.SYNTAX_COND_EQ            );
+		COND_NEQ           = Dict.getSyntax( Dict.SYNTAX_COND_NEQ           );
+		COND_NDEF          = Dict.getSyntax( Dict.SYNTAX_COND_NDEF          );
+		COND_LT            = Dict.getSyntax( Dict.SYNTAX_COND_LT            );
+		COND_LE            = Dict.getSyntax( Dict.SYNTAX_COND_LE            );
+		COND_GT            = Dict.getSyntax( Dict.SYNTAX_COND_GT            );
+		COND_GE            = Dict.getSyntax( Dict.SYNTAX_COND_GE            );
+		COND_IN            = Dict.getSyntax( Dict.SYNTAX_COND_IN            );
+		COND_IN_SEP        = Dict.getSyntax( Dict.SYNTAX_COND_IN_SEP        );
 		
 		// Remember the original names of some commands.
 		// Needed to redefine them without getting an error in the following parsing runs.
@@ -386,31 +430,9 @@ public class MidicaPLParser extends SequenceParser {
 				// now the comment symbol cannot change any more.
 				cleanLines(lines);
 				
-				// prepare constant/variable replacing
-				varPattern = Pattern.compile(
-					  "("       // group 1: the whole construct (constant, variable or parameter)
-					+ "("       // group 2: $
-					+ Pattern.quote(VAR_SYMBOL)
-					+ ")"
-					+ "("       // group 3: everything except $
-					+ "("
-					+ "\\w+"    // group 4: normal variable
-					+ ")"
-					+ "|"
-					+ Pattern.quote(PARAM_INDEX_OPEN)
-					+ "("
-					+ "\\d+"    // group 5: indexed parameter
-					+ ")"
-					+ Pattern.quote(PARAM_INDEX_CLOSE)
-					+ "|"
-					+ Pattern.quote(PARAM_NAMED_OPEN)
-					+ "("
-					+ "\\w+"    // group 6: named parameter
-					+ ")"
-					+ Pattern.quote(PARAM_NAMED_CLOSE)
-					+ ")"
-					+ ")"
-				);
+				// compile regex patterns that are needed after the
+				// define run is finished.
+				compilePatterns();
 				
 				// look for constant definitions
 				isConstParsRun = true;
@@ -433,6 +455,15 @@ public class MidicaPLParser extends SequenceParser {
 				isFuncParsRun = true;
 				parsingRun(lines);
 				isFuncParsRun = false;
+				
+				// pre-check if/elsif conditions
+				isCondCheckParsRun = true;
+				parsingRun(lines);
+				isCondCheckParsRun = false;
+				
+				// prepare if-elsif-else for root-level blocks
+				condChainOpened = false;
+				condChainHit    = false;
 				
 				// look for everything else
 				// final parsing run, building up the sequence
@@ -472,6 +503,88 @@ public class MidicaPLParser extends SequenceParser {
 		if (isRootParser) {
 			postprocessSequence( SequenceCreator.getSequence(), "midica", chosenCharset );
 		}
+	}
+	
+	/**
+	 * Create patterns for regexes.
+	 * This is called after the define run so that the syntax keywords cannot change any more.
+	 */
+	private void compilePatterns() {
+		
+		// match constants/variables/parameters
+		varPattern = Pattern.compile(
+			  "("       // group 1: the whole construct (constant, variable or parameter)
+			+ "("       // group 2: $
+			+ Pattern.quote(VAR_SYMBOL)
+			+ ")"
+			+ "("       // group 3: everything except $
+			+ "("
+			+ "\\w+"    // group 4: normal variable
+			+ ")"
+			+ "|"
+			+ Pattern.quote(PARAM_INDEX_OPEN)
+			+ "("
+			+ "\\w+"    // group 5: indexed parameter
+			+ ")"
+			+ Pattern.quote(PARAM_INDEX_CLOSE)
+			+ "|"
+			+ Pattern.quote(PARAM_NAMED_OPEN)
+			+ "("
+			+ "\\w+"    // group 6: named parameter
+			+ ")"
+			+ Pattern.quote(PARAM_NAMED_CLOSE)
+			+ ")"
+			+ ")"
+		);
+		
+		// match function calls
+		callPattern = Pattern.compile(
+			  "^([^"                      // function name, consisting of all characters except:
+			+ "\\s"                       // - whitespace
+			+ Pattern.quote(PARAM_OPEN)   // - (
+			+ Pattern.quote(PARAM_CLOSE)  // - )
+			+ "]+)"                       // ... with one or more characters
+			+ "\\s*"                      // optional whitespace(s)
+			+ "("                         // open capturing group for an optional parameter list
+			+ "\\s*"                          // optional whitespace(s)
+			+ Pattern.quote(PARAM_OPEN)       // (
+			+ "\\s*"                              // optional whitespace(s)
+			+ "(.*?)"                                 // parameters
+			+ "\\s*"                              // optional whitespace(s)
+			+ Pattern.quote(PARAM_CLOSE)      // )
+			+ "\\s*"                          // optional whitespace(s)
+			+ ")?"                         // close optional parameter list
+			+ "\\s*"                       // optional whitespace(s)
+			+ "(.+?)?"                     // optional options
+			+ "\\s*"                       // optional whitespace(s)
+			+ "$"
+		);
+		
+		// split on condition for if/elsif
+		condPattern = Pattern.compile(
+			"("                           // group 1: get the operator
+			+ Pattern.quote(COND_EQ)      // ==
+			+ "|"
+			+ Pattern.quote(COND_NEQ)     // !=
+			+ "|"
+			+ Pattern.quote(COND_NDEF)    // !
+			+ "|"
+			+ Pattern.quote(COND_LE)      // <=
+			+ "|"
+			+ Pattern.quote(COND_LT)      // <
+			+ "|"
+			+ Pattern.quote(COND_GE)      // >=
+			+ "|"
+			+ Pattern.quote(COND_GT)      // >
+			+ "|"
+			+ "\\b"
+			+ Pattern.quote(COND_IN)      // IN-clause, e.g. $x in 0;1;2;5
+			+ "\\b"
+			+ ")"
+		);
+		
+		// split list in "in" conditions for if/elsif
+		condInPattern = Pattern.compile("\\s*" + Pattern.quote(COND_IN_SEP) + "\\s*");
 	}
 	
 	/**
@@ -669,6 +782,15 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void parseTokens(String[] tokens) throws ParseException {
 		
+		// reset if/elsif/else conditions in blocks
+		if (isDefaultParsRun
+			&& 0 == nestableBlkDepth
+			&& ! "".equals(tokens[0])
+			&& ! BLOCK_OPEN.equals(tokens[0]) ) {
+			condChainOpened = false;
+			condChainHit    = false;
+		}
+		
 		// continue or not - decide depending on parsing run and current mode
 		boolean mustIgnore = mustIgnore(tokens[0]);
 		if (mustIgnore) {
@@ -789,10 +911,12 @@ public class MidicaPLParser extends SequenceParser {
 		else if (CALL.equals(tokens[0])) {
 			
 			// only remember the line?
-			if (isFunct)
-				currentFunction.add(String.join(" ", tokens)); // add to function
-			else if (isBlock)
-				nestableBlkStack.peek().add(tokens); // add to block
+			if ( ! isCondCheckParsRun ) {
+				if (isFunct)
+					currentFunction.add(String.join(" ", tokens)); // add to function
+				else if (isBlock)
+					nestableBlkStack.peek().add(tokens); // add to block
+			}
 			
 			parseCALL(tokens, isFake);
 		}
@@ -1066,6 +1190,14 @@ public class MidicaPLParser extends SequenceParser {
 				return false;
 			}
 			if (MODE_FUNCTION == currentMode) {
+				return false;
+			}
+			return true;
+		}
+		
+		// pre-checks if/elsif conditions
+		if (isCondCheckParsRun) {
+			if (BLOCK_OPEN.equals(cmd) || BLOCK_CLOSE.equals(cmd) || CALL.equals(cmd)) {
 				return false;
 			}
 			return true;
@@ -1622,10 +1754,14 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// get options (quantity / multiple)
-		int     quantity = -1;
-		int     shift    =  0;
-		boolean multiple = false;
-		String  tuplet   = null;
+		int     quantity       = -1;
+		int     shift          =  0;
+		boolean multiple       = false;
+		String  condIf         = null;
+		String  condElsif      = null;
+		boolean isElse         = false;
+		String  tuplet         = null;
+		boolean mustCheckChain = isDefaultParsRun && nestableBlkDepth == 0;
 		if (optionsStr.length() > 0) {
 			ArrayList<CommandOption> options = parseOptions(optionsStr, isFake);
 			for (CommandOption opt : options) {
@@ -1638,8 +1774,42 @@ public class MidicaPLParser extends SequenceParser {
 					tuplet = opt.getTuplet();
 				else if (OPT_SHIFT.equals(optName))
 					shift += opt.getShift();
+				else if (OPT_IF.equals(optName)) {
+					if (condIf != null || condElsif != null || isElse) {
+						throw new ParseException( Dict.get(Dict.ERROR_BLOCK_IF_MUST_BE_ALONE) );
+					}
+					condIf = opt.getCondition();
+				}
+				else if (OPT_ELSIF.equals(optName)) {
+					if (condIf != null || condElsif != null || isElse) {
+						throw new ParseException( Dict.get(Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE) );
+					}
+					if (mustCheckChain && ! condChainOpened) {
+						throw new ParseException( Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND) + ": " + optName );
+					}
+					condElsif = opt.getCondition();
+				}
+				else if (OPT_ELSE.equals(optName)) {
+					if (condIf != null || condElsif != null || isElse) {
+						throw new ParseException( Dict.get(Dict.ERROR_BLOCK_ELSE_MUST_BE_ALONE) );
+					}
+					if (mustCheckChain && ! condChainOpened) {
+						throw new ParseException( Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND) + ": " + optName );
+					}
+					isElse = true;
+				}
 				else
-					throw new ParseException( Dict.get(Dict.ERROR_BLOCK_INVALID_ARG) + optName );
+					throw new ParseException( Dict.get(Dict.ERROR_BLOCK_INVALID_OPT) + optName );
+				
+				// only check?
+				if (isCondCheckParsRun) {
+					if (OPT_IF.equals(optName) || OPT_ELSIF.equals(optName)) {
+						if (OPT_IF.equals(optName))
+							evalCondition(condIf);
+						else if (OPT_ELSIF.equals(optName))
+							evalCondition(condElsif);
+					}
+				}
 			}
 		}
 		
@@ -1680,11 +1850,22 @@ public class MidicaPLParser extends SequenceParser {
 			else
 				block.setTuplet(TUPLET_INTRO + tuplet, OPT_TUPLET);
 		}
+		if (condIf != null)
+			block.setIf(condIf);
+		if (condElsif != null)
+			block.setElsif(condElsif);
+		if (isElse)
+			block.setElse();
 		
 		// apply root block
 		if (BLOCK_CLOSE.equals(cmd) && nestableBlkDepth == 0) {
 			int  line = currentLineNumber;
 			File file = this.file;
+			
+			// get condition from the WHOLE block (not only the closing brace)
+			String condition     = block.getCondition();
+			int    conditionType = block.getConditionType();
+			
 			if ( ! functionNameStack.isEmpty() ) {
 				String functionName = functionNameStack.peek();
 				int offset = functionToLineOffset.get(functionName);
@@ -1692,7 +1873,44 @@ public class MidicaPLParser extends SequenceParser {
 				file = functionFileStack.peek();
 			}
 			block.applyTupletsAndShifts(null, 0);
-			block.play(stackTrace, true, file, line);
+			boolean mustPlay = true;
+			try {
+				if (conditionType != COND_TYPE_NONE) {
+					if (COND_TYPE_IF == conditionType) {
+						condChainHit = false;
+					}
+					
+					// check if-elsif-else
+					if (COND_TYPE_ELSIF == conditionType || COND_TYPE_ELSE == conditionType) {
+						if ( ! condChainOpened )
+						throw new ParseException( Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND) );
+					}
+					if (COND_TYPE_ELSE == conditionType)
+						mustPlay = ! condChainHit;
+					else if (condChainHit)
+						mustPlay = false;
+					else
+						mustPlay = evalCondition(condition);
+				}
+			}
+			catch (ParseException e) {
+				e.setCausedByBlockConditions();
+				throw e;
+			}
+			
+			if (mustPlay) {
+				block.play(stackTrace, true, file, line);
+			}
+			
+			// postprocess conditions
+			if (COND_TYPE_ELSE == conditionType) {
+				condChainOpened = false;
+				condChainHit    = false;
+			}
+			else if (conditionType != COND_TYPE_NONE) {
+				condChainOpened = true;
+				condChainHit    = condChainHit || mustPlay;
+			}
 		}
 	}
 	
@@ -1768,27 +1986,6 @@ public class MidicaPLParser extends SequenceParser {
 		String functionName = null;
 		String paramString  = null;
 		String optionString = null;
-		Pattern callPattern = Pattern.compile(
-			  "^([^"                      // function name, consisting of all characters except:
-			+ "\\s"                       // - whitespace
-			+ Pattern.quote(PARAM_OPEN)   // - (
-			+ Pattern.quote(PARAM_CLOSE)  // - )
-			+ "]+)"                       // ... with one or more characters
-			+ "\\s*"                      // optional whitespace(s)
-			+ "("                         // open capturing group for an optional parameter list
-			+ "\\s*"                          // optional whitespace(s)
-			+ Pattern.quote(PARAM_OPEN)       // (
-			+ "\\s*"                              // optional whitespace(s)
-			+ "(.*?)"                                 // parameters
-			+ "\\s*"                              // optional whitespace(s)
-			+ Pattern.quote(PARAM_CLOSE)      // )
-			+ "\\s*"                          // optional whitespace(s)
-			+ ")?"                         // close optional parameter list
-			+ "\\s*"                       // optional whitespace(s)
-			+ "(.+?)?"                     // optional options
-			+ "\\s*"                       // optional whitespace(s)
-			+ "$"
-		);
 		Matcher callMatcher = callPattern.matcher( tokens[1] );
 		if (callMatcher.matches()) {
 			functionName = callMatcher.group( 1 );
@@ -1803,6 +2000,7 @@ public class MidicaPLParser extends SequenceParser {
 		int     quantity = 1;
 		int     shift    = 0;
 		boolean multiple = false;
+		String  condIf   = null;
 		if (optionString != null && ! "".equals(optionString)) {
 			ArrayList<CommandOption> options = parseOptions(optionString, isFake);
 			for (CommandOption opt : options) {
@@ -1813,10 +2011,24 @@ public class MidicaPLParser extends SequenceParser {
 					shift += opt.getShift();
 				else if (OPT_MULTIPLE.equals(optName))
 					multiple = true;
+				else if (OPT_IF.equals(optName)) {
+					if (condIf != null) {
+						throw new ParseException( Dict.get(Dict.ERROR_CALL_IF_MUST_BE_ALONE) + optName );
+					}
+					condIf = opt.getCondition();
+					
+					// only check?
+					if (isCondCheckParsRun) {
+						evalCondition(condIf);
+					}
+				}
 				else
-					throw new ParseException( Dict.get(Dict.ERROR_CALL_UNKNOWN_ARG) + optName );
+					throw new ParseException( Dict.get(Dict.ERROR_CALL_UNKNOWN_OPT) + optName );
 			}
 		}
+		
+		if (isCondCheckParsRun)
+			return;
 		
 		// check function name
 		if (functionName.equals(currentFunctionName)) {
@@ -1889,6 +2101,10 @@ public class MidicaPLParser extends SequenceParser {
 			return;
 		}
 		
+		// check if condition
+		if (condIf != null && ! evalCondition(condIf))
+			return;
+		
 		// remember current tickstamps
 		ArrayList<Long> tickstamps = rememberTickstamps();
 		
@@ -1908,6 +2124,11 @@ public class MidicaPLParser extends SequenceParser {
 		functionFileStack.push(file);
 		paramStackIndexed.push(paramsIndexed);
 		paramStackNamed.push(paramsNamed);
+		
+		// check recursion
+		if (functionNameStack.size() > MAX_RECURSION_DEPTH_FUNCTION) {
+			throw new ParseException( Dict.get(Dict.ERROR_FUNCTION_RECURSION_DEPTH) );
+		}
 		
 		// apply all lines of the called function
 		for (int m=0; m<quantity; m++) {
@@ -1950,6 +2171,114 @@ public class MidicaPLParser extends SequenceParser {
 		functionFileStack.pop();
 		paramStackIndexed.pop();
 		paramStackNamed.pop();
+	}
+	
+	/**
+	 * Evaluates the given if/elsif condition.
+	 * 
+	 * @param condition  the condition to be evaluated.
+	 * @return **true**, if the condition evaluates to **true**, otherwise: **false**.
+	 * @throws ParseException if the condition is invalid
+	 */
+	public boolean evalCondition(String condition) throws ParseException {
+		condition = clean(condition);
+		
+		String first    = null;
+		String second   = null;
+		String operator = null;
+		
+		// get condition parts
+		String[] parts = condPattern.split(condition, -1);
+		if (parts.length > 2)
+			throw new ParseException( Dict.get(Dict.ERROR_TOO_MANY_OPERATORS_IN_COND) + condition );
+		else if (parts.length == 1) {
+			
+			// defined
+			Matcher wsMatcher = whitespace.matcher(parts[0]);
+			if (wsMatcher.find())
+				throw new ParseException( Dict.get(Dict.ERROR_COND_DEFINED_HAS_WHITESPACE) + condition );
+			
+			if ("".equals(parts[0]))
+				return false;
+			else
+				return true;
+		}
+		else {
+			// one operator, two operands
+			first  = clean(parts[0]);
+			second = clean(parts[1]);
+			Matcher condMatcher = condPattern.matcher(condition);
+			if (condMatcher.find())
+				operator = condMatcher.group(1);
+			else
+				throw new ParseException( "invalid operator\nThis should not happen. Please report." );
+			
+			// check for forbidden whitespaces
+			Matcher wsFirstMatcher = whitespace.matcher(first);
+			if (wsFirstMatcher.find())
+				throw new ParseException( Dict.get(Dict.ERROR_COND_WHITESPACE_IN_FIRST_OP) + first );
+			if ( ! COND_IN.equals(operator) ) {
+				Matcher wsSecondMatcher = whitespace.matcher(second);
+				if (wsSecondMatcher.find())
+					throw new ParseException( Dict.get(Dict.ERROR_COND_WHITESPACE_IN_SEC_OP) + second );
+			}
+			
+			// evaluate binary operation
+			if (COND_NDEF.equals(operator)) {
+				if ( isCondCheckParsRun && "".equals(second) )
+					throw new ParseException( Dict.get(Dict.ERROR_COND_UNDEF_EMPTY) + condition );
+				if ( ! "".equals(first) )
+					throw new ParseException( Dict.get(Dict.ERROR_COND_UNDEF_IN_CENTER) + condition );
+				
+				if ("".equals(second))
+					return true;
+				else
+					return false;
+			}
+			if (COND_EQ.equals(operator)) {
+				// ==
+				if (first.equals(second))
+					return true;
+				else
+					return false;
+			}
+			else if (COND_NEQ.equals(operator)) {
+				// !=
+				if (first.equals(second))
+					return false;
+				else
+					return true;
+			}
+			else if (COND_LT.equals(operator) || COND_LE.equals(operator) || COND_GT.equals(operator) || COND_GE.equals(operator)) {
+				int firstInt  = isCondCheckParsRun ? 0 : toInt(first, false);
+				int secondInt = isCondCheckParsRun ? 0 : toInt(second, false);
+				if (COND_LT.equals(operator))
+					return firstInt < secondInt;
+				else if (COND_LE.equals(operator))
+					return firstInt <= secondInt;
+				else if (COND_GT.equals(operator))
+					return firstInt > secondInt;
+				else
+					return firstInt >= secondInt;
+			}
+			else if (COND_IN.equals(operator)) {
+				String[]     candidates    = condInPattern.split(second);
+				List<String> candidateList = Arrays.asList(candidates);
+				
+				// check for forbidden whitespaces
+				for (String candidate : candidateList) {
+					Matcher wsMatcher = whitespace.matcher(candidate);
+					if (wsMatcher.find())
+						throw new ParseException( Dict.get(Dict.ERROR_COND_WHITESPACE_IN_IN_ELEM) + candidate );
+					else if (isCondCheckParsRun && "".equals(candidate))
+						throw new ParseException( Dict.get(Dict.ERROR_COND_EMPTY_ELEM_IN_IN_LIST) + second );
+				}
+				
+				return candidateList.contains(first);
+			}
+			else
+				throw new ParseException( "invalid operator (" + operator + ")\nThis should not happen. Please report." );
+		}
 	}
 	
 	/**
@@ -2233,6 +2562,18 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_TUPLET_INTRO.equals(cmdId)       ) TUPLET_INTRO       = cmdName;
 		else if ( Dict.SYNTAX_TUPLET_FOR.equals(cmdId)         ) TUPLET_FOR         = cmdName;
 		else if ( Dict.SYNTAX_DURATION_PLUS.equals(cmdId)      ) DURATION_PLUS      = cmdName;
+		else if ( Dict.SYNTAX_IF.equals(cmdId)                 ) IF                 = cmdName;
+		else if ( Dict.SYNTAX_ELSIF.equals(cmdId)              ) ELSIF              = cmdName;
+		else if ( Dict.SYNTAX_ELSE.equals(cmdId)               ) ELSE               = cmdName;
+		else if ( Dict.SYNTAX_COND_EQ.equals(cmdId)            ) COND_EQ            = cmdName;
+		else if ( Dict.SYNTAX_COND_NEQ.equals(cmdId)           ) COND_NEQ           = cmdName;
+		else if ( Dict.SYNTAX_COND_NDEF.equals(cmdId)          ) COND_NDEF          = cmdName;
+		else if ( Dict.SYNTAX_COND_LT.equals(cmdId)            ) COND_LT            = cmdName;
+		else if ( Dict.SYNTAX_COND_LE.equals(cmdId)            ) COND_LE            = cmdName;
+		else if ( Dict.SYNTAX_COND_GT.equals(cmdId)            ) COND_GT            = cmdName;
+		else if ( Dict.SYNTAX_COND_GE.equals(cmdId)            ) COND_GE            = cmdName;
+		else if ( Dict.SYNTAX_COND_IN.equals(cmdId)            ) COND_IN            = cmdName;
+		else if ( Dict.SYNTAX_COND_IN_SEP.equals(cmdId)        ) COND_IN_SEP        = cmdName;
 		else {
 			throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_COMMAND_ID) + cmdId );
 		}
@@ -2261,6 +2602,11 @@ public class MidicaPLParser extends SequenceParser {
 		// constant name already defined?
 		String name  = assignParts[ 0 ];
 		String value = assignParts[ 1 ];
+		
+		// recursion not allowed
+		if (name.equals(value)) {
+			throw new ParseException( Dict.get(Dict.ERROR_CONST_NAME_EQ_VALUE) + name );
+		}
 		
 		// the value could contain other constants as well
 		value = replaceConstants(value);
@@ -2301,6 +2647,11 @@ public class MidicaPLParser extends SequenceParser {
 			throw new ParseException( Dict.get(Dict.ERROR_VAR_ALREADY_DEF_AS_CONST) + name );
 		}
 		
+		// recursion not allowed
+		if (name.equals(value)) {
+			throw new ParseException( Dict.get(Dict.ERROR_VAR_NAME_EQ_VALUE) + name );
+		}
+		
 		// no whitespace in variable values allowed!
 		Matcher matcher = whitespace.matcher(value);
 		if (matcher.find()) {
@@ -2319,7 +2670,7 @@ public class MidicaPLParser extends SequenceParser {
 			isNamedParam   = varMatcher.group(6) != null;
 		}
 		else {
-			throw new ParseException( "invalid variable name\nThis should not happen. Please report." );
+			throw new ParseException( Dict.get(Dict.ERROR_VAR_NAME_INVALID) + name );
 		}
 		
 		// the value could contain other variables as well
@@ -2351,7 +2702,7 @@ public class MidicaPLParser extends SequenceParser {
 			if (null == params.get(index)) {
 				throw new ParseException( Dict.get(Dict.ERROR_PARAM_INDEX_UNDEFINED) + name );
 			}
-			params.add(index, value);
+			params.set(index, value);
 		}
 		else {
 			// normal variable
@@ -2364,16 +2715,19 @@ public class MidicaPLParser extends SequenceParser {
 	 * 
 	 * @param str  The string to be replaced.
 	 * @return     The resulting string.
+	 * @throws ParseException if the recursion depth is too high
 	 */
-	private String replaceConstants(String str) {
+	private String replaceConstants(String str) throws ParseException {
 		
 		// no constant/variable found?
 		if ( ! varPattern.matcher(str).find() ) {
 			return str;
 		}
 		
+		int     recursionCount  = 0;
 		boolean mustSearchAgain = true;
 		while (mustSearchAgain) {
+			recursionCount++;
 			mustSearchAgain = false;
 			Matcher constMatcher = varPattern.matcher(str);
 			StringBuffer resultingLine = new StringBuffer();
@@ -2395,6 +2749,11 @@ public class MidicaPLParser extends SequenceParser {
 				constMatcher.appendTail(resultingLine);
 				str = resultingLine.toString();
 			}
+			
+			// recursion depth too high?
+			if (recursionCount > MAX_RECURSION_DEPTH_CONST) {
+				throw new ParseException( Dict.get(Dict.ERROR_CONST_RECURSION) );
+			}
 		}
 		
 		return str;
@@ -2405,7 +2764,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * 
 	 * @param str  The string to be replaced.
 	 * @return     The resulting string.
-	 * @throws ParseException    if an undefined variable is found.
+	 * @throws ParseException    if an undefined variable is found or the recursion depth is too high.
 	 */
 	public String replaceVariables(String str) throws ParseException {
 		
@@ -2414,8 +2773,10 @@ public class MidicaPLParser extends SequenceParser {
 			return str;
 		}
 		
+		int     recursionCount  = 0;
 		boolean mustSearchAgain = true;
 		while (mustSearchAgain) {
+			recursionCount++;
 			mustSearchAgain = false;
 			Matcher varMatcher = varPattern.matcher(str);
 			StringBuffer resultingLine = new StringBuffer();
@@ -2428,32 +2789,40 @@ public class MidicaPLParser extends SequenceParser {
 				boolean isNamedParam   = varMatcher.group(6) != null;
 				
 				String varValue = null;
-				if (isIndexedParam) {
-					int index = toInt( varMatcher.group(5) );
-					ArrayList<String> params = paramStackIndexed.peek();
-					if (null == params) {
-						throw new ParseException( Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + varName );
+				try {
+					if (isIndexedParam) {
+						int index = toInt( varMatcher.group(5) );
+						ArrayList<String> params = paramStackIndexed.peek();
+						if (null == params) {
+							throw new ParseException( Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + varName );
+						}
+						if (index <= params.size()) {
+							varValue = params.get(index);
+						}
 					}
-					varValue = params.get(index);
-				}
-				else if (isNamedParam) {
-					String name = varMatcher.group(6);
-					HashMap<String, String> params = paramStackNamed.peek();
-					if (null == params) {
-						throw new ParseException( Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + varName );
+					else if (isNamedParam) {
+						String name = varMatcher.group(6);
+						HashMap<String, String> params = paramStackNamed.peek();
+						if (null == params) {
+							throw new ParseException( Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + varName );
+						}
+						varValue = params.get(name);
 					}
-					varValue = params.get(name);
+					else {
+						varValue = variables.get(varName);
+					}
 				}
-				else {
-					varValue = variables.get(varName);
+				catch (ParseException e) {
+					e.setCausedByInvalidVar(varName);
+					throw e;
 				}
 				
 				// variable undefined?
 				if (null == varValue) {
-					if (isIndexedParam || isNamedParam) {
-						throw new ParseException( Dict.get(Dict.ERROR_PARAM_UNDEFINED) + varName );
-					}
-					throw new ParseException( Dict.get(Dict.ERROR_VAR_NOT_DEFINED) + varName );
+					if (isIndexedParam || isNamedParam)
+						varValue = ""; // allow undefined parameters
+					else
+						throw new ParseException( Dict.get(Dict.ERROR_VAR_NOT_DEFINED) + varName );
 				}
 				
 				// replace
@@ -2464,6 +2833,11 @@ public class MidicaPLParser extends SequenceParser {
 			if (mustSearchAgain) {
 				varMatcher.appendTail(resultingLine);
 				str = resultingLine.toString();
+			}
+			
+			// recursion depth too high?
+			if (recursionCount > MAX_RECURSION_DEPTH_VAR) {
+				throw new ParseException( Dict.get(Dict.ERROR_VAR_RECURSION) );
 			}
 		}
 		
@@ -2936,7 +3310,7 @@ public class MidicaPLParser extends SequenceParser {
 		String[] optTokens = optString.split(OPT_SEPARATOR, -1);
 		for (String opt : optTokens) {
 			opt = clean( opt );
-			String[] optParts = opt.split("[" + Pattern.quote(OPT_ASSIGNER) + "\\s]+", -1); // name and value can be separated by OPT_ASSIGNER (e,g, "=") and/or whitespace(s)
+			String[] optParts = opt.split("[" + Pattern.quote(OPT_ASSIGNER) + "\\s]+", 2); // name and value can be separated by OPT_ASSIGNER (e,g, "=") and/or whitespace(s)
 			if (optParts.length > 2)
 				throw new ParseException( Dict.get(Dict.ERROR_CANT_PARSE_OPTIONS) + opt );
 			
@@ -2947,8 +3321,12 @@ public class MidicaPLParser extends SequenceParser {
 			// construct name and value
 			String        optName  = optParts[0];
 			CommandOption optValue = new CommandOption();
+			
+			if (isCondCheckParsRun && ! IF.equals(optName) && ! ELSIF.equals(optName) && ! ELSE.equals(optName))
+				continue;
+			
 			if (V.equals(optName) || VELOCITY.equals(optName)) {
-				if (optParts.length < 2) {
+				if (optParts.length < 2 || "".equals(optParts[1])) {
 					throw new ParseException( Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName );
 				}
 				optName = OPT_VELOCITY;
@@ -2960,7 +3338,7 @@ public class MidicaPLParser extends SequenceParser {
 				optValue.set(optName, val);
 			}
 			else if (D.equals(optName) || DURATION.equals(optName)) {
-				if (optParts.length < 2) {
+				if (optParts.length < 2 || "".equals(optParts[1])) {
 					throw new ParseException( Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName );
 				}
 				optName = OPT_DURATION;
@@ -2973,6 +3351,9 @@ public class MidicaPLParser extends SequenceParser {
 				optValue.set(optName, val);
 			}
 			else if (Q.equals(optName) || QUANTITY.equals(optName)) {
+				if (optParts.length < 2 || "".equals(optParts[1])) {
+					throw new ParseException( Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName );
+				}
 				optName = OPT_QUANTITY;
 				optValue.set( optName, toInt(optParts[1], true) );
 			}
@@ -2983,6 +3364,9 @@ public class MidicaPLParser extends SequenceParser {
 					throw new ParseException( Dict.get(Dict.ERROR_OPTION_VAL_NOT_ALLOWED) + optName );
 			}
 			else if (L.equals(optName) || LYRICS.equals(optName)) {
+				if (optParts.length < 2 || "".equals(optParts[1])) {
+					throw new ParseException( Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName );
+				}
 				optName = OPT_LYRICS;
 				optValue.set( optName, optParts[1] );
 			}
@@ -3002,12 +3386,40 @@ public class MidicaPLParser extends SequenceParser {
 				}
 			}
 			else if (TR.equals(optName) || TREMOLO.equals(optName)) {
+				if (optParts.length < 2 || "".equals(optParts[1])) {
+					throw new ParseException( Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName );
+				}
 				optName = OPT_TREMOLO;
 				optValue.set( optName, parseDuration(optParts[1]) );
 			}
 			else if (S.equals(optName) || SHIFT.equals(optName)) {
+				if (optParts.length < 2 || "".equals(optParts[1])) {
+					throw new ParseException( Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName );
+				}
 				optName = OPT_SHIFT;
 				optValue.set( optName, toInt(optParts[1], false) );
+			}
+			else if (IF.equals(optName)) {
+				if (isCondCheckParsRun && (optParts.length < 2 || "".equals(optParts[1]))) {
+					throw new ParseException( Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName );
+				}
+				String val = optParts.length >= 2 ? optParts[1] : "";
+				optName = OPT_IF;
+				optValue.set( optName, val );
+			}
+			else if (ELSIF.equals(optName)) {
+				if (isCondCheckParsRun && (optParts.length < 2 || "".equals(optParts[1]))) {
+					throw new ParseException( Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName );
+				}
+				String val = optParts.length >= 2 ? optParts[1] : "";
+				optName = OPT_ELSIF;
+				optValue.set( optName, val );
+			}
+			else if (ELSE.equals(optName)) {
+				optName = OPT_ELSE;
+				optValue.set(optName, true);
+				if (optParts.length > 1)
+					throw new ParseException( Dict.get(Dict.ERROR_OPTION_VAL_NOT_ALLOWED) + optName );
 			}
 			else {
 				throw new ParseException( Dict.get(Dict.ERROR_UNKNOWN_OPTION) + optName );
@@ -3449,6 +3861,8 @@ public class MidicaPLParser extends SequenceParser {
 		// reset fields
 		currentMode         = MODE_DEFAULT;
 		currentFunctionName = null;
+		condChainOpened     = false;
+		condChainHit        = false;
 		
 		if (isRootParser) {
 			try {
@@ -3465,6 +3879,7 @@ public class MidicaPLParser extends SequenceParser {
 			isChInstMetaParsRun  = false;
 			isFuncNameParsRun    = false;
 			isFuncParsRun        = false;
+			isCondCheckParsRun   = false;
 			isDefaultParsRun     = false;
 			instruments          = new ArrayList<>();
 			definedFunctionNames = new HashSet<>();
@@ -3486,6 +3901,9 @@ public class MidicaPLParser extends SequenceParser {
 			constants            = new HashMap<>();
 			variables            = new HashMap<>();
 			varPattern           = null;
+			callPattern          = null;
+			condPattern          = null;
+			condInPattern        = null;
 			refreshSyntax();
 			NestableBlock.reset();
 		}

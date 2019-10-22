@@ -23,17 +23,24 @@ public class NestableBlock {
 	
 	private static Pattern plus = null;
 	
-	private MidicaPLParser    parser   = null;
-	private boolean           multiple = false;
-	private int               quantity = 1;
-	private String            tuplet   = null;
-	private int               shift    = 0;
-	private ArrayList<Object> elements = null;
+	private MidicaPLParser    parser    = null;
+	private boolean           multiple  = false;
+	private int               quantity  = 1;
+	private String            tuplet    = null;
+	private int               shift     = 0;
+	private ArrayList<Object> elements  = null;
+	private String            condition = null;
+	
+	private boolean condChainOpened = false;
+	private boolean condChainHit    = false;
 	
 	private boolean isMultipleSet = false;
 	private boolean isQuantitySet = false;
 	private boolean isTupletSet   = false;
 	private boolean isShiftSet    = false;
+	private boolean isIf          = false;
+	private boolean isElsif       = false;
+	private boolean isElse        = false;
 	
 	/**
 	 * Creates a new nestable block.
@@ -129,6 +136,74 @@ public class NestableBlock {
 		
 		this.shift += shift;
 		isShiftSet = true;
+	}
+	
+	/**
+	 * Sets the **if** option as well as the according condition.
+	 * 
+	 * @param condition  the IF condition.
+	 * @throws ParseException  if this option is combined with other if-elsif-else options.
+	 */
+	public void setIf(String condition) throws ParseException {
+		if (isIf || isElsif || isElse) {
+			throw new ParseException( Dict.get(Dict.ERROR_BLOCK_IF_MUST_BE_ALONE) );
+		}
+		
+		isIf = true;
+		this.condition = condition;
+	}
+	
+	/**
+	 * Sets the **elsif** option as well as the according condition.
+	 * 
+	 * @param condition  the ELSIF condition.
+	 * @throws ParseException  if this option is combined with other if-elsif-else options.
+	 */
+	public void setElsif(String condition) throws ParseException {
+		if (isIf || isElsif || isElse) {
+			throw new ParseException( Dict.get(Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE) );
+		}
+		
+		isElsif = true;
+		this.condition = condition;
+	}
+	
+	/**
+	 * Sets the **else** option.
+	 * 
+	 * @throws ParseException  if this option is combined with other if-elsif-else options.
+	 */
+	public void setElse() throws ParseException {
+		if (isIf || isElsif || isElse) {
+			throw new ParseException( Dict.get(Dict.ERROR_BLOCK_ELSE_MUST_BE_ALONE) );
+		}
+		
+		isElse = true;
+	}
+	
+	/**
+	 * Returns the condition type of the block, representing **if**, **elsif**, **else** or **none**.
+	 * 
+	 * @return a number representing the condition type.
+	 */
+	public int getConditionType() {
+		if (isIf)
+			return MidicaPLParser.COND_TYPE_IF;
+		else if (isElsif)
+			return MidicaPLParser.COND_TYPE_ELSIF;
+		else if (isElse)
+			return MidicaPLParser.COND_TYPE_ELSE;
+		return MidicaPLParser.COND_TYPE_NONE;
+	}
+	
+	/**
+	 * Returns the condition, if this block contains an **if** or **elsif**.
+	 * Otherwise: returns **null**.
+	 * 
+	 * @return the block condition.
+	 */
+	public String getCondition() {
+		return condition;
 	}
 	
 	/**
@@ -253,6 +328,10 @@ public class NestableBlock {
 			lineNumber = lineNumberOpen;
 			traceElem.resetLine();
 			
+			// reset conditions
+			condChainOpened = false;
+			condChainHit    = false;
+			
 			for (Object element : elements) {
 				
 				// increment line
@@ -268,7 +347,58 @@ public class NestableBlock {
 					traceElem.addToLine( increment );
 					lineNumber += increment;
 					
-					childBlock.play(callStack, false, file, offsetLine);
+					// track temp line (only in case of an exception before the child block's play() is called)
+					StackTraceElement childTraceElem = new StackTraceElement(file, childBlock.getNumberOfLines());
+					childTraceElem.setOptions(childBlock.getOptionsForStackTrace());
+					childTraceElem.setNestableBlock(offsetLine, lineNumber);
+					callStack.push(childTraceElem);
+					
+					// check if/elsif/else conditions
+					String  childCondition     = childBlock.getCondition();
+					int     childConditionType = childBlock.getConditionType();
+					boolean mustPlay = true;
+					try {
+						if (childCondition != null) {
+							childCondition = parser.replaceVariables(childCondition);
+						}
+						if (childConditionType != MidicaPLParser.COND_TYPE_NONE) {
+							if (MidicaPLParser.COND_TYPE_IF == childConditionType) {
+								condChainHit = false;
+							}
+							if (MidicaPLParser.COND_TYPE_ELSIF == childConditionType || MidicaPLParser.COND_TYPE_ELSE == childConditionType) {
+								if ( ! condChainOpened )
+									throw new ParseException( Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND) );
+							}
+							if (MidicaPLParser.COND_TYPE_ELSE == childConditionType)
+								mustPlay = ! condChainHit;
+							else if (condChainHit)
+								mustPlay = false;
+							else
+								mustPlay = parser.evalCondition(childCondition);
+						}
+					}
+					catch (ParseException e) {
+						e.setCausedByBlockConditions();
+						throw e;
+					}
+					
+					// remove temporary stack element
+					callStack.pop();
+					
+					// execute child block
+					if (mustPlay) {
+						childBlock.play(callStack, false, file, offsetLine);
+					}
+					
+					// postprocess conditions
+					if (MidicaPLParser.COND_TYPE_ELSE == childConditionType) {
+						condChainOpened = false;
+						condChainHit    = false;
+					}
+					else if (childConditionType != MidicaPLParser.COND_TYPE_NONE) {
+						condChainOpened = true;
+						condChainHit    = condChainHit || mustPlay;
+					}
 				}
 				else if (element instanceof String[]) {
 					
@@ -276,7 +406,14 @@ public class NestableBlock {
 					StackTraceElement lineTraceElem = new StackTraceElement(file, lineNumber);
 					callStack.push(lineTraceElem);
 					
+					// reset conditions
 					String[] tokens = (String[]) element;
+					if ( ! "".equals(tokens[0]) ) {
+						condChainOpened = false;
+						condChainHit    = false;
+					}
+					
+					// parse line
 					String line;
 					if (shift != 0 || tuplet != null) {
 						if ( ! MidicaPLParser.VAR.equals(tokens[0]) ) {
@@ -331,6 +468,15 @@ public class NestableBlock {
 		if (shift != 0) {
 			options.add(MidicaPLParser.S + MidicaPLParser.OPT_ASSIGNER + shift);
 		}
+		if (isIf) {
+			options.add(MidicaPLParser.OPT_IF + " " + condition);
+		}
+		if (isElsif) {
+			options.add(MidicaPLParser.OPT_ELSIF + " " + condition);
+		}
+		if (isElse) {
+			options.add(MidicaPLParser.OPT_ELSE);
+		}
 		
 		return String.join(MidicaPLParser.OPT_SEPARATOR + " ", options);
 	}
@@ -353,34 +499,5 @@ public class NestableBlock {
 		}
 		
 		return count;
-	}
-	
-	/**
-	 * Returns a string representation of the block contents.
-	 * This is mainly for debugging.
-	 */
-	public String toString() {
-		if (null == elements) {
-			return "null";
-		}
-		StringBuilder str = new StringBuilder("( ");
-		if (isMultipleSet)
-			str.append("m ");
-		if (isQuantitySet)
-			str.append("q=" + quantity + " ");
-		if (isTupletSet)
-			str.append("t=" + tuplet);
-		str.append("\n");
-		for (Object element : elements) {
-			if (element instanceof NestableBlock) {
-				str.append(element);
-			}
-			else {
-				str.append( String.join(" ", (String[]) element) );
-				str.append("\n");
-			}
-		}
-		str.append(")\n");
-		return str.toString();
 	}
 }

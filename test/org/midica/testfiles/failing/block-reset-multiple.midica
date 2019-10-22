@@ -1,0 +1,5 @@
+INCLUDE inc/instruments.midica
+
+( m
+	0  c  /4
+) m

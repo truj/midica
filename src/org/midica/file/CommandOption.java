@@ -55,6 +55,15 @@ public class CommandOption {
 		else if (MidicaPLParser.OPT_SHIFT.equals(name)) {
 			this.value = (Integer) value;
 		}
+		else if (MidicaPLParser.OPT_IF.equals(name)) {
+			this.value = (String) value;
+		}
+		else if (MidicaPLParser.OPT_ELSIF.equals(name)) {
+			this.value = (String) value;
+		}
+		else if (MidicaPLParser.OPT_ELSE.equals(name)) {
+			this.value = (Boolean) value;
+		}
 		else {
 			// should never happen
 			throw new ParseException("Invalid option name: " + name + ". Please report.");
@@ -123,5 +132,13 @@ public class CommandOption {
 	 */
 	public int getShift() {
 		return (Integer) value;
+	}
+	
+	/**
+	 * Returns a condition for an if or elsif option.
+	 * @return condition.
+	 */
+	public String getCondition() {
+		return (String) value;
 	}
 }

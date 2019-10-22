@@ -1,0 +1,8 @@
+INCLUDE inc/instruments.midica
+
+VAR $d = $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+VAR $a = a;
+VAR $a = $d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$a
+
+0  c  /4  l=$a
+0  c  /4  l=$a

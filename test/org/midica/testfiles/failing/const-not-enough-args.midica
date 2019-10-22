@@ -1,0 +1,7 @@
+INCLUDE inc/instruments.midica
+
+CONST $crd 
+
+CHORD test $crd
+
+0  test  /4

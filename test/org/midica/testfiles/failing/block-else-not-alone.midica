@@ -1,0 +1,10 @@
+INCLUDE inc/instruments.midica
+
+VAR $x = 1
+
+( if=$x
+	0  c  /4
+)
+( else, else
+	0  c  /4
+)

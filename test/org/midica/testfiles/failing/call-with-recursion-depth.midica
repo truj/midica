@@ -1,0 +1,11 @@
+INCLUDE inc/instruments.midica
+
+CALL test1
+
+FUNCTION test1
+	CALL test2
+END
+
+FUNCTION test2
+	CALL test1
+END

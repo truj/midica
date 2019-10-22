@@ -1,0 +1,8 @@
+INCLUDE inc/instruments.midica
+
+CALL test(x=z)
+
+FUNCTION test
+	VAR ${y} = b
+	0  c  /4  l=${y}
+END

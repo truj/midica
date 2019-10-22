@@ -1,0 +1,7 @@
+INCLUDE inc/instruments.midica
+
+VAR $x = 5
+
+( t=5:
+	0  c  /4
+)

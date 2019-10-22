@@ -1,0 +1,9 @@
+INCLUDE inc/instruments.midica
+
+VAR $x = 1
+
+CALL test if=$x, if $x
+
+FUNCTION test
+	0  c  /4
+END

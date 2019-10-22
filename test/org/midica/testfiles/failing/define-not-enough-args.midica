@@ -1,0 +1,7 @@
+INCLUDE inc/instruments.midica
+
+DEFINE CHORD
+
+crd test c,d,e
+
+0  test  /4

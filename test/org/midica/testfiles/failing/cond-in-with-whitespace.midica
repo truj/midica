@@ -1,0 +1,7 @@
+INCLUDE inc/instruments.midica
+
+VAR $x = 1
+
+( if $x in 1;2;3 4;5
+	0  c  /4
+)

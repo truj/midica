@@ -314,6 +314,23 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "1920/1/91/c-2 / 90",   messages.get(i++).toString() );
 			assertEquals( "2400/1/91/c#-2 / 110", messages.get(i++).toString() );
 		}
+		
+		parse(getWorkingFile("if-elsif-else-blocks"));
+		assertEquals(
+			"EQ: 1 2 3 4\n"
+			+ "NEQ: 1 2 3 4\n"
+			+ "LT: 1 2 3 4\n"
+			+ "LE: 1 2 3 4\n"
+			+ "GT: 1 2 3 4\n"
+			+ "GE: 1 2 3 4\n"
+			+ "IN: 1 2 3 4\n"
+			+ "DEF: 1 2 3 4\n"
+			+ "NDEF: 1 2 3 4\n"
+			+ "I.A.E.: 1 3\n"
+			+ "Nested: a a1 a1b a b3b b3c if\n"
+			+ "CALL: 2 2 2 4 6",
+			getLyrics()
+		);
 	}
 	
 	/**
@@ -327,9 +344,11 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("nestable-block-open-at-eof")) );
 		assertEquals( 6, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NESTABLE_BLOCK_OPEN_AT_EOF)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("function-open-at-eof")) );
 		assertEquals( 6, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NAMED_BLOCK_OPEN_AT_EOF)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("file-that-does-not-exist")) );
 		assertTrue( e.getMessage().startsWith("java.io.FileNotFoundException:") );
@@ -337,157 +356,235 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-failing-file")) );
 		assertTrue( e.getFile().getName().equals("instruments-with-nestable-block.midica") );
 		assertEquals( 4, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_INSTR_BLK)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-not-existing-file")) );
 		assertEquals( 1, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FILE_EXISTS)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("global-cmd-in-instruments")) );
 		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_GLOBALS_IN_INSTR_DEF)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-in-block")) );
 		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_UNMATCHED_OPEN)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("function-in-block")) );
 		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_UNMATCHED_OPEN)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("using-channel-without-instr-def")) );
 		assertEquals( 1, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHANNEL_UNDEFINED).replaceFirst("%s", "2")) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("using-undefined-channel")) );
 		assertEquals( 6, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHANNEL_UNDEFINED).replaceFirst("%s", "2")) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("using-invalid-drumkit")) );
 		assertEquals( 10, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INSTR_BANK)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-param")) );
 		assertEquals( 1, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_MODE_INSTR_NUM_OF_ARGS)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("end-with-param")) );
 		assertEquals( 4, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ARGS_NOT_ALLOWED)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("unmatched-end")) );
 		assertEquals( 6, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CMD_END_WITHOUT_BEGIN)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("unmatched-close")) );
 		assertEquals( 6, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_UNMATCHED_CLOSE)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("function-nested")) );
 		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNCTION_NOT_ALLOWED_HERE)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("function-redefined")) );
 		assertEquals( 8, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNCTION_ALREADY_DEFINED)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("function-with-second-param")) );
 		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNCTION_NUM_OF_ARGS)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-soundfont-twice")) );
 		assertEquals( 6, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOUNDFONT_ALREADY_PARSED)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-soundfont-inside-block")) );
 		assertEquals( 6, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK) + "SOUNDFONT") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-soundfont-inside-function")) );
 		assertEquals( 6, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK) + "SOUNDFONT") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("unknown-cmd")) );
 		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_CMD)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-reset-multiple")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ARG_ALREADY_SET) + "multiple") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-reset-quantity")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ARG_ALREADY_SET) + "quantity") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-reset-tuplet")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ARG_ALREADY_SET) + "tuplet") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-reset-shift")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ARG_ALREADY_SET) + "shift") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-param-invalid")) );
 		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_INVALID_OPT)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-inside-block")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-inside-function")) );
 		assertEquals( 4, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-inside-instruments")) );
 		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-without-param")) );
 		assertEquals( 2, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_NUM_OF_ARGS)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-without-notes")) );
 		assertEquals( 2, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_NUM_OF_ARGS)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-redefined")) );
 		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_ALREADY_DEFINED)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-name-like-note")) );
 		assertEquals( 2, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_EQUALS_NOTE)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-name-like-percussion")) );
 		assertEquals( 2, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_EQUALS_PERCUSSION)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-with-duplicate-note")) );
 		assertEquals( 2, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_CONTAINS_ALREADY)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-with-invalid-option")) );
 		assertEquals( 6, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_UNKNOWN_OPT)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-with-recursion")) );
 		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNCTION_RECURSION)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-with-recursion-depth")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNCTION_RECURSION_DEPTH)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-undefined-function")) );
 		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNCTION_UNDEFINED)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-without-name")) );
 		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_NUM_OF_ARGS)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-more-instr-sep")) );
 		assertEquals( 4, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_AN_INTEGER) + "0,0") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-more-bank-sep")) );
 		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_AN_INTEGER) + "0/0") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-big-banknumber")) );
 		assertEquals( 4, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INSTR_BANK)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-big-msb")) );
 		assertEquals( 4, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INSTR_BANK)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-big-lsb")) );
 		assertEquals( 4, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INSTR_BANK)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-missing-bank")) );
 		assertEquals( 4, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_AN_INTEGER)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-missing-lsb")) );
 		assertEquals( 4, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_AN_INTEGER)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("meta-in-block")) );
 		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_UNMATCHED_OPEN)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("meta-with-block")) );
 		assertEquals( 4, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_META_BLK)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("meta-in-function")) );
 		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_META_NOT_ALLOWED_HERE)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("meta-with-param")) );
 		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_META_NUM_OF_ARGS)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-inside-meta")) );
 		assertEquals( 4, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_META_UNKNOWN_CMD) + "CHORD") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("note-in-percussion-channel")) );
 		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_PERCUSSION) + "c") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("note-unknown")) );
 		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_NOTE) + "c+6") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-with-unknown-note")) );
 		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_NOTE) + "c+6") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-with-unknown-note-number")) );
 		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOTE_TOO_BIG) + "128") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("channel-cmd-missing-param")) );
 		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CH_CMD_NUM_OF_ARGS)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("channel-rest-missing-param")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CH_CMD_NUM_OF_ARGS)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instrument-in-instruments")) );
 		assertEquals( 4, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SINGLE_INSTR_IN_INSTR_DEF)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("var-in-instruments")) );
 		assertEquals( 6, e.getLineNumber() );
-		assertEquals( true, e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_NOT_ALLOWED)) );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_NOT_ALLOWED)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("stacktrace")) );
 		assertEquals( 10, e.getLineNumber() );
@@ -504,7 +601,407 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "stacktrace.midica/42",    stackTrace.pop().toString() ); // in test6(...)
 		assertEquals( "st-incl-1.midica/10",     stackTrace.pop().toString() ); // CALL test6(...) from root
 		
-//		 System.out.println(e.getMessage() + "\n" + e.getFile().getName());
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("var-undefined")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_NOT_DEFINED) + "$x") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("param-i-outside-function")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + "$[1]") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("param-i-outside-function-nested")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + "$[1]") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("param-n-outside-function")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + "${x}") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("param-n-outside-function-nested")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + "${x}") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("param-i-with-name")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_AN_INTEGER)) );
+		assertTrue( e.getFullMessage().contains(Dict.get(Dict.EXCEPTION_CAUSED_BY_INVALID_VAR)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-if-not-alone")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_IF_MUST_BE_ALONE)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-if-not-alone-2")) );
+		assertEquals( 7, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_IF_MUST_BE_ALONE)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-if-not-alone-nested")) );
+		assertEquals( 8, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_IF_MUST_BE_ALONE)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-elsif-not-alone")) );
+		assertEquals( 8, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-elsif-not-alone-2")) );
+		assertEquals( 10, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-elsif-not-alone-nested")) );
+		assertEquals( 11, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-else-not-alone")) );
+		assertEquals( 8, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSE_MUST_BE_ALONE)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-else-not-alone-2")) );
+		assertEquals( 10, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSE_MUST_BE_ALONE)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-else-not-alone-nested")) );
+		assertEquals( 11, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSE_MUST_BE_ALONE)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-elsif-without-if")) );
+		assertEquals( 11, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-elsif-without-if-nested")) );
+		assertEquals( 13, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-else-without-if")) );
+		assertEquals( 11, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-else-without-if-nested")) );
+		assertEquals( 13, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-elsif")) );
+		assertEquals( 8, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_UNKNOWN_OPT)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-else")) );
+		assertEquals( 8, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_UNKNOWN_OPT)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-if-not-alone")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_IF_MUST_BE_ALONE)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("cond-too-many-operators")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_TOO_MANY_OPERATORS_IN_COND)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("cond-defined-with-whitespace")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_COND_DEFINED_HAS_WHITESPACE)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("cond-first-with-whitespace")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_COND_WHITESPACE_IN_FIRST_OP)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("cond-second-with-whitespace")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_COND_WHITESPACE_IN_SEC_OP)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("cond-undef-empty")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_COND_UNDEF_EMPTY)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("cond-undef-not-at-start")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_COND_UNDEF_IN_CENTER)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("cond-in-with-whitespace")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_COND_WHITESPACE_IN_IN_ELEM)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("cond-empty-in-element")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_COND_EMPTY_ELEM_IN_IN_LIST)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-velocity")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "v") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-velocity-2")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "v") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-duration")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "d") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-duration-2")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "d") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-quantity")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "q") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-quantity-2")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "q") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-lyrics")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "l") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-lyrics-2")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "lyrics") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-tremolo")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "tr") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-tremolo-2")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "tr") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-shift")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "s") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-shift-2")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "s") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-if")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "if") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-if-2")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "if") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-elsif")) );
+		assertEquals( 8, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "elsif") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-elsif-2")) );
+		assertEquals( 8, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "elsif") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-with-value-multiple")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_VAL_NOT_ALLOWED) + "m") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-with-value-else")) );
+		assertEquals( 8, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_VAL_NOT_ALLOWED) + "else") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-tuplet-invalid")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_TUPLET_INVALID) + "5") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-tuplet-invalid-2")) );
+		assertEquals( 7, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_0_NOT_ALLOWED)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-tuplet-invalid-3")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_TUPLET_INVALID) + "5:") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-tuplet-invalid-4")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_TUPLET_INVALID) + ":3") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-unknown")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_OPTION) + "xyz") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-velocity-too-high")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VEL_NOT_MORE_THAN_127)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-velocity-negative")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NEGATIVE_NOT_ALLOWED)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-velocity-zero")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VEL_NOT_LESS_THAN_1)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-duration-zero")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_DURATION_MORE_THAN_0)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-duration-not-float")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_A_FLOAT)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-duration-negative")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_DURATION_MORE_THAN_0)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("channel-negative")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_CMD) + "-1") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("channel-too-high")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INVALID_CHANNEL_NUMBER)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-param-empty")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_EMPTY_PARAM)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-param-name-empty")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_PARAM_NAME_EMPTY)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-param-name-invalid")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_PARAM_NAME_WITH_SPEC)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-param-name-doublet")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_DUPLICATE_PARAM_NAME)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-param-value-empty")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_PARAM_VALUE_EMPTY)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-param-named-more-assigners")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_PARAM_MORE_ASSIGNERS)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-directory")) );
+		assertEquals( 1, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FILE_NORMAL)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-without-args")) );
+		assertEquals( 1, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FILE_NUM_OF_ARGS)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-too-many-args")) );
+		assertEquals( 1, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FILE_NUM_OF_ARGS)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundfont-file-doesnt-exist")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FILE_EXISTS)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundfont-file-not-normal")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FILE_NORMAL)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundfont-file-no-args")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOUNDFONT_NUM_OF_ARGS)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundfont-file-too-many-args")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOUNDFONT_NUM_OF_ARGS)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundfont-file-invalid")) );
+		assertEquals( 3, e.getLineNumber() );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("define-not-enough-args")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_DEFINE_NUM_OF_ARGS)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("define-too-many-args")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_DEFINE_NUM_OF_ARGS)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("const-without-args")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CONST_NUM_OF_ARGS)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("const-not-enough-args")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CONST_NUM_OF_ARGS)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("const-already-defined")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CONST_ALREADY_DEFINED)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("const-name-eq-value")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CONST_NAME_EQ_VALUE)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("const-recursion")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CONST_RECURSION)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("var-without-args")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_NUM_OF_ARGS)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("var-not-enough-args")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_NUM_OF_ARGS)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("var-without-dollar")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_NAME_INVALID) + "x") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("var-name-eq-value")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_NAME_EQ_VALUE)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("var-recursion")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_RECURSION)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("var-with-whitespace")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_VAL_HAS_WHITESPACE)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("param-n-assign-unknown-name")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PARAM_NAMED_UNKNOWN)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("param-i-assign-index-too-high")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PARAM_INDEX_TOO_HIGH)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instrument-not-enough-args")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INSTR_NUM_OF_ARGS_SINGLE)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-elem-not-enough-args")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INSTR_NUM_OF_ARGS)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("global-timesig-invalid")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INVALID_TIME_SIG) + "3:4") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("global-tonality-invalid")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INVALID_TONALITY) + "inval") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("global-keysig-invalid-note")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_NOTE) + "d5") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("global-keysig-invalid")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INVALID_KEY_SIG) + "d5:maj") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("global-unknown-cmd")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_GLOBAL_CMD) + "cmd") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("global-partial-empty")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PARTIAL_RANGE_EMPTY)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("global-partial-order")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PARTIAL_RANGE_ORDER) + "2-2") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("global-partial-invalid-range-elem")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PARTIAL_RANGE) + "2-3-4") );
+		
+//		System.out.println(e.getMessage() + "\n" + e.getFile().getName());
 	}
 	
 	/**

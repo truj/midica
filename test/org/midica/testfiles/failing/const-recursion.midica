@@ -1,0 +1,7 @@
+INCLUDE inc/instruments.midica
+
+CONST $a = !$b!
+CONST $b = !$a!
+
+0  c  /4  l=$a
+0  c  /4  l=$b
