@@ -79,10 +79,10 @@ END
 CALL  m3_4
 *
 CALL  m3_4
-( q=2
+{ q=2
 	6  e,g# /4.
 	6  e,g# /16  q=2
-)
+}
 
 // m. 7-8
 *
@@ -99,10 +99,10 @@ CALL  m1  q=2
 // m. 9-10
 *
 CALL  m1  q=2
-( q=2
+{ q=2
 	5  b-,b  /4.
 	5  b-,b  /16  q=2
-)
+}
 6  b-,f#  /8
 6  e,g#   /8
 6  b-,f#  /8
@@ -114,7 +114,7 @@ CALL  m1  q=2
 *
 
 // m. 11-14
-( q=4
+{ q=4
 	5  b-,b   /8
 	5  b-,b   /16  q=2
 	5  b-,b   /8   q=2
@@ -127,7 +127,7 @@ CALL  m1  q=2
 	10 b-2    /8
 	10 b-2    /16  q=2
 	10 b-2    /8   q=2
-)
+}
 
 // m. 15-17
 *
@@ -148,7 +148,7 @@ CALL  d_all_staccato
 10  -  /4.
 *
 CALL  v_all_pp
-( q=2
+{ q=2
 	3   b-      /16
 	4   e-      /16
 	6   b-,g#-  /16
@@ -156,7 +156,7 @@ CALL  v_all_pp
 	12  g#-     /16  $p
 	13  e-      /16  $p
 	14  e-      /16  $p
-)
+}
 
 // m. 19
 *
@@ -211,12 +211,12 @@ END
 FUNCTION m20
 	CALL m20_1
 	CALL m20_2_low
-	(
+	{
 		3   b-      /16  q=2
 		11  b-      /16  q=2
 		12  g#-     /16  q=2
 		13  e-      /16  q=2
-	)
+	}
 END
 CALL  m20
 
@@ -225,7 +225,7 @@ CALL  m20
 FUNCTION m21
 	CALL  m19_half_low   q=2
 	CALL  m19_half_high
-	(
+	{
 		3   e       /8
 		3   g#      /16  q=2
 		11  e       /8
@@ -234,7 +234,7 @@ FUNCTION m21
 		12  b-      /16  q=2
 		13  e-,g#-  /8
 		13  e-,g#-  /16  q=2
-	)
+	}
 END
 CALL  m21
 
@@ -275,14 +275,14 @@ FUNCTION m24
 	CALL m20_1
 	CALL v_all_ff
 	CALL m20_2_low
-	(
+	{
 		3   e       /16
 		3   g#      /16
 		11  e       /16
 		11  g#      /16
 		12  e       /16  q=2
 		13  g#-,b-  /16  q=2
-	)
+	}
 END
 CALL  m24
 
@@ -297,7 +297,7 @@ FUNCTION m25
 	11  a       /16      $staccato
 	11  g#      /16
 	11  f#      /16
-	( q=2
+	{ q=2
 		4   f#-,a-  /8
 		4   f#-,a-  /16  q=2
 		6   b-2,d#  /8
@@ -312,7 +312,7 @@ FUNCTION m25
 		14  b-2     /16  q=2
 		15  b-3     /8
 		15  b-3     /16  q=2
-	)
+	}
 END
 CALL  m25
 
@@ -435,7 +435,7 @@ CALL  m26_2
 FUNCTION m29
 	CALL m27_half_low  q=2
 	CALL m27_half_high
-	(
+	{
 		0  e+2    /8
 		0  g#+2   /16  q=2
 		1  e+2    /8
@@ -450,7 +450,7 @@ FUNCTION m29
 		12 b-     /16  q=2
 		13 e-,g#- /8
 		13 e-,g#- /16  q=2
-	)
+	}
 END
 CALL  m29
 
@@ -543,7 +543,7 @@ FUNCTION m33
 	11 a      /16         $staccato
 	11 g#     /16
 	11 f#     /16
-	( q=2
+	{ q=2
 		4  b-2,d# /8
 		4  b-2,d# /16  q=2
 		5  b-     /8
@@ -564,7 +564,7 @@ FUNCTION m33
 		14 b-2    /16  q=2
 		15 b-3    /8
 		15 b-3    /16  q=2
-	)
+	}
 END
 CALL  m33
 
@@ -863,12 +863,12 @@ CALL  m34_2_to_41
 // m. 50
 *
 FUNCTION m50_violin1
-	( q=2
+	{ q=2
 		11 b+     /16
 		11 a#+    /16       $p
 		11 c#+2   /16
 		11 a#+    /16
-	)
+	}
 END
 FUNCTION m50_trumpet
 	7  b          /8
@@ -963,12 +963,12 @@ CALL  m50_trumpet
 // m. 54
 *
 FUNCTION m54_violin2
-	( q=2
+	{ q=2
 		12 b   /16  $pp
 		12 a#  /16
 		12 c#+ /16
 		12 a#  /16
-	)
+	}
 END
 FUNCTION m54
 	2  -       /4.
@@ -1092,10 +1092,10 @@ CALL  m58
 // m. 59
 *
 FUNCTION m59_contrabass
-	( q=2
+	{ q=2
 		15 e-2  /8
 		15 e-2  /16  q=2
-	)
+	}
 END
 CALL  m19
 CALL  m59_contrabass
@@ -1186,7 +1186,7 @@ CALL  m34_1
 *
 CALL  v_all_tutta_forza
 CALL  d_all_legato
-(  t=7:4
+{  t=7:4
 	0  e+2   /32
 	0  f#+2  /32
 	0  g#+2  /32
@@ -1215,7 +1215,7 @@ CALL  d_all_legato
 	12 b     /32
 	12 c#+   /32
 	12 d#+   /32
-)
+}
 CALL  d_all_staccato
 
 // m. 75-77
@@ -1315,7 +1315,7 @@ CALL  v_all_ff
 *
 CALL  d_all_staccato
 FUNCTION m78
-	( q=2
+	{ q=2
 		0  b+2        /8
 		0  -          /8
 		5  b          /8
@@ -1334,7 +1334,7 @@ FUNCTION m78
 		14 -          /8
 		15 e-2        /8
 		15 -          /8
-	)
+	}
 	1  b+      /8
 	1  -       /8
 	1  g#+2    /8
@@ -1350,12 +1350,12 @@ FUNCTION m78
 	6  e-,g#   /8
 	6  -       /8
 	6  g#-,e   /8
-	( q=3
+	{ q=3
 		11 b+   /16
 		11 c#+2 /16
 		12 b    /16
 		12 c#+  /16
-	)
+	}
 	11 d#+2     /16
 	11 e+2      /16
 	12 d#+      /16
@@ -1366,7 +1366,7 @@ CALL  m78
 // m. 79
 *
 FUNCTION m79
-	( q=2
+	{ q=2
 		0  a+2        /8
 		0  -          /8
 		1  f#+2       /8
@@ -1395,13 +1395,13 @@ FUNCTION m79
 		14 -          /8
 		15 d#-2       /8
 		15 -          /8
-	)
-	( q=3
+	}
+	{ q=3
 		11 a+ /16
 		11 b+ /16
 		12 a  /16
 		12 b  /16
-	)
+	}
 	11 c#+2   /16
 	11 d#+2   /16
 	12 c#+    /16
@@ -1412,7 +1412,7 @@ CALL  m79
 // m. 80
 *
 FUNCTION m80
-	( q=2
+	{ q=2
 		0  g#+2       /8
 		0  -          /8
 		1  e+2        /8
@@ -1441,13 +1441,13 @@ FUNCTION m80
 		14 -          /8
 		15 e-2        /8
 		15 -          /8
-	)
-	( q=3
+	}
+	{ q=3
 		11 g#+ /16
 		11 a+  /16
 		12 g#  /16
 		12 a   /16
-	)
+	}
 	11 b+      /16
 	11 c#+2    /16
 	12 b       /16
@@ -1458,7 +1458,7 @@ CALL  m80
 // m. 81
 *
 FUNCTION m81
-	( q=2
+	{ q=2
 		0  f#+2       /8
 		0  -          /8
 		3  f#,e+      /8
@@ -1483,19 +1483,19 @@ FUNCTION m81
 		14 -          /8
 		15 e-2        /8
 		15 -          /8
-	)
+	}
 	1  f#+2           /8
 	1  -              /8
 	1  e+2            /8
 	2  c#+,f#+        /8
 	2  -              /8
 	2  c#+,e+         /8
-	( q=4
+	{ q=4
 		11 f#+        /16
 		11 g#+        /16
 		12 f#         /16
 		12 g#         /16
-	)
+	}
 END
 CALL  m81
 
@@ -1581,12 +1581,12 @@ FUNCTION m89_1
 	8  a-2,a-     /8
 	p  bd2,cc2,to /8
 	10 e-         /8
-	( q=2
+	{ q=2
 		11 f#+    /16
 		11 g#+    /16
 		12 f#     /16
 		12 g#     /16
-	)
+	}
 	13 c#,e       /8
 	14 e-         /8
 	15 e-2        /8
@@ -1621,7 +1621,7 @@ CALL  m89_2
 
 // m. 90
 *
-(
+{
 	0  e+2        /8
 	1  e+2        /8
 	2  e+         /8
@@ -1641,14 +1641,14 @@ CALL  m89_2
 	13 g#-,e      /8
 	14 e-         /8
 	15 e-2        /8
-)
+}
 CALL  i_pizzicato_14
 CALL  i_pizzicato_15
 
 // m. 91
 *
 CALL  v_all_pp
-( m
+{ m
 	11 -     /16
 	11 c+    /16
 	11 c#+   /16
@@ -1657,7 +1657,7 @@ CALL  v_all_pp
 	11 c#+   /16
 	11 b     /16
 	11 a     /16
-)
+}
 FUNCTION m91_without_violin1
 	12 g#    /8
 	13 c#,e  /8
@@ -1676,7 +1676,7 @@ CALL  m91_without_violin1
 // m. 92
 *
 FUNCTION m92
-	(
+	{
 		4  c#     /2+/8  m, $legato
 		6  c+,e+  /2     m, $legato
 		11 a      /16
@@ -1687,22 +1687,22 @@ FUNCTION m92
 		13 c#,e   /8
 		14 c#-    /8
 		15 c#-2   /8
-	)
+	}
 	*
-	(
+	{
 		11 c#     /16    q=2
 		12 e      /8
 		13 g#-,c# /8
 		14 c#-    /8
 		15 c#-2   /8
-	)
+	}
 END
 CALL  m92
 
 // m. 93
 *
 FUNCTION m93
-	(
+	{
 		4  g#-,c  /2   m
 		6  b,d    /2   m
 		11 e      /16
@@ -1713,27 +1713,27 @@ FUNCTION m93
 		13 g#-,c# /8
 		14 g#-    /8
 		15 g#-2   /8
-	)
+	}
 	*
-	(
+	{
 		11 g#-    /16  q=2
 		12 d#     /8
 		13 g#-,d# /8
 		14 g#-2   /8
 		15 g#-3   /8
-	)
+	}
 END
 CALL  m93
 
 // m. 94
 *
-( m
+{ m
 	11 g#-    /16
 	11 c#     /16
 	11 e      /16
 	11 g#     /16
 	11 c#+    /16  q=4
-)
+}
 FUNCTION m94_without_violin1
 	6  c+     /8
 	12 e      /8
@@ -1746,16 +1746,16 @@ CALL  m94_without_violin1
 
 // m. 95
 *
-( m
-	( q=2
+{ m
+	{ q=2
 		11 c#+ /16
 		11 c+  /16
-	)
+	}
 	11 d#+ /16
 	11 c#+ /16
 	11 b   /16
 	11 a   /16
-)
+}
 CALL  m91_without_violin1
 
 // m. 96
@@ -1768,7 +1768,7 @@ CALL  m93
 
 // m. 98
 *
-( m
+{ m
 	11 g#-    /16
 	11 c#     /16
 	11 e      /16
@@ -1777,14 +1777,14 @@ CALL  m93
 	11 e+     /16
 	11 d#+    /16
 	11 c#+    /16
-)
+}
 CALL  m94_without_violin1
 
 // m. 99
 *
-(
+{
 	3  g#+  /1+/4  m,   $legato
-)
+}
 FUNCTION m99_without_clarinet
 	2  c+,d#+ /4.       $legato
 	2  c#+,e+ /8
@@ -1815,7 +1815,7 @@ CALL  m99_without_clarinet
 
 // m. 101
 *
-(
+{
 	2  b,d#+  /4
 	2  a#,c#+ /4
 	3  -      /4
@@ -1834,17 +1834,17 @@ CALL  m99_without_clarinet
 	13 g#-,b- /8
 	13 -      /8
 	13 g-,a#- /8
-	( q=2
+	{ q=2
 		14 d#-     /8
 		14 -       /8
 		15 d#-2    /8
 		15 -       /8
-	)
-)
+	}
+}
 
 // m. 102
 *
-(
+{
 	2  g#,b    /8
 	3  g#      /8
 	4  g#-     /8
@@ -1860,7 +1860,7 @@ CALL  m99_without_clarinet
 	13 d#-,g#- /8
 	14 g#-     /8
 	15 g#-2    /8
-)
+}
 
 // m. 103
 *
@@ -1887,9 +1887,9 @@ CALL  m103
 
 // m. 104
 *
-(
+{
 	13 g#-,b-  /8
-)
+}
 FUNCTION m104_without_viola
 	3  e,g#   /4.
 	3  f#,a   /8
@@ -1905,18 +1905,18 @@ FUNCTION m104_without_viola
 	12 -      /8
 	12 e      /8
 	12 f#     /8
-	( q=2
+	{ q=2
 		14 e-  /8
 		14 -   /8
 		15 e-2 /8
 		15 -   /8
-	)
+	}
 END
 CALL  m104_without_viola
 
 // m. 105
 *
-(
+{
 	6  c+     *2+/2+/8  m
 	11 b      /16
 	11 g#+    /16
@@ -1929,19 +1929,19 @@ CALL  m104_without_viola
 	13 g#-,b- /8
 	13 -      /8
 	13 g-,c#  /8
-)
+}
 FUNCTION m105_low   // without E-horn, voilin1 and voila (without channels 6, 11, 13)
 	3  g#,b   /4
 	3  g,a#   /4
 	12 g#     /8
 	12 -      /8
 	12 a#     /8
-	( q=2
+	{ q=2
 		14 e-  /8
 		14 -   /8
 		15 e-2 /8
 		15 -   /8
-	)
+	}
 END
 CALL  m105_low
 
@@ -1963,12 +1963,12 @@ FUNCTION m106
 	13 g#-,e  /8
 	13 -      /8
 	13 b-,e   /8
-	( q=2
+	{ q=2
 		14 e-  /8
 		14 -   /8
 		15 e-2 /8
 		15 -   /8
-	)
+	}
 END
 CALL  m106
 
@@ -1986,7 +1986,7 @@ FUNCTION m107
 	11 d#+    /16
 	11 e+     /16
 	11 f#+    /16
-	( q=2
+	{ q=2
 		12 a     /8
 		12 -     /8
 		13 b-,f# /8
@@ -1995,17 +1995,17 @@ FUNCTION m107
 		14 -     /8
 		15 b-3   /8
 		15 -     /8
-	)
+	}
 END
 CALL  m107
 
 // m. 108
 *
-(
+{
 	3  e   /1  m
 	3  g#  /2
 	6  e   /1  m
-)
+}
 FUNCTION m108_without_clarinet_and_g_horn
 	4  e   /2
 	11 g#  /16
@@ -2016,7 +2016,7 @@ FUNCTION m108_without_clarinet_and_g_horn
 	11 c#+ /16
 	11 d#+ /16
 	11 e+  /16
-	( q=2
+	{ q=2
 		12 g#   /8
 		12 -    /8
 		13 b-,e /8
@@ -2025,20 +2025,20 @@ FUNCTION m108_without_clarinet_and_g_horn
 		14 -    /8
 		15 e-2  /8
 		15 -    /8
-	)
+	}
 END
 CALL  m108_without_clarinet_and_g_horn
 
 // m. 109
 *
-(
+{
 	3  f#     /2
 	4  a-,c#  /2
-	( q=4
+	{ q=4
 		11 f# /16
 		11 g# /16
-	)
-	( q=2
+	}
+	{ q=2
 		12 f#    /8
 		12 -     /8
 		13 e-,c# /8
@@ -2047,12 +2047,12 @@ CALL  m108_without_clarinet_and_g_horn
 		14 -     /8
 		15 a-3   /8
 		15 -     /8
-	)
-)
+	}
+}
 
 // m. 110
 *
-(
+{
 	3  d#,f#  /8
 	4  b-     /8
 	6  b-     /8
@@ -2068,7 +2068,7 @@ CALL  m108_without_clarinet_and_g_horn
 	13 f#-,d# /8
 	14 b-2    /8
 	15 b-3    /8
-)
+}
 
 // m. 111
 *
@@ -2076,14 +2076,14 @@ CALL  m103
 
 // m. 112
 *
-(
+{
 	13 e-,g#-  /8
-)
+}
 CALL  m104_without_viola
 
 // m. 113
 *
-(
+{
 	6  c+     *2+/4  m
 	11 b      /16
 	11 g#+    /16
@@ -2096,7 +2096,7 @@ CALL  m104_without_viola
 	13 e-,g#- /8
 	13 -      /8
 	13 g-,c#  /8
-)
+}
 CALL  m105_low
 
 // m. 114-116
@@ -2105,16 +2105,16 @@ CALL  m106
 *
 CALL  m107
 *
-(
+{
 	3  e   /2.  m
 	3  g#  /2
 	6  e   /2.  m
-)
+}
 CALL  m108_without_clarinet_and_g_horn
 
 // m. 117
 *
-(
+{
 	3  f#     /2
 	4  a-,c#  /4
 	4  b-     /4
@@ -2140,11 +2140,11 @@ CALL  m108_without_clarinet_and_g_horn
 	15 a-3    /8
 	15 -      /8
 	15 b-3    /8
-)
+}
 
 // m. 118
 *
-(
+{
 	0  -      /16
 	1  -      /16
 	3  e,g#   /8
@@ -2155,12 +2155,12 @@ CALL  m108_without_clarinet_and_g_horn
 	13 e-,g#- /8
 	14 e-     /8
 	15 e-2    /8
-)
+}
 CALL  d_all_staccato
 CALL  i_arco_14
 CALL  i_arco_15
 CALL  v_all_ff
-(
+{
 	0  e+2   /16
 	0  f#+2  /16
 	0  g#+2  /16
@@ -2189,7 +2189,7 @@ CALL  v_all_ff
 	12 b     /16
 	12 c#+   /16
 	12 d#+   /16
-)
+}
 
 // m. 119-121
 *
@@ -2229,7 +2229,7 @@ CALL  m89_2
 
 // m. 134-141
 *
-(
+{
 	0  e+2        /8
 	0  b+2        /8
 	0  e+2        /8
@@ -2256,7 +2256,7 @@ CALL  m89_2
 	13 g#-,e      /8  q=3
 	14 e-         /8  q=3
 	15 e-2        /8  q=3
-)
+}
 *
 CALL  v_all_ff
 CALL  m34_2_to_41
@@ -2325,7 +2325,7 @@ CALL  m26_1
 *
 CALL  v_all_f
 FUNCTION m166_2
-	( q=2
+	{ q=2
 		0  b+2   /16
 		1  b+    /16
 		2  b     /16
@@ -2334,7 +2334,7 @@ FUNCTION m166_2
 		6  e,g#  /16
 		10 e-    /16
 		11 b     /16
-	)
+	}
 END
 CALL  m166_2
 
@@ -2348,7 +2348,7 @@ FUNCTION m167_low
 	CALL  m167_drum
 	12 b-,g# /2         tr=/16
 	13 e-,e  /2         tr=/16
-	( q=2
+	{ q=2
 		5  -     /8
 		5  b-,g# /8
 		7  -     /8
@@ -2359,7 +2359,7 @@ FUNCTION m167_low
 		14 -     /8
 		15 e-2   /8
 		15 -     /8
-	)
+	}
 END
 FUNCTION m167_high_half
 	0  b+2     /8
@@ -2417,7 +2417,7 @@ CALL  m166_2
 CALL  m167_low  m
 CALL  m167_high_half
 *
-(
+{
 	0  e+3   /8
 	0  g#+3  /16  q=2
 	1  e+2   /8
@@ -2434,11 +2434,11 @@ CALL  m167_high_half
 	10 e-    /16  q=2
 	11 b     /8
 	11 b     /16  q=2
-)
+}
 
 // m. 170
 *
-(
+{
 	0  f#+3   /8
 	0  d#+3   /8
 	0  b+2    /8
@@ -2467,7 +2467,7 @@ CALL  m167_high_half
 	11 b      /8   q=2
 	12 b-,f#  /2        tr=/16
 	13 b-,d#  /2        tr=/16
-	( q=2
+	{ q=2
 		5  -      /8
 		5  b-,g#  /8
 		7  -      /8
@@ -2478,8 +2478,8 @@ CALL  m167_high_half
 		14 -      /8
 		15 b-3    /8
 		15 -      /8
-	)
-)
+	}
+}
 
 // m. 171
 *
@@ -2490,7 +2490,7 @@ CALL  m167
 CALL  m167_low  m
 CALL  m168_1_high
 *
-(
+{
 	0  e+2    /16
 	0  g#+2   /16
 	1  e+     /16
@@ -2503,11 +2503,11 @@ CALL  m168_1_high
 	6  e,g#-  /16  q=2
 	10 e-     /16  q=2
 	11 e+,g#+ /16  q=2
-)
+}
 
 // m. 173
 *
-(
+{
 	0  b+2    /4+/16    $legato
 	0  a+2    /16       $staccato
 	0  g#+2   /16
@@ -2540,7 +2540,7 @@ CALL  m168_1_high
 	11 f#+    /16
 	12 d#,b   /2                tr=/16
 	13 b-,f#  /2                tr=/16
-	( q=2
+	{ q=2
 		5  -      /8
 		5  b-,g#  /8
 		7  -      /8
@@ -2551,15 +2551,15 @@ CALL  m168_1_high
 		14 -      /8
 		15 b-3    /8
 		15 -      /8
-	)
-)
+	}
+}
 
 // m. 174
 *
-( m
+{ m
 	8  e-     /2     m,  $legato
 	8  e      /2+/8
-)
+}
 FUNCTION m174_without_trombone
 	CALL d_all_legato
 	0  e+2    /8.
@@ -2737,11 +2737,11 @@ CALL  m176_to_177
 
 // m. 178-179
 *
-( m
+{ m
 	8  e-,e /8.   $legato
 	8  e    /16
 	8  e    /4.
-)
+}
 CALL  m174_without_trombone
 *
 CALL  m175
@@ -2792,14 +2792,14 @@ FUNCTION m182
 	15 e-2      /8
 	15 -        /8
 	15 g#-3     /8
-	( q=2
+	{ q=2
 		5  g#         /8
 		5  -          /8
 		p  bd2,cc2,to /8
 		p  -          /8
 		10 e-         /8
 		10 -          /8
-	)
+	}
 	CALL  d_all_staccato
 END
 CALL  m182
@@ -2864,9 +2864,9 @@ CALL  m183
 
 // m. 184-185
 *
-( m
+{ m
 	7  g#  /8
-)
+}
 CALL  m182
 *
 CALL  m183
@@ -3022,7 +3022,7 @@ CALL  m190_to_191
 
 // m. 192-193
 *
-(
+{
 	CALL  v_all_sf
 	11 a#+2       /2   tr=/16
 	12 a#+        /2   tr=/16
@@ -3035,7 +3035,7 @@ CALL  m190_to_191
 	12 g+         /8   tr=/8
 	12 e+         /8   tr=/8
 	12 g+         /8   tr=/8
-)
+}
 FUNCTION m192_to_193_without_violins
 	CALL  m186_187_drums
 	CALL  d_all_legato
@@ -3077,7 +3077,7 @@ FUNCTION m194_drums
 	p  to       /2       m, tr=/32
 	p  bd2,cc2  /4  q=2
 END
-(
+{
 	11 b+2    /8   tr=/8
 	11 a#+2   /8   tr=/8
 	11 a+2    /8   tr=/8
@@ -3094,7 +3094,7 @@ END
 	12 e+     /8   tr=/8
 	12 d#+    /8   tr=/8
 	12 c#+    /8   tr=/8
-)
+}
 FUNCTION m194_to_195_without_violins
 	CALL  d_all_legato
 	0  b+3    /8         $staccato
@@ -3133,7 +3133,7 @@ CALL  m194_to_195_without_violins
 
 // m. 196-197
 *
-(
+{
 	11 b+      /8   tr=/8
 	11 a#+     /8   tr=/8
 	11 a+      /8   tr=/8
@@ -3150,7 +3150,7 @@ CALL  m194_to_195_without_violins
 	12 e       /8   tr=/8
 	12 d#      /8   tr=/8
 	12 f#      /8   tr=/8
-)
+}
 FUNCTION m196_to_197_without_violins
 	CALL  d_all_legato
 	0  b+3     /8          $staccato
@@ -3189,10 +3189,10 @@ CALL  m196_to_197_without_violins
 
 // m. 198-199
 *
-( m
+{ m
 	8  e-     /2     m,  $legato
 	8  e      /2+/8
-)
+}
 CALL  m174_without_trombone
 *
 CALL  m175
@@ -3203,11 +3203,11 @@ CALL  m176_to_177
 
 // m. 202-203
 *
-( m
+{ m
 	8  e-,e /8.    $legato
 	8  e    /16
 	8  e    /4.
-)
+}
 CALL  m174_without_trombone
 *
 CALL  m175
@@ -3224,9 +3224,9 @@ CALL  m183
 
 // m. 208-209
 *
-( m
+{ m
 	7  g#  /8
-)
+}
 CALL  m182
 *
 CALL  m183
@@ -3245,7 +3245,7 @@ CALL  m190_to_191
 
 // m. 216-217
 *
-(
+{
 	CALL  v_all_sf
 	11 a#+2   /2        tr=/16
 	12 a#+    /2        tr=/16
@@ -3258,12 +3258,12 @@ CALL  m190_to_191
 	12 g+     /16  q=2
 	12 e+     /16  q=2
 	12 g+     /16  q=2
-)
+}
 CALL  m192_to_193_without_violins
 
 // m. 218-219
 *
-(
+{
 	11 b+2    /16  q=2
 	11 a#+2   /16  q=2
 	11 a+2    /16  q=2
@@ -3280,12 +3280,12 @@ CALL  m192_to_193_without_violins
 	12 e+     /16  q=2
 	12 d#+    /16  q=2
 	12 c#+    /16  q=2
-)
+}
 CALL  m194_to_195_without_violins
 
 // m. 220-221
 *
-(
+{
 	11 b+      /16  q=2
 	11 a#+     /16  q=2
 	11 a+      /16  q=2
@@ -3302,14 +3302,14 @@ CALL  m194_to_195_without_violins
 	12 e       /16  q=2
 	12 d#      /16  q=2
 	12 f#      /16  q=2
-)
+}
 CALL  m196_to_197_without_violins
 
 // m. 222
 *
-(
+{
 	CALL  d_all_legato
-	( q=2
+	{ q=2
 		0  e+3    /16
 		0  d#+3   /16
 		1  e+2    /16
@@ -3320,7 +3320,7 @@ CALL  m196_to_197_without_violins
 		12 d#     /16
 		14 e-     /16
 		14 d#-    /16
-	)
+	}
 	0  e+3        /8
 	1  e+2        /8
 	2  e+,g#+     /4.
@@ -3340,7 +3340,7 @@ CALL  m196_to_197_without_violins
 	14 e-         /8
 	15 e-2        /8
 	CALL  d_all_staccato
-)
+}
 *
 FUNCTION m222_2
 		0  b+2 /16  q=2
@@ -3413,14 +3413,14 @@ FUNCTION m225_1
 	13 b-   /8
 	14 b-   /8
 END
-( q=2
+{ q=2
 	CALL  m225_1
 	CALL  m224_2
-)
+}
 
 // m. 226
 *
-(
+{
 	0  g#+3 /8
 	0  a+3  /8
 	0  b+3  /8
@@ -3452,11 +3452,11 @@ END
 	14 g#   /8
 	14 a    /8
 	14 b    /8
-)
+}
 
 // m. 227
 *
-(
+{
 	CALL  m224_1
 	11 e    /8
 	11 f#   /8
@@ -3471,11 +3471,11 @@ END
 	14 f#   /8
 	14 g#   /8
 	14 -    /8
-)
+}
 
 // m. 228
 *
-(
+{
 	0  g#+2 /8
 	0  a+2  /8
 	0  b+2  /8
@@ -3501,7 +3501,7 @@ END
 	14 a-   /8
 	14 b-   /8
 	14 -    /8
-)
+}
 
 // m. 229
 *
@@ -3509,7 +3509,7 @@ END
 
 // m. 230-231
 *
-(
+{
 	CALL  d_all_legato
 	CALL  v_all_sf
 	0  d#+3    /1
@@ -3563,13 +3563,13 @@ END
 	13 f#,a    /2           tr=/16
 	14 b-      /2           tr=/16
 	15 b-3     /8   q=7,    $staccato
-)
+}
 
 // m. 232-235
 *
 CALL  d_all_staccato
-( q=4
-	( q=2
+{ q=4
+	{ q=2
 		0  e+3     /8
 		0  d#+3    /8
 		1  e+3     /8
@@ -3603,10 +3603,10 @@ CALL  d_all_staccato
 		14 b-2     /8
 		15 e-2     /8
 		15 b-3     /8
-	)
+	}
 	p  to      /2       m, tr=/32
 	p  bd2,cc2 /8   q=4
-)
+}
 
 // m. 236
 *
@@ -3628,7 +3628,7 @@ FUNCTION m236_low_ch12_15
 	14 e-      /2          tr=/16,  $legato
 	15 e-2     /8     q=4,          $staccato
 END
-(
+{
 	0  e+3     /8
 	0  e+3     /16    q=2
 	0  e+3     /8     q=2
@@ -3644,11 +3644,11 @@ END
 	11 e+2     /4          tr=/16
 	CALL  m236_low_ch5_10
 	CALL  m236_low_ch12_15
-)
+}
 
 // m. 237
 *
-(
+{
 	0  e+3  /8
 	0  b+2  /16  q=2
 	0  b+2  /8   q=2
@@ -3660,11 +3660,11 @@ END
 	11 b+   /16  q=2
 	11 b+   /4          tr=/16
 	CALL  m236_low_ch12_15
-)
+}
 
 // m. 238
 *
-(
+{
 	0  b+2  /8
 	0  g#+2 /16  q=2
 	0  g#+2 /8   q=2
@@ -3676,11 +3676,11 @@ END
 	11 g#+  /16  q=2
 	11 g#+  /4          tr=/16
 	CALL  m236_low_ch12_15
-)
+}
 
 // m. 239
 *
-(
+{
 	0  g#+2 /8
 	0  e+2  /16  q=2
 	0  e+2  /8   q=2
@@ -3692,11 +3692,11 @@ END
 	11 e+   /16  q=2
 	11 e+   /4          tr=/16
 	CALL  m236_low_ch12_15
-)
+}
 
 // m. 240
 *
-(
+{
 	0  e+2    /8
 	0  e+3    /16  q=2
 	0  e+3    /8   q=2
@@ -3717,11 +3717,11 @@ END
 	14 e      /8   q=3
 	15 e-2    /8          $staccato
 	15 e-     /8   q=3
-)
+}
 
 // m. 241
 *
-(
+{
 	0  e+3    /8
 	0  b+2    /16  q=2
 	0  b+2    /8   q=2
@@ -3742,11 +3742,11 @@ END
 	14 b-     /8   q=3
 	15 e-     /8
 	15 b-2    /8   q=3
-)
+}
 
 // m. 242
 *
-(
+{
 	0  b+2      /8
 	0  g#+2     /16  q=2
 	0  g#+2     /8   q=2
@@ -3767,11 +3767,11 @@ END
 	14 g#-    /8   q=3
 	15 b-2    /8
 	15 g#-2   /8   q=3
-)
+}
 
 // m. 243
 *
-(
+{
 	0  g#+2     /8
 	0  e+2      /16  q=2
 	0  e+2      /8   q=2
@@ -3792,11 +3792,11 @@ END
 	14 e-       /8   q=3
 	15 g#-2     /8
 	15 e-2      /8   q=3
-)
+}
 
 // m. 244
 *
-(
+{
 	CALL  d_all_staccato
 	0  e+2        /8
 	1  e+         /8
@@ -3832,11 +3832,11 @@ END
 	13 b-         /16  q=2
 	14 e-         /8
 	15 e-2        /8
-)
+}
 
 // m. 245
 *
-(
+{
 	3  g#   /8
 	3  e    /8
 	3  b    /8
@@ -3865,11 +3865,11 @@ END
 	13 e    /16  q=2
 	13 b    /16  q=2
 	13 g#   /16  q=2
-)
+}
 
 // m. 246
 *
-(
+{
 	0  -    /8
 	0  b+   /8
 	0  e+2  /8
@@ -3916,17 +3916,17 @@ END
 	15 b-3  /8
 	15 e-2  /8
 	15 b-3  /8
-	( q=2
+	{ q=2
 		3  e+ /8
 		3  b  /8
 		6  e  /8
 		6  b- /8
-	)
-)
+	}
+}
 
 // m. 247
 *
-(
+{
 	0  g#+2  /8
 	0  e+2   /8
 	0  b+2   /8
@@ -3980,11 +3980,11 @@ END
 	15 e-2   /8
 	15 b-2   /8
 	15 g#-2  /8
-)
+}
 
 // m. 248
 *
-(
+{
 	0  e+3    /4
 	1  e+2    /4
 	2  e+     /4
@@ -4000,9 +4000,9 @@ END
 	14 e      /4
 	15 e-     /4
 	15 -      /8
-)
+}
 *
-(
+{
 	0  e+3    /16  q=2
 	1  e+2    /16  q=2
 	2  g#+,b+ /16  q=2
@@ -4013,11 +4013,11 @@ END
 	13 g#,e+  /16  q=2
 	14 e      /16  q=2
 	15 e-     /16  q=2
-)
+}
 
 // m. 249
 *
-(
+{
 	0  e+3    /8   q=4
 	1  e+2    /8   q=4
 	2  g#+,b+ /8   q=4
@@ -4046,11 +4046,11 @@ END
 	15 b-2    /8
 	15 g#-2   /8
 	15 b-2    /8
-)
+}
 
 // m. 250
 *
-(
+{
 	0  e+3        /4
 	1  e+2        /4
 	2  g#+,b+     /4
@@ -4068,9 +4068,9 @@ END
 	14 e-         /4
 	15 e-2        /4
 	15 -          /8.
-)
+}
 *
-(
+{
 	0  e+3    /16
 	1  e+2    /16
 	2  e+,g#+ /16
@@ -4086,11 +4086,11 @@ END
 	13 e,b    /16
 	14 e-     /16
 	15 e-2    /16
-)
+}
 
 // m. 251
 *
-(
+{
 	0  e+3        /4
 	1  e+2        /4
 	2  e+,g#+     /4
@@ -4108,9 +4108,9 @@ END
 	14 e-         /4
 	15 e-2        /4
 	15 -          /8.
-)
+}
 *
-(
+{
 	0  e+2        /16
 	1  e+         /16
 	2  g#,e+      /16
@@ -4126,11 +4126,11 @@ END
 	13 g#-,e      /16
 	14 e-         /16
 	15 e-2        /16
-)
+}
 
 // m. 252
 *  tempo  60
-(
+{
 	CALL  d_all_legato
 	0  e+2        /2
 	1  e+         /2
@@ -4148,7 +4148,7 @@ END
 	13 g#-,e      /2
 	14 e-         /2
 	15 e-2        /2
-)
+}
 
 ////////////////////////////////////////////////////////
 // HELPER FUNCTIONS

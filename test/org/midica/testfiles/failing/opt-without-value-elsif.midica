@@ -2,9 +2,9 @@ INCLUDE inc/instruments.midica
 
 VAR $x = 5
 
-( if $x
+{ if $x
 	0  c  /4
-)
-( elsif
+}
+{ elsif
 	0  c  /4
-)
+}

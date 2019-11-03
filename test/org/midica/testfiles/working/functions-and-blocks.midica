@@ -8,15 +8,15 @@ END
 
 FUNCTION test2        // 1920
 	0 d /2            // 960
-	( q=2             // 0 (because of m at the closing brace)
-		( m, q=5
+	{ q=2             // 0 (because of m at the closing brace)
+		{ m, q=5
 			0 e /4
 			0 f /4 
 			* 0,1 
-		)
+		}
 		0 g /4
 		CALL test4
-	) m
+	} m
 	0 a /2         // 960
 END
 FUNCTION test4     // 480
@@ -33,13 +33,13 @@ CALL test2 q=3, m  // 0
 CALL test3         // 5760
 
 0 c /4           // 480
-( q=2            // 0
-	( m, q=5
+{ q=2            // 0
+	{ m, q=5
 		0 e /4
 		0 f /4
-	)
+	}
 	0 g /4
-) m
+} m
 0 c /2           // 960
 
 // total: 3840 + 5760 + 480 + 960 = 11040

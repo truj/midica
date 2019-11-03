@@ -1,7 +1,7 @@
 INCLUDE inc/instruments.midica
 
 META
-	(
+	{
 		composer	Beethoven
-	)
+	}
 END

@@ -5,9 +5,9 @@
 
 FUNCTION test5
 	
-	(
+	{
 	
-	)
+	}
 	
 	CALL test2(dur=-2,l1=bbb,??) quantity=2  ,     m
 	

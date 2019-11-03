@@ -15,14 +15,14 @@ END
 
 FUNCTION test2                                    // /4 ==> 960, /2 ==> 1920
 	0 d ${dur}                                    // /4 ==> 480, /2 ==> 960
-	( q=2                                         // 0 (because of m at the closing brace)
-		( q=3
+	{ q=2                                         // 0 (because of m at the closing brace)
+		{ q=3
 			0 e 128  l =${l1}
 			0 f 128  l =$[2]_
-		)
+		}
 		0 g /4
 		CALL test4
-	) m
+	} m
 	0 a ${dur}        // /4 ==> 480, /2 ==> 960
 END
 FUNCTION test4
@@ -54,9 +54,9 @@ CALL test3()                                 // 4800   (abc..._) x 6 (bbb??_) x 
 
 FUNCTION test5
 	${ch}  ${n1}${oct}  /4  v=${vel},s=${sft}  // 1  c+2  /4  v=60,s=-1  ==> b+  (60)
-	(
+	{
 		VAR ${vel}=63
-	)
+	}
 	${ch}  ${n2}+2      /4  v ${vel}           // 1  c+2  /4  v 63       ==> c+2 (63)
 END
 
@@ -68,9 +68,9 @@ END
 
 FUNCTION test7
 	${ch}  $[1]- /4  v=$[4]                    // 1  c-  /4  v=90        ==> c-  --> CALL(...) s=-12 ==> c-2  (90)
-	(
+	{
 		VAR $[4] 110
-	)
+	}
 	${ch}  $[2]- /4  s=${sft},v=$[4]           // 1  d-  /4  s -1,v=110  ==> c#- --> CALL(...) s=-12 ==> c#-2 (110)
 END
 

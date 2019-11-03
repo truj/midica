@@ -21,9 +21,9 @@ INCLUDE inc/instruments.midica
 
 
 VAR $v = -2
-(
+{
 // 0 d $v
-)
+}
 
 INCLUDE  inc/st-incl-1.midica
 INCLUDE  inc/st-incl-3.midica  // includes also st-incl-2.midica
@@ -35,11 +35,11 @@ END
 
 FUNCTION test6
 	
-	(
+	{
 		
 		CALL test5
 		
-	)
+	}
 	
 END
 

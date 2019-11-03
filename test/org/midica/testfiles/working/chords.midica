@@ -5,12 +5,12 @@ CHORD ch2 f g 99
 CHORD ch3 b, c, d
 
 FUNCTION test
-	( q=2
+	{ q=2
 		0 ch1 /4
 		0 ch2 /4
 		0 ch3 /4
 		0 c,e,g /4
-	)
+	}
 	0 c /4
 END
 CALL test q=3

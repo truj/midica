@@ -1,9 +1,9 @@
 INCLUDE inc/instruments.midica
 
-(
+{
 
 	INSTRUMENTS
 		0 1 test3
 	END
 
-)
+}

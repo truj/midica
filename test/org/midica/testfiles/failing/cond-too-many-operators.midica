@@ -2,6 +2,6 @@ INCLUDE inc/instruments.midica
 
 VAR $x = 1
 
-( if $x==$x!=$x
+{ if $x==$x!=$x
 	0  c  /4
-)
+}

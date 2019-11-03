@@ -8,10 +8,11 @@ But it can also be used as a MIDI Player, a MIDI Karaoke player or a MIDI file a
 You write music with the easy-to-learn programming language "MidicaPL".  
 You can use the same techniques like in regular programming, like:
 
-- Copy & Paste
+- Variables and Constants
+- Loops
+- Conditions (if/elsif/else)
 - Functions
 - Modules for code re-use
-- Variables and Constants
 - Code Comments
 
 You write your songs in plain text files using the text editor of your choice. Midica transforms these files into MIDI.
@@ -94,8 +95,8 @@ In this Readme one short example shall be enough:
 	*  time   3/4              // time signature
 	*  tempo  170              // tempo in beats per minute
 	
-	( q=2                      // outer block to be repeated twice
-	    ( q=3                  // inner block to be repeated 3 times
+	{ q=2                      // outer block to be repeated twice
+	    { q=3                  // inner block to be repeated 3 times
 	        1  d-  /8  v=70    // channel 1: play D3 as an 8th note, using mezzo piano
 	        0  d   /8  v=70    // channel 0: play D4 and switch to mezzo piano
 	        0  -   /8          // play a rest
@@ -104,7 +105,7 @@ In this Readme one short example shall be enough:
 	        0  d   /8
 	        0  d#  /8
 	        *                   // synchronize: bring all channels to the same time
-	    )
+	    }
 	    1  d-  /4
 	    1  f-  /4
 	    1  c-  /4
@@ -114,7 +115,7 @@ In this Readme one short example shall be enough:
 	    0  d#  /8
 	    0  f   /8
 	    0  d#  /8
-	)
+	}
 
 This results in a MIDI sequence like this:
 

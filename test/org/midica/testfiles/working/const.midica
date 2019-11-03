@@ -17,7 +17,7 @@ CONST $whole_line           0  c  /4  $staccato
 FUNCTION test1
 	0  c  /4  v=$forte
 	0  c  /4  $staccato
-	(
+	{
 		0  c  /4  v=$forte
 		0  c  /4  v=$piano,$staccato
 		0  c  /4  v=$mezzoforte , $legato
@@ -27,7 +27,7 @@ FUNCTION test1
 		0  $several_columns
 		$cmd_with_columns $legato
 		$whole_line
-	)
+	}
 END
 CALL test1
 

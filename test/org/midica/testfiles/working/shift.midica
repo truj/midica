@@ -4,10 +4,10 @@ INCLUDE inc/instruments.midica
 0  c  /4  s=2, s=2         // e
 0  c  /4  s=2, s=-4, s=2   // c
 
-( s=-2, s=-2, s=2
+{ s=-2, s=-2, s=2
 	0  c  /4               // a#-
 	0  c  /4  s=2          // c
-)
+}
 
 CALL test1
 CALL test1  s=12
@@ -15,9 +15,9 @@ CALL test1  s=12
 FUNCTION test1
 	0  c  /4               // c  /  c+
 	CALL  test2
-	( s=-2
+	{ s=-2
 		CALL  test2
-	)
+	}
 END
 
 FUNCTION test2

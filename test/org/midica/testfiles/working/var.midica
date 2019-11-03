@@ -18,15 +18,15 @@ VAR $medium_duration = 75$per$cent  // 75%
 FUNCTION test1
 	$c $n /4  v=$forte
 	$c $n /4  d = $staccato
-	( q=$q
+	{ q=$q
 		$c $n     $l  d $staccato , v=$mezzoforte
 		$c $n,$n2 $l  d $medium_duration
-	)
+	}
 	VAR $c = 0
 	$c $n /4  d= $legato%,v=$forte
-	(
+	{
 		VAR $c = 1
-	)
+	}
 END
 
 VAR $c  = 1     // 1   (channel)
@@ -43,15 +43,15 @@ END
 CALL test2
 
 // assign some variables in a block and/or function
-(
-	(
+{
+	{
 		VAR $q = 3
-	)
-)
+	}
+}
 CALL test3
 FUNCTION test3
 	VAR $l = /2
-	(
+	{
 		VAR $n2 = d
-	)
+	}
 END

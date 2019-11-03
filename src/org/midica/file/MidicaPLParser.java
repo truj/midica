@@ -922,7 +922,7 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// nestable block commands
-		// "(", ")", instruments, function, end
+		// "{", "}", instruments, function, end
 		else if (BLOCK_OPEN.equals(tokens[0]) || BLOCK_CLOSE.equals(tokens[0])) {
 			
 			// only remember the line?
@@ -1723,7 +1723,7 @@ public class MidicaPLParser extends SequenceParser {
 	
 	/**
 	 * Parses opening or closing a nestable block.
-	 * By default, that is **(** or **)**.
+	 * By default, that is **{** or **}**.
 	 * 
 	 * @param tokens             Token array.
 	 * @param isFake             **true**, if this is called inside a function definition or block.

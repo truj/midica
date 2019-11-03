@@ -1,5 +1,5 @@
 INCLUDE inc/instruments.midica
 
-( q=3
+{ q=3
 	0  c  /4
-) q=2
+} q=2

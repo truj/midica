@@ -3,8 +3,8 @@ def INCLUDE incl_f
 def INSTRUMENTS instruments[
 def END ]
 def FUNCTION procedure[
-def BLOCK_OPEN {
-def BLOCK_CLOSE }
+def BLOCK_OPEN (
+def BLOCK_CLOSE )
 def PERCUSSION_CHANNEL perc
 def CALL inc
 def GLOBAL glob

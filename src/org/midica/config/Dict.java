@@ -2935,8 +2935,8 @@ public class Dict {
 		setSyntax( SYNTAX_GLOBAL,            "*"             );
 		setSyntax( SYNTAX_P,                 "p"             );
 		setSyntax( SYNTAX_END,               "END"           );
-		setSyntax( SYNTAX_BLOCK_OPEN,        "("             );
-		setSyntax( SYNTAX_BLOCK_CLOSE,       ")"             );
+		setSyntax( SYNTAX_BLOCK_OPEN,        "{"             );
+		setSyntax( SYNTAX_BLOCK_CLOSE,       "}"             );
 		setSyntax( SYNTAX_FUNCTION,          "FUNCTION"      );
 		setSyntax( SYNTAX_PARAM_OPEN,        "("             );
 		setSyntax( SYNTAX_PARAM_CLOSE,       ")"             );
