@@ -13,11 +13,15 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
+import java.awt.event.KeyListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.TreeSet;
 
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -29,10 +33,14 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.tree.DefaultTreeCellRenderer;
 
 import org.midica.Midica;
+import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.config.KeyBinding;
 import org.midica.config.KeyBindingManager;
 import org.midica.config.Laf;
 import org.midica.file.SequenceParser;
@@ -85,6 +93,7 @@ import org.midica.ui.widget.MidicaTree;
  *     - General information
  *     - Banks, Instruments and Notes
  *     - MIDI Messages
+ * - Key Bindings
  * - General Midica version and build information.
  * 
  * @author Jan Trukenmüller
@@ -135,10 +144,13 @@ public class InfoView extends JDialog {
 	// Fake widths and heights, used for dimensions. The real sizes are
 	// determined by the layout manager. But for some reasons,
 	// setPreferredSize() is anyway necessary for correct display.
-	private static final int MSG_TREE_PREF_WIDTH     = 1;
-	private static final int MSG_TREE_PREF_HEIGHT    = 1;
-	private static final int MSG_DETAILS_PREF_WIDTH  = 1;
-	private static final int MSG_DETAILS_PREF_HEIGHT = 1;
+	private static final int MSG_TREE_PREF_WIDTH         = 1;
+	private static final int MSG_TREE_PREF_HEIGHT        = 1;
+	private static final int MSG_DETAILS_PREF_WIDTH      = 1;
+	private static final int MSG_DETAILS_PREF_HEIGHT     = 1;
+	private static final int KEYBINDING_TREE_PREF_WIDTH  = 1;
+	private static final int KEYBINDING_TREE_PREF_HEIGHT = 1;
+	
 	private static final int MAX_HEIGHT_LYRICS       = 1; // max height
 	
 	// width/height constants for FlowLabels
@@ -146,9 +158,11 @@ public class InfoView extends JDialog {
 	private static final int CPL_SOUNDFONT_INFO        =  73;
 	private static final int CPL_MSG_DETAILS           =  28;
 	private static final int CPL_ABOUT                 =  35;
+	private static final int CPL_KEYBINDING_DESC       =  45;
 	private static final int PWIDTH_GENERAL_INFO_VALUE = 500; // PWIDTH: preferred width
 	private static final int PWIDTH_MSG_DETAIL_CONTENT = 170;
 	private static final int PWIDTH_ABOUT              = 200;
+	private static final int PWIDTH_KEYBINDING_DESC    =   1;
 	private static final int MAX_HEIGHT_SOUNDFONT_DESC = 155; // max height
 	private static final int MAX_HEIGHT_KARAOKE_INFO   =  45; // max height
 	
@@ -177,6 +191,7 @@ public class InfoView extends JDialog {
 	private static Dimension sfInstrTableDim    = null;
 	private static Dimension sfResourceTableDim = null;
 	private static Dimension msgTreeDim         = null;
+	private static Dimension keyBindingTreeDim  = null;
 	private static Dimension msgDetailsDim      = null;
 	private static Dimension msgTableDim        = null;
 	private static Dimension collapseExpandDim  = null;
@@ -185,21 +200,31 @@ public class InfoView extends JDialog {
 	
 	private static InfoView infoView = null;
 	
-	private InfoController        controller        = null;
-	private KeyBindingManager     keyBindingManager = null;
-	private JTabbedPane           content           = null;
-	private JTabbedPane           contentConfig     = null;
-	private JTabbedPane           contentSoundfont  = null;
-	private JTabbedPane           contentMidi       = null;
+	private InfoController        controller         = null;
+	private KeyBindingManager     keyBindingManager  = null;
+	private JTabbedPane           content            = null;
+	private JTabbedPane           contentConfig      = null;
+	private JTabbedPane           contentSoundfont   = null;
+	private JTabbedPane           contentMidi        = null;
+	private JSplitPane            contentKeybindings = null;
 	
 	// widgets
-	private MidicaTree                  bankTotalTree         = null;
-	private MidicaTree                  bankChannelTree       = null;
-	private MidicaTree                  msgTree               = null;
-	private JPanel                      msgDetails            = null;
-	private MidicaTable                 msgTable              = null;
-	private HashMap<String, JComponent> filterWidgets         = null;
-	private ArrayList<MidicaButton>     expandCollapseButtons = null;
+	private MidicaTree                  bankTotalTree          = null;
+	private MidicaTree                  bankChannelTree        = null;
+	private MidicaTree                  keyBindingTree         = null;
+	private JTextField                  keybindingTreeFilter   = null;
+	private MidicaButton                keybindingAddBtn       = null;
+	private JCheckBox                   keybindingResetIdCbx   = null;
+	private JCheckBox                   keybindingResetGlobCbx = null;
+	private MidicaButton                keybindingResetIdBtn   = null;
+	private MidicaButton                keybindingResetGlobBtn = null;
+	private MidicaTree                  msgTree                = null;
+	private JPanel                      msgDetails             = null;
+	private JPanel                      keyBindingDetails      = null;
+	private MidicaTable                 msgTable               = null;
+	private HashMap<String, JComponent> filterWidgets          = null;
+	private JTextField                  addKeyBindingFld       = null;
+	private ArrayList<MidicaButton>     expandCollapseButtons  = null;
 	
 	private HashMap<String, JComponent> tableStringFilterIcons = null;
 	
@@ -242,9 +267,10 @@ public class InfoView extends JDialog {
 		msgTableDim        = new Dimension( msgTableWidth,   MSG_TABLE_PREF_HEIGHT );
 		
 		// initialize dimensions for trees, collapse-all/expand-all buttons and message details
-		msgTreeDim        = new Dimension( MSG_TREE_PREF_WIDTH,    MSG_TREE_PREF_HEIGHT    );
-		msgDetailsDim     = new Dimension( MSG_DETAILS_PREF_WIDTH, MSG_DETAILS_PREF_HEIGHT );
-		collapseExpandDim = new Dimension( COLLAPSE_EXPAND_WIDTH,  COLLAPSE_EXPAND_HEIGHT  );
+		msgTreeDim        = new Dimension( MSG_TREE_PREF_WIDTH,        MSG_TREE_PREF_HEIGHT        );
+		keyBindingTreeDim = new Dimension( KEYBINDING_TREE_PREF_WIDTH, KEYBINDING_TREE_PREF_HEIGHT );
+		msgDetailsDim     = new Dimension( MSG_DETAILS_PREF_WIDTH,     MSG_DETAILS_PREF_HEIGHT     );
+		collapseExpandDim = new Dimension( COLLAPSE_EXPAND_WIDTH,      COLLAPSE_EXPAND_HEIGHT      );
 		
 		expandCollapseButtons = new ArrayList<>();
 		
@@ -275,6 +301,7 @@ public class InfoView extends JDialog {
 		content.addTab( Dict.get(Dict.TAB_CONFIG),        createConfigArea()       );
 		content.addTab( Dict.get(Dict.TAB_SOUNDFONT),     createSoundfontArea()    );
 		content.addTab( Dict.get(Dict.TAB_MIDI_SEQUENCE), createMidiSequenceArea() );
+		content.addTab( Dict.get(Dict.TAB_KEYBINDINGS),   createKeyBindingArea()   );
 		content.addTab( Dict.get(Dict.TAB_ABOUT),         createAboutArea()        );
 	}
 	
@@ -346,6 +373,25 @@ public class InfoView extends JDialog {
 		contentMidi.addTab( Dict.get(Dict.TAB_MESSAGES),           createMsgArea()              );
 		
 		return contentMidi;
+	}
+	
+	/**
+	 * Creates the key binding area.
+	 * 
+	 * @return the created area
+	 */
+	private Container createKeyBindingArea() {
+		
+		// create split pane
+		contentKeybindings = new MidicaSplitPane( JSplitPane.HORIZONTAL_SPLIT );
+		contentKeybindings.setResizeWeight( 0.5 );
+		contentKeybindings.setDividerLocation( 0.5 );
+		
+		// fill the sub areas
+		contentKeybindings.add( createKeyBindingLeft() );
+		contentKeybindings.add( createKeyBindingRight() );
+		
+		return contentKeybindings;
 	}
 	
 	/**
@@ -1480,6 +1526,212 @@ public class InfoView extends JDialog {
 	}
 	
 	/**
+	 * Creates the left side of the key binding area, containing
+	 * the key binding tree and the collapse/expand buttons.
+	 * 
+	 * @return the created area
+	 */
+	private Container createKeyBindingLeft() {
+		// content
+		JPanel area = new JPanel();
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout( layout );
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.insets     = Laf.INSETS_NW;
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 1;
+		constraints.weighty    = 0;
+		constraints.anchor     = GridBagConstraints.NORTH;
+		
+		// get tree model and inform the controller
+		MidicaTreeModel model = controller.getKeyBindingTreeModel();
+		
+		// headline (translation, expand, collapse)
+		Container head = createTreeHeadline( Dict.get(Dict.TAB_KEYBINDINGS), InfoController.NAME_TREE_KEYBINDINGS );
+		area.add( head, constraints );
+		
+		// tree filter
+		constraints.gridy++;
+		constraints.insets = Laf.INSETS_W;
+		Container filter = createTreeFilter();
+		area.add(filter, constraints);
+		
+		// tree
+		constraints.insets = Laf.INSETS_W;
+		constraints.gridy++;
+		constraints.weighty = 1;
+		keyBindingTree      = new MidicaTree(model);
+		JScrollPane scroll  = new JScrollPane(keyBindingTree);
+		scroll.setPreferredSize(keyBindingTreeDim);
+		keyBindingTree.setName(InfoController.NAME_TREE_KEYBINDINGS);
+		keyBindingTree.addTreeSelectionListener( controller );
+		keyBindingTree.addFocusListener( controller );
+		model.setTree(keyBindingTree);
+		area.add(scroll, constraints);
+		
+		// prepare reset checkbox and reset button
+		keybindingResetGlobCbx = new JCheckBox( Dict.get(Dict.KB_RESET_GLOB_CBX) );
+		keybindingResetGlobBtn = new MidicaButton( Dict.get(Dict.KB_RESET_GLOB_BTN) );
+		keybindingResetGlobBtn.setActionCommand(InfoController.CMD_RESET_KEY_BINDING_GLOB);
+		keybindingResetGlobBtn.addActionListener(controller);
+		
+		// reset checkbox
+		constraints.gridy++;
+		constraints.weighty = 0;
+		area.add(keybindingResetGlobCbx, constraints);
+		keybindingResetGlobCbx.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				if (keybindingResetGlobCbx.isSelected())
+					keybindingResetGlobBtn.setEnabled(true);
+				else
+					keybindingResetGlobBtn.setEnabled(false);
+			}
+		});
+		
+		// reset button
+		constraints.insets = Laf.INSETS_SW;
+		constraints.gridy++;
+		keybindingResetGlobBtn.setEnabled(false);
+		area.add(keybindingResetGlobBtn, constraints);
+		
+		return area;
+	}
+	
+	/**
+	 * Creates the area containing the key binding tree filter (label and text field).
+	 * 
+	 * @return the created area.
+	 */
+	private Container createTreeFilter() {
+		// content
+		JPanel area = new JPanel();
+		keybindingTreeFilter = new JTextField("");
+		keybindingTreeFilter.setName( InfoController.NAME_KB_FILTER );
+		keybindingTreeFilter.getDocument().putProperty("name", InfoController.NAME_KB_FILTER);
+		keybindingTreeFilter.getDocument().addDocumentListener(controller);
+		
+		// layout
+		BoxLayout layout = new BoxLayout(area, BoxLayout.X_AXIS);
+		area.setLayout(layout);
+		
+		// spacer
+		area.add( Box.createHorizontalStrut(3) );
+		
+		// label
+		JLabel lbl = new JLabel( Dict.get(Dict.KB_FILTER) );
+		area.add(lbl);
+		
+		// spacer
+		area.add( Box.createHorizontalStrut(10) );
+		
+		// text field
+		area.add(keybindingTreeFilter);
+		
+		return area;
+	}
+	
+	/**
+	 * Returns the key binding tree filter text field.
+	 * 
+	 * @return the key binding tree filter text field
+	 */
+	public JTextField getKeybindingTreeFilter() {
+		return keybindingTreeFilter;
+	}
+	
+	/**
+	 * Creates the right side of the key binding area, where the selected
+	 * key binding ID can be configured.
+	 * 
+	 * @return the created area
+	 */
+	private Container createKeyBindingRight() {
+		// content
+		JPanel area = new JPanel();
+		
+		// create objects that need to be available even if they are not visible
+		addKeyBindingFld = new JTextField("");
+		keybindingAddBtn = new MidicaButton( Dict.get(Dict.KB_ADD_BTN) );
+		keybindingAddBtn.setActionCommand(InfoController.CMD_ADD_KEY_BINDING);
+		keybindingAddBtn.addActionListener(controller);
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout(layout);
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill       = GridBagConstraints.NONE;
+		constraints.insets     = Laf.INSETS_NE;
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 0;
+		constraints.weighty    = 0;
+		constraints.anchor     = GridBagConstraints.CENTER;
+		
+		// details headline
+		JLabel lblDetails = new JLabel( Dict.get(Dict.DETAILS) );
+		Laf.makeBold(lblDetails);
+		area.add(lblDetails, constraints);
+		
+		// synchronize with the tree headline from the other
+		// half of the split pane
+		int       width       = lblDetails.getPreferredSize().width;
+		Dimension headlineDim = new Dimension( width, collapseExpandHeadlineHeight );
+		lblDetails.setPreferredSize( headlineDim );
+		
+		// details content
+		constraints.insets = Laf.INSETS_E;
+		constraints.gridy++;
+		constraints.weightx = 1;
+		constraints.weighty = 1;
+		constraints.fill    = GridBagConstraints.BOTH;
+		keyBindingDetails   = new JPanel();
+		keyBindingDetails.setLayout(layout);
+		keyBindingDetails.setBackground( Laf.COLOR_KEYBINDING_DEFAULT );
+		JScrollPane detailsScroll = new JScrollPane(keyBindingDetails);
+		area.add( detailsScroll, constraints );
+		
+		// add reset checkbox
+		constraints.gridy++;
+		constraints.weighty = 0;
+		keybindingResetIdCbx = new JCheckBox( Dict.get(Dict.KB_RESET_ID_CBX) );
+		area.add(keybindingResetIdCbx, constraints);
+		
+		// add reset button
+		constraints.gridy++;
+		constraints.insets = Laf.INSETS_SE;
+		keybindingResetIdBtn = new MidicaButton( Dict.get(Dict.KB_RESET_ID_BTN) );
+		keybindingResetIdBtn.setActionCommand(InfoController.CMD_RESET_KEY_BINDING_ID);
+		keybindingResetIdBtn.addActionListener(controller);
+		keybindingResetIdBtn.setEnabled(false);
+		area.add(keybindingResetIdBtn, constraints);
+		
+		// connect button and checkbox with each other
+		keybindingResetIdCbx.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				if (keybindingResetIdCbx.isSelected())
+					keybindingResetIdBtn.setEnabled(true);
+				else
+					keybindingResetIdBtn.setEnabled(false);
+			}
+		});
+		
+		// disable the reset widgets by default
+		resetResetWidgetsForSelectedKeyBindingAction();
+		
+		return area;
+	}
+	
+	/**
 	 * Creates the headline area for a {@link MidicaTree}, containing a translation
 	 * and collapse-all / expand-all buttons.
 	 * 
@@ -2223,7 +2475,7 @@ public class InfoView extends JDialog {
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
-		area.setLayout( layout );
+		area.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.NONE;
 		constraints.insets     = Laf.INSETS_NWE;
@@ -2392,6 +2644,16 @@ public class InfoView extends JDialog {
 		msgDetails.setBackground( Laf.COLOR_MSG_DEFAULT );
 		msgDetails.revalidate();
 		msgDetails.repaint();
+	}
+	
+	/**
+	 * Removes all contents from the key binding details area.
+	 */
+	public void cleanKeyBindingDetails() {
+		keyBindingDetails.removeAll();
+		keyBindingDetails.setBackground( Laf.COLOR_KEYBINDING_DEFAULT );
+		keyBindingDetails.revalidate();
+		keyBindingDetails.repaint();
 	}
 	
 	/**
@@ -2754,6 +3016,223 @@ public class InfoView extends JDialog {
 	}
 	
 	/**
+	 * Fills the details area for a key binding action.
+	 * This area contains:
+	 * 
+	 * - category and action description
+	 * - a form to add a new key binding
+	 * - the already configured key bindings for the action
+	 * - a checkbox and button to reset the key bindings for this action
+	 * 
+	 * @param id        the ID of the key binding action
+	 * @param category  the category description (the window containing the action)
+	 */
+	public void fillKeyBindingDetails(String id, String category) {
+		
+		// set background color
+		keyBindingDetails.setBackground(Laf.COLOR_KEYBINDING_SELECTED);
+		
+		// reset the reset checkbox and the reset button
+		resetResetWidgetsForSelectedKeyBindingAction();
+		keybindingResetIdCbx.setEnabled(true);
+		
+		// layout
+		GridBagConstraints constrLeft = new GridBagConstraints();
+		constrLeft.fill       = GridBagConstraints.NONE;
+		constrLeft.insets     = Laf.INSETS_IN;
+		constrLeft.gridx      = 0;
+		constrLeft.gridy      = 0;
+		constrLeft.gridheight = 1;
+		constrLeft.gridwidth  = 1;
+		constrLeft.weightx    = 0;
+		constrLeft.weighty    = 0;
+		constrLeft.anchor     = GridBagConstraints.NORTHEAST;
+		GridBagConstraints constrRight = (GridBagConstraints) constrLeft.clone();
+		constrRight.gridx++;
+		constrRight.weightx = 1;
+		constrRight.fill    = GridBagConstraints.HORIZONTAL;
+		constrRight.anchor  = GridBagConstraints.NORTHWEST;
+		GridBagConstraints constrFull = (GridBagConstraints) constrLeft.clone();
+		constrFull.gridwidth = 2;
+		constrFull.fill      = GridBagConstraints.HORIZONTAL;
+		constrFull.anchor    = GridBagConstraints.CENTER;
+		
+		// category
+		JLabel catLbl = new JLabel( Dict.get(Dict.KB_CATEGORY) );
+		Laf.makeBold(catLbl);
+		keyBindingDetails.add(catLbl, constrLeft);
+		JLabel catValueLbl = new JLabel(category);
+		keyBindingDetails.add(catValueLbl, constrRight);
+		
+		// description
+		constrLeft.gridy++;
+		JLabel descLbl = new JLabel( Dict.get(Dict.KB_ACTION) );
+		Laf.makeBold(descLbl);
+		keyBindingDetails.add(descLbl, constrLeft);
+		constrRight.gridy++;
+		FlowLabel descValueLbl = new FlowLabel(Dict.get(id), CPL_KEYBINDING_DESC, PWIDTH_KEYBINDING_DESC);
+		keyBindingDetails.add(descValueLbl, constrRight);
+		
+		// hint
+		constrLeft.gridy++;
+		JLabel hintLbl = new JLabel( Dict.get(Dict.KB_HINT) );
+		Laf.makeBold(hintLbl);
+		hintLbl.setForeground(Laf.COLOR_HINT);
+		keyBindingDetails.add(hintLbl, constrLeft);
+		constrRight.gridy++;
+		FlowLabel hintValueLbl = new FlowLabel(Dict.get(Dict.KB_HINT_TXT), CPL_KEYBINDING_DESC, PWIDTH_KEYBINDING_DESC);
+		hintValueLbl.setForeground(Laf.COLOR_HINT);
+		keyBindingDetails.add(hintValueLbl, constrRight);
+		
+		// add-new-key-binding area
+		constrLeft.gridy++;
+		constrRight.gridy++;
+		constrFull.gridy  = constrLeft.gridy;
+		constrLeft.anchor = GridBagConstraints.EAST;
+		constrRight.fill  = GridBagConstraints.NONE;
+		Container configForm = createKeyBindingForm();
+		keyBindingDetails.add(configForm, constrFull);
+		
+		// configured bindings
+		constrFull.gridy++;
+		Container configuredBindings = createConfiguredBindingsArea(id);
+		keyBindingDetails.add(configuredBindings, constrFull);
+		
+		// add spacer
+		constrFull.gridy++;
+		constrFull.weighty = 1;
+		JLabel spacer = new JLabel(" ");
+		keyBindingDetails.add(spacer, constrFull);
+	}
+	
+	/**
+	 * Resets the checkbox and button to reset the key bindings on the right side.
+	 */
+	public void resetResetWidgetsForSelectedKeyBindingAction() {
+		keybindingResetIdCbx.setSelected(false);
+		keybindingResetIdCbx.setEnabled(false);
+		keybindingResetIdBtn.setEnabled(false);
+	}
+	
+	/**
+	 * Creates the form to add a new key binding.
+	 * 
+	 * @return the created form.
+	 */
+	private Container createKeyBindingForm() {
+		JPanel area = new JPanel();
+		area.setBackground(Laf.COLOR_KEYBINDING_SELECTED);
+		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.KB_ADD)) );
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout(layout);
+		GridBagConstraints constrLeft = new GridBagConstraints();
+		constrLeft.fill       = GridBagConstraints.NONE;
+		constrLeft.insets     = Laf.INSETS_ZERO;
+		constrLeft.gridx      = 0;
+		constrLeft.gridy      = 0;
+		constrLeft.gridheight = 1;
+		constrLeft.gridwidth  = 1;
+		constrLeft.weightx    = 0;
+		constrLeft.weighty    = 0;
+		constrLeft.anchor     = GridBagConstraints.EAST;
+		GridBagConstraints constrRight = (GridBagConstraints) constrLeft.clone();
+		constrRight.gridx++;
+		constrRight.weightx = 1;
+		constrRight.fill    = GridBagConstraints.HORIZONTAL;
+		constrRight.anchor  = GridBagConstraints.NORTHWEST;
+		
+		// label for text field
+		JLabel fieldLbl = new JLabel( Dict.get(Dict.KB_ENTER) );
+		area.add(fieldLbl, constrLeft);
+		
+		// text field
+		addKeyBindingFld.setText("");
+		area.add(addKeyBindingFld, constrRight);
+		
+		// bindings for the text field
+		for (KeyListener listener : addKeyBindingFld.getKeyListeners()) {
+			addKeyBindingFld.removeKeyListener(listener);
+		}
+		addKeyBindingFld.addKeyListener(controller.createKeyListener(addKeyBindingFld));
+		
+		// add button
+		constrRight.gridy++;
+		area.add(keybindingAddBtn, constrRight);
+		
+		return area;
+	}
+	
+	/**
+	 * Creates the area with all configured key bindings for a certain action.
+	 * Each key binding consists of a description of the key combination and a button
+	 * to delete this key binding.
+	 * 
+	 * @param id  the ID of the key binding action
+	 * @return the created area.
+	 */
+	private Container createConfiguredBindingsArea(String id) {
+		JPanel area = new JPanel();
+		area.setBackground(Laf.COLOR_KEYBINDING_SELECTED);
+		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.KB_CONFIGURED)) );
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout(layout);
+		GridBagConstraints constrLeft = new GridBagConstraints();
+		constrLeft.fill       = GridBagConstraints.NONE;
+		constrLeft.insets     = Laf.INSETS_IN;
+		constrLeft.gridx      = 0;
+		constrLeft.gridy      = 0;
+		constrLeft.gridheight = 1;
+		constrLeft.gridwidth  = 1;
+		constrLeft.weightx    = 0;
+		constrLeft.weighty    = 0;
+		constrLeft.anchor     = GridBagConstraints.EAST;
+		GridBagConstraints constrRight = (GridBagConstraints) constrLeft.clone();
+		constrRight.gridx++;
+		constrRight.weightx = 1;
+		constrRight.fill    = GridBagConstraints.NONE;
+		constrRight.anchor  = GridBagConstraints.WEST;
+		GridBagConstraints constrFull = (GridBagConstraints) constrLeft.clone();
+		constrFull.gridwidth = 2;
+		constrFull.fill      = GridBagConstraints.HORIZONTAL;
+		constrFull.anchor    = GridBagConstraints.CENTER;
+		
+		// add all configured bindings
+		int i = 0;
+		TreeSet<KeyBinding> bindings = Config.getKeyBindings(id);
+		for (KeyBinding binding : bindings) {
+			
+			// add separator
+			if (i > 0) {
+				constrRight.gridy++;
+				constrLeft.gridy++;
+				constrFull.gridy = constrLeft.gridy;
+				area.add(Laf.createSeparator(), constrFull);
+			}
+			
+			// add binding
+			constrLeft.gridy++;
+			JLabel bindingLbl = new JLabel(binding.getDescription());
+			area.add(bindingLbl, constrLeft);
+			
+			// button to remove the old binding
+			constrRight.gridy++;
+			MidicaButton removeBtn = new MidicaButton( Dict.get(Dict.KB_REMOVE) );
+			area.add(removeBtn, constrRight);
+			removeBtn.setActionCommand(InfoController.CMD_REMOVE_KEY_BINDING);
+			removeBtn.setName(binding.toString());
+			removeBtn.addActionListener(controller);
+			
+			i++;
+		}
+		
+		return area;
+	}
+	
+	/**
 	 * Closes and destroys the info window.
 	 */
 	public void close() {
@@ -2774,10 +3253,11 @@ public class InfoView extends JDialog {
 		keyBindingManager.addBindingsForClose( Dict.KEY_INFO_CLOSE );
 		
 		// level-1 tabs
-		keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_INFO_CONF,  0 );
-		keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_INFO_SF,    1 );
-		keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_INFO_MIDI,  2 );
-		keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_INFO_ABOUT, 3 );
+		keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_INFO_CONF,        0 );
+		keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_INFO_SF,          1 );
+		keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_INFO_MIDI,        2 );
+		keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_INFO_KEYBINDINGS, 3 );
+		keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_INFO_ABOUT,       4 );
 		
 		// level-2 tabs (config)
 		keyBindingManager.addBindingsForTabLevel2( contentConfig, Dict.KEY_INFO_CONF_NOTE,    0, 0 );
@@ -2832,22 +3312,34 @@ public class InfoView extends JDialog {
 		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_TXT_TRACKS),           Dict.KEY_INFO_MIDI_MSG_TRACKS_TXT );
 		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_BTN_SHOW_TREE),        Dict.KEY_INFO_MIDI_MSG_SHOW_IN_TR );
 		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_AUTO_SHOW),        Dict.KEY_INFO_MIDI_MSG_SHOW_AUTO  );
-		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  0), Dict.KEY_INFO_MIDI_MSG_CH_0       );
-		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  1), Dict.KEY_INFO_MIDI_MSG_CH_1       );
-		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  2), Dict.KEY_INFO_MIDI_MSG_CH_2       );
-		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  3), Dict.KEY_INFO_MIDI_MSG_CH_3       );
-		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  4), Dict.KEY_INFO_MIDI_MSG_CH_4       );
-		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  5), Dict.KEY_INFO_MIDI_MSG_CH_5       );
-		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  6), Dict.KEY_INFO_MIDI_MSG_CH_6       );
-		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  7), Dict.KEY_INFO_MIDI_MSG_CH_7       );
-		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  8), Dict.KEY_INFO_MIDI_MSG_CH_8       );
-		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  9), Dict.KEY_INFO_MIDI_MSG_CH_9       );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  0), Dict.KEY_INFO_MIDI_MSG_CH_00      );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  1), Dict.KEY_INFO_MIDI_MSG_CH_01      );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  2), Dict.KEY_INFO_MIDI_MSG_CH_02      );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  3), Dict.KEY_INFO_MIDI_MSG_CH_03      );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  4), Dict.KEY_INFO_MIDI_MSG_CH_04      );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  5), Dict.KEY_INFO_MIDI_MSG_CH_05      );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  6), Dict.KEY_INFO_MIDI_MSG_CH_06      );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  7), Dict.KEY_INFO_MIDI_MSG_CH_07      );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  8), Dict.KEY_INFO_MIDI_MSG_CH_08      );
+		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX +  9), Dict.KEY_INFO_MIDI_MSG_CH_09      );
 		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX + 10), Dict.KEY_INFO_MIDI_MSG_CH_10      );
 		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX + 11), Dict.KEY_INFO_MIDI_MSG_CH_11      );
 		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX + 12), Dict.KEY_INFO_MIDI_MSG_CH_12      );
 		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX + 13), Dict.KEY_INFO_MIDI_MSG_CH_13      );
 		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX + 14), Dict.KEY_INFO_MIDI_MSG_CH_14      );
 		keyBindingManager.addBindingsForTabLevel3( filterWidgets.get(FILTER_CBX_CHAN_PREFIX + 15), Dict.KEY_INFO_MIDI_MSG_CH_15      );
+		
+		// level-3 (keybindings)
+		keyBindingManager.addBindingsForTabLevel3( keyBindingTree,               Dict.KEY_INFO_KEY_TREE           );
+		keyBindingManager.addBindingsForTabLevel3( expandCollapseButtons.get(7), Dict.KEY_INFO_KEY_PL             );
+		keyBindingManager.addBindingsForTabLevel3( expandCollapseButtons.get(6), Dict.KEY_INFO_KEY_MIN            );
+		keyBindingManager.addBindingsForTabLevel3( addKeyBindingFld,             Dict.KEY_INFO_KEY_FLD            );
+		keyBindingManager.addBindingsForTabLevel3( keybindingTreeFilter,         Dict.KEY_INFO_KEY_FILTER         );
+		keyBindingManager.addBindingsForTabLevel3( keybindingAddBtn,             Dict.KEY_INFO_KEY_ADD_BTN        );
+		keyBindingManager.addBindingsForTabLevel3( keybindingResetIdCbx,         Dict.KEY_INFO_KEY_RESET_ID_CBX   );
+		keyBindingManager.addBindingsForTabLevel3( keybindingResetIdBtn,         Dict.KEY_INFO_KEY_RESET_ID_BTN   );
+		keyBindingManager.addBindingsForTabLevel3( keybindingResetGlobCbx,       Dict.KEY_INFO_KEY_RESET_GLOB_CBX );
+		keyBindingManager.addBindingsForTabLevel3( keybindingResetGlobBtn,       Dict.KEY_INFO_KEY_RESET_GLOB_BTN );
 		
 		// set input and action maps
 		keyBindingManager.postprocess();

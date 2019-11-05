@@ -13,13 +13,17 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.InputEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,6 +32,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -44,16 +49,22 @@ import javax.swing.text.Document;
 import javax.swing.text.Element;
 import javax.swing.text.Position;
 import javax.swing.text.Segment;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreePath;
 
+import org.midica.config.Config;
+import org.midica.config.Dict;
+import org.midica.config.KeyBinding;
 import org.midica.config.Laf;
 import org.midica.midi.SequenceAnalyzer;
 import org.midica.ui.model.MessageTableModel;
+import org.midica.ui.ErrorMsgView;
 import org.midica.ui.model.IMessageType;
 import org.midica.ui.model.SingleMessage;
 import org.midica.ui.tablesorter.MessageTableSorter;
 import org.midica.ui.model.MessageTreeNode;
 import org.midica.ui.model.MidicaTreeModel;
+import org.midica.ui.model.MidicaTreeNode;
 import org.midica.ui.widget.MidicaButton;
 import org.midica.ui.widget.MidicaTable;
 import org.midica.ui.widget.MidicaTree;
@@ -69,9 +80,15 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 	
 	public static final String CMD_COLLAPSE                = "cmd_collapse";
 	public static final String CMD_EXPAND                  = "cmd_expand";
+	public static final String CMD_ADD_KEY_BINDING         = "cmd_add_key_binding";
+	public static final String CMD_REMOVE_KEY_BINDING      = "cmd_remove_key_binding";
+	public static final String CMD_RESET_KEY_BINDING_ID    = "cmd_reset_key_binding_id";
+	public static final String CMD_RESET_KEY_BINDING_GLOB  = "cmd_reset_key_binding_glob";
 	public static final String NAME_TREE_BANKS_TOTAL       = "name_tree_banks_total";
 	public static final String NAME_TREE_BANKS_PER_CHANNEL = "name_tree_banks_per_channel";
 	public static final String NAME_TREE_MESSAGES          = "name_tree_messages";
+	public static final String NAME_TREE_KEYBINDINGS       = "name_tree_keybindings";
+	public static final String NAME_KB_FILTER              = "name_kb_filter";
 	
 	private InfoView view = null;
 	
@@ -79,6 +96,10 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 	private MidicaTreeModel tmBanksTotal      = null;
 	private MidicaTreeModel tmBanksPerChannel = null;
 	private MidicaTreeModel tmMessages        = null;
+	private MidicaTreeModel tmKeyBindings     = null;
+	
+	private String     selectedKeyBindingId = null;
+	private KeyBinding pressedKeyBinding    = null;
 	
 	/**
 	 * Creates a new instance of the controller for the given info view.
@@ -97,7 +118,7 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 	 * @param treeModel The tree model to be set.
 	 * @param name      The name associated with this tree.
 	 */
-	public void setTreeModel( MidicaTreeModel treeModel, String name ) {
+	public void setTreeModel(MidicaTreeModel treeModel, String name) {
 		if ( NAME_TREE_BANKS_TOTAL.equals(name) ) {
 			tmBanksTotal = treeModel;
 		}
@@ -110,18 +131,34 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 	}
 	
 	/**
-	 * Handles all button clicks from in the info view window.
+	 * Creates the key binding tree model, if not yet done, and returns it.
+	 * 
+	 * @return the key binding tree model
+	 */
+	public MidicaTreeModel getKeyBindingTreeModel() {
+		if (tmKeyBindings == null)
+			tmKeyBindings = Config.getKeyBindingTreeModel();
+		return tmKeyBindings;
+	}
+	
+	/**
+	 * Handles all button clicks from the info view window.
 	 * 
 	 * Those are:
 	 * 
 	 * - pushing a collapse-all button
 	 * - pushing an expand-all button
 	 * - pushing a show-in-tree button in the message filter
+	 * - pushing one of the buttons in the key binding window:
+	 *     - add key binding
+	 *     - remove one key binding
+	 *     - reset key bindings for one action
+	 *     - reset all key bindings globally
 	 * 
 	 * @param e    The invoked action event.
 	 */
 	@Override
-	public void actionPerformed( ActionEvent e ) {
+	public void actionPerformed(ActionEvent e) {
 		String       cmd  = e.getActionCommand();
 		MidicaButton btn  = (MidicaButton) e.getSource();
 		String       name = btn.getName();
@@ -136,16 +173,78 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 				tmBanksPerChannel.expandOrCollapse( mustExpand );
 			else if ( NAME_TREE_MESSAGES.equals(name) )
 				tmMessages.expandOrCollapse( mustExpand );
+			else if ( NAME_TREE_KEYBINDINGS.equals(name) )
+				tmKeyBindings.expandOrCollapse( mustExpand );
 		}
 		
 		// show a message in the tree (after it has been clicked in the table)
 		else if ( InfoView.FILTER_BTN_SHOW_TREE.equals(cmd) ) {
 			showInTree();
 		}
+		
+		// add a key binding
+		else if ( CMD_ADD_KEY_BINDING.equals(cmd) ) {
+			
+			// no key binding entered?
+			if (null == pressedKeyBinding) {
+				ErrorMsgView msgView = new ErrorMsgView(view);
+				msgView.init( Dict.get(Dict.KB_ERROR_NO_BINDING_PRESSED) );
+			}
+			
+			// add key binding
+			Config.addKeyBinding(selectedKeyBindingId, pressedKeyBinding);
+			
+			// refresh details
+			displayKeyBindingDetailsIfPossible( tmKeyBindings.getTree() );
+			
+			// update tree
+			updateKeyBindingTree();
+		}
+		
+		// remove a key binding
+		else if ( CMD_REMOVE_KEY_BINDING.equals(cmd) ) {
+			
+			// remove it
+			Config.removeKeyBinding(selectedKeyBindingId, name);
+			
+			// refresh details
+			displayKeyBindingDetailsIfPossible( tmKeyBindings.getTree() );
+			
+			// update tree
+			updateKeyBindingTree();
+		}
+		
+		// reset key bindings for one action
+		else if ( CMD_RESET_KEY_BINDING_ID.equals(cmd) ) {
+			
+			// reset selected bindings
+			Config.resetKeyBindingsToDefault(selectedKeyBindingId);
+			
+			// refresh details
+			displayKeyBindingDetailsIfPossible( tmKeyBindings.getTree() );
+			
+			// update tree
+			updateKeyBindingTree();
+		}
+		
+		// reset all key bindings globally
+		else if ( CMD_RESET_KEY_BINDING_GLOB.equals(cmd) ) {
+			
+			// reset all bindings
+			Config.resetAllKeyBindingsToDefault();
+
+			// refresh details
+			displayKeyBindingDetailsIfPossible( tmKeyBindings.getTree() );
+			
+			// update tree
+			updateKeyBindingTree();
+		}
 	}
 	
 	/**
-	 * Handles selection changes in the message tree.
+	 * Handles selection changes in the message or key binding tree.
+	 * 
+	 * **Message tree**
 	 * 
 	 * - Filters the messages shown in the table. (Only if the filter checkbox
 	 *   for selected nodes is selected.)
@@ -155,34 +254,47 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 	 * this is a leaf node.
 	 * In all other cases it will just be emptied.
 	 * 
+	 * **Key binding tree**
+	 * 
+	 * - Shows the currently selected key bindings for the chosen ID in the detail area.
+	 *   (Only if exactly one leaf node is selected.)
+	 * - Empties the detail area, if not exactly one leaf node is selected.
+	 * 
 	 * @param e    The event to be handled.
 	 */
 	@Override
-	public void valueChanged( TreeSelectionEvent e ) {
+	public void valueChanged(TreeSelectionEvent e) {
 		MidicaTree tree = (MidicaTree) e.getSource();
 		String     name = tree.getName();
 		
-		// only handle the message tree
-		if ( ! name.equals(NAME_TREE_MESSAGES) )
-			return;
-		
-		// prepare widgets
-		HashMap<String, JComponent> widgets = getMsgFilterWidgetsIfReady();
-		if ( null == widgets )
-			return;
-		JCheckBox cbxNodes = (JCheckBox) widgets.get( InfoView.FILTER_CBX_NODE );
-		
-		// apply filter changes to the message table
-		boolean mustFilterNodes = cbxNodes.isSelected();
-		if (mustFilterNodes) {
-			filterMessages();
+		// message tree
+		if ( name.equals(NAME_TREE_MESSAGES) ) {
+			
+			// prepare widgets
+			HashMap<String, JComponent> widgets = getMsgFilterWidgetsIfReady();
+			if ( null == widgets )
+				return;
+			JCheckBox cbxNodes = (JCheckBox) widgets.get( InfoView.FILTER_CBX_NODE );
+			
+			// apply filter changes to the message table
+			boolean mustFilterNodes = cbxNodes.isSelected();
+			if (mustFilterNodes) {
+				filterMessages();
+			}
+			
+			// make the details area empty so that it's ready for refilling
+			view.cleanMsgDetails();
+			
+			// display details, if exactly one leaf node is selected now
+			displayDetailsIfPossible( true );
 		}
 		
-		// make the details area empty so that it's ready for refilling
-		view.cleanMsgDetails();
-		
-		// display details, if exactly one leaf node is selected now
-		displayDetailsIfPossible( true );
+		// key bindings tree
+		else if ( name.equals(NAME_TREE_KEYBINDINGS) ) {
+			
+			// show configured binding details
+			displayKeyBindingDetailsIfPossible(tree);
+		}
 	}
 	
 	/**
@@ -374,36 +486,33 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 	}
 	
 	/**
-	 * Checks text field contents after a change (by calling
-	 * {@link #checkTextFields(DocumentEvent)}).
+	 * Handles text field changes.
 	 * 
 	 * @param e    Event object.
 	 */
 	@Override
-	public void changedUpdate( DocumentEvent e ) {
-		checkTextFields( e );
+	public void changedUpdate(DocumentEvent e) {
+		handleTextFieldChange(e);
 	}
 	
 	/**
-	 * Checks text field contents after a change (by calling
-	 * {@link #checkTextFields(DocumentEvent)}).
+	 * Handles text field changes.
 	 * 
 	 * @param e    Event object.
 	 */
 	@Override
-	public void insertUpdate( DocumentEvent e ) {
-		checkTextFields( e );
+	public void insertUpdate(DocumentEvent e) {
+		handleTextFieldChange(e);
 	}
 	
 	/**
-	 * Checks text field contents after a change (by calling
-	 * {@link #checkTextFields(DocumentEvent)}).
+	 * Handles text field changes.
 	 * 
 	 * @param e    Event object.
 	 */
 	@Override
-	public void removeUpdate( DocumentEvent e ) {
-		checkTextFields( e );
+	public void removeUpdate(DocumentEvent e) {
+		handleTextFieldChange(e);
 	}
 	
 	/**
@@ -433,6 +542,76 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 	@Override
 	public void sorterChanged(RowSorterEvent e) {
 		filterMessages();
+	}
+	
+	/**
+	 * Creates and returns a key listener to handle the detection of a new key binding that's pressed
+	 * while the key binding form text field is focused.
+	 * 
+	 * @param field  the text field that must be focused to receive a new key binding
+	 * @return the key listener
+	 */
+	public KeyAdapter createKeyListener(JTextField field) {
+		
+		return new KeyAdapter() {
+			private int     lastPressedKeyCode = 0;
+			private int     lastPressedMods    = 0;
+			private boolean canDetect          = true;
+			
+			@Override
+			public void keyPressed(KeyEvent e) {
+				int keyCode = e.getKeyCode();
+				
+				// ignore an already presssed key, if only a modifier has been released
+				if ( ! canDetect && keyCode == lastPressedKeyCode ) {
+					e.consume();
+					return;
+				}
+				
+				canDetect          = true;
+				lastPressedKeyCode = e.getKeyCode();
+				lastPressedMods    = 0x00;
+				lastPressedMods   |= ( e.isShiftDown()    ? InputEvent.SHIFT_DOWN_MASK     : 0x00 );
+				lastPressedMods   |= ( e.isControlDown()  ? InputEvent.CTRL_DOWN_MASK      : 0x00 );
+				lastPressedMods   |= ( e.isAltDown()      ? InputEvent.ALT_DOWN_MASK       : 0x00 );
+				lastPressedMods   |= ( e.isAltGraphDown() ? InputEvent.ALT_GRAPH_DOWN_MASK : 0x00 );
+				lastPressedMods   |= ( e.isMetaDown()     ? InputEvent.META_DOWN_MASK      : 0x00 );
+				e.consume();
+			}
+			
+			@Override
+			public void keyReleased(KeyEvent e) {
+				
+				// ignore the key binding used to focus the text field
+				if (0 == lastPressedKeyCode) {
+					e.consume();
+					return;
+				}
+				
+				// Only detect, if the first key is released.
+				if (canDetect) {
+					boolean lastIsModifier = lastPressedKeyCode == KeyEvent.VK_ALT
+					                      || lastPressedKeyCode == KeyEvent.VK_ALT_GRAPH
+					                      || lastPressedKeyCode == KeyEvent.VK_CONTROL
+					                      || lastPressedKeyCode == KeyEvent.VK_SHIFT
+					                      || lastPressedKeyCode == KeyEvent.VK_META;
+					if ( ! lastIsModifier ) {
+						
+						// show and remember key binding
+						KeyBinding binding = new KeyBinding(lastPressedKeyCode, lastPressedMods);
+						field.setText( binding.getDescription() );
+						pressedKeyBinding = binding;
+					}
+				}
+				canDetect = false;
+				e.consume();
+			}
+			
+			@Override
+			public void keyTyped(KeyEvent e) {
+				e.consume();
+			}
+		};
 	}
 	
 	/**
@@ -486,6 +665,195 @@ public class InfoController implements WindowListener, ActionListener, TreeSelec
 				view.fillMsgDetails(singleMessage);
 			}
 		}
+	}
+	
+	/**
+	 * Shows the key bindings, configured for the currently selected ID in the tree.
+	 * This is done only if exactly one leaf node is currently selected.
+	 * 
+	 * @param tree  the key binding tree
+	 */
+	private void displayKeyBindingDetailsIfPossible(MidicaTree tree) {
+		
+		selectedKeyBindingId = null;
+		pressedKeyBinding    = null;
+		
+		// empty the details area so that it can be (re)filled (again)
+		view.cleanKeyBindingDetails();
+		view.resetResetWidgetsForSelectedKeyBindingAction();
+		
+		int count = tree.getSelectionCount();
+		
+		// not exactly 1 node selected?
+		if ( count != 1 )
+			return;
+		
+		// selected node is not a leaf?
+		MidicaTreeNode node = (MidicaTreeNode) tree.getLastSelectedPathComponent();
+		if ( node.getChildCount() > 0 )
+			return;
+		
+		// display configured key bindings
+		String         id       = node.getId();
+		MidicaTreeNode catNode  = (MidicaTreeNode) node.getParent();
+		String         category = catNode.getName();
+		selectedKeyBindingId    = id;
+		view.fillKeyBindingDetails(id, category);
+	}
+	
+	/**
+	 * Handles text field change events.
+	 * 
+	 * The text field causing the event can be one of the following:
+	 * 
+	 * - the key binding tree filter
+	 * - one of the MIDI message filters (from ticks, to ticks, tracks)
+	 * 
+	 * In the first case the tree is filtered. In the second case, the
+	 * text field contents are checked (by calling
+	 * {@link #checkTextFields(DocumentEvent)}).
+	 * 
+	 * @param e    Event object.
+	 */
+	private void handleTextFieldChange(DocumentEvent e) {
+		
+		String fieldName = e.getDocument().getProperty("name").toString();
+		if (NAME_KB_FILTER.equals(fieldName)) {
+			filterKeyBindingTree();
+		}
+		else {
+			checkTextFields(e);
+		}
+	}
+	
+	/**
+	 * Filters the tree according to the text from the tree filter field.
+	 * Only filters leaf nodes but no categories.
+	 * Categories or the root node are colored in gray, if they don't contain
+	 * any matching leaf nodes.
+	 * 
+	 * The filter is checked against the action description and all
+	 * associated key binding descriptions.
+	 * 
+	 * Example:
+	 * To look for the action to close error message windows, you can
+	 * filter for one of the following strings:
+	 * 
+	 * - "Close the message window"
+	 * - "Enter"
+	 * - "Escape"
+	 * - "Space"
+	 */
+	private void filterKeyBindingTree() {
+		JTextField filter    = view.getKeybindingTreeFilter();
+		String     filterStr = filter.getText().toLowerCase();
+		MidicaTree tree      = tmKeyBindings.getTree();
+		
+		// add filter functionality
+		tree.setCellRenderer(new DefaultTreeCellRenderer() {
+			
+			private static final long serialVersionUID = 1L;
+			
+			private JLabel nullLabel = new JLabel();
+			
+			@Override
+			public Component getTreeCellRendererComponent(JTree tree, Object value, boolean sel, boolean expanded,
+				boolean leaf, int row, boolean hasFocus) {
+				
+				Component defaultComponent = super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
+				
+				// don't filter, if the filter text is empty
+				if ("".equals(filterStr))
+					return defaultComponent;
+				
+				// category?
+				// don't filter but colorize
+				MidicaTreeNode node = (MidicaTreeNode) value;
+				if ( ! node.isLeaf() ) {
+					if ( ! hasMatchingDescendant(node) ) {
+						defaultComponent.setForeground(Laf.COLOR_TREE_NODE_INACTIVE);
+					}
+					return defaultComponent;
+				}
+				
+				// leaf - filter matches?
+				if (filterMatches(node))
+					return defaultComponent;
+				
+				// leaf - filter doesn't match
+				return nullLabel;
+			}
+			
+			/**
+			 * Determins if the given node has a descending leaf matching the filter.
+			 * 
+			 * @param node  the node to be checked
+			 * @return **true**, if a descending leaf is found, otherwise **false**
+			 */
+			private boolean hasMatchingDescendant(MidicaTreeNode node) {
+				int count = node.getChildCount();
+				for (int i = 0; i < count; i++) {
+					MidicaTreeNode child = (MidicaTreeNode) node.getChildAt(i);
+					if (child.isLeaf()) {
+						if (filterMatches(child)) {
+							return true;
+						}
+					}
+					else if (hasMatchingDescendant(child)) {
+						return true;
+					}
+				}
+				
+				return false;
+			}
+			
+			/**
+			 * Checks if the given leaf node matches the filter.
+			 * The filter is matching, if either the action description matches or one of
+			 * the associated key binding descriptions.
+			 * 
+			 * @param node  the leaf node to be checked
+			 * @return **true**, if the filter matches, otherwise **false**.
+			 */
+			private boolean filterMatches(MidicaTreeNode node) {
+				
+				// check action name
+				String action = node.getName();
+				if (action.toLowerCase().contains(filterStr))
+					return true;
+				
+				// check key binding description
+				String id = node.getId();
+				for (KeyBinding binding : Config.getKeyBindings(id)) {
+					if (binding.getDescription().toLowerCase().contains(filterStr)) {
+						return true;
+					}
+				}
+				
+				return false;
+			}
+		});
+	}
+	
+	/**
+	 * Recreates the key binding tree model, reconnects it with the
+	 * tree and selects the previously selected nodes.
+	 * 
+	 * This is called when the key bindings have been changed.
+	 */
+	private void updateKeyBindingTree() {
+		
+		// remember selected nodes
+		TreeSet<String> selectedIds = tmKeyBindings.getSelectedIds();
+		
+		// recreate the tree model and reconnect it with the tree
+		MidicaTree tree = tmKeyBindings.getTree();
+		tmKeyBindings   = Config.getKeyBindingTreeModel();
+		tree.setModel(tmKeyBindings);
+		tmKeyBindings.setTree(tree);
+		
+		// re-select previous selection
+		tmKeyBindings.selectByIds(selectedIds);
 	}
 	
 	/**

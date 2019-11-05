@@ -875,14 +875,14 @@ public class SequenceAnalyzer {
 		perChannel.add( bankOpts    );
 		perChannel.add( programOpts );
 		perChannel.add( noteOpts    );
-		banksAndInstrPerChannel.add( perChannel );
+		banksAndInstrPerChannel.add(perChannel, null);
 		
 		// total
 		ArrayList<String[]> total = new ArrayList<>();
 		total.add( bankOpts    );
 		total.add( programOpts );
 		total.add( noteOpts    );
-		banksAndInstrTotal.add( total );
+		banksAndInstrTotal.add(total, null);
 	}
 	
 	/**

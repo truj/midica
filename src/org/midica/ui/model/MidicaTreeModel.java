@@ -9,6 +9,7 @@ package org.midica.ui.model;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.TreeSet;
 
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
@@ -92,13 +93,42 @@ public class MidicaTreeModel extends DefaultTreeModel {
 	 * and incremented by 1. That includes all branches and the leaf.
 	 * 
 	 * @param params  Two-dimensional list.
-	 *                1st dimension: node, 2nd dimension: id, name and number
+	 * 
+	 * - 1st dimension: node
+	 * - 2nd dimension:
+	 *     - id
+	 *     - name
+	 *     - number
+	 *     - sort key (optional) -- if missing, **id** is used instead
+	 * @param ttAttachment  added to the leaf node's tool tip text, if not **null**
 	 * @return the leaf node of the added path.
 	 * @throws ReflectiveOperationException if the new child node cannot be created.
 	 */
-	public MidicaTreeNode add( ArrayList<String[]> params ) throws ReflectiveOperationException {
+	public MidicaTreeNode add(ArrayList<String[]> params, String ttAttachment) throws ReflectiveOperationException {
 		rootNode.increment();
-		return add( rootNode, params );
+		return add(rootNode, params, ttAttachment, true);
+	}
+	
+	/**
+	 * Adds a new path to the tree, if it does not yet exist, using the
+	 * root node as the entry point, without incrementing the nodes in the path.
+	 * 
+	 * All nodes on the way to the leaf will be created if not yet done, but not incremented.
+	 * That includes all branches and the leaf.
+	 * 
+	 * @param params  params  Two-dimensional list.
+	 * 
+	 * - 1st dimension: node
+	 * - 2nd dimension:
+	 *     - id
+	 *     - name
+	 *     - number
+	 *     - sort key (optional) -- if missing, **id** is used instead
+	 * @return the leaf node of the added path.
+	 * @throws ReflectiveOperationException
+	 */
+	public MidicaTreeNode addWithoutIncrementing(ArrayList<String[]> params) throws ReflectiveOperationException {
+		return add(rootNode, params, null, false);
 	}
 	
 	/**
@@ -106,30 +136,43 @@ public class MidicaTreeModel extends DefaultTreeModel {
 	 * 
 	 * @param parent  Data structure where the new node is to be added.
 	 * @param params  Two-dimensional list.
-	 *                1st dimension: node, 2nd dimension: id, name and number.
+	 * 
+	 * - 1st dimension: node
+	 * - 2nd dimension:
+	 *     - id
+	 *     - name
+	 *     - number
+	 *     - sort key (optional) -- if missing, **id** is used instead
+	 * 
+	 * @param ttAttachment   added to the leaf node's tool tip text, if not **null**
+	 * @param mustIncrement  **true** if the affected nodes should be incremented, otherwise **false**.
 	 * @return the leaf node of the added/incremented path.
 	 * @throws ReflectiveOperationException if the new child node cannot be created.
 	 */
-	private MidicaTreeNode add( MidicaTreeNode parent, ArrayList<String[]> params ) throws ReflectiveOperationException {
+	private MidicaTreeNode add(MidicaTreeNode parent, ArrayList<String[]> params, String ttAttachment, boolean mustIncrement) throws ReflectiveOperationException {
 		
 		// get options of the first node to be added/incremented
 		boolean isLeaf  = 1 == params.size();
-		String[] opts   = params.get( 0 );
-		String   id     = opts[ 0 ];
-		String   name   = opts[ 1 ];
-		String   number = opts[ 2 ];
+		String[] opts    = params.get( 0 );
+		String   id      = opts[ 0 ];
+		String   name    = opts[ 1 ];
+		String   number  = opts[ 2 ];
+		String   sortKey = null;
+		if (opts.length > 3)
+			sortKey = opts[ 3 ];
 		
 		// add/increment the first node
-		MidicaTreeNode incrementedChild = parent.addAndOrIncrement( id, name, number, isLeaf );
+		MidicaTreeNode affectedChild;
+		affectedChild = parent.addAndOrIncrement(id, name, number, isLeaf, sortKey, ttAttachment, mustIncrement);
 		
 		// recursion or return
 		if (isLeaf) {
-			return incrementedChild;
+			return affectedChild;
 		}
 		else {
 			// recursion: add/increment the other nodes
-			params.remove( 0 );
-			return add( incrementedChild, params );
+			params.remove(0);
+			return add(affectedChild, params, ttAttachment, mustIncrement);
 		}
 	}
 	
@@ -180,11 +223,11 @@ public class MidicaTreeModel extends DefaultTreeModel {
 	 * @param parentPath  Path of the node to be expended.
 	 * @param mustExpand  **true** for expanding, **false** for collapsing
 	 */
-	private void expandOrCollapse( TreePath parentPath, boolean mustExpand ) {
+	private void expandOrCollapse(TreePath parentPath, boolean mustExpand) {
 		
 		// expand/collapse the children recursively
 		MidicaTreeNode node = (MidicaTreeNode) parentPath.getLastPathComponent();
-		if ( node.getChildCount() >= 0 ) {
+		if (node.getChildCount() >= 0) {
 			for ( Enumeration<MidicaTreeNode> e = node.children(); e.hasMoreElements(); ) {
 				MidicaTreeNode childNode = (MidicaTreeNode) e.nextElement();
 				TreePath childPath = parentPath.pathByAddingChild( childNode );
@@ -194,8 +237,74 @@ public class MidicaTreeModel extends DefaultTreeModel {
 		
 		// expand/collapse the parent
 		if (mustExpand)
-			tree.expandPath( parentPath );
+			tree.expandPath(parentPath);
 		else
-			tree.collapsePath( parentPath );
+			tree.collapsePath(parentPath);
+	}
+	
+	/**
+	 * Collects and returns all IDs of currently selected tree nodes.
+	 * Does not collect **null** IDs.
+	 * 
+	 * @return the collected IDs.
+	 */
+	public TreeSet<String> getSelectedIds() {
+		TreePath[]      paths       = tree.getSelectionPaths();
+		TreeSet<String> selectedIds = new TreeSet<>();
+		if (paths != null) {
+			for (TreePath path : paths) {
+				MidicaTreeNode node = (MidicaTreeNode) path.getLastPathComponent();
+				String id = node.getId();
+				if (id != null)
+					selectedIds.add(id);
+			}
+		}
+		return selectedIds;
+	}
+	
+	/**
+	 * Selects all tree nodes that contain one of the given IDs.
+	 * 
+	 * @param ids  the IDs associated with the nodes to be selected.
+	 */
+	public void selectByIds(TreeSet<String> ids) {
+		ArrayList<TreePath> selectionPaths = new ArrayList<>();
+		fillPathsByIds(ids, rootNode, selectionPaths);
+		TreePath[] paths = new TreePath[selectionPaths.size()];
+		int i = 0;
+		for (TreePath path : selectionPaths) {
+			paths[i] = path;
+			i++;
+		}
+		tree.setSelectionPaths(paths);
+	}
+	
+	/**
+	 * Fills the given **selectionPaths** structure with all nodes under the given **node** recursively,
+	 * that contain one of the given **ids**.
+	 * Works recursively.
+	 * 
+	 * @param ids             the IDs associated with the nodes to be collected.
+	 * @param node            the node under which to be searched.
+	 * @param selectionPaths  the structure to be filled.
+	 */
+	private void fillPathsByIds(TreeSet<String> ids, MidicaTreeNode node, ArrayList<TreePath> selectionPaths) {
+		
+		// add given node to the list, if it has one of the requested IDs
+		String id = node.getId();
+		if (id != null) {
+			if (ids.contains(id)) {
+				TreePath path = new TreePath(node.getPath());
+				selectionPaths.add(path);
+			}
+		}
+		
+		// do the same with the children, recursively
+		if (node.getChildCount() > 0) {
+			for (int i = 0; i < node.getChildCount(); i++) {
+				MidicaTreeNode child = (MidicaTreeNode) node.getChildAt(i);
+				fillPathsByIds(ids, child, selectionPaths); // recursion
+			}
+		}
 	}
 }

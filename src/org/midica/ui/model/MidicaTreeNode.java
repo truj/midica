@@ -15,9 +15,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 /**
  * This class represents a node for a {@link org.midica.ui.widget.MidicaTree}.
  * 
- * It contains a name, a descendant counter and a number
+ * It contains a name, a descendant counter, an ID and a number
  * representing a MIDI byte, double byte or byte range.
- * However the number can be **null**.
+ * However the number can be **null**, as well as the ID.
  * 
  * This class is designed to be used mainly from a {@link MidicaTreeModel}.
  * The following steps are necessary:
@@ -25,7 +25,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
  * - Call one of the constructors.
  * - Call {@link #initChildren()}, if it's a branch. Not necessary for leafs.
  * - For each child:
- *   - Call {@link #addAndOrIncrement(String, String, String, boolean)}
+ *   - Call {@link #addAndOrIncrement(String, String, String, boolean, String, boolean)}
  *   - Call {@link #increment()}
  * - After all children are added, connect them with each other in the right
  *   order by calling {@link #addChildren()}. This works recursively.
@@ -45,8 +45,14 @@ public class MidicaTreeNode extends DefaultMutableTreeNode {
 	/** number of leaves under the node's hierarchy */
 	private int count = 0;
 	
+	/** id of the node */
+	private String id = null;
+	
 	/** stores the child nodes in a sorted form */
 	private TreeMap<String, MidicaTreeNode> sortedChildren = null;
+	
+	/** additions to the tool tip */
+	private String toolTipAttachment = null;
 	
 	/**
 	 * Creates a new node with the given text and number.
@@ -54,7 +60,7 @@ public class MidicaTreeNode extends DefaultMutableTreeNode {
 	 * @param name    Main text to be displayed.
 	 * @param number  MIDI number representing this node.
 	 */
-	public MidicaTreeNode( String name, String number ) {
+	public MidicaTreeNode(String name, String number) {
 		this.number = number;
 		this.name   = name;
 	}
@@ -64,7 +70,7 @@ public class MidicaTreeNode extends DefaultMutableTreeNode {
 	 * 
 	 * @param name  Main text to be displayed.
 	 */
-	public MidicaTreeNode( String name ) {
+	public MidicaTreeNode(String name) {
 		this.name = name;
 	}
 	
@@ -77,7 +83,7 @@ public class MidicaTreeNode extends DefaultMutableTreeNode {
 	 * {@link #setName(String)} or {@link #setNumber(String)}.
 	 */
 	public MidicaTreeNode() {
-		super( "" );
+		super("");
 	}
 	
 	/**
@@ -93,7 +99,7 @@ public class MidicaTreeNode extends DefaultMutableTreeNode {
 	 * 
 	 * @param number MIDI number.
 	 */
-	public void setNumber( String number ) {
+	public void setNumber(String number) {
 		this.number = number;
 	}
 	
@@ -111,8 +117,26 @@ public class MidicaTreeNode extends DefaultMutableTreeNode {
 	 * 
 	 * @param name base text of the node
 	 */
-	public void setName( String name ) {
+	public void setName(String name) {
 		this.name = name;
+	}
+	
+	/**
+	 * Returns the ID of the node.
+	 * 
+	 * @return ID of the node
+	 */
+	public String getId() {
+		return id;
+	}
+	
+	/**
+	 * Sets the ID of the node.
+	 * 
+	 * @param ID of the node
+	 */
+	public void setId(String id) {
+		this.id = id;
 	}
 	
 	/**
@@ -137,36 +161,62 @@ public class MidicaTreeNode extends DefaultMutableTreeNode {
 	 * If a new child is created, it is also added to the sorted children
 	 * data structure. However it is not yet added to the tree.
 	 * 
-	 * @param id      Child identifier string -- unique for the children of this node.
-	 * @param name    Child name.
-	 * @param number  MIDI number representation of the child.
-	 * @param isLeaf  Specifies if the child is a leaf or a branch.
+	 * @param id             Child identifier string -- unique for the children of this node.
+	 * @param name           Child name.
+	 * @param number         MIDI number representation of the child.
+	 * @param isLeaf         Specifies if the child is a leaf or a branch.
+	 * @param sortKey        String used for sorting (if **null**, the **id** is used for sorting instead).
+	 * @param ttAttachment   added to the leaf node's tool tip text, if not **null**
+	 * @param mustIncrement  **true** if the affected nodes should be incremented, otherwise **false**.
 	 * @return created or incremented child.
 	 * @throws ReflectiveOperationException if the new child node cannot be created.
 	 */
-	public MidicaTreeNode addAndOrIncrement( String id, String name, String number, boolean isLeaf ) throws ReflectiveOperationException {
+	public MidicaTreeNode addAndOrIncrement(String id, String name, String number, boolean isLeaf,
+			String sortKey, String ttAttachment, boolean mustIncrement) throws ReflectiveOperationException {
+		
+		if (null == sortKey)
+			sortKey = id;
 		
 		// create child, if not yet done
-		if ( ! sortedChildren.containsKey(id) ) {
+		if ( ! sortedChildren.containsKey(sortKey) ) {
 			MidicaTreeNode child;
 			try {
 				child = getClass().newInstance();
-				child.setNumber( number );
-				child.setName( name );
-				sortedChildren.put( id, child );
+				child.setNumber(number);
+				child.setName(name);
+				child.setId(id);
+				sortedChildren.put(sortKey, child);
 				if ( ! isLeaf )
 					child.initChildren();
 			}
-			catch ( ReflectiveOperationException e ) {
+			catch (ReflectiveOperationException e) {
 				throw e;
 			}
 		}
 		
 		// increment child
-		MidicaTreeNode child = sortedChildren.get( id );
-		child.increment();
+		MidicaTreeNode child = sortedChildren.get(sortKey);
+		if (mustIncrement)
+			child.increment();
+		
+		// tool tip attachment
+		if (isLeaf && ttAttachment != null) {
+			child.attachToToolTip(ttAttachment);
+		}
 		
 		return child;
+	}
+	
+	/**
+	 * Adds the given attachment to the node's tool tip.
+	 * 
+	 * @param ttAttachment  tool tip attachment
+	 */
+	public void attachToToolTip(String ttAttachment) {
+		if (toolTipAttachment == null)
+			toolTipAttachment = ttAttachment;
+		else
+			toolTipAttachment += ttAttachment;
 	}
 	
 	/**
@@ -174,10 +224,10 @@ public class MidicaTreeNode extends DefaultMutableTreeNode {
 	 */
 	public void addChildren() {
 		
-		if ( null == sortedChildren )
+		if (null == sortedChildren)
 			return;
 		
-		for ( Entry<String, MidicaTreeNode> childEntry : sortedChildren.entrySet() ) {
+		for (Entry<String, MidicaTreeNode> childEntry : sortedChildren.entrySet()) {
 			MidicaTreeNode child = childEntry.getValue();
 			child.addChildren();
 			add( child );
@@ -192,6 +242,16 @@ public class MidicaTreeNode extends DefaultMutableTreeNode {
 	 * @return the tooltip to be displayed.
 	 */
 	public String getToolTip() {
+		
+		if (toolTipAttachment != null) {
+			return "<html>"
+				+ toString()
+				.replaceAll("&", "&amp;")
+				.replaceAll("<", "&lt;")
+				.replaceAll(">", "&gt;")
+				+ toolTipAttachment;
+		}
+		
 		return toString();
 	}
 	
@@ -200,7 +260,7 @@ public class MidicaTreeNode extends DefaultMutableTreeNode {
 	 */
 	@Override
 	public String toString() {
-		if ( null == number )
+		if (null == number)
 			return name + " (" + count + ")";
 		return "[" + number + "] " + name + " (" + count + ")";
 	}

@@ -56,6 +56,7 @@ You write your songs in plain text files using the text editor of your choice. M
     - Syntax (3 different sets of key words for the programming language) - not _that_ important as the syntax can be redefined in MidicaPL anyway
     - Percussion IDs (English or German)
     - Instrument IDs (English or German)
+    - Key bindings
 
 # Screenshots
 

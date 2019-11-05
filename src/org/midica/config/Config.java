@@ -19,13 +19,17 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.midica.Midica;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
+import org.midica.ui.model.MidicaTreeModel;
 
 /**
  * This class handles configuration issues.
@@ -197,7 +201,7 @@ public class Config {
 	 * 
 	 * @param homeDir Home directory of the current user
 	 */
-	public static void restoreDefaults( String homeDir ) {
+	public static void restoreDefaults(String homeDir) {
 		
 		// define default config
 		defaults = new HashMap<>();
@@ -231,6 +235,15 @@ public class Config {
 		for ( String key : defaults.keySet() ) {
 			set( key, defaults.get(key) );
 		}
+		
+		// do the same thing with key bindings
+		restoreDefaultKeyBindings();
+	}
+	
+	/**
+	 * Initializes all key default key bindings and uses copies of them for the real key bindings
+	 */
+	private static void restoreDefaultKeyBindings() {
 		
 		// define default key bindings
 		defaultBindings = new TreeMap<>();
@@ -273,97 +286,97 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_PLAYER_TRANSPOSE_SLD,     KeyEvent.VK_T,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_VOL_FLD,        KeyEvent.VK_V,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_VOL_SLD,        KeyEvent.VK_V,        InputEvent.ALT_DOWN_MASK  | InputEvent.SHIFT_DOWN_MASK );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_0,              KeyEvent.VK_0,        0                          );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_1,              KeyEvent.VK_1,        0                          );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_2,              KeyEvent.VK_2,        0                          );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_3,              KeyEvent.VK_3,        0                          );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_4,              KeyEvent.VK_4,        0                          );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_5,              KeyEvent.VK_5,        0                          );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_6,              KeyEvent.VK_6,        0                          );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_7,              KeyEvent.VK_7,        0                          );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_8,              KeyEvent.VK_8,        0                          );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_9,              KeyEvent.VK_P,        InputEvent.SHIFT_DOWN_MASK );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_9,              KeyEvent.VK_9,        0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_00,             KeyEvent.VK_0,        0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_01,             KeyEvent.VK_1,        0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_02,             KeyEvent.VK_2,        0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_03,             KeyEvent.VK_3,        0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_04,             KeyEvent.VK_4,        0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_05,             KeyEvent.VK_5,        0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_06,             KeyEvent.VK_6,        0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_07,             KeyEvent.VK_7,        0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_08,             KeyEvent.VK_8,        0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_09,             KeyEvent.VK_P,        InputEvent.SHIFT_DOWN_MASK );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_09,             KeyEvent.VK_9,        0                          );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_10,             KeyEvent.VK_0,        InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_11,             KeyEvent.VK_1,        InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_12,             KeyEvent.VK_2,        InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_13,             KeyEvent.VK_3,        InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_14,             KeyEvent.VK_4,        InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_15,             KeyEvent.VK_5,        InputEvent.SHIFT_DOWN_MASK );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_0,              KeyEvent.VK_NUMPAD0,  0                          );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_1,              KeyEvent.VK_NUMPAD1,  0                          );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_2,              KeyEvent.VK_NUMPAD2,  0                          );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_3,              KeyEvent.VK_NUMPAD3,  0                          );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_4,              KeyEvent.VK_NUMPAD4,  0                          );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_5,              KeyEvent.VK_NUMPAD5,  0                          );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_6,              KeyEvent.VK_NUMPAD6,  0                          );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_7,              KeyEvent.VK_NUMPAD7,  0                          );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_8,              KeyEvent.VK_NUMPAD8,  0                          );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_9,              KeyEvent.VK_NUMPAD9,  0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_00,             KeyEvent.VK_NUMPAD0,  0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_01,             KeyEvent.VK_NUMPAD1,  0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_02,             KeyEvent.VK_NUMPAD2,  0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_03,             KeyEvent.VK_NUMPAD3,  0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_04,             KeyEvent.VK_NUMPAD4,  0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_05,             KeyEvent.VK_NUMPAD5,  0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_06,             KeyEvent.VK_NUMPAD6,  0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_07,             KeyEvent.VK_NUMPAD7,  0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_08,             KeyEvent.VK_NUMPAD8,  0                          );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_09,             KeyEvent.VK_NUMPAD9,  0                          );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_10,             KeyEvent.VK_NUMPAD0,  InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_11,             KeyEvent.VK_NUMPAD1,  InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_12,             KeyEvent.VK_NUMPAD2,  InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_13,             KeyEvent.VK_NUMPAD3,  InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_14,             KeyEvent.VK_NUMPAD4,  InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_15,             KeyEvent.VK_NUMPAD5,  InputEvent.SHIFT_DOWN_MASK );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_0_M,            KeyEvent.VK_0,        InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_1_M,            KeyEvent.VK_1,        InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_2_M,            KeyEvent.VK_2,        InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_3_M,            KeyEvent.VK_3,        InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_4_M,            KeyEvent.VK_4,        InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_5_M,            KeyEvent.VK_5,        InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_6_M,            KeyEvent.VK_6,        InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_7_M,            KeyEvent.VK_7,        InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_8_M,            KeyEvent.VK_8,        InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_9_M,            KeyEvent.VK_9,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_00_M,           KeyEvent.VK_0,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_01_M,           KeyEvent.VK_1,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_02_M,           KeyEvent.VK_2,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_03_M,           KeyEvent.VK_3,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_04_M,           KeyEvent.VK_4,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_05_M,           KeyEvent.VK_5,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_06_M,           KeyEvent.VK_6,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_07_M,           KeyEvent.VK_7,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_08_M,           KeyEvent.VK_8,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_09_M,           KeyEvent.VK_9,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_10_M,           KeyEvent.VK_0,        InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_11_M,           KeyEvent.VK_1,        InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_12_M,           KeyEvent.VK_2,        InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_13_M,           KeyEvent.VK_3,        InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_14_M,           KeyEvent.VK_4,        InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_15_M,           KeyEvent.VK_5,        InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_0_M,            KeyEvent.VK_NUMPAD0,  InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_1_M,            KeyEvent.VK_NUMPAD1,  InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_2_M,            KeyEvent.VK_NUMPAD2,  InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_3_M,            KeyEvent.VK_NUMPAD3,  InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_4_M,            KeyEvent.VK_NUMPAD4,  InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_5_M,            KeyEvent.VK_NUMPAD5,  InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_6_M,            KeyEvent.VK_NUMPAD6,  InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_7_M,            KeyEvent.VK_NUMPAD7,  InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_8_M,            KeyEvent.VK_NUMPAD8,  InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_9_M,            KeyEvent.VK_NUMPAD9,  InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_00_M,           KeyEvent.VK_NUMPAD0,  InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_01_M,           KeyEvent.VK_NUMPAD1,  InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_02_M,           KeyEvent.VK_NUMPAD2,  InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_03_M,           KeyEvent.VK_NUMPAD3,  InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_04_M,           KeyEvent.VK_NUMPAD4,  InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_05_M,           KeyEvent.VK_NUMPAD5,  InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_06_M,           KeyEvent.VK_NUMPAD6,  InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_07_M,           KeyEvent.VK_NUMPAD7,  InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_08_M,           KeyEvent.VK_NUMPAD8,  InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_09_M,           KeyEvent.VK_NUMPAD9,  InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_10_M,           KeyEvent.VK_NUMPAD0,  InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_11_M,           KeyEvent.VK_NUMPAD1,  InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_12_M,           KeyEvent.VK_NUMPAD2,  InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_13_M,           KeyEvent.VK_NUMPAD3,  InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_14_M,           KeyEvent.VK_NUMPAD4,  InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_15_M,           KeyEvent.VK_NUMPAD5,  InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_0_S,            KeyEvent.VK_0,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_1_S,            KeyEvent.VK_1,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_2_S,            KeyEvent.VK_2,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_3_S,            KeyEvent.VK_3,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_4_S,            KeyEvent.VK_4,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_5_S,            KeyEvent.VK_5,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_6_S,            KeyEvent.VK_6,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_7_S,            KeyEvent.VK_7,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_8_S,            KeyEvent.VK_8,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_9_S,            KeyEvent.VK_9,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_00_S,           KeyEvent.VK_0,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_01_S,           KeyEvent.VK_1,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_02_S,           KeyEvent.VK_2,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_03_S,           KeyEvent.VK_3,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_04_S,           KeyEvent.VK_4,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_05_S,           KeyEvent.VK_5,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_06_S,           KeyEvent.VK_6,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_07_S,           KeyEvent.VK_7,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_08_S,           KeyEvent.VK_8,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_09_S,           KeyEvent.VK_9,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_10_S,           KeyEvent.VK_0,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_11_S,           KeyEvent.VK_1,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_12_S,           KeyEvent.VK_2,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_13_S,           KeyEvent.VK_3,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_14_S,           KeyEvent.VK_4,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_15_S,           KeyEvent.VK_5,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_0_S,            KeyEvent.VK_NUMPAD0,  InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_1_S,            KeyEvent.VK_NUMPAD1,  InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_2_S,            KeyEvent.VK_NUMPAD2,  InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_3_S,            KeyEvent.VK_NUMPAD3,  InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_4_S,            KeyEvent.VK_NUMPAD4,  InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_5_S,            KeyEvent.VK_NUMPAD5,  InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_6_S,            KeyEvent.VK_NUMPAD6,  InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_7_S,            KeyEvent.VK_NUMPAD7,  InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_8_S,            KeyEvent.VK_NUMPAD8,  InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_9_S,            KeyEvent.VK_NUMPAD9,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_00_S,           KeyEvent.VK_NUMPAD0,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_01_S,           KeyEvent.VK_NUMPAD1,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_02_S,           KeyEvent.VK_NUMPAD2,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_03_S,           KeyEvent.VK_NUMPAD3,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_04_S,           KeyEvent.VK_NUMPAD4,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_05_S,           KeyEvent.VK_NUMPAD5,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_06_S,           KeyEvent.VK_NUMPAD6,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_07_S,           KeyEvent.VK_NUMPAD7,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_08_S,           KeyEvent.VK_NUMPAD8,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_09_S,           KeyEvent.VK_NUMPAD9,  InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_10_S,           KeyEvent.VK_NUMPAD0,  InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_11_S,           KeyEvent.VK_NUMPAD1,  InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_12_S,           KeyEvent.VK_NUMPAD2,  InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
@@ -382,49 +395,49 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_VEL_SLD,       KeyEvent.VK_V,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_DURATION,      KeyEvent.VK_D,        0                          );
 		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_KEEP,          KeyEvent.VK_K,        0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_0,          KeyEvent.VK_NUMPAD0,  0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_1,          KeyEvent.VK_NUMPAD1,  0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_2,          KeyEvent.VK_NUMPAD2,  0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_3,          KeyEvent.VK_NUMPAD3,  0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_4,          KeyEvent.VK_NUMPAD4,  0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_5,          KeyEvent.VK_NUMPAD5,  0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_6,          KeyEvent.VK_NUMPAD6,  0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_7,          KeyEvent.VK_NUMPAD7,  0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_8,          KeyEvent.VK_NUMPAD8,  0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_9,          KeyEvent.VK_NUMPAD9,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_00,         KeyEvent.VK_NUMPAD0,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_01,         KeyEvent.VK_NUMPAD1,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_02,         KeyEvent.VK_NUMPAD2,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_03,         KeyEvent.VK_NUMPAD3,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_04,         KeyEvent.VK_NUMPAD4,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_05,         KeyEvent.VK_NUMPAD5,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_06,         KeyEvent.VK_NUMPAD6,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_07,         KeyEvent.VK_NUMPAD7,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_08,         KeyEvent.VK_NUMPAD8,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_09,         KeyEvent.VK_NUMPAD9,  0                          );
 		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_10,         KeyEvent.VK_NUMPAD0,  InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_11,         KeyEvent.VK_NUMPAD1,  InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_12,         KeyEvent.VK_NUMPAD2,  InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_13,         KeyEvent.VK_NUMPAD3,  InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_14,         KeyEvent.VK_NUMPAD4,  InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_15,         KeyEvent.VK_NUMPAD5,  InputEvent.SHIFT_DOWN_MASK );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_0,          KeyEvent.VK_0,        0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_1,          KeyEvent.VK_1,        0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_2,          KeyEvent.VK_2,        0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_3,          KeyEvent.VK_3,        0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_4,          KeyEvent.VK_4,        0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_5,          KeyEvent.VK_5,        0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_6,          KeyEvent.VK_6,        0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_7,          KeyEvent.VK_7,        0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_8,          KeyEvent.VK_8,        0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_9,          KeyEvent.VK_P,        InputEvent.SHIFT_DOWN_MASK );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_9,          KeyEvent.VK_9,        0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_00,         KeyEvent.VK_0,        0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_01,         KeyEvent.VK_1,        0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_02,         KeyEvent.VK_2,        0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_03,         KeyEvent.VK_3,        0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_04,         KeyEvent.VK_4,        0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_05,         KeyEvent.VK_5,        0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_06,         KeyEvent.VK_6,        0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_07,         KeyEvent.VK_7,        0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_08,         KeyEvent.VK_8,        0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_09,         KeyEvent.VK_P,        InputEvent.SHIFT_DOWN_MASK );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_09,         KeyEvent.VK_9,        0                          );
 		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_10,         KeyEvent.VK_0,        InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_11,         KeyEvent.VK_1,        InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_12,         KeyEvent.VK_2,        InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_13,         KeyEvent.VK_3,        InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_14,         KeyEvent.VK_4,        InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_15,         KeyEvent.VK_5,        InputEvent.SHIFT_DOWN_MASK );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_0,          KeyEvent.VK_NUMPAD0,  0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_1,          KeyEvent.VK_NUMPAD1,  0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_2,          KeyEvent.VK_NUMPAD2,  0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_3,          KeyEvent.VK_NUMPAD3,  0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_4,          KeyEvent.VK_NUMPAD4,  0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_5,          KeyEvent.VK_NUMPAD5,  0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_6,          KeyEvent.VK_NUMPAD6,  0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_7,          KeyEvent.VK_NUMPAD7,  0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_8,          KeyEvent.VK_NUMPAD8,  0                          );
-		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_9,          KeyEvent.VK_NUMPAD9,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_00,         KeyEvent.VK_NUMPAD0,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_01,         KeyEvent.VK_NUMPAD1,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_02,         KeyEvent.VK_NUMPAD2,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_03,         KeyEvent.VK_NUMPAD3,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_04,         KeyEvent.VK_NUMPAD4,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_05,         KeyEvent.VK_NUMPAD5,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_06,         KeyEvent.VK_NUMPAD6,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_07,         KeyEvent.VK_NUMPAD7,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_08,         KeyEvent.VK_NUMPAD8,  0                          );
+		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_09,         KeyEvent.VK_NUMPAD9,  0                          );
 		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_10,         KeyEvent.VK_NUMPAD0,  InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_11,         KeyEvent.VK_NUMPAD1,  InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_SOUNDCHECK_CH_12,         KeyEvent.VK_NUMPAD2,  InputEvent.SHIFT_DOWN_MASK );
@@ -448,6 +461,7 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_BANKS,          KeyEvent.VK_B,        0                          );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG,            KeyEvent.VK_M,        0                          );
 		addDefaultKeyBinding( Dict.KEY_INFO_ABOUT,               KeyEvent.VK_A,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_KEYBINDINGS,         KeyEvent.VK_K,        0                          );
 		addDefaultKeyBinding( Dict.KEY_INFO_CONF_NOTE_FILTER,    KeyEvent.VK_F,        0                          );
 		addDefaultKeyBinding( Dict.KEY_INFO_CONF_NOTE_FILTER,    KeyEvent.VK_F,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_INFO_CONF_PERC_FILTER,    KeyEvent.VK_F,        0                          );
@@ -491,38 +505,50 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_TRACKS_TXT, KeyEvent.VK_T,        InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_SHOW_IN_TR, KeyEvent.VK_S,        InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_SHOW_AUTO,  KeyEvent.VK_A,        0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_0,       KeyEvent.VK_0,        0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_1,       KeyEvent.VK_1,        0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_2,       KeyEvent.VK_2,        0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_3,       KeyEvent.VK_3,        0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_4,       KeyEvent.VK_4,        0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_5,       KeyEvent.VK_5,        0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_6,       KeyEvent.VK_6,        0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_7,       KeyEvent.VK_7,        0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_8,       KeyEvent.VK_8,        0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_9,       KeyEvent.VK_9,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_00,      KeyEvent.VK_0,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_01,      KeyEvent.VK_1,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_02,      KeyEvent.VK_2,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_03,      KeyEvent.VK_3,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_04,      KeyEvent.VK_4,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_05,      KeyEvent.VK_5,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_06,      KeyEvent.VK_6,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_07,      KeyEvent.VK_7,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_08,      KeyEvent.VK_8,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_09,      KeyEvent.VK_9,        0                          );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_10,      KeyEvent.VK_0,        InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_11,      KeyEvent.VK_1,        InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_12,      KeyEvent.VK_2,        InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_13,      KeyEvent.VK_3,        InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_14,      KeyEvent.VK_4,        InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_15,      KeyEvent.VK_5,        InputEvent.SHIFT_DOWN_MASK );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_0,       KeyEvent.VK_NUMPAD0,  0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_1,       KeyEvent.VK_NUMPAD1,  0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_2,       KeyEvent.VK_NUMPAD2,  0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_3,       KeyEvent.VK_NUMPAD3,  0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_4,       KeyEvent.VK_NUMPAD4,  0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_5,       KeyEvent.VK_NUMPAD5,  0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_6,       KeyEvent.VK_NUMPAD6,  0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_7,       KeyEvent.VK_NUMPAD7,  0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_8,       KeyEvent.VK_NUMPAD8,  0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_9,       KeyEvent.VK_NUMPAD9,  0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_00,      KeyEvent.VK_NUMPAD0,  0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_01,      KeyEvent.VK_NUMPAD1,  0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_02,      KeyEvent.VK_NUMPAD2,  0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_03,      KeyEvent.VK_NUMPAD3,  0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_04,      KeyEvent.VK_NUMPAD4,  0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_05,      KeyEvent.VK_NUMPAD5,  0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_06,      KeyEvent.VK_NUMPAD6,  0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_07,      KeyEvent.VK_NUMPAD7,  0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_08,      KeyEvent.VK_NUMPAD8,  0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_09,      KeyEvent.VK_NUMPAD9,  0                          );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_10,      KeyEvent.VK_NUMPAD0,  InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_11,      KeyEvent.VK_NUMPAD1,  InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_12,      KeyEvent.VK_NUMPAD2,  InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_13,      KeyEvent.VK_NUMPAD3,  InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_14,      KeyEvent.VK_NUMPAD4,  InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_CH_15,      KeyEvent.VK_NUMPAD5,  InputEvent.SHIFT_DOWN_MASK );
+		addDefaultKeyBinding( Dict.KEY_INFO_KEY_TREE,            KeyEvent.VK_T,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_KEY_PL,              KeyEvent.VK_PLUS,     0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_KEY_PL,              KeyEvent.VK_ADD,      0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_KEY_MIN,             KeyEvent.VK_MINUS,    0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_KEY_MIN,             KeyEvent.VK_SUBTRACT, 0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_KEY_FLD,             KeyEvent.VK_K,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_INFO_KEY_FILTER,          KeyEvent.VK_F,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_KEY_ADD_BTN,         KeyEvent.VK_A,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_INFO_KEY_RESET_ID_CBX,    KeyEvent.VK_R,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_KEY_RESET_ID_BTN,    KeyEvent.VK_R,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_INFO_KEY_RESET_GLOB_CBX,  KeyEvent.VK_R,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
+		addDefaultKeyBinding( Dict.KEY_INFO_KEY_RESET_GLOB_BTN,  KeyEvent.VK_R,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK | InputEvent.ALT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_MSG_CLOSE,                KeyEvent.VK_ESCAPE,   0                          );
 		addDefaultKeyBinding( Dict.KEY_MSG_CLOSE,                KeyEvent.VK_ENTER,    0                          );
 		addDefaultKeyBinding( Dict.KEY_MSG_CLOSE,                KeyEvent.VK_SPACE,    0                          );
@@ -531,9 +557,10 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_STRING_FILTER_CLEAR,      KeyEvent.VK_C,        InputEvent.ALT_DOWN_MASK   );
 		
 		// init key bindings with defaults
-		keyBindings  = new TreeMap<>();
-		for ( String id : defaultBindings.keySet() ) {
-			keyBindings.put( id, defaultBindings.get(id) );
+		keyBindings = new TreeMap<>();
+		for (String id : defaultBindings.keySet()) {
+			TreeSet<KeyBinding> bindings = (TreeSet<KeyBinding>) defaultBindings.get(id).clone();
+			keyBindings.put(id, bindings);
 		}
 	}
 	
@@ -612,11 +639,23 @@ public class Config {
 				FileWriter     fw = new FileWriter( configFile );
 				BufferedWriter bw = new BufferedWriter( fw );
 				
+				// normal config
 				for ( String key : defaults.keySet() ) {
 					String value = config.get( key );
 					bw.write( key + " " + value );
 					bw.newLine();
 				}
+				
+				// key bindings
+				for ( String key : keyBindings.keySet() ) {
+					String value = config.get( key );
+					if (null == value) {
+						continue;
+					}
+					bw.write( key + " " + value );
+					bw.newLine();
+				}
+				
 				bw.close();
 			}
 		}
@@ -638,9 +677,41 @@ public class Config {
 		line = line.replaceFirst( "\\s+$", "" ); // eliminate trailing whitespaces
 		String[] splitted = line.split( " ", 2 );
 		try {
-			set( splitted[0], splitted[1] );
+			String name = splitted[0];
+			String value;
+			
+			// null values are allowed for key bindings...
+			if (defaultBindings.containsKey(name)) {
+				try {
+					value = splitted[1];
+				}
+				catch (ArrayIndexOutOfBoundsException|NumberFormatException e) {
+					value = "";
+				}
+			}
+			else {
+				// ... but for other config values they are forbidden
+				value = splitted[1];
+			}
+			
+			if (defaultBindings.containsKey(name)) {
+				TreeSet<KeyBinding> bindings = new TreeSet<>();
+				String[] bindingStr = value.split(",");
+				
+				if ( ! "".equals(value) ) {
+					for (String keycodeAndMods : bindingStr) {
+						String[]   elements  = keycodeAndMods.split("-", -1);
+						int        keyCode   = Integer.parseInt(elements[0]);
+						int        modifiers = Integer.parseInt(elements[1]);
+						KeyBinding binding   = new KeyBinding(keyCode, modifiers);
+						bindings.add(binding);
+					}
+				}
+				keyBindings.put(name, bindings);
+			}
+			set(name, value);
 		}
-		catch ( ArrayIndexOutOfBoundsException e ) {
+		catch (ArrayIndexOutOfBoundsException|NumberFormatException e) {
 			// nothing to set
 			return;
 		}
@@ -689,6 +760,177 @@ public class Config {
 		else if (lang.equals(CBX_LANG_GERMAN)) {
 			Locale.setDefault(Locale.GERMAN);
 		}
+	}
+	
+	/**
+	 * Creates and returns a tree model for the currently configured key bindings.
+	 * 
+	 * @return tree model for the key bindings.
+	 */
+	public static MidicaTreeModel getKeyBindingTreeModel() {
+		MidicaTreeModel model = new MidicaTreeModel( Dict.get(Dict.KB_CATEGORIES) );
+		
+		Pattern chPattern = Pattern.compile( "(\\d{1})" );
+		
+		// category == window
+		int catNum = 0;
+		for (String category : Dict.getKeyBindingCategories()) {
+			String catName = Dict.get(category);
+			
+			// key binding action == widget
+			for (String id : keyBindings.keySet()) {
+				if (id.startsWith(category)) {
+					
+					// we want the action to be displayed in the tree, even if it has no
+					// configured key bindings.
+					boolean mustFake = false;
+					if (0 == keyBindings.get(id).size()) {
+						mustFake = true;
+						keyBindings.get(id).add(new KeyBinding(-1, -1));
+					}
+					
+					// number of bindings
+					Iterator<KeyBinding> iterator = keyBindings.get(id).iterator();
+					while (iterator.hasNext()) {
+						KeyBinding binding = iterator.next();
+						ArrayList<String[]> treePath = new ArrayList<>();
+						
+						// Ensure correct sorting for channel-based key bindings.
+						// E.g. 1, 9, 10 instead of 1, 10, 9
+						String sortString = Dict.get(id);
+						if (id.contains("_0")) {
+							Matcher chMatcher = chPattern.matcher(sortString);
+							if (chMatcher.find()) {
+								sortString = chMatcher.replaceAll("0$1");
+							}
+						}
+						
+						// add path to tree model
+						String[] cat         = { catNum + "",  catName,      null             };
+						String[] bindingNode = { id,           Dict.get(id), null, sortString };
+						treePath.add(cat);
+						treePath.add(bindingNode);
+						
+						try {
+							if (mustFake) {
+								model.addWithoutIncrementing(treePath);
+							}
+							else {
+								keyBindings.get(id);
+								String kbToolTip = "<br>- " + binding.getDescription();
+								model.add(treePath, kbToolTip);
+							}
+						}
+						catch (ReflectiveOperationException e) {
+						}
+					}
+					
+					// remove faked element again
+					if (mustFake) {
+						keyBindings.get(id).clear();
+					}
+				}
+			}
+			catNum++;
+		}
+		model.postprocess();
+		
+		return model;
+	}
+	
+	/**
+	 * Adds a new key binding.
+	 * This is called when the user manually adds a new key binding.
+	 * 
+	 * @param id       the ID describing the action for the key binding
+	 * @param binding  the key binding to be added to the action
+	 */
+	public static void addKeyBinding(String id, KeyBinding binding) {
+		
+		// make it ready to be used now
+		TreeSet<KeyBinding> bindings = keyBindings.get(id);
+		bindings.add(binding);
+		
+		// mark it to be written into the config file
+		setKeyBindingIdInConfig(id, bindings);
+	}
+	
+	/**
+	 * Removes the given key binding.
+	 * This is called when the user manually removes a key binding.
+	 * 
+	 * @param id           the ID describing the action for the key binding
+	 * @param bindingDesc  short string describing the key binding uniquely
+	 */
+	public static void removeKeyBinding(String id, String bindingDesc) {
+		
+		// find the binding to be removed
+		KeyBinding targetBinding = null;
+		TreeSet<KeyBinding> bindings = keyBindings.get(id);
+		for (KeyBinding b : bindings) {
+			if (b.toString().equals(bindingDesc)) {
+				targetBinding = b;
+				break;
+			}
+		}
+		
+		// remove it from the currently used structure
+		bindings.remove(targetBinding);
+		
+		// mark it to be written into the config file
+		setKeyBindingIdInConfig(id, bindings);
+	}
+	
+	/**
+	 * Resets the key bindings belonging to the specified action to the default.
+	 * 
+	 * @param id  the ID describing the action for the key binding
+	 */
+	public static void resetKeyBindingsToDefault(String id) {
+		
+		// copy from default
+		TreeSet<KeyBinding> bindings = (TreeSet<KeyBinding>) defaultBindings.get(id).clone();
+		keyBindings.put(id, bindings);
+		
+		// mark it to be removed from the config file
+		config.remove(id);
+	}
+	
+	/**
+	 * Resets all key bindings to the default value.
+	 */
+	public static void resetAllKeyBindingsToDefault() {
+		
+		// copy from default
+		keyBindings.clear();
+		for (String id : defaultBindings.keySet()) {
+			TreeSet<KeyBinding> bindings = (TreeSet<KeyBinding>) defaultBindings.get(id).clone();
+			keyBindings.put(id, bindings);
+		}
+		
+		// mark them to be removed from the config file
+		for (String id : keyBindings.keySet()) {
+			config.remove(id);
+		}
+	}
+	
+	/**
+	 * Creates and sets a config value for key bindings to be written into the config file later.
+	 * 
+	 * @param id        the ID describing the action for the key binding
+	 * @param bindings  key bindings of the action to be set
+	 */
+	private static void setKeyBindingIdInConfig(String id, TreeSet<KeyBinding> bindings) {
+		
+		// create a value for the config file
+		ArrayList<String> values = new ArrayList<>();
+		for (KeyBinding b : bindings) {
+			values.add( b.toString() );
+		}
+		String configValue = String.join(",", values);
+		
+		// mark it to be written into the config file
+		set(id, configValue);
 	}
 	
 	/**

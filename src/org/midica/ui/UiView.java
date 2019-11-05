@@ -14,17 +14,12 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
 
-import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSeparator;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
-import javax.swing.plaf.SeparatorUI;
 
 import org.midica.Midica;
 import org.midica.config.Config;
@@ -231,7 +226,7 @@ public class UiView extends JFrame {
 	 */
 	private Container createConfigArea() {
 		JPanel area = new JPanel();
-		area.setBorder( createTitledBorder(Dict.get(Dict.CONFIGURATION)) );
+		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.CONFIGURATION)) );
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
@@ -373,7 +368,7 @@ public class UiView extends JFrame {
 	 */
 	private Container createPlayerArea() {
 		JPanel area = new JPanel();
-		area.setBorder( createTitledBorder(Dict.get(Dict.PLAYER)) );
+		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.PLAYER)) );
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
@@ -410,7 +405,7 @@ public class UiView extends JFrame {
 	 */
 	private Container createImportArea() {
 		JPanel area = new JPanel();
-		area.setBorder( createTitledBorder(Dict.get(Dict.IMPORT)) );
+		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.IMPORT)) );
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
@@ -469,7 +464,7 @@ public class UiView extends JFrame {
 		
 		// line
 		constraints.gridy++;
-		area.add( createSeparator(), constraints );
+		area.add( Laf.createSeparator(), constraints );
 		
 		// midi label
 		constraints.insets = Laf.INSETS_LBL_IMPORT_EXPORT;
@@ -517,7 +512,7 @@ public class UiView extends JFrame {
 		
 		// line
 		constraints.gridy++;
-		area.add( createSeparator(), constraints );
+		area.add( Laf.createSeparator(), constraints );
 		
 		// soundfont label
 		constraints.insets = Laf.INSETS_LBL_IMPORT_EXPORT;
@@ -573,7 +568,7 @@ public class UiView extends JFrame {
 	 */
 	private Container createExportArea() {
 		JPanel area = new JPanel();
-		area.setBorder( createTitledBorder(Dict.get(Dict.EXPORT)) );
+		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.EXPORT)) );
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
@@ -601,7 +596,7 @@ public class UiView extends JFrame {
 		constraints.gridx = 0;
 		constraints.gridy++;
 		constraints.gridwidth = 2;
-		area.add( createSeparator(), constraints );
+		area.add( Laf.createSeparator(), constraints );
 		
 		// midi label
 		constraints.gridx = 0;
@@ -621,7 +616,7 @@ public class UiView extends JFrame {
 		constraints.gridx = 0;
 		constraints.gridy++;
 		constraints.gridwidth = 2;
-		area.add( createSeparator(), constraints );
+		area.add( Laf.createSeparator(), constraints );
 		
 		// MidicaPL label
 		constraints.gridwidth = 1;
@@ -666,52 +661,6 @@ public class UiView extends JFrame {
 	 */
 	public JLabel getChosenSoundfontFileLbl() {
 		return lblChosenSoundfontFile;
-	}
-	
-	/**
-	 * Creates a new titled and etched border for a named object grouping widget.
-	 * This border is used to group and label:
-	 * 
-	 * - the configuration area
-	 * - the player area
-	 * - the import area
-	 * - the export area
-	 * 
-	 * @param title    Label for the border.
-	 * @return         Titled and etched border.
-	 */
-	private Border createTitledBorder(String title) {
-		Border lineBorder = BorderFactory.createLineBorder(Laf.COLOR_BORDER);
-		Border titledBorder = BorderFactory.createTitledBorder(
-			lineBorder,
-			title,
-			TitledBorder.RIGHT,
-			TitledBorder.TOP
-		);
-		return titledBorder;
-	}
-	
-	/**
-	 * Creates and returns a horizontal separator with a fitting color.
-	 * 
-	 * @return the separator.
-	 */
-	private JSeparator createSeparator() {
-		JSeparator sep = new JSeparator(JSeparator.HORIZONTAL);
-		sep.setOpaque(true);
-		if (Laf.isNimbus) {
-			sep.setForeground(Laf.COLOR_PANEL);
-			sep.setBackground(Laf.COLOR_BORDER);
-			
-			// replace nimbus UI by a default UI that respects the colors
-			sep.setUI(new SeparatorUI() {});
-		}
-		else {
-			sep.setForeground(Laf.COLOR_BORDER);
-			sep.setBackground(Laf.COLOR_PANEL);
-		}
-		
-		return sep;
 	}
 	
 	/**

@@ -35,11 +35,9 @@ public class FlowLabel extends JScrollPane {
 	
 	private static final long serialVersionUID = 1L;
 	
-	private static final int HEIGHT_PER_LINE = 15;
-	
 	private int       charsPerLine    = 0;
 	private int       preferredWidth  = 0;
-	private int       preferredHeight = HEIGHT_PER_LINE;
+	private int       preferredHeight = Laf.heightPerLineFlowLbl;
 	private int       maxHeight       = -1;
 	private String    text            = null;
 	private JTextArea label           = null;
@@ -51,38 +49,38 @@ public class FlowLabel extends JScrollPane {
 	 * @param charsPerLine    The estimated number of characters fitting in one line.
 	 * @param prefWidth       The designated width of the label.
 	 */
-	public FlowLabel( String content, int charsPerLine, int prefWidth ) {
+	public FlowLabel(String content, int charsPerLine, int prefWidth) {
 		
 		// Create the label inside the scroll pane.
 		this.text           = content;
 		this.charsPerLine   = charsPerLine;
 		this.preferredWidth = prefWidth;
-		this.label          = new JTextArea( content );
+		this.label          = new JTextArea(content);
 		
 		// background color for nimbus
 		if (Laf.isNimbus) {
-			this.label.setMargin( Laf.INSETS_FLOW_LBL_NIMBUS );
-			this.setBackground( Laf.COLOR_PANEL );
+			this.label.setMargin(Laf.INSETS_FLOW_LBL_NIMBUS);
+			this.setBackground(Laf.COLOR_PANEL);
 		}
 		
 		// Make it look like a label.
-		label.setOpaque( false );
+		label.setOpaque(false);
 		
 		// Make it behave like a label.
-		label.setEditable( false );
+		label.setEditable(false);
 		
 		// Break lines if needed.
-		label.setLineWrap( true );
+		label.setLineWrap(true);
 		
 		// Don't break the lines inside of a word but between words, if possible.
-		label.setWrapStyleWord( true );
+		label.setWrapStyleWord(true);
 		
 		// Connect the label with the scroll pane.
-		this.setViewportView( label );
+		this.setViewportView(label);
 		
 		// Enable scrollbars if needed.
-		this.setHorizontalScrollBarPolicy( JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED );
-		this.setVerticalScrollBarPolicy( JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED );
+		this.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		this.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
 		
 		// calculate the preferred height
 		adjustHeight();
@@ -104,12 +102,12 @@ public class FlowLabel extends JScrollPane {
 	private void adjustHeight() {
 		
 		// get lines specified by line breaks
-		String[] lines = text.split( "\n", -1 ); // -1: don't ignore trailing line breaks
+		String[] lines = text.split("\n", -1); // -1: don't ignore trailing line breaks
 		int lineCount  = lines.length;
 		
 		// increment the line count for oversized lines
 		int extraLines = 0;
-		for ( String line : lines ) {
+		for (String line : lines) {
 			
 			// estimate the needed sub lines for this line
 			int chars        = line.length();
@@ -121,7 +119,7 @@ public class FlowLabel extends JScrollPane {
 		lineCount += extraLines;
 		
 		// get the needed height
-		int neededHeight = lineCount * HEIGHT_PER_LINE;
+		int neededHeight = lineCount * Laf.heightPerLineFlowLbl;
 		
 		// adjust the resulting height
 		preferredHeight = neededHeight;
@@ -140,9 +138,9 @@ public class FlowLabel extends JScrollPane {
 	@Override
 	public Dimension getPreferredSize() {
 		int height = preferredHeight;
-		if ( maxHeight > -1 && preferredHeight > maxHeight )
+		if (maxHeight > -1 && preferredHeight > maxHeight)
 			height = maxHeight;
-		return new Dimension( preferredWidth, height );
+		return new Dimension(preferredWidth, height);
 	}
 	
 	/**
@@ -155,28 +153,40 @@ public class FlowLabel extends JScrollPane {
 	 * 
 	 * @param height  Height limit for the preferred size of the label.
 	 */
-	public void setHeightLimit( int height ) {
+	public void setHeightLimit(int height) {
 		maxHeight = height;
+	}
+	
+	/**
+	 * Sets the foreground color.
+	 */
+	@Override
+	public void setForeground(Color color) {
+		
+		if (null == label)
+			return;
+		
+		label.setForeground(color);
 	}
 	
 	/**
 	 * Sets the background color.
 	 */
 	@Override
-	public void setBackground( Color color ) {
+	public void setBackground(Color color) {
 		
-		if ( null == label )
+		if (null == label)
 			return;
 		
-		label.setBackground( color );
-		label.setOpaque( true );
+		label.setBackground(color);
+		label.setOpaque(true);
 	}
 	
 	/**
 	 * This method is overridden in order to show no border at all.
 	 */
 	@Override
-	public void setBorder( Border border ) {
+	public void setBorder(Border border) {
 		// nothing to do
 	}
 	
@@ -185,8 +195,8 @@ public class FlowLabel extends JScrollPane {
 	 * 
 	 * @param text The text to be displayed.
 	 */
-	public void setText( String text ) {
-		label.setText( text );
+	public void setText(String text) {
+		label.setText(text);
 	}
 	
 	/**
@@ -195,7 +205,7 @@ public class FlowLabel extends JScrollPane {
 	 * @param text The tool tip text to be set.
 	 */
 	@Override
-	public void setToolTipText( String text ) {
-		label.setToolTipText( text );
+	public void setToolTipText(String text) {
+		label.setToolTipText(text);
 	}
 }

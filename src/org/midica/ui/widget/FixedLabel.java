@@ -48,8 +48,8 @@ public class FixedLabel extends JTextField {
 		
 		// background color for nimbus
 		if (Laf.isNimbus) {
-			setMargin( Laf.INSETS_FLOW_LBL_NIMBUS );
-			setBackground( Laf.COLOR_PANEL );
+			setMargin(Laf.INSETS_FLOW_LBL_NIMBUS);
+			setBackground(Laf.COLOR_PANEL);
 		}
 		
 		// Make it look like a label.
@@ -76,14 +76,14 @@ public class FixedLabel extends JTextField {
 	 */
 	@Override
 	public Dimension getPreferredSize() {
-		return new Dimension( preferredWidth, preferredHeight );
+		return new Dimension(preferredWidth, preferredHeight);
 	}
 	
 	/**
 	 * Sets the background color.
 	 */
 	@Override
-	public void setBackground( Color color ) {
+	public void setBackground(Color color) {
 		super.setBackground(color);
 		setOpaque(true);
 	}

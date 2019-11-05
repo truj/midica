@@ -464,7 +464,7 @@ public class KeyBindingManager {
 		tabToLevel.put(id, 1);
 		
 		// tooltips
-		String tt = getBindingSpecificTooTip(id, Dict.TT_KEY_TAB_SELECT);
+		String tt = getBindingSpecificToolTip(id, Dict.TT_KEY_TAB_SELECT);
 		tabbedPane.setToolTipTextAt(index, "<html>" + tt);
 		
 		// remember bindings and fill input map
@@ -491,7 +491,7 @@ public class KeyBindingManager {
 		indexToLvl2Pane.put(indexLvl1, lvl2Pane);
 		
 		// tooltips
-		String tt = getBindingSpecificTooTip(id, Dict.TT_KEY_TAB_SELECT);
+		String tt = getBindingSpecificToolTip(id, Dict.TT_KEY_TAB_SELECT);
 		lvl2Pane.setToolTipTextAt(indexLvl2, "<html>" + tt);
 		
 		// remember parent index (level-1 index)
@@ -817,7 +817,7 @@ public class KeyBindingManager {
 		}
 		
 		// append the key binding specific part
-		String bindingSpecific = getBindingSpecificTooTip(id, ttType);
+		String bindingSpecific = getBindingSpecificToolTip(id, ttType);
 		tt.append(bindingSpecific);
 		
 		// add or replace tooltip
@@ -831,7 +831,7 @@ public class KeyBindingManager {
 	 * @param ttType  the translation ID of the tooltip type
 	 * @return the key binding specific part of a tool tip.
 	 */
-	private static String getBindingSpecificTooTip(String id, String ttType) {
+	private static String getBindingSpecificToolTip(String id, String ttType) {
 		
 		// key binding type description
 		StringBuilder tt = new StringBuilder( Dict.get(ttType) );

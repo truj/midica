@@ -67,6 +67,7 @@ public class Dict {
 	private static ArrayList<SyntaxElement>     syntaxList             = null;
 	private static ArrayList<InstrumentElement> instrumentList         = null;
 	private static ArrayList<InstrumentElement> drumkitList            = null;
+	private static ArrayList<String>            keyBindingCategories   = null;
 	
 	// needed to build up the note dictionaries (noteNameToInt and noteIntToName)
 	private static String[] notes      = new String[12];
@@ -456,6 +457,14 @@ public class Dict {
 	public static final String TT_KEY_FILTER_OPEN           = "tt_key_filter_open";
 	public static final String TT_KEY_TAB_SELECT            = "tt_key_tab_select";
 	
+	// key binding categories (windows)
+	public static final String KEYCAT_MAIN                  = "key_main";
+	public static final String KEYCAT_PLAYER                = "key_player";
+	public static final String KEYCAT_SOUNDCHECK            = "key_soundcheck";
+	public static final String KEYCAT_INFO                  = "key_info";
+	public static final String KEYCAT_MSG                   = "key_msg";
+	public static final String KEYCAT_STRING_FILTER         = "key_string_filter";
+	
 	// key binding IDs
 	public static final String KEY_MAIN_INFO                = "key_main_info";
 	public static final String KEY_MAIN_PLAYER              = "key_main_player";
@@ -495,48 +504,48 @@ public class Dict {
 	public static final String KEY_PLAYER_TRANSPOSE_SLD     = "key_player_transpose_sld";
 	public static final String KEY_PLAYER_CH_VOL_FLD        = "key_player_ch_vol_fld";
 	public static final String KEY_PLAYER_CH_VOL_SLD        = "key_player_ch_vol_sld";
-	public static final String KEY_PLAYER_CH_0              = "key_player_ch_0";
-	public static final String KEY_PLAYER_CH_1              = "key_player_ch_1";
-	public static final String KEY_PLAYER_CH_2              = "key_player_ch_2";
-	public static final String KEY_PLAYER_CH_3              = "key_player_ch_3";
-	public static final String KEY_PLAYER_CH_4              = "key_player_ch_4";
-	public static final String KEY_PLAYER_CH_5              = "key_player_ch_5";
-	public static final String KEY_PLAYER_CH_6              = "key_player_ch_6";
-	public static final String KEY_PLAYER_CH_7              = "key_player_ch_7";
-	public static final String KEY_PLAYER_CH_8              = "key_player_ch_8";
-	public static final String KEY_PLAYER_CH_9              = "key_player_ch_9";
+	public static final String KEY_PLAYER_CH_00             = "key_player_ch_00";
+	public static final String KEY_PLAYER_CH_01             = "key_player_ch_01";
+	public static final String KEY_PLAYER_CH_02             = "key_player_ch_02";
+	public static final String KEY_PLAYER_CH_03             = "key_player_ch_03";
+	public static final String KEY_PLAYER_CH_04             = "key_player_ch_04";
+	public static final String KEY_PLAYER_CH_05             = "key_player_ch_05";
+	public static final String KEY_PLAYER_CH_06             = "key_player_ch_06";
+	public static final String KEY_PLAYER_CH_07             = "key_player_ch_07";
+	public static final String KEY_PLAYER_CH_08             = "key_player_ch_08";
+	public static final String KEY_PLAYER_CH_09             = "key_player_ch_09";
 	public static final String KEY_PLAYER_CH_10             = "key_player_ch_10";
 	public static final String KEY_PLAYER_CH_11             = "key_player_ch_11";
 	public static final String KEY_PLAYER_CH_12             = "key_player_ch_12";
 	public static final String KEY_PLAYER_CH_13             = "key_player_ch_13";
 	public static final String KEY_PLAYER_CH_14             = "key_player_ch_14";
 	public static final String KEY_PLAYER_CH_15             = "key_player_ch_15";
-	public static final String KEY_PLAYER_CH_0_M            = "key_player_ch_0_m";
-	public static final String KEY_PLAYER_CH_1_M            = "key_player_ch_1_m";
-	public static final String KEY_PLAYER_CH_2_M            = "key_player_ch_2_m";
-	public static final String KEY_PLAYER_CH_3_M            = "key_player_ch_3_m";
-	public static final String KEY_PLAYER_CH_4_M            = "key_player_ch_4_m";
-	public static final String KEY_PLAYER_CH_5_M            = "key_player_ch_5_m";
-	public static final String KEY_PLAYER_CH_6_M            = "key_player_ch_6_m";
-	public static final String KEY_PLAYER_CH_7_M            = "key_player_ch_7_m";
-	public static final String KEY_PLAYER_CH_8_M            = "key_player_ch_8_m";
-	public static final String KEY_PLAYER_CH_9_M            = "key_player_ch_9_m";
+	public static final String KEY_PLAYER_CH_00_M           = "key_player_ch_00_m";
+	public static final String KEY_PLAYER_CH_01_M           = "key_player_ch_01_m";
+	public static final String KEY_PLAYER_CH_02_M           = "key_player_ch_02_m";
+	public static final String KEY_PLAYER_CH_03_M           = "key_player_ch_03_m";
+	public static final String KEY_PLAYER_CH_04_M           = "key_player_ch_04_m";
+	public static final String KEY_PLAYER_CH_05_M           = "key_player_ch_05_m";
+	public static final String KEY_PLAYER_CH_06_M           = "key_player_ch_06_m";
+	public static final String KEY_PLAYER_CH_07_M           = "key_player_ch_07_m";
+	public static final String KEY_PLAYER_CH_08_M           = "key_player_ch_08_m";
+	public static final String KEY_PLAYER_CH_09_M           = "key_player_ch_09_m";
 	public static final String KEY_PLAYER_CH_10_M           = "key_player_ch_10_m";
 	public static final String KEY_PLAYER_CH_11_M           = "key_player_ch_11_m";
 	public static final String KEY_PLAYER_CH_12_M           = "key_player_ch_12_m";
 	public static final String KEY_PLAYER_CH_13_M           = "key_player_ch_13_m";
 	public static final String KEY_PLAYER_CH_14_M           = "key_player_ch_14_m";
 	public static final String KEY_PLAYER_CH_15_M           = "key_player_ch_15_m";
-	public static final String KEY_PLAYER_CH_0_S            = "key_player_ch_0_s";
-	public static final String KEY_PLAYER_CH_1_S            = "key_player_ch_1_s";
-	public static final String KEY_PLAYER_CH_2_S            = "key_player_ch_2_s";
-	public static final String KEY_PLAYER_CH_3_S            = "key_player_ch_3_s";
-	public static final String KEY_PLAYER_CH_4_S            = "key_player_ch_4_s";
-	public static final String KEY_PLAYER_CH_5_S            = "key_player_ch_5_s";
-	public static final String KEY_PLAYER_CH_6_S            = "key_player_ch_6_s";
-	public static final String KEY_PLAYER_CH_7_S            = "key_player_ch_7_s";
-	public static final String KEY_PLAYER_CH_8_S            = "key_player_ch_8_s";
-	public static final String KEY_PLAYER_CH_9_S            = "key_player_ch_9_s";
+	public static final String KEY_PLAYER_CH_00_S           = "key_player_ch_00_s";
+	public static final String KEY_PLAYER_CH_01_S           = "key_player_ch_01_s";
+	public static final String KEY_PLAYER_CH_02_S           = "key_player_ch_02_s";
+	public static final String KEY_PLAYER_CH_03_S           = "key_player_ch_03_s";
+	public static final String KEY_PLAYER_CH_04_S           = "key_player_ch_04_s";
+	public static final String KEY_PLAYER_CH_05_S           = "key_player_ch_05_s";
+	public static final String KEY_PLAYER_CH_06_S           = "key_player_ch_06_s";
+	public static final String KEY_PLAYER_CH_07_S           = "key_player_ch_07_s";
+	public static final String KEY_PLAYER_CH_08_S           = "key_player_ch_08_s";
+	public static final String KEY_PLAYER_CH_09_S           = "key_player_ch_09_s";
 	public static final String KEY_PLAYER_CH_10_S           = "key_player_ch_10_s";
 	public static final String KEY_PLAYER_CH_11_S           = "key_player_ch_11_s";
 	public static final String KEY_PLAYER_CH_12_S           = "key_player_ch_12_s";
@@ -555,16 +564,16 @@ public class Dict {
 	public static final String KEY_SOUNDCHECK_VEL_SLD       = "key_soundcheck_vel_sld";
 	public static final String KEY_SOUNDCHECK_DURATION      = "key_soundcheck_duration";
 	public static final String KEY_SOUNDCHECK_KEEP          = "key_soundcheck_keep";
-	public static final String KEY_SOUNDCHECK_CH_0          = "key_soundcheck_ch_0";
-	public static final String KEY_SOUNDCHECK_CH_1          = "key_soundcheck_ch_1";
-	public static final String KEY_SOUNDCHECK_CH_2          = "key_soundcheck_ch_2";
-	public static final String KEY_SOUNDCHECK_CH_3          = "key_soundcheck_ch_3";
-	public static final String KEY_SOUNDCHECK_CH_4          = "key_soundcheck_ch_4";
-	public static final String KEY_SOUNDCHECK_CH_5          = "key_soundcheck_ch_5";
-	public static final String KEY_SOUNDCHECK_CH_6          = "key_soundcheck_ch_6";
-	public static final String KEY_SOUNDCHECK_CH_7          = "key_soundcheck_ch_7";
-	public static final String KEY_SOUNDCHECK_CH_8          = "key_soundcheck_ch_8";
-	public static final String KEY_SOUNDCHECK_CH_9          = "key_soundcheck_ch_9";
+	public static final String KEY_SOUNDCHECK_CH_00         = "key_soundcheck_ch_00";
+	public static final String KEY_SOUNDCHECK_CH_01         = "key_soundcheck_ch_01";
+	public static final String KEY_SOUNDCHECK_CH_02         = "key_soundcheck_ch_02";
+	public static final String KEY_SOUNDCHECK_CH_03         = "key_soundcheck_ch_03";
+	public static final String KEY_SOUNDCHECK_CH_04         = "key_soundcheck_ch_04";
+	public static final String KEY_SOUNDCHECK_CH_05         = "key_soundcheck_ch_05";
+	public static final String KEY_SOUNDCHECK_CH_06         = "key_soundcheck_ch_06";
+	public static final String KEY_SOUNDCHECK_CH_07         = "key_soundcheck_ch_07";
+	public static final String KEY_SOUNDCHECK_CH_08         = "key_soundcheck_ch_08";
+	public static final String KEY_SOUNDCHECK_CH_09         = "key_soundcheck_ch_09";
 	public static final String KEY_SOUNDCHECK_CH_10         = "key_soundcheck_ch_10";
 	public static final String KEY_SOUNDCHECK_CH_11         = "key_soundcheck_ch_11";
 	public static final String KEY_SOUNDCHECK_CH_12         = "key_soundcheck_ch_12";
@@ -588,6 +597,7 @@ public class Dict {
 	public static final String KEY_INFO_MIDI_BANKS          = "key_info_midi_banks";
 	public static final String KEY_INFO_MIDI_MSG            = "key_info_midi_msg";
 	public static final String KEY_INFO_ABOUT               = "key_info_about";
+	public static final String KEY_INFO_KEYBINDINGS         = "key_info_keybindings";
 	public static final String KEY_INFO_CONF_NOTE_FILTER    = "key_info_conf_note_filter";
 	public static final String KEY_INFO_CONF_PERC_FILTER    = "key_info_conf_perc_filter";
 	public static final String KEY_INFO_CONF_SYNTAX_FILTER  = "key_info_conf_syntax_filter";
@@ -616,22 +626,32 @@ public class Dict {
 	public static final String KEY_INFO_MIDI_MSG_TRACKS_TXT = "key_info_midi_msg_tracks_txt";
 	public static final String KEY_INFO_MIDI_MSG_SHOW_IN_TR = "key_info_midi_msg_show_in_tr";
 	public static final String KEY_INFO_MIDI_MSG_SHOW_AUTO  = "key_info_midi_msg_show_auto";
-	public static final String KEY_INFO_MIDI_MSG_CH_0       = "key_info_midi_msg_ch_0";
-	public static final String KEY_INFO_MIDI_MSG_CH_1       = "key_info_midi_msg_ch_1";
-	public static final String KEY_INFO_MIDI_MSG_CH_2       = "key_info_midi_msg_ch_2";
-	public static final String KEY_INFO_MIDI_MSG_CH_3       = "key_info_midi_msg_ch_3";
-	public static final String KEY_INFO_MIDI_MSG_CH_4       = "key_info_midi_msg_ch_4";
-	public static final String KEY_INFO_MIDI_MSG_CH_5       = "key_info_midi_msg_ch_5";
-	public static final String KEY_INFO_MIDI_MSG_CH_6       = "key_info_midi_msg_ch_6";
-	public static final String KEY_INFO_MIDI_MSG_CH_7       = "key_info_midi_msg_ch_7";
-	public static final String KEY_INFO_MIDI_MSG_CH_8       = "key_info_midi_msg_ch_8";
-	public static final String KEY_INFO_MIDI_MSG_CH_9       = "key_info_midi_msg_ch_9";
+	public static final String KEY_INFO_MIDI_MSG_CH_00      = "key_info_midi_msg_ch_00";
+	public static final String KEY_INFO_MIDI_MSG_CH_01      = "key_info_midi_msg_ch_01";
+	public static final String KEY_INFO_MIDI_MSG_CH_02      = "key_info_midi_msg_ch_02";
+	public static final String KEY_INFO_MIDI_MSG_CH_03      = "key_info_midi_msg_ch_03";
+	public static final String KEY_INFO_MIDI_MSG_CH_04      = "key_info_midi_msg_ch_04";
+	public static final String KEY_INFO_MIDI_MSG_CH_05      = "key_info_midi_msg_ch_05";
+	public static final String KEY_INFO_MIDI_MSG_CH_06      = "key_info_midi_msg_ch_06";
+	public static final String KEY_INFO_MIDI_MSG_CH_07      = "key_info_midi_msg_ch_07";
+	public static final String KEY_INFO_MIDI_MSG_CH_08      = "key_info_midi_msg_ch_08";
+	public static final String KEY_INFO_MIDI_MSG_CH_09      = "key_info_midi_msg_ch_09";
 	public static final String KEY_INFO_MIDI_MSG_CH_10      = "key_info_midi_msg_ch_10";
 	public static final String KEY_INFO_MIDI_MSG_CH_11      = "key_info_midi_msg_ch_11";
 	public static final String KEY_INFO_MIDI_MSG_CH_12      = "key_info_midi_msg_ch_12";
 	public static final String KEY_INFO_MIDI_MSG_CH_13      = "key_info_midi_msg_ch_13";
 	public static final String KEY_INFO_MIDI_MSG_CH_14      = "key_info_midi_msg_ch_14";
 	public static final String KEY_INFO_MIDI_MSG_CH_15      = "key_info_midi_msg_ch_15";
+	public static final String KEY_INFO_KEY_TREE            = "key_info_key_tree";
+	public static final String KEY_INFO_KEY_PL              = "key_info_key_pl";
+	public static final String KEY_INFO_KEY_MIN             = "key_info_key_min";
+	public static final String KEY_INFO_KEY_FLD             = "key_info_key_fld";
+	public static final String KEY_INFO_KEY_FILTER          = "key_info_key_filter";
+	public static final String KEY_INFO_KEY_ADD_BTN         = "key_info_key_add_btn";
+	public static final String KEY_INFO_KEY_RESET_ID_CBX    = "key_info_key_reset_id_cbx";
+	public static final String KEY_INFO_KEY_RESET_ID_BTN    = "key_info_key_reset_id_btn";
+	public static final String KEY_INFO_KEY_RESET_GLOB_CBX  = "key_info_key_reset_glob_cbx";
+	public static final String KEY_INFO_KEY_RESET_GLOB_BTN  = "key_info_key_reset_glob_btn";
 	public static final String KEY_MSG_CLOSE                = "key_msg_close";
 	public static final String KEY_STRING_FILTER_CLOSE      = "key_string_filter_close";
 	public static final String KEY_STRING_FILTER_CLEAR      = "key_string_filter_clear";
@@ -691,6 +711,7 @@ public class Dict {
 	public static final String TAB_CONFIG                  = "tab_config";
 	public static final String TAB_SOUNDFONT               = "tab_soundfont";
 	public static final String TAB_MIDI_SEQUENCE           = "tab_midi_sequence";
+	public static final String TAB_KEYBINDINGS             = "tab_keybindings";
 	public static final String TAB_ABOUT                   = "tab_about";
 	public static final String TAB_NOTE_DETAILS            = "tab_note_details";
 	public static final String TAB_PERCUSSION_DETAILS      = "tab_percussion_details";
@@ -869,6 +890,22 @@ public class Dict {
 	public static final String MSG_DETAILS_TEXT_PL         = "msg_details_text_pl";
 	public static final String MSG_DETAILS_MESSAGE         = "msg_details_message";
 	public static final String MSG_DETAILS_DESCRIPTION     = "msg_details_description";
+	public static final String KB_CATEGORIES               = "kb_categories";
+	public static final String KB_CATEGORY                 = "kb_category";
+	public static final String KB_FILTER                   = "kb_filter";
+	public static final String KB_ACTION                   = "kb_action";
+	public static final String KB_HINT                     = "kb_hint";
+	public static final String KB_HINT_TXT                 = "kb_hint_txt";
+	public static final String KB_CONFIGURED               = "kb_configured";
+	public static final String KB_ENTER                    = "kb_enter";
+	public static final String KB_ADD                      = "kb_add";
+	public static final String KB_ADD_BTN                  = "kb_add_btn";
+	public static final String KB_REMOVE                   = "kb_remove";
+	public static final String KB_RESET_ID_CBX             = "kb_reset_id_cbx";
+	public static final String KB_RESET_ID_BTN             = "kb_reset_id_btn";
+	public static final String KB_RESET_GLOB_CBX           = "kb_reset_glob_cbx";
+	public static final String KB_RESET_GLOB_BTN           = "kb_reset_glob_btn";
+	public static final String KB_ERROR_NO_BINDING_PRESSED = "kb_error_no_binding_pressed";
 	
 	// MIDI messages for InfoView - level 1
 	public static final String MSG1_CH_VOICE            = "msg1_ch_voice";          // MSG2_CV_*
@@ -1479,6 +1516,15 @@ public class Dict {
 		initPercussion();
 		initSyntax();
 		initInstruments();
+		
+		// init key binding categories
+		keyBindingCategories = new ArrayList<>();
+		keyBindingCategories.add(KEYCAT_MAIN);
+		keyBindingCategories.add(KEYCAT_PLAYER);
+		keyBindingCategories.add(KEYCAT_SOUNDCHECK);
+		keyBindingCategories.add(KEYCAT_INFO);
+		keyBindingCategories.add(KEYCAT_MSG);
+		keyBindingCategories.add(KEYCAT_STRING_FILTER);
 	}
 	
 	/**
@@ -1549,6 +1595,14 @@ public class Dict {
 		set( TT_KEY_FILTER_OPEN,           "Key binding(s) to open"                     );
 		set( TT_KEY_TAB_SELECT,            "Key binding(s) to select"                   );
 		
+		// key binding categories (windows)
+		set( KEYCAT_MAIN,                  "Main Window"                                                                 );
+		set( KEYCAT_PLAYER,                "Player"                                                                      );
+		set( KEYCAT_SOUNDCHECK,            "Soundcheck"                                                                  );
+		set( KEYCAT_INFO,                  "Info & Configuration"                                                        );
+		set( KEYCAT_MSG,                   "Message Window"                                                              );
+		set( KEYCAT_STRING_FILTER,         "Table Filter"                                                                );
+		
 		// key binding IDs
 		set( KEY_MAIN_INFO,                "Open Info & Config Details"                                                  );
 		set( KEY_MAIN_PLAYER,              "Open Player Window"                                                          );
@@ -1588,48 +1642,48 @@ public class Dict {
 		set( KEY_PLAYER_TRANSPOSE_SLD,     "Focus the transpose slider"                                                  );
 		set( KEY_PLAYER_CH_VOL_FLD,        "Focus the channel volume text field"                                         );
 		set( KEY_PLAYER_CH_VOL_SLD,        "Focus the channel volume slider"                                             );
-		set( KEY_PLAYER_CH_0,              "Toggle channel 0"                                                            );
-		set( KEY_PLAYER_CH_1,              "Toggle channel 1"                                                            );
-		set( KEY_PLAYER_CH_2,              "Toggle channel 2"                                                            );
-		set( KEY_PLAYER_CH_3,              "Toggle channel 3"                                                            );
-		set( KEY_PLAYER_CH_4,              "Toggle channel 4"                                                            );
-		set( KEY_PLAYER_CH_5,              "Toggle channel 5"                                                            );
-		set( KEY_PLAYER_CH_6,              "Toggle channel 6"                                                            );
-		set( KEY_PLAYER_CH_7,              "Toggle channel 7"                                                            );
-		set( KEY_PLAYER_CH_8,              "Toggle channel 8"                                                            );
-		set( KEY_PLAYER_CH_9,              "Toggle channel 9"                                                            );
+		set( KEY_PLAYER_CH_00,             "Toggle channel 0"                                                            );
+		set( KEY_PLAYER_CH_01,             "Toggle channel 1"                                                            );
+		set( KEY_PLAYER_CH_02,             "Toggle channel 2"                                                            );
+		set( KEY_PLAYER_CH_03,             "Toggle channel 3"                                                            );
+		set( KEY_PLAYER_CH_04,             "Toggle channel 4"                                                            );
+		set( KEY_PLAYER_CH_05,             "Toggle channel 5"                                                            );
+		set( KEY_PLAYER_CH_06,             "Toggle channel 6"                                                            );
+		set( KEY_PLAYER_CH_07,             "Toggle channel 7"                                                            );
+		set( KEY_PLAYER_CH_08,             "Toggle channel 8"                                                            );
+		set( KEY_PLAYER_CH_09,             "Toggle channel 9"                                                            );
 		set( KEY_PLAYER_CH_10,             "Toggle channel 10"                                                           );
 		set( KEY_PLAYER_CH_11,             "Toggle channel 11"                                                           );
 		set( KEY_PLAYER_CH_12,             "Toggle channel 12"                                                           );
 		set( KEY_PLAYER_CH_13,             "Toggle channel 13"                                                           );
 		set( KEY_PLAYER_CH_14,             "Toggle channel 14"                                                           );
 		set( KEY_PLAYER_CH_15,             "Toggle channel 15"                                                           );
-		set( KEY_PLAYER_CH_0_M,            "Mute or Unmute channel 0"                                                    );
-		set( KEY_PLAYER_CH_1_M,            "Mute or Unmute channel 1"                                                    );
-		set( KEY_PLAYER_CH_2_M,            "Mute or Unmute channel 2"                                                    );
-		set( KEY_PLAYER_CH_3_M,            "Mute or Unmute channel 3"                                                    );
-		set( KEY_PLAYER_CH_4_M,            "Mute or Unmute channel 4"                                                    );
-		set( KEY_PLAYER_CH_5_M,            "Mute or Unmute channel 5"                                                    );
-		set( KEY_PLAYER_CH_6_M,            "Mute or Unmute channel 6"                                                    );
-		set( KEY_PLAYER_CH_7_M,            "Mute or Unmute channel 7"                                                    );
-		set( KEY_PLAYER_CH_8_M,            "Mute or Unmute channel 8"                                                    );
-		set( KEY_PLAYER_CH_9_M,            "Mute or Unmute channel 9"                                                    );
+		set( KEY_PLAYER_CH_00_M,           "Mute or Unmute channel 0"                                                    );
+		set( KEY_PLAYER_CH_01_M,           "Mute or Unmute channel 1"                                                    );
+		set( KEY_PLAYER_CH_02_M,           "Mute or Unmute channel 2"                                                    );
+		set( KEY_PLAYER_CH_03_M,           "Mute or Unmute channel 3"                                                    );
+		set( KEY_PLAYER_CH_04_M,           "Mute or Unmute channel 4"                                                    );
+		set( KEY_PLAYER_CH_05_M,           "Mute or Unmute channel 5"                                                    );
+		set( KEY_PLAYER_CH_06_M,           "Mute or Unmute channel 6"                                                    );
+		set( KEY_PLAYER_CH_07_M,           "Mute or Unmute channel 7"                                                    );
+		set( KEY_PLAYER_CH_08_M,           "Mute or Unmute channel 8"                                                    );
+		set( KEY_PLAYER_CH_09_M,           "Mute or Unmute channel 9"                                                    );
 		set( KEY_PLAYER_CH_10_M,           "Mute or Unmute channel 10"                                                   );
 		set( KEY_PLAYER_CH_11_M,           "Mute or Unmute channel 11"                                                   );
 		set( KEY_PLAYER_CH_12_M,           "Mute or Unmute channel 12"                                                   );
 		set( KEY_PLAYER_CH_13_M,           "Mute or Unmute channel 13"                                                   );
 		set( KEY_PLAYER_CH_14_M,           "Mute or Unmute channel 14"                                                   );
 		set( KEY_PLAYER_CH_15_M,           "Mute or Unmute channel 15"                                                   );
-		set( KEY_PLAYER_CH_0_S,            "Solo or Unsolo channel 0"                                                    );
-		set( KEY_PLAYER_CH_1_S,            "Solo or Unsolo channel 1"                                                    );
-		set( KEY_PLAYER_CH_2_S,            "Solo or Unsolo channel 2"                                                    );
-		set( KEY_PLAYER_CH_3_S,            "Solo or Unsolo channel 3"                                                    );
-		set( KEY_PLAYER_CH_4_S,            "Solo or Unsolo channel 4"                                                    );
-		set( KEY_PLAYER_CH_5_S,            "Solo or Unsolo channel 5"                                                    );
-		set( KEY_PLAYER_CH_6_S,            "Solo or Unsolo channel 6"                                                    );
-		set( KEY_PLAYER_CH_7_S,            "Solo or Unsolo channel 7"                                                    );
-		set( KEY_PLAYER_CH_8_S,            "Solo or Unsolo channel 8"                                                    );
-		set( KEY_PLAYER_CH_9_S,            "Solo or Unsolo channel 9"                                                    );
+		set( KEY_PLAYER_CH_00_S,           "Solo or Unsolo channel 0"                                                    );
+		set( KEY_PLAYER_CH_01_S,           "Solo or Unsolo channel 1"                                                    );
+		set( KEY_PLAYER_CH_02_S,           "Solo or Unsolo channel 2"                                                    );
+		set( KEY_PLAYER_CH_03_S,           "Solo or Unsolo channel 3"                                                    );
+		set( KEY_PLAYER_CH_04_S,           "Solo or Unsolo channel 4"                                                    );
+		set( KEY_PLAYER_CH_05_S,           "Solo or Unsolo channel 5"                                                    );
+		set( KEY_PLAYER_CH_06_S,           "Solo or Unsolo channel 6"                                                    );
+		set( KEY_PLAYER_CH_07_S,           "Solo or Unsolo channel 7"                                                    );
+		set( KEY_PLAYER_CH_08_S,           "Solo or Unsolo channel 8"                                                    );
+		set( KEY_PLAYER_CH_09_S,           "Solo or Unsolo channel 9"                                                    );
 		set( KEY_PLAYER_CH_10_S,           "Solo or Unsolo channel 10"                                                   );
 		set( KEY_PLAYER_CH_11_S,           "Solo or Unsolo channel 11"                                                   );
 		set( KEY_PLAYER_CH_12_S,           "Solo or Unsolo channel 12"                                                   );
@@ -1648,16 +1702,16 @@ public class Dict {
 		set( KEY_SOUNDCHECK_VEL_SLD,       "Focus the velocity slider"                                                   );
 		set( KEY_SOUNDCHECK_DURATION,      "Focus the duration text field"                                               );
 		set( KEY_SOUNDCHECK_KEEP,          "Toggle the \"Keep Settings\" checkbox"                                       );
-		set( KEY_SOUNDCHECK_CH_0,          "Select channel 0"                                                            );
-		set( KEY_SOUNDCHECK_CH_1,          "Select channel 1"                                                            );
-		set( KEY_SOUNDCHECK_CH_2,          "Select channel 2"                                                            );
-		set( KEY_SOUNDCHECK_CH_3,          "Select channel 3"                                                            );
-		set( KEY_SOUNDCHECK_CH_4,          "Select channel 4"                                                            );
-		set( KEY_SOUNDCHECK_CH_5,          "Select channel 5"                                                            );
-		set( KEY_SOUNDCHECK_CH_6,          "Select channel 6"                                                            );
-		set( KEY_SOUNDCHECK_CH_7,          "Select channel 7"                                                            );
-		set( KEY_SOUNDCHECK_CH_8,          "Select channel 8"                                                            );
-		set( KEY_SOUNDCHECK_CH_9,          "Select channel 9"                                                            );
+		set( KEY_SOUNDCHECK_CH_00,         "Select channel 0"                                                            );
+		set( KEY_SOUNDCHECK_CH_01,         "Select channel 1"                                                            );
+		set( KEY_SOUNDCHECK_CH_02,         "Select channel 2"                                                            );
+		set( KEY_SOUNDCHECK_CH_03,         "Select channel 3"                                                            );
+		set( KEY_SOUNDCHECK_CH_04,         "Select channel 4"                                                            );
+		set( KEY_SOUNDCHECK_CH_05,         "Select channel 5"                                                            );
+		set( KEY_SOUNDCHECK_CH_06,         "Select channel 6"                                                            );
+		set( KEY_SOUNDCHECK_CH_07,         "Select channel 7"                                                            );
+		set( KEY_SOUNDCHECK_CH_08,         "Select channel 8"                                                            );
+		set( KEY_SOUNDCHECK_CH_09,         "Select channel 9"                                                            );
 		set( KEY_SOUNDCHECK_CH_10,         "Select channel 10"                                                           );
 		set( KEY_SOUNDCHECK_CH_11,         "Select channel 11"                                                           );
 		set( KEY_SOUNDCHECK_CH_12,         "Select channel 12"                                                           );
@@ -1681,6 +1735,7 @@ public class Dict {
 		set( KEY_INFO_MIDI_BANKS,          "Switch to the MIDI Sequence / Banks, Instruments, Notes tab"                 );
 		set( KEY_INFO_MIDI_MSG,            "Switch to the MIDI Sequence / MIDI Messages tab"                             );
 		set( KEY_INFO_ABOUT,               "Switch to the About tab"                                                     );
+		set( KEY_INFO_KEYBINDINGS,         "Switch to the Key Bindings Tab"                                              );
 		set( KEY_INFO_CONF_NOTE_FILTER,    "Open the Note table filter"                                                  );
 		set( KEY_INFO_CONF_PERC_FILTER,    "Open the Percussion ID table filter"                                         );
 		set( KEY_INFO_CONF_SYNTAX_FILTER,  "Open the Syntax table filter"                                                );
@@ -1709,22 +1764,32 @@ public class Dict {
 		set( KEY_INFO_MIDI_MSG_TRACKS_TXT, "Focus Tracks text field"                                                     );
 		set( KEY_INFO_MIDI_MSG_SHOW_IN_TR, "Click \"Show in Tree\" button"                                               );
 		set( KEY_INFO_MIDI_MSG_SHOW_AUTO,  "Toggle \"Automatically\" checkbox"                                           );
-		set( KEY_INFO_MIDI_MSG_CH_0,       "Toggle checkbox for channel 0"                                               );
-		set( KEY_INFO_MIDI_MSG_CH_1,       "Toggle checkbox for channel 1"                                               );
-		set( KEY_INFO_MIDI_MSG_CH_2,       "Toggle checkbox for channel 2"                                               );
-		set( KEY_INFO_MIDI_MSG_CH_3,       "Toggle checkbox for channel 3"                                               );
-		set( KEY_INFO_MIDI_MSG_CH_4,       "Toggle checkbox for channel 4"                                               );
-		set( KEY_INFO_MIDI_MSG_CH_5,       "Toggle checkbox for channel 5"                                               );
-		set( KEY_INFO_MIDI_MSG_CH_6,       "Toggle checkbox for channel 6"                                               );
-		set( KEY_INFO_MIDI_MSG_CH_7,       "Toggle checkbox for channel 7"                                               );
-		set( KEY_INFO_MIDI_MSG_CH_8,       "Toggle checkbox for channel 8"                                               );
-		set( KEY_INFO_MIDI_MSG_CH_9,       "Toggle checkbox for channel 9"                                               );
+		set( KEY_INFO_MIDI_MSG_CH_00,      "Toggle checkbox for channel 0"                                               );
+		set( KEY_INFO_MIDI_MSG_CH_01,      "Toggle checkbox for channel 1"                                               );
+		set( KEY_INFO_MIDI_MSG_CH_02,      "Toggle checkbox for channel 2"                                               );
+		set( KEY_INFO_MIDI_MSG_CH_03,      "Toggle checkbox for channel 3"                                               );
+		set( KEY_INFO_MIDI_MSG_CH_04,      "Toggle checkbox for channel 4"                                               );
+		set( KEY_INFO_MIDI_MSG_CH_05,      "Toggle checkbox for channel 5"                                               );
+		set( KEY_INFO_MIDI_MSG_CH_06,      "Toggle checkbox for channel 6"                                               );
+		set( KEY_INFO_MIDI_MSG_CH_07,      "Toggle checkbox for channel 7"                                               );
+		set( KEY_INFO_MIDI_MSG_CH_08,      "Toggle checkbox for channel 8"                                               );
+		set( KEY_INFO_MIDI_MSG_CH_09,      "Toggle checkbox for channel 9"                                               );
 		set( KEY_INFO_MIDI_MSG_CH_10,      "Toggle checkbox for channel 10"                                              );
 		set( KEY_INFO_MIDI_MSG_CH_11,      "Toggle checkbox for channel 11"                                              );
 		set( KEY_INFO_MIDI_MSG_CH_12,      "Toggle checkbox for channel 12"                                              );
 		set( KEY_INFO_MIDI_MSG_CH_13,      "Toggle checkbox for channel 13"                                              );
 		set( KEY_INFO_MIDI_MSG_CH_14,      "Toggle checkbox for channel 14"                                              );
 		set( KEY_INFO_MIDI_MSG_CH_15,      "Toggle checkbox for channel 15"                                              );
+		set( KEY_INFO_KEY_TREE,            "Focus key binding Tree"                                                      );
+		set( KEY_INFO_KEY_PL,              "Expand selected nodes (or the whole tree) from Key Bindings"                 );
+		set( KEY_INFO_KEY_MIN,             "Collapse selected nodes (or the whole tree) from Key Bindings"               );
+		set( KEY_INFO_KEY_FLD,             "Focus the field to enter a new key binding"                                  );
+		set( KEY_INFO_KEY_FILTER,          "Focus the key binding tree filter field"                                     );
+		set( KEY_INFO_KEY_ADD_BTN,         "Press the button to add a key binding"                                       );
+		set( KEY_INFO_KEY_RESET_ID_CBX,    "Toggle the checkbox to reset the key bindings of the selected action"        );
+		set( KEY_INFO_KEY_RESET_ID_BTN,    "Press the button to reset the key bindings of the selected action"           );
+		set( KEY_INFO_KEY_RESET_GLOB_CBX,  "Toggle the checkbox to reset all key bindings globally"                      );
+		set( KEY_INFO_KEY_RESET_GLOB_BTN,  "Press the button to reset all key bindings globally"                         );
 		set( KEY_MSG_CLOSE,                "Close the message window"                                                    );
 		set( KEY_STRING_FILTER_CLOSE,      "Close the table filter"                                                      );
 		set( KEY_STRING_FILTER_CLEAR,      "Clear the table filter"                                                      );
@@ -1783,6 +1848,7 @@ public class Dict {
 		set( TAB_CONFIG,                             "Configuration"                 );
 		set( TAB_SOUNDFONT,                          "Soundfont"                     );
 		set( TAB_MIDI_SEQUENCE,                      "MIDI Sequence"                 );
+		set( TAB_KEYBINDINGS,                        "Key Bindings"                  );
 		set( TAB_ABOUT,                              "About"                         );
 		set( TAB_NOTE_DETAILS,                       "Note Table"                    );
 		set( TAB_PERCUSSION_DETAILS,                 "Percussion IDs"                );
@@ -1943,29 +2009,45 @@ public class Dict {
 		set( MSG_FLTR_TT_AUTO_SHOW,                  "Show Selected Message in the tree automatically without pushing the button" );
 		set( MSG_FLTR_TT_VISIBLE,                    "Currently shown Messages (matching the filter)" );
 		set( MSG_FLTR_TT_TOTAL,                      "All messages"                                   );
-		set( MSG_DETAILS_TICK_SG,                    "Tick:"            );
-		set( MSG_DETAILS_TICK_PL,                    "Ticks:"           );
-		set( MSG_DETAILS_LENGTH,                     "Length:"          );
-		set( MSG_DETAILS_STATUS_BYTE,                "Status Byte:"     );
-		set( MSG_DETAILS_TRACK_SG,                   "Track:"           );
-		set( MSG_DETAILS_TRACK_PL,                   "Tracks:"          );
-		set( MSG_DETAILS_CHANNEL_SG,                 "Channel:"         );
-		set( MSG_DETAILS_CHANNEL_PL,                 "Channels:"        );
-		set( MSG_DETAILS_META_TYPE,                  "Meta Type:"       );
-		set( MSG_DETAILS_VENDOR,                     "Manufacturer:"    );
-		set( MSG_DETAILS_DEVICE_ID_SG,               "Device ID:"       );
-		set( MSG_DETAILS_DEVICE_ID_PL,               "Device IDs:"      );
-		set( MSG_DETAILS_SUB_ID_1,                   "Sub ID 1"         );
-		set( MSG_DETAILS_SUB_ID_2,                   "Sub ID 2"         );
-		set( MSG_DETAILS_CTRL_BYTE,                  "Controller Byte:" );
-		set( MSG_DETAILS_RPN_BYTE_SG,                "RPN Byte:"        );
-		set( MSG_DETAILS_RPN_BYTE_PL,                "RPN Bytes:"       );
-		set( MSG_DETAILS_NRPN_BYTE_SG,               "NRPN Byte:"       );
-		set( MSG_DETAILS_NRPN_BYTE_PL,               "NRPN Bytes:"      );
-		set( MSG_DETAILS_TEXT_SG,                    "Text:"            );
-		set( MSG_DETAILS_TEXT_PL,                    "Texts:"           );
-		set( MSG_DETAILS_MESSAGE,                    "Message (Hex):"   );
-		set( MSG_DETAILS_DESCRIPTION,                "Description"      );
+		set( MSG_DETAILS_TICK_SG,                    "Tick:"                               );
+		set( MSG_DETAILS_TICK_PL,                    "Ticks:"                              );
+		set( MSG_DETAILS_LENGTH,                     "Length:"                             );
+		set( MSG_DETAILS_STATUS_BYTE,                "Status Byte:"                        );
+		set( MSG_DETAILS_TRACK_SG,                   "Track:"                              );
+		set( MSG_DETAILS_TRACK_PL,                   "Tracks:"                             );
+		set( MSG_DETAILS_CHANNEL_SG,                 "Channel:"                            );
+		set( MSG_DETAILS_CHANNEL_PL,                 "Channels:"                           );
+		set( MSG_DETAILS_META_TYPE,                  "Meta Type:"                          );
+		set( MSG_DETAILS_VENDOR,                     "Manufacturer:"                       );
+		set( MSG_DETAILS_DEVICE_ID_SG,               "Device ID:"                          );
+		set( MSG_DETAILS_DEVICE_ID_PL,               "Device IDs:"                         );
+		set( MSG_DETAILS_SUB_ID_1,                   "Sub ID 1"                            );
+		set( MSG_DETAILS_SUB_ID_2,                   "Sub ID 2"                            );
+		set( MSG_DETAILS_CTRL_BYTE,                  "Controller Byte:"                    );
+		set( MSG_DETAILS_RPN_BYTE_SG,                "RPN Byte:"                           );
+		set( MSG_DETAILS_RPN_BYTE_PL,                "RPN Bytes:"                          );
+		set( MSG_DETAILS_NRPN_BYTE_SG,               "NRPN Byte:"                          );
+		set( MSG_DETAILS_NRPN_BYTE_PL,               "NRPN Bytes:"                         );
+		set( MSG_DETAILS_TEXT_SG,                    "Text:"                               );
+		set( MSG_DETAILS_TEXT_PL,                    "Texts:"                              );
+		set( MSG_DETAILS_MESSAGE,                    "Message (Hex):"                      );
+		set( MSG_DETAILS_DESCRIPTION,                "Description"                         );
+		set( KB_CATEGORIES,                          "Category or Window"                  );
+		set( KB_CATEGORY,                            "Category: "                          );
+		set( KB_FILTER,                              "Filter:"                             );
+		set( KB_ACTION,                              "Action: "                            );
+		set( KB_HINT,                                "Hint: "                              );
+		set( KB_HINT_TXT,                            "Key binding changes will be active after next opening of the according window(s)." );
+		set( KB_CONFIGURED,                          "Currently configured key bindings: " );
+		set( KB_ENTER,                               "Press Key Combination: "             );
+		set( KB_ADD,                                 "Add Key Binding"                     );
+		set( KB_ADD_BTN,                             "Add Key Binding"                     );
+		set( KB_REMOVE,                              "Remove"                              );
+		set( KB_RESET_ID_CBX,                        "<html>Reset Key Binding(s) for this Action<br>(Must be checked before clicking the reset button)" );
+		set( KB_RESET_ID_BTN,                        "Reset Key Binding(s) for this Action" );
+		set( KB_RESET_GLOB_CBX,                      "<html>Reset ALL Key Bindings GLOBALLY<br>(Must be checked before clicking the reset button)" );
+		set( KB_RESET_GLOB_BTN,                      "Reset ALL Key Bindings GLOBALLY"     );
+		set( KB_ERROR_NO_BINDING_PRESSED,            "<html>No key binding entered.<br>Focus the text field and press a key combination first." );
 		
 		// syntax for InfoView
 		set( SYNTAX_DEFINE,             "syntax element definition"                        );
@@ -4645,6 +4727,15 @@ public class Dict {
 	 */
 	public static ArrayList<InstrumentElement> getDrumkitList() {
 		return drumkitList;
+	}
+	
+	/**
+	 * Returns the list of key binding category identifiers.
+	 * 
+	 * @return key binding category IDs
+	 */
+	public static ArrayList<String> getKeyBindingCategories() {
+		return keyBindingCategories;
 	}
 	
 	/**

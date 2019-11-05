@@ -8,6 +8,7 @@
 package org.midica.ui.widget;
 
 import java.awt.Desktop;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -40,6 +41,7 @@ public class LinkLabel extends JTextArea {
 	private static       Font   LINK_FONT_NORMAL    = null;
 	private static       Font   LINK_FONT_MOUSEOVER = null;
 	private              URI    uri                 = null;
+	private Dimension           preferredSize       = null;
 	
 	private Map<TextAttribute, Integer> underlineAttr = new HashMap<TextAttribute, Integer>();
 	
@@ -76,10 +78,10 @@ public class LinkLabel extends JTextArea {
 		this.setFont(LINK_FONT_NORMAL);
 		
 		// Make it look like a label.
-		this.setOpaque( false );
+		this.setOpaque(false);
 		
 		// Make it behave like a label.
-		this.setEditable( false );
+		this.setEditable(false);
 		
 		// adds the mouse listener with the following functionality:
 		// 
@@ -142,7 +144,28 @@ public class LinkLabel extends JTextArea {
 	 * This method is overridden in order to show no border at all.
 	 */
 	@Override
-	public void setBorder( Border border ) {
+	public void setBorder(Border border) {
 		// nothing to do
+	}
+	
+	/**
+	 * Calculates and sets the preferred size, based on the given width.
+	 * The hight is the same as the line height of a flow label.
+	 * 
+	 * @param width  the width to be set.
+	 */
+	public void setPreferredWidth(int width) {
+		preferredSize = new Dimension(width, Laf.heightPerLineFlowLbl);
+	}
+	
+	/**
+	 * Overrides the parent's method, if the preferred size has been set before.
+	 * Otherwise, just calls the parent's method.
+	 */
+	@Override
+	public Dimension getPreferredSize() {
+		if (preferredSize != null)
+			return preferredSize;
+		return super.getPreferredSize();
 	}
 }

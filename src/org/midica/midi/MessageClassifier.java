@@ -572,7 +572,7 @@ public class MessageClassifier {
 		distinctDetails.put( IMessageType.OPT_TRACK, trackNum );
 		
 		// add message to the data structures
-		MessageTreeNode leaf          = (MessageTreeNode) msgTreeModel.add(path);
+		MessageTreeNode leaf          = (MessageTreeNode) msgTreeModel.add(path, null);
 		SingleMessage   singleMessage = new SingleMessage();
 		messages.add(singleMessage);
 		
@@ -692,7 +692,7 @@ public class MessageClassifier {
 		distinctDetails.put( IMessageType.OPT_TRACK, trackNum );
 		
 		// add message to the data structures
-		MessageTreeNode leaf          = (MessageTreeNode) msgTreeModel.add(path);
+		MessageTreeNode leaf          = (MessageTreeNode) msgTreeModel.add(path, null);
 		SingleMessage   singleMessage = new SingleMessage();
 		messages.add(singleMessage);
 		
@@ -902,7 +902,7 @@ public class MessageClassifier {
 		distinctDetails.put( IMessageType.OPT_TRACK, trackNum  );
 		
 		// add message to the data structures
-		MessageTreeNode leaf          = (MessageTreeNode) msgTreeModel.add(path);
+		MessageTreeNode leaf          = (MessageTreeNode) msgTreeModel.add(path, null);
 		SingleMessage   singleMessage = new SingleMessage();
 		messages.add(singleMessage);
 		

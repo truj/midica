@@ -14,12 +14,17 @@ import java.util.HashMap;
 import java.util.Set;
 
 import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
 import javax.swing.JComponent;
+import javax.swing.JSeparator;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.plaf.SeparatorUI;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 import org.midica.ui.painter.BackgroundPainter;
@@ -47,8 +52,11 @@ public class Laf {
 	/** **true**, if metal look and feel is used. */
 	public static boolean isMetal = false;
 	
-	/** Height of each text field. */
+	/** Height of text fields. */
 	public static int textFieldHeight = 19;
+	
+	/** Height per line of FlowLabel and FixedLabel fields. */
+	public static int heightPerLineFlowLbl = 15;
 	
 	// inset values
 	private static final int iIn  = 2;  // Pixels used for insets between components (inner insets)
@@ -102,6 +110,7 @@ public class Laf {
 	private static final Color COLOR_WHITE           = new Color( 255, 255, 255 );
 	private static final Color COLOR_BLACK           = new Color(   0,   0,   0 );
 	private static final Color COLOR_INACTIVE        = new Color( 228, 228, 228 );
+	public  static final Color COLOR_HINT            = COLOR_BORDER;
 	
 	// button colors
 	private static final Color COLOR_BUTTON_PRIMARY    = COLOR_SECONDARY;
@@ -123,6 +132,9 @@ public class Laf {
 	public  static final Color COLOR_TABLE_CELL_PAST         = COLOR_WHITE;                // current or past notes for the note history
 	private static final Color COLOR_TABLE_GRID              = COLOR_BORDER;
 	
+	// tree colors
+	public  static final Color COLOR_TREE_NODE_INACTIVE      = new Color( 180, 180, 180 );
+	
 	// message table and tree colors
 	public  static final Color COLOR_MSG_TABLE_HEADER_BG     = COLOR_TABLE_HEADER_BG;
 	public  static final Color COLOR_MSG_TABLE_HEADER_TXT    = COLOR_TABLE_HEADER_TXT;
@@ -134,6 +146,10 @@ public class Laf {
 	private static final Color COLOR_MSG_TREE_SELECTED_TXT   = COLOR_BLACK;
 	public  static final Color COLOR_MSG_DEFAULT             = UIManager.getColor( "Panel.background" );
 	public  static final Color COLOR_MSG_TABLE_GRID          = COLOR_SECONDARY;
+	
+	// colors for key binding configuration
+	public  static final Color COLOR_KEYBINDING_DEFAULT      = UIManager.getColor( "Panel.background" );
+	public  static final Color COLOR_KEYBINDING_SELECTED     = UIManager.getColor( "Panel.background" );
 	
 	// string filter for tables
 	public static final Color COLOR_TBL_FILTER_LAYER_BACKGROUND     = COLOR_SECONDARY_LIGHT;
@@ -203,6 +219,7 @@ public class Laf {
 		if (isNimbus) {
 			isNimbus                      = true;
 			textFieldHeight               = 22;
+			heightPerLineFlowLbl          = 17;
 			INSETS_BTN_EXPAND_COLLAPSE    = new Insets( -10, -10, -10, -10 );
 			INSETS_MSG_FILTER_CBX_LBL     = new Insets(   0,   7,   0,   0 );
 			INSETS_MSG_FILTER_FROM_TO_LBL = new Insets(   2,   7,   0,   0 );
@@ -614,5 +631,54 @@ public class Laf {
 		if (BOLD_LABEL_FONT != null) {
 			component.setFont(BOLD_LABEL_FONT);
 		}
+	}
+	
+	/**
+	 * Creates a new titled and etched border for a named object grouping widget.
+	 * 
+	 * This border is used in the main window to group and label:
+	 * 
+	 * - the configuration area
+	 * - the player area
+	 * - the import area
+	 * - the export area
+	 * 
+	 * It's also used in the info window.
+	 * 
+	 * @param title    Label for the border.
+	 * @return         Titled and etched border.
+	 */
+	public static Border createTitledBorder(String title) {
+		Border lineBorder   = BorderFactory.createLineBorder(COLOR_BORDER);
+		Border titledBorder = BorderFactory.createTitledBorder(
+			lineBorder,
+			title,
+			TitledBorder.RIGHT,
+			TitledBorder.TOP
+		);
+		return titledBorder;
+	}
+	
+	/**
+	 * Creates and returns a horizontal separator with a fitting color.
+	 * 
+	 * @return the separator.
+	 */
+	public static JSeparator createSeparator() {
+		JSeparator sep = new JSeparator(JSeparator.HORIZONTAL);
+		sep.setOpaque(true);
+		if (isNimbus) {
+			sep.setForeground(COLOR_PANEL);
+			sep.setBackground(COLOR_BORDER);
+			
+			// replace nimbus UI by a default UI that respects the colors
+			sep.setUI(new SeparatorUI() {});
+		}
+		else {
+			sep.setForeground(COLOR_BORDER);
+			sep.setBackground(COLOR_PANEL);
+		}
+		
+		return sep;
 	}
 }

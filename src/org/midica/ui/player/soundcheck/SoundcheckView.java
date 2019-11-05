@@ -778,16 +778,16 @@ public class SoundcheckView extends JDialog {
 		keyBindingManager.addBindingsForCheckbox( this.cbxKeep, Dict.KEY_SOUNDCHECK_KEEP );
 		
 		// add key bindings for switching the channel
-		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_0,  0  );
-		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_1,  1  );
-		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_2,  2  );
-		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_3,  3  );
-		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_4,  4  );
-		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_5,  5  );
-		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_6,  6  );
-		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_7,  7  );
-		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_8,  8  );
-		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_9,  9  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_00, 0  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_01, 1  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_02, 2  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_03, 3  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_04, 4  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_05, 5  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_06, 6  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_07, 7  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_08, 8  );
+		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_09, 9  );
 		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_10, 10 );
 		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_11, 11 );
 		keyBindingManager.addBindingsForComboboxSelect( this.cbxChannel, Dict.KEY_SOUNDCHECK_CH_12, 12 );
