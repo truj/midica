@@ -331,6 +331,52 @@ class MidicaPLParserTest extends MidicaPLParser {
 			+ "CALL: 2 2 2 4 6",
 			getLyrics()
 		);
+		
+		parse(getWorkingFile("legato-correction"));
+		// channel 0:
+		messages = getNoteOnOffMessagesByChannel(0);
+		assertEquals( 8, messages.size() );
+		for (SingleMessage msg : messages) {
+			int i = 0;
+			assertEquals( "0/0/90/c / 78",    messages.get(i++).toString() ); // c ON
+			assertEquals( "480/0/90/d / 78",  messages.get(i++).toString() ); // d ON
+			assertEquals( "960/0/90/e / 78",  messages.get(i++).toString() ); // e ON
+			assertEquals( "1439/0/80/e / 0",  messages.get(i++).toString() ); // e OFF (correction)
+			assertEquals( "1440/0/90/e / 78", messages.get(i++).toString() ); // e ON
+			assertEquals( "2400/0/80/c / 0",  messages.get(i++).toString() ); // c OFF
+			assertEquals( "2880/0/80/d / 0",  messages.get(i++).toString() ); // d OFF
+			assertEquals( "3840/0/80/e / 0",  messages.get(i++).toString() ); // e OFF
+		}
+		// channel 1:
+		messages = getNoteOnOffMessagesByChannel(1);
+		assertEquals( 14, messages.size() );
+		for (SingleMessage msg : messages) {
+			int i = 0;
+			assertEquals( "0/1/91/c / 102",    messages.get(i++).toString() ); // c,d,e : c ON
+			assertEquals( "0/1/91/d / 102",    messages.get(i++).toString() ); // c,d,e : d ON
+			assertEquals( "0/1/91/e / 102",    messages.get(i++).toString() ); // c,d,e : e ON
+			assertEquals( "480/1/91/f / 102",  messages.get(i++).toString() ); // f     : f ON
+			assertEquals( "959/1/81/d / 0",    messages.get(i++).toString() ); // c,d,e : d OFF (correction)
+			assertEquals( "960/1/91/d / 102",  messages.get(i++).toString() ); // g,d,a : d ON
+			assertEquals( "960/1/91/g / 102",  messages.get(i++).toString() ); // g,d,a : g ON
+			assertEquals( "960/1/91/a / 102",  messages.get(i++).toString() ); // g,d,a : a ON
+			assertEquals( "2400/1/81/c / 0",   messages.get(i++).toString() ); // c,d,e : c OFF
+			assertEquals( "2400/1/81/e / 0",   messages.get(i++).toString() ); // c,d,e : e OFF
+			assertEquals( "2880/1/81/f / 0",   messages.get(i++).toString() ); // f     : f OFF
+			assertEquals( "3360/1/81/d / 0",   messages.get(i++).toString() ); // g,d,a : d OFF
+			assertEquals( "3360/1/81/g / 0",   messages.get(i++).toString() ); // g,d,a : g OFF
+			assertEquals( "3360/1/81/a / 0",   messages.get(i++).toString() ); // g,d,a : a OFF
+		}
+		// channel 2:
+		messages = getNoteOnOffMessagesByChannel(2);
+		assertEquals( 4, messages.size() );
+		for (SingleMessage msg : messages) {
+			int i = 0;
+			assertEquals( "0/2/92/c / 35",   messages.get(i++).toString() ); //            c ON
+			assertEquals( "479/2/82/c / 0",  messages.get(i++).toString() ); //            c OFF (correction)
+			assertEquals( "480/2/92/c / 35", messages.get(i++).toString() ); // d/s=-2 ==> c ON
+			assertEquals( "1920/2/82/c / 0", messages.get(i++).toString() ); // d/s=-2 ==> c OFF
+		}
 	}
 	
 	/**
@@ -1057,7 +1103,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 	 */
 	private static ArrayList<SingleMessage> getMessagesByChannel(int channel) {
 		ArrayList<SingleMessage> allMessages = (ArrayList<SingleMessage>) SequenceAnalyzer.getSequenceInfo().get("messages");
-		ArrayList<SingleMessage> messages = new ArrayList<>();
+		ArrayList<SingleMessage> messages    = new ArrayList<>();
 		for (SingleMessage msg : allMessages) {
 			Integer ch = (Integer) msg.getOption(IMessageType.OPT_CHANNEL);
 			if (ch != null && ch == channel)
@@ -1075,11 +1121,35 @@ class MidicaPLParserTest extends MidicaPLParser {
 	 */
 	private static ArrayList<SingleMessage> getMessagesByStatus(String statusByte) {
 		ArrayList<SingleMessage> allMessages = (ArrayList<SingleMessage>) SequenceAnalyzer.getSequenceInfo().get("messages");
-		ArrayList<SingleMessage> messages = new ArrayList<>();
+		ArrayList<SingleMessage> messages    = new ArrayList<>();
 		for (SingleMessage msg : allMessages) {
 			String status = (String) msg.getOption(IMessageType.OPT_STATUS_BYTE);
 			if (status.equals(statusByte))
 				messages.add(msg);
+		}
+		
+		return messages;
+	}
+	
+	/**
+	 * Returns only NOTE-ON and NOTE-OFF messages from the message list, filtered by channel.
+	 * 
+	 * @param channel  MIDI channel
+	 * @return the filtered messages.
+	 */
+	private static ArrayList<SingleMessage> getNoteOnOffMessagesByChannel(int channel) {
+		ArrayList<SingleMessage> allMessages = (ArrayList<SingleMessage>) SequenceAnalyzer.getSequenceInfo().get("messages");
+		ArrayList<SingleMessage> messages    = new ArrayList<>();
+		
+		// filter
+		for (SingleMessage msg : allMessages) {
+			Integer ch     = (Integer) msg.getOption(IMessageType.OPT_CHANNEL);
+			String  status = (String)  msg.getOption(IMessageType.OPT_STATUS_BYTE);
+			if (ch != null && ch == channel) {
+				if (status.startsWith("8") || status.startsWith("9")) {
+					messages.add(msg);
+				}
+			}
 		}
 		
 		return messages;

@@ -82,7 +82,7 @@ public class SingleMessage implements IMessageType, Comparable<SingleMessage> {
 		if ( ! options.containsKey(id) )
 			return null;
 		
-		return options.get( id ) + "";
+		return options.get(id) + "";
 	}
 	
 	/**
@@ -108,6 +108,7 @@ public class SingleMessage implements IMessageType, Comparable<SingleMessage> {
 	 * 
 	 * # tickstamp
 	 * # track
+	 * # note (only for NOTE-ON or NOTE-OFF messages)
 	 * # message number inside the track
 	 * 
 	 * - Returns **+1**, if this message is "greater" than the other message.
@@ -124,7 +125,7 @@ public class SingleMessage implements IMessageType, Comparable<SingleMessage> {
 		Long tick      = (Long) getOption( IMessageType.OPT_TICK );
 		Long otherTick = (Long) other.getOption( IMessageType.OPT_TICK );
 		int  result    = tick.compareTo( otherTick );
-		if ( result != 0 ) {
+		if (result != 0) {
 			return result;
 		}
 		
@@ -132,15 +133,31 @@ public class SingleMessage implements IMessageType, Comparable<SingleMessage> {
 		Integer track      = (Integer) getOption( IMessageType.OPT_TRACK );
 		Integer otherTrack = (Integer) other.getOption( IMessageType.OPT_TRACK );
 		result             = track.compareTo( otherTrack );
-		if ( result != 0 ) {
+		if (result != 0) {
 			return result;
+		}
+		
+		// both NOTE-ON or both NOTE-OFF? - sort by note number
+		String status         = (String) getOption( IMessageType.OPT_STATUS_BYTE );
+		String otherStatus    = (String) other.getOption( IMessageType.OPT_STATUS_BYTE );
+		char   cmdNibble      = status.charAt(0);
+		char   otherCmdNibble = otherStatus.charAt(0);
+		if (cmdNibble == otherCmdNibble) {
+			if ('8' == cmdNibble || '9' == cmdNibble) {
+				byte[] msgBytes      = (byte[]) getOption( IMessageType.OPT_MESSAGE );
+				byte[] otherMsgBytes = (byte[]) other.getOption( IMessageType.OPT_MESSAGE );
+				if (msgBytes[1] < otherMsgBytes[1])
+					return -1;
+				else if (msgBytes[1] > otherMsgBytes[1])
+					return 1;
+			}
 		}
 		
 		// sort by message number inside the track
 		Integer msgNum      = (Integer) getOption( IMessageType.OPT_MSG_NUM );
 		Integer otherMsgNum = (Integer) other.getOption( IMessageType.OPT_MSG_NUM );
 		result              = msgNum.compareTo( otherMsgNum );
-		if ( result != 0 ) {
+		if (result != 0) {
 			return result;
 		}
 		

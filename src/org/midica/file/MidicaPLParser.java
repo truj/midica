@@ -3277,11 +3277,23 @@ public class MidicaPLParser extends SequenceParser {
 						}
 						
 						// get end ticks of the current note
-						long endTicks = instr.addNote( currentTremolo );
+						long endTicks = instr.addNote(note, currentTremolo);
+						int  newNote  = transpose(note, channel);
+						
+						// correction of legato overlappings needed?
+						Long tickToCorrect = instr.getStopTickToCorrect();
+						if (tickToCorrect != null) {
+							long targetTick = startTicks - 1;
+							try {
+								SequenceCreator.moveNoteOffMessage(channel, newNote, tickToCorrect, targetTick);
+							}
+							catch (Exception e) {
+								throw new ParseException( e.getMessage() );
+							}
+						}
 						
 						// create and add messages
-						int newNote = transpose( note, channel );
-						SequenceCreator.addMessageKeystroke( channel, newNote, startTicks, endTicks, velocity );
+						SequenceCreator.addMessageKeystroke(channel, newNote, startTicks, endTicks, velocity);
 					}
 				}
 			}
@@ -3689,7 +3701,7 @@ public class MidicaPLParser extends SequenceParser {
 				int    bankMSB      = instr.getBankMSB();
 				int    bankLSB      = instr.getBankLSB();
 				// reset instrument
-				instr.resetCurrentTicks();
+				instr.reset();
 				if (! instr.autoChannel) {
 					if (bankMSB != 0) {
 						SequenceCreator.setBank( channel, 0L, bankMSB, false );

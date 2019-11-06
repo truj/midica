@@ -47,6 +47,8 @@ public class SequenceCreator {
 	private static Track[]  tracks     = null;
 	private static Sequence seq;
 	
+	/**                    channel   --     note  -- event      */
+	private static HashMap<Integer, HashMap<Integer, MidiEvent>> lastNoteOffEvent = null;
 	
 	/**
 	 * This class is only used statically so a public constructor is not needed.
@@ -62,14 +64,14 @@ public class SequenceCreator {
 	 * @throws InvalidMidiDataException    if {@link Sequence}.PPQ is not a valid division type.
 	 *                                     This should never happen.
 	 */
-	public static void reset( String chosenCharset ) throws InvalidMidiDataException {
+	public static void reset(String chosenCharset) throws InvalidMidiDataException {
 		resolution = DEFAULT_RESOLUTION;
 		
 		if (null == chosenCharset) {
 			chosenCharset = Config.get( Config.CHARSET_MPL );
 		}
 		
-		reset( resolution, chosenCharset );
+		reset(resolution, chosenCharset);
 		fileType = "midica";
 	}
 	
@@ -86,12 +88,14 @@ public class SequenceCreator {
 	public static void reset( int res, String chosenCharset ) throws InvalidMidiDataException {
 		
 		// create a new sequence
-		resolution = res;
-		charset    = chosenCharset;
-		seq        = new Sequence( Sequence.PPQ, resolution );
-		tracks     = new Track[ NUM_TRACKS ];
-		for ( int i = 0; i < NUM_TRACKS; i++ ) {
-			tracks[ i ] = seq.createTrack();
+		resolution       = res;
+		charset          = chosenCharset;
+		seq              = new Sequence(Sequence.PPQ, resolution);
+		tracks           = new Track[NUM_TRACKS];
+		lastNoteOffEvent = new HashMap<>();
+		for (int i = 0; i < NUM_TRACKS; i++) {
+			tracks[i] = seq.createTrack();
+			lastNoteOffEvent.put(i, new HashMap<Integer, MidiEvent>());
 		}
 		fileType = "mid";
 		
@@ -197,11 +201,11 @@ public class SequenceCreator {
 	 * @param velocity    Velocity of the key stroke.
 	 * @throws InvalidMidiDataException if invalid MIDI data is used to create a MIDI message.
 	 */
-	public static void addMessageNoteON( int channel, int note, long tick, int velocity ) throws InvalidMidiDataException {
+	public static void addMessageNoteON(int channel, int note, long tick, int velocity) throws InvalidMidiDataException {
 		ShortMessage msg = new ShortMessage();
-		msg.setMessage( ShortMessage.NOTE_ON, channel, note, velocity );
-		MidiEvent event = new MidiEvent( msg, tick );
-		tracks[ channel + NUM_META_TRACKS ].add( event );
+		msg.setMessage(ShortMessage.NOTE_ON, channel, note, velocity);
+		MidiEvent event = new MidiEvent(msg, tick);
+		tracks[channel + NUM_META_TRACKS].add(event);
 	}
 	
 	/**
@@ -212,11 +216,55 @@ public class SequenceCreator {
 	 * @param tick       Tickstamp of the event.
 	 * @throws InvalidMidiDataException if invalid MIDI data is used to create a MIDI message.
 	 */
-	public static void addMessageNoteOFF( int channel, int note, long tick ) throws InvalidMidiDataException {
+	public static void addMessageNoteOFF(int channel, int note, long tick) throws InvalidMidiDataException {
 		ShortMessage msg = new ShortMessage();
-		msg.setMessage( ShortMessage.NOTE_OFF, channel, note, 0 );
-		MidiEvent event = new MidiEvent( msg, tick );
-		tracks[ channel + NUM_META_TRACKS ].add( event );
+		msg.setMessage(ShortMessage.NOTE_OFF, channel, note, 0);
+		MidiEvent event = new MidiEvent(msg, tick);
+		tracks[channel + NUM_META_TRACKS].add(event);
+		
+		// remember event, in case a correction is necessary later
+		lastNoteOffEvent.get(channel).put(note, event);
+	}
+	
+	/**
+	 * Moves the last note-off event matching the given parameters to a new position.
+	 * This is needed to correct legato-overlappings, otherwise resulting in a sequence like this:
+	 * 
+	 * # note-on
+	 * # note-on
+	 * # note-off
+	 * # note-off
+	 * 
+	 * This can happen if a note is played twice in a row in the same channel, with a legato value of more than 100%.
+	 * 
+	 * @param channel     Channel number from 0 to 15.
+	 * @param note        Note number.
+	 * @param fromTick    Tick from where the event shall be moved away.
+	 * @param toTick      Tick where the event shall be moved to.
+	 * @throws Exception if the event to be moved was not found or has a different tick than expected.
+	 */
+	public static void moveNoteOffMessage(int channel, int note, long fromTick, long toTick) throws Exception {
+		Track track = tracks[channel + NUM_META_TRACKS];
+		
+		// get the event to be corrected
+		MidiEvent event = lastNoteOffEvent.get(channel).get(note);
+		if (event == null) {
+			throw new Exception("Cannot move note-off: event not found. This should not happen. Please report.");
+		}
+		
+		// remove the event
+		track.remove(event);
+		
+		// check
+		if (event.getTick() != fromTick) {
+			throw new Exception("cannot move note-off - wrong 'from' tick. This should not happen. Please report.");
+		}
+		
+		// change tick
+		event.setTick(toTick);
+		
+		// re-add the event
+		track.add(event);
 	}
 	
 	/**

@@ -8,6 +8,7 @@
 package org.midica.file;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.midica.config.Dict;
 
@@ -51,6 +52,16 @@ public class Instrument implements Comparable<Instrument> {
 	private int bankMSB;
 	/** LSB of the bank number (0-127) */
 	private int bankLSB;
+	/** key = note; value = tickstamp of the last NOTE-ON */
+	private HashMap<Integer, Long> lastNoteOn = new HashMap<>();
+	/** key = note; value = tickstamp of the last NOTE-OFF */
+	private HashMap<Integer, Long> lastNoteOff = new HashMap<>();
+	/**
+	 * If legato overlappings are detected while adding a note, this is the stop tick
+	 * of the detected note to be corrected.
+	 * If no legato overlappings are detected, this is **null**.
+	 */
+	private Long stopTickForLegatoCorrection = null;
 	
 	/** Current velocity */
 	private int velocity = DEFAULT_VELOCITY;
@@ -142,11 +153,14 @@ public class Instrument implements Comparable<Instrument> {
 	}
 	
 	/**
-	 * Resets the current tickstamp.
+	 * Resets the current tickstamp and the data structures storing the last pressed notes.
+	 * 
 	 * This is done during the initial instruments setup.
 	 */
-	public void resetCurrentTicks() {
-		this.currentTicks = MIN_CURRENT_TICKS;
+	public void reset() {
+		currentTicks = MIN_CURRENT_TICKS;
+		lastNoteOn   = new HashMap<>();
+		lastNoteOff  = new HashMap<>();
 	}
 	
 	/**
@@ -175,10 +189,17 @@ public class Instrument implements Comparable<Instrument> {
 	/**
 	 * Increments the tickstamp according to the note's duration in ticks.
 	 * 
+	 * @param note        Note number.
 	 * @param duration    Note length duration in ticks.
 	 * @return Tickstamp for the key release according to note length duration and key press duration ratio.
 	 */
-	public long addNote(int duration) {
+	public long addNote(int note, int duration) {
+		
+		// get last ticks of that note - maybe we need corrections because of legato overlappings
+		Long lastOnTick             = lastNoteOn.get(note);
+		Long lastOffTick            = lastNoteOff.get(note);
+		long noteOnTick             = currentTicks;
+		stopTickForLegatoCorrection = null;
 		
 		// calculate key release tickstamp
 		long pressTicks = Math.round(duration * this.durationRatio);
@@ -190,7 +211,28 @@ public class Instrument implements Comparable<Instrument> {
 		// increment channel tickstamp
 		incrementTicks(duration);
 		
+		// correction needed?
+		if (lastOnTick != null && lastOffTick != null) {
+			if (lastOnTick < noteOnTick && lastOffTick > noteOnTick) {
+				stopTickForLegatoCorrection = lastOffTick;
+			}
+		}
+		
+		// store note for the next legato check
+		lastNoteOn.put(note, noteOnTick);
+		lastNoteOff.put(note, endTick);
+		
 		return endTick;
+	}
+	
+	/**
+	 * Returns the stop tick of the note to be corrected due to legato overlappings, or **null** if
+	 * no overlappings have been detected.
+	 * 
+	 * @return the stop tick to be corrected or **null**.
+	 */
+	public Long getStopTickToCorrect() {
+		return stopTickForLegatoCorrection;
 	}
 	
 	/**
