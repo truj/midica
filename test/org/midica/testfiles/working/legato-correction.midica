@@ -2,6 +2,7 @@ INSTRUMENTS
 	0    ACOUSTIC_GRAND_PIANO    Piano
 	1    VIOLIN                  Fiddle
 	2    HARPSICHORD             Harpsichord
+	3    CLAVINET                Clavinet
 END
 
 // normal notes
@@ -18,3 +19,6 @@ END
 // with shift
 2  c  /4  d=300%, v=35
 2  d  /4  s=-2
+
+// d=100%
+3  c  /4  d=100%, q=2, v=65

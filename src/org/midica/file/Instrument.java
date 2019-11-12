@@ -213,7 +213,7 @@ public class Instrument implements Comparable<Instrument> {
 		
 		// correction needed?
 		if (lastOnTick != null && lastOffTick != null) {
-			if (lastOnTick < noteOnTick && lastOffTick > noteOnTick) {
+			if (lastOnTick < noteOnTick && lastOffTick >= noteOnTick) {
 				stopTickForLegatoCorrection = lastOffTick;
 			}
 		}

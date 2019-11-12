@@ -244,9 +244,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "0/0/90/c / 30",     messages.get(++i).toString() );  // c piano
 			assertEquals( "240/0/80/c / 0",    messages.get(++i).toString() );  //   staccato=240 ticks
 			assertEquals( "480/0/90/c / 30",   messages.get(++i).toString() );  // c
-			assertEquals( "960/0/80/c / 0",    messages.get(++i).toString() );  //   legato=480 ticks
+			assertEquals( "959/0/80/c / 0",    messages.get(++i).toString() );  //   legato=480-1 ticks    (-1: legato-correction)
 			assertEquals( "960/0/90/c / 123",  messages.get(++i).toString() );  // c forte   (CALL test1)
-			assertEquals( "1440/0/80/c / 0",   messages.get(++i).toString() );  //   legato=480 ticks
+			assertEquals( "1439/0/80/c / 0",   messages.get(++i).toString() );  //   legato=480-1 ticks    (-1: legato-correction)
 			assertEquals( "1440/0/90/c / 123", messages.get(++i).toString() );  // c         (CALL test2)
 			assertEquals( "1920/0/80/c / 0",   messages.get(++i).toString() );  //   legato=480 ticks
 		}
@@ -377,6 +377,34 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "480/2/92/c / 35", messages.get(i++).toString() ); // d/s=-2 ==> c ON
 			assertEquals( "1920/2/82/c / 0", messages.get(i++).toString() ); // d/s=-2 ==> c OFF
 		}
+		// channel 3:
+		messages = getNoteOnOffMessagesByChannel(3);
+		assertEquals( 4, messages.size() );
+		for (SingleMessage msg : messages) {
+			int i = 0;
+			assertEquals( "0/3/93/c / 65",   messages.get(i++).toString() ); // c ON
+			assertEquals( "479/3/83/c / 0",  messages.get(i++).toString() ); // c OFF (correction)
+			assertEquals( "480/3/93/c / 65", messages.get(i++).toString() ); // c ON
+			assertEquals( "960/3/83/c / 0",  messages.get(i++).toString() ); // c OFF
+		}
+		// different transpose level
+		setTransposeLevel((byte) 12);
+		parse(getWorkingFile("legato-correction"));
+		setTransposeLevel((byte) 0);
+		messages = getNoteOnOffMessagesByChannel(0);
+		assertEquals( 8, messages.size() );
+		for (SingleMessage msg : messages) {
+			int i = 0;
+			assertEquals( "0/0/90/c+ / 78",    messages.get(i++).toString() ); // c+ ON
+			assertEquals( "480/0/90/d+ / 78",  messages.get(i++).toString() ); // d+ ON
+			assertEquals( "960/0/90/e+ / 78",  messages.get(i++).toString() ); // e+ ON
+			assertEquals( "1439/0/80/e+ / 0",  messages.get(i++).toString() ); // e+ OFF (correction)
+			assertEquals( "1440/0/90/e+ / 78", messages.get(i++).toString() ); // e+ ON
+			assertEquals( "2400/0/80/c+ / 0",  messages.get(i++).toString() ); // c+ OFF
+			assertEquals( "2880/0/80/d+ / 0",  messages.get(i++).toString() ); // d+ OFF
+			assertEquals( "3840/0/80/e+ / 0",  messages.get(i++).toString() ); // e+ OFF
+		}
+		
 	}
 	
 	/**
