@@ -212,27 +212,27 @@ public class SequenceAnalyzer {
 	 * The following structures are returned:
 	 * 
 	 * - **instrument_history**: TreeMap<Byte, TreeMap<Long, Byte[]>>
-	 *   - channel
-	 *   - tick
-	 *   - 0=bankMSB, 1=bankLSB, 3=program
+	 *     - channel
+	 *     - tick
+	 *     - 0=bankMSB, 1=bankLSB, 3=program
 	 * - **comment_history**: TreeMap<Byte, TreeMap<Long, String>>
-	 *   - channel
-	 *   - tick
-	 *   - comment
+	 *     - channel
+	 *     - tick
+	 *     - comment
 	 * - **note_history**: TreeMap<Byte, TreeMap<Long, TreeMap<Byte, Byte>>>
-	 *   - channel
-	 *   - tick
-	 *   - note
-	 *   - velocity
+	 *     - channel
+	 *     - tick
+	 *     - note
+	 *     - velocity
 	 * - **note_on_off**: TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>>
-	 *   - channel
-	 *   - note
-	 *   - tick
-	 *   - on/off
+	 *     - channel
+	 *     - note
+	 *     - tick
+	 *     - on/off
 	 * - **lyrics**: TreeMap<Long, TreeMap<Long, String>>
-	 *   - line begin tick
-	 *   - syllable tick
-	 *   - syllable
+	 *     - line begin tick
+	 *     - syllable tick
+	 *     - syllable
 	 * 
 	 * @return internal data structures as described above.
 	 */
