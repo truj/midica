@@ -130,6 +130,7 @@ public class Dict {
 	public static final String SYNTAX_LYRICS_SPACE       = "LYRICS_SPACE";
 	public static final String SYNTAX_LYRICS_CR          = "LYRICS_CR";
 	public static final String SYNTAX_LYRICS_LF          = "LYRICS_LF";
+	public static final String SYNTAX_LYRICS_COMMA       = "LYRICS_COMMA";
 	public static final String SYNTAX_TUPLET             = "TUPLET";
 	public static final String SYNTAX_T                  = "TUPLET_SHORT";
 	public static final String SYNTAX_TREMOLO            = "TREMOLO";
@@ -2106,6 +2107,7 @@ public class Dict {
 		set( SYNTAX_LYRICS_SPACE,       "placeholder for a space inside of a syllable"     );
 		set( SYNTAX_LYRICS_CR,          "placeholder for a new line inside of a syllable"  );
 		set( SYNTAX_LYRICS_LF,          "placeholder for a new paragraph inside of a syllable" );
+		set( SYNTAX_LYRICS_COMMA,       "placeholder for a comma inside of a syllable"     );
 		set( SYNTAX_TUPLET,             "tuplet option (long)"                             );
 		set( SYNTAX_T,                  "tuplet option (short)"                            );
 		set( SYNTAX_TREMOLO,            "tremolo option (long)"                            );
@@ -3060,6 +3062,7 @@ public class Dict {
 		setSyntax( SYNTAX_LYRICS_SPACE,       "_"            );
 		setSyntax( SYNTAX_LYRICS_CR,          "\\r"          );
 		setSyntax( SYNTAX_LYRICS_LF,          "\\n"          );
+		setSyntax( SYNTAX_LYRICS_COMMA,       "\\c"          );
 		setSyntax( SYNTAX_TUPLET,             "tuplet"       );
 		setSyntax( SYNTAX_T,                  "t"            );
 		setSyntax( SYNTAX_TREMOLO,            "tremolo"      );
@@ -3190,6 +3193,7 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_LYRICS_SPACE     );
 		addSyntaxForInfoView( SYNTAX_LYRICS_CR        );
 		addSyntaxForInfoView( SYNTAX_LYRICS_LF        );
+		addSyntaxForInfoView( SYNTAX_LYRICS_COMMA     );
 		addSyntaxForInfoView( SYNTAX_TUPLET           );
 		addSyntaxForInfoView( SYNTAX_T                );
 		addSyntaxForInfoView( SYNTAX_TREMOLO          );

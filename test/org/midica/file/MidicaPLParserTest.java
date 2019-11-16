@@ -53,7 +53,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 	}
 	
 	/**
-	 * Test method for {@link org.midica.file.MidicaPLParser}.
+	 * Test method parseDuration().
 	 */
 	@Test
 	void testParseDuration() throws ParseException {
@@ -187,7 +187,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		);
 		
 		parse(getWorkingFile("lyrics"));
-		assertEquals( "happy birthday to you\nhappy birthday to you\n\nhappy", getLyrics() );
+		assertEquals( "happy birthday to you,\nhappy birthday to you,\n\nhappy", getLyrics() );
 		
 		parse(getWorkingFile("block-tuplets"));
 		assertEquals( 3668, instruments.get(0).getCurrentTicks() );

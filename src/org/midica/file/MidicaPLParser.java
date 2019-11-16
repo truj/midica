@@ -133,6 +133,7 @@ public class MidicaPLParser extends SequenceParser {
 	public static String LYRICS_SPACE       = null;
 	public static String LYRICS_CR          = null;
 	public static String LYRICS_LF          = null;
+	public static String LYRICS_COMMA       = null;
 	public static String FUNCTION           = null;
 	public static String PARAM_OPEN         = null;
 	public static String PARAM_CLOSE        = null;
@@ -324,6 +325,7 @@ public class MidicaPLParser extends SequenceParser {
 		LYRICS_SPACE       = Dict.getSyntax( Dict.SYNTAX_LYRICS_SPACE       );
 		LYRICS_CR          = Dict.getSyntax( Dict.SYNTAX_LYRICS_CR          );
 		LYRICS_LF          = Dict.getSyntax( Dict.SYNTAX_LYRICS_LF          );
+		LYRICS_COMMA       = Dict.getSyntax( Dict.SYNTAX_LYRICS_COMMA       );
 		FUNCTION           = Dict.getSyntax( Dict.SYNTAX_FUNCTION           );
 		PARAM_OPEN         = Dict.getSyntax( Dict.SYNTAX_PARAM_OPEN         );
 		PARAM_CLOSE        = Dict.getSyntax( Dict.SYNTAX_PARAM_CLOSE        );
@@ -2529,6 +2531,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_LYRICS_SPACE.equals(cmdId)       ) LYRICS_SPACE       = cmdName;
 		else if ( Dict.SYNTAX_LYRICS_CR.equals(cmdId)          ) LYRICS_CR          = cmdName;
 		else if ( Dict.SYNTAX_LYRICS_LF.equals(cmdId)          ) LYRICS_LF          = cmdName;
+		else if ( Dict.SYNTAX_LYRICS_COMMA.equals(cmdId)       ) LYRICS_COMMA       = cmdName;
 		else if ( Dict.SYNTAX_FUNCTION.equals(cmdId)           ) FUNCTION           = cmdName;
 		else if ( Dict.SYNTAX_PARAM_OPEN.equals(cmdId)         ) PARAM_OPEN         = cmdName;
 		else if ( Dict.SYNTAX_PARAM_CLOSE.equals(cmdId)        ) PARAM_CLOSE        = cmdName;
@@ -3242,9 +3245,10 @@ public class MidicaPLParser extends SequenceParser {
 				int  currentTremolo  = tremolo;
 				long startTicks      = instr.getCurrentTicks();
 				if (! isFake && syllable != null) {
-					syllable = syllable.replaceAll(Pattern.quote(LYRICS_SPACE), " ");
-					syllable = syllable.replaceAll(Pattern.quote(LYRICS_CR), "\r");
-					syllable = syllable.replaceAll(Pattern.quote(LYRICS_LF), "\n");
+					syllable = syllable.replaceAll( Pattern.quote(LYRICS_SPACE), " "  );
+					syllable = syllable.replaceAll( Pattern.quote(LYRICS_CR),    "\r" );
+					syllable = syllable.replaceAll( Pattern.quote(LYRICS_LF),    "\n" );
+					syllable = syllable.replaceAll( Pattern.quote(LYRICS_COMMA), ","  );
 					SequenceCreator.addMessageLyrics(syllable, startTicks);
 				}
 				if (REST_VALUE == note) {

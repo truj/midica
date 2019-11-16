@@ -5,14 +5,14 @@ INCLUDE inc/instruments.midica
 0	d	/4 l=birth
 0	c	/4 l=day_
 0	f	/4 l=to_
-0	e	/2 l=you\r
+0	e	/2 l=you\c\r
 
 0	c	/8 l=hap
 0	c	/8 l=py_
 0	d	/4 l=birth
 0	c	/4 l=day_
 0	g	/4 l=to_
-0	f	/2 l=you\n
+0	f	/2 l=you\c\n
 
 0	c	/8 l=hap
 0	c	/8 l=py
