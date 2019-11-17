@@ -1,0 +1,177 @@
+// This example file provides the traditional children's song
+// "Old MacDonald had a farm".
+// 
+// This file assumes standard program configuration:
+// - Note System:      International: c, d, e, ... (lower case)
+// - Half Tone Symbol: # (c#, d#, e#, ...)
+// - Octave Naming:    +n/-n
+// - Syntax:           Mixed Case Syntax
+
+META
+	copyright  (c) Mozilla Public License, v. 2.0, author: Jan Trukenmüller
+	title      Old MacDonald had a farm
+	composer   traditional
+	lyrics     traditional
+END
+
+INSTRUMENTS
+	0  LEAD_VOICE      Vocals
+	1  STEEL_GUITAR    Guitar
+END
+
+// initialize channel defaults
+0  -  /4  m, d=75%,  v=127
+1  -  /4  m, d=100%, v=40
+
+// execute the verses with different animals and sounds
+CALL verse(1, cow, moo)
+CALL verse(2, pig, oink)
+CALL verse(3, duck, quack)
+CALL verse(4, lamb, baa)
+CALL verse(6, dog, woof)
+
+FUNCTION verse
+	CALL vocals($[0], $[1], $[2])
+	CALL guitar
+END
+
+///////////////////////////
+// vocals
+///////////////////////////
+
+FUNCTION vocals
+	
+	// Define indefinite article for the animal and its sound.
+	// The default is "a" but if the word begins with a vowel, we need "an"
+	VAR $animal_article = a_   // maybe he will have an ape one day...
+	VAR $sound_article  = a_   // we need "an" for the pig's "oink" in the second verse
+	{ if $[0] in 2
+		VAR $sound_article = an_
+	}
+	
+	0  g  /4   l=Old_
+	0  g  /4   l=Mac
+	0  g  /4   l=Don
+	0  d  /4   l=ald_
+	
+	0  e  /4   l=had_
+	0  e  /4   l=a_
+	0  d  /2   l=farm.\r
+	
+	0  b  /4   l=Ee_
+	0  b  /4   l=i_
+	0  a  /4   l=ee_
+	0  a  /4   l=i_
+	
+	0  g  /2.  l=oh!\r
+	0  d  /4   l=And_
+	
+	0  g  /4   l=on_
+	0  g  /4   l=his_
+	0  g  /4   l=farm_
+	0  d  /4   l=he_
+	
+	0  e  /4   l=had_
+	0  e  /4   l=$animal_article
+	0  d  /2   l=$[1].\r
+	
+	0  b  /4   l=Ee_
+	0  b  /4   l=i_
+	0  a  /4   l=ee_
+	0  a  /4   l=i_
+	
+	0  g  /2.  l=oh!\r
+	0  d  /8   l=With_
+	0  d  /8   l=$sound_article
+	
+	0  g  /4   l=$[2]_
+	0  g  /4   l=$[2]_
+	0  g  /4   l=here\r
+	0  d  /8   l=and_
+	0  d  /8   l=$sound_article
+	
+	0  g  /4   l=$[2]_
+	0  g  /4   l=$[2]_
+	0  g  /4   l=there.\r
+	0  -  /4
+	
+	0  g  /8   l=Here_
+	0  g  /8   l=$sound_article
+	0  g  /4   l=$[2]\c_
+	0  g  /8   l=there_
+	0  g  /8   l=$sound_article
+	0  g  /4   l=$[2]\c\r
+	
+	0  g  /8   l=ev
+	0  g  /8   l=ery
+	0  g  /8   l=where_
+	0  g  /8   l=$sound_article
+	0  g  /4   l=$[2]_
+	0  g  /4   l=$[2].\r
+	
+	0  g  /4   l=Old_
+	0  g  /4   l=Mac
+	0  g  /4   l=Don
+	0  d  /4   l=ald_
+	
+	0  e  /4   l=had_
+	0  e  /4   l=a_
+	0  d  /2   l=farm.\r
+	
+	0  b  /4   l=Ee_
+	0  b  /4   l=i_
+	0  a  /4   l=ee_
+	0  a  /4   l=i_
+	
+	0  g  /1   l=oh!\n
+END
+
+///////////////////////////
+// guitar
+///////////////////////////
+
+// define some chords
+CHORD  gmaj   g-  d   g   b   d+  g+
+CHORD  cmaj   c   g   c+  e+  g+
+CHORD  dmaj   d   a   d+  f#+ a+
+
+// constants for guitar strokes
+CONST $tr_long  = /2
+CONST $tr_short = /8
+CONST $tremolo = *32
+
+FUNCTION guitar
+	CALL guitar_line q=2
+	
+	1  gmaj  /1      q=2   // moo moo here and a moo moo there
+	
+	1  gmaj  /8  q=2       // here a
+	1  gmaj  /4            // moo
+	1  gmaj  /8  q=2       // there a
+	1  gmaj  /4            // moo
+	
+	1  gmaj  /8      q=4   // everywhere a
+	1  gmaj  /4      q=2   // moo moo
+	
+	CALL guitar_line
+END
+
+// 4 measures: "Old MacDonald..." until "EE i ee i oh"
+FUNCTION guitar_line
+	1  gmaj  /4  tr=$tr_long
+	1  gmaj  /2  tr=$tr_short
+	1  gmaj  /4  tr=$tr_long
+	
+	1  cmaj  /4  tr=$tr_short
+	1  cmaj  /4  tr=$tr_long
+	1  gmaj  /2  tr=$tr_long
+	
+	1  gmaj  /4
+	1  gmaj  /4  tr=$tr_short
+	1  dmaj  /4
+	1  dmaj  /4  tr=$tr_short
+	
+	1  gmaj  /4  tr=$tr_long
+	1  gmaj  /2  tr=$tr_short
+	1  gmaj  /4  tr=$tr_long
+END
