@@ -28,7 +28,7 @@ CALL verse(1, cow, moo)
 CALL verse(2, pig, oink)
 CALL verse(3, duck, quack)
 CALL verse(4, lamb, baa)
-CALL verse(6, dog, woof)
+CALL verse(5, dog, woof)
 
 FUNCTION verse
 	CALL vocals($[0], $[1], $[2])
@@ -138,20 +138,19 @@ CHORD  dmaj   d   a   d+  f#+ a+
 // constants for guitar strokes
 CONST $tr_long  = /2
 CONST $tr_short = /8
-CONST $tremolo = *32
 
 FUNCTION guitar
 	CALL guitar_line q=2
 	
-	1  gmaj  /1      q=2   // moo moo here and a moo moo there
+	1  gmaj  /1  q=2   // moo moo here and a moo moo there
 	
-	1  gmaj  /8  q=2       // here a
-	1  gmaj  /4            // moo
-	1  gmaj  /8  q=2       // there a
-	1  gmaj  /4            // moo
+	1  gmaj  /8  q=2   // here a
+	1  gmaj  /4        // moo
+	1  gmaj  /8  q=2   // there a
+	1  gmaj  /4        // moo
 	
-	1  gmaj  /8      q=4   // everywhere a
-	1  gmaj  /4      q=2   // moo moo
+	1  gmaj  /8  q=4   // everywhere a
+	1  gmaj  /4  q=2   // moo moo
 	
 	CALL guitar_line
 END
