@@ -17,6 +17,12 @@
 // - Functions starting with 'd_all_' switch all channels to a certain duration mode (staccato or legato)
 // - Functions starting with 'v_all_' switch all channels to a certain velocity mode (piano, forte, ...)
 
+META
+	copyright  (c) Mozilla Public License, v. 2.0, author: Jan Trukenmüller
+	title      William Tell Ouverture - Finale
+	composer   Gioachino Rossini
+END
+
 // define constants
 CONST $staccato    = d=50%
 CONST $legato      = d=100%

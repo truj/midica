@@ -18,6 +18,11 @@
 //   The channel number in channel commands is always expressed
 //   by the variable $c.
 
+META
+	copyright  (c) Mozilla Public License, v. 2.0, author: Jan Trukenmüller
+	title      The Four Seasons (Summer) - 3rd movement
+	composer   Antonio Vivaldi
+END
 
 // init channels with instruments
 INSTRUMENTS
