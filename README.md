@@ -80,6 +80,7 @@ You can find a MidicaPL tutorial here:
 - [Chapter 2](http://www.midica.org/tutorial-2.html)
 - [Chapter 3](http://www.midica.org/tutorial-3.html)
 - [Chapter 4](http://www.midica.org/tutorial-4.html)
+- [Chapter 5](http://www.midica.org/tutorial-5.html)
 
 A first example of a complete song can be found in the
 [examples directory](examples/). There will be more in the future.

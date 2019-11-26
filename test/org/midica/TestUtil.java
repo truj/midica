@@ -23,6 +23,7 @@ public class TestUtil {
 	
 	/**
 	 * Initializes and stores midica in test mode, if not yet done.
+	 * Should be called by unit test classes in the method setUpBeforeClass().
 	 * 
 	 * @throws InterruptedException       on interruptions while waiting for the event dispatching thread.
 	 * @throws InvocationTargetException  on exceptions.

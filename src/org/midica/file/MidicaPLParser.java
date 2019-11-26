@@ -178,7 +178,7 @@ public class MidicaPLParser extends SequenceParser {
 	public static String TRIPLET            = null;
 	public static String TUPLET_INTRO       = null;
 	public static String TUPLET_FOR         = null;
-	public static String DURATION_PLUS      = null;
+	public static String LENGTH_PLUS        = null;
 	
 	public static String ORIGINAL_DEFINE  = null;
 	public static String ORIGINAL_INCLUDE = null;
@@ -358,7 +358,7 @@ public class MidicaPLParser extends SequenceParser {
 		TRIPLET            = Dict.getSyntax( Dict.SYNTAX_TRIPLET            );
 		TUPLET_INTRO       = Dict.getSyntax( Dict.SYNTAX_TUPLET_INTRO       );
 		TUPLET_FOR         = Dict.getSyntax( Dict.SYNTAX_TUPLET_FOR         );
-		DURATION_PLUS      = Dict.getSyntax( Dict.SYNTAX_DURATION_PLUS      );
+		LENGTH_PLUS        = Dict.getSyntax( Dict.SYNTAX_LENGTH_PLUS        );
 		IF                 = Dict.getSyntax( Dict.SYNTAX_IF                 );
 		ELSIF              = Dict.getSyntax( Dict.SYNTAX_ELSIF              );
 		ELSE               = Dict.getSyntax( Dict.SYNTAX_ELSE               );
@@ -1418,11 +1418,11 @@ public class MidicaPLParser extends SequenceParser {
 	 * @throws ParseException  If the duration string cannot be parsed.
 	 */
 	protected int parseDuration(String s) throws ParseException {
-		String[] summands = s.split(Pattern.quote(DURATION_PLUS), -1);
+		String[] summands = s.split(Pattern.quote(LENGTH_PLUS), -1);
 		int      duration = 0;
 		for (String summand : summands) {
 			if ("".equals(summand))
-				throw new ParseException( Dict.get(Dict.ERROR_EMPTY_DURATION_SUMMAND) + s );
+				throw new ParseException( Dict.get(Dict.ERROR_EMPTY_LENGTH_SUMMAND) + s );
 			duration += parseDurationSummand(summand);
 		}
 		
@@ -2564,7 +2564,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_TRIPLET.equals(cmdId)            ) TRIPLET            = cmdName;
 		else if ( Dict.SYNTAX_TUPLET_INTRO.equals(cmdId)       ) TUPLET_INTRO       = cmdName;
 		else if ( Dict.SYNTAX_TUPLET_FOR.equals(cmdId)         ) TUPLET_FOR         = cmdName;
-		else if ( Dict.SYNTAX_DURATION_PLUS.equals(cmdId)      ) DURATION_PLUS      = cmdName;
+		else if ( Dict.SYNTAX_LENGTH_PLUS.equals(cmdId)        ) LENGTH_PLUS        = cmdName;
 		else if ( Dict.SYNTAX_IF.equals(cmdId)                 ) IF                 = cmdName;
 		else if ( Dict.SYNTAX_ELSIF.equals(cmdId)              ) ELSIF              = cmdName;
 		else if ( Dict.SYNTAX_ELSE.equals(cmdId)               ) ELSE               = cmdName;

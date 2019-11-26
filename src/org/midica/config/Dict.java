@@ -170,7 +170,7 @@ public class Dict {
 	public static final String SYNTAX_TRIPLET            = "TRIPLET";
 	public static final String SYNTAX_TUPLET_INTRO       = "TUPLET_INTRO";
 	public static final String SYNTAX_TUPLET_FOR         = "TUPLET_FOR";
-	public static final String SYNTAX_DURATION_PLUS      = "DURATION_PLUS";
+	public static final String SYNTAX_LENGTH_PLUS        = "LENGTH_PLUS";
 	
 	// TODO: use for the syntax or delete
 	// drumkit identifiers
@@ -1311,7 +1311,7 @@ public class Dict {
 	public static final String ERROR_NOTE_TOO_BIG                = "error_note_too_big";
 	public static final String ERROR_NOTE_TOO_SMALL              = "error_note_too_small";
 	public static final String ERROR_NOTE_LENGTH_INVALID         = "error_note_length_invalid";
-	public static final String ERROR_EMPTY_DURATION_SUMMAND      = "error_empty_duration_summand";
+	public static final String ERROR_EMPTY_LENGTH_SUMMAND        = "error_empty_length_summand";
 	public static final String ERROR_UNKNOWN_FUNCTION_CMD        = "error_unknown_function_cmd";
 	public static final String ERROR_INSTR_NUM_OF_ARGS           = "error_num_of_args";
 	public static final String ERROR_INSTR_NUM_OF_ARGS_SINGLE    = "error_num_of_args_single";
@@ -2148,7 +2148,7 @@ public class Dict {
 		set( SYNTAX_TRIPLET,          "triplet (note length devided by 1.5)"             );
 		set( SYNTAX_TUPLET_INTRO,     "tuplet opener"                                    );
 		set( SYNTAX_TUPLET_FOR,       "tuplet definition separator"                      );
-		set( SYNTAX_DURATION_PLUS,    "duration addition symbol"                         );
+		set( SYNTAX_LENGTH_PLUS,      "note length addition symbol"                      );
 		
 		// messages for InfoView
 		set( MSG1_CH_VOICE,               "Channel Voice Messages"                         );
@@ -2549,7 +2549,7 @@ public class Dict {
 		set( ERROR_NOTE_TOO_BIG,                  "note number too big: "                                             );
 		set( ERROR_NOTE_TOO_SMALL,                "note number too small: "                                           );
 		set( ERROR_NOTE_LENGTH_INVALID,           "invalid note length expression: "                                  );
-		set( ERROR_EMPTY_DURATION_SUMMAND,        "empty summand in duration string: "                                );
+		set( ERROR_EMPTY_LENGTH_SUMMAND,          "empty summand in length string: "                                  );
 		set( ERROR_UNKNOWN_FUNCTION_CMD,          "unknown function command: "                                        ); // TODO: check
 		set( ERROR_INSTR_NUM_OF_ARGS,             "wrong number of arguments in instrument command"                   );
 		set( ERROR_INSTR_NUM_OF_ARGS_SINGLE,      "wrong number of arguments in single-line instrument command"       );
@@ -3102,7 +3102,7 @@ public class Dict {
 		setSyntax( SYNTAX_TRIPLET,            "t"            );
 		setSyntax( SYNTAX_TUPLET_INTRO,       "t"            );
 		setSyntax( SYNTAX_TUPLET_FOR,         ":"            );
-		setSyntax( SYNTAX_DURATION_PLUS,      "+"            );
+		setSyntax( SYNTAX_LENGTH_PLUS,        "+"            );
 		
 		// switch to lower/upper, if needed
 		if ( Config.CBX_SYNTAX_LOWER.equals(configuredSyntax) ) {
@@ -3230,7 +3230,7 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_TRIPLET       );
 		addSyntaxForInfoView( SYNTAX_TUPLET_INTRO  );
 		addSyntaxForInfoView( SYNTAX_TUPLET_FOR    );
-		addSyntaxForInfoView( SYNTAX_DURATION_PLUS );
+		addSyntaxForInfoView( SYNTAX_LENGTH_PLUS   );
 	}
 	
 	/**

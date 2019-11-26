@@ -249,7 +249,7 @@ public class NestableBlock {
 			// no exception - channel command
 			
 			if (null == plus)
-				plus = Pattern.compile( Pattern.quote(MidicaPLParser.DURATION_PLUS) );
+				plus = Pattern.compile( Pattern.quote(MidicaPLParser.LENGTH_PLUS) );
 			
 			// add tuplet to all summands inside of the duration column
 			// e.g. *1+/8 --> *1t4:3+/8t4:3
@@ -258,7 +258,7 @@ public class NestableBlock {
 				for (int j=0; j < atoms.length; j++) {
 					atoms[j] += tuplet;
 				}
-				tokens[2] = String.join(MidicaPLParser.DURATION_PLUS, atoms);
+				tokens[2] = String.join(MidicaPLParser.LENGTH_PLUS, atoms);
 			}
 		}
 		catch (ParseException e) {

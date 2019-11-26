@@ -166,8 +166,8 @@ public class Instrument implements Comparable<Instrument> {
 	/**
 	 * Returns the current duration ratio of the channel.
 	 * This is the ratio between key press duration and note length duration.
-	 * 0.1 means 1% (strong staccato)  
-	 * 0.5 means 5% (staccato)  
+	 * 0.1 means 10% (strong staccato)  
+	 * 0.5 means 50% (staccato)  
 	 * 1.0 means 100% (legato)  
 	 * more than 1.0 is overlapping legato
 	 * 
