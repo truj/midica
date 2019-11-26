@@ -5,7 +5,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.midica.file;
+package org.midica.file.write;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.midica.config.Dict;
-import org.midica.file.SoundfontParser;
+import org.midica.file.read.SoundfontParser;
 import org.midica.ui.tablesorter.OptionalNumber;
 
 /**

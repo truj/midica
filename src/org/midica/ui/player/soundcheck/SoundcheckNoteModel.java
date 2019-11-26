@@ -13,7 +13,7 @@ import java.util.Collections;
 import javax.swing.DefaultListModel;
 
 import org.midica.config.Dict;
-import org.midica.file.NamedInteger;
+import org.midica.config.NamedInteger;
 
 /**
  * This class provides the model for the note/percussion list in the

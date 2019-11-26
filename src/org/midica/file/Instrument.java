@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.midica.config.Dict;
+import org.midica.file.read.MidicaPLParser;
+import org.midica.file.write.MidicaPLExporter;
 
 /**
  * Objects of this class represent a specific MIDI channel.

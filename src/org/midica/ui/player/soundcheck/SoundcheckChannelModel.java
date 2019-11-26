@@ -10,7 +10,7 @@ package org.midica.ui.player.soundcheck;
 import javax.swing.DefaultComboBoxModel;
 
 import org.midica.config.Dict;
-import org.midica.file.NamedInteger;
+import org.midica.config.NamedInteger;
 
 /**
  * This is the model for the channel combobox in the soundcheck window.

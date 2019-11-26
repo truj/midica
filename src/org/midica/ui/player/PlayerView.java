@@ -31,7 +31,7 @@ import javax.swing.SwingConstants;
 import org.midica.config.Dict;
 import org.midica.config.KeyBindingManager;
 import org.midica.config.Laf;
-import org.midica.file.SequenceParser;
+import org.midica.file.read.SequenceParser;
 import org.midica.midi.SequenceCreator;
 import org.midica.ui.UiView;
 import org.midica.ui.widget.FixedLabel;

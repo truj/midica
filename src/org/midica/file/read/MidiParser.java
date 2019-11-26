@@ -5,7 +5,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.midica.file;
+package org.midica.file.read;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,6 +23,7 @@ import javax.sound.midi.Track;
 
 import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.file.CharsetUtils;
 import org.midica.midi.LyricUtil;
 import org.midica.midi.MidiListener;
 import org.midica.midi.SequenceCreator;

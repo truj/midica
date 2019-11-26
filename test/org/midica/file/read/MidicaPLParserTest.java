@@ -5,7 +5,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.midica.file;
+package org.midica.file.read;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -24,6 +24,10 @@ import org.junit.jupiter.api.Test;
 import org.midica.Midica;
 import org.midica.TestUtil;
 import org.midica.config.Dict;
+import org.midica.file.CharsetUtils;
+import org.midica.file.read.MidicaPLParser;
+import org.midica.file.read.ParseException;
+import org.midica.file.read.StackTraceElement;
 import org.midica.midi.SequenceAnalyzer;
 import org.midica.midi.SequenceCreator;
 import org.midica.ui.model.IMessageType;
@@ -31,7 +35,7 @@ import org.midica.ui.model.MidicaTreeModel;
 import org.midica.ui.model.SingleMessage;
 
 /**
- * This is the test class for {@link org.midica.file.MidicaPLParser}.
+ * This is the test class for {@link MidicaPLParser}.
  * 
  * @author Jan Trukenmüller
  */

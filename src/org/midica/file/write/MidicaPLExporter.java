@@ -5,7 +5,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.midica.file;
+package org.midica.file.write;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -30,6 +30,8 @@ import javax.sound.midi.Track;
 
 import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.file.Instrument;
+import org.midica.file.read.MidicaPLParser;
 import org.midica.midi.MidiDevices;
 import org.midica.midi.MidiListener;
 import org.midica.midi.SequenceAnalyzer;

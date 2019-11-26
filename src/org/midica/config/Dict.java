@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.Set;
 
 import org.midica.Midica;
-import org.midica.file.NamedInteger;
 import org.midica.ui.info.InstrumentElement;
 import org.midica.ui.info.SyntaxElement;
 import org.midica.ui.model.ConfigComboboxModel;

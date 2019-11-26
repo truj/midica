@@ -16,7 +16,7 @@ import javax.swing.JTable;
 
 import org.midica.config.Dict;
 import org.midica.config.Laf;
-import org.midica.file.SoundfontParser;
+import org.midica.file.read.SoundfontParser;
 
 /**
  * Cell renderer for the instruments and drum kits table in the

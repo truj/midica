@@ -23,8 +23,8 @@ import javax.sound.midi.Track;
 import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.CharsetUtils;
-import org.midica.file.MidiParser;
-import org.midica.file.MidicaPLParser;
+import org.midica.file.read.MidiParser;
+import org.midica.file.read.MidicaPLParser;
 
 import com.sun.media.sound.MidiUtils;
 

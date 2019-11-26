@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.midica.config.Dict;
-import org.midica.file.ExportResult;
+import org.midica.file.write.ExportResult;
 
 /**
  * This class represents the data model of export result tables.

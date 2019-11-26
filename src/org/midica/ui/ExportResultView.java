@@ -19,7 +19,7 @@ import javax.swing.JScrollPane;
 
 import org.midica.config.Dict;
 import org.midica.config.Laf;
-import org.midica.file.ExportResult;
+import org.midica.file.write.ExportResult;
 import org.midica.ui.model.ExportResultTableModel;
 import org.midica.ui.renderer.MidicaTableCellRenderer;
 import org.midica.ui.widget.MidicaTable;

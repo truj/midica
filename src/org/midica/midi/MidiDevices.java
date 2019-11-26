@@ -28,7 +28,7 @@ import javax.sound.midi.Transmitter;
 import javax.swing.table.AbstractTableModel;
 
 import org.midica.config.Dict;
-import org.midica.file.SoundfontParser;
+import org.midica.file.read.SoundfontParser;
 import org.midica.ui.info.InstrumentElement;
 import org.midica.ui.player.PlayerController;
 

@@ -9,8 +9,8 @@ package org.midica.worker;
 
 import java.io.File;
 
-import org.midica.file.IParser;
-import org.midica.file.ParseException;
+import org.midica.file.read.IParser;
+import org.midica.file.read.ParseException;
 
 
 /**

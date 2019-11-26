@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.TreeMap;
 
 import org.midica.config.Dict;
-import org.midica.file.SoundfontParser;
+import org.midica.file.read.SoundfontParser;
 import org.midica.ui.model.MidicaTableModel;
 import org.midica.ui.tablesorter.BankNumber;
 import org.midica.ui.tablesorter.OptionalNumber;

@@ -32,7 +32,7 @@ import javax.swing.SwingUtilities;
 import org.midica.config.Dict;
 import org.midica.config.KeyBindingManager;
 import org.midica.config.Laf;
-import org.midica.file.NamedInteger;
+import org.midica.config.NamedInteger;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.player.PlayerView;
 import org.midica.ui.tablefilter.FilterIconWithLabel;
