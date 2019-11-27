@@ -150,7 +150,8 @@ public class Dict {
 	public static final String SYNTAX_COND_IN_SEP        = "COND_IN_SEP";
 	public static final String SYNTAX_REST               = "REST";
 	public static final String SYNTAX_CHORD              = "CHORD";
-	public static final String SYNTAX_INLINE_CHORD_SEP   = "INLINE_CHORD_SEP";
+	public static final String SYNTAX_CHORD_ASSIGNER     = "CHORD_ASSIGNER";
+	public static final String SYNTAX_CHORD_SEPARATOR    = "CHORD_SEPARATOR";
 	public static final String SYNTAX_INCLUDE            = "INCLUDE";
 	public static final String SYNTAX_SOUNDFONT          = "SOUNDFONT";
 	public static final String SYNTAX_32                 = "LENGTH_32";
@@ -826,7 +827,9 @@ public class Dict {
 	public static final String TOOLTIP_BANK_FULL           = "tooltip_bank_full";
 	public static final String SYNTAX_CAT_DEFINITION       = "syntax_cat_definition";
 	public static final String SYNTAX_CAT_EXECUTE          = "syntax_cat_execute";
+	public static final String SYNTAX_CAT_VAR_AND_CONST    = "syntax_cat_var_and_const";
 	public static final String SYNTAX_CAT_OPTION           = "syntax_cat_option";
+	public static final String SYNTAX_CAT_CONDITON         = "syntax_cat_condition";
 	public static final String SYNTAX_CAT_GLOBAL           = "syntax_cat_global";
 	public static final String SYNTAX_CAT_OTHER            = "syntax_cat_other";
 	public static final String SYNTAX_CAT_META             = "syntax_cat_meta";
@@ -1963,7 +1966,9 @@ public class Dict {
 		set( TOOLTIP_BANK_FULL,                      "Bank Number"                   );
 		set( SYNTAX_CAT_DEFINITION,                  "Definition Commands"           );
 		set( SYNTAX_CAT_EXECUTE,                     "Execution Commands"            );
+		set( SYNTAX_CAT_VAR_AND_CONST,               "Constants/Variables/Parameters" );
 		set( SYNTAX_CAT_OPTION,                      "Option Syntax"                 );
+		set( SYNTAX_CAT_CONDITON,                    "Conditions"                    );
 		set( SYNTAX_CAT_GLOBAL,                      "Global Commands"               );
 		set( SYNTAX_CAT_OTHER,                       "Other Commands"                );
 		set( SYNTAX_CAT_META,                        "Meta Commands"                 );
@@ -2127,7 +2132,8 @@ public class Dict {
 		set( SYNTAX_COND_IN_SEP,        "Separator for in-condition"                       );
 		set( SYNTAX_REST,               "rest character"                                   );
 		set( SYNTAX_CHORD,              "chord definition"                                 );
-		set( SYNTAX_INLINE_CHORD_SEP,   "inline chord separator"                           );
+		set( SYNTAX_CHORD_ASSIGNER,     "assign symbol between chord name and notes"       );
+		set( SYNTAX_CHORD_SEPARATOR,    "separator for chord notes"                        );
 		set( SYNTAX_INCLUDE,            "including another file"                           );
 		set( SYNTAX_SOUNDFONT,          "including a soundfont file"                       );
 		
@@ -3082,7 +3088,8 @@ public class Dict {
 		setSyntax( SYNTAX_COND_IN_SEP,        ";"            );
 		setSyntax( SYNTAX_REST,               "-"            );
 		setSyntax( SYNTAX_CHORD,              "CHORD"        );
-		setSyntax( SYNTAX_INLINE_CHORD_SEP,   ","            );
+		setSyntax( SYNTAX_CHORD_ASSIGNER,     "="            );
+		setSyntax( SYNTAX_CHORD_SEPARATOR,    ","            );
 		setSyntax( SYNTAX_INCLUDE,            "INCLUDE"      );
 		setSyntax( SYNTAX_SOUNDFONT,          "SOUNDFONT"    );
 		setSyntax( SYNTAX_32,                 "/32"          );
@@ -3121,17 +3128,19 @@ public class Dict {
 		syntaxList = new ArrayList<SyntaxElement>();
 		
 		addSyntaxCategory( get(SYNTAX_CAT_DEFINITION) );
-		addSyntaxForInfoView( SYNTAX_DEFINE      );
-		addSyntaxForInfoView( SYNTAX_CONST       );
-		addSyntaxForInfoView( SYNTAX_VAR         );
-		addSyntaxForInfoView( SYNTAX_INSTRUMENT  );
-		addSyntaxForInfoView( SYNTAX_INSTRUMENTS );
-		addSyntaxForInfoView( SYNTAX_META        );
-		addSyntaxForInfoView( SYNTAX_CHORD       );
-		addSyntaxForInfoView( SYNTAX_FUNCTION    );
-		addSyntaxForInfoView( SYNTAX_END         );
-		addSyntaxForInfoView( SYNTAX_BLOCK_OPEN  );
-		addSyntaxForInfoView( SYNTAX_BLOCK_CLOSE );
+		addSyntaxForInfoView( SYNTAX_DEFINE          );
+		addSyntaxForInfoView( SYNTAX_META            );
+		addSyntaxForInfoView( SYNTAX_FUNCTION        );
+		addSyntaxForInfoView( SYNTAX_END             );
+		addSyntaxForInfoView( SYNTAX_CHORD           );
+		addSyntaxForInfoView( SYNTAX_CHORD_ASSIGNER  );
+		addSyntaxForInfoView( SYNTAX_CHORD_SEPARATOR );
+		addSyntaxForInfoView( SYNTAX_INSTRUMENT      );
+		addSyntaxForInfoView( SYNTAX_INSTRUMENTS     );
+		addSyntaxForInfoView( SYNTAX_PROG_BANK_SEP   );
+		addSyntaxForInfoView( SYNTAX_BANK_SEP        );
+		addSyntaxForInfoView( SYNTAX_BLOCK_OPEN      );
+		addSyntaxForInfoView( SYNTAX_BLOCK_CLOSE     );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_EXECUTE) );
 		addSyntaxForInfoView( SYNTAX_CALL            );
@@ -3158,13 +3167,6 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_COMMENT           );
 		addSyntaxForInfoView( SYNTAX_REST              );
 		addSyntaxForInfoView( SYNTAX_P                 );
-		addSyntaxForInfoView( SYNTAX_INLINE_CHORD_SEP  );
-		addSyntaxForInfoView( SYNTAX_VAR_SYMBOL        );
-		addSyntaxForInfoView( SYNTAX_VAR_ASSIGNER      );
-		addSyntaxForInfoView( SYNTAX_PARAM_NAMED_OPEN  );
-		addSyntaxForInfoView( SYNTAX_PARAM_NAMED_CLOSE );
-		addSyntaxForInfoView( SYNTAX_PARAM_INDEX_OPEN  );
-		addSyntaxForInfoView( SYNTAX_PARAM_INDEX_CLOSE );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_META) );
 		addSyntaxForInfoView( SYNTAX_META_COPYRIGHT );
@@ -3173,11 +3175,19 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_META_LYRICIST  );
 		addSyntaxForInfoView( SYNTAX_META_ARTIST    );
 		
+		addSyntaxCategory( get(SYNTAX_CAT_VAR_AND_CONST) );
+		addSyntaxForInfoView( SYNTAX_CONST             );
+		addSyntaxForInfoView( SYNTAX_VAR               );
+		addSyntaxForInfoView( SYNTAX_VAR_SYMBOL        );
+		addSyntaxForInfoView( SYNTAX_VAR_ASSIGNER      );
+		addSyntaxForInfoView( SYNTAX_PARAM_NAMED_OPEN  );
+		addSyntaxForInfoView( SYNTAX_PARAM_NAMED_CLOSE );
+		addSyntaxForInfoView( SYNTAX_PARAM_INDEX_OPEN  );
+		addSyntaxForInfoView( SYNTAX_PARAM_INDEX_CLOSE );
+		
 		addSyntaxCategory( get(SYNTAX_CAT_OPTION) );
 		addSyntaxForInfoView( SYNTAX_OPT_SEPARATOR    );
 		addSyntaxForInfoView( SYNTAX_OPT_ASSIGNER     );
-		addSyntaxForInfoView( SYNTAX_PROG_BANK_SEP    );
-		addSyntaxForInfoView( SYNTAX_BANK_SEP         );
 		addSyntaxForInfoView( SYNTAX_VELOCITY         );
 		addSyntaxForInfoView( SYNTAX_V                );
 		addSyntaxForInfoView( SYNTAX_DURATION         );
@@ -3202,6 +3212,8 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_IF               );
 		addSyntaxForInfoView( SYNTAX_ELSIF            );
 		addSyntaxForInfoView( SYNTAX_ELSE             );
+		
+		addSyntaxCategory( get(SYNTAX_CAT_CONDITON) );
 		addSyntaxForInfoView( SYNTAX_COND_EQ          );
 		addSyntaxForInfoView( SYNTAX_COND_NEQ         );
 		addSyntaxForInfoView( SYNTAX_COND_NDEF        );

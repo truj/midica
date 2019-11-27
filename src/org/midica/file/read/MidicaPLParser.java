@@ -94,7 +94,8 @@ public class MidicaPLParser extends SequenceParser {
 	public static String PARTIAL_SYNC_RANGE = null;
 	public static String PARTIAL_SYNC_SEP   = null;
 	public static String CHORD              = null;
-	public static String INLINE_CHORD_SEP   = null;
+	public static String CHORD_ASSIGNER     = null;
+	public static String CHORD_SEPARATOR    = null;
 	public static String COMMENT            = null;
 	public static String CONST              = null;
 	public static String VAR                = null;
@@ -286,7 +287,8 @@ public class MidicaPLParser extends SequenceParser {
 		PARTIAL_SYNC_RANGE = Dict.getSyntax( Dict.SYNTAX_PARTIAL_SYNC_RANGE );
 		PARTIAL_SYNC_SEP   = Dict.getSyntax( Dict.SYNTAX_PARTIAL_SYNC_SEP   );
 		CHORD              = Dict.getSyntax( Dict.SYNTAX_CHORD              );
-		INLINE_CHORD_SEP   = Dict.getSyntax( Dict.SYNTAX_INLINE_CHORD_SEP   );
+		CHORD_ASSIGNER     = Dict.getSyntax( Dict.SYNTAX_CHORD_ASSIGNER     );
+		CHORD_SEPARATOR    = Dict.getSyntax( Dict.SYNTAX_CHORD_SEPARATOR    );
 		COMMENT            = Dict.getSyntax( Dict.SYNTAX_COMMENT            );
 		CONST              = Dict.getSyntax( Dict.SYNTAX_CONST              );
 		VAR                = Dict.getSyntax( Dict.SYNTAX_VAR                );
@@ -1942,7 +1944,7 @@ public class MidicaPLParser extends SequenceParser {
 			throw new ParseException( Dict.get(Dict.ERROR_CHORD_NUM_OF_ARGS) );
 		
 		// get and process chord name
-		String[] chordParts = chordDef.split( "[" + Pattern.quote(OPT_ASSIGNER) + "\\s]+", 2 ); // chord name and chords can be separated by OPT_ASSIGNER (e,g, "=") and/or whitespace(s)
+		String[] chordParts = chordDef.split( "[" + Pattern.quote(CHORD_ASSIGNER) + "\\s]+", 2 ); // chord name and chords can be separated by CHORD_ASSIGNER (e,g, "=") and/or whitespace(s)
 		if (chordParts.length < 2) {
 			throw new ParseException( Dict.get(Dict.ERROR_CHORD_NUM_OF_ARGS) );
 		}
@@ -1960,7 +1962,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// get and process chord elements
 		HashSet<Integer> chord = new HashSet<>();
-		String[] notes = chordValue.split( "[" + OPT_SEPARATOR + "\\s]+" ); // notes of the chord can be separated by OPT_ASSIGNER (e,g, "=") and/or whitespace(s)
+		String[] notes = chordValue.split( "[" + CHORD_SEPARATOR + "\\s]+" ); // notes of the chord can be separated by CHORD_SEPARATOR (e,g, "=") and/or whitespace(s)
 		
 		for (String note : notes) {
 			int noteVal = parseNote( note );
@@ -2492,7 +2494,8 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_PARTIAL_SYNC_RANGE.equals(cmdId) ) PARTIAL_SYNC_RANGE = cmdName;
 		else if ( Dict.SYNTAX_PARTIAL_SYNC_SEP.equals(cmdId)   ) PARTIAL_SYNC_SEP   = cmdName;
 		else if ( Dict.SYNTAX_CHORD.equals(cmdId)              ) CHORD              = cmdName;
-		else if ( Dict.SYNTAX_INLINE_CHORD_SEP.equals(cmdId)   ) INLINE_CHORD_SEP   = cmdName;
+		else if ( Dict.SYNTAX_CHORD_SEPARATOR.equals(cmdId)    ) CHORD_SEPARATOR    = cmdName;
+		else if ( Dict.SYNTAX_CHORD_ASSIGNER.equals(cmdId)     ) CHORD_ASSIGNER     = cmdName;
 		else if ( Dict.SYNTAX_COMMENT.equals(cmdId)            ) COMMENT            = cmdName;
 		else if ( Dict.SYNTAX_CONST.equals(cmdId)              ) CONST              = cmdName;
 		else if ( Dict.SYNTAX_VAR.equals(cmdId)                ) VAR                = cmdName;
@@ -3515,11 +3518,11 @@ public class MidicaPLParser extends SequenceParser {
 	 * @return a collection of all included notes, of **null**, if the token contains only a single note.
 	 */
 	private HashSet<String> parseChord(String token) {
-		if (token.matches(".*" + Pattern.quote(INLINE_CHORD_SEP) + ".*") || chords.containsKey(token)) {
+		if (token.matches(".*" + Pattern.quote(CHORD_SEPARATOR) + ".*") || chords.containsKey(token)) {
 			HashSet<String> chordElements = new HashSet<>();
 			
 			// collect comma-separated inline chord parts
-			String[] inlineElements = token.split( Pattern.quote(INLINE_CHORD_SEP) );
+			String[] inlineElements = token.split( Pattern.quote(CHORD_SEPARATOR) );
 			for (String inlineElement : inlineElements) {
 				
 				// collect predefined chord elements
