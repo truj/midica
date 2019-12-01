@@ -3,7 +3,7 @@
 Midica is an interpreter for a Music Programming Language.
 It translates source code to MIDI.
 
-But it can also be used as a MIDI Player, a MIDI Karaoke player or a MIDI file analyzer.
+But it can also be used as a MIDI Player, MIDI compiler, MIDI decompiler, MIDI Karaoke player or a MIDI file analyzer.
 
 You write music with the easy-to-learn programming language "MidicaPL".  
 You can use the same techniques like in regular programming, like:
@@ -47,7 +47,7 @@ You write your songs in plain text files using the text editor of your choice. M
     - Test Soundfonts with the Soundcheck window
 - **Exporting MIDI sequences**
     - As MIDI files
-    - As MidicaPL files (not yet implemented)
+    - As MidicaPL files (experimental)
 - **Configuration** of
     - GUI language (currently English or German)
     - Note System - (6 different systems), e.g. International (C,D,E,F,G,A,B), German (C,D,E,F,G,A,H), Italian (Do,Re,Mi,Fa,Sol,La,Si)

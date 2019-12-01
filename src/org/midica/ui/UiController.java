@@ -229,11 +229,6 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		else if ( UiView.CMD_SHOW_INFO_WINDOW.equals(cmd) ) {
 			InfoView.showInfoWindow(view);
 		}
-		
-		// not yet implemented function used
-		else if ( UiView.CMD_OPEN_FCT_NOT_READY.equals(cmd) ) {
-			showErrorMessage( Dict.get(Dict.ERROR_NOT_YET_IMPLEMENTED) );
-		}
 	}
 	
 	/**

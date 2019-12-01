@@ -62,7 +62,6 @@ public class UiView extends JFrame {
 	public static final String CMD_SHOW_INFO_WINDOW    = "cmd_show_info_window";
 	public static final String CMD_EXPORT_MIDI         = "cmd_export_midi";
 	public static final String CMD_EXPORT_MIDICAPL     = "cmd_export_midicapl";
-	public static final String CMD_OPEN_FCT_NOT_READY  = "cmd_open_fct_not_ready";
 	
 	// application icons
 	private static final String    APP_ICON_PATH = "org/midica/resources/app-icon.png";
@@ -628,9 +627,8 @@ public class UiView extends JFrame {
 		// file selector button
 		constraints.gridx++;
 		btnExportMidicaPL = new MidicaButton( Dict.get(Dict.CHOOSE_FILE_EXPORT) );
-		btnExportMidicaPL.setActionCommand( CMD_EXPORT_MIDICAPL );
-		btnExportMidicaPL.setActionCommand( CMD_OPEN_FCT_NOT_READY ); // TODO: delete when implemented
-		btnExportMidicaPL.addActionListener( controller );
+		btnExportMidicaPL.setActionCommand(CMD_EXPORT_MIDICAPL);
+		btnExportMidicaPL.addActionListener(controller);
 		area.add( btnExportMidicaPL, constraints );
 		
 		return area;

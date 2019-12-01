@@ -278,52 +278,14 @@ public class MessageClassifier {
 					if (0x59 == type) {
 						byte    sharpsOrFlats = msg[3];
 						byte    tonality      = msg[4];
-						boolean isMajor       = 0 == tonality;
-						boolean isMinor       = 1 == tonality;
 						
-						// note and tonality
-						int    note        = -1;
-						String tonalityStr = "";
-						if (isMajor) {
-							tonalityStr = Dict.getSyntax(Dict.SYNTAX_KEY_SEPARATOR) + Dict.getSyntax(Dict.SYNTAX_KEY_MAJ);
-							if      (0  == sharpsOrFlats) note = 60; // C maj
-							else if (1  == sharpsOrFlats) note = 67; // G maj
-							else if (2  == sharpsOrFlats) note = 62; // D maj
-							else if (3  == sharpsOrFlats) note = 69; // A maj
-							else if (4  == sharpsOrFlats) note = 64; // E maj
-							else if (5  == sharpsOrFlats) note = 71; // B maj
-							else if (6  == sharpsOrFlats) note = 66; // F# maj
-							else if (7  == sharpsOrFlats) note = 61; // C# maj
-							else if (-1 == sharpsOrFlats) note = 65; // F maj
-							else if (-2 == sharpsOrFlats) note = 70; // Bb maj
-							else if (-3 == sharpsOrFlats) note = 63; // Eb maj
-							else if (-4 == sharpsOrFlats) note = 68; // Ab maj
-							else if (-5 == sharpsOrFlats) note = 61; // Db maj
-							else if (-6 == sharpsOrFlats) note = 66; // Gb maj
-							else if (-7 == sharpsOrFlats) note = 71; // Cb maj
-						}
-						else if (isMinor) {
-							tonalityStr = Dict.getSyntax(Dict.SYNTAX_KEY_SEPARATOR) + Dict.getSyntax(Dict.SYNTAX_KEY_MIN);
-							if      (0  == sharpsOrFlats) note = 69; // A min
-							else if (1  == sharpsOrFlats) note = 64; // E min
-							else if (2  == sharpsOrFlats) note = 71; // B min
-							else if (3  == sharpsOrFlats) note = 66; // F# min
-							else if (4  == sharpsOrFlats) note = 61; // C# min
-							else if (5  == sharpsOrFlats) note = 68; // G# min
-							else if (6  == sharpsOrFlats) note = 63; // D# min
-							else if (7  == sharpsOrFlats) note = 70; // A# min
-							else if (-1 == sharpsOrFlats) note = 62; // D min
-							else if (-2 == sharpsOrFlats) note = 67; // G min
-							else if (-3 == sharpsOrFlats) note = 60; // C min
-							else if (-4 == sharpsOrFlats) note = 65; // F min
-							else if (-5 == sharpsOrFlats) note = 70; // Bb min
-							else if (-6 == sharpsOrFlats) note = 63; // Eb min
-							else if (-7 == sharpsOrFlats) note = 68; // Ab min
-						}
+						// get note and tonality
+						String[] noteAndTonality = getKeySignature(sharpsOrFlats, tonality);
+						String keyStr      = noteAndTonality[0];
+						String tonalityStr = noteAndTonality[1];
 						
-						// get note as string
-						String keyStr = Dict.getNote(note);
-						shortDesc     = keyStr + tonalityStr + ", " + Math.abs(sharpsOrFlats) + " ";
+						// short description
+						shortDesc = keyStr + Dict.getSyntax(Dict.SYNTAX_KEY_SEPARATOR) + tonalityStr + ", " + Math.abs(sharpsOrFlats) + " ";
 						
 						// display sharps / flats
 						String  sharpFlatStr;
@@ -341,7 +303,7 @@ public class MessageClassifier {
 						}
 						
 						// put it all together
-						if (-1 == note || "".equals(tonalityStr))
+						if ("".equals(keyStr) || "".equals(tonalityStr))
 							description.append( "\n" + Dict.get(Dict.MSG_DESC_F_UNKNOWN_TONALITY) );
 						else
 							description.append("\n" + keyStr + tonalityStr);
@@ -360,6 +322,77 @@ public class MessageClassifier {
 		String[] result = {null, shortDesc};
 		if (description != null && description.toString().length() > 0)
 			result[0] = description.toString();
+		return result;
+	}
+	
+	/**
+	 * Returns the note and tonality of a KEY_SIGNATURE message like it's used in MidicaPL format.
+	 * 
+	 * Example:
+	 * 
+	 * In standard configuration, **getKeySignature(0, 1)** returns **["c", "maj"]**.
+	 * 
+	 * If note or tonality cannot be found out, both returned values are empty strings.
+	 * 
+	 * @param sharpsOrFlats  number of sharps or flats
+	 * @param tonality       tonality byte from the message
+	 * @return note name and tonality.
+	 */
+	public static String[] getKeySignature(byte sharpsOrFlats, byte tonality) {
+		
+		// tonality
+		boolean isMajor     = 0 == tonality;
+		boolean isMinor     = 1 == tonality;
+		int     note        = -1;
+		String  tonalityStr = "";
+		
+		if (isMajor) {
+			tonalityStr = Dict.getSyntax(Dict.SYNTAX_KEY_MAJ);
+			if      (0  == sharpsOrFlats) note = 60; // C maj
+			else if (1  == sharpsOrFlats) note = 67; // G maj
+			else if (2  == sharpsOrFlats) note = 62; // D maj
+			else if (3  == sharpsOrFlats) note = 69; // A maj
+			else if (4  == sharpsOrFlats) note = 64; // E maj
+			else if (5  == sharpsOrFlats) note = 71; // B maj
+			else if (6  == sharpsOrFlats) note = 66; // F# maj
+			else if (7  == sharpsOrFlats) note = 61; // C# maj
+			else if (-1 == sharpsOrFlats) note = 65; // F maj
+			else if (-2 == sharpsOrFlats) note = 70; // Bb maj
+			else if (-3 == sharpsOrFlats) note = 63; // Eb maj
+			else if (-4 == sharpsOrFlats) note = 68; // Ab maj
+			else if (-5 == sharpsOrFlats) note = 61; // Db maj
+			else if (-6 == sharpsOrFlats) note = 66; // Gb maj
+			else if (-7 == sharpsOrFlats) note = 71; // Cb maj
+		}
+		else if (isMinor) {
+			tonalityStr = Dict.getSyntax(Dict.SYNTAX_KEY_MIN);
+			if      (0  == sharpsOrFlats) note = 69; // A min
+			else if (1  == sharpsOrFlats) note = 64; // E min
+			else if (2  == sharpsOrFlats) note = 71; // B min
+			else if (3  == sharpsOrFlats) note = 66; // F# min
+			else if (4  == sharpsOrFlats) note = 61; // C# min
+			else if (5  == sharpsOrFlats) note = 68; // G# min
+			else if (6  == sharpsOrFlats) note = 63; // D# min
+			else if (7  == sharpsOrFlats) note = 70; // A# min
+			else if (-1 == sharpsOrFlats) note = 62; // D min
+			else if (-2 == sharpsOrFlats) note = 67; // G min
+			else if (-3 == sharpsOrFlats) note = 60; // C min
+			else if (-4 == sharpsOrFlats) note = 65; // F min
+			else if (-5 == sharpsOrFlats) note = 70; // Bb min
+			else if (-6 == sharpsOrFlats) note = 63; // Eb min
+			else if (-7 == sharpsOrFlats) note = 68; // Ab min
+		}
+		
+		// note name
+		String keyStr = Dict.getNote(note);
+		if (-1 == note) {
+			keyStr = "";
+		}
+		
+		// pack and return the result
+		String[] result = new String[2];
+		result[0] = keyStr;
+		result[1] = tonalityStr;
 		return result;
 	}
 	
