@@ -65,6 +65,19 @@ public class MidicaPLExporter extends Exporter {
 	public static final byte NP_MULTIPLE = 6;
 	public static final byte NP_LYRICS   = 7;
 	
+	// constants for statistics about the decompilation quality
+	private static final byte STAT_TOTAL           = 17;
+	private static final byte STAT_RESTS           = 21;
+	private static final byte STAT_REST_SKIPPED    = 22;
+	private static final byte STAT_REST_TRIPLETS   = 23;
+	private static final byte STAT_REST_SUMMANDS   = 24;
+	private static final byte STAT_NOTES           = 31;
+	private static final byte STAT_NOTE_VELOCITIES = 32;
+	private static final byte STAT_NOTE_DURATIONS  = 33;
+	private static final byte STAT_NOTE_TRIPLETS   = 34;
+	private static final byte STAT_NOTE_SUMMANDS   = 35;
+	private static final byte STAT_NOTE_MULTIPLE   = 36;
+	
 	private static final String NEW_LINE = System.getProperty("line.separator");
 	
 	// tolerances
@@ -113,6 +126,9 @@ public class MidicaPLExporter extends Exporter {
 	private static TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>> noteOnOff         = null;
 	private static TreeMap<Long, TreeMap<Long, String>>                 lyrics            = null;
 	
+	/** stores statistics to estimate the decompilation quality */
+	private static TreeMap<Byte, TreeMap<Byte, Integer>> statistics = null;
+	
 	/* *******************
 	 * instance fields
 	 *********************/
@@ -157,6 +173,9 @@ public class MidicaPLExporter extends Exporter {
 			chords           = new TreeMap<>();
 			chordCount       = new TreeMap<>();
 			chordsByBaseNote = new TreeMap<>();
+			
+			// initialize statistics
+			initStatistics();
 			
 			// initialize instruments (to track the channel configuration)
 			initInstruments();
@@ -214,6 +233,48 @@ public class MidicaPLExporter extends Exporter {
 			Instrument instr = new Instrument(channel, instrNumber, null, isAutomatic);
 			instruments.add(instr);
 		}
+	}
+	
+	/**
+	 * Initializes data structures for the statistics to estimate the decompilation quality.
+	 */
+	private void initStatistics() {
+		statistics = new TreeMap<>();
+		for (byte channel = 0; channel < 16; channel++) {
+			TreeMap<Byte, Integer> channelStats = new TreeMap<>();
+			statistics.put(channel, channelStats);
+		}
+		TreeMap<Byte, Integer> totalStats = new TreeMap<>();
+		statistics.put(STAT_TOTAL, totalStats);
+		
+		// init sub statistics for all channels and total
+		for (Byte channelOrTotal : statistics.keySet()) {
+			TreeMap<Byte, Integer> channelStats = statistics.get(channelOrTotal);
+			channelStats.put( STAT_RESTS,           0 );
+			channelStats.put( STAT_REST_SKIPPED,    0 );
+			channelStats.put( STAT_REST_TRIPLETS,   0 );
+			channelStats.put( STAT_REST_SUMMANDS,   0 );
+			channelStats.put( STAT_NOTES,           0 );
+			channelStats.put( STAT_NOTE_VELOCITIES, 0 );
+			channelStats.put( STAT_NOTE_DURATIONS,  0 );
+			channelStats.put( STAT_NOTE_TRIPLETS,   0 );
+			channelStats.put( STAT_NOTE_SUMMANDS,   0 );
+			channelStats.put( STAT_NOTE_MULTIPLE,   0 );
+		}
+	}
+	
+	/**
+	 * Increments the statistics for the channel and total.
+	 * 
+	 * @param type     statistics type
+	 * @param channel  MIDI channel
+	 */
+	private void incrementStats(Byte type, Byte channel) {
+		int channelValue = statistics.get(channel).get(type);
+		int totalValue   = statistics.get(STAT_TOTAL).get(type);
+		
+		statistics.get(channel).put(type, channelValue + 1);
+		statistics.get(STAT_TOTAL).put(type, totalValue + 1);
 	}
 	
 	/**
@@ -388,6 +449,10 @@ public class MidicaPLExporter extends Exporter {
 						Long   offTick  = sliceOnOff.get(channel).get(note).ceilingKey(tick + 1);
 						
 						// TODO: handle the case that there is no offTick at all
+						// can happen if the MIDI is corrupt or uses all-notes-off / all-sounds-off instead of note-off
+						if (null == offTick) {
+							System.err.println("note-off not found for channel " + channel + ", note: " + note + ", tick: " + tick);
+						}
 						
 						// create structure for this note
 						TreeMap<Byte, String> noteStruct = new TreeMap<>();
@@ -429,14 +494,12 @@ public class MidicaPLExporter extends Exporter {
 	 * 
 	 * @param onTick   Note-ON tick of the note.
 	 * @param offTick  Note-OFF tick of the note.
-	 * @param slice    Note history of the channel inside of the according slice.
 	 * @return the following values:
 	 * 
 	 * - note length in ticks (according to the source resolution)
 	 * - duration in percent (rounded mathematically)
 	 */
-	// TODO: remove unused parameters
-	private long[] getNoteLengthProperties(long onTick, long offTick, Slice slice, byte channel) {
+	private long[] getNoteLengthProperties(long onTick, long offTick, byte channel) {
 		
 		long  pressTicks = offTick - onTick;
 		long  noteTicks;
@@ -681,7 +744,8 @@ public class MidicaPLExporter extends Exporter {
 	private String createMidicaPL() {
 		StringBuilder output = new StringBuilder();
 		
-		// TODO: META
+		// META block
+		output.append( createMetaBlock() );
 		
 		// initial INSTRUMENTS block (tick 0)
 		output.append( createInitialInstrumentsBlock() );
@@ -703,6 +767,9 @@ public class MidicaPLExporter extends Exporter {
 				output.append( createCommandsFromTimeline(slice, channel) );
 			}
 		}
+		
+		// statistics
+		output.append( createStatistics() );
 		
 		return output.toString();
 	}
@@ -748,14 +815,19 @@ public class MidicaPLExporter extends Exporter {
 					long offTick = Long.parseLong( params.get(NP_OFF_TICK) );
 					
 					// calculate note length / duration
-					long[] lengthProps  = getNoteLengthProperties(tick, offTick, slice, channel);
+					long[] lengthProps  = getNoteLengthProperties(tick, offTick, channel);
 					long   length       = lengthProps[0];
 					long   endTick      = tick + length;
 					String durationPerc = lengthProps[1] + "";
 					ArrayList<Long> summands = getLengthsForSum(length, false);
 					ArrayList<String> summandStrings = new ArrayList<>();
 					for (Long summand : summands) {
-						summandStrings.add( noteLength.get(summand) );
+						String summandStr = noteLength.get(summand);
+						summandStrings.add(summandStr);
+						incrementStats(STAT_NOTE_SUMMANDS, channel);
+						if (summandStr.endsWith(MidicaPLParser.TRIPLET)) {
+							incrementStats(STAT_NOTE_TRIPLETS, channel);
+						}
 					}
 					String lengthStr = String.join(MidicaPLParser.LENGTH_PLUS, summandStrings);
 					
@@ -763,6 +835,8 @@ public class MidicaPLExporter extends Exporter {
 					params.put( NP_LENGTH,   lengthStr    );
 					params.put( NP_END_TICK, endTick + "" );
 					params.put( NP_DURATION, durationPerc );
+					
+					incrementStats(STAT_NOTES, channel);
 				}
 				
 				// write MidicaPL
@@ -776,6 +850,51 @@ public class MidicaPLExporter extends Exporter {
 		}
 		
 		return lines.toString();
+	}
+	
+	/**
+	 * Creates the META block, if the sequence contains any META information.
+	 * 
+	 * @return the META block, or an empty string if the sequence doesn't contain any meta information.
+	 */
+	private String createMetaBlock() {
+		StringBuilder     block = new StringBuilder("");
+		ArrayList<String> lines = new ArrayList<>();
+		
+		// get data structures
+		HashMap<String, Object> sequenceInfo = (HashMap<String, Object>) SequenceAnalyzer.getSequenceInfo();
+		HashMap<String, String> metaInfo     = (HashMap<String, String>) sequenceInfo.get("meta_info");
+		HashMap<String, Object> karaokeInfo  = (HashMap<String, Object>) sequenceInfo.get( "karaoke" );
+		String copyright = (String) metaInfo.get("copyright");
+		String title     = (String) karaokeInfo.get("title");
+		String composer  = (String) karaokeInfo.get("composer");
+		String lyrics    = (String) karaokeInfo.get("lyricist");
+		String artist    = (String) karaokeInfo.get("artist");
+		
+		// add available meta lines
+		if (copyright != null)
+			lines.add("\t" + MidicaPLParser.META_COPYRIGHT + "\t" + copyright + NEW_LINE);
+		if (title != null)
+			lines.add("\t" + MidicaPLParser.META_TITLE + "\t" + title + NEW_LINE);
+		if (composer != null)
+			lines.add("\t" + MidicaPLParser.META_COMPOSER + "\t" + composer + NEW_LINE);
+		if (lyrics != null)
+			lines.add("\t" + MidicaPLParser.META_LYRICIST + "\t" + lyrics + NEW_LINE);
+		if (artist != null)
+			lines.add("\t" + MidicaPLParser.META_ARTIST + "\t" + artist + NEW_LINE);
+		
+		// no meta data found?
+		if (lines.isEmpty())
+			return "";
+		
+		// add block
+		block.append(MidicaPLParser.META + NEW_LINE);
+		for (String line : lines) {
+			block.append(line);
+		}
+		block.append(MidicaPLParser.END + NEW_LINE + NEW_LINE);
+		
+		return block.toString();
 	}
 	
 	/**
@@ -969,6 +1088,166 @@ public class MidicaPLExporter extends Exporter {
 		chordBlock.append(NEW_LINE);
 		
 		return chordBlock.toString();
+	}
+	
+	/**
+	 * Creates the statistics to be printed at the end of the produced file.
+	 * 
+	 * @return statistics block
+	 */
+	private String createStatistics() {
+		StringBuilder statLines = new StringBuilder("");
+		
+		statLines.append(MidicaPLParser.COMMENT + "STATISTICS:" + NEW_LINE);
+		
+		// channels
+		for (byte channel = 0; channel < 16; channel++) {
+			TreeMap<Byte, Integer> channelStats = statistics.get(channel);
+			
+			// nothing to do?
+			if (0 == channelStats.get(STAT_NOTES) && 0 == channelStats.get(STAT_RESTS))
+				continue;
+			
+			statLines.append(MidicaPLParser.COMMENT + " Channel " + channel + ":" + NEW_LINE);
+			statLines.append( createStatisticPart(channelStats, false) );
+		}
+		
+		// total
+		statLines.append(MidicaPLParser.COMMENT + " TOTAL:" + NEW_LINE);
+		statLines.append( createStatisticPart(statistics.get(STAT_TOTAL), true) );
+		
+		return statLines.toString();
+	}
+	
+	/**
+	 * Creates the statistics for one part (either a channel or total).
+	 * 
+	 * @param subStat  statistic structure for the part (channel or total)
+	 * @param isTotal  **true**, if this is for the total statistics, **false** for channel statistics
+	 * @return the created statistics.
+	 */
+	private String createStatisticPart(TreeMap<Byte,Integer> subStat, boolean isTotal) {
+		StringBuilder stats = new StringBuilder("");
+		
+		// markers for the quality score
+		int    markerCount = 0;
+		double markerSum   = 0;
+		
+		// rests
+		{
+			int rests = subStat.get(STAT_RESTS);
+			stats.append(MidicaPLParser.COMMENT + "\t" + "Rests: " + rests + NEW_LINE);
+			
+			// rests / notes
+			int notes = subStat.get(STAT_NOTES);
+			if (notes > 0) {
+				double restsPercent = ((double) rests) / ((double) (notes));
+				restsPercent *= 100;
+				String restsPercentStr = String.format("%.2f", restsPercent);
+				stats.append(MidicaPLParser.COMMENT + "\t\t" + "Rests/Total: " + subStat.get(STAT_REST_SKIPPED) + " (" + restsPercentStr + "%)" + NEW_LINE);
+				markerCount++;
+				markerSum += (100.0D - restsPercent);
+			}
+			
+			if (rests > 0) {
+				
+				// rests skipped
+				double restsSkipped = ((double) subStat.get(STAT_REST_SKIPPED)) / ((double) rests);
+				restsSkipped *= 100;
+				String restsSkippedStr = String.format("%.2f", restsSkipped);
+				stats.append(MidicaPLParser.COMMENT + "\t\t" + "Skipped: " + subStat.get(STAT_REST_SKIPPED) + " (" + restsSkippedStr + "%)" + NEW_LINE);
+				markerCount++;
+				markerSum += (100.0D - restsSkipped);
+				
+				// rest summands
+				int    summands        = subStat.get(STAT_REST_SUMMANDS);
+				double summandsPercent = ((double) summands) / ((double) rests);
+				summandsPercent *= 100;
+				String summandsPercentStr = String.format("%.2f", summandsPercent);
+				stats.append(MidicaPLParser.COMMENT + "\t\t" + "Summands: " + summands + " (" + summandsPercentStr + "%)" + NEW_LINE);
+				markerCount++;
+				markerSum += 100.0D - (summandsPercent - 100.0D);
+				
+				// rest triplets
+				if (summands > 0) {
+					int triplets = subStat.get(STAT_REST_TRIPLETS);
+					double tripletsPercent = ((double) triplets) / ((double) summands);
+					tripletsPercent *= 100;
+					String tripletsStr = String.format("%.2f", tripletsPercent);
+					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Triplets: " + triplets + " (" + tripletsStr + "%)" + NEW_LINE);
+					markerCount++;
+					markerSum += (100.0D - tripletsPercent);
+				}
+			}
+		}
+		
+		// notes
+		{
+			int notes = subStat.get(STAT_NOTES);
+			stats.append(MidicaPLParser.COMMENT + "\t" + "Notes: " + notes + NEW_LINE);
+			if (notes > 0) {
+				
+				// note summands
+				int    summands    = subStat.get(STAT_NOTE_SUMMANDS);
+				double summandsPercent = ((double) summands) / ((double) notes);
+				summandsPercent *= 100;
+				String summandsPercentStr = String.format("%.2f", summandsPercent);
+				stats.append(MidicaPLParser.COMMENT + "\t\t" + "Summands: " + summands + " (" + summandsPercentStr + "%)" + NEW_LINE);
+				markerCount++;
+				markerSum += 100.0D - (summandsPercent - 100.0D);
+				
+				// note triplets
+				if (summands > 0) {
+					int triplets = subStat.get(STAT_NOTE_TRIPLETS);
+					double tripletsPercent = ((double) triplets) / ((double) summands);
+					tripletsPercent *= 100;
+					String tripletsStr = String.format("%.2f", tripletsPercent);
+					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Triplets: " + triplets + " (" + tripletsStr + "%)" + NEW_LINE);
+					markerCount++;
+					markerSum += (100.0D - tripletsPercent);
+				}
+				
+				// velocity changes
+				int    velocities    = subStat.get(STAT_NOTE_VELOCITIES);
+				double velocitiesPercent = ((double) velocities) / ((double) notes);
+				velocitiesPercent *= 100;
+				String velocitiesPercentStr = String.format("%.2f", velocitiesPercent);
+				stats.append(MidicaPLParser.COMMENT + "\t\t" + "Velocity changes: " + velocities + " (" + velocitiesPercentStr + "%)" + NEW_LINE);
+				markerCount++;
+				markerSum += (100.0D - velocitiesPercent);
+				
+				// duration changes
+				int    durations   = subStat.get(STAT_NOTE_DURATIONS);
+				double durationPercent = ((double) durations) / ((double) notes);
+				durationPercent *= 100;
+				String durationPercentStr = String.format("%.2f", durationPercent);
+				stats.append(MidicaPLParser.COMMENT + "\t\t" + "Duration changes: " + durations + " (" + durationPercentStr + "%)" + NEW_LINE);
+				markerCount++;
+				markerSum += (100.0D - durationPercent);
+				
+				// multiple option
+				int    multiple        = subStat.get(STAT_NOTE_MULTIPLE);
+				double multiplePercent = ((double) multiple) / ((double) notes);
+				multiplePercent *= 100;
+				String multiplePercentStr = String.format("%.2f", multiplePercent);
+				stats.append(MidicaPLParser.COMMENT + "\t\t" + "Multiple option: " + multiple + " (" + multiplePercentStr + "%)" + NEW_LINE);
+				markerCount++;
+				markerSum += (100.0D - multiplePercent);
+			}
+		}
+		
+		// quality score
+		if (isTotal) {
+			stats.append(MidicaPLParser.COMMENT + NEW_LINE);
+			double totalScore = ((double) markerSum) / markerCount;
+			String totalScoreStr = String.format("%.2f", totalScore);
+			stats.append(MidicaPLParser.COMMENT + " QUALITY SCORE: " + totalScoreStr + NEW_LINE);
+		}
+		
+		// empty line
+		stats.append(MidicaPLParser.COMMENT + NEW_LINE);
+		
+		return stats.toString();
 	}
 	
 	/**
@@ -1199,6 +1478,7 @@ public class MidicaPLExporter extends Exporter {
 			// multiple
 			if (noteOrCrd.containsKey(NP_MULTIPLE)) {
 				options.add(MidicaPLParser.M);
+				incrementStats(STAT_NOTE_MULTIPLE, channel);
 			}
 			
 			// duration
@@ -1215,6 +1495,7 @@ public class MidicaPLExporter extends Exporter {
 				}
 				options.add(MidicaPLParser.D + MidicaPLParser.OPT_ASSIGNER + durationPercentStr + MidicaPLParser.DURATION_PERCENT);
 				instr.setDurationRatio(duration);
+				incrementStats(STAT_NOTE_DURATIONS, channel);
 			}
 			
 			// velocity
@@ -1223,6 +1504,7 @@ public class MidicaPLExporter extends Exporter {
 			if (velocity != oldVelocity) {
 				options.add(MidicaPLParser.V + MidicaPLParser.OPT_ASSIGNER + velocity);
 				instr.setVelocity(velocity);
+				incrementStats(STAT_NOTE_VELOCITIES, channel);
 			}
 			
 			// TODO: implement and test lyrics
@@ -1266,19 +1548,26 @@ public class MidicaPLExporter extends Exporter {
 		// transform to strings
 		ArrayList<String> lengthSummands = new ArrayList<>();
 		for (Long length : lengthElements) {
-			lengthSummands.add( restLength.get(length) );
+			String summandStr = restLength.get(length);
+			lengthSummands.add(summandStr);
+			incrementStats(STAT_REST_SUMMANDS, channel);
+			if (summandStr.endsWith(MidicaPLParser.TRIPLET)) {
+				incrementStats(STAT_REST_TRIPLETS, channel);
+			}
 		}
 		
 		// add line
 		if (lengthSummands.size() > 0) {
 			String length = String.join(MidicaPLParser.LENGTH_PLUS, lengthSummands);
 			line.append(channel + "\t" + MidicaPLParser.REST + "\t" + length);
+			incrementStats(STAT_RESTS, channel);
 		}
 		else {
 			// TODO: Dict
 			// TODO: add warning
 			System.err.println("rest too small to be handled: " + ticks + " ticks");
 			line.append("// rest too small to be handled: " + ticks + " ticks");
+			incrementStats(STAT_REST_SKIPPED, channel);
 		}
 		if (beginTick >= 0) {
 			line.append( createTickComment(beginTick, true) );
