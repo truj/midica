@@ -1,0 +1,116 @@
+// This example file provides the traditional song
+// "London Bridge is Falling Down".
+// 
+// This file assumes standard program configuration:
+// - Note System:      International: c, d, e, ... (lower case)
+// - Half Tone Symbol: # (c#, d#, e#, ...)
+// - Octave Naming:    +n/-n
+// - Syntax:           Mixed Case Syntax
+
+META
+	copyright  (c) Mozilla Public License, v. 2.0, author: Jan Trukenmüller
+	title      London Bridge is Falling Down
+	composer   traditional
+	lyrics     traditional
+END
+
+INSTRUMENTS
+	0  LEAD_SAWTOOTH   Vocals
+	1  E_GUITAR_CLEAN  Guitar
+END
+
+// global defaults
+*  tempo  150
+*  time   4/4
+*  key    d/maj
+
+// initialize channel defaults
+0  -  /4  m, d=75%,  v=100
+1  -  /4  m, d=100%, v=70
+
+// execute the verses with different animals and sounds
+CALL verse(Lon, don_, Bridge_, is_, fal, ling_, down)
+CALL verse(Build_, it_, up_, with_, wood_, and_, clay)
+CALL verse(Wood_, and_, clay_, will_, wash_, a, way)
+CALL verse(Build_, it_, up_, with_, bricks_, and_, mortar)
+CALL verse(Bricks_, and_, mor, tar_, will_, not_, stay)
+CALL verse(Build_, it_, up_, with_, iron_, and_, steel)
+CALL verse(Iron_, and_, steel_, will_, bend_, and_, bow)
+CALL verse(Build_, it_, up_, with_, silver_, and_, gold)
+CALL verse(Silver_, and_, gold_, will_be_, stolen_, a, way)
+CALL verse(Set_, a_, man_, to_, watch_, all_, night)
+CALL verse(Suppose_, the_, man_, should_, fall_, a, sleep)
+CALL verse(Give_him_, a_, pipe_, to_, smoke_, all_, night)
+
+FUNCTION verse
+	CALL vocals($[0], $[1], $[2], $[3], $[4], $[5], $[6])
+	CALL guitar
+END
+
+///////////////////////////
+// vocals
+///////////////////////////
+
+FUNCTION vocals
+	CALL vocals_m1($[0], $[1], $[2], $[3])  // London bridge is
+	CALL vocals_m2($[4], $[5], $[6]\c\r)    // falling down,
+	CALL vocals_m3($[4], $[5], $[6]\c_)     // falling down,
+	CALL vocals_m2($[4], $[5], $[6].\r)     // falling down.
+	CALL vocals_m1($[0], $[1], $[2], $[3])  // London bridge is
+	CALL vocals_m2($[4], $[5], $[6].\r)     // falling down,
+	CALL vocals_m7_8()                      // My fair lady.
+END
+FUNCTION vocals_m1
+	0  a  /4.  l=$[0]    // Lon-
+	0  b  /8   l=$[1]    // don
+	0  a  /4   l=$[2]    // bridge
+	0  g  /4   l=$[3]    // is
+END
+FUNCTION vocals_m2
+	0  f#  /4   l=$[0]    // fal-
+	0  g   /4   l=$[1]    // ling
+	0  a   /2   l=$[2]    // down
+END
+FUNCTION vocals_m3
+	0  e   /4   l=$[0]    // fal-
+	0  f#  /4   l=$[1]    // ling
+	0  g   /2   l=$[2]    // down
+END
+FUNCTION vocals_m7_8
+	0  e   /2   l=My_
+	0  a   /2   l=fair_
+	0  f#  /4   l=La
+	0  d   /2.  l=dy.\n
+END
+
+///////////////////////////
+// guitar
+///////////////////////////
+
+FUNCTION guitar
+	CALL guitar_dmaj q=2
+	CALL guitar_amaj
+	CALL guitar_dmaj q=3
+	CALL guitar_amaj
+	CALL guitar_dmaj
+END
+FUNCTION guitar_amaj
+	1  a-   /8
+	1  e    /8
+	1  a    /8
+	1  e    /8
+	1  c#+  /8
+	1  e    /8
+	1  a    /8
+	1  c#+  /8
+END
+FUNCTION guitar_dmaj
+	1  d    /8
+	1  a    /8
+	1  d+   /8
+	1  a    /8
+	1  f#+  /8
+	1  a    /8
+	1  d+   /8
+	1  f#+  /8
+END
