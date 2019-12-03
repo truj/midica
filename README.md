@@ -3,16 +3,16 @@
 Midica is an interpreter for a Music Programming Language.
 It translates source code to MIDI.
 
-But it can also be used as a MIDI Player, MIDI compiler, MIDI decompiler, MIDI Karaoke player or a MIDI file analyzer.
+But it can also be used as a MIDI Player, MIDI compiler, MIDI decompiler, MIDI Karaoke Player or a MIDI File Analyzer.
 
 You write music with the easy-to-learn programming language "MidicaPL".  
 You can use the same techniques like in regular programming, like:
 
 - Variables and Constants
+- Functions
 - Loops
 - Conditions (if/elsif/else)
-- Functions
-- Modules for code re-use
+- Including Libraries
 - Code Comments
 
 You write your songs in plain text files using the text editor of your choice. Midica transforms these files into MIDI.
@@ -30,6 +30,9 @@ You write your songs in plain text files using the text editor of your choice. M
 - **Loading and playing** MIDI sequences from:
     - MidicaPL files
     - MIDI files
+- **Exporting MIDI sequences**
+    - As MIDI files
+    - As MidicaPL files (experimental)
 - **Integrated MIDI player** featuring:
     - Regulation of volume, tempo and pitch transposition
     - Memorizing a position in the MIDI sequence and jumping back to that position
@@ -45,9 +48,6 @@ You write your songs in plain text files using the text editor of your choice. M
     - Loading Soundfonts and using them for playback
     - Analyzing Soundfont contents
     - Test Soundfonts with the Soundcheck window
-- **Exporting MIDI sequences**
-    - As MIDI files
-    - As MidicaPL files (experimental)
 - **Configuration** of
     - GUI language (currently English or German)
     - Note System - (6 different systems), e.g. International (C,D,E,F,G,A,B), German (C,D,E,F,G,A,H), Italian (Do,Re,Mi,Fa,Sol,La,Si)
@@ -82,8 +82,7 @@ You can find a MidicaPL tutorial here:
 - [Chapter 4](http://www.midica.org/tutorial-4.html)
 - [Chapter 5](http://www.midica.org/tutorial-5.html)
 
-A first example of a complete song can be found in the
-[examples directory](examples/). There will be more in the future.
+Examples of complete songs can be found in the [examples directory](examples/).
 
 In this Readme one short example shall be enough:
 
