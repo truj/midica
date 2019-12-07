@@ -54,7 +54,6 @@ public class MidicaPLExporter extends Exporter {
 	// event types
 	public static final byte ET_INSTR = 1;
 	public static final byte ET_NOTES = 2;
-	public static final byte ET_PAUSE = 3;
 	
 	// note properties
 	public static final byte NP_VELOCITY = 1;
@@ -80,10 +79,13 @@ public class MidicaPLExporter extends Exporter {
 	
 	private static final String NEW_LINE = System.getProperty("line.separator");
 	
-	// tolerances
-	private static final long  DURATION_TICK_TOLERANCE  = 2;
-	private static final float DURATION_RATIO_TOLERANCE = 0.014f;
-	private static final long  NEXT_NOTE_ON_TOLERANCE   = 3;
+	// decompile configuration
+	private static final boolean INLINE                   = true;
+	private static final boolean BLOCK                    = false;
+	private static final boolean ORPHANED_SYLLABLES       = BLOCK;
+	private static final long    DURATION_TICK_TOLERANCE  = 2;
+	private static final float   DURATION_RATIO_TOLERANCE = 0.014f;
+	private static final long    NEXT_NOTE_ON_TOLERANCE   = 3;
 	
 	/* *****************
 	 * class fields
@@ -124,7 +126,13 @@ public class MidicaPLExporter extends Exporter {
 	private static TreeMap<Byte, TreeMap<Long, String>>                 commentHistory    = null;
 	private static TreeMap<Byte, TreeMap<Long, TreeMap<Byte, Byte>>>    noteHistory       = null;
 	private static TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>> noteOnOff         = null;
-	private static TreeMap<Long, TreeMap<Long, String>>                 lyrics            = null;
+	private static TreeMap<Long, String>                                lyricsSyllables   = null;
+	
+	/** channels that can be used for lyrics, sorted by priority */
+	ArrayList<Byte> lyricsChannels = null;
+	
+	/** Priority which channel to choose for a lyrics events, if we have different possibilities. */
+	ArrayList<Byte> karaokePriority = null;
 	
 	/** stores statistics to estimate the decompilation quality */
 	private static TreeMap<Byte, TreeMap<Byte, Integer>> statistics = null;
@@ -168,8 +176,9 @@ public class MidicaPLExporter extends Exporter {
 			commentHistory    = (TreeMap<Byte, TreeMap<Long, String>>)                 histories.get( "comment_history" );
 			noteHistory       = (TreeMap<Byte, TreeMap<Long, TreeMap<Byte, Byte>>>)    histories.get( "note_history" );
 			noteOnOff         = (TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>>) histories.get( "note_on_off" );
-			lyrics            = (TreeMap<Long, TreeMap<Long, String>>)                 histories.get( "lyrics" );
+			lyricsSyllables   = (TreeMap<Long, String>)                                histories.get( "lyrics" );
 			
+			// init data structures
 			chords           = new TreeMap<>();
 			chordCount       = new TreeMap<>();
 			chordsByBaseNote = new TreeMap<>();
@@ -179,6 +188,9 @@ public class MidicaPLExporter extends Exporter {
 			
 			// initialize instruments (to track the channel configuration)
 			initInstruments();
+			
+			// Prioritize channels to be used for karaoke.
+			lyricsChannels = prioritizeChannelsForLyrics();
 			
 			// make sure that the syntax configuration is up to date
 			MidicaPLParser.refreshSyntax();
@@ -199,6 +211,7 @@ public class MidicaPLExporter extends Exporter {
 			// fill slices
 			addInstrumentsToSlices();
 			addNotesToSlices();
+			addLyricsToSlices();
 			
 			// create MidicaPL string from the data structures and write it into the file
 			writer.write( createMidicaPL() );
@@ -233,6 +246,124 @@ public class MidicaPLExporter extends Exporter {
 			Instrument instr = new Instrument(channel, instrNumber, null, isAutomatic);
 			instruments.add(instr);
 		}
+	}
+	
+	/**
+	 * Prioritizes the channels for karaoke usage.
+	 * 
+	 * Calculates the following values for each channel:
+	 * 
+	 * - **notes**: number of ticks with a note or chord
+	 * - **matches**: number of ticks with a note or chords that can be used for a syllable
+	 * - **relevance**: matches divided by notes
+	 * - **coverage**: matches divided by the total number of syllables
+	 * - **priority**: relevance plus coverage
+	 * 
+	 * Sorts the channels by priority and returns them.
+	 * 
+	 * Reasons for this approach:
+	 * 
+	 * Often we have the following facts:
+	 * 
+	 * - One channel is mainly used for the lead vocals.
+	 * - Another channel is mainly used for background vocals, e.g. only for the refrain,
+	 *   together with the lead vocals channel.
+	 * - Another channel (e.g. the percussion channel) has also a lot of matches because
+	 *   it contains a lot of notes.
+	 * 
+	 * In this case the lead vocal channel is the best choice.
+	 * 
+	 * But the background vocals could have a better relevance, and the percussion channel
+	 * could have the best coverage.
+	 * 
+	 * However the lead vocal channel has probably the highest sum (relevance + coverage).
+	 * That's why we choose this approach.
+	 * 
+	 * @return channels usable for lyrics, sorted by priority.
+	 */
+	private ArrayList<Byte> prioritizeChannelsForLyrics() {
+		TreeMap<Byte, Integer> channelMatches = new TreeMap<>(); // number of events matching a lyrics tick
+		TreeMap<Byte, Integer> channelNotes   = new TreeMap<>(); // total number of different ticks with Note-ON
+		
+		// collect all channels that can be used at all
+		for (byte channel = 0; channel < 16; channel++) {
+			
+			// no notes?
+			if (instruments.get(channel).autoChannel)
+				continue;
+			
+			channelMatches.put(channel, 0);
+			channelNotes.put(channel, noteHistory.get(channel).size());
+		}
+		
+		// Fallback: no notes at all, but only lyrics.
+		// In this case: use the percussion channel because this is the only channel that doesn't need to
+		// appear in the INSTRUMENTS block.
+		if (channelMatches.isEmpty()) {
+			ArrayList<Byte> prioritizedChannels = new ArrayList<>();
+			prioritizedChannels.add((byte) 9);
+			
+			return prioritizedChannels;
+		}
+		
+		// count the lyrics with notes in the same ticks (for each channel)
+		// TICK:
+		for (long tick: lyricsSyllables.keySet()) {
+			
+			// CHANNEL:
+			for (byte channel : channelMatches.keySet()) {
+				
+				// channel contains a note at this tick? - increment
+				if (noteHistory.get(channel).containsKey(tick)) {
+					int count = channelMatches.get(channel);
+					channelMatches.put(channel, count + 1);
+				}
+			}
+		}
+		
+		// calculate priority for each channel
+		TreeMap<Byte, Float> channelPriorities = new TreeMap<>();
+		int allSyllables = lyricsSyllables.size();
+		for (byte channel : channelMatches.keySet()) {
+			int matches = channelMatches.get(channel);
+			int notes   = channelNotes.get(channel);
+			
+			// 1st priority part: relevance = matches / events
+			float relevance = -1;
+			if (matches > 0 && notes > 0) {
+				relevance = ((float) matches) / ((float) notes);
+			}
+			
+			// 2nd priority part: coverage = matches / total lyrics
+			float coverage = -1;
+			if (matches > 0 && allSyllables > 0) {
+				coverage = ((float) matches) / ((float) allSyllables);
+			}
+			
+			// put it together
+			float priority = coverage + relevance;
+			channelPriorities.put(channel, priority);
+		}
+		
+		// collect and sort all priorities
+		TreeSet<Float> priorities = new TreeSet<>();
+		for (byte channel : channelPriorities.keySet()) {
+			float priority = channelPriorities.get(channel);
+			priorities.add(priority);
+		}
+		
+		// prioritize by number of counts
+		ArrayList<Byte> prioritizedChannels = new ArrayList<>();
+		for (float priority : priorities.descendingSet()) {
+			for (byte channel : channelPriorities.keySet()) {
+				float channelPriority = channelPriorities.get(channel);
+				if (priority == channelPriority) {
+					prioritizedChannels.add(channel);
+				}
+			}
+		}
+		
+		return prioritizedChannels;
 	}
 	
 	/**
@@ -478,6 +609,51 @@ public class MidicaPLExporter extends Exporter {
 					// add all notes/chords of this tick/channel to the timeline of the slice/channel
 					slice.addNotesToTimeline(tick, channel, notesStruct);
 				}
+			}
+		}
+	}
+	
+	/**
+	 * Adds syllables to the slices' timelines.
+	 * 
+	 * If there are any notes or chords played in the same tick as the syllable, the syllable is added to
+	 * one of them (according to the channel's priority).
+	 * 
+	 * If there are no notes or chords played in the syllable's tick, the syllable is added to the timeline
+	 * as an option to a rest.
+	 */
+	private void addLyricsToSlices() {
+		
+		TICK:
+		for (long tick : lyricsSyllables.keySet()) {
+			Slice  slice    = Slice.getSliceByTick(slices, tick);
+			String syllable = lyricsSyllables.get(tick);
+			
+			CHANNEL:
+			for (byte channel : lyricsChannels) {
+				TreeMap<Byte, TreeMap<String, TreeMap<Byte, String>>> events = slice.getTimeline(channel).get(tick);
+				
+				// no event for this channel/tick
+				if (null == events)
+					continue CHANNEL;
+				
+				// no notes for this channel/tick?
+				TreeMap<String, TreeMap<Byte, String>> notes = events.get(ET_NOTES);
+				if (null == notes)
+					continue CHANNEL;
+				
+				// add the syllable to the first available note/chord
+				String noteOrChord = notes.firstKey();
+				TreeMap<Byte, String> params = notes.get(noteOrChord);
+				params.put(NP_LYRICS, syllable);
+				
+				continue TICK;
+			}
+			
+			// If we reach this point, there is no matching note/chord.
+			// Add the syllable to the slice using a rest.
+			if (BLOCK == ORPHANED_SYLLABLES) {
+				slice.addSyllableRest(tick, syllable);
 			}
 		}
 	}
@@ -764,6 +940,13 @@ public class MidicaPLExporter extends Exporter {
 			
 			// channel commands and instrument changes
 			for (byte channel = 0; channel < 16; channel++) {
+				
+				// block with rests that are only used for syllables that don't have a note
+				if (slice.hasSyllableRests() && channel == lyricsChannels.get(0)) {
+					output.append( createSyllableRestsBlock(slice) );
+				}
+				
+				// normal commands
 				output.append( createCommandsFromTimeline(slice, channel) );
 			}
 		}
@@ -772,6 +955,58 @@ public class MidicaPLExporter extends Exporter {
 		output.append( createStatistics() );
 		
 		return output.toString();
+	}
+	
+	/**
+	 * Creates a nestable block containing all rests with syllables that
+	 * have no corresponting Note-ON event.
+	 * 
+	 * @param slice  the sequence slice
+	 * @return the created block.
+	 */
+	private String createSyllableRestsBlock(Slice slice) {
+		StringBuilder lines = new StringBuilder();
+		TreeMap<Long, String> timeline = slice.getSyllableRestTimeline();
+		
+		// open the block
+		lines.append(MidicaPLParser.BLOCK_OPEN + " " + MidicaPLParser.M);
+		lines.append(NEW_LINE);
+		
+		// get channel and tickstamp
+		byte channel      = lyricsChannels.get(0);
+		long currentTicks = instruments.get(channel).getCurrentTicks();
+		
+		// TICK:
+		for (Entry<Long, String> entry : timeline.entrySet()) {
+			long   restTick = entry.getKey();
+			String syllable = entry.getValue();
+			
+			// need a normal rest before the syllable?
+			if (restTick < currentTicks) {
+				long missingTicks = restTick - currentTicks;
+				lines.append( "\t" + createRest(channel, missingTicks, currentTicks, null) );
+				currentTicks = restTick;
+			}
+			
+			// get tick distance until the next syllable
+			Long nextTick = timeline.ceilingKey(currentTicks + 1);
+			if (null == nextTick) {
+				// last syllable in this slice
+				nextTick = currentTicks + sourceResolution; // use a quarter note
+			}
+			
+			long restLength = nextTick - currentTicks;
+			
+			// add the rest with the syllable
+			lines.append( "\t" + createRest(channel, restLength, currentTicks, syllable) );
+			currentTicks = nextTick;
+		}
+		
+		// close the block
+		lines.append(MidicaPLParser.BLOCK_CLOSE);
+		lines.append(NEW_LINE);
+		
+		return lines.toString();
 	}
 	
 	/**
@@ -791,7 +1026,7 @@ public class MidicaPLExporter extends Exporter {
 	 * @param channel  MIDI channel
 	 * @return the created commands (or an empty string, if the slice's timeline doesn't contain anything in the given channel)
 	 */
-	public String createCommandsFromTimeline(Slice slice, byte channel) {
+	private String createCommandsFromTimeline(Slice slice, byte channel) {
 		StringBuilder lines = new StringBuilder();
 		TreeMap<Long, TreeMap<Byte, TreeMap<String, TreeMap<Byte, String>>>> timeline = slice.getTimeline(channel);
 		
@@ -1290,7 +1525,7 @@ public class MidicaPLExporter extends Exporter {
 		long missingTicks = slice.getBeginTick() - chosenInstr.getCurrentTicks();
 		if (missingTicks > 0) {
 			byte channel = (byte) chosenInstr.channel;
-			restStr.append( createRest(channel, missingTicks, -1) );
+			restStr.append( createRest(channel, missingTicks, -1, null) );
 		}
 		
 		return restStr.toString();
@@ -1376,7 +1611,7 @@ public class MidicaPLExporter extends Exporter {
 		long currentTicks = instr.getCurrentTicks();
 		if (tick > currentTicks) {
 			long restTicks = tick - currentTicks;
-			lines.append( createRest(channel, restTicks, tick) );
+			lines.append( createRest(channel, restTicks, tick, null) );
 			instr.setCurrentTicks(tick);
 		}
 		
@@ -1509,11 +1744,8 @@ public class MidicaPLExporter extends Exporter {
 			
 			// TODO: implement and test lyrics
 			if (noteOrCrd.containsKey(NP_LYRICS)) {
-				String syllable = noteOrCrd.get(NP_LYRICS)
-					.replaceAll(" ", "_")
-					.replaceAll(",", "\\c")
-					.replaceAll("\n", "\\n")
-					.replaceAll("\r", "\\r");
+				String syllable = noteOrCrd.get(NP_LYRICS);
+				syllable = replaceSyllable(syllable);
 				options.add(MidicaPLParser.L + MidicaPLParser.OPT_ASSIGNER + syllable);
 			}
 		}
@@ -1537,9 +1769,10 @@ public class MidicaPLExporter extends Exporter {
 	 * @param channel    MIDI channel
 	 * @param ticks      tick length of the rest to create
 	 * @param beginTick  used for the tick comment (negative value: don't include a tick comment)
+	 * @param syllable   a lyrics syllable or (in most cases): **null**
 	 * @return the channel command containing the rest.
 	 */
-	private String createRest(byte channel, long ticks, long beginTick) {
+	private String createRest(byte channel, long ticks, long beginTick, String syllable) {
 		StringBuilder line = new StringBuilder("");
 		
 		// split length into elements
@@ -1569,12 +1802,33 @@ public class MidicaPLExporter extends Exporter {
 			line.append("// rest too small to be handled: " + ticks + " ticks");
 			incrementStats(STAT_REST_SKIPPED, channel);
 		}
+		
+		// add lyrics option, if needed
+		if (syllable != null) {
+			syllable = replaceSyllable(syllable);
+			line.append("\t" + MidicaPLParser.L + MidicaPLParser.OPT_ASSIGNER + syllable);
+		}
+		
+		// finish the line
 		if (beginTick >= 0) {
 			line.append( createTickComment(beginTick, true) );
 		}
 		line.append(NEW_LINE);
 		
 		return line.toString();
+	}
+	
+	/**
+	 * Replaces special characters in syllables.
+	 * 
+	 * @param syllable The syllable to be replaced.
+	 * @return the replaced syllable.
+	 */
+	private String replaceSyllable(String syllable) {
+		return syllable.replaceAll(" ", "_")
+			.replaceAll(",",  "\\\\c")
+			.replaceAll("\n", "\\\\n")
+			.replaceAll("\r", "\\\\r");
 	}
 	
 	/**

@@ -7,8 +7,6 @@
 
 package org.midica.midi;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,9 +52,6 @@ import com.sun.media.sound.MidiUtils;
  * @author Jan Trukenmüller
  */
 public class SequenceAnalyzer {
-	
-	// message debugging
-	private static final boolean DEBUG_MODE = false;
 	
 	// karaoke-related constants
 	private static final int    KARAOKE_TEXT           =  1; // meta message type: text
@@ -111,29 +106,67 @@ public class SequenceAnalyzer {
 	/**                    tick */
 	private static TreeSet<Long> markerTicks = null;
 	
-	/**                    channel   --  0=bankMSB, 1=bankLSB, 2=program  */
-	private static TreeMap<Byte, Byte[]> channelConfig = null;
-	
-	/**                    channel   --  tick -- 0=bankMSB, 1=bankLSB, 3=program   */
+	/**
+	 * History of the instrument configuration for each channel.
+	 * 
+	 * - channel
+	 * - tick
+	 * - index:
+	 *     - 0: bankMSB
+	 *     - 1: bankLSB
+	 *     - 2: program number
+	 */
 	private static TreeMap<Byte, TreeMap<Long, Byte[]>> instrumentHistory = null;
 	
 	/**                    channel   --  tick -- comment   */
 	private static TreeMap<Byte, TreeMap<Long, String>> commentHistory = null;
 	
-	/**                    channel   --  0=RPN MSB, 1=RPN LSB, 2=NRPN MSB, 3=NRPN LSB, 4=1(RPN)|0(NRPN)|-1(unknown) */
+	/**
+	 * Describes which parameter (RPN/NRPN and MSB/LSB) will be changed in case of a
+	 * data entry / data increment / data decrement.
+	 * 
+	 * - channel
+	 * - index
+	 *     - 0: RPN MSB
+	 *     - 1: RPN LSB
+	 *     - 2: NRPN MSB
+	 *     - 3: NRPN LSB
+	 *     - 4: 1=RPN, 0=NRPN, -1=unknown
+	 */
 	private static TreeMap<Byte, Byte[]> channelParamConfig = null;
 	
-	/**                    channel   --  tick -- 0=RPN MSB, 1=RPN LSB, 2=NRPN MSB, 3=NRPN LSB, 4=1(RPN)|0(NRPN)|-1(unknown) */
+	/**
+	 * History of {@link #channelParamConfig} by tick.
+	 * 
+	 * - channel
+	 * - tick
+	 * - index
+	 *     - 0: RPN MSB
+	 *     - 1: RPN LSB
+	 *     - 2: NRPN MSB
+	 *     - 3: NRPN LSB
+	 *     - 4: 1=RPN, 0=NRPN, -1=unknown
+	 */
 	private static TreeMap<Byte, TreeMap<Long, Byte[]>> channelParamHistory = null;
 	
-	/**                    channel   --  tick -- MSB */
-	private static TreeMap<Byte, TreeMap<Long, Byte>> pitchBendSensMsbHistory = null;
+	/**                  channel  --  controller  --  tick -- value */
+	private static TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Byte>>> controllerHistory = null;
 	
-	/**                    channel   --  tick -- LSB */
-	private static TreeMap<Byte, TreeMap<Long, Byte>> pitchBendSensLsbHistory = null;
+	/**
+	 * RPN history by tick.
+	 * 
+	 * - channel
+	 * - RPN: (MSB*128+LSB)
+	 * - tick
+	 * - value: (MSB*128+LSB)
+	 */
+	private static TreeMap<Byte, TreeMap<Integer, TreeMap<Long, Integer>>> rpnHistory = null;
 	
 	/**        line begin tick -- syllable tick -- syllable */
 	private static TreeMap<Long, TreeMap<Long, String>> lyrics = null;
+	
+	/** Flat lyrics structure: tick -- syllable */
+	private static TreeMap<Long, String> lyricsFlat = null;
 	
 	/**
 	 * This class is only used statically so a public constructor is not needed.
@@ -150,6 +183,7 @@ public class SequenceAnalyzer {
 	public static void reset() {
 		sequenceInfo = null;
 		lyrics       = null;
+		lyricsFlat   = null;
 		noteHistory  = null;
 	}
 	
@@ -173,9 +207,6 @@ public class SequenceAnalyzer {
 			parse();
 		}
 		catch (Exception e) {
-			if (DEBUG_MODE) {
-				e.printStackTrace();
-			}
 			if (e instanceof ParseException) {
 				throw (ParseException) e;
 			}
@@ -229,8 +260,7 @@ public class SequenceAnalyzer {
 	 *     - note
 	 *     - tick
 	 *     - on/off
-	 * - **lyrics**: TreeMap<Long, TreeMap<Long, String>>
-	 *     - line begin tick
+	 * - **lyrics**: TreeMap<Long, String>
 	 *     - syllable tick
 	 *     - syllable
 	 * 
@@ -242,7 +272,7 @@ public class SequenceAnalyzer {
 		histories.put( "comment_history",    commentHistory     );
 		histories.put( "note_history",       noteHistory        );
 		histories.put( "note_on_off",        noteOnOffByChannel );
-		histories.put( "lyrics",             lyrics             );
+		histories.put( "lyrics",             lyricsFlat         );
 		
 		return histories;
 	}
@@ -291,15 +321,13 @@ public class SequenceAnalyzer {
 			Byte[] conf0 = { 127, 127, 127, 127, -1 }; // MSB=LSB=127 (no parameter set), -1: neither RPN nor NRPN is active
 			paramHistory.put( 0L, conf0 );
 		}
-		pitchBendSensMsbHistory = new TreeMap<>();
-		pitchBendSensLsbHistory = new TreeMap<>();
+		controllerHistory = new TreeMap<>();
 		for (byte channel = 0; channel < 16; channel++) {
-			TreeMap<Long, Byte> msbHistoryEntry = new TreeMap<>();
-			TreeMap<Long, Byte> lsbHistoryEntry = new TreeMap<>();
-			msbHistoryEntry.put(0L, (byte) 2); // default: 2 half tone steps
-			lsbHistoryEntry.put(0L, (byte) 0);
-			pitchBendSensMsbHistory.put(channel, msbHistoryEntry);
-			pitchBendSensLsbHistory.put(channel, lsbHistoryEntry);
+			resetAllControllers(channel, 0L);
+		}
+		rpnHistory = new TreeMap<>();
+		for (byte channel = 0; channel < 16; channel++) {
+			resetAllRPNs(channel, 0L);
 		}
 		
 		// initialize data structures for karaoke
@@ -312,6 +340,7 @@ public class SequenceAnalyzer {
 		karLineEnded     = false;
 		karaokeInfo      = new HashMap<>();
 		lyrics           = new TreeMap<>();
+		lyricsFlat       = new TreeMap<>();
 		lyricsEvent      = new TreeSet<>();
 		karaokeInfo.put( "lyrics", lyrics );
 		sequenceInfo.put( "karaoke", karaokeInfo );
@@ -328,18 +357,12 @@ public class SequenceAnalyzer {
 			noteHistory.put( channel, new TreeMap<>() );
 		}
 		
-		// init data structures for the bank and instrument history
-		channelConfig = new TreeMap<>();
-		for (byte channel = 0; channel < 16; channel++) {
-			Byte[] conf = { 0, 0, 0 }; // default values: bankMSB=0, bankLSB=0, program=0
-			channelConfig.put( channel, conf );
-		}
 		instrumentHistory = new TreeMap<>();
 		for (byte channel = 0; channel < 16; channel++) {
 			TreeMap<Long, Byte[]> channelHistory = new TreeMap<>();
 			instrumentHistory.put( channel, channelHistory );
 			
-			// default config (same as the default in channelConfig)
+			// default config
 			Byte[] conf0 = { 0, 0, 0 }; // default values: bankMSB=0, bankLSB=0, program=0
 			channelHistory.put( DEFAULT_CHANNEL_CONFIG_TICK, conf0 ); // this must be configured before the sequence starts
 		}
@@ -357,7 +380,7 @@ public class SequenceAnalyzer {
 	 */
 	private static void parse() throws ReflectiveOperationException {
 		
-		// Analyze for channel activity, note history, banks, instruments and (N)RPN.
+		// Analyze for channel activity, note history, banks, instruments, controllers and (N)RPN.
 		// Therefore the CREATED sequence is used.
 		// In this sequence tracks match channels. So we know that we will
 		// process the note-related events in the right order.
@@ -384,11 +407,6 @@ public class SequenceAnalyzer {
 				MidiEvent   event = t.get( i );
 				long        tick  = event.getTick();
 				MidiMessage msg   = event.getMessage();
-				
-				// replace some messages
-				if (DEBUG_MODE) {
-					msg = replaceMessage( msg, tick );
-				}
 				
 				if (msg instanceof MetaMessage) {
 					processMetaMessage( (MetaMessage) msg, tick, trackNum, msgNum );
@@ -467,34 +485,42 @@ public class SequenceAnalyzer {
 		
 		// Program Change?
 		if (ShortMessage.PROGRAM_CHANGE == cmd) {
-			// PROGRAM index = 2
-			channelConfig.get( channel )[ 2 ] = (byte) msg.getData1();
-			Byte[] confAtTick = channelConfig.get( channel ).clone();
-			instrumentHistory.get( channel ).put( tick, confAtTick );
-			markerTicks.add( tick ); // prepare marker event
+			
+			// get current config
+			Entry<Long, Byte> bankMsbEntry = controllerHistory.get(channel).get( (byte) 0x00 ).floorEntry(tick);
+			Entry<Long, Byte> bankLsbEntry = controllerHistory.get(channel).get( (byte) 0x20 ).floorEntry(tick);
+			byte bankMsb       = bankMsbEntry.getValue();
+			byte bankLsb       = bankLsbEntry.getValue();
+			byte programNumber = (byte) msg.getData1();
+			Byte[] currentConf = { bankMsb, bankLsb, programNumber };
+			
+			// add to history
+			instrumentHistory.get(channel).put(tick, currentConf);
+			
+			// prepare marker event
+			markerTicks.add(tick);
 			
 			return;
 		}
 		
 		// CONTROL CHANGE
 		if (ShortMessage.CONTROL_CHANGE == cmd) {
-			int controller = msg.getData1();
-			int value      = msg.getData2();
+			byte controller = (byte) msg.getData1();
+			byte value      = (byte) msg.getData2();
 			
-			// BANK MSB
-			if (0x00 == controller) {
-				// MSB index = 0
-				channelConfig.get( channel )[ 0 ] = (byte) value;
-			}
-			
-			// BANK LSB
-			else if (0x20 == controller) {
-				// LSB index = 1
-				channelConfig.get( channel )[ 1 ] = (byte) value;
-			}
+			//    0-31: high resolution MSB
+			//   32-63: high resolution LSB
+			//   64-69: single byte (switches)
+			//   70-95: single byte (low resolution)
+			//   96-97: data increment/decrement
+			//   98-99: NRPN LSB/MSB
+			// 100-101: RPN LSB/MSB
+			// 102-119: single byte (undefined)
+			// 120-127: mode
+			controllerHistory.get(channel).get(controller).put(tick, value);
 			
 			// (N)RPN MSB/LSB
-			else if (controller >= 0x62 && controller <= 0x65) {
+			if (controller >= 0x62 && controller <= 0x65) {
 				
 				// adjust current channel param config
 				int index = 0x62 == controller ? 3  // NRPN LSB
@@ -505,7 +531,7 @@ public class SequenceAnalyzer {
 				if (-1 == index) { // should never happen
 					return;
 				}
-				channelParamConfig.get( channel )[ index ] = (byte) value;
+				channelParamConfig.get(channel)[index] = value;
 				
 				// calculate and adjust active parameter type: RPN(1), NRPN(0) or none(-1)?
 				byte rpnNrpnReset;
@@ -513,23 +539,23 @@ public class SequenceAnalyzer {
 				byte currentLsb;
 				if (controller >= 0x64) {
 					rpnNrpnReset = 1;  // RPN
-					currentMsb = channelParamConfig.get( channel )[ 0 ];
-					currentLsb = channelParamConfig.get( channel )[ 1 ];
+					currentMsb = channelParamConfig.get(channel)[ 0 ];
+					currentLsb = channelParamConfig.get(channel)[ 1 ];
 				}
 				else {
 					rpnNrpnReset = 0;  // NRPN
-					currentMsb = channelParamConfig.get( channel )[ 2 ];
-					currentLsb = channelParamConfig.get( channel )[ 3 ];
+					currentMsb = channelParamConfig.get(channel)[ 2 ];
+					currentLsb = channelParamConfig.get(channel)[ 3 ];
 				}
 				if (((byte) 0x7F) == currentMsb && ((byte) 0x7F) == currentLsb) {
 					// reset
 					rpnNrpnReset = -1;
 				}
-				channelParamConfig.get( channel )[ 4 ] = rpnNrpnReset;
+				channelParamConfig.get(channel)[ 4 ] = rpnNrpnReset;
 				
 				// add history entry
-				Byte[] confAtTick = channelParamConfig.get( channel ).clone();
-				channelParamHistory.get( channel ).put( tick, confAtTick );
+				Byte[] confAtTick = channelParamConfig.get(channel).clone();
+				channelParamHistory.get(channel).put(tick, confAtTick);
 			}
 			
 			// Data Entry/Increment/Decrement
@@ -538,33 +564,59 @@ public class SequenceAnalyzer {
 			       || 0x60 == controller       // data button increment
 			       || 0x61 == controller ) {   // data button decrement
 				
+				// find out what parameter has to be changed
 				Byte[] paramMsbLsb = getChannelParamMsbLsbType(channel, tick);
 				byte msb  = paramMsbLsb[ 0 ];
 				byte lsb  = paramMsbLsb[ 1 ];
 				byte type = paramMsbLsb[ 2 ];
 				
-				// data change for pitch bend sensitivity?
-				if (0 == msb && 0 == lsb && 1 == type) {
-					boolean mustChangeBoth = false;
-					float   currentValue = getPitchBendSensitivity(channel, tick);
+				// change RPN
+				if (1 == type) {
+					
+					// get current value
+					int rpn = (128 * (int) msb) + lsb;
+					TreeMap<Long, Integer> paramValueHistory = rpnHistory.get(channel).get(rpn);
+					if (null == paramValueHistory) {
+						
+						// not yet set - get the default
+						byte[] defaultMsbLsb = getRpnDefault(msb, lsb);
+						int    defaultValue  = (defaultMsbLsb[0] << 8) + defaultMsbLsb[1];
+						paramValueHistory = new TreeMap<>();
+						paramValueHistory.put(0L, defaultValue);
+						rpnHistory.get(channel).put(rpn, paramValueHistory);
+					}
+					Entry<Long, Integer> paramValueEntry = paramValueHistory.floorEntry(tick);
+					int  currentValue = paramValueEntry.getValue();
+					byte msbVal       = (byte) (currentValue >> 8 & 0xFF);
+					byte lsbVal       = (byte) (currentValue      & 0xFF);
+					
+					// change MSB or LSB or both
 					if (0x06 == controller)         // data entry MSB
-						pitchBendSensMsbHistory.get( channel ).put(tick, (byte) value);
-					else if (0x26 == controller)    // data entry LSB (ignore)
-						pitchBendSensLsbHistory.get( channel ).put(tick, (byte) value);
+						msbVal = value;
+					else if (0x26 == controller)    // data entry LSB
+						lsbVal = value;
 					else if (0x60 == controller) {  // data button increment
-						mustChangeBoth = true;
-						currentValue += ( 1f / 128f );
+						if (lsbVal < 0x7F) {
+							lsbVal++;
+						}
+						else if (msbVal < 0x7F) {
+							lsbVal = 0;
+							msbVal++;
+						}
 					}
 					else if (0x61 == controller) {  // data button decrement
-						mustChangeBoth = true;
-						currentValue -= ( 1f / 128f );
+						if (lsbVal > 0x00) {
+							lsbVal--;
+						}
+						else if (msbVal > 0x00) {
+							lsbVal = 0x7F;
+							msbVal--;
+						}
 					}
-					if (mustChangeBoth) {
-						byte newMsb = (byte) currentValue;
-						byte newLsb = (byte) Math.round(128 * (currentValue - (float) newMsb));
-						pitchBendSensMsbHistory.get( channel ).put(tick, (byte) newMsb);
-						pitchBendSensLsbHistory.get( channel ).put(tick, (byte) newLsb);
-					}
+					
+					// calculate and set the new value
+					int newValue = (msbVal << 8) + lsbVal;
+					rpnHistory.get(channel).get(rpn).put(tick, newValue);
 				}
 			}
 		}
@@ -576,17 +628,17 @@ public class SequenceAnalyzer {
 			
 			// on or off?
 			if (velocity > 0) {
-				addNoteOn( tick, channel, note, velocity );
+				addNoteOn(tick, channel, note, velocity);
 			}
 			else {
-				addNoteOff( tick, channel, note );
+				addNoteOff(tick, channel, note);
 			}
 		}
 		
 		// NOTE OFF
 		else if (ShortMessage.NOTE_OFF == cmd) {
 			byte note = (byte) msg.getData1();
-			addNoteOff( tick, channel, note );
+			addNoteOff(tick, channel, note);
 		}
 	}
 	
@@ -690,7 +742,7 @@ public class SequenceAnalyzer {
 				midiFileCharset = newCharset;
 			}
 			text = lyricUtil.removeTags(text);
-			processKaraoke( text, KARAOKE_LYRICS, tick );
+			processKaraoke(text, KARAOKE_LYRICS, tick);
 		}
 		
 		// INSTRUMENT NAME
@@ -845,9 +897,10 @@ public class SequenceAnalyzer {
 		// bank/instrument/note info for the tree
 		String channelTxt = Dict.get(Dict.CHANNEL) + " " + channel;
 		String channelID  = String.format( "%02X", channel );
-		Byte[] config     = channelConfig.get( channel );
-		int    bankNum    = ( config[0] << 7 ) | config[ 1 ]; // bankMSB * 2^7 + bankLSB
-		String bankSyntax = config[ 0 ] + ""; // MSB as a string
+		Entry<Long, Byte[]> instrEntry = instrumentHistory.get(channel).floorEntry(tick);
+		Byte[] config     = instrEntry.getValue();
+		int    bankNum    = (config[0] << 7) | config[1]; // bankMSB * 2^7 + bankLSB
+		String bankSyntax = config[0] + ""; // MSB as a string
 		if (config[1] > 0) {  // MSB/LSB
 			bankSyntax    = bankSyntax + Dict.getSyntax( Dict.SYNTAX_PROG_BANK_SEP ) + config[ 1 ];
 		}
@@ -963,6 +1016,10 @@ public class SequenceAnalyzer {
 			return;
 		if ( "".equals(text) )
 			return;
+		
+		// add it to the flat structure (used only by the decompiler)
+		if (null == lyricsFlat.get(tick))
+			lyricsFlat.put(tick, text);
 		
 		// UNIFY WHITESPACES FROM DIFFERENT SOURCES
 		if (KARAOKE_LYRICS == type) {
@@ -1156,12 +1213,12 @@ public class SequenceAnalyzer {
 		for (byte channel = 0; channel < 16; channel++) {
 			
 			// channel unused?
-			TreeMap<Long, TreeMap<Byte, Byte>> channelNoteHistory = noteHistory.get( channel );
+			TreeMap<Long, TreeMap<Byte, Byte>> channelNoteHistory = noteHistory.get(channel);
 			if (channelNoteHistory.isEmpty()) {
-				TreeMap<Long, Byte[]> channelInstrumentHistory = instrumentHistory.get( channel );
+				TreeMap<Long, Byte[]> channelInstrumentHistory = instrumentHistory.get(channel);
 				
 				Byte[] conf0 = { -1, -1, -1 };
-				channelInstrumentHistory.put( -1L, conf0 );
+				channelInstrumentHistory.put(-1L, conf0);
 			}
 		}
 		
@@ -1204,7 +1261,7 @@ public class SequenceAnalyzer {
 				}
 				
 				// is there an instrument change at the current tick?
-				Byte[] instrChange = instrumentHistory.get( channel ).get( tick );
+				Byte[] instrChange = instrumentHistory.get(channel).get(tick);
 				if (instrChange != null) {
 					instrumentChanged = true;
 				}
@@ -1751,7 +1808,7 @@ public class SequenceAnalyzer {
 	 * @return         instrument description as described above
 	 */
 	public static Byte[] getInstrument(byte channel, long tick) {
-		Entry<Long, Byte[]> entry = instrumentHistory.get( channel ).floorEntry( tick );
+		Entry<Long, Byte[]> entry = instrumentHistory.get(channel).floorEntry(tick);
 		return entry.getValue();
 	}
 	
@@ -1791,7 +1848,7 @@ public class SequenceAnalyzer {
 	public static Byte[] getChannelParamMsbLsbType(byte channel, long tick) {
 		
 		// get all params at the given tick
-		Entry<Long, Byte[]> entry = channelParamHistory.get( channel ).floorEntry( tick );
+		Entry<Long, Byte[]> entry = channelParamHistory.get(channel).floorEntry(tick);
 		Byte[] confAtTick = entry.getValue();
 		
 		// get current type (0=RPN, 1=NRPN or -1=none)
@@ -1823,11 +1880,12 @@ public class SequenceAnalyzer {
 	 * @return         pitch bend sensitivity
 	 */
 	public static final float getPitchBendSensitivity(byte channel, long tick) {
-		Entry<Long, Byte> msbEntry = pitchBendSensMsbHistory.get( channel ).floorEntry( tick );
-		Entry<Long, Byte> lsbEntry = pitchBendSensLsbHistory.get( channel ).floorEntry( tick );
-		float msb = msbEntry.getValue();
-		float lsb = lsbEntry.getValue();
-		return msb + (lsb / 128f);
+		Entry<Long, Integer> entry = rpnHistory.get(channel).get(0).floorEntry(tick);
+		int  paramValue = entry.getValue();
+		byte msb        = (byte) (paramValue >> 8 & 0xFF);
+		byte lsb        = (byte) (paramValue      & 0xFF);
+		
+		return ((float) msb) + (((float) lsb) / 128f);
 	}
 	
 	/**
@@ -1853,113 +1911,368 @@ public class SequenceAnalyzer {
 	}
 	
 	/**
-	 * Can be used for replacing MIDI messages for debugging reasons.
+	 * Resets all controllers of the given channel to their default values.
 	 * 
-	 * This method is only used if {@link #DEBUG_MODE} is **true**.
-	 * 
-	 * @param msg    The original message.
-	 * @param tick   The tickstamp when the message occurs.
-	 * @return the replaced message.
+	 * @param channel  MIDI channel
+	 * @param tick     tickstamp of the sequence
 	 */
-	private static final MidiMessage replaceMessage(MidiMessage msg, long tick) {
+	private static final void resetAllControllers(byte channel, long tick) {
 		
-		// only replace messages in a certain tick range
-		try {
-			
-			// fake short messages
-			if (tick > 10000 && tick < 20000) {
-				if (tick < 12000)
-					msg = new ShortMessage( ShortMessage.ACTIVE_SENSING );
-				else if (tick < 14000)
-					msg = new ShortMessage( 0xFB ); // system realtime: continue
-				else if (tick < 16000)
-					msg = new ShortMessage( 0xF7 ); // system common: end of sysex
-				else if (tick < 18000)
-					msg = new ShortMessage( 0xB0, 0x65, 0x00 ); // rpn MSB
-				else
-					msg = new ShortMessage( 0xB1, 0x65, 0x01 ); // rpn MSB
-			}
-			
-			// fake sysex messages
-			if (tick > 20000 && tick < 30000) {
-				byte[] content = {
-					(byte) 0xF0,	// status
-					0x41,			// vendor
-					0x7F,			// channel
-					0x08,			// sub 1
-					0x00,			// sub 2
-					0x66,			// data
-					(byte) 0xF7,	// end of sysex
-				};
-				if (tick < 22000) {
-					// nothing more to do
-				}
-				else if (tick < 24000) {
-					content[ 1 ] = 0x7E;
-				}
-				else if (tick < 26000) {
-					content[ 1 ] = 0x7F;
-				}
-				else {
-					content[ 1 ] = 0x7D;
-				}
-				
-				msg = new SysexMessage( content, content.length );
-			}
-			
-			// fake meta messages
-			if (tick > 30000 && tick < 40000) {
-				int    type = 0x05; // lyrics
-				byte[] content;
-				try {
-					if (tick < 32000) {
-						String text = "faked DEFAULT lyrics for testing äöü ÄÖÜ § 中中中中";
-						content     = text.getBytes();
-					}
-					else if (tick < 34000) {
-						String text = "faked ISO-8859-1 lyrics for testing äöü ÄÖÜ § 中中中中";
-						content     = text.getBytes( "ISO-8859-1" );
-					}
-					else {
-						String text = "faked UTF8 lyrics for testing äöü ÄÖÜ § 中中中中";
-						content     = text.getBytes( Charset.forName("UTF-8") );
-					}
-				}
-				catch (UnsupportedEncodingException e) {
-					String text = "faked DEFAULT lyrics after UnsupportedEncodingException for testing äöü ÄÖÜ § 中中中中";
-					content     = text.getBytes();
-				}
-				if (tick > 36000) {
-					type = 0x7F;     // sequencer specific
-					content = new byte[ 3 ];
-					if (tick < 38000) {
-						content[ 0 ] = 0x41; // roland
-						content[ 1 ] = 0x01;
-						content[ 2 ] = 0x02;
-					}
-					else if (tick < 39000) {
-						content[ 0 ] = 0x42; // korg
-						content[ 1 ] = 0x03;
-						content[ 2 ] = 0x04;
-					}
-					else {
-						content = new byte[ 6 ];
-						content[ 0 ] = 0x00;
-						content[ 1 ] = 0x00;
-						content[ 2 ] = 0x41; // microsoft
-						content[ 3 ] = 0x06;
-						content[ 4 ] = 0x07;
-						content[ 5 ] = 0x08;
-					}
-				}
-				 
-				msg = new MetaMessage( type, content, content.length );
+		TreeMap<Byte, TreeMap<Long, Byte>> channelCtrlHistory = new TreeMap<>();
+		if (0L == tick) {
+			// initialize ALL controllers by their default values
+			for (int ctrl = 0; ctrl < 128; ctrl++) {
+				TreeMap<Long, Byte> ctrlHistoryEntry = new TreeMap<>();
+				byte defaultValue = getControllerDefault(ctrl);
+				ctrlHistoryEntry.put(tick, defaultValue);
+				channelCtrlHistory.put((byte) ctrl, ctrlHistoryEntry);
 			}
 		}
-		catch (InvalidMidiDataException e) {
-			e.printStackTrace();
+		else {
+			// TODO: only reset the controllers mentioned in gm2, page 14
+		}
+		controllerHistory.put(channel, channelCtrlHistory);
+		
+		// TODO: reset modes:
+		// omni on / poly (page 11)
+		
+		// TODO: mode messages:
+		// 120: all sounds off
+		// 121: reset all controllers
+		// 122: local control
+		// 123: all notes off
+		// 124: omni off
+		// 125: omni on
+		// 126: mono on, poly off
+		// 127: poly on, mono off
+		
+		// TODO: modes
+		// mode 1: == omni on, poly
+		// mode 2: == omni on, mono
+		// mode 3: == omni off, poly
+		// mode 4: == omni off, mono
+		
+		// TODO:
+		// controllers 123-127: also imply 123 (all notes off) (page 52)
+		
+		// TODO: system defaul: General MIDI mode: on
+		// see (page 332)
+		
+		// TODO: GM system on message:
+		// implies: everything from "reset all controllers"
+		// implies: volume (7) == 100
+		// implies: expression (11) == 127
+		// implies: pan (64) == 64
+		// implies: bank-msb == 0
+		// implies: bank-lsb == 0
+		// implies: program-change == 0
+		
+		// TODO: all controller defaults should be 0 or 64 except:
+		// #7 (volume)
+		// #11 (expression)
+		// see (page 323)
+		
+		// TODO: all sound off (#120)
+		// 
+		
+		// TODO: MPE Config Message (MCM)
+		// implies: reset all controllers
+		// implies: stop all ongoing notes
+		// see: MPE docu, page 5
+		
+	}
+	
+	/**
+	 * Returns the default value for the given controller number.
+	 * 
+	 * @param ctrl Controller number
+	 * @return default value.
+	 */
+	private static final byte getControllerDefault(int ctrl) {
+		
+		// 0-31 (0x00-0x1F): high resolution MSB
+		if (0x00 == ctrl) return 0x00; // msb bank                     (0x00 == 0)  // TODO: adjust ???
+		if (0x01 == ctrl) return 0x00; // msb modulation wheel         (0x00, see gm2, page 6)
+		if (0x02 == ctrl) return 0x00; // msb breath ctrl              
+		if (0x03 == ctrl) return 0x00; // msb (undefined)
+		if (0x04 == ctrl) return 0x00; // msb foot ctrl                
+		if (0x05 == ctrl) return 0x00; // msb portamento time          (0x00, see gm2, page 6)
+		if (0x06 == ctrl) return 0x7F; // msb DATA ENTRY               (0x00 == 0, see gm2, page 12)
+		if (0x07 == ctrl) return 0x64; // msb channel volume           (0x64 == 100)
+		if (0x08 == ctrl) return 0x00; // msb balance                  (0x40 == 64, see MIDI 1.0, page 45)
+		if (0x09 == ctrl) return 0x00; // msb (undefined)
+		if (0x0A == ctrl) return 0x40; // msb pan                      (0x40 == 64, see gm2, page 8 and RP-036)
+		if (0x0B == ctrl) return 0x7F; // msb expression               (0x7F == 127, see gm2, page 8)
+		if (0x0C == ctrl) return 0x00; // msb effect ctrl 1
+		if (0x0D == ctrl) return 0x00; // msb effect ctrl 2
+		if (0x0E == ctrl) return 0x00; // msb (undefined)
+		if (0x0F == ctrl) return 0x00; // msb (undefined)
+		if (0x10 == ctrl) return 0x00; // msb general purpose ctrl 1
+		if (0x11 == ctrl) return 0x00; // msb general purpose ctrl 2
+		if (0x12 == ctrl) return 0x00; // msb general purpose ctrl 3
+		if (0x13 == ctrl) return 0x00; // msb general purpose ctrl 4
+		if (0x14 == ctrl) return 0x00; // msb (undefined)
+		if (0x15 == ctrl) return 0x00; // msb (undefined)
+		if (0x16 == ctrl) return 0x00; // msb (undefined)
+		if (0x17 == ctrl) return 0x00; // msb (undefined)
+		if (0x18 == ctrl) return 0x00; // msb (undefined)
+		if (0x19 == ctrl) return 0x00; // msb (undefined)
+		if (0x1A == ctrl) return 0x00; // msb (undefined)
+		if (0x1B == ctrl) return 0x00; // msb (undefined)
+		if (0x1C == ctrl) return 0x00; // msb (undefined)
+		if (0x1D == ctrl) return 0x00; // msb (undefined)
+		if (0x1E == ctrl) return 0x00; // msb (undefined)
+		if (0x1F == ctrl) return 0x00; // msb (undefined)
+		
+		// 32-63 (0x20-0x3F): high resolution LSB
+		if (0x20 == ctrl) return 0x00; // lsb bank (0x00 == 0)
+		if (0x21 == ctrl) return 0x00; // lsb modulation wheel
+		if (0x22 == ctrl) return 0x00; // lsb breath ctrl
+		if (0x23 == ctrl) return 0x00; // lsb (undefined)
+		if (0x24 == ctrl) return 0x00; // lsb foot ctrl
+		if (0x25 == ctrl) return 0x00; // lsb portamento time
+		if (0x26 == ctrl) return 0x7F; // lsb DATA ENTRY             (0x00 == 0, see gm2, page 12)
+		if (0x27 == ctrl) return 0x00; // lsb channel volume         (0x00 == 0)
+		if (0x28 == ctrl) return 0x00; // lsb balance                (0x00 == 0, not mentioned in MIDI 1.0 page 45 but 0x00 makes sense)
+		if (0x29 == ctrl) return 0x00; // lsb (undefined)
+		if (0x2A == ctrl) return 0x00; // lsb pan                    (0x00 == 0, not mentioned in RP-036 but 0x00 makes sense)
+		if (0x2B == ctrl) return 0x00; // lsb expression
+		if (0x2C == ctrl) return 0x00; // lsb effect ctrl 1
+		if (0x2D == ctrl) return 0x00; // lsb effect ctrl 2
+		if (0x2E == ctrl) return 0x00; // lsb (undefined)
+		if (0x2F == ctrl) return 0x00; // lsb (undefined)
+		if (0x30 == ctrl) return 0x00; // lsb general purpose ctrl 1
+		if (0x31 == ctrl) return 0x00; // lsb general purpose ctrl 2
+		if (0x32 == ctrl) return 0x00; // lsb general purpose ctrl 3
+		if (0x33 == ctrl) return 0x00; // lsb general purpose ctrl 4
+		if (0x34 == ctrl) return 0x00; // lsb (undefined)
+		if (0x35 == ctrl) return 0x00; // lsb (undefined)
+		if (0x36 == ctrl) return 0x00; // lsb (undefined)
+		if (0x37 == ctrl) return 0x00; // lsb (undefined)
+		if (0x38 == ctrl) return 0x00; // lsb (undefined)
+		if (0x39 == ctrl) return 0x00; // lsb (undefined)
+		if (0x3A == ctrl) return 0x00; // lsb (undefined)
+		if (0x3B == ctrl) return 0x00; // lsb (undefined)
+		if (0x3C == ctrl) return 0x00; // lsb (undefined)
+		if (0x3D == ctrl) return 0x00; // lsb (undefined)
+		if (0x3E == ctrl) return 0x00; // lsb (undefined)
+		if (0x3F == ctrl) return 0x00; // lsb (undefined)
+		
+		// 64-69 (0x40-0x45): single byte (switches)
+		if (0x40 == ctrl) return 0x00; // hold pedal 1        (0x00, see gm2, page 8)
+		if (0x41 == ctrl) return 0x00; // portamento pedal    (0x00, see gm2, page 9)
+		if (0x42 == ctrl) return 0x00; // sostenuto pedal     (0x00, see gm2, page 9)
+		if (0x43 == ctrl) return 0x00; // soft pedal          (0x00, see gm2, page 9)
+		if (0x44 == ctrl) return 0x00; // legato pedal
+		if (0x45 == ctrl) return 0x00; // hold pedal 2
+		
+		// 70-95 (0x46-0x5F): single byte (low resolution)
+		if (0x46 == ctrl) return 0x00; // sound ctrl 1 (sound variation)
+		if (0x47 == ctrl) return 0x40; // sound ctrl 2 (timbre/harmonic/filter)    (0x40 == 64, see gm2, page 9)
+		if (0x48 == ctrl) return 0x40; // sound ctrl 3 (release time)              (0x40 == 64, see gm2, page 10)
+		if (0x49 == ctrl) return 0x40; // sound ctrl 4 (attack time)               (0x40 == 64, see gm2, page 10)
+		if (0x4A == ctrl) return 0x40; // sound ctrl 5 (brightness)                (0x40 == 64, see gm2, page 10)
+		if (0x4B == ctrl) return 0x40; // sound ctrl 6 (decay time)                (0x40 == 64, see gm2, page 10)
+		if (0x4C == ctrl) return 0x40; // sound ctrl 7 (vibrato rate)              (0x40 == 64, see gm2, page 11)
+		if (0x4D == ctrl) return 0x40; // sound ctrl 8 (vibrato depth)             (0x40 == 64, see gm2, page 11)
+		if (0x4E == ctrl) return 0x40; // sound ctrl 9 (vibrato delay)             (0x40 == 64, see gm2, page 11)
+		if (0x4F == ctrl) return 0x00; // sound ctrl 10
+		if (0x50 == ctrl) return 0x00; // general purpose ctrl 5
+		if (0x51 == ctrl) return 0x00; // general purpose ctrl 6
+		if (0x52 == ctrl) return 0x00; // general purpose ctrl 7
+		if (0x53 == ctrl) return 0x00; // general purpose ctrl 8
+		if (0x54 == ctrl) return 0x00; // portamento ctrl
+		if (0x55 == ctrl) return 0x00; // (undefined)
+		if (0x56 == ctrl) return 0x00; // (undefined)
+		if (0x57 == ctrl) return 0x00; // (undefined)
+		if (0x58 == ctrl) return 0x00; // high resolution velocity prefix
+		if (0x59 == ctrl) return 0x00; // (undefined)
+		if (0x5A == ctrl) return 0x00; // (undefined)
+		if (0x5B == ctrl) return 0x28; // effect 1 depth (reverb send level)       (0x28 == 40, see gm2, page 11)
+		if (0x5C == ctrl) return 0x00; // effect 2 depth (tremolo depth)
+		if (0x5D == ctrl) return 0x00; // effect 3 depth (chorus send level)       (0x00 == 0, see gm2, page 11)
+		if (0x5E == ctrl) return 0x00; // effect 4 depth (celeste depth)
+		if (0x5F == ctrl) return 0x00; // effect 5 depth (phaser level)
+		
+		// 96-97 (0x60-0x61): data increment/decrement
+		if (0x60 == ctrl) return 0x00; // DATA INCREMENT       (not used anyway)
+		if (0x61 == ctrl) return 0x00; // DATA DECREMENT       (not used anyway)
+		
+		// 98-99 (0x62-0x63): NRPN LSB/MSB
+		if (0x62 == ctrl) return 0x00; // NRPN LSB             (0x7F = 127, not mentioned but makes sense)
+		if (0x63 == ctrl) return 0x00; // NRPN MSB             (0x7F = 127, not mentioned but makes sense)
+		
+		// 100-101 (0x64-0x65): RPN LSB/MSB
+		if (0x64 == ctrl) return 0x00; // RPN LSB              (0x7F = 127, see gm2, page 12)
+		if (0x65 == ctrl) return 0x00; // RPN MSB              (0x7F = 127, see gm2, page 12)
+		
+		// 102-119 (0x66-0x77): single byte (undefined)
+		if (0x66 == ctrl) return 0x00; // (undefined)
+		if (0x67 == ctrl) return 0x00; // (undefined)
+		if (0x68 == ctrl) return 0x00; // (undefined)
+		if (0x69 == ctrl) return 0x00; // (undefined)
+		if (0x6A == ctrl) return 0x00; // (undefined)
+		if (0x6B == ctrl) return 0x00; // (undefined)
+		if (0x6C == ctrl) return 0x00; // (undefined)
+		if (0x6D == ctrl) return 0x00; // (undefined)
+		if (0x6E == ctrl) return 0x00; // (undefined)
+		if (0x6F == ctrl) return 0x00; // (undefined)
+		if (0x70 == ctrl) return 0x00; // (undefined)
+		if (0x71 == ctrl) return 0x00; // (undefined)
+		if (0x72 == ctrl) return 0x00; // (undefined)
+		if (0x73 == ctrl) return 0x00; // (undefined)
+		if (0x74 == ctrl) return 0x00; // (undefined)
+		if (0x75 == ctrl) return 0x00; // (undefined)
+		if (0x76 == ctrl) return 0x00; // (undefined)
+		if (0x77 == ctrl) return 0x00; // (undefined)
+		
+		// 120-127 (0x78-0x7F): mode
+		if (0x78 == ctrl) return 0x00; // all sounds off                                (see gm2, page 13)
+		if (0x79 == ctrl) return 0x00; // all controllers off (reset all controllers)   (see gm2, page 14)
+		if (0x7A == ctrl) return 0x7F; // local control (0=ON, 7F=OFF, rest=invalid)    (see MIDI 1.0, page 26)
+		if (0x7B == ctrl) return 0x00; // all notes off                                 (see gm2, page 14)
+		if (0x7C == ctrl) return 0x00; // omni mode: off (+all notes off)               (see gm2, page 14)
+		if (0x7D == ctrl) return 0x00; // omni mode: on  (+all notes off)               (see gm2, page 14)
+		if (0x7E == ctrl) return 0x01; // mono mode (+poly off, +all notes off)         (see gm2, page 14)
+		if (0x7F == ctrl) return 0x00; // poly mode (+mono off, +all notes off)         (see gm2, page 15)
+		
+		// default (should never happen)
+		return 0x00;
+	}
+	
+	/**
+	 * Resets all known RPNs to their default values.
+	 * 
+	 * @param channel  MIDI channel
+	 * @param tick     tickstamp of the sequence
+	 */
+	private static final void resetAllRPNs(byte channel, long tick) {
+		TreeMap<Integer, TreeMap<Long, Integer>> channelRpnHistory = new TreeMap<>();
+		
+		byte msb = 0x00;
+		byte lsb = 0x00;
+		
+		// normal RPNs
+		while (lsb <= 0x06) {
+			int rpn = msb * 128 + lsb;
+			TreeMap<Long, Integer> rpnHistoryEntry = new TreeMap<>();
+			byte[] defaultMsbLsb = getRpnDefault(msb, lsb);
+			int    defaultValue  = (defaultMsbLsb[0] << 8) + defaultMsbLsb[1];
+			rpnHistoryEntry.put(tick, defaultValue);
+			channelRpnHistory.put(rpn, rpnHistoryEntry);
+			rpnHistory.put(channel, channelRpnHistory);
+			lsb++;
 		}
 		
-		return msg;
+		// 3D
+		msb = 0x3D;
+		lsb = 0x00;
+		while (lsb <= 0x08) {
+			int rpn = msb * 128 + lsb;
+			TreeMap<Long, Integer> rpnHistoryEntry = new TreeMap<>();
+			byte[] defaultMsbLsb = getRpnDefault(msb, lsb);
+			int    defaultValue  = (defaultMsbLsb[0] << 8) + defaultMsbLsb[1];
+			rpnHistoryEntry.put(tick, defaultValue);
+			channelRpnHistory.put(rpn, rpnHistoryEntry);
+			rpnHistory.put(channel, channelRpnHistory);
+			lsb++;
+		}
+	}
+	
+	/**
+	 * Returns the default value for the given RPN.
+	 * 
+	 * @param msb  RPN MSB
+	 * @param lsb  RPN LSB
+	 * @return default MSB (index 0) and default LSB (index 1)
+	 */
+	private static final byte[] getRpnDefault(int msb, int lsb) {
+		byte[] result = {0, 0};
+		if (0x00 == msb) {
+			if (0x00 == lsb) {
+				// pitch bend sensitivity    (see gm2, page 12)
+				result[0] = 0x02;
+				result[1] = 0x00;
+			}
+			else if (0x01 == lsb) {
+				// master fine tune    (see gm2, page 12)
+				result[0] = 0x40;
+				result[1] = 0x00;
+			}
+			else if (0x02 == lsb) {
+				// master coarse tune    (see gm2, page 13)
+				result[0] = 0x40;
+				result[1] = 0x00;
+			}
+			else if (0x03 == lsb) {
+				// tuning program change
+				// TODO: default
+			}
+			else if (0x04 == lsb) {
+				// tuning bank select
+				// TODO: default
+			}
+			else if (0x05 == lsb) {
+				// modulation depth range    (see gm2, page 13)
+				result[0] = 0x00;
+				result[1] = 0x40;
+			}
+			else if (0x06 == lsb) {
+				// MPE config message (MCM)    (see RP-053)
+				result[0] = 0x00;
+				result[1] = 0x00;
+			}
+		}
+		else if (0x3D == msb) {
+			// 3D defaults can be found in RP-049
+			
+			if (0x00 == lsb) {
+				// azimuth angle
+				result[0] = 0x40;
+				result[1] = 0x00;
+			}
+			else if (0x01 == lsb) {
+				// elevation angle
+				result[0] = 0x40;
+				result[1] = 0x00;
+			}
+			else if (0x02 == lsb) {
+				// gain
+				result[0] = 0x7F;
+				result[1] = 0x7F;
+			}
+			else if (0x03 == lsb) {
+				// distance ratio
+				result[0] = 0x00;
+				result[1] = 0x10;
+			}
+			else if (0x04 == lsb) {
+				// maximum distance
+				result[0] = 0x7F;
+				result[1] = 0x7F;
+			}
+			else if (0x05 == lsb) {
+				// gain at maximum distance
+				result[0] = 0x51;
+				result[1] = 0x0F;
+			}
+			else if (0x06 == lsb) {
+				// reference distance ratio
+				result[0] = 0x00;
+				result[1] = 0x10;
+			}
+			else if (0x07 == lsb) {
+				// pan spread angle
+				result[0] = 0x4A;
+				result[1] = 0x55;
+			}
+			else if (0x08 == lsb) {
+				// roll angle
+				result[0] = 0x40;
+				result[1] = 0x00;
+			}
+		}
+		
+		return result;
 	}
 }

@@ -53,6 +53,14 @@ public class Slice {
 	private ArrayList<TreeMap<Long, TreeMap<Byte, TreeMap<String, TreeMap<Byte, String>>>>> timelines = null;
 	
 	/**
+	 * Timeline for rests that are only there for syllables.
+	 * 
+	 * - tick
+	 * - value: syllable
+	 */
+	private TreeMap<Long, String> syllableRestTimeline = null;
+	
+	/**
 	 * Returns the slice belonging to the given tick.
 	 * 
 	 * @param slices  all slices
@@ -62,7 +70,7 @@ public class Slice {
 	public static Slice getSliceByTick(ArrayList<Slice> slices, long tick) {
 		
 		for (Slice slice : slices) {
-			if (tick >= slice.getBeginTick())
+			if (tick >= slice.getBeginTick() && tick < slice.getEndTick())
 				return slice;
 		}
 		
@@ -86,6 +94,7 @@ public class Slice {
 			TreeMap<Long, TreeMap<Byte,TreeMap<String, TreeMap<Byte, String>>>> timeline = new TreeMap<>();
 			timelines.add(timeline);
 		}
+		syllableRestTimeline = new TreeMap<>();
 	}
 	
 	/**
@@ -113,6 +122,15 @@ public class Slice {
 	 */
 	public long getEndTick() {
 		return endTick;
+	}
+	
+	/**
+	 * Determins if the slice contains rests with syllables.
+	 * 
+	 * @return **true**, if the slice contains rests with syllables, otherwise: **false**.
+	 */
+	public boolean hasSyllableRests() {
+		return ! syllableRestTimeline.isEmpty();
 	}
 	
 	/**
@@ -156,6 +174,17 @@ public class Slice {
 	}
 	
 	/**
+	 * Adds a lyrics syllable to a special timeline as an option to a rest command.
+	 * This is needed if there is no note/chord being played at the tick when the syllable appears.
+	 * 
+	 * @param tick      MIDI tick
+	 * @param syllable  Lyrics syllable for Karaoke
+	 */
+	public void addSyllableRest(long tick, String syllable) {
+		syllableRestTimeline.put(tick, syllable);
+	}
+	
+	/**
 	 * Returns the timeline for the given channel.
 	 * 
 	 * @param channel  MIDI channel
@@ -163,6 +192,14 @@ public class Slice {
 	 */
 	public TreeMap<Long, TreeMap<Byte, TreeMap<String, TreeMap<Byte, String>>>> getTimeline(int channel) {
 		return timelines.get(channel);
+	}
+	
+	/**
+	 * Returns the special timeline only for rests with syllables.
+	 * @return
+	 */
+	public TreeMap<Long, String> getSyllableRestTimeline() {
+		return syllableRestTimeline;
 	}
 	
 	/**
@@ -208,10 +245,6 @@ public class Slice {
 			// add structure
 			this.noteHistory.put(channel, slideNoteHistory);
 		}
-		
-		// TODO: delete
-		System.out.println("notes added.");
-		System.out.println(this.noteOnOff);
 		
 		return this.noteHistory;
 	}
@@ -276,7 +309,7 @@ public class Slice {
 					
 					// TODO: test
 					
-					// the rest of the notes are out of the slice's scope
+					// the rest of the Note-ONs are out of the slice's scope
 					slideChannelOnOff.put(note, slideNoteOnOff);
 					continue NOTE;
 				}

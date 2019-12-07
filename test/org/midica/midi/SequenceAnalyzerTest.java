@@ -233,11 +233,17 @@ public class SequenceAnalyzerTest {
 		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0x99, 0x4B, 0x7F) ); // Note-On
 		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0x89, 0x4B, 0x00) ); // Note-Off
 		
+		// TODO: add a SysEx message: GM2 System On
+		// This will change the default bank numbers to 0x79 (for normal channels) and 0x78 (for channel 9).
+		// Implement this functionality in the Sequence Analyzer.
+		// Add some more notes and/or instrument changes.
+		// Write some tests for this.
+		
 		// parse and get tree
 		parseMidiFile(filename, events);
 		MidicaTreeModel model = (MidicaTreeModel) SequenceAnalyzer.getSequenceInfo().get("banks_per_channel");
 		model.postprocess();
-		MidicaTreeNode  rootNode = (MidicaTreeNode) model.getRoot();
+		MidicaTreeNode rootNode = (MidicaTreeNode) model.getRoot();
 		assertEquals( "Per Channel", rootNode.getName() );
 		
 		// channel 0
@@ -311,6 +317,42 @@ public class SequenceAnalyzerTest {
 		// channel 9, bank 15360, program 24, note clave
 		MidicaTreeNode nodeCh9bank15360prog24cla = (MidicaTreeNode) nodeCh9bank15360prog24.getChildAt( 0 );
 		assertEquals( "clave", nodeCh9bank15360prog24cla.getName() );
+		
+		// test instrument history
+		byte channel = 0;
+		Byte[] instrConfig = SequenceAnalyzer.getInstrument(channel, 12); // bank: default, program: default
+		assertEquals(   0, (byte) instrConfig[0] ); // default bank MSB
+		assertEquals(   0, (byte) instrConfig[1] ); // default bank LSB
+		assertEquals(   0, (byte) instrConfig[2] ); // default program number
+		instrConfig = SequenceAnalyzer.getInstrument(channel, 15);        // bank: default, program: 40=VIOLIN
+		assertEquals(   0, (byte) instrConfig[0] ); // bank MSB
+		assertEquals(   0, (byte) instrConfig[1] ); // bank LSB
+		assertEquals(  40, (byte) instrConfig[2] ); // program number: 40=VIOLIN
+		instrConfig = SequenceAnalyzer.getInstrument(channel, 21);        // only bank change, no program change yet
+		assertEquals(   0, (byte) instrConfig[0] ); // bank MSB
+		assertEquals(   0, (byte) instrConfig[1] ); // bank LSB
+		assertEquals(  40, (byte) instrConfig[2] ); // program number: 40=VIOLIN
+		instrConfig = SequenceAnalyzer.getInstrument(channel, 22);        // bank: 10/20=1300, program: 8=CELESTA
+		assertEquals(  10, (byte) instrConfig[0] ); // bank MSB
+		assertEquals(  20, (byte) instrConfig[1] ); // bank LSB
+		assertEquals(   8, (byte) instrConfig[2] ); // program number: 8=CELESTA
+		channel = 9;
+		instrConfig = SequenceAnalyzer.getInstrument(channel, 16);        // bank: default, program: default
+		assertEquals(   0, (byte) instrConfig[0] ); // default bank MSB
+		assertEquals(   0, (byte) instrConfig[1] ); // default bank LSB
+		assertEquals(   0, (byte) instrConfig[2] ); // default program number
+		instrConfig = SequenceAnalyzer.getInstrument(channel, 17);        // bank: default, program: default
+		assertEquals(   0, (byte) instrConfig[0] ); // default bank MSB
+		assertEquals(   0, (byte) instrConfig[1] ); // default bank LSB
+		assertEquals(   8, (byte) instrConfig[2] ); // program number: 8=ROOM
+		instrConfig = SequenceAnalyzer.getInstrument(channel, 26);        // only bank change, no program change yet
+		assertEquals(   0, (byte) instrConfig[0] ); // default bank MSB
+		assertEquals(   0, (byte) instrConfig[1] ); // default bank LSB
+		assertEquals(   8, (byte) instrConfig[2] ); // program number: 8=ROOM
+		instrConfig = SequenceAnalyzer.getInstrument(channel, 27);        // bank: 120/0=1300, program: 24=ELECTRONIC
+		assertEquals( 120, (byte) instrConfig[0] ); // default bank MSB
+		assertEquals(   0, (byte) instrConfig[1] ); // default bank LSB
+		assertEquals(  24, (byte) instrConfig[2] ); // program number: 24=ELECTRONIC
 	}
 	
 	/**
@@ -330,7 +372,7 @@ public class SequenceAnalyzerTest {
 		ArrayList<List<Number>> events   = new ArrayList<>();
 		int  track = 0;
 		long tick  = 10;
-
+		
 		// pitch bend
 		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x00, 0x00) ); // minimum
 		events.add( Arrays.asList(SHORT_MSG, track, tick++, 0xE0, 0x00, 0x40) ); // neutral
