@@ -80,9 +80,9 @@ public class MidicaPLExporter extends Exporter {
 	private static final String NEW_LINE = System.getProperty("line.separator");
 	
 	// decompile configuration
-	private static final boolean INLINE                   = true;
-	private static final boolean BLOCK                    = false;
-	private static final boolean ORPHANED_SYLLABLES       = BLOCK;
+	public  static final byte    INLINE                   = 1;
+	public  static final byte    BLOCK                    = 2;
+	private static final boolean KARAOKE_ONE_CHANNEL      = false;
 	private static final long    DURATION_TICK_TOLERANCE  = 2;
 	private static final float   DURATION_RATIO_TOLERANCE = 0.014f;
 	private static final long    NEXT_NOTE_ON_TOLERANCE   = 3;
@@ -354,11 +354,14 @@ public class MidicaPLExporter extends Exporter {
 		
 		// prioritize by number of counts
 		ArrayList<Byte> prioritizedChannels = new ArrayList<>();
+		PRIORITY:
 		for (float priority : priorities.descendingSet()) {
 			for (byte channel : channelPriorities.keySet()) {
 				float channelPriority = channelPriorities.get(channel);
 				if (priority == channelPriority) {
 					prioritizedChannels.add(channel);
+					if (KARAOKE_ONE_CHANNEL)
+						break PRIORITY;
 				}
 			}
 		}
@@ -652,9 +655,8 @@ public class MidicaPLExporter extends Exporter {
 			
 			// If we reach this point, there is no matching note/chord.
 			// Add the syllable to the slice using a rest.
-			if (BLOCK == ORPHANED_SYLLABLES) {
-				slice.addSyllableRest(tick, syllable);
-			}
+			byte channel = lyricsChannels.get(0);
+			slice.addSyllableRest(tick, syllable, channel, BLOCK, sourceResolution);
 		}
 	}
 	
@@ -1172,7 +1174,6 @@ public class MidicaPLExporter extends Exporter {
 		if (changeTicks.contains(tick)) {
 			String instrLine = createInstrLine(tick, channel);
 			if ( ! "".equals(instrLine) ) {
-				lines.append(createTickComment(tick, false));
 				lines.append(instrLine);
 			}
 		}
@@ -1260,13 +1261,19 @@ public class MidicaPLExporter extends Exporter {
 			commentStr = commentHistory.get(channel).get(instrNameTick);
 		}
 		
+		// tick comment (only for instrument changes
+		String lineEnd = NEW_LINE;
+		if (tick > 0) {
+			lineEnd = createTickComment(tick, true);
+		}
+		
 		// put everything together
 		return (
 			  cmd
 			+ "\t"   + channelStr
 			+ "\t"   + programStr
 			+ "\t\t" + commentStr
-			+ NEW_LINE
+			+ lineEnd
 		);
 	}
 	
@@ -1692,6 +1699,7 @@ public class MidicaPLExporter extends Exporter {
 	
 	/**
 	 * Prints a single channel command for a note or chord.
+	 * (Or a rest with a syllable, if orphaned syllables are configured as INLINE.)
 	 * 
 	 * @param channel    MIDI channel
 	 * @param noteName   note or chord name
@@ -1716,30 +1724,34 @@ public class MidicaPLExporter extends Exporter {
 				incrementStats(STAT_NOTE_MULTIPLE, channel);
 			}
 			
-			// duration
-			float duration           = Float.parseFloat( noteOrCrd.get(NP_DURATION) ) / 100;
-			float oldDuration        = instr.getDurationRatio();
-			int   durationPercent    = (int) ((duration    * 1000 + 0.5f) / 10);
-			int   oldDurationPercent = (int) ((oldDuration * 1000 + 0.5f) / 10);
-			if (durationPercent != oldDurationPercent) {
-				// don't allow 0%
-				String durationPercentStr = durationPercent + "";
-				if (durationPercent < 1) {
-					durationPercentStr = "0.5";
-					duration = 0.005f;
+			// duration and velocity
+			if ( ! noteName.equals(MidicaPLParser.REST) ) {
+				
+				// duration
+				float duration           = Float.parseFloat( noteOrCrd.get(NP_DURATION) ) / 100;
+				float oldDuration        = instr.getDurationRatio();
+				int   durationPercent    = (int) ((duration    * 1000 + 0.5f) / 10);
+				int   oldDurationPercent = (int) ((oldDuration * 1000 + 0.5f) / 10);
+				if (durationPercent != oldDurationPercent) {
+					// don't allow 0%
+					String durationPercentStr = durationPercent + "";
+					if (durationPercent < 1) {
+						durationPercentStr = "0.5";
+						duration = 0.005f;
+					}
+					options.add(MidicaPLParser.D + MidicaPLParser.OPT_ASSIGNER + durationPercentStr + MidicaPLParser.DURATION_PERCENT);
+					instr.setDurationRatio(duration);
+					incrementStats(STAT_NOTE_DURATIONS, channel);
 				}
-				options.add(MidicaPLParser.D + MidicaPLParser.OPT_ASSIGNER + durationPercentStr + MidicaPLParser.DURATION_PERCENT);
-				instr.setDurationRatio(duration);
-				incrementStats(STAT_NOTE_DURATIONS, channel);
-			}
-			
-			// velocity
-			int velocity    = Integer.parseInt( noteOrCrd.get(NP_VELOCITY) );
-			int oldVelocity = instr.getVelocity();
-			if (velocity != oldVelocity) {
-				options.add(MidicaPLParser.V + MidicaPLParser.OPT_ASSIGNER + velocity);
-				instr.setVelocity(velocity);
-				incrementStats(STAT_NOTE_VELOCITIES, channel);
+				
+				// velocity
+				int velocity    = Integer.parseInt( noteOrCrd.get(NP_VELOCITY) );
+				int oldVelocity = instr.getVelocity();
+				if (velocity != oldVelocity) {
+					options.add(MidicaPLParser.V + MidicaPLParser.OPT_ASSIGNER + velocity);
+					instr.setVelocity(velocity);
+					incrementStats(STAT_NOTE_VELOCITIES, channel);
+				}
 			}
 			
 			// TODO: implement and test lyrics

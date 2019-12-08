@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
+import org.midica.file.read.MidicaPLParser;
+
 /**
  * This class is used by the MidicaPlExporter to store a sequence slice.
  * 
@@ -174,14 +176,50 @@ public class Slice {
 	}
 	
 	/**
-	 * Adds a lyrics syllable to a special timeline as an option to a rest command.
+	 * Adds a lyrics syllable as an option to a rest command.
 	 * This is needed if there is no note/chord being played at the tick when the syllable appears.
 	 * 
-	 * @param tick      MIDI tick
-	 * @param syllable  Lyrics syllable for Karaoke
+	 * According to the **orphaned** parameter one of the following strategies is used to add the rest:
+	 * 
+	 * - The rest is added to a special timeline and later added inside a nestable block
+	 *   that contains only rests.
+	 * - The rest is added to the timeline of notes/chords and is later added inline.
+	 * 
+	 * @param tick        MIDI tick
+	 * @param syllable    Lyrics syllable for Karaoke
+	 * @param channel     MIDI channel
+	 * @param orphaned    either {@link MidicaPLExporter.INLINE} or {@link MidicaPLExporter.BLOCK}
+	 * @param resolution  source resolution of the sequence
 	 */
-	public void addSyllableRest(long tick, String syllable) {
-		syllableRestTimeline.put(tick, syllable);
+	public void addSyllableRest(long tick, String syllable, byte channel, byte orphaned, long resolution) {
+		
+		// add the rest inside a nestable block
+		if (MidicaPLExporter.BLOCK == orphaned) {
+			syllableRestTimeline.put(tick, syllable);
+		}
+		else {
+			// Add the rest inline.
+			// We know that there is no Note-ON in this tick. But there may
+			// still be an instrument change.
+			TreeMap<Byte, TreeMap<String, TreeMap<Byte, String>>> events = timelines.get(channel).get(tick);
+			if (null == events) {
+				events = new TreeMap<>();
+				timelines.get(channel).put(tick, events);
+			}
+			
+			// add the rest
+			TreeMap<String, TreeMap<Byte, String>> notes = new TreeMap<>();
+			events.put(MidicaPLExporter.ET_NOTES, notes);
+			TreeMap<Byte, String> rest = new TreeMap<>();
+			notes.put(MidicaPLParser.REST, rest);
+			
+			// add properties to the rest
+			rest.put(MidicaPLExporter.NP_LYRICS, syllable);
+			Long nextNoteOnTick = noteHistory.get(channel).ceilingKey(tick + 1);
+			if (null == nextNoteOnTick)
+				nextNoteOnTick = tick + resolution;
+			rest.put(MidicaPLExporter.NP_OFF_TICK, nextNoteOnTick + "");
+		}
 	}
 	
 	/**
