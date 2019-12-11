@@ -1,0 +1,4 @@
+INCLUDE inc/instruments.midica
+
+SOFT_KARAOKE
+END

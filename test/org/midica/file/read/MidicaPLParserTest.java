@@ -187,9 +187,29 @@ class MidicaPLParserTest extends MidicaPLParser {
 			+ "{#artist=\\{Someone\\} \\[Else\\]}"
 			+ "{#software=Midica " + Midica.VERSION + "}"
 			+ "{#}",
-			getMetaMsgText(2, 0)  // RP-026 tags
+			getMetaMsgText(0, 1)  // RP-026 tags
 		);
+		// soft karaoke fields (meta track)
+		assertEquals( "@KMIDI KARAOKE FILE", getMetaMsgText(0, 2) );
+		assertEquals( "@V0100",              getMetaMsgText(0, 3) );
+		assertEquals( "@Iinfo 1",            getMetaMsgText(0, 4) );
+		assertEquals( "@Iinfo 2",            getMetaMsgText(0, 5) );
+		assertEquals( "@Iinfo 3",            getMetaMsgText(0, 6) );
+		// soft karaoke fields (lyrics track)
+		assertEquals( "@LENGL",           getMetaMsgText(1, 0) );
+		assertEquals( "@Tsk-title",       getMetaMsgText(1, 1) );
+		assertEquals( "@Tthe kar author", getMetaMsgText(1, 2) );
+		assertEquals( "@Tsk-copyright",   getMetaMsgText(1, 3) );
+		// soft karaoke syllables
+		assertEquals( "\\test1", getMetaMsgText(1, 4) );
+		assertEquals( "\\test2", getMetaMsgText(1, 5) );
+		assertEquals( "/test3",  getMetaMsgText(1, 6) );
+		assertEquals( " test4",  getMetaMsgText(1, 7) );
+		assertEquals( " test5",  getMetaMsgText(1, 8) );
+		// soft karaoke lyrics
+		assertEquals( "test1\n\ntest2\ntest3 test4 test5", getLyrics() );
 		
+		// test normal lyrics
 		parse(getWorkingFile("lyrics"));
 		assertEquals( "happy birthday to you,\nhappy birthday to you,\n\nhappy", getLyrics() );
 		
@@ -482,7 +502,11 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("function-nested")) );
 		assertEquals( 5, e.getLineNumber() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNCTION_NOT_ALLOWED_HERE)) );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK) + "FUNCTION") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("function-in-meta")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK) + "FUNCTION") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("function-redefined")) );
 		assertEquals( 8, e.getLineNumber() );
@@ -622,11 +646,43 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("meta-in-function")) );
 		assertEquals( 5, e.getLineNumber() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_META_NOT_ALLOWED_HERE)) );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK) + "META") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("meta-with-param")) );
 		assertEquals( 3, e.getLineNumber() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_META_NUM_OF_ARGS)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("sk-with-param")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOFT_KARAOKE_NUM_OF_ARGS)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("sk-in-function")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOFT_KARAOKE_NOT_ALLOWED_HERE)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("sk-in-root-lvl")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOFT_KARAOKE_NOT_ALLOWED_HERE)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("sk-duplicate")) );
+		assertEquals( 9, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOFT_KARAOKE_ALREADY_SET)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("sk-unknown-sk-cmd")) );
+		assertEquals( 8, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOFT_KARAOKE_UNKNOWN_CMD) + "composer") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("sk-unknown-cmd")) );
+		assertEquals( 8, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_CMD) + "testcmd") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("sk-field-with-crlf")) );
+		assertEquals( 15, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SK_FIELD_CRLF_NOT_ALLOWED)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("sk-lyrics-with-crlf")) );
+		assertEquals( 15, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SK_SYLLABLE_CRLF_NOT_ALLOWED)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-inside-meta")) );
 		assertEquals( 4, e.getLineNumber() );

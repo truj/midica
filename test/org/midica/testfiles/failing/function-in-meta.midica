@@ -1,0 +1,6 @@
+INCLUDE inc/instruments.midica
+
+META
+	FUNCTION
+	END
+END

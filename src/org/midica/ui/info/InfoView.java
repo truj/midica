@@ -1244,15 +1244,65 @@ public class InfoView extends JDialog {
 	 * @return the created area.
 	 */
 	private Container createKaraokeArea() {
+		
 		// content
 		JPanel area = new JPanel();
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
-		area.setLayout( layout );
+		area.setLayout(layout);
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill       = GridBagConstraints.HORIZONTAL;
+		constraints.insets     = Laf.INSETS_NWE;
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 1;
+		constraints.weighty    = 0;
+		
+		// get karaoke info
+		HashMap<String, Object> sequenceInfo = SequenceAnalyzer.getSequenceInfo();
+		HashMap<String, Object> karaokeInfo  = (HashMap<String, Object>) sequenceInfo.get( "karaoke" );
+		if (null == karaokeInfo)
+			karaokeInfo = new HashMap<String, Object>();
+		
+		// general
+		area.add(createKaraokeGeneralArea(karaokeInfo), constraints);
+		
+		// soft karaoke
+		constraints.gridy++;
+		constraints.insets = Laf.INSETS_WE;
+		area.add(createKaraokeSkArea(karaokeInfo), constraints);
+		
+		// lyrics
+		constraints.gridy++;
+		constraints.weighty = 1;
+		constraints.fill    = GridBagConstraints.BOTH;
+		constraints.insets  = Laf.INSETS_SWE;
+		area.add(createKaraokeLyricsArea(karaokeInfo), constraints);
+		
+		return area;
+	}
+	
+	/**
+	 * Creates the area for general karaoke information inside of the karaoke and lyrics area.
+	 * 
+	 * @param karaokeInfo  karaoke information, extracted from the MIDI sequence
+	 * @return the created area.
+	 */
+	private Container createKaraokeGeneralArea(HashMap<String, Object> karaokeInfo) {
+		
+		// content
+		JPanel area = new JPanel();
+		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.KARAOKE_GENERAL)) );
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout(layout);
 		GridBagConstraints constrLeft = new GridBagConstraints();
 		constrLeft.fill       = GridBagConstraints.NONE;
-		constrLeft.insets     = Laf.INSETS_NW;
+		constrLeft.insets     = Laf.INSETS_W;
 		constrLeft.gridx      = 0;
 		constrLeft.gridy      = 0;
 		constrLeft.gridheight = 1;
@@ -1262,142 +1312,125 @@ public class InfoView extends JDialog {
 		constrLeft.anchor     = GridBagConstraints.NORTHEAST;
 		GridBagConstraints constrRight = (GridBagConstraints) constrLeft.clone();
 		constrRight.gridx++;
-		constrRight.insets  = Laf.INSETS_NE;
+		constrRight.insets  = Laf.INSETS_E;
 		constrRight.weightx = 1;
 		constrRight.fill    = GridBagConstraints.HORIZONTAL;
 		constrRight.anchor  = GridBagConstraints.NORTHWEST;
 		
-		// get karaoke info
-		HashMap<String, Object> sequenceInfo = SequenceAnalyzer.getSequenceInfo();
-		HashMap<String, Object> karaokeInfo  = (HashMap<String, Object>) sequenceInfo.get( "karaoke" );
-		if ( null == karaokeInfo )
-			karaokeInfo = new HashMap<String, Object>();
-		
-		// karaoke type
-		JLabel lblKarType = new JLabel( Dict.get(Dict.KARAOKE_TYPE) + ": " );
-		Laf.makeBold(lblKarType);
-		area.add(lblKarType, constrLeft);
-		
-		// karaoke type content
-		String karType = "-";
-		if ( null != karaokeInfo.get("type") )
-			karType = (String) karaokeInfo.get("type");
-		FlowLabel lblKarTypeContent = new FlowLabel( karType, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
-		area.add( lblKarTypeContent, constrRight );
-		
-		// version
-		constrLeft.insets = Laf.INSETS_W;
-		constrLeft.gridy++;
-		JLabel lblVersion  = new JLabel( Dict.get(Dict.VERSION) + ": " );
-		Laf.makeBold(lblVersion);
-		area.add(lblVersion, constrLeft);
-		
-		// version content
-		constrRight.insets = Laf.INSETS_E;
-		constrRight.gridy++;
-		String version = "-";
-		if ( null != karaokeInfo.get("version") )
-			version = (String) karaokeInfo.get("version");
-		FlowLabel lblVersionContent = new FlowLabel( version, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
-		area.add( lblVersionContent, constrRight );
-		
 		// title
-		constrLeft.gridy++;
-		JLabel lblTitle = new JLabel( Dict.get(Dict.SONG_TITLE) + ": " );
+		JLabel lblTitle = new JLabel(Dict.get(Dict.SONG_TITLE) + ": ");
 		Laf.makeBold(lblTitle);
 		area.add(lblTitle, constrLeft);
 		
 		// title content
-		constrRight.gridy++;
-		String title = "-";
-		if ( null != karaokeInfo.get("title") )
-			title = (String) karaokeInfo.get("title");
-		FlowLabel lblTitleContent = new FlowLabel( title, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
-		area.add( lblTitleContent, constrRight );
-		
-		// author
-		constrLeft.gridy++;
-		JLabel lblAuthor = new JLabel( Dict.get(Dict.AUTHOR) + ": " );
-		Laf.makeBold(lblAuthor);
-		area.add(lblAuthor, constrLeft);
-		
-		// author content
-		constrRight.gridy++;
-		String author = "-";
-		if ( null != karaokeInfo.get("author") )
-			author = (String) karaokeInfo.get("author");
-		FlowLabel lblAuthorContent = new FlowLabel( author, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
-		area.add( lblAuthorContent, constrRight );
+		String title = (String) karaokeInfo.get("title");
+		if (null == title)
+			title = "-";
+		FlowLabel lblTitleContent = new FlowLabel(title, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		area.add(lblTitleContent, constrRight);
 		
 		// composer
 		constrLeft.gridy++;
-		JLabel lblComposer = new JLabel( Dict.get(Dict.COMPOSER) + ": " );
+		JLabel lblComposer = new JLabel(Dict.get(Dict.COMPOSER) + ": ");
 		Laf.makeBold(lblComposer);
 		area.add(lblComposer, constrLeft);
 		
 		// composer content
 		constrRight.gridy++;
 		String composer = "-";
-		if ( null != karaokeInfo.get("composer") )
+		if (null != karaokeInfo.get("composer"))
 			composer = (String) karaokeInfo.get("composer");
-		FlowLabel lblComposerContent = new FlowLabel( composer, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
-		area.add( lblComposerContent, constrRight );
+		FlowLabel lblComposerContent = new FlowLabel(composer, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		area.add(lblComposerContent, constrRight);
 		
 		// lyricist
 		constrLeft.gridy++;
-		JLabel lblLyricist = new JLabel( Dict.get(Dict.LYRICIST) + ": " );
+		JLabel lblLyricist = new JLabel(Dict.get(Dict.LYRICIST) + ": ");
 		Laf.makeBold(lblLyricist);
 		area.add(lblLyricist, constrLeft);
 		
 		// lyricist content
 		constrRight.gridy++;
 		String lyricist = "-";
-		if ( null != karaokeInfo.get("lyricist") )
+		if (null != karaokeInfo.get("lyricist"))
 			lyricist = (String) karaokeInfo.get("lyricist");
-		FlowLabel lblLyricistContent = new FlowLabel( lyricist, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
-		area.add( lblLyricistContent, constrRight );
+		FlowLabel lblLyricistContent = new FlowLabel(lyricist, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		area.add(lblLyricistContent, constrRight);
 		
 		// artist
 		constrLeft.gridy++;
-		JLabel lblArtist = new JLabel( Dict.get(Dict.ARTIST) + ": " );
+		JLabel lblArtist = new JLabel(Dict.get(Dict.ARTIST) + ": ");
 		Laf.makeBold(lblArtist);
 		area.add(lblArtist, constrLeft);
 		
 		// artist content
 		constrRight.gridy++;
 		String artist = "-";
-		if ( null != karaokeInfo.get("artist") )
+		if (null != karaokeInfo.get("artist"))
 			artist = (String) karaokeInfo.get("artist");
-		FlowLabel lblArtistContent = new FlowLabel( artist, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
-		area.add( lblArtistContent, constrRight );
+		FlowLabel lblArtistContent = new FlowLabel(artist, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		area.add(lblArtistContent, constrRight);
 		
-		// copyright
+		return area;
+	}
+	
+	/**
+	 * Creates the area for SOFT KARAOKE inside of the karaoke and lyrics area.
+	 * 
+	 * @param karaokeInfo  karaoke information, extracted from the MIDI sequence
+	 * @return the created area.
+	 */
+	private Container createKaraokeSkArea(HashMap<String, Object> karaokeInfo) {
+		
+		// content
+		JPanel area = new JPanel();
+		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.KARAOKE_SOFT_KARAOKE)) );
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout(layout);
+		GridBagConstraints constrLeft = new GridBagConstraints();
+		constrLeft.fill       = GridBagConstraints.NONE;
+		constrLeft.insets     = Laf.INSETS_W;
+		constrLeft.gridx      = 0;
+		constrLeft.gridy      = 0;
+		constrLeft.gridheight = 1;
+		constrLeft.gridwidth  = 1;
+		constrLeft.weightx    = 0;
+		constrLeft.weighty    = 0;
+		constrLeft.anchor     = GridBagConstraints.NORTHEAST;
+		GridBagConstraints constrRight = (GridBagConstraints) constrLeft.clone();
+		constrRight.gridx++;
+		constrRight.insets  = Laf.INSETS_E;
+		constrRight.weightx = 1;
+		constrRight.fill    = GridBagConstraints.HORIZONTAL;
+		constrRight.anchor  = GridBagConstraints.NORTHWEST;
+		
+		// karaoke type
+		JLabel lblKarType = new JLabel(Dict.get(Dict.KARAOKE_TYPE) + ": ");
+		Laf.makeBold(lblKarType);
+		area.add(lblKarType, constrLeft);
+		
+		// karaoke type content
+		String karType = "-";
+		if (null != karaokeInfo.get("sk_type"))
+			karType = (String) karaokeInfo.get("sk_type");
+		FlowLabel lblKarTypeContent = new FlowLabel( karType, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
+		area.add(lblKarTypeContent, constrRight);
+		
+		// version
 		constrLeft.gridy++;
-		JLabel lblCopyright = new JLabel( Dict.get(Dict.KARAOKE_COPYRIGHT) + ": " );
-		Laf.makeBold(lblCopyright);
-		area.add(lblCopyright, constrLeft);
+		JLabel lblVersion  = new JLabel(Dict.get(Dict.VERSION) + ": ");
+		Laf.makeBold(lblVersion);
+		area.add(lblVersion, constrLeft);
 		
-		// copyright content
+		// version content
 		constrRight.gridy++;
-		String copyright = "-";
-		if ( null != karaokeInfo.get("copyright") )
-			copyright = (String) karaokeInfo.get("copyright");
-		FlowLabel lblCopyrightContent = new FlowLabel( copyright, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
-		area.add( lblCopyrightContent, constrRight );
-		
-		// language
-		constrLeft.gridy++;
-		JLabel lblLanguage = new JLabel( Dict.get(Dict.LANGUAGE) + ": " );
-		Laf.makeBold(lblLanguage);
-		area.add(lblLanguage, constrLeft);
-		
-		// language content
-		constrRight.gridy++;
-		String language = "-";
-		if ( null != karaokeInfo.get("language") )
-			language = (String) karaokeInfo.get("language");
-		FlowLabel lblLanguageContent = new FlowLabel( language, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
-		area.add( lblLanguageContent, constrRight );
+		String version = "-";
+		if (null != karaokeInfo.get("sk_version"))
+			version = (String) karaokeInfo.get("sk_version");
+		FlowLabel lblVersionContent = new FlowLabel(version, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		area.add(lblVersionContent, constrRight);
 		
 		// info
 		constrLeft.gridy++;
@@ -1408,30 +1441,105 @@ public class InfoView extends JDialog {
 		// info content
 		constrRight.gridy++;
 		String info = "-";
-		if ( null != karaokeInfo.get("info") )
+		if (null != karaokeInfo.get("info"))
 			info = (String) karaokeInfo.get("info");
-		FlowLabel lblInfoContent = new FlowLabel( info, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
-		lblInfoContent.setHeightLimit( MAX_HEIGHT_KARAOKE_INFO );
-		area.add( lblInfoContent, constrRight );
+		FlowLabel lblInfoContent = new FlowLabel(info, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		lblInfoContent.setHeightLimit(MAX_HEIGHT_KARAOKE_INFO);
+		area.add(lblInfoContent, constrRight);
 		
-		// lyrics translation
-		constrLeft.insets = Laf.INSETS_SW;
+		// language
 		constrLeft.gridy++;
-		JLabel lblLyrics = new JLabel( Dict.get(Dict.LYRICS) + ": " );
-		Laf.makeBold(lblLyrics);
-		area.add(lblLyrics, constrLeft);
+		JLabel lblLanguage = new JLabel(Dict.get(Dict.LANGUAGE) + ": ");
+		Laf.makeBold(lblLanguage);
+		area.add(lblLanguage, constrLeft);
 		
-		// lyrics content
-		constrRight.insets = Laf.INSETS_SE;
+		// language content
 		constrRight.gridy++;
-		constrRight.weighty = 1;
-		constrRight.fill    = GridBagConstraints.BOTH;
-		String lyrics       = "";
-		if ( null != karaokeInfo.get("lyrics_full") )
-			lyrics = (String) karaokeInfo.get( "lyrics_full"  );
-		FlowLabel lblLyricsContent = new FlowLabel( lyrics, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
-		lblLyricsContent.setHeightLimit( MAX_HEIGHT_LYRICS );
-		area.add( lblLyricsContent, constrRight );
+		String language = "-";
+		if ( null != karaokeInfo.get("sk_language") )
+			language = (String) karaokeInfo.get("sk_language");
+		FlowLabel lblLanguageContent = new FlowLabel(language, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		area.add(lblLanguageContent, constrRight);
+		
+		// title
+		constrLeft.gridy++;
+		JLabel lblTitle = new JLabel(Dict.get(Dict.SONG_TITLE) + ": ");
+		Laf.makeBold(lblTitle);
+		area.add(lblTitle, constrLeft);
+		
+		// title content
+		constrRight.gridy++;
+		String title = (String) karaokeInfo.get("sk_title");
+		if (null == title || "".equals(title)) {
+			title = "-";
+		}
+		FlowLabel lblTitleContent = new FlowLabel(title, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		area.add(lblTitleContent, constrRight);
+		
+		// author
+		constrLeft.gridy++;
+		JLabel lblAuthor = new JLabel(Dict.get(Dict.AUTHOR) + ": ");
+		Laf.makeBold(lblAuthor);
+		area.add(lblAuthor, constrLeft);
+		
+		// author content
+		constrRight.gridy++;
+		String author = "";
+		if (null != karaokeInfo.get("sk_author"))
+			author = (String) karaokeInfo.get("sk_author");
+		if ("".equals(author))
+			author = "-";
+		FlowLabel lblAuthorContent = new FlowLabel( author, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE );
+		area.add( lblAuthorContent, constrRight );
+		
+		// copyright
+		constrLeft.gridy++;
+		JLabel lblCopyright = new JLabel(Dict.get(Dict.KARAOKE_COPYRIGHT) + ": ");
+		Laf.makeBold(lblCopyright);
+		area.add(lblCopyright, constrLeft);
+		
+		// copyright content
+		constrRight.gridy++;
+		String copyright = "-";
+		if (null != karaokeInfo.get("sk_copyright"))
+			copyright = (String) karaokeInfo.get("sk_copyright");
+		FlowLabel lblCopyrightContent = new FlowLabel(copyright, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		area.add(lblCopyrightContent, constrRight);
+		
+		return area;
+	}
+	
+	/**
+	 * Creates the area for lyrics inside of the karaoke and lyrics area.
+	 * 
+	 * @param karaokeInfo  karaoke information, extracted from the MIDI sequence
+	 * @return the created area.
+	 */
+	private Container createKaraokeLyricsArea(HashMap<String, Object> karaokeInfo) {
+		// content
+		JPanel area = new JPanel();
+		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.LYRICS)) );
+		
+		// layout
+		GridBagLayout layout = new GridBagLayout();
+		area.setLayout(layout);
+		GridBagConstraints constraints = new GridBagConstraints();
+		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.insets     = Laf.INSETS_WE;
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 1;
+		constraints.weighty    = 1;
+		constraints.anchor     = GridBagConstraints.NORTHWEST;
+		
+		String lyrics = "";
+		if (null != karaokeInfo.get("lyrics_full"))
+			lyrics = (String) karaokeInfo.get("lyrics_full");
+		FlowLabel lblLyricsContent = new FlowLabel(lyrics, CPL_MIDI_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		lblLyricsContent.setHeightLimit(MAX_HEIGHT_LYRICS);
+		area.add(lblLyricsContent, constraints);
 		
 		return area;
 	}

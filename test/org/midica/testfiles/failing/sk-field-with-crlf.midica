@@ -12,7 +12,7 @@ META
 	SOFT_KARAOKE
 		version    0100
 		language   ENGL
-		title      sk-title
+		title      sk\rtitle
 		author     the kar author
 		copyright  sk-copyright
 		info       info 1

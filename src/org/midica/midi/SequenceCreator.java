@@ -38,7 +38,7 @@ public class SequenceCreator {
 	
 	public static final long NOW                =   0; // MIDI tick for channel initializations
 	public static final int  DEFAULT_RESOLUTION = 480; // ticks per quarter note
-	public static final int  NUM_META_TRACKS    =   3; // number of non-channel tracks
+	public static final int  NUM_META_TRACKS    =   2; // number of non-channel tracks
 	public static final int  NUM_TRACKS         = NUM_META_TRACKS + 16; // total number of tracks
 	
 	private static String   fileType   = null; // last parsing attempt ("midica" or "mid")
@@ -415,13 +415,37 @@ public class SequenceCreator {
 	 * 
 	 * @param lyrics    The message to be added.
 	 * @param tick      The tick where the lyrics event shall be added.
+	 * @param isRp26    **true** in case of a RP-026 message, otherwis: **false**
 	 * @throws InvalidMidiDataException if invalid MIDI data is used to create a MIDI message.
 	 */
-	public static void addMessageLyrics(String lyrics, long tick) throws InvalidMidiDataException {
+	public static void addMessageLyrics(String lyrics, long tick, boolean isRp26) throws InvalidMidiDataException {
 		MetaMessage metaMsg = new MetaMessage();
 		byte[] data = CharsetUtils.getBytesFromText(lyrics, charset);
-		metaMsg.setMessage( MidiListener.META_LYRICS, data, data.length );
-		tracks[ 2 ].add( new MidiEvent(metaMsg, tick) );
+		metaMsg.setMessage(MidiListener.META_LYRICS, data, data.length);
+		int track = isRp26 ? 0 : 1;
+		tracks[track].add( new MidiEvent(metaMsg, tick) );
+	}
+	
+	/**
+	 * Adds a text meta message.
+	 * 
+	 * The **skType** parameter can have the following values:
+	 * 
+	 * - **0**: not a Soft Karaoke text event
+	 * - **1**: used for Soft Karaoke events starting with \@K, \@V or \@I
+	 * - **2**: used for Soft Karaoke events starting with \@L, \@T or normal lyrics
+	 * 
+	 * @param text    The text to be added.
+	 * @param tick    MIDI tick.
+	 * @param skType  Soft Karaoke text type: **0**, **1** or **2** - as described above.
+	 * @throws InvalidMidiDataException
+	 */
+	public static void addMessageText(String text, long tick, int skType) throws InvalidMidiDataException {
+		MetaMessage metaMsg = new MetaMessage();
+		byte[] data = CharsetUtils.getBytesFromText(text, charset);
+		metaMsg.setMessage(MidiListener.META_TEXT, data, data.length);
+		int track = skType == 0 ? 0 : skType - 1;
+		tracks[track].add( new MidiEvent(metaMsg, tick) );
 	}
 	
 	/**

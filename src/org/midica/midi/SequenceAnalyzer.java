@@ -749,7 +749,7 @@ public class SequenceAnalyzer {
 		if (MidiListener.META_INSTRUMENT_NAME == type) {
 			
 			// get channel number
-			byte channel = (byte) ( trackNum - SequenceCreator.NUM_META_TRACKS );
+			byte channel = (byte) (trackNum - SequenceCreator.NUM_META_TRACKS);
 			
 			// invalid channel - not produced by Midica?
 			if (channel < 0 || channel >= MidiDevices.NUMBER_OF_CHANNELS) {
@@ -757,13 +757,13 @@ public class SequenceAnalyzer {
 			}
 			
 			// remember the channel comment
-			text = CharsetUtils.getTextFromBytes( data, chosenCharset, midiFileCharset );
-			commentHistory.get( channel ).put( tick, text );
+			text = CharsetUtils.getTextFromBytes(data, chosenCharset, midiFileCharset);
+			commentHistory.get(channel).put(tick, text);
 		}
 		
 		// TEXT
 		else if (MidiListener.META_TEXT == type) {
-			text = CharsetUtils.getTextFromBytes( data, chosenCharset, midiFileCharset );
+			text = CharsetUtils.getTextFromBytes(data, chosenCharset, midiFileCharset);
 			
 			// karaoke meta message according to .kar files?
 			if (text.startsWith("@") && text.length() > 1) {
@@ -773,44 +773,44 @@ public class SequenceAnalyzer {
 				// karaoke type definition?
 				if ("@K".equals(prefix)) {
 					karaokeMode = text;
-					karaokeInfo.put( "type", karaokeMode );
+					karaokeInfo.put("sk_type", karaokeMode);
 				}
 				
 				// version
 				else if ("@V".equals(prefix)) {
-					if (null == karaokeInfo.get("version")) {
-						karaokeInfo.put( "version", text );
+					if (null == karaokeInfo.get("sk_version")) {
+						karaokeInfo.put("sk_version", text);
 					}
 				}
 				
 				// language
 				else if ("@L".equals(prefix)) {
-					if (null == karaokeInfo.get("language")) {
-						karaokeInfo.put( "language", text );
+					if (null == karaokeInfo.get("sk_language")) {
+						karaokeInfo.put("sk_language", text);
 					}
 				}
 				
 				// title, author or copyright
 				else if ("@T".equals(prefix)) {
-					if (null == karaokeInfo.get("title")) {
-						karaokeInfo.put( "title", text );
+					if (null == karaokeInfo.get("sk_title")) {
+						karaokeInfo.put("sk_title", text);
 					}
-					else if (null == karaokeInfo.get("author")) {
-						karaokeInfo.put( "author", text );
+					else if (null == karaokeInfo.get("sk_author")) {
+						karaokeInfo.put("sk_author", text);
 					}
-					else if (null == karaokeInfo.get("copyright")) {
-						karaokeInfo.put( "copyright", text );
+					else if (null == karaokeInfo.get("sk_copyright")) {
+						karaokeInfo.put("sk_copyright", text);
 					}
 				}
 				
 				// further information
 				else if ("@I".equals(prefix)) {
-					ArrayList<String> infos = (ArrayList<String>) karaokeInfo.get( "infos" );
+					ArrayList<String> infos = (ArrayList<String>) karaokeInfo.get("sk_infos");
 					if (null == infos) {
 						infos = new ArrayList<>();
-						karaokeInfo.put( "infos", infos );
+						karaokeInfo.put("sk_infos", infos);
 					}
-					infos.add( text );
+					infos.add(text);
 				}
 				
 				// ignore all other messages beginning with "@"
@@ -821,7 +821,7 @@ public class SequenceAnalyzer {
 			// Unfortunately some MIDI files contain lyrics as type TEXT
 			// instead of LYRICS without providing an @K header. So we must
 			// consider all text as possibly lyrics.
-			processKaraoke( text, KARAOKE_TEXT, tick );
+			processKaraoke(text, KARAOKE_TEXT, tick);
 		}
 	}
 	
@@ -1233,10 +1233,9 @@ public class SequenceAnalyzer {
 			}
 			else {
 				// No channel activity at all, only lyrics.
-				// Use channel 0 for lyrics and avoid a later null pointer exception.
+				// Use channel 0 for lyrics.
 				lyricsChannel = 0;
-				activeChannels.add( lyricsChannel );
-				activityByChannel.put( lyricsChannel, new TreeMap<>() );
+				activityByChannel.put(lyricsChannel, new TreeMap<>());
 			}
 		}
 		
@@ -1336,7 +1335,7 @@ public class SequenceAnalyzer {
 	private static void postprocessKaraoke() {
 		
 		// join all info headers (@I)
-		ArrayList<String> infoHeaders = (ArrayList<String>) karaokeInfo.get( "infos" );
+		ArrayList<String> infoHeaders = (ArrayList<String>) karaokeInfo.get("sk_infos");
 		if (infoHeaders != null) {
 			karaokeInfo.put( "info", String.join("\n", infoHeaders) );
 		}

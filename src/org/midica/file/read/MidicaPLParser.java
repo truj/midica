@@ -61,10 +61,11 @@ public class MidicaPLParser extends SequenceParser {
 	public static final String OPT_ELSIF    = "elsif";
 	public static final String OPT_ELSE     = "else";
 	
-	private static final int MODE_DEFAULT     = 0;
-	private static final int MODE_INSTRUMENTS = 1;
-	private static final int MODE_FUNCTION    = 2;
-	private static final int MODE_META        = 3;
+	private static final int MODE_DEFAULT      = 0;
+	private static final int MODE_INSTRUMENTS  = 1;
+	private static final int MODE_FUNCTION     = 2;
+	private static final int MODE_META         = 3;
+	private static final int MODE_SOFT_KARAOKE = 4;
 	
 	public static final  int COND_TYPE_NONE   = 0;
 	public static final  int COND_TYPE_IF     = 1;
@@ -118,6 +119,13 @@ public class MidicaPLParser extends SequenceParser {
 	public static String META_COMPOSER      = null;
 	public static String META_LYRICIST      = null;
 	public static String META_ARTIST        = null;
+	public static String META_SOFT_KARAOKE  = null;
+	public static String META_SK_VERSION    = null;
+	public static String META_SK_LANG       = null;
+	public static String META_SK_TITLE      = null;
+	public static String META_SK_AUTHOR     = null;
+	public static String META_SK_COPYRIGHT  = null;
+	public static String META_SK_INFO       = null;
 	public static String LENGTH_32          = null;
 	public static String LENGTH_16          = null;
 	public static String LENGTH_8           = null;
@@ -199,6 +207,7 @@ public class MidicaPLParser extends SequenceParser {
 	private   static HashMap<String, HashSet<Integer>>  chords               = null;
 	private   static boolean                            instrumentsParsed    = false;
 	private   static HashMap<String, StringBuilder>     metaInfo             = null;
+	private   static HashMap<String, ArrayList<String>> softKaraokeInfo      = null;
 	private   static boolean                            frstInstrBlkOver     = false;
 	private   static String                             chosenCharset        = null;
 	private   static HashSet<String>                    definedFunctionNames = null;
@@ -218,6 +227,8 @@ public class MidicaPLParser extends SequenceParser {
 	private   static Pattern                            callPattern          = null;
 	private   static Pattern                            condPattern          = null;
 	private   static Pattern                            condInPattern        = null;
+	private   static Pattern                            crlfSkPattern        = null;
+	private   static boolean                            isSoftKaraoke        = false;
 	
 	private static boolean isDefineParsRun     = false; // parsing run for define commands
 	private static boolean isConstParsRun      = false; // parsing run for constant definitions
@@ -311,6 +322,13 @@ public class MidicaPLParser extends SequenceParser {
 		META_COMPOSER      = Dict.getSyntax( Dict.SYNTAX_META_COMPOSER      );
 		META_LYRICIST      = Dict.getSyntax( Dict.SYNTAX_META_LYRICIST      );
 		META_ARTIST        = Dict.getSyntax( Dict.SYNTAX_META_ARTIST        );
+		META_SOFT_KARAOKE  = Dict.getSyntax( Dict.SYNTAX_META_SOFT_KARAOKE  );
+		META_SK_VERSION    = Dict.getSyntax( Dict.SYNTAX_META_SK_VERSION    );
+		META_SK_LANG       = Dict.getSyntax( Dict.SYNTAX_META_SK_LANG       );
+		META_SK_TITLE      = Dict.getSyntax( Dict.SYNTAX_META_SK_TITLE      );
+		META_SK_AUTHOR     = Dict.getSyntax( Dict.SYNTAX_META_SK_AUTHOR     );
+		META_SK_COPYRIGHT  = Dict.getSyntax( Dict.SYNTAX_META_SK_COPYRIGHT  );
+		META_SK_INFO       = Dict.getSyntax( Dict.SYNTAX_META_SK_INFO       );
 		LENGTH_32          = Dict.getSyntax( Dict.SYNTAX_32                 );
 		LENGTH_16          = Dict.getSyntax( Dict.SYNTAX_16                 );
 		LENGTH_8           = Dict.getSyntax( Dict.SYNTAX_8                  );
@@ -590,6 +608,9 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// split list in "in" conditions for if/elsif
 		condInPattern = Pattern.compile("\\s*" + Pattern.quote(COND_IN_SEP) + "\\s*");
+		
+		// find forbidden \r or \n in a soft karaoke field or syllable
+		crlfSkPattern = Pattern.compile(Pattern.quote(LYRICS_CR) + "|" + Pattern.quote(LYRICS_LF));
 	}
 	
 	/**
@@ -664,6 +685,20 @@ public class MidicaPLParser extends SequenceParser {
 		if (META_LYRICIST.equals(cmd))
 			return true;
 		if (META_ARTIST.equals(cmd))
+			return true;
+		if (META_SOFT_KARAOKE.equals(cmd))
+			return true;
+		if (META_SK_VERSION.equals(cmd))
+			return true;
+		if (META_SK_LANG.equals(cmd))
+			return true;
+		if (META_SK_TITLE.equals(cmd))
+			return true;
+		if (META_SK_AUTHOR.equals(cmd))
+			return true;
+		if (META_SK_COPYRIGHT.equals(cmd))
+			return true;
+		if (META_SK_INFO.equals(cmd))
 			return true;
 		return false;
 	}
@@ -937,8 +972,12 @@ public class MidicaPLParser extends SequenceParser {
 			parseBLOCK(tokens, isFunct);
 		}
 		
-		// mode command (instruments, function, meta, end)
-		else if (INSTRUMENTS.equals(tokens[0]) || FUNCTION.equals(tokens[0]) || META.equals(tokens[0]) || END.equals(tokens[0])) {
+		// mode command (instruments, function, meta, soft karaoke, end)
+		else if (INSTRUMENTS.equals(tokens[0])
+			|| FUNCTION.equals(tokens[0])
+			|| META.equals(tokens[0])
+			|| META_SOFT_KARAOKE.equals(tokens[0])
+			|| END.equals(tokens[0])) {
 			parseModeCmd(tokens);
 			return;
 		}
@@ -946,6 +985,11 @@ public class MidicaPLParser extends SequenceParser {
 		// meta definition
 		else if (MODE_META == currentMode) {
 			parseMetaCmd(tokens);
+		}
+		
+		// soft karaoke definition
+		else if (MODE_SOFT_KARAOKE == currentMode) {
+			parseSoftKaraokeCmd(tokens);
 		}
 		
 		// root-level commands (that are not allowed to appear inside of a block)
@@ -1006,6 +1050,13 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( META_COMPOSER.equals(cmd)         ) {}
 		else if ( META_LYRICIST.equals(cmd)         ) {}
 		else if ( META_ARTIST.equals(cmd)           ) {}
+		else if ( META_SOFT_KARAOKE.equals(cmd)     ) {}
+		else if ( META_SK_VERSION.equals(cmd)       ) {}
+		else if ( META_SK_LANG.equals(cmd)          ) {}
+		else if ( META_SK_TITLE.equals(cmd)         ) {}
+		else if ( META_SK_AUTHOR.equals(cmd)        ) {}
+		else if ( META_SK_COPYRIGHT.equals(cmd)     ) {}
+		else if ( META_SK_INFO.equals(cmd)          ) {}
 		else if ( GLOBAL.equals(cmd)                ) {}
 		else if ( P.equals(cmd)                     ) {}
 		else if ( ORIGINAL_DEFINE.equals(cmd)       ) {}
@@ -1116,7 +1167,7 @@ public class MidicaPLParser extends SequenceParser {
 			checkNesting(cmd);
 			
 			// ignore blocks other than instruments or meta
-			if (END.equals(cmd) && (MODE_INSTRUMENTS == currentMode || MODE_META == currentMode)) {
+			if (END.equals(cmd) && (MODE_INSTRUMENTS == currentMode || MODE_META == currentMode || MODE_SOFT_KARAOKE == currentMode)) {
 				// handle later
 			}
 			else if (BLOCK_OPEN.equals(cmd) || BLOCK_CLOSE.equals(cmd) || FUNCTION.equals(cmd) || END.equals(cmd)) {
@@ -1131,6 +1182,11 @@ public class MidicaPLParser extends SequenceParser {
 			
 			// parse meta
 			if (META.equals(cmd) || MODE_META == currentMode) {
+				return false;
+			}
+			
+			// parse soft karaoke
+			if (META_SOFT_KARAOKE.equals(cmd) || MODE_SOFT_KARAOKE == currentMode) {
 				return false;
 			}
 			
@@ -1161,7 +1217,7 @@ public class MidicaPLParser extends SequenceParser {
 		if (CHORD.equals(cmd)) {
 			return true;
 		}
-		if (META.equals(cmd) || MODE_META == currentMode) {
+		if (META.equals(cmd) || MODE_META == currentMode || META_SOFT_KARAOKE.equals(cmd) || MODE_SOFT_KARAOKE == currentMode) {
 			trackNesting(cmd);
 			return true;
 		}
@@ -1265,6 +1321,10 @@ public class MidicaPLParser extends SequenceParser {
 			currentMode = MODE_FUNCTION;
 		else if (META.equals(cmd) && MODE_DEFAULT == currentMode)
 			currentMode = MODE_META;
+		else if (META_SOFT_KARAOKE.equals(cmd) && MODE_META == currentMode)
+			currentMode = MODE_SOFT_KARAOKE;
+		else if (END.equals(cmd) && MODE_SOFT_KARAOKE == currentMode)
+			currentMode = MODE_META;
 		else if (END.equals(cmd) && currentMode != MODE_INSTRUMENTS)
 			currentMode = MODE_DEFAULT;
 	}
@@ -1280,12 +1340,15 @@ public class MidicaPLParser extends SequenceParser {
 			if (nestableBlkDepth > 0) {
 				throw new ParseException( Dict.get(Dict.ERROR_BLOCK_UNMATCHED_OPEN) );
 			}
+			if (MODE_DEFAULT != currentMode && ! END.equals(cmd)) {
+				throw new ParseException( Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK) + cmd );
+			}
 		}
 		else if (BLOCK_OPEN.equals(cmd) || BLOCK_CLOSE.equals(cmd)) {
 			if (MODE_INSTRUMENTS == currentMode) {
 				throw new ParseException( Dict.get(Dict.ERROR_NOT_ALLOWED_IN_INSTR_BLK) + cmd );
 			}
-			if (MODE_META == currentMode) {
+			if (MODE_META == currentMode || MODE_SOFT_KARAOKE == currentMode) {
 				throw new ParseException( Dict.get(Dict.ERROR_NOT_ALLOWED_IN_META_BLK) + cmd );
 			}
 		}
@@ -1559,6 +1622,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * - INSTRUMENTS
 	 * - FUNCTION
 	 * - META
+	 * - SOFT_KARAOKE
 	 * - END
 	 * 
 	 * Determines the type of mode command and calls the appropriate method to
@@ -1586,6 +1650,9 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		else if (META.equals(cmd)) {
 			parseMETA(tokens);
+		}
+		else if (META_SOFT_KARAOKE.equals(cmd)) {
+			parseSOFT_KARAOKE(tokens);
 		}
 		
 		// other - may never happen
@@ -1665,6 +1732,11 @@ public class MidicaPLParser extends SequenceParser {
 					postprocessInstruments();
 				}
 			}
+			if (MODE_SOFT_KARAOKE == currentMode) {
+				currentMode         = MODE_META;
+				currentFunctionName = null;
+				return;
+			}
 			currentMode         = MODE_DEFAULT;
 			currentFunctionName = null;
 		}
@@ -1724,6 +1796,29 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		else
 			throw new ParseException( Dict.get(Dict.ERROR_META_NUM_OF_ARGS) );
+	}
+	
+	/**
+	 * Parses a SOFT_KARAOKE command.
+	 * A SOFT_KARAOKE command is a mode command that opens a SOFT_KARAOKE definition block
+	 * inside of a META block.
+	 * 
+	 * @param tokens             Token array.
+	 * @throws ParseException    If the command cannot be parsed.
+	 */
+	private void parseSOFT_KARAOKE(String[] tokens) throws ParseException {
+		if (MODE_META != currentMode) {
+			throw new ParseException( Dict.get(Dict.ERROR_SOFT_KARAOKE_NOT_ALLOWED_HERE) );
+		}
+		if (1 == tokens.length) {
+			if (isSoftKaraoke) {
+				throw new ParseException( Dict.get(Dict.ERROR_SOFT_KARAOKE_ALREADY_SET) );
+			}
+			currentMode   = MODE_SOFT_KARAOKE;
+			isSoftKaraoke = true;
+		}
+		else
+			throw new ParseException( Dict.get(Dict.ERROR_SOFT_KARAOKE_NUM_OF_ARGS) );
 	}
 	
 	/**
@@ -2518,6 +2613,13 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_META_COMPOSER.equals(cmdId)      ) META_COMPOSER      = cmdName;
 		else if ( Dict.SYNTAX_META_LYRICIST.equals(cmdId)      ) META_LYRICIST      = cmdName;
 		else if ( Dict.SYNTAX_META_ARTIST.equals(cmdId)        ) META_ARTIST        = cmdName;
+		else if ( Dict.SYNTAX_META_SOFT_KARAOKE.equals(cmdId)  ) META_SOFT_KARAOKE  = cmdName;
+		else if ( Dict.SYNTAX_META_SK_VERSION.equals(cmdId)    ) META_SK_VERSION    = cmdName;
+		else if ( Dict.SYNTAX_META_SK_LANG.equals(cmdId)       ) META_SK_LANG       = cmdName;
+		else if ( Dict.SYNTAX_META_SK_TITLE.equals(cmdId)      ) META_SK_TITLE      = cmdName;
+		else if ( Dict.SYNTAX_META_SK_AUTHOR.equals(cmdId)     ) META_SK_AUTHOR     = cmdName;
+		else if ( Dict.SYNTAX_META_SK_COPYRIGHT.equals(cmdId)  ) META_SK_COPYRIGHT  = cmdName;
+		else if ( Dict.SYNTAX_META_SK_INFO.equals(cmdId)       ) META_SK_INFO       = cmdName;
 		else if ( Dict.SYNTAX_32.equals(cmdId)                 ) LENGTH_32          = cmdName;
 		else if ( Dict.SYNTAX_16.equals(cmdId)                 ) LENGTH_16          = cmdName;
 		else if ( Dict.SYNTAX_8.equals(cmdId)                  ) LENGTH_8           = cmdName;
@@ -3027,6 +3129,10 @@ public class MidicaPLParser extends SequenceParser {
 			key = "lyrics";
 		else if (META_ARTIST.equals(tokens[0]))
 			key = "artist";
+		else if (META_SOFT_KARAOKE.equals(tokens[0])) {
+			currentMode = MODE_SOFT_KARAOKE;
+			return;
+		}
 		else
 			throw new ParseException( Dict.get(Dict.ERROR_META_UNKNOWN_CMD) + tokens[0] );
 		
@@ -3050,6 +3156,54 @@ public class MidicaPLParser extends SequenceParser {
 			val.append(crlf);
 		}
 		val.append(line);
+	}
+	
+	/**
+	 * Parses one command inside of a SOFT_KARAOKE block.
+	 * 
+	 * @param tokens             Token array.
+	 * @throws ParseException    If the command cannot be parsed.
+	 */
+	private void parseSoftKaraokeCmd(String[] tokens) throws ParseException {
+		String key;
+		if (META_SK_VERSION.equals(tokens[0]))
+			key = "sk_version";
+		else if (META_SK_LANG.equals(tokens[0]))
+			key = "sk_lang";
+		else if (META_SK_TITLE.equals(tokens[0]))
+			key = "sk_title";
+		else if (META_SK_AUTHOR.equals(tokens[0]))
+			key = "sk_author";
+		else if (META_SK_COPYRIGHT.equals(tokens[0]))
+			key = "sk_copyright";
+		else if (META_SK_INFO.equals(tokens[0]))
+			key = "sk_info";
+		else
+			throw new ParseException( Dict.get(Dict.ERROR_SOFT_KARAOKE_UNKNOWN_CMD) + tokens[0] );
+		
+		// create a new value, if necessary
+		ArrayList<String> values = softKaraokeInfo.get(key);
+		if (null == values) {
+			values = new ArrayList<>();
+		}
+		else {
+			// value exists already
+			
+			// no limit for info events
+			// other values may exist only once
+			if ( ! META_SK_INFO.equals(tokens[0]) ) {
+				throw new ParseException( Dict.get(Dict.ERROR_SK_VALUE_ALREADY_SET) + tokens[0] );
+			}
+		}
+		
+		// don't allow line breaks (\r or \n)
+		if (crlfSkPattern.matcher(tokens[1]).find()) {
+			throw new ParseException( Dict.get(Dict.ERROR_SK_FIELD_CRLF_NOT_ALLOWED) );
+		}
+		
+		// add content
+		values.add(tokens[1]);
+		softKaraokeInfo.put(key, values);
 	}
 	
 	/**
@@ -3216,6 +3370,9 @@ public class MidicaPLParser extends SequenceParser {
 				}
 				else if (OPT_LYRICS.equals(optName)) {
 					syllable = opt.getLyrics();
+					if (isSoftKaraoke && crlfSkPattern.matcher(syllable).find()) {
+						throw new ParseException( Dict.get(Dict.ERROR_SK_SYLLABLE_CRLF_NOT_ALLOWED) );
+					}
 				}
 				else if (OPT_TREMOLO.equals(optName)) {
 					tremolo = opt.getTremolo();
@@ -3253,7 +3410,10 @@ public class MidicaPLParser extends SequenceParser {
 					syllable = syllable.replaceAll( Pattern.quote(LYRICS_CR),    "\r" );
 					syllable = syllable.replaceAll( Pattern.quote(LYRICS_LF),    "\n" );
 					syllable = syllable.replaceAll( Pattern.quote(LYRICS_COMMA), ","  );
-					SequenceCreator.addMessageLyrics(syllable, startTicks);
+					if (isSoftKaraoke)
+						SequenceCreator.addMessageText(syllable, startTicks, 2);
+					else
+						SequenceCreator.addMessageLyrics(syllable, startTicks, false);
 				}
 				if (REST_VALUE == note) {
 					if (! isFake)
@@ -3758,7 +3918,43 @@ public class MidicaPLParser extends SequenceParser {
 			
 			// add end tag and write RP-026 tags
 			rp26.append("{#}");
-			SequenceCreator.addMessageLyrics(rp26.toString(), 0);
+			SequenceCreator.addMessageLyrics(rp26.toString(), 0, true);
+			
+			// postprocess soft karaoke
+			if (isSoftKaraoke) {
+				SequenceCreator.addMessageText("@KMIDI KARAOKE FILE", 0, 1);
+				if (softKaraokeInfo.containsKey("sk_version")) {
+					String version = softKaraokeInfo.get("sk_version").get(0);
+					SequenceCreator.addMessageText("@V" + version, 0, 1);
+				}
+				if (softKaraokeInfo.containsKey("sk_info")) {
+					ArrayList<String> infos = softKaraokeInfo.get("sk_info");
+					for (String info : infos) {
+						SequenceCreator.addMessageText("@I" + info, 0, 1);
+					}
+				}
+				if (softKaraokeInfo.containsKey("sk_lang")) {
+					String language = softKaraokeInfo.get("sk_lang").get(0);
+					SequenceCreator.addMessageText("@L" + language, 0, 2);
+				}
+				int tFieldCount  = 0;
+				String[] tFields = {"", "", ""};
+				if (softKaraokeInfo.containsKey("sk_title")) {
+					tFieldCount = 1;
+					tFields[0]  = softKaraokeInfo.get("sk_title").get(0);
+				}
+				if (softKaraokeInfo.containsKey("sk_author")) {
+					tFieldCount = tFieldCount < 2 ? 2 : tFieldCount;
+					tFields[1]  = softKaraokeInfo.get("sk_author").get(0);
+				}
+				if (softKaraokeInfo.containsKey("sk_copyright")) {
+					tFieldCount = tFieldCount < 3 ? 3 : tFieldCount;
+					tFields[2]  = softKaraokeInfo.get("sk_copyright").get(0);
+				}
+				for (int i = 0; i < tFieldCount; i++) {
+					SequenceCreator.addMessageText("@T" + tFields[i], 0, 2);
+				}
+			}
 		}
 		catch (InvalidMidiDataException e) {
 			throw new ParseException( Dict.get(Dict.ERROR_MIDI_PROBLEM) + e.getMessage() );
@@ -3893,6 +4089,7 @@ public class MidicaPLParser extends SequenceParser {
 			}
 			instrumentsParsed    = false;
 			metaInfo             = new HashMap<>();
+			softKaraokeInfo      = new HashMap<>();
 			frstInstrBlkOver     = false;
 			isDefineParsRun      = false;
 			isConstParsRun       = false;
@@ -3918,12 +4115,14 @@ public class MidicaPLParser extends SequenceParser {
 			paramStackIndexed    = new ArrayDeque<>();
 			redefinitions        = new HashSet<>();
 			soundfontParsed      = false;
+			isSoftKaraoke        = false;
 			constants            = new HashMap<>();
 			variables            = new HashMap<>();
 			varPattern           = null;
 			callPattern          = null;
 			condPattern          = null;
 			condInPattern        = null;
+			crlfSkPattern        = null;
 			refreshSyntax();
 			NestableBlock.reset();
 		}

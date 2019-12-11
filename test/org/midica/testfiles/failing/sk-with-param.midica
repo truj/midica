@@ -1,0 +1,9 @@
+INCLUDE inc/instruments.midica
+
+META
+	composer	Beethoven
+	
+	SOFT_KARAOKE test
+		language   ENGL
+	END
+END

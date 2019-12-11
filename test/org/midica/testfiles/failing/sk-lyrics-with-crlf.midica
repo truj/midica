@@ -1,0 +1,16 @@
+INCLUDE inc/instruments.midica
+
+0 c /4
+*
+
+META
+	SOFT_KARAOKE
+	END
+END
+
+0  c  /4  l=\test1
+0  c  /4  l=\test2
+0  c  /4  l=/test3
+0  c  /4  l=_test4
+0  c  /4  l=_te\nst5
+0  c  /4  l=_test6
