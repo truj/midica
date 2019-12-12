@@ -52,17 +52,17 @@ public class MidicaPLExporter extends Exporter {
 	 *******************/
 	
 	// event types
-	public static final byte ET_INSTR = 1;
-	public static final byte ET_NOTES = 2;
+	public static final byte ET_INSTR = 1; // instrument change
+	public static final byte ET_NOTES = 2; // notes or chords (or an inline rest with syllable)
 	
 	// note properties
-	public static final byte NP_VELOCITY = 1;
-	public static final byte NP_OFF_TICK = 2;
-	public static final byte NP_END_TICK = 3;
-	public static final byte NP_LENGTH   = 4;
-	public static final byte NP_DURATION = 5;
-	public static final byte NP_MULTIPLE = 6;
-	public static final byte NP_LYRICS   = 7;
+	public static final byte NP_VELOCITY = 1; // velocity option
+	public static final byte NP_OFF_TICK = 2; // note-off tick
+	public static final byte NP_END_TICK = 3; // tick at end of note
+	public static final byte NP_LENGTH   = 4; // length column as MidicaPL length
+	public static final byte NP_DURATION = 5; // duration option as float number
+	public static final byte NP_MULTIPLE = 6; // multiple option (value ignored)
+	public static final byte NP_LYRICS   = 7; // lyrics option
 	
 	// constants for statistics about the decompilation quality
 	private static final byte STAT_TOTAL           = 17;
@@ -94,6 +94,7 @@ public class MidicaPLExporter extends Exporter {
 	private static int          sourceResolution = 0;
 	private static int          targetResolution = SequenceCreator.DEFAULT_RESOLUTION;
 	private static ExportResult exportResult     = null;
+	private static boolean      isSoftKaraoke    = false;
 	
 	/** stores the current state of each channel */
 	private static ArrayList<Instrument> instruments = null;
@@ -485,14 +486,14 @@ public class MidicaPLExporter extends Exporter {
 						byte tonality      = data[1];
 						
 						String[] noteAndTonality = MessageClassifier.getKeySignature(sharpsOrFlats, tonality);
-						String keySig            = noteAndTonality[0] + Dict.getSyntax(Dict.SYNTAX_KEY_SEPARATOR) + noteAndTonality[1];
+						String keySig            = noteAndTonality[0] + MidicaPLParser.KEY_SEPARATOR + noteAndTonality[1];
 						currentSlice             = addSliceIfNecessary(tick, "key", keySig);
 					}
 					else if (MidiListener.META_TIME_SIGNATURE == type) {
 						int numerator   = data[0];
 						int exp         = data[1];
 						int denominator = (int) Math.pow(2, exp);
-						String timeSig  = numerator + Dict.getSyntax(Dict.SYNTAX_TIME_SIG_SLASH) + denominator;
+						String timeSig  = numerator + MidicaPLParser.TIME_SIG_SLASH + denominator;
 						currentSlice    = addSliceIfNecessary(tick, "time", timeSig);
 					}
 				}
@@ -656,7 +657,7 @@ public class MidicaPLExporter extends Exporter {
 			// If we reach this point, there is no matching note/chord.
 			// Add the syllable to the slice using a rest.
 			byte channel = lyricsChannels.get(0);
-			slice.addSyllableRest(tick, syllable, channel, BLOCK, sourceResolution);
+			slice.addSyllableRest(tick, syllable, channel, INLINE, sourceResolution);
 		}
 	}
 	
@@ -1103,22 +1104,44 @@ public class MidicaPLExporter extends Exporter {
 		HashMap<String, String> metaInfo     = (HashMap<String, String>) sequenceInfo.get("meta_info");
 		HashMap<String, Object> karaokeInfo  = (HashMap<String, Object>) sequenceInfo.get( "karaoke" );
 		String copyright = (String) metaInfo.get("copyright");
-		String title     = (String) karaokeInfo.get("title");
-		String composer  = (String) karaokeInfo.get("composer");
-		String lyrics    = (String) karaokeInfo.get("lyricist");
-		String artist    = (String) karaokeInfo.get("artist");
+		String[] fields = {"copyright", "title", "composer", "lyricist", "artist"};
+		String[] values = new String[5];
+		String[] mplIds = {
+			MidicaPLParser.META_COPYRIGHT,
+			MidicaPLParser.META_TITLE,
+			MidicaPLParser.META_COMPOSER,
+			MidicaPLParser.META_LYRICIST,
+			MidicaPLParser.META_ARTIST,
+		};
+		values[0] = copyright;
 		
-		// add available meta lines
-		if (copyright != null)
-			lines.add("\t" + MidicaPLParser.META_COPYRIGHT + "\t" + copyright + NEW_LINE);
-		if (title != null)
-			lines.add("\t" + MidicaPLParser.META_TITLE + "\t" + title + NEW_LINE);
-		if (composer != null)
-			lines.add("\t" + MidicaPLParser.META_COMPOSER + "\t" + composer + NEW_LINE);
-		if (lyrics != null)
-			lines.add("\t" + MidicaPLParser.META_LYRICIST + "\t" + lyrics + NEW_LINE);
-		if (artist != null)
-			lines.add("\t" + MidicaPLParser.META_ARTIST + "\t" + artist + NEW_LINE);
+		// process fields
+		for (int i = 0; i < fields.length; i++) {
+			
+			// read value (skip copyright as we have it already)
+			if (i > 0)
+				values[i] = (String) karaokeInfo.get(fields[i]);
+			
+			// value not set
+			if (null == values[i])
+				continue;
+			
+			// split the line, if necessary
+			String[] multiLines = values[i].split("\n");
+			
+			// LINE of this field
+			for (String singleLine : multiLines) {
+				if ( ! "".equals(singleLine) )
+					lines.add("\t" + mplIds[i] + "\t" + singleLine + NEW_LINE);
+			}
+		}
+		
+		// add soft karaoke block, if necessary
+		String skType = (String) karaokeInfo.get("sk_type");
+		if (skType != null && "MIDI KARAOKE FILE".equals(skType.toUpperCase())) {
+			isSoftKaraoke = true;
+			lines.add(createSoftKaraokeBlock(karaokeInfo));
+		}
 		
 		// no meta data found?
 		if (lines.isEmpty())
@@ -1130,6 +1153,58 @@ public class MidicaPLExporter extends Exporter {
 			block.append(line);
 		}
 		block.append(MidicaPLParser.END + NEW_LINE + NEW_LINE);
+		
+		return block.toString();
+	}
+	
+	/**
+	 * Creates the SOFT_KARAOKE block inside of the META block.
+	 * This is called only if the sequence uses SOFT KARAOKE.
+	 * 
+	 * @param karaokeInfo  Karaoke information extracted from the sequence.
+	 * @return the created block.
+	 */
+	private String createSoftKaraokeBlock(HashMap<String, Object> karaokeInfo) {
+		StringBuilder block = new StringBuilder("");
+		
+		// open the block
+		block.append("\t" + MidicaPLParser.META_SOFT_KARAOKE + NEW_LINE);
+		
+		// read single-line fields
+		String[] fields = {"sk_version", "sk_language", "sk_title", "sk_author", "sk_copyright"};
+		String[] mplIds = {
+			MidicaPLParser.META_SK_VERSION,
+			MidicaPLParser.META_SK_LANG,
+			MidicaPLParser.META_SK_TITLE,
+			MidicaPLParser.META_SK_AUTHOR,
+			MidicaPLParser.META_SK_COPYRIGHT,
+		};
+		
+		// process single-line fields
+		for (int i = 0; i < fields.length; i++) {
+			
+			// read value
+			String value = (String) karaokeInfo.get(fields[i]);
+			if (null == value)
+				continue;
+			
+			// append the line
+			block.append("\t\t" + mplIds[i] + "\t" + value + NEW_LINE);
+		}
+		
+		// process info fields
+		ArrayList<String> infos = (ArrayList<String>) karaokeInfo.get("sk_infos");
+		if (infos != null) {
+			for (String info : infos) {
+				
+				// append info line
+				if ( ! "".equals(info) )
+					block.append("\t\t" + MidicaPLParser.META_SK_INFO + "\t" + info + NEW_LINE);
+			}
+		}
+		
+		// close the block
+		block.append("\t" + MidicaPLParser.END + NEW_LINE);
 		
 		return block.toString();
 	}
@@ -1528,6 +1603,10 @@ public class MidicaPLExporter extends Exporter {
 			}
 		}
 		
+		// no notes? - default to the percussion channel
+		if (null == chosenInstr)
+			chosenInstr = instruments.get(9);
+		
 		// get missing ticks
 		long missingTicks = slice.getBeginTick() - chosenInstr.getCurrentTicks();
 		if (missingTicks > 0) {
@@ -1754,10 +1833,10 @@ public class MidicaPLExporter extends Exporter {
 				}
 			}
 			
-			// TODO: implement and test lyrics
+			// add syllable, if needed
 			if (noteOrCrd.containsKey(NP_LYRICS)) {
 				String syllable = noteOrCrd.get(NP_LYRICS);
-				syllable = replaceSyllable(syllable);
+				syllable = escapeSyllable(syllable);
 				options.add(MidicaPLParser.L + MidicaPLParser.OPT_ASSIGNER + syllable);
 			}
 		}
@@ -1817,7 +1896,7 @@ public class MidicaPLExporter extends Exporter {
 		
 		// add lyrics option, if needed
 		if (syllable != null) {
-			syllable = replaceSyllable(syllable);
+			syllable = escapeSyllable(syllable);
 			line.append("\t" + MidicaPLParser.L + MidicaPLParser.OPT_ASSIGNER + syllable);
 		}
 		
@@ -1831,16 +1910,23 @@ public class MidicaPLExporter extends Exporter {
 	}
 	
 	/**
-	 * Replaces special characters in syllables.
+	 * Escapes special characters in syllables.
 	 * 
-	 * @param syllable The syllable to be replaced.
+	 * @param syllable  The syllable to be escaped.
 	 * @return the replaced syllable.
 	 */
-	private String replaceSyllable(String syllable) {
-		return syllable.replaceAll(" ", "_")
-			.replaceAll(",",  "\\\\c")
-			.replaceAll("\n", "\\\\n")
-			.replaceAll("\r", "\\\\r");
+	private String escapeSyllable(String syllable) {
+		
+		// escape \r and \n
+		if (isSoftKaraoke) {
+			syllable = syllable.replaceAll("\n", "_").replaceAll("\r", "_");
+		}
+		else {
+			syllable = syllable.replaceAll("\n", "\\\\n").replaceAll("\r", "\\\\r");
+		}
+		
+		// escape space and comma
+		return syllable.replaceAll(" ", "_").replaceAll(",",  "\\\\c");
 	}
 	
 	/**
@@ -1881,19 +1967,19 @@ public class MidicaPLExporter extends Exporter {
 	 */
 	private TreeMap<Long, String> initNoteLengths() {
 		
-		String triplet = Dict.getSyntax( Dict.SYNTAX_TRIPLET );
-		String dot     = Dict.getSyntax( Dict.SYNTAX_DOT     );
-		String d1      = Dict.getSyntax( Dict.SYNTAX_1       );
-		String d2      = Dict.getSyntax( Dict.SYNTAX_2       );
-		String d4      = Dict.getSyntax( Dict.SYNTAX_4       );
-		String d8      = Dict.getSyntax( Dict.SYNTAX_8       );
-		String d16     = Dict.getSyntax( Dict.SYNTAX_16      );
-		String d32     = Dict.getSyntax( Dict.SYNTAX_32      );
-		String m2      = Dict.getSyntax( Dict.SYNTAX_M2      );
-		String m4      = Dict.getSyntax( Dict.SYNTAX_M4      );
-		String m8      = Dict.getSyntax( Dict.SYNTAX_M8      );
-		String m16     = Dict.getSyntax( Dict.SYNTAX_M16     );
-		String m32     = Dict.getSyntax( Dict.SYNTAX_M32     );
+		String triplet = MidicaPLParser.TRIPLET;
+		String dot     = MidicaPLParser.DOT;
+		String d1      = MidicaPLParser.LENGTH_1;
+		String d2      = MidicaPLParser.LENGTH_2;
+		String d4      = MidicaPLParser.LENGTH_4;
+		String d8      = MidicaPLParser.LENGTH_8;
+		String d16     = MidicaPLParser.LENGTH_16;
+		String d32     = MidicaPLParser.LENGTH_32;
+		String m2      = MidicaPLParser.LENGTH_M2;
+		String m4      = MidicaPLParser.LENGTH_M4;
+		String m8      = MidicaPLParser.LENGTH_M8;
+		String m16     = MidicaPLParser.LENGTH_M16;
+		String m32     = MidicaPLParser.LENGTH_M32;
 		
 		TreeMap<Long, String> noteLength = new TreeMap<>();
 		
