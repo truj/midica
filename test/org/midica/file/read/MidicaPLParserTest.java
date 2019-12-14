@@ -13,7 +13,6 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Deque;
-import java.util.HashMap;
 
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiMessage;
@@ -28,6 +27,7 @@ import org.midica.file.CharsetUtils;
 import org.midica.file.read.MidicaPLParser;
 import org.midica.file.read.ParseException;
 import org.midica.file.read.StackTraceElement;
+import org.midica.midi.KaraokeAnalyzer;
 import org.midica.midi.SequenceAnalyzer;
 import org.midica.midi.SequenceCreator;
 import org.midica.ui.model.IMessageType;
@@ -1249,6 +1249,6 @@ class MidicaPLParserTest extends MidicaPLParser {
 	 * @return full lyrics.
 	 */
 	private static String getLyrics() {
-		return (String) ((HashMap<String, Object>)SequenceAnalyzer.getSequenceInfo().get("karaoke")).get("lyrics_full");
+		return (String) KaraokeAnalyzer.getKaraokeInfo().get("lyrics_full");
 	}
 }

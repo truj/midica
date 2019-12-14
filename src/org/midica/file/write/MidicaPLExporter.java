@@ -30,6 +30,7 @@ import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.Instrument;
 import org.midica.file.read.MidicaPLParser;
+import org.midica.midi.KaraokeAnalyzer;
 import org.midica.midi.MessageClassifier;
 import org.midica.midi.MidiDevices;
 import org.midica.midi.MidiListener;
@@ -122,7 +123,7 @@ public class MidicaPLExporter extends Exporter {
 	/** lowest note  --  comma-separated note bytes (This structure is only needed for the sorting: lowest note first, then chord name) */
 	private static TreeMap<String, ArrayList<String>> chordsByBaseNote = null;
 	
-	// structures built by the SequenceAnalyzer
+	// structures built by SequenceAnalyzer and KaraokeAnalyzer
 	private static TreeMap<Byte, TreeMap<Long, Byte[]>>                 instrumentHistory = null;
 	private static TreeMap<Byte, TreeMap<Long, String>>                 commentHistory    = null;
 	private static TreeMap<Byte, TreeMap<Long, TreeMap<Byte, Byte>>>    noteHistory       = null;
@@ -177,7 +178,7 @@ public class MidicaPLExporter extends Exporter {
 			commentHistory    = (TreeMap<Byte, TreeMap<Long, String>>)                 histories.get( "comment_history" );
 			noteHistory       = (TreeMap<Byte, TreeMap<Long, TreeMap<Byte, Byte>>>)    histories.get( "note_history" );
 			noteOnOff         = (TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>>) histories.get( "note_on_off" );
-			lyricsSyllables   = (TreeMap<Long, String>)                                histories.get( "lyrics" );
+			lyricsSyllables   = KaraokeAnalyzer.getLyricsFlat();
 			
 			// init data structures
 			chords           = new TreeMap<>();
@@ -1102,7 +1103,7 @@ public class MidicaPLExporter extends Exporter {
 		// get data structures
 		HashMap<String, Object> sequenceInfo = (HashMap<String, Object>) SequenceAnalyzer.getSequenceInfo();
 		HashMap<String, String> metaInfo     = (HashMap<String, String>) sequenceInfo.get("meta_info");
-		HashMap<String, Object> karaokeInfo  = (HashMap<String, Object>) sequenceInfo.get( "karaoke" );
+		HashMap<String, Object> karaokeInfo  = KaraokeAnalyzer.getKaraokeInfo();
 		String copyright = (String) metaInfo.get("copyright");
 		String[] fields = {"copyright", "title", "composer", "lyricist", "artist"};
 		String[] values = new String[5];

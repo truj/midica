@@ -432,8 +432,8 @@ public class SequenceCreator {
 	 * The **skType** parameter can have the following values:
 	 * 
 	 * - **0**: not a Soft Karaoke text event
-	 * - **1**: used for Soft Karaoke events starting with \@K, \@V or \@I
-	 * - **2**: used for Soft Karaoke events starting with \@L, \@T or normal lyrics
+	 * - **1**: used for Soft Karaoke events starting with @K, @V or @I
+	 * - **2**: used for Soft Karaoke events starting with @L, @T or normal lyrics
 	 * 
 	 * @param text    The text to be added.
 	 * @param tick    MIDI tick.

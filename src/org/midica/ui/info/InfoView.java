@@ -45,6 +45,7 @@ import org.midica.config.KeyBindingManager;
 import org.midica.config.Laf;
 import org.midica.file.read.SequenceParser;
 import org.midica.file.read.SoundfontParser;
+import org.midica.midi.KaraokeAnalyzer;
 import org.midica.midi.MessageClassifier;
 import org.midica.midi.SequenceAnalyzer;
 import org.midica.ui.model.DrumkitTableModel;
@@ -1262,10 +1263,7 @@ public class InfoView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// get karaoke info
-		HashMap<String, Object> sequenceInfo = SequenceAnalyzer.getSequenceInfo();
-		HashMap<String, Object> karaokeInfo  = (HashMap<String, Object>) sequenceInfo.get( "karaoke" );
-		if (null == karaokeInfo)
-			karaokeInfo = new HashMap<String, Object>();
+		HashMap<String, Object> karaokeInfo = KaraokeAnalyzer.getKaraokeInfo();
 		
 		// general
 		area.add(createKaraokeGeneralArea(karaokeInfo), constraints);

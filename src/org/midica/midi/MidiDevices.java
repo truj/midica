@@ -369,8 +369,8 @@ public final class MidiDevices {
 	 * changes the UI accordingly.
 	 */
 	public static void refreshLyrics() {
-		String lyrics = SequenceAnalyzer.getLyrics( getTickPosition() );
-		playerController.setLyrics( lyrics );
+		String lyrics = KaraokeAnalyzer.getLyricsForPlayer( getTickPosition() );
+		playerController.setLyrics(lyrics);
 	}
 	
 	/**
