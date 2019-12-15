@@ -679,10 +679,10 @@ public class KeyBindingManager {
 	
 	/**
 	 * Fills the input maps for the key bindings of the given ID.
-	 * Used instead of {@link addInputMap()}, when nested tabs are used.
+	 * Used instead of {@link #addInputs(String)}, when nested tabs are used.
 	 * Used for the info window.
 	 * 
-	 * Other than addInputMap(), the key of the added input maps also contains the key binding.
+	 * Other than addInputs(), the key of the added input maps also contains the key binding.
 	 * 
 	 * @param id  the key binding ID
 	 */
@@ -951,11 +951,12 @@ public class KeyBindingManager {
 	}
 	
 	/**
-	 * Returns an action for a slider-specific key-binding that can be put into the slider's action map.
+	 * Creates and returns an action for a slider-specific key-binding that can be put into
+	 * the slider's action map.
 	 * 
 	 * @param slider      the slider
 	 * @param actionName  an identifier that describes how the slider value must be changed
-	 * @return
+	 * @return the created action.
 	 */
 	private Action getSliderAction(JSlider slider, String actionName) {
 		

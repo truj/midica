@@ -25,7 +25,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
  * - Call one of the constructors.
  * - Call {@link #initChildren()}, if it's a branch. Not necessary for leafs.
  * - For each child:
- *   - Call {@link #addAndOrIncrement(String, String, String, boolean, String, boolean)}
+ *   - Call {@link #addAndOrIncrement(String, String, String, boolean, String, String, boolean)}
  *   - Call {@link #increment()}
  * - After all children are added, connect them with each other in the right
  *   order by calling {@link #addChildren()}. This works recursively.
@@ -133,7 +133,7 @@ public class MidicaTreeNode extends DefaultMutableTreeNode {
 	/**
 	 * Sets the ID of the node.
 	 * 
-	 * @param ID of the node
+	 * @param id  ID of the node
 	 */
 	public void setId(String id) {
 		this.id = id;

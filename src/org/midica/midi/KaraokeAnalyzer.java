@@ -203,17 +203,17 @@ public class KaraokeAnalyzer {
 	 * 
 	 * Simple Soft Karaoke fields:
 	 * 
-	 * - **sk_type**: content of the @K tag
-	 * - **sk_version**: content of the @V tag
-	 * - **sk_language**: content of the @L tag
-	 * - **sk_title**: content of first @T tag
-	 * - **sk_author**: content of second @T tag
-	 * - **sk_copyright**: content of third @T tag
+	 * - **sk_type**: content of the **@K** tag
+	 * - **sk_version**: content of the **@V** tag
+	 * - **sk_language**: content of the **@L** tag
+	 * - **sk_title**: content of first **@T** tag
+	 * - **sk_author**: content of second **@T** tag
+	 * - **sk_copyright**: content of third **@T** tag
 	 * 
 	 * Special Soft Karaoke fields:
 	 * 
-	 * - **sk_infos**: {@link ArrayList<String>} of all contents of @I tags
-	 * - **info**: all @I tags, joined with \n
+	 * - **sk_infos**: `ArrayList<String>` of all contents of **@I** tags
+	 * - **info**: all **@I** tags, joined with \n
 	 * 
 	 * @return the information as described above.
 	 */
@@ -227,7 +227,7 @@ public class KaraokeAnalyzer {
 	 * Counts the LYRICS or TEXT event by type and track for later determination about what to use for lyrics.
 	 * Also retrieves song and karaoke related fields.
 	 * 
-	 * @param type     META message type: {@link KARAOKE_TEXT} or {@link KARAOKE_LYRICS}.
+	 * @param type     META message type: {@link #KARAOKE_TEXT} or {@link #KARAOKE_LYRICS}.
 	 * @param track    track number of the META message
 	 * @param content  text content of the META message.
 	 */
@@ -282,7 +282,7 @@ public class KaraokeAnalyzer {
 	 * Collects karaoke specific information from meta messages and adds the event to
 	 * the lyrics, if necessary.
 	 * 
-	 * @param type     META message type: {@link KARAOKE_TEXT} or {@link KARAOKE_LYRICS}.
+	 * @param type     META message type: {@link #KARAOKE_TEXT} or {@link #KARAOKE_LYRICS}.
 	 * @param track    Track number of the META message.
 	 * @param tick     Tickstamp of the META message.
 	 * @param content  Text content of the META message.

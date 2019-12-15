@@ -768,8 +768,8 @@ public class MidicaPLExporter extends Exporter {
 	/**
 	 * Calculates the duration ratio.
 	 * 
-	 * @param noteLength   full (theoretical) note length in ticks
-	 * @param pressLength  number of ticks that the note is pressed (from note-ON to note-OFF)
+	 * @param noteTicks   full (theoretical) note length in ticks
+	 * @param pressTicks  number of ticks that the note is pressed (from note-ON to note-OFF)
 	 * @return the duration ratio
 	 */
 	private static float calculateDuration(long noteTicks, long pressTicks) {
@@ -1213,7 +1213,7 @@ public class MidicaPLExporter extends Exporter {
 	/**
 	 * Creates the initial INSTRUMENTS block.
 	 * 
-	 * @return
+	 * @return the created block.
 	 */
 	private String createInitialInstrumentsBlock() {
 		

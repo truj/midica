@@ -188,7 +188,7 @@ public class Slice {
 	 * @param tick        MIDI tick
 	 * @param syllable    Lyrics syllable for Karaoke
 	 * @param channel     MIDI channel
-	 * @param orphaned    either {@link MidicaPLExporter.INLINE} or {@link MidicaPLExporter.BLOCK}
+	 * @param orphaned    either {@link MidicaPLExporter#INLINE} or {@link MidicaPLExporter#BLOCK}
 	 * @param resolution  source resolution of the sequence
 	 */
 	public void addSyllableRest(long tick, String syllable, byte channel, byte orphaned, long resolution) {
@@ -234,7 +234,8 @@ public class Slice {
 	
 	/**
 	 * Returns the special timeline only for rests with syllables.
-	 * @return
+	 * 
+	 * @return the timeline for rests with syllables.
 	 */
 	public TreeMap<Long, String> getSyllableRestTimeline() {
 		return syllableRestTimeline;

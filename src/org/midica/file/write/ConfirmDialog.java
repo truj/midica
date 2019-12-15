@@ -35,9 +35,9 @@ public class ConfirmDialog {
 	 * 
 	 * Returns a result value, according to the user's action:
 	 * 
-	 * - If the YES button was pressed, returns {@link JOptionPane.YES_OPTION}.
-	 * - If the NO button was pressed, returns {@link JOptionPane.NO_OPTION}.
-	 * - If no button was pressed (dialog closed by pressing ESC or otherwise), returns {@link JOptionPane.CANCEL_OPTION}.
+	 * - If the YES button was pressed, returns {@link JOptionPane#YES_OPTION}.
+	 * - If the NO button was pressed, returns {@link JOptionPane#NO_OPTION}.
+	 * - If no button was pressed (dialog closed by pressing ESC or otherwise), returns {@link JOptionPane#CANCEL_OPTION}.
 	 * 
 	 * @param parent     the parent frame
 	 * @param message    the question to be asked

@@ -74,7 +74,7 @@ public class MessageTreeNode extends MidicaTreeNode implements IMessageType {
 	 * If the option value is comparable, remembers the minimum and maximum
 	 * of all calls to this method with the same **id**.
 	 * 
-	 * These values can be retrieved later with {@link #getOption(String)}.
+	 * These values can be retrieved later with {@link #getOption(int)}.
 	 * 
 	 * @param id     The option ID.
 	 * @param value  The option value.
@@ -153,7 +153,7 @@ public class MessageTreeNode extends MidicaTreeNode implements IMessageType {
 	 * If this method is called several times with the same ID, the according
 	 * value is only stored if not yet done.
 	 * 
-	 * The values can be retrieved later with {@link #getDistinctOptions(String)}
+	 * The values can be retrieved later with {@link #getDistinctOptions(int)}
 	 * 
 	 * The following data types are allowed for the value:
 	 * 
@@ -188,7 +188,7 @@ public class MessageTreeNode extends MidicaTreeNode implements IMessageType {
 	 * 
 	 * Returns **null**, if no distinct options with this ID have been added.
 	 * 
-	 * Same as {@link #getDistinctOptions(String, String)} using "**, **" as
+	 * Same as {@link #getDistinctOptions(int, String)} using "**, **" as
 	 * the separator.
 	 * 
 	 * @param id    The option ID.

@@ -55,7 +55,7 @@ public class SingleMessage implements IMessageType, Comparable<SingleMessage> {
 	 * 
 	 * Returns **null**, if no option of the given ID exists.
 	 * 
-	 * Same as {@link #getDistinctOptions(String)}, but necessary in order to
+	 * Same as {@link #getDistinctOptions(int)}, but necessary in order to
 	 * fulfill the interface requirements.
 	 * 
 	 * @param id  The option ID.
@@ -71,7 +71,7 @@ public class SingleMessage implements IMessageType, Comparable<SingleMessage> {
 	 * 
 	 * Returns **null**, if no option of the given ID exists.
 	 * 
-	 * The only difference to {@link #getOption(String)} is the
+	 * The only difference to {@link #getOption(int)} is the
 	 * return type.
 	 * 
 	 * @param id  The option ID.
@@ -90,7 +90,7 @@ public class SingleMessage implements IMessageType, Comparable<SingleMessage> {
 	 * 
 	 * Returns **null**, if no option of the given ID exists.
 	 * 
-	 * Same as {@link #getOption(String)}, but necessary in order to
+	 * Same as {@link #getOption(int)}, but necessary in order to
 	 * fulfill the interface requirements.
 	 * 
 	 * @param id  The option ID.

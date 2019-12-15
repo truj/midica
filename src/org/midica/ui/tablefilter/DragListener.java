@@ -25,7 +25,7 @@ public class DragListener extends MouseInputAdapter {
 	/**
 	 * Remembers the starting point of the dragging.
 	 * 
-	 * @param  the mouse event
+	 * @param e  the mouse event
 	 */
 	@Override
 	public void mousePressed(MouseEvent e) {
@@ -35,7 +35,7 @@ public class DragListener extends MouseInputAdapter {
 	/**
 	 * Moves the component to the new location.
 	 * 
-	 * @param  the mouse event
+	 * @param e  the mouse event
 	 */
 	@Override
 	public void mouseDragged(MouseEvent e) {

@@ -4621,12 +4621,12 @@ public class Dict {
 	/**
 	 * Returns a percussion instrument number by percussion ID.
 	 * 
-	 * @param id    long or short ID of the percussion instrument
-	 * @return      instrument value as defined by the MIDI specification
+	 * @param id  long or short ID of the percussion instrument
+	 * @return    instrument value as defined by the MIDI specification
 	 */
-	public static int getPercussion(String name) {
-		if ( percussionIdToInt.containsKey(name) )
-			return percussionIdToInt.get(name);
+	public static int getPercussion(String id) {
+		if ( percussionIdToInt.containsKey(id) )
+			return percussionIdToInt.get(id);
 		else
 			return UNKNOWN_CODE;
 	}

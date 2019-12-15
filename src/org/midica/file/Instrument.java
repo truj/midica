@@ -182,7 +182,7 @@ public class Instrument implements Comparable<Instrument> {
 	/**
 	 * Sets a new key-press/note-length duration ratio.
 	 * 
-	 * @param duration New duration ratio.
+	 * @param durationRatio  New duration ratio.
 	 */
 	public void setDurationRatio(float durationRatio) {
 		this.durationRatio = durationRatio;
