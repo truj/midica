@@ -36,6 +36,8 @@ import org.midica.midi.MidiDevices;
 import org.midica.midi.MidiListener;
 import org.midica.midi.SequenceAnalyzer;
 import org.midica.midi.SequenceCreator;
+import org.midica.ui.file.DecompileConfigController;
+import org.midica.ui.file.ExportResult;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
 
@@ -80,13 +82,33 @@ public class MidicaPLExporter extends Exporter {
 	
 	private static final String NEW_LINE = System.getProperty("line.separator");
 	
+	// decompile constants
+	public static final byte INLINE = 1;
+	public static final byte BLOCK  = 2;
+	
+	// decompile configuration defaults
+	public static final boolean DEFAULT_MUST_ADD_TICK_COMMENTS   = true;
+	public static final boolean DEFAULT_MUST_ADD_CONFIG          = true;
+	public static final boolean DEFAULT_MUST_ADD_QUALITY_SCORE   = true;
+	public static final boolean DEFAULT_MUST_ADD_STATISTICS      = true;
+	public static final long    DEFAULT_DURATION_TICK_TOLERANCE  = 2;
+	public static final float   DEFAULT_DURATION_RATIO_TOLERANCE = 0.014f;
+	public static final long    DEFAULT_NEXT_NOTE_ON_TOLERANCE   = 3;
+	public static final byte    DEFAULT_ORPHANED_SYLLABLES       = INLINE;
+	public static final boolean DEFAULT_KARAOKE_ONE_CHANNEL      = false;
+	public static final String  DEFAULT_EXTRA_GLOBALS_STR        = "";
+	
 	// decompile configuration
-	public  static final byte    INLINE                   = 1;
-	public  static final byte    BLOCK                    = 2;
-	private static final boolean KARAOKE_ONE_CHANNEL      = false;
-	private static final long    DURATION_TICK_TOLERANCE  = 2;
-	private static final float   DURATION_RATIO_TOLERANCE = 0.014f;
-	private static final long    NEXT_NOTE_ON_TOLERANCE   = 3;
+	private static boolean       MUST_ADD_TICK_COMMENTS   = DEFAULT_MUST_ADD_TICK_COMMENTS;
+	private static boolean       MUST_ADD_CONFIG          = DEFAULT_MUST_ADD_CONFIG;
+	private static boolean       MUST_ADD_QUALITY_SCORE   = DEFAULT_MUST_ADD_QUALITY_SCORE;
+	private static boolean       MUST_ADD_STATISTICS      = DEFAULT_MUST_ADD_STATISTICS;
+	private static long          DURATION_TICK_TOLERANCE  = DEFAULT_DURATION_TICK_TOLERANCE;
+	private static float         DURATION_RATIO_TOLERANCE = DEFAULT_DURATION_RATIO_TOLERANCE;
+	private static long          NEXT_NOTE_ON_TOLERANCE   = DEFAULT_NEXT_NOTE_ON_TOLERANCE;
+	public  static byte          ORPHANED_SYLLABLES       = DEFAULT_ORPHANED_SYLLABLES;
+	private static boolean       KARAOKE_ONE_CHANNEL      = DEFAULT_KARAOKE_ONE_CHANNEL;
+	private static TreeSet<Long> EXTRA_GLOBALS            = null;
 	
 	/* *****************
 	 * class fields
@@ -158,6 +180,9 @@ public class MidicaPLExporter extends Exporter {
 	 */
 	public ExportResult export(File file) throws ExportException {
 		
+		// refresh decompile config
+		refreshConfig();
+		
 		exportResult         = new ExportResult(true);
 		String targetCharset = ((ComboboxStringOption) ConfigComboboxModel.getModel(Config.CHARSET_EXPORT_MPL).getSelectedItem() ).getIdentifier();
 		
@@ -227,6 +252,23 @@ public class MidicaPLExporter extends Exporter {
 		}
 		
 		return exportResult;
+	}
+	
+	/**
+	 * Re-reads all config variables that are relevant for decompilation.
+	 */
+	private void refreshConfig() {
+		HashMap<String, String> sessionConfig = DecompileConfigController.getSessionConfig();
+		MUST_ADD_TICK_COMMENTS   = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_TICK_COMMENTS)   );
+		MUST_ADD_CONFIG          = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_CONFIG)          );
+		MUST_ADD_QUALITY_SCORE   = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_QUALITY_SCORE)   );
+		MUST_ADD_STATISTICS      = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_STATISTICS)      );
+		ORPHANED_SYLLABLES       = Byte.parseByte(       sessionConfig.get(Config.DC_ORPHANED_SYLLABLES)       );
+		KARAOKE_ONE_CHANNEL      = Boolean.parseBoolean( sessionConfig.get(Config.DC_KARAOKE_ONE_CHANNEL)      );
+		DURATION_TICK_TOLERANCE  = Long.parseLong(       sessionConfig.get(Config.DC_DURATION_TICK_TOLERANCE)  );
+		DURATION_RATIO_TOLERANCE = Float.parseFloat(     sessionConfig.get(Config.DC_DURATION_RATIO_TOLERANCE) );
+		NEXT_NOTE_ON_TOLERANCE   = Long.parseLong(       sessionConfig.get(Config.DC_NEXT_NOTE_ON_TOLERANCE)   );
+		EXTRA_GLOBALS            = DecompileConfigController.getExtraGlobalTicks();
 	}
 	
 	/**
@@ -658,7 +700,7 @@ public class MidicaPLExporter extends Exporter {
 			// If we reach this point, there is no matching note/chord.
 			// Add the syllable to the slice using a rest.
 			byte channel = lyricsChannels.get(0);
-			slice.addSyllableRest(tick, syllable, channel, INLINE, sourceResolution);
+			slice.addSyllableRest(tick, syllable, channel, ORPHANED_SYLLABLES, sourceResolution);
 		}
 	}
 	
@@ -1416,7 +1458,8 @@ public class MidicaPLExporter extends Exporter {
 	private String createStatistics() {
 		StringBuilder statLines = new StringBuilder("");
 		
-		statLines.append(MidicaPLParser.COMMENT + "STATISTICS:" + NEW_LINE);
+		if (MUST_ADD_STATISTICS)
+			statLines.append(MidicaPLParser.COMMENT + "STATISTICS:" + NEW_LINE);
 		
 		// channels
 		for (byte channel = 0; channel < 16; channel++) {
@@ -1426,12 +1469,14 @@ public class MidicaPLExporter extends Exporter {
 			if (0 == channelStats.get(STAT_NOTES) && 0 == channelStats.get(STAT_RESTS))
 				continue;
 			
-			statLines.append(MidicaPLParser.COMMENT + " Channel " + channel + ":" + NEW_LINE);
+			if (MUST_ADD_STATISTICS)
+				statLines.append(MidicaPLParser.COMMENT + " Channel " + channel + ":" + NEW_LINE);
 			statLines.append( createStatisticPart(channelStats, false) );
 		}
 		
 		// total
-		statLines.append(MidicaPLParser.COMMENT + " TOTAL:" + NEW_LINE);
+		if (MUST_ADD_STATISTICS)
+			statLines.append(MidicaPLParser.COMMENT + " TOTAL:" + NEW_LINE);
 		statLines.append( createStatisticPart(statistics.get(STAT_TOTAL), true) );
 		
 		return statLines.toString();
@@ -1454,7 +1499,8 @@ public class MidicaPLExporter extends Exporter {
 		// rests
 		{
 			int rests = subStat.get(STAT_RESTS);
-			stats.append(MidicaPLParser.COMMENT + "\t" + "Rests: " + rests + NEW_LINE);
+			if (MUST_ADD_STATISTICS)
+				stats.append(MidicaPLParser.COMMENT + "\t" + "Rests: " + rests + NEW_LINE);
 			
 			// rests / notes
 			int notes = subStat.get(STAT_NOTES);
@@ -1462,7 +1508,8 @@ public class MidicaPLExporter extends Exporter {
 				double restsPercent = ((double) rests) / ((double) (notes));
 				restsPercent *= 100;
 				String restsPercentStr = String.format("%.2f", restsPercent);
-				stats.append(MidicaPLParser.COMMENT + "\t\t" + "Rests/Total: " + subStat.get(STAT_REST_SKIPPED) + " (" + restsPercentStr + "%)" + NEW_LINE);
+				if (MUST_ADD_STATISTICS)
+					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Rests/Total: " + subStat.get(STAT_REST_SKIPPED) + " (" + restsPercentStr + "%)" + NEW_LINE);
 				markerCount++;
 				markerSum += (100.0D - restsPercent);
 			}
@@ -1473,7 +1520,8 @@ public class MidicaPLExporter extends Exporter {
 				double restsSkipped = ((double) subStat.get(STAT_REST_SKIPPED)) / ((double) rests);
 				restsSkipped *= 100;
 				String restsSkippedStr = String.format("%.2f", restsSkipped);
-				stats.append(MidicaPLParser.COMMENT + "\t\t" + "Skipped: " + subStat.get(STAT_REST_SKIPPED) + " (" + restsSkippedStr + "%)" + NEW_LINE);
+				if (MUST_ADD_STATISTICS)
+					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Skipped: " + subStat.get(STAT_REST_SKIPPED) + " (" + restsSkippedStr + "%)" + NEW_LINE);
 				markerCount++;
 				markerSum += (100.0D - restsSkipped);
 				
@@ -1482,7 +1530,8 @@ public class MidicaPLExporter extends Exporter {
 				double summandsPercent = ((double) summands) / ((double) rests);
 				summandsPercent *= 100;
 				String summandsPercentStr = String.format("%.2f", summandsPercent);
-				stats.append(MidicaPLParser.COMMENT + "\t\t" + "Summands: " + summands + " (" + summandsPercentStr + "%)" + NEW_LINE);
+				if (MUST_ADD_STATISTICS)
+					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Summands: " + summands + " (" + summandsPercentStr + "%)" + NEW_LINE);
 				markerCount++;
 				markerSum += 100.0D - (summandsPercent - 100.0D);
 				
@@ -1492,7 +1541,8 @@ public class MidicaPLExporter extends Exporter {
 					double tripletsPercent = ((double) triplets) / ((double) summands);
 					tripletsPercent *= 100;
 					String tripletsStr = String.format("%.2f", tripletsPercent);
-					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Triplets: " + triplets + " (" + tripletsStr + "%)" + NEW_LINE);
+					if (MUST_ADD_STATISTICS)
+						stats.append(MidicaPLParser.COMMENT + "\t\t" + "Triplets: " + triplets + " (" + tripletsStr + "%)" + NEW_LINE);
 					markerCount++;
 					markerSum += (100.0D - tripletsPercent);
 				}
@@ -1502,7 +1552,8 @@ public class MidicaPLExporter extends Exporter {
 		// notes
 		{
 			int notes = subStat.get(STAT_NOTES);
-			stats.append(MidicaPLParser.COMMENT + "\t" + "Notes: " + notes + NEW_LINE);
+			if (MUST_ADD_STATISTICS)
+				stats.append(MidicaPLParser.COMMENT + "\t" + "Notes: " + notes + NEW_LINE);
 			if (notes > 0) {
 				
 				// note summands
@@ -1510,7 +1561,8 @@ public class MidicaPLExporter extends Exporter {
 				double summandsPercent = ((double) summands) / ((double) notes);
 				summandsPercent *= 100;
 				String summandsPercentStr = String.format("%.2f", summandsPercent);
-				stats.append(MidicaPLParser.COMMENT + "\t\t" + "Summands: " + summands + " (" + summandsPercentStr + "%)" + NEW_LINE);
+				if (MUST_ADD_STATISTICS)
+					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Summands: " + summands + " (" + summandsPercentStr + "%)" + NEW_LINE);
 				markerCount++;
 				markerSum += 100.0D - (summandsPercent - 100.0D);
 				
@@ -1520,7 +1572,8 @@ public class MidicaPLExporter extends Exporter {
 					double tripletsPercent = ((double) triplets) / ((double) summands);
 					tripletsPercent *= 100;
 					String tripletsStr = String.format("%.2f", tripletsPercent);
-					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Triplets: " + triplets + " (" + tripletsStr + "%)" + NEW_LINE);
+					if (MUST_ADD_STATISTICS)
+						stats.append(MidicaPLParser.COMMENT + "\t\t" + "Triplets: " + triplets + " (" + tripletsStr + "%)" + NEW_LINE);
 					markerCount++;
 					markerSum += (100.0D - tripletsPercent);
 				}
@@ -1530,7 +1583,8 @@ public class MidicaPLExporter extends Exporter {
 				double velocitiesPercent = ((double) velocities) / ((double) notes);
 				velocitiesPercent *= 100;
 				String velocitiesPercentStr = String.format("%.2f", velocitiesPercent);
-				stats.append(MidicaPLParser.COMMENT + "\t\t" + "Velocity changes: " + velocities + " (" + velocitiesPercentStr + "%)" + NEW_LINE);
+				if (MUST_ADD_STATISTICS)
+					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Velocity changes: " + velocities + " (" + velocitiesPercentStr + "%)" + NEW_LINE);
 				markerCount++;
 				markerSum += (100.0D - velocitiesPercent);
 				
@@ -1539,7 +1593,8 @@ public class MidicaPLExporter extends Exporter {
 				double durationPercent = ((double) durations) / ((double) notes);
 				durationPercent *= 100;
 				String durationPercentStr = String.format("%.2f", durationPercent);
-				stats.append(MidicaPLParser.COMMENT + "\t\t" + "Duration changes: " + durations + " (" + durationPercentStr + "%)" + NEW_LINE);
+				if (MUST_ADD_STATISTICS)
+					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Duration changes: " + durations + " (" + durationPercentStr + "%)" + NEW_LINE);
 				markerCount++;
 				markerSum += (100.0D - durationPercent);
 				
@@ -1548,7 +1603,8 @@ public class MidicaPLExporter extends Exporter {
 				double multiplePercent = ((double) multiple) / ((double) notes);
 				multiplePercent *= 100;
 				String multiplePercentStr = String.format("%.2f", multiplePercent);
-				stats.append(MidicaPLParser.COMMENT + "\t\t" + "Multiple option: " + multiple + " (" + multiplePercentStr + "%)" + NEW_LINE);
+				if (MUST_ADD_STATISTICS)
+					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Multiple option: " + multiple + " (" + multiplePercentStr + "%)" + NEW_LINE);
 				markerCount++;
 				markerSum += (100.0D - multiplePercent);
 			}
@@ -1556,14 +1612,21 @@ public class MidicaPLExporter extends Exporter {
 		
 		// quality score
 		if (isTotal) {
-			stats.append(MidicaPLParser.COMMENT + NEW_LINE);
+			if (MUST_ADD_STATISTICS && MUST_ADD_QUALITY_SCORE)
+				stats.append(MidicaPLParser.COMMENT + NEW_LINE);
 			double totalScore = ((double) markerSum) / markerCount;
 			String totalScoreStr = String.format("%.2f", totalScore);
-			stats.append(MidicaPLParser.COMMENT + " QUALITY SCORE: " + totalScoreStr + NEW_LINE);
+			if (MUST_ADD_QUALITY_SCORE)
+				stats.append(MidicaPLParser.COMMENT + " QUALITY SCORE: " + totalScoreStr + NEW_LINE);
 		}
 		
 		// empty line
-		stats.append(MidicaPLParser.COMMENT + NEW_LINE);
+		if (MUST_ADD_STATISTICS || MUST_ADD_QUALITY_SCORE) {
+			if (isTotal)
+				stats.append(NEW_LINE);
+			else if (MUST_ADD_STATISTICS)
+				stats.append(MidicaPLParser.COMMENT + NEW_LINE);
+		}
 		
 		return stats.toString();
 	}
@@ -2116,7 +2179,7 @@ public class MidicaPLExporter extends Exporter {
 	}
 	
 	/**
-	 * Creates a comment line giving the current tick.
+	 * Creates a comment line giving the current tick - if configured accordingly.
 	 * 
 	 * @param tick        MIDI tickstamp.
 	 * @param mustAppend  **true** for a comment to be appended to a line; **false** for a full-line comment.
@@ -2127,14 +2190,20 @@ public class MidicaPLExporter extends Exporter {
 		// convert source tick to target tick
 		long targetTick = (tick * targetResolution * 10 + 5) / (sourceResolution * 10);
 		
-		String comment = MidicaPLParser.COMMENT + " "
-			+ Dict.get(Dict.EXPORTER_TICK)  + " "
-			+ tick
-			+ " ==> "
-			+ targetTick;
+		String comment = "";
+		if (MUST_ADD_TICK_COMMENTS) {
+			if (mustAppend)
+				comment = "\t\t\t\t";
+			
+			comment += MidicaPLParser.COMMENT + " "
+				+ Dict.get(Dict.EXPORTER_TICK)  + " "
+				+ tick
+				+ " ==> "
+				+ targetTick;
+		}
 		
 		if (mustAppend)
-			return "\t\t\t\t" + comment;
+			return comment;
 		return comment + NEW_LINE;
 	}
 }

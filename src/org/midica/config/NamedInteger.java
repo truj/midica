@@ -19,7 +19,10 @@ public class NamedInteger {
 	public String name;
 	
 	/** Value of the named integer */
-	public int    value;
+	public int value;
+	
+	/** Determines if the number should be displayed as well (false) or not (true). */
+	public boolean hideNumber = false;
 	
 	/**
 	 * Creates a new object without initializing name or integer.
@@ -34,16 +37,33 @@ public class NamedInteger {
 	 * @param name     Name of the integer.
 	 * @param value    Value of the integer.
 	 */
-	public NamedInteger( String name, int value ) {
+	public NamedInteger(String name, int value) {
 		this.name  = name;
 		this.value = value;
 	}
 	
 	/**
-	 * Returns a descriptive string containing number and name.
+	 * Creates a new object and initializes name and value of the integer.
+	 * The additional parameter **hideNumber** determines if the number should be displayed
+	 * together with the name or not. Default is **false** (show both).
+	 * 
+	 * @param name        Name of the integer.
+	 * @param value       Value of the integer.
+	 * @param hideNumber  Hide the number in {@link #toString()} or not
+	 */
+	public NamedInteger(String name, int value, boolean hideNumber) {
+		this(name, value);
+		this.hideNumber = hideNumber;
+	}
+	
+	/**
+	 * Returns a descriptive string containing.
 	 * This is needed if this class is used for combobox or list entries.
 	 */
 	public String toString() {
+		
+		if (hideNumber)
+			return name;
 		
 		// \u00a0 is a non-breaking space.
 		// reason: avoid key binding conflicts in the soundcheck view

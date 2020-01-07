@@ -5,18 +5,22 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.midica.ui;
+package org.midica.ui.file;
 
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
 
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 
 import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.config.KeyBindingManager;
+import org.midica.ui.UiController;
+import org.midica.ui.UiView;
 import org.midica.ui.widget.MidicaFileChooser;
 
 /**
@@ -91,12 +95,13 @@ public class FileSelector extends JDialog {
     			charSetSelect = true;
     		}
 		}
-		fileChooser = new MidicaFileChooser(type, filePurpose, directory, charSetSelect);
+		fileChooser = new MidicaFileChooser(type, filePurpose, directory, charSetSelect, this);
 		
 		fileChooser.setFileFilter( new FileExtensionFilter(type) );
 		fileChooser.setAcceptAllFileFilterUsed(false);
 		fileChooser.addActionListener(controller);
 		add(fileChooser);
+		addKeyBindings();
 		pack();
 		setVisible(false);
 		
@@ -150,13 +155,13 @@ public class FileSelector extends JDialog {
 			if (READ == this.filePurpose) {
 				if ( FILE_TYPE_MIDI.equals(fileType) )
 					Config.set(Config.DIRECTORY_MID, directory);
-    			else if ( FILE_TYPE_SOUNDFONT.equals(fileType) )
+    			else if (FILE_TYPE_SOUNDFONT.equals(fileType))
     				Config.set(Config.DIRECTORY_SF2, directory);
     			else
     				Config.set(Config.DIRECTORY_MPL, directory);
     		}
 			else {
-				if ( FILE_TYPE_MIDI.equals(fileType) )
+				if (FILE_TYPE_MIDI.equals(fileType))
 					Config.set(Config.DIRECTORY_EXPORT_MID, directory);
 				else
     				Config.set(Config.DIRECTORY_EXPORT_MPL, directory);
@@ -164,5 +169,22 @@ public class FileSelector extends JDialog {
 		}
 		catch (IOException e) {
 		}
+	}
+	
+	/**
+	 * Adds key bindings to the info window.
+	 */
+	private void addKeyBindings() {
+		
+		// reset everything
+		KeyBindingManager keyBindingManager = new KeyBindingManager(this, this.getRootPane());
+		
+		// open decompile config
+		JComponent icon = fileChooser.getWidgetByKeyBindingId(Dict.KEY_FILE_SELECT_DC_OPEN);
+		if (icon != null)
+			keyBindingManager.addBindingsForIconLabel(icon, Dict.KEY_FILE_SELECT_DC_OPEN);
+		
+		// set input and action maps
+		keyBindingManager.postprocess();
 	}
 }

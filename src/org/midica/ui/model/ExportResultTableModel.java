@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.midica.config.Dict;
-import org.midica.file.write.ExportResult;
+import org.midica.ui.file.ExportResult;
 
 /**
  * This class represents the data model of export result tables.
@@ -31,7 +31,7 @@ public class ExportResultTableModel extends MidicaTableModel {
 
 	private static final long serialVersionUID = 1L;
 	
-	private ArrayList<HashMap<String, String>> warnings = null;
+	private ArrayList<HashMap<String, Object>> warnings = null;
 	
 	/**
 	 * Creates a new instance of the export result table data model.
@@ -50,6 +50,14 @@ public class ExportResultTableModel extends MidicaTableModel {
 		columnNames[ 2 ] = Dict.get( Dict.WARNING_COL_CHANNEL );
 		columnNames[ 3 ] = Dict.get( Dict.WARNING_COL_NOTE    );
 		columnNames[ 4 ] = Dict.get( Dict.WARNING_COL_MESSAGE );
+		
+		// column classes, used for sorting
+		columnClasses = new Class[ 5 ];
+		columnClasses[ 0 ] = Integer.class;
+		columnClasses[ 1 ] = Long.class;
+		columnClasses[ 2 ] = Byte.class;
+		columnClasses[ 3 ] = String.class;
+		columnClasses[ 4 ] = String.class;
 	}
 	
 	
@@ -75,50 +83,48 @@ public class ExportResultTableModel extends MidicaTableModel {
 	 * @return    Table cell text.
 	 */
 	@Override
-	public Object getValueAt( int rowIndex, int colIndex ) {
+	public Object getValueAt(int rowIndex, int colIndex) {
 		
 		// track
-		if ( 0 == colIndex ) {
-			return warnings.get( rowIndex ).get( "track" );
+		if (0 == colIndex) {
+			return warnings.get(rowIndex).get("track");
 		}
 		
 		// tick
-		else if ( 1 == colIndex ) {
-			return warnings.get( rowIndex ).get( "tick" );
+		else if (1 == colIndex) {
+			return warnings.get(rowIndex).get("tick");
 		}
 		
 		// channel
-		else if ( 2 == colIndex ) {
-			String channel = warnings.get( rowIndex ).get( "channel" );
-			if ( "-1".equals(channel) ) {
+		else if (2 == colIndex) {
+			Integer channel = (Integer) warnings.get(rowIndex).get("channel");
+			if (-1 == channel) {
 				return "-";
 			}
 			return channel;
 		}
 		
 		// note
-		else if ( 3 == colIndex ) {
-			String noteNum = warnings.get( rowIndex ).get( "note" );
-			if ( "-1".equals(noteNum) ) {
+		else if (3 == colIndex) {
+			Integer noteNum = (Integer) warnings.get(rowIndex).get("note");
+			if (-1 == noteNum) {
 				return "-";
 			}
-			String channel = warnings.get( rowIndex ).get( "channel" );
+			Integer channel = (Integer) warnings.get(rowIndex).get("channel");
 			String noteName;
-			if ( "9".equals(channel) )
-				noteName = Dict.getPercussionLongId( Integer.parseInt(noteNum) );
+			if (9 == channel)
+				noteName = Dict.getPercussionLongId(noteNum);
 			else
-				noteName = Dict.getNote( Integer.parseInt(noteNum) );
+				noteName = Dict.getNote(noteNum);
 			return noteNum + ": " + noteName;
 		}
 		
 		// message
-		else if ( 4 == colIndex ) {
-			return warnings.get( rowIndex ).get( "msg" );
+		else if (4 == colIndex) {
+			return warnings.get(rowIndex).get("msg");
 		}
 		
 		// default
 		return "";
 	}
 }
-
-

@@ -117,9 +117,10 @@ public class Laf {
 	private static final Color COLOR_BUTTON_SEC_NIMBUS = new Color( 44, 174, 92 );
 	
 	// text field background colors
-	public  static final Color COLOR_NORMAL = COLOR_WHITE;
-	public  static final Color COLOR_OK     = new Color( 200, 255, 200 );
-	public  static final Color COLOR_ERROR  = new Color( 255, 150, 150 );
+	public  static final Color COLOR_NORMAL  = COLOR_WHITE;
+	public  static final Color COLOR_OK      = new Color( 200, 255, 200 );
+	public  static final Color COLOR_ERROR   = new Color( 255, 150, 150 );
+	public  static final Color COLOR_WARNING = COLOR_SECONDARY_LIGHT;
 	
 	// table header and column colors
 	public  static final Color COLOR_TABLE_HEADER_BG         = COLOR_SECONDARY;
@@ -157,6 +158,12 @@ public class Laf {
 	public static final Color COLOR_TBL_FILTER_ICON_BORDER_ACTIVE   = COLOR_ALERT;
 	public static final Color COLOR_TBL_FILTER_ICON_HOVER_BG_EMPTY  = COLOR_SECONDARY;
 	public static final Color COLOR_TBL_FILTER_ICON_HOVER_BG_ACTIVE = COLOR_SECONDARY;
+	
+	// config icon colors
+	public static final Color COLOR_CONFIG_ICON_BORDER_OK      = COLOR_BORDER;
+	public static final Color COLOR_CONFIG_ICON_BORDER_WRONG   = COLOR_ALERT;
+	public static final Color COLOR_CONFIG_ICON_HOVER_BG_OK    = COLOR_SECONDARY;
+	public static final Color COLOR_CONFIG_ICON_HOVER_BG_WRONG = COLOR_SECONDARY;
 	
 	// tooltip colors
 	private static final Color COLOR_TOOLTIP_FOREGROUND = COLOR_BLACK;

@@ -5,7 +5,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.midica.ui;
+package org.midica.ui.file;
 
 import java.io.File;
 import java.util.ArrayList;

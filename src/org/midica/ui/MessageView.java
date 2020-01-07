@@ -15,6 +15,7 @@ import javax.swing.JFrame;
 
 import org.midica.config.Dict;
 import org.midica.config.KeyBindingManager;
+import org.midica.ui.file.ExportResultView;
 import org.midica.ui.widget.MidicaButton;
 
 /**

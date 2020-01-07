@@ -5,7 +5,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.midica.file.write;
+package org.midica.ui.file;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +20,7 @@ import java.util.TreeMap;
  */
 public class ExportResult {
 	
-	private TreeMap<Long, ArrayList<HashMap<String, String>>> warningMap;
+	private TreeMap<Long, ArrayList<HashMap<String, Object>>> warningMap;
 	private int     numberOfWarnings;
 	private boolean success = true;
 	
@@ -32,7 +32,7 @@ public class ExportResult {
 	 */
 	public ExportResult( boolean success ) {
 		this.success     = success;
-		warningMap       = new TreeMap<Long, ArrayList<HashMap<String, String>>>();
+		warningMap       = new TreeMap<Long, ArrayList<HashMap<String, Object>>>();
 		numberOfWarnings = 0;
 	}
 	
@@ -50,22 +50,22 @@ public class ExportResult {
 		numberOfWarnings++;
 		
 		// create new warning list for the given tick, if this is the first warning at that tick
-		ArrayList<HashMap<String, String>> warningsAtTick;
+		ArrayList<HashMap<String, Object>> warningsAtTick;
 		if ( warningMap.containsKey(tick) ) {
 			warningsAtTick = warningMap.get( tick );
 		}
 		else {
-			warningsAtTick = new ArrayList<HashMap<String, String>>();
+			warningsAtTick = new ArrayList<HashMap<String, Object>>();
 			warningMap.put( tick, warningsAtTick );
 		}
 		
 		// create new warning
-		HashMap<String, String> warning = new HashMap<String, String>();
-		warning.put( "track",   track   + "" );
-		warning.put( "tick",    tick    + "" );
-		warning.put( "channel", channel + "" );
-		warning.put( "note",    note    + "" );
-		warning.put( "msg",     msg          );
+		HashMap<String, Object> warning = new HashMap<String, Object>();
+		warning.put( "track",   track   );
+		warning.put( "tick",    tick    );
+		warning.put( "channel", channel );
+		warning.put( "note",    note    );
+		warning.put( "msg",     msg     );
 		
 		// add the new warning
 		warningsAtTick.add( warning );
@@ -81,10 +81,10 @@ public class ExportResult {
 	 * 
 	 * @return data structure containing all warnings.
 	 */
-	public ArrayList<HashMap<String, String>> getWarnings() {
+	public ArrayList<HashMap<String, Object>> getWarnings() {
 		
 		// transform the warnings into a flat data structure
-		ArrayList<HashMap<String, String>> warnings = new ArrayList<HashMap<String,String>>();
+		ArrayList<HashMap<String, Object>> warnings = new ArrayList<HashMap<String,Object>>();
 		for ( long tick : warningMap.keySet() ) {
 			for ( int i = 0; i < warningMap.get(tick).size(); i++ ) {
 				warnings.add( warningMap.get(tick).get(i) );
@@ -111,6 +111,4 @@ public class ExportResult {
 	public boolean isSuccessful() {
 		return success;
 	}
-	
-	
 }

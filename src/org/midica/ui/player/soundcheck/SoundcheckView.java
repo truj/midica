@@ -763,7 +763,7 @@ public class SoundcheckView extends JDialog {
 		keyBindingManager.addBindingsForButton( this.btnPlay, Dict.KEY_SOUNDCHECK_PLAY );
 		
 		// add bindings for table filters
-		keyBindingManager.addBindingsForTableFilter( this.labelWithFilter, Dict.KEY_SOUNDCHECK_FILTER_INSTR );
+		keyBindingManager.addBindingsForIconLabel( this.labelWithFilter, Dict.KEY_SOUNDCHECK_FILTER_INSTR );
 		
 		// add focus bindings
 		keyBindingManager.addBindingsForFocus( this.tblInstrument, Dict.KEY_SOUNDCHECK_INSTR    );

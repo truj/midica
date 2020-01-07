@@ -454,6 +454,7 @@ public class Dict {
 	public static final String TT_KEY_NOT_CONFIGURED        = "tt_key_not_configured";
 	public static final String TT_KEY_BUTTON_PRESS          = "tt_key_button_press";
 	public static final String TT_KEY_TXT_FLD_FOCUS         = "tt_key_txt_fld_focus";
+	public static final String TT_KEY_TXT_AREA_FOCUS        = "tt_key_txt_area_focus";
 	public static final String TT_KEY_SLD_FOCUS             = "tt_key_sld_focus";
 	public static final String TT_KEY_TREE_FOCUS            = "tt_key_tree_focus";
 	public static final String TT_KEY_TABLE_FOCUS           = "tt_key_table_focus";
@@ -464,6 +465,7 @@ public class Dict {
 	public static final String TT_KEY_CBX_SELECT_CHANNEL_N  = "tt_key_cbx_select_channel_n";
 	public static final String TT_KEY_FILTER_OPEN           = "tt_key_filter_open";
 	public static final String TT_KEY_TAB_SELECT            = "tt_key_tab_select";
+	public static final String TT_KEY_DC_CONFIG_OPEN        = "tt_key_dc_config_open";
 	
 	// key binding categories (windows)
 	public static final String KEYCAT_MAIN                  = "key_main";
@@ -471,6 +473,8 @@ public class Dict {
 	public static final String KEYCAT_SOUNDCHECK            = "key_soundcheck";
 	public static final String KEYCAT_INFO                  = "key_info";
 	public static final String KEYCAT_MSG                   = "key_msg";
+	public static final String KEYCAT_FILE_SELECT           = "key_file_select";
+	public static final String KEYCAT_DC_CONF               = "key_dc_conf";
 	public static final String KEYCAT_STRING_FILTER         = "key_string_filter";
 	
 	// key binding IDs
@@ -663,6 +667,28 @@ public class Dict {
 	public static final String KEY_MSG_CLOSE                = "key_msg_close";
 	public static final String KEY_STRING_FILTER_CLOSE      = "key_string_filter_close";
 	public static final String KEY_STRING_FILTER_CLEAR      = "key_string_filter_clear";
+	public static final String KEY_FILE_SELECT_DC_OPEN      = "key_file_select_dc_config_open";
+	public static final String KEY_DC_CONFIG_CLOSE          = "key_dc_config_close";
+	public static final String KEY_DC_ADD_TICK_COMMENTS     = "key_dc_add_tick_comments";
+	public static final String KEY_DC_ADD_CONFIG            = "key_dc_config";
+	public static final String KEY_DC_ADD_SCORE             = "key_dc_add_score";
+	public static final String KEY_DC_ADD_STATISTICS        = "key_dc_add_statistics";
+	public static final String KEY_DC_TOL_DUR_TICK          = "key_dc_tol_dur_tick";
+	public static final String KEY_DC_TOL_DUR_RATIO         = "key_dc_tol_dur_ratio";
+	public static final String KEY_DC_TOL_NEXT_ON           = "key_dc_tol_next_on";
+	public static final String KEY_DC_KAR_ORPHANED          = "key_dc_kar_orphaned";
+	public static final String KEY_DC_KAR_ONE_CH            = "key_dc_kar_one_ch";
+	public static final String KEY_DC_FLD_GLOB_SINGLE       = "key_dc_fld_glob_single";
+	public static final String KEY_DC_BTN_GLOB_SINGLE       = "key_dc_btn_glob_single";
+	public static final String KEY_DC_FLD_GLOB_EACH         = "key_dc_fld_glob_each";
+	public static final String KEY_DC_FLD_GLOB_FROM         = "key_dc_fld_glob_from";
+	public static final String KEY_DC_FLD_GLOB_TO           = "key_dc_fld_glob_to";
+	public static final String KEY_DC_BTN_GLOB_RANGE        = "key_dc_btn_glob_range";
+	public static final String KEY_DC_AREA_GLOB_ALL         = "key_dc_area_glob_all";
+	public static final String KEY_DC_BTN_GLOB_ALL          = "key_dc_btn_glob_all";
+	public static final String KEY_DC_RESTORE_SAVED         = "key_dc_restore_saved";
+	public static final String KEY_DC_RESTORE_DEFAULT       = "key_dc_restore_default";
+	public static final String KEY_DC_SAVE                  = "key_dc_save";
 	
 	// UiView
 	public static final String TITLE_MAIN_WINDOW           = "title_main";
@@ -713,6 +739,40 @@ public class Dict {
 	public static final String CHARSET_DESC_MID_READ       = "charset_desc_mid_read";
 	public static final String CHARSET_DESC_MPL_WRITE      = "charset_desc_mpl_write";
 	public static final String CHARSET_DESC_MID_WRITE      = "charset_desc_mid_write";
+	
+	// DecompileConfigView
+	public static final String TITLE_DC_CONFIG             = "title_dc_config";
+	public static final String DC_CAT_DEBUG                = "dc_cat_debug";
+	public static final String DC_CAT_TOLERANCE            = "dc_cat_tolerance";
+	public static final String DC_CAT_KARAOKE              = "dc_cat_karaoke";
+	public static final String DC_CAT_SLICE                = "dc_cat_slice";
+	public static final String DC_ADD_TICK_COMMENT         = "dc_add_tick_comment";
+	public static final String DC_ADD_CONFIG               = "dc_add_config";
+	public static final String DC_ADD_SCORE                = "dc_add_score";
+	public static final String DC_ADD_STATISTICS           = "dc_add_statistics";
+	public static final String DURATION_TICK_TOLERANCE     = "duration_tick_tolerance";
+	public static final String DURATION_TICK_TOLERANCE_D   = "duration_tick_tolerance_d";
+	public static final String DURATION_RATIO_TOLERANCE    = "duration_ratio_tolerance";
+	public static final String DURATION_RATIO_TOLERANCE_D  = "duration_ratio_tolerance_d";
+	public static final String NEXT_NOTE_ON_TOLERANCE      = "next_note_on_tolerance";
+	public static final String NEXT_NOTE_ON_TOLERANCE_D    = "next_note_on_tolerance_d";
+	public static final String ORPHANED_SYLLABLES          = "orphaned_syllables";
+	public static final String ORPHANED_SYLLABLES_D        = "orphaned_syllables_d";
+	public static final String DC_INLINE                   = "dc_inline";
+	public static final String DC_BLOCK                    = "dc_block";
+	public static final String KAR_ONE_CHANNEL             = "kar_one_channel";
+	public static final String KAR_ONE_CHANNEL_D           = "kar_one_channel_d";
+	public static final String ADD_GLOBAL_AT_TICK          = "add_global_at_tick";
+	public static final String ADD_GLOBAL_EACH             = "add_global_each";
+	public static final String ADD_GLOBAL_FROM             = "add_global_from";
+	public static final String ADD_GLOBAL_TO               = "add_global_to";
+	public static final String DC_ALL_TICKS                = "dc_all_ticks";
+	public static final String BTN_ADD_TICK                = "btn_add_tick";
+	public static final String BTN_ADD_TICKS               = "btn_add_ticks";
+	public static final String BTN_UPDATE_TICKS            = "btn_update_ticks";
+	public static final String DC_RESTORE                  = "dc_restore";
+	public static final String DC_RESTORE_DEFAULTS         = "dc_restore_defaults";
+	public static final String DC_SAVE                     = "dc_save";
 	
 	// InfoView
 	public static final String TITLE_INFO_VIEW             = "title_info_view";
@@ -1443,6 +1503,9 @@ public class Dict {
 	
 	// FileSelector
 	public static final String TITLE_FILE_SELECTOR              = "title_file_selector";
+	public static final String DC_ICON_TOOLTIP                  = "dc_icon_tooltip";
+	public static final String DC_ICON_TOOLTIP_WRONG            = "dc_icon_tooltip_wrong";
+	public static final String DC_ICON_TOOLTIP_OK               = "dc_icon_tooltip_ok";
 	
 	// PlayerView
 	public static final String TITLE_PLAYER                     = "title_player";
@@ -1543,6 +1606,8 @@ public class Dict {
 		keyBindingCategories.add(KEYCAT_SOUNDCHECK);
 		keyBindingCategories.add(KEYCAT_INFO);
 		keyBindingCategories.add(KEYCAT_MSG);
+		keyBindingCategories.add(KEYCAT_FILE_SELECT);
+		keyBindingCategories.add(KEYCAT_DC_CONF);
 		keyBindingCategories.add(KEYCAT_STRING_FILTER);
 	}
 	
@@ -1603,6 +1668,7 @@ public class Dict {
 		set( TT_KEY_NOT_CONFIGURED,        "No key binding(s) configured"               );
 		set( TT_KEY_BUTTON_PRESS,          "Key binding(s) to press"                    );
 		set( TT_KEY_TXT_FLD_FOCUS,         "Key binding(s) to focus"                    );
+		set( TT_KEY_TXT_AREA_FOCUS,        "Key binding(s) to focus"                    );
 		set( TT_KEY_SLD_FOCUS,             "Key binding(s) to focus"                    );
 		set( TT_KEY_TREE_FOCUS,            "Key binding(s) to focus the tree"           );
 		set( TT_KEY_TABLE_FOCUS,           "Key binding(s) to focus the table"          );
@@ -1613,6 +1679,7 @@ public class Dict {
 		set( TT_KEY_CBX_SELECT_CHANNEL_N,  "Select Channel "                            );
 		set( TT_KEY_FILTER_OPEN,           "Key binding(s) to open"                     );
 		set( TT_KEY_TAB_SELECT,            "Key binding(s) to select"                   );
+		set( TT_KEY_DC_CONFIG_OPEN,        "Key binding(s) to open"                     );
 		
 		// key binding categories (windows)
 		set( KEYCAT_MAIN,                  "Main Window"                                                                 );
@@ -1620,6 +1687,8 @@ public class Dict {
 		set( KEYCAT_SOUNDCHECK,            "Soundcheck"                                                                  );
 		set( KEYCAT_INFO,                  "Info & Configuration"                                                        );
 		set( KEYCAT_MSG,                   "Message Window"                                                              );
+		set( KEYCAT_FILE_SELECT,           "File Selector"                                                               );
+		set( KEYCAT_DC_CONF,               "Decompile Config Window"                                                     );
 		set( KEYCAT_STRING_FILTER,         "Table Filter"                                                                );
 		
 		// key binding IDs
@@ -1812,6 +1881,28 @@ public class Dict {
 		set( KEY_MSG_CLOSE,                "Close the message window"                                                    );
 		set( KEY_STRING_FILTER_CLOSE,      "Close the table filter"                                                      );
 		set( KEY_STRING_FILTER_CLEAR,      "Clear the table filter"                                                      );
+		set( KEY_FILE_SELECT_DC_OPEN,      "Open the Decompile Configuration Window"                                     );
+		set( KEY_DC_CONFIG_CLOSE,          "Close the Decompile Configuration Window"                                    );
+		set( KEY_DC_ADD_TICK_COMMENTS,     "Toggle Checkbox: Add Tick Comments"                                          );
+		set( KEY_DC_ADD_CONFIG,            "Toggle Checkbox: Add Configuration"                                          );
+		set( KEY_DC_ADD_SCORE,             "Toggle Checkbox: Add Quality Score"                                          );
+		set( KEY_DC_ADD_STATISTICS,        "Toggle Checkbox: Add Statistics"                                             );
+		set( KEY_DC_TOL_DUR_TICK,          "Focus the text field for the Duration Tick Tolerance"                        );
+		set( KEY_DC_TOL_DUR_RATIO,         "Focus the text field for the Duration Ratio Tolerance"                       );
+		set( KEY_DC_TOL_NEXT_ON,           "Focus the text field for the Next Note-ON Tolerance"                         );
+		set( KEY_DC_KAR_ORPHANED,          "Open Orphaned Syllables Selection"                                           );
+		set( KEY_DC_KAR_ONE_CH,            "Toggle Checkbox: All Lyrics in One Channel"                                  );
+		set( KEY_DC_FLD_GLOB_SINGLE,       "Focus text field: Add one global cmd at tick..."                             );
+		set( KEY_DC_BTN_GLOB_SINGLE,       "Press Button: Add Single Tick"                                               );
+		set( KEY_DC_FLD_GLOB_EACH,         "Focus text field: Add many global commands (distance)"                       );
+		set( KEY_DC_FLD_GLOB_FROM,         "Focus text field: Add many global commands (from)"                           );
+		set( KEY_DC_FLD_GLOB_TO,           "Focus text field: Add many global commands (to)"                             );
+		set( KEY_DC_BTN_GLOB_RANGE,        "Press Button: Add many global commands"                                      );
+		set( KEY_DC_AREA_GLOB_ALL,         "Focus text area: All Global Command Ticks"                                   );
+		set( KEY_DC_BTN_GLOB_ALL,          "Press Button: Update Ticks"                                                  );
+		set( KEY_DC_RESTORE_SAVED,         "Press the button to restore saved decompile config"                          );
+		set( KEY_DC_RESTORE_DEFAULT,       "Press the button to restore default decompile config"                        );
+		set( KEY_DC_SAVE,                  "Press the button to save the decompile config"                               );
 		
 		// UiView
 		set( CONFIGURATION,                "Configuration"                 );
@@ -1861,6 +1952,40 @@ public class Dict {
 		set( CHARSET_DESC_MID_READ,    "Default encoding of text-based messages in the source file. Used if neither a BOM nor a {@...} tag is found." );
 		set( CHARSET_DESC_MPL_WRITE,   "Encoding of the file to be saved."                    );
 		set( CHARSET_DESC_MID_WRITE,   "Encoding for text-based messages in the target file." );
+		
+		// DecompileConfigView
+		set( TITLE_DC_CONFIG,              "Midica - Decompilation Settings"                  );
+		set( DC_CAT_DEBUG,                 "Debugging"                                        );
+		set( DC_CAT_TOLERANCE,             "Tolerances"                                       );
+		set( DC_CAT_KARAOKE,               "Karaoke Settings"                                 );
+		set( DC_CAT_SLICE,                 "Extra Global Commands"                            );
+		set( DC_ADD_TICK_COMMENT,          "Add Tick Comments"                                );
+		set( DC_ADD_CONFIG,                "Add Configuration"                                );
+		set( DC_ADD_SCORE,                 "Add Quality Score"                                );
+		set( DC_ADD_STATISTICS,            "Add Quality Statistics"                           );
+		set( DURATION_TICK_TOLERANCE,      "Duration Tick Tolerance"                          );
+		set( DURATION_TICK_TOLERANCE_D,    "Tolerance in Ticks for keeping a note's duration" );
+		set( DURATION_RATIO_TOLERANCE,     "Duration Ratio Tolerance"                         );
+		set( DURATION_RATIO_TOLERANCE_D,   "Tolerance fraction for keeping a note's duration" );
+		set( NEXT_NOTE_ON_TOLERANCE,       "Next Note-ON Tolerance"                           );
+		set( NEXT_NOTE_ON_TOLERANCE_D,     "Tolerance in ticks to find out if the strategy 'next note-on' can be used" );
+		set( ORPHANED_SYLLABLES,           "Orphaned Syllables"                                                        );
+		set( ORPHANED_SYLLABLES_D,         "How to treat syllables that appear in a tick without any note-on"          );
+		set( DC_INLINE,                    "Inline"                                                                    );
+		set( DC_BLOCK,                     "Block"                                                                     );
+		set( KAR_ONE_CHANNEL,              "All Lyrics in one channel"                                                 );
+		set( KAR_ONE_CHANNEL_D,            "If checked, all lyrics are put to the same channel"                        );
+		set( ADD_GLOBAL_AT_TICK,           "Add one global command at tick:"                                           );
+		set( ADD_GLOBAL_EACH,              "Add many global commands. Tick distance:"                                  );
+		set( ADD_GLOBAL_FROM,              "...starting from tick:"                                                    );
+		set( ADD_GLOBAL_TO,                "...ending not later than tick:"                                            );
+		set( DC_ALL_TICKS,                 "Edit directly"                                                             );
+		set( BTN_ADD_TICK,                 "Add Single Tick"                                                           );
+		set( BTN_ADD_TICKS,                "Add Tick Range"                                                            );
+		set( BTN_UPDATE_TICKS,             "Update Ticks"                                                              );
+		set( DC_RESTORE,                   "Restore saved settings"                                                    );
+		set( DC_RESTORE_DEFAULTS,          "Restore default settings"                                                  );
+		set( DC_SAVE,                      "Save settings"                                                             );
 		
 		// InfoView
 		set( TITLE_INFO_VIEW,                        "Midica Info"                   );
@@ -2704,6 +2829,9 @@ public class Dict {
 		
 		// FileSelector
 		set( TITLE_FILE_SELECTOR,                 "Midica Choose File"         );
+		set( DC_ICON_TOOLTIP,                     "Decompile Options"          );
+		set( DC_ICON_TOOLTIP_WRONG,               "Config contains errors"     );
+		set( DC_ICON_TOOLTIP_OK,                  "Config formally correct"    );
 		
 		// PlayerView
 		set( TITLE_PLAYER,                        "Midica Player"              );

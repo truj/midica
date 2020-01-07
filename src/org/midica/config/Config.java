@@ -27,6 +27,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.midica.Midica;
+import org.midica.file.write.MidicaPLExporter;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
 import org.midica.ui.model.MidicaTreeModel;
@@ -159,10 +160,23 @@ public class Config {
 	};
 	private static ArrayList<ComboboxStringOption> CBX_INSTRUMENT_OPTIONS = null;
 	
+	// decompile options
+	public static final String DC_MUST_ADD_TICK_COMMENTS   = "dc_must_add_tick_comments";
+	public static final String DC_MUST_ADD_CONFIG          = "dc_must_add_config";
+	public static final String DC_MUST_ADD_QUALITY_SCORE   = "dc_must_add_quality_score";
+	public static final String DC_MUST_ADD_STATISTICS      = "dc_must_add_statistics";
+	public static final String DC_DURATION_TICK_TOLERANCE  = "dc_duration_tick_tolerance";
+	public static final String DC_DURATION_RATIO_TOLERANCE = "dc_duration_ratio_tolerance";
+	public static final String DC_NEXT_NOTE_ON_TOLERANCE   = "dc_next_note_on_tolerance";
+	public static final String DC_ORPHANED_SYLLABLES       = "dc_orphaned_syllables";
+	public static final String DC_KARAOKE_ONE_CHANNEL      = "dc_karaoke_one_channel";
+	public static final String DC_EXTRA_GLOBALS_STR        = "dc_extra_globals_str";
+	
 	// private constants
 	private static File configFile;
 	private static HashMap<String, String>              defaults        = null;
 	private static TreeMap<String, TreeSet<KeyBinding>> defaultBindings = null;
+	private static HashMap<String, String>              dcDefaults      = null;
 	private static TreeMap<String, String>              config          = null;
 	private static TreeMap<String, TreeSet<KeyBinding>> keyBindings     = null;
 	
@@ -232,12 +246,38 @@ public class Config {
 		
 		// init config with defaults
 		config = new TreeMap<>();
-		for ( String key : defaults.keySet() ) {
-			set( key, defaults.get(key) );
+		for (String key : defaults.keySet()) {
+			set(key, defaults.get(key));
+		}
+		
+		// do the same thing with the decompile configuration
+		dcDefaults = getDefaultDecompileConfig();
+		for (String key : dcDefaults.keySet()) {
+			set(key, dcDefaults.get(key));
 		}
 		
 		// do the same thing with key bindings
 		restoreDefaultKeyBindings();
+	}
+	
+	/**
+	 * Initializes all default decompile configuration values and copies them to the current config.
+	 */
+	public static HashMap<String, String> getDefaultDecompileConfig() {
+		HashMap<String, String> dcDefaults = new HashMap<>();
+		
+		dcDefaults.put( DC_MUST_ADD_TICK_COMMENTS,   "" + MidicaPLExporter.DEFAULT_MUST_ADD_TICK_COMMENTS   );
+		dcDefaults.put( DC_MUST_ADD_CONFIG,          "" + MidicaPLExporter.DEFAULT_MUST_ADD_CONFIG          );
+		dcDefaults.put( DC_MUST_ADD_QUALITY_SCORE,   "" + MidicaPLExporter.DEFAULT_MUST_ADD_QUALITY_SCORE   );
+		dcDefaults.put( DC_MUST_ADD_STATISTICS,      "" + MidicaPLExporter.DEFAULT_MUST_ADD_STATISTICS      );
+		dcDefaults.put( DC_DURATION_TICK_TOLERANCE,  "" + MidicaPLExporter.DEFAULT_DURATION_TICK_TOLERANCE  );
+		dcDefaults.put( DC_DURATION_RATIO_TOLERANCE, "" + MidicaPLExporter.DEFAULT_DURATION_RATIO_TOLERANCE );
+		dcDefaults.put( DC_NEXT_NOTE_ON_TOLERANCE,   "" + MidicaPLExporter.DEFAULT_NEXT_NOTE_ON_TOLERANCE   );
+		dcDefaults.put( DC_ORPHANED_SYLLABLES,       "" + MidicaPLExporter.DEFAULT_ORPHANED_SYLLABLES       );
+		dcDefaults.put( DC_KARAOKE_ONE_CHANNEL,      "" + MidicaPLExporter.DEFAULT_KARAOKE_ONE_CHANNEL      );
+		dcDefaults.put( DC_EXTRA_GLOBALS_STR,             MidicaPLExporter.DEFAULT_EXTRA_GLOBALS_STR        );
+		
+		return dcDefaults;
 	}
 	
 	/**
@@ -555,6 +595,29 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_STRING_FILTER_CLOSE,      KeyEvent.VK_ESCAPE,   0                          );
 		addDefaultKeyBinding( Dict.KEY_STRING_FILTER_CLOSE,      KeyEvent.VK_ENTER,    0                          );
 		addDefaultKeyBinding( Dict.KEY_STRING_FILTER_CLEAR,      KeyEvent.VK_C,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECT_DC_OPEN,      KeyEvent.VK_C,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_DC_CONFIG_CLOSE,          KeyEvent.VK_ESCAPE,   0                          );
+		addDefaultKeyBinding( Dict.KEY_DC_ADD_TICK_COMMENTS,     KeyEvent.VK_C,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_DC_ADD_CONFIG,            KeyEvent.VK_C,        InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK );
+		addDefaultKeyBinding( Dict.KEY_DC_ADD_SCORE,             KeyEvent.VK_S,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_DC_ADD_STATISTICS,        KeyEvent.VK_S,        InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK );
+		addDefaultKeyBinding( Dict.KEY_DC_TOL_DUR_TICK,          KeyEvent.VK_T,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_TOL_DUR_RATIO,         KeyEvent.VK_R,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_TOL_NEXT_ON,           KeyEvent.VK_N,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_KAR_ORPHANED,          KeyEvent.VK_O,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_KAR_ONE_CH,            KeyEvent.VK_O,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_DC_FLD_GLOB_SINGLE,       KeyEvent.VK_A,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_DC_BTN_GLOB_SINGLE,       KeyEvent.VK_A,        InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
+		addDefaultKeyBinding( Dict.KEY_DC_FLD_GLOB_EACH,         KeyEvent.VK_E,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_DC_FLD_GLOB_FROM,         KeyEvent.VK_S,        InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
+		addDefaultKeyBinding( Dict.KEY_DC_FLD_GLOB_TO,           KeyEvent.VK_E,        InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
+		addDefaultKeyBinding( Dict.KEY_DC_BTN_GLOB_RANGE,        KeyEvent.VK_R,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_DC_AREA_GLOB_ALL,         KeyEvent.VK_E,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_BTN_GLOB_ALL,          KeyEvent.VK_U,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_RESTORE_SAVED,         KeyEvent.VK_R,        InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK );
+		addDefaultKeyBinding( Dict.KEY_DC_RESTORE_DEFAULT,       KeyEvent.VK_D,        InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK );
+		addDefaultKeyBinding( Dict.KEY_DC_SAVE,                  KeyEvent.VK_S,        InputEvent.CTRL_DOWN_MASK  );
+		
 		
 		// init key bindings with defaults
 		keyBindings = new TreeMap<>();
@@ -593,24 +656,24 @@ public class Config {
 			return;
 		}
 		
-		if ( configFile.canRead() ) {
+		if (configFile.canRead()) {
 			try {
 				// open file for reading
-				FileReader     fr = new FileReader( configFile );
-				BufferedReader br = new BufferedReader( fr );
+				FileReader     fr = new FileReader(configFile);
+				BufferedReader br = new BufferedReader(fr);
 				String line;
 				
 				// parse line by line
-				while ( null != (line = br.readLine()) ) {
-					parseConfig( line );
+				while (null != (line = br.readLine())) {
+					parseConfig(line);
 				}
 				
 				br.close();
 			}
-			catch ( FileNotFoundException e ) {
+			catch (FileNotFoundException e) {
 				e.printStackTrace();
 			}
-			catch ( IOException e ) {
+			catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -635,34 +698,41 @@ public class Config {
 			}
 			
 			// write config if possible
-			if ( configFile.canWrite() ) {
-				FileWriter     fw = new FileWriter( configFile );
-				BufferedWriter bw = new BufferedWriter( fw );
+			if (configFile.canWrite()) {
+				FileWriter     fw = new FileWriter(configFile);
+				BufferedWriter bw = new BufferedWriter(fw);
 				
 				// normal config
-				for ( String key : defaults.keySet() ) {
-					String value = config.get( key );
-					bw.write( key + " " + value );
+				for (String key : defaults.keySet()) {
+					String value = config.get(key);
+					bw.write(key + " " + value);
+					bw.newLine();
+				}
+				
+				// decompile config
+				for (String key : dcDefaults.keySet()) {
+					String value = config.get(key);
+					bw.write(key + " " + value);
 					bw.newLine();
 				}
 				
 				// key bindings
-				for ( String key : keyBindings.keySet() ) {
-					String value = config.get( key );
+				for (String key : keyBindings.keySet()) {
+					String value = config.get(key);
 					if (null == value) {
 						continue;
 					}
-					bw.write( key + " " + value );
+					bw.write(key + " " + value);
 					bw.newLine();
 				}
 				
 				bw.close();
 			}
 		}
-		catch ( FileNotFoundException e ) {
+		catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		catch ( IOException e ) {
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
@@ -673,9 +743,9 @@ public class Config {
 	 * 
 	 * @param line The line of the config file to be parsed
 	 */
-	private static void parseConfig( String line ) {
+	private static void parseConfig(String line) {
 		line = line.replaceFirst( "\\s+$", "" ); // eliminate trailing whitespaces
-		String[] splitted = line.split( " ", 2 );
+		String[] splitted = line.split(" ", 2);
 		try {
 			String name = splitted[0];
 			String value;

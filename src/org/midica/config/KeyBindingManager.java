@@ -33,6 +33,7 @@ import javax.swing.JList;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JViewport;
 import javax.swing.KeyStroke;
@@ -42,6 +43,7 @@ import javax.swing.event.ChangeListener;
 import org.midica.ui.ErrorMsgView;
 import org.midica.ui.tablefilter.FilterIcon;
 import org.midica.ui.tablefilter.FilterIconWithLabel;
+import org.midica.ui.widget.DecompileConfigIcon;
 import org.midica.ui.widget.MidicaButton;
 import org.midica.ui.widget.MidicaTable;
 import org.midica.ui.widget.MidicaTree;
@@ -177,6 +179,8 @@ public class KeyBindingManager {
 			addTooltip(comp, id, Dict.TT_KEY_TREE_FOCUS);
 		else if (comp instanceof JList)
 			addTooltip(comp, id, Dict.TT_KEY_LIST_FOCUS);
+		else if (comp instanceof JTextArea)
+			addTooltip(comp, id, Dict.TT_KEY_TXT_AREA_FOCUS);
 		
 		// fill action map
 		actionMap.put(id, new AbstractAction() {
@@ -348,16 +352,18 @@ public class KeyBindingManager {
 	}
 	
 	/**
-	 * Adds a key binding for a table string filter to be opened.
-	 * The given filter icon can be an element of one of the following classes:
+	 * Adds a key binding for an icon label that's used to open a window or layer.
 	 * 
-	 * - {@link FilterIconWithLabel}
-	 * - {@link FilterIcon}
+	 * The given icon can be an element of one of the following classes:
 	 * 
-	 * @param icon  the icon belonging to the string filter to be opened
+	 * - {@link FilterIconWithLabel} - opens a table string filter
+	 * - {@link FilterIcon} - opens a table string filter
+	 * - {@link DecompileConfigIcon} - opens the decompile configuration window
+	 * 
+	 * @param icon  the icon belonging
 	 * @param id    the key binding ID
 	 */
-	public void addBindingsForTableFilter(JComponent icon, String id) {
+	public void addBindingsForIconLabel(JComponent icon, String id) {
 		
 		// fill input map
 		addInputs(id);
@@ -370,6 +376,10 @@ public class KeyBindingManager {
 		else if (icon instanceof FilterIcon) {
 			((FilterIcon) icon).rememberKeyBindingId(id, Dict.TT_KEY_FILTER_OPEN);
 			addTooltip(icon, id, Dict.TT_KEY_FILTER_OPEN);
+		}
+		else if (icon instanceof DecompileConfigIcon) {
+			((DecompileConfigIcon) icon).rememberKeyBindingId(id, Dict.TT_KEY_DC_CONFIG_OPEN);
+			addTooltip(icon, id, Dict.TT_KEY_DC_CONFIG_OPEN);
 		}
 		
 		// fill action map
@@ -387,6 +397,8 @@ public class KeyBindingManager {
 					((FilterIconWithLabel) icon).open();
 				else if (icon instanceof FilterIcon)
 					((FilterIcon) icon).open();
+				else if (icon instanceof DecompileConfigIcon)
+					((DecompileConfigIcon) icon).open();
 			}
 		});
 	}

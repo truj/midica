@@ -6,7 +6,7 @@
  */
 
 package org.midica.ui.tablefilter;
-import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -131,14 +131,15 @@ public class StringFilterLayer extends JDialog implements WindowListener, Window
 	 * Initializes the content of the filter layer.
 	 */
 	private void init() {
-
+		
 		// background
-		JRootPane content = getRootPane();
-		content.setBackground(Laf.COLOR_TBL_FILTER_LAYER_BACKGROUND);
-		content.setBorder(new RoundedBorder(ARC_WIDTH, ARC_HEIGHT, BORDER_WIDTH, Laf.COLOR_BORDER));
-		content.setOpaque(true);
+		JRootPane rootPane = getRootPane();
+		rootPane.setBackground(Laf.COLOR_TBL_FILTER_LAYER_BACKGROUND);
+		rootPane.setBorder(new RoundedBorder(ARC_WIDTH, ARC_HEIGHT, BORDER_WIDTH, Laf.COLOR_BORDER));
+		rootPane.setOpaque(true);
 		
 		// layout
+		Container content = getRootPane();
 		content.setLayout(new GridBagLayout());
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.NONE;
@@ -152,7 +153,6 @@ public class StringFilterLayer extends JDialog implements WindowListener, Window
 		
 		// label
 		JLabel label = new JLabel( Dict.get(Dict.FILTER_LAYER_LABEL) );
-		label.setBackground(Color.ORANGE);
 		Laf.makeBold(label);
 		content.add(label, constraints);
 		

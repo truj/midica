@@ -5,7 +5,7 @@
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.midica.ui;
+package org.midica.ui.file;
 
 import java.awt.Container;
 import java.awt.Dimension;
@@ -19,11 +19,10 @@ import javax.swing.JScrollPane;
 
 import org.midica.config.Dict;
 import org.midica.config.Laf;
-import org.midica.file.write.ExportResult;
+import org.midica.ui.MessageView;
 import org.midica.ui.model.ExportResultTableModel;
 import org.midica.ui.renderer.MidicaTableCellRenderer;
 import org.midica.ui.widget.MidicaTable;
-
 
 /**
  * This class provides a window for showing the result of file exports.
@@ -52,7 +51,7 @@ public class ExportResultView extends MessageView {
 	 * @param owner    The parent window (Player).
 	 */
 	public ExportResultView(JDialog owner) {
-		super( owner, Dict.get(Dict.TITLE_EXPORT_RESULT) );
+		super(owner, Dict.get(Dict.TITLE_EXPORT_RESULT));
 	}
 	
 	/**
@@ -62,7 +61,7 @@ public class ExportResultView extends MessageView {
 	 * @param owner    The parent window (main window).
 	 */
 	public ExportResultView(JFrame owner) {
-		super( owner, Dict.get(Dict.TITLE_EXPORT_RESULT) );
+		super(owner, Dict.get(Dict.TITLE_EXPORT_RESULT));
 	}
 	
 	/**
@@ -70,13 +69,13 @@ public class ExportResultView extends MessageView {
 	 * 
 	 * @param result    Export result.
 	 */
-	public void init( ExportResult result ) {
+	public void init(ExportResult result) {
 		// content
 		content = getContentPane();
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
-		content.setLayout( layout );
+		content.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
 		constraints.insets     = Laf.INSETS_NWE;
@@ -89,25 +88,25 @@ public class ExportResultView extends MessageView {
 		
 		// show success message
 		JLabel successLbl = new JLabel( Dict.get(Dict.EXPORT_SUCCESS) );
-		content.add( successLbl, constraints );
+		content.add(successLbl, constraints);
 		
 		// show number of warnings
 		constraints.gridy++;
 		JLabel warningCountLbl = new JLabel( Dict.get(Dict.NUMBER_OF_WARNINGS) + " " +  result.countWarnings() );
-		content.add( warningCountLbl, constraints );
+		content.add(warningCountLbl, constraints);
 		
 		// scrollable warning table
 		int tableWidth = COL_WIDTH_TRACK + COL_WIDTH_TICK + COL_WIDTH_CHANNEL + COL_WIDTH_NOTE + COL_WIDTH_MSG;
-		this.tableDim  = new Dimension( tableWidth, TABLE_HEIGHT );
-		if ( result.countWarnings() > 0 ) {
+		this.tableDim  = new Dimension(tableWidth, TABLE_HEIGHT);
+		if (result.countWarnings() > 0) {
     		constraints.gridy++;
     		constraints.weighty = 1;
     		MidicaTable table   = new MidicaTable();
-    		table.setModel( new ExportResultTableModel(result) );
-    		table.setDefaultRenderer( Object.class, new MidicaTableCellRenderer() );
-    		JScrollPane scroll = new JScrollPane( table );
-    		scroll.setPreferredSize( tableDim );
-    		content.add( scroll, constraints );
+    		table.setModel(new ExportResultTableModel(result));
+    		table.setDefaultRenderer(Object.class, new MidicaTableCellRenderer());
+    		JScrollPane scroll = new JScrollPane(table);
+    		scroll.setPreferredSize(tableDim);
+    		content.add(scroll, constraints);
     		
     		// set column sizes
     		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_TRACK   );
@@ -122,10 +121,10 @@ public class ExportResultView extends MessageView {
 		// close button
 		constraints.gridy++;
 		constraints.insets = Laf.INSETS_SWE;
-		content.add( createCloseButton(), constraints );
+		content.add(createCloseButton(), constraints);
 		super.addKeyBindings();
 		
 		pack();
-		setVisible( true );
+		setVisible(true);
 	}
 }

@@ -23,6 +23,7 @@ import org.midica.file.CharsetUtils;
 import org.midica.midi.MidiDevices;
 import org.midica.midi.MidiListener;
 import org.midica.midi.SequenceCreator;
+import org.midica.ui.file.ExportResult;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
 
