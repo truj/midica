@@ -9,6 +9,7 @@ package org.midica.file.read;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -27,9 +28,6 @@ import javax.sound.sampled.AudioInputStream;
 
 import org.midica.config.Dict;
 import org.midica.midi.MidiDevices;
-
-import com.sun.media.sound.SF2Instrument;
-import com.sun.media.sound.SF2Soundbank;
 
 /**
  * This class is used in order to load a user-defined soundfont file.
@@ -219,17 +217,30 @@ public class SoundfontParser implements IParser {
 		generalInfo.put( "description", description != null ? description : unknown );
 		
 		// get sf2 specific information
-		if ( soundfont instanceof SF2Soundbank ) {
-			SF2Soundbank sf2    = (SF2Soundbank) soundfont;
-			String creationDate = sf2.getCreationDate();
-			String tools        = sf2.getTools();
-			String product      = sf2.getProduct();
-			String targetEngine = sf2.getTargetEngine();
-			generalInfo.put( "creation_date", creationDate != null ? creationDate : unknown );
-			generalInfo.put( "tools",         tools        != null ? tools        : unknown );
-			generalInfo.put( "product",       product      != null ? product      : unknown );
-			generalInfo.put( "target_engine", targetEngine != null ? targetEngine : unknown );
+		String creationDate    = unknown;
+		String tools           = unknown;
+		String product         = unknown;
+		String targetEngine    = unknown;
+		try {
+			Method getCreationDate = soundfont.getClass().getMethod("getCreationDate");
+			Method getTools        = soundfont.getClass().getMethod("getTools");
+			Method getProduct      = soundfont.getClass().getMethod("getProduct");
+			Method getTargetEngine = soundfont.getClass().getMethod("getTargetEngine");
+			creationDate = (String) getCreationDate.invoke(soundfont, (Object[]) null);
+			tools        = (String) getTools.invoke(soundfont, (Object[]) null);
+			product      = (String) getProduct.invoke(soundfont, (Object[]) null);
+			targetEngine = (String) getTargetEngine.invoke(soundfont, (Object[]) null);
 		}
+		catch(Exception e) {
+		}
+		creationDate = null == creationDate ? unknown : creationDate;
+		tools        = null == tools        ? unknown : tools;
+		product      = null == product      ? unknown : product;
+		targetEngine = null == targetEngine ? unknown : targetEngine;
+		generalInfo.put( "creation_date", creationDate );
+		generalInfo.put( "tools",         tools        );
+		generalInfo.put( "product",       product      );
+		generalInfo.put( "target_engine", targetEngine );
 		
 		// count instruments and drumkits
 		int chromaticCount    = 0;
@@ -348,32 +359,55 @@ public class SoundfontParser implements IParser {
 			Instrument midiInstr = instruments[ i ];
 			Patch      patch     = midiInstr.getPatch();
 			int        bank      = patch.getBank();
+			int        bankMsb   = bank >> 7;
+			int        bankLsb   = bank & 0b00000000_01111111;
 			int        program   = patch.getProgram();
-			instrument.put( "name",     midiInstr.getName()                          );
-			instrument.put( "program",  Integer.toString(program)                    );
-			instrument.put( "bank",     Integer.toString(bank)                       );
-			instrument.put( "bank_msb", Integer.toString(bank >> 7)                  );
-			instrument.put( "bank_lsb", Integer.toString(bank & 0b00000000_01111111) );
+			instrument.put( "name",     midiInstr.getName()       );
+			instrument.put( "program",  Integer.toString(program) );
+			instrument.put( "bank",     Integer.toString(bank)    );
+			instrument.put( "bank_msb", Integer.toString(bankMsb) );
+			instrument.put( "bank_lsb", Integer.toString(bankLsb) );
 			
-			// add class specific instrument data
-			if ( ! (midiInstr instanceof SF2Instrument) ) {
-				
-				// unknown class
+			// prepare syntax
+			String syntaxDrum = Dict.getDrumkit(program);
+			if ( Dict.get(Dict.UNKNOWN_INSTRUMENT).equals(syntaxDrum) )
+				syntaxDrum = instrument.get("program");
+			String syntaxChrom = Dict.getInstrument(program);
+			if ( Dict.get(Dict.UNKNOWN_DRUMKIT_NAME).equals(syntaxChrom) )
+				syntaxChrom = instrument.get("program");
+			String postfix = "";
+			if (bankLsb != 0)
+				// TODO: test with a soundfont that uses the LSB
+				postfix = Dict.getSyntax(Dict.SYNTAX_PROG_BANK_SEP) + bankMsb + Dict.getSyntax(Dict.SYNTAX_BANK_SEP) + bankLsb;
+			else if (bankMsb != 0)
+				postfix = Dict.getSyntax(Dict.SYNTAX_PROG_BANK_SEP) + bankMsb;
+			syntaxDrum  += postfix;
+			syntaxChrom += postfix;
+			
+			// get channels and keys
+			boolean[] sf2Channels = null;
+			String[]  sf2keys     = null;
+			try {
+				Method getChannels = midiInstr.getClass().getMethod("getChannels");
+				Method getKeys     = midiInstr.getClass().getMethod("getKeys");
+				sf2Channels = (boolean[]) getChannels.invoke(midiInstr, (Object[]) null);
+				sf2keys     = (String[]) getKeys.invoke(midiInstr, (Object[]) null);
+			}
+			catch(Exception e) {
 				needCategoryUnknown = true;
 				instrument.put( "channels",      "-"  );
 				instrument.put( "channels_long", "-1" );
 				instrument.put( "keys",          "-"  );
 				instrument.put( "type",          "-"  );
+				instrument.put( "syntax", syntaxChrom + " / " + syntaxDrum );
 				
 				continue;
 			}
 			
-			// get channels
+			// process channels
 			boolean            hasChromaticChannel = false;
 			boolean            hasDrumChannel      = false;
-			SF2Instrument      sf2Instr    = (SF2Instrument) midiInstr;
-			boolean[]          sf2Channels = sf2Instr.getChannels();
-			ArrayList<Integer> channels    = new ArrayList<Integer>();
+			ArrayList<Integer> channels            = new ArrayList<Integer>();
 			for ( int channel = 0; channel < sf2Channels.length; channel++ ) {
 				
 				// channel not supported?
@@ -400,22 +434,11 @@ public class SoundfontParser implements IParser {
 			instrument.put( "channels_long", channelsStr.toString() ); // e.g. "0,1,2,3,4,5,6,7,8,10,11,12,13,14,15"
 			
 			// add syntax name
-			String syntax;
-			if (hasDrumChannel) {
-				syntax = Dict.getDrumkit( program );
-				if ( Dict.get(Dict.UNKNOWN_INSTRUMENT).equals(syntax) )
-					syntax = instrument.get("program");
-			}
-			else {
-				syntax = Dict.getInstrument( program );
-				if ( Dict.get(Dict.UNKNOWN_DRUMKIT_NAME).equals(syntax) )
-					syntax = instrument.get("program");
-			}
+			String syntax = hasDrumChannel ? syntaxDrum : syntaxChrom;
 			instrument.put( "syntax", syntax );
 			
-			// get keys
+			// process keys
 			ArrayList<Integer> keys = new ArrayList<Integer>();
-			String[] sf2keys = sf2Instr.getKeys();
 			for ( int key = 0; key < sf2keys.length; key++ ) {
 				
 				// key not available?

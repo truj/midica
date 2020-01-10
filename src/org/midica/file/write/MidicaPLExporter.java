@@ -36,12 +36,11 @@ import org.midica.midi.MidiDevices;
 import org.midica.midi.MidiListener;
 import org.midica.midi.SequenceAnalyzer;
 import org.midica.midi.SequenceCreator;
+import org.midica.midi.Tempo;
 import org.midica.ui.file.DecompileConfigController;
 import org.midica.ui.file.ExportResult;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
-
-import com.sun.media.sound.MidiUtils;
 
 /**
  * This class is used to export the currently loaded MIDI sequence as a MidicaPL source file.
@@ -519,8 +518,7 @@ public class MidicaPLExporter extends Exporter {
 					byte[] data   = metaMsg.getData();
 					
 					if (MidiListener.META_SET_TEMPO == type) {
-						int    mpq    = MidiUtils.getTempoMPQ(metaMsg);
-						int    bpm    = (int) MidiUtils.convertTempo(mpq);
+						int    bpm    = Tempo.getBpm(metaMsg);
 						String bpmStr = Integer.toString(bpm);
 						currentSlice  = addSliceIfNecessary(tick, "tempo", bpmStr);
 					}

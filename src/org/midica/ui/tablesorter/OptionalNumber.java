@@ -35,7 +35,7 @@ public class OptionalNumber implements Comparable<OptionalNumber> {
 				this.display = (String) value;
 				this.value   = Long.parseLong(display);
 			}
-			catch(NumberFormatException e) {
+			catch (NumberFormatException e) {
 				this.value = -1L;
 			}
 		}
@@ -51,7 +51,7 @@ public class OptionalNumber implements Comparable<OptionalNumber> {
 	
 	@Override
 	public int compareTo(OptionalNumber o) {
-		return value.compareTo( o.value );
+		return value.compareTo(o.value);
 	}
 	
 	/**

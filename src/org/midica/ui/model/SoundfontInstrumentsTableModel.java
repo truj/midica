@@ -30,7 +30,7 @@ import org.midica.ui.tablesorter.OptionalNumber;
  * The bank column is special. A bank can consist of 2 bytes. However in most cases
  * only the MSB is used. In these cases we show only the MSB.
  * If the LSB is not 0, we show both, MSB and LSB, separated by the currently
- * configured separator bank separator syntax element.
+ * configured bank separator syntax element.
  * 
  * @author Jan Trukenmüller
  */
@@ -75,7 +75,7 @@ public class SoundfontInstrumentsTableModel extends MidicaTableModel {
 	 */
 	@Override
 	public int getRowCount() {
-		if ( null == instruments )
+		if (null == instruments)
 			return 0;
 		return instruments.size();
 	}
@@ -88,16 +88,16 @@ public class SoundfontInstrumentsTableModel extends MidicaTableModel {
 	 * @return    Table cell text.
 	 */
 	@Override
-	public Object getValueAt( int rowIndex, int colIndex ) {
+	public Object getValueAt(int rowIndex, int colIndex) {
 		
 		// program number
-		if ( 0 == colIndex ) {
-			Object value = instruments.get( rowIndex ).get( "program" );
+		if (0 == colIndex) {
+			Object value = instruments.get(rowIndex).get("program");
 			return new OptionalNumber(value);
 		}
 		
 		// bank number
-		else if ( 1 == colIndex ) {
+		else if (1 == colIndex) {
 			
 			// Don't show the bank number if it's a category.
 			boolean isCategory = instruments.get( rowIndex ).get("category") != null;
@@ -110,25 +110,33 @@ public class SoundfontInstrumentsTableModel extends MidicaTableModel {
 				return new OptionalNumber( instruments.get(rowIndex).get("bank_msb") );
 			
 			// show MSB and LSB, separated according to the configured syntax
-			String display = instruments.get( rowIndex ).get( "bank_msb" )
+			String display = instruments.get(rowIndex).get("bank_msb")
 			     + Dict.getSyntax( Dict.SYNTAX_BANK_SEP )
-			     + instruments.get( rowIndex ).get( "bank_lsb" );
+			     + instruments.get(rowIndex).get("bank_lsb");
 			return new OptionalNumber(display);
 		}
 		
 		// name
-		else if ( 2 == colIndex ) {
-			return instruments.get( rowIndex ).get( "name" );
+		else if (2 == colIndex) {
+			return instruments.get(rowIndex).get("name");
 		}
 		
 		// channels
-		else if ( 3 == colIndex ) {
-			return instruments.get( rowIndex ).get( "channels" );
+		else if (3 == colIndex) {
+			String txt = instruments.get(rowIndex).get("channels");
+			if ("-".equals(txt)) {
+				return Dict.get(Dict.UNKNOWN);
+			}
+			return txt;
 		}
 		
 		// keys (notes)
-		else if ( 4 == colIndex ) {
-			return instruments.get( rowIndex ).get( "keys" );
+		else if (4 == colIndex) {
+			String txt = instruments.get(rowIndex).get("keys");
+			if ("-".equals(txt)) {
+				return Dict.get(Dict.UNKNOWN);
+			}
+			return txt;
 		}
 		
 		// default

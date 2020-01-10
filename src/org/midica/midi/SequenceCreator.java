@@ -26,8 +26,6 @@ import org.midica.file.CharsetUtils;
 import org.midica.file.read.MidiParser;
 import org.midica.file.read.MidicaPLParser;
 
-import com.sun.media.sound.MidiUtils;
-
 /**
  * This class is used to create a MIDI sequence. It is used by one of the parser methods while
  * parsing a MidicaPL or MIDI file.
@@ -276,7 +274,7 @@ public class SequenceCreator {
 	 */
 	public static void addMessageTempo(int bpm, long tick) throws InvalidMidiDataException {
 		// bpm (beats per minute) --> mpq (microseconds per quarter)
-		int mpq = (int) MidiUtils.convertTempo( bpm );
+		int mpq = Tempo.bpmToMpq(bpm);
 		int cmd = MidiListener.META_SET_TEMPO;
 		
 		MetaMessage msg = new MetaMessage();
@@ -285,9 +283,9 @@ public class SequenceCreator {
 		data[ 1 ] = (byte) ( (mpq >>  8) & 0xFF );
 		data[ 2 ] = (byte) (  mpq        & 0xFF );
 		
-		msg.setMessage( cmd, data, data.length );
-		MidiEvent event = new MidiEvent( msg, tick );
-		tracks[ 0 ].add( event );
+		msg.setMessage(cmd, data, data.length);
+		MidiEvent event = new MidiEvent(msg, tick);
+		tracks[0].add(event);
 	}
 	
 	/**

@@ -81,22 +81,33 @@ public class SoundcheckInstrumentModel extends MidicaTableModel {
 		
 		// process instruments
 		HashMap<String, String> currentMainCategory = null;
+		String currentMainCategoryType = null;
 		INSTRUMENT:
 		for ( HashMap<String, String> sfInstr : sfInstruments ) {
 			
 			// main category
 			if ( sfInstr.containsKey("category") ) {
+				
 				// Do not yet add the category to the list because we don't yet
 				// know if it contains instruments that are supported for the
 				// current channel.
-				currentMainCategory = sfInstr;
+				currentMainCategory     = sfInstr;
+				currentMainCategoryType = sfInstr.get("type");
 				continue INSTRUMENT;
 			}
 			
 			// instrument supported by the selected channel?
-			boolean isSupported = isChannelSupported( channel, sfInstr );
-			if ( ! isSupported )
-				continue INSTRUMENT;
+			boolean isSupported = isChannelSupported(channel, sfInstr);
+			if ( ! isSupported ) {
+				
+				// unknown category: probably java version > 8
+				if ("category_unknown".equals(currentMainCategoryType)) {
+					// don't ignore - otherwise the soundcheck will not work at all
+				}
+				else {
+					continue INSTRUMENT;
+				}
+			}
 			
 			// add last remembered main category, if not yet done
 			if ( currentMainCategory != null ) {
@@ -202,16 +213,7 @@ public class SoundcheckInstrumentModel extends MidicaTableModel {
 		}
 		else if ( 3 == col ) {
 			// syntax
-			if ( rowObj.get("bank").equals("0") )
-				return rowObj.get("syntax");
-			else if ( rowObj.get("bank_lsb").equals("0") )
-				return rowObj.get("syntax") + Dict.getSyntax( Dict.SYNTAX_PROG_BANK_SEP )
-				     + rowObj.get("bank_msb");
-			else
-				// TODO: test with a soundfont that uses the LSB
-				return rowObj.get("syntax")   + Dict.getSyntax( Dict.SYNTAX_PROG_BANK_SEP )
-				     + rowObj.get("bank_msb") + Dict.getSyntax( Dict.SYNTAX_BANK_SEP )
-				     + rowObj.get("bank_lsb");
+			return rowObj.get("syntax");
 		}
 		
 		// fallback

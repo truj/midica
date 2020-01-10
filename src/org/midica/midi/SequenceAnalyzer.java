@@ -38,8 +38,6 @@ import org.midica.ui.model.SingleMessage;
 import org.midica.ui.model.MessageTreeNode;
 import org.midica.ui.model.MidicaTreeModel;
 
-import com.sun.media.sound.MidiUtils;
-
 /**
  * This class analyzes a MIDI sequence and collects information from it.
  * This information can be displayed later by the {@link org.midica.ui.info.InfoView}
@@ -618,8 +616,8 @@ public class SequenceAnalyzer {
 		
 		// TEMPO
 		if (MidiListener.META_SET_TEMPO == type) {
-			int mpq = MidiUtils.getTempoMPQ(msg);
-			int bpm = (int) MidiUtils.convertTempo(mpq);
+			int bpm = Tempo.getBpm(msg);
+			int mpq = Tempo.bpmToMpq(bpm);
 			TreeMap<Long, Integer> tempoMpq = (TreeMap<Long, Integer>) sequenceInfo.get("tempo_mpq");
 			tempoMpq.put(tick, mpq);
 			TreeMap<Long, Integer> tempoBpm = (TreeMap<Long, Integer>) sequenceInfo.get("tempo_bpm");

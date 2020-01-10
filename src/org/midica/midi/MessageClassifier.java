@@ -22,8 +22,6 @@ import org.midica.ui.model.SingleMessage;
 import org.midica.ui.model.MessageTreeNode;
 import org.midica.ui.model.MidicaTreeModel;
 
-import com.sun.media.sound.MidiUtils;
-
 /**
  * This class is used to classify a message.
  * 
@@ -659,10 +657,10 @@ public class MessageClassifier {
 		
 		// TEMPO
 		if (MidiListener.META_SET_TEMPO == type) {
-			int mpq = MidiUtils.getTempoMPQ( msg );
-			int bpm = (int) MidiUtils.convertTempo( mpq );
-			distinctDetails.put( IMessageType.OPT_TEMPO_MPQ, mpq );
-			distinctDetails.put( IMessageType.OPT_TEMPO_BPM, bpm );
+			int bpm = Tempo.getBpm(msg);
+			int mpq = Tempo.bpmToMpq(bpm);
+			distinctDetails.put(IMessageType.OPT_TEMPO_MPQ, mpq);
+			distinctDetails.put(IMessageType.OPT_TEMPO_BPM, bpm);
 		}
 		
 		// level 1 node
