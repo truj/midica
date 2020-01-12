@@ -12,6 +12,7 @@ import java.util.Enumeration;
 import java.util.TreeSet;
 
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 import org.midica.ui.widget.MidicaTree;
@@ -228,7 +229,7 @@ public class MidicaTreeModel extends DefaultTreeModel {
 		// expand/collapse the children recursively
 		MidicaTreeNode node = (MidicaTreeNode) parentPath.getLastPathComponent();
 		if (node.getChildCount() >= 0) {
-			for ( Enumeration<MidicaTreeNode> e = node.children(); e.hasMoreElements(); ) {
+			for ( Enumeration<TreeNode> e = node.children(); e.hasMoreElements(); ) {
 				MidicaTreeNode childNode = (MidicaTreeNode) e.nextElement();
 				TreePath childPath = parentPath.pathByAddingChild( childNode );
 				expandOrCollapse( childPath, mustExpand );
