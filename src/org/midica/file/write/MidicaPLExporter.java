@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -93,6 +94,10 @@ public class MidicaPLExporter extends Exporter {
 	public static final long    DEFAULT_DURATION_TICK_TOLERANCE  = 2;
 	public static final float   DEFAULT_DURATION_RATIO_TOLERANCE = 0.014f;
 	public static final long    DEFAULT_NEXT_NOTE_ON_TOLERANCE   = 3;
+	public static final boolean DEFAULT_USE_PRE_DEFINED_CHORDS   = true;
+	public static final long    DEFAULT_CHORD_NOTE_ON_TOLERANCE  = 0;
+	public static final long    DEFAULT_CHORD_NOTE_OFF_TOLERANCE = 0;
+	public static final long    DEFAULT_CHORD_VELOCITY_TOLERANCE = 0;
 	public static final byte    DEFAULT_ORPHANED_SYLLABLES       = INLINE;
 	public static final boolean DEFAULT_KARAOKE_ONE_CHANNEL      = false;
 	public static final String  DEFAULT_EXTRA_GLOBALS_STR        = "";
@@ -105,7 +110,11 @@ public class MidicaPLExporter extends Exporter {
 	private static long          DURATION_TICK_TOLERANCE  = DEFAULT_DURATION_TICK_TOLERANCE;
 	private static float         DURATION_RATIO_TOLERANCE = DEFAULT_DURATION_RATIO_TOLERANCE;
 	private static long          NEXT_NOTE_ON_TOLERANCE   = DEFAULT_NEXT_NOTE_ON_TOLERANCE;
-	public  static byte          ORPHANED_SYLLABLES       = DEFAULT_ORPHANED_SYLLABLES;
+	private static boolean       USE_PRE_DEFINED_CHORDS   = DEFAULT_USE_PRE_DEFINED_CHORDS;
+	private static long          CHORD_NOTE_ON_TOLERANCE  = DEFAULT_CHORD_NOTE_ON_TOLERANCE;
+	private static long          CHORD_NOTE_OFF_TOLERANCE = DEFAULT_CHORD_NOTE_OFF_TOLERANCE;
+	private static long          CHORD_VELOCITY_TOLERANCE = DEFAULT_CHORD_VELOCITY_TOLERANCE;
+	private static byte          ORPHANED_SYLLABLES       = DEFAULT_ORPHANED_SYLLABLES;
 	private static boolean       KARAOKE_ONE_CHANNEL      = DEFAULT_KARAOKE_ONE_CHANNEL;
 	private static TreeSet<Long> EXTRA_GLOBALS            = null;
 	
@@ -262,11 +271,15 @@ public class MidicaPLExporter extends Exporter {
 		MUST_ADD_CONFIG          = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_CONFIG)          );
 		MUST_ADD_QUALITY_SCORE   = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_QUALITY_SCORE)   );
 		MUST_ADD_STATISTICS      = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_STATISTICS)      );
-		ORPHANED_SYLLABLES       = Byte.parseByte(       sessionConfig.get(Config.DC_ORPHANED_SYLLABLES)       );
-		KARAOKE_ONE_CHANNEL      = Boolean.parseBoolean( sessionConfig.get(Config.DC_KARAOKE_ONE_CHANNEL)      );
 		DURATION_TICK_TOLERANCE  = Long.parseLong(       sessionConfig.get(Config.DC_DURATION_TICK_TOLERANCE)  );
 		DURATION_RATIO_TOLERANCE = Float.parseFloat(     sessionConfig.get(Config.DC_DURATION_RATIO_TOLERANCE) );
 		NEXT_NOTE_ON_TOLERANCE   = Long.parseLong(       sessionConfig.get(Config.DC_NEXT_NOTE_ON_TOLERANCE)   );
+		USE_PRE_DEFINED_CHORDS   = Boolean.parseBoolean( sessionConfig.get(Config.DC_USE_PRE_DEFINED_CHORDS)   );
+		CHORD_NOTE_ON_TOLERANCE  = Long.parseLong(       sessionConfig.get(Config.DC_CHORD_NOTE_ON_TOLERANCE)  );
+		CHORD_NOTE_OFF_TOLERANCE = Long.parseLong(       sessionConfig.get(Config.DC_CHORD_NOTE_OFF_TOLERANCE) );
+		CHORD_VELOCITY_TOLERANCE = Long.parseLong(       sessionConfig.get(Config.DC_CHORD_VELOCITY_TOLERANCE) );
+		ORPHANED_SYLLABLES       = Byte.parseByte(       sessionConfig.get(Config.DC_ORPHANED_SYLLABLES)       );
+		KARAOKE_ONE_CHANNEL      = Boolean.parseBoolean( sessionConfig.get(Config.DC_KARAOKE_ONE_CHANNEL)      );
 		EXTRA_GLOBALS            = DecompileConfigController.getExtraGlobalTicks();
 	}
 	
@@ -468,10 +481,21 @@ public class MidicaPLExporter extends Exporter {
 	 */
 	private void splitSequence() {
 		
-		// add the first slice
-		Slice currentSlice = new Slice(0L); // the first slice always begins at tick 0
-		slices.add(currentSlice);
+		// structure for all global commands ticks and their command strings
+		TreeMap <Long, ArrayList<String[]>> allGlobals = new TreeMap<>();
 		
+		// make sure that the first slice always begins in tick 0
+		EXTRA_GLOBALS.add(0L);
+		
+		// add extra global ticks from configuration
+		Iterator<Long> iterator = EXTRA_GLOBALS.iterator();
+		while (iterator.hasNext()) {
+			long tick = iterator.next();
+			ArrayList<String[]> commands = new ArrayList<String[]>();
+			allGlobals.put(tick, commands);
+		}
+		
+		// add global ticks from META events
 		int trackNum = 0;
 		TRACK:
 		for (Track track : MidiDevices.getSequence().getTracks()) {
@@ -513,33 +537,65 @@ public class MidicaPLExporter extends Exporter {
 				// meta message
 				if (msg instanceof MetaMessage) {
 					MetaMessage metaMsg = (MetaMessage) msg;
-					int    type   = metaMsg.getType();
-					int    status = metaMsg.getStatus();
-					byte[] data   = metaMsg.getData();
-					
+					int     type       = metaMsg.getType();
+					int     status     = metaMsg.getStatus();
+					byte[]  data       = metaMsg.getData();
+					String  cmdId      = null;
+					String  value      = null;
 					if (MidiListener.META_SET_TEMPO == type) {
-						int    bpm    = Tempo.getBpm(metaMsg);
-						String bpmStr = Integer.toString(bpm);
-						currentSlice  = addSliceIfNecessary(tick, "tempo", bpmStr);
+						int bpm = Tempo.getBpm(metaMsg);
+						cmdId   = "tempo";
+						value   = Integer.toString(bpm);
 					}
 					else if (MidiListener.META_KEY_SIGNATURE == type) {
-						byte sharpsOrFlats = data[0];
-						byte tonality      = data[1];
-						
+						byte sharpsOrFlats       = data[0];
+						byte tonality            = data[1];
 						String[] noteAndTonality = MessageClassifier.getKeySignature(sharpsOrFlats, tonality);
-						String keySig            = noteAndTonality[0] + MidicaPLParser.KEY_SEPARATOR + noteAndTonality[1];
-						currentSlice             = addSliceIfNecessary(tick, "key", keySig);
+						cmdId = "key";
+						value = noteAndTonality[0] + MidicaPLParser.KEY_SEPARATOR + noteAndTonality[1];
 					}
 					else if (MidiListener.META_TIME_SIGNATURE == type) {
 						int numerator   = data[0];
 						int exp         = data[1];
 						int denominator = (int) Math.pow(2, exp);
-						String timeSig  = numerator + MidicaPLParser.TIME_SIG_SLASH + denominator;
-						currentSlice    = addSliceIfNecessary(tick, "time", timeSig);
+						cmdId           = "time";
+						value           = numerator + MidicaPLParser.TIME_SIG_SLASH + denominator;
+					}
+					
+					// global command found?
+					if (cmdId != null) {
+						ArrayList<String[]> commands = allGlobals.get(tick);
+						if (null == commands) {
+							commands = new ArrayList<String[]>();
+							allGlobals.put(tick, commands);
+						}
+						commands.add(new String[]{cmdId, value});
 					}
 				}
 			}
 			trackNum++;
+		}
+		
+		// add slices
+		Slice currentSlice = null;
+		for (long tick : allGlobals.keySet()) {
+			
+			// close last slice
+			if (currentSlice != null) {
+				currentSlice.setEndTick(tick);
+			}
+			
+			// add new slice
+			currentSlice = new Slice(tick);
+			slices.add(currentSlice);
+			
+			// add global commands to slice
+			ArrayList<String[]> commands = allGlobals.get(tick);
+			for (String[] cmd : commands) {
+				String cmdId = cmd[ 0 ];
+				String value = cmd[ 1 ];
+				currentSlice.addGlobalCmd(cmdId, value);
+			}
 		}
 		
 		// set end tick of the last slice.
@@ -882,6 +938,8 @@ public class MidicaPLExporter extends Exporter {
 						if ( noteName.equals(Dict.get(Dict.UNKNOWN_PERCUSSION_NAME)) ) {
 							noteName = note + "";
 						}
+					}
+					if (isPercussion || ! USE_PRE_DEFINED_CHORDS) {
 						inlineChord.add(noteName);
 					}
 					
@@ -901,7 +959,7 @@ public class MidicaPLExporter extends Exporter {
 				
 				// chord not yet available?
 				String chordName = chords.get(chordKey.toString());
-				if (isPercussion) {
+				if (isPercussion || ! USE_PRE_DEFINED_CHORDS) {
 					chordName = String.join(MidicaPLParser.CHORD_SEPARATOR, inlineChord);
 				}
 				else {
@@ -994,6 +1052,9 @@ public class MidicaPLExporter extends Exporter {
 				output.append( createCommandsFromTimeline(slice, channel) );
 			}
 		}
+		
+		// config
+		output.append( createConfig() );
 		
 		// statistics
 		output.append( createStatistics() );
@@ -1380,7 +1441,7 @@ public class MidicaPLExporter extends Exporter {
 		// tick comment (only for instrument changes
 		String lineEnd = NEW_LINE;
 		if (tick > 0) {
-			lineEnd = createTickComment(tick, true);
+			lineEnd = createTickComment(tick, true) + NEW_LINE;
 		}
 		
 		// put everything together
@@ -1449,6 +1510,34 @@ public class MidicaPLExporter extends Exporter {
 	}
 	
 	/**
+	 * Creates the block with configuration variables that has been used for decompilation.
+	 * 
+	 * @return configuration block
+	 */
+	private String createConfig() {
+		StringBuilder statLines = new StringBuilder("");
+		
+		if ( ! MUST_ADD_CONFIG )
+			return statLines.toString();
+		
+		// headline
+		statLines.append(MidicaPLParser.COMMENT + " " + "CONFIGURATION:" + NEW_LINE);
+		statLines.append(MidicaPLParser.COMMENT + NEW_LINE);
+		
+		// config values
+		HashMap<String, String> sessionConfig = DecompileConfigController.getSessionConfig();
+		ArrayList<String> configKeys = new ArrayList<String>(sessionConfig.keySet());
+		Collections.sort(configKeys);
+		for (String key : configKeys) {
+			String value = sessionConfig.get(key);
+			statLines.append(MidicaPLParser.COMMENT + " " + key + "\t" + value + NEW_LINE);
+		}
+		statLines.append(NEW_LINE + NEW_LINE);
+		
+		return statLines.toString();
+	}
+	
+	/**
 	 * Creates the statistics to be printed at the end of the produced file.
 	 * 
 	 * @return statistics block
@@ -1457,7 +1546,7 @@ public class MidicaPLExporter extends Exporter {
 		StringBuilder statLines = new StringBuilder("");
 		
 		if (MUST_ADD_STATISTICS)
-			statLines.append(MidicaPLParser.COMMENT + "STATISTICS:" + NEW_LINE);
+			statLines.append(MidicaPLParser.COMMENT + " " + "STATISTICS:" + NEW_LINE);
 		
 		// channels
 		for (byte channel = 0; channel < 16; channel++) {
@@ -1694,10 +1783,17 @@ public class MidicaPLExporter extends Exporter {
 			instr.setCurrentTicks(maxTick);
 		}
 		
+		// tick comment
+		result.append( createTickComment(slice.getBeginTick(), false) );
+		
 		// create global commands
 		TreeMap<String, String> globalCmds = slice.getGlobalCommands();
-		if (globalCmds.size() > 0) {
-			result.append( createTickComment(slice.getBeginTick(), false) );
+		if (0 == globalCmds.size()) {
+			if (slice.getBeginTick() > 0) {
+				result.append(MidicaPLParser.GLOBAL + NEW_LINE + NEW_LINE);
+			}
+		}
+		else {
 			for (String cmdId : globalCmds.keySet()) {
 				String value = globalCmds.get(cmdId);
 				
@@ -1709,7 +1805,7 @@ public class MidicaPLExporter extends Exporter {
 					globalCmd = MidicaPLParser.KEY_SIG;
 				
 				// append command
-				result.append( MidicaPLParser.GLOBAL + "\t" + globalCmd + "\t" + value + NEW_LINE );
+				result.append(MidicaPLParser.GLOBAL + "\t" + globalCmd + "\t" + value + NEW_LINE);
 			}
 			result.append(NEW_LINE);
 		}
@@ -2177,7 +2273,9 @@ public class MidicaPLExporter extends Exporter {
 	}
 	
 	/**
-	 * Creates a comment line giving the current tick - if configured accordingly.
+	 * Creates a comment giving the current tick - if configured accordingly.
+	 * 
+	 * Adds a line break, if **must_append** is **true**.
 	 * 
 	 * @param tick        MIDI tickstamp.
 	 * @param mustAppend  **true** for a comment to be appended to a line; **false** for a full-line comment.

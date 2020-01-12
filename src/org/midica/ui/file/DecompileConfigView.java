@@ -59,12 +59,16 @@ public class DecompileConfigView extends JDialog {
 	JTextField              fldDurationTickTolerance;
 	JTextField              fldDurationRatioTolerance;
 	JTextField              fldNextNoteOnTolerance;
+	JTextField              fldChordNoteOnTolerance;
+	JTextField              fldChordNoteOffTolerance;
+	JTextField              fldChordVelocityTolerance;
 	JComboBox<NamedInteger> cbxOrphanedSyllables;
 	JCheckBox               cbxAddTickComments;
 	JCheckBox               cbxAddScore;
 	JCheckBox               cbxAddStatistics;
 	JCheckBox               cbxAddConfig;
 	JCheckBox               cbxKarOneChannel;
+	JCheckBox               cbxPredefinedChords;
 	JTextField              fldAddGlobalAtTick;
 	JTextField              fldAddGlobalsStartTick;
 	JTextField              fldAddGlobalsEachTick;
@@ -91,12 +95,16 @@ public class DecompileConfigView extends JDialog {
 		fldDurationTickTolerance  = new JTextField();
 		fldDurationRatioTolerance = new JTextField();
 		fldNextNoteOnTolerance    = new JTextField();
+		fldChordNoteOnTolerance   = new JTextField();
+		fldChordNoteOffTolerance  = new JTextField();
+		fldChordVelocityTolerance = new JTextField();
 		cbxOrphanedSyllables      = new JComboBox<>();
 		cbxAddTickComments        = new JCheckBox( Dict.get(Dict.DC_ADD_TICK_COMMENT) );
 		cbxAddScore               = new JCheckBox( Dict.get(Dict.DC_ADD_SCORE) );
 		cbxAddStatistics          = new JCheckBox( Dict.get(Dict.DC_ADD_STATISTICS) );
 		cbxAddConfig              = new JCheckBox( Dict.get(Dict.DC_ADD_CONFIG) );
 		cbxKarOneChannel          = new JCheckBox();
+		cbxPredefinedChords       = new JCheckBox();
 		fldAddGlobalAtTick        = new JTextField();
 		fldAddGlobalsStartTick    = new JTextField();
 		fldAddGlobalsEachTick     = new JTextField();
@@ -149,10 +157,15 @@ public class DecompileConfigView extends JDialog {
 		// debug
 		content.add(createDebugArea(), constraints);
 		
-		// tolerances
+		// note length calculation
 		constraints.insets = Laf.INSETS_WE;
 		constraints.gridy++;
-		content.add(createToleranceArea(), constraints);
+		content.add(createNoteLengthArea(), constraints);
+		
+		// chords
+		constraints.insets = Laf.INSETS_WE;
+		constraints.gridy++;
+		content.add(createChordArea(), constraints);
 		
 		// karaoke
 		constraints.insets = Laf.INSETS_WE;
@@ -206,13 +219,13 @@ public class DecompileConfigView extends JDialog {
 	}
 	
 	/**
-	 * Creates the area for tolerance settings.
+	 * Creates the area for note length calculation settings.
 	 * 
 	 * @return the created area
 	 */
-	private Container createToleranceArea() {
+	private Container createNoteLengthArea() {
 		JPanel area = new JPanel();
-		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.DC_CAT_TOLERANCE)) );
+		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.DC_CAT_NOTE_LENGTH)) );
 		
 		// layout
 		area.setLayout(new GridBagLayout());
@@ -271,6 +284,94 @@ public class DecompileConfigView extends JDialog {
 		constrRight.gridy++;
 		JLabel descNextOnTol = new JLabel( Dict.get(Dict.NEXT_NOTE_ON_TOLERANCE_D) );
 		area.add(descNextOnTol, constrRight);
+		
+		return area;
+	}
+	
+	/**
+	 * Creates the area for chord settings.
+	 * 
+	 * @return the created area
+	 */
+	private Container createChordArea() {
+		JPanel area = new JPanel();
+		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.DC_CAT_CHORDS)) );
+		
+		// layout
+		area.setLayout(new GridBagLayout());
+		GridBagConstraints[] constaints = createConstraintsForArea();
+		GridBagConstraints constrLeft   = constaints[0];
+		GridBagConstraints constrCenter = constaints[1];
+		GridBagConstraints constrRight  = constaints[2];
+		
+		// pre-defined chords
+		// label
+		JLabel lblPredefined = new JLabel( Dict.get(Dict.USE_PRE_DEFINED_CHORDS) );
+		Laf.makeBold(lblPredefined);
+		area.add(lblPredefined, constrLeft);
+		
+		// checkbox
+		cbxPredefinedChords.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
+		cbxPredefinedChords.addActionListener(controller);
+		area.add(cbxPredefinedChords, constrCenter);
+		
+		// description
+		JLabel descTickTol = new JLabel( Dict.get(Dict.USE_PRE_DEFINED_CHORDS_D) );
+		area.add(descTickTol, constrRight);
+		
+		// note-on tolerance
+		// label
+		constrLeft.gridy++;
+		JLabel lblNoteOnTol = new JLabel( Dict.get(Dict.CHORD_NOTE_ON_TOLERANCE) );
+		Laf.makeBold(lblNoteOnTol);
+		area.add(lblNoteOnTol, constrLeft);
+		
+		// field
+		constrCenter.gridy++;
+		fldChordNoteOnTolerance.getDocument().addDocumentListener(controller);
+		fldChordNoteOnTolerance.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
+		area.add(fldChordNoteOnTolerance, constrCenter);
+		
+		// description
+		constrRight.gridy++;
+		JLabel descOnTol = new JLabel( Dict.get(Dict.CHORD_NOTE_ON_TOLERANCE_D) );
+		area.add(descOnTol, constrRight);
+		
+		// note-off tolerance
+		// label
+		constrLeft.gridy++;
+		JLabel lblNoteOffTol = new JLabel( Dict.get(Dict.CHORD_NOTE_OFF_TOLERANCE) );
+		Laf.makeBold(lblNoteOffTol);
+		area.add(lblNoteOffTol, constrLeft);
+		
+		// field
+		constrCenter.gridy++;
+		fldChordNoteOffTolerance.getDocument().addDocumentListener(controller);
+		fldChordNoteOffTolerance.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
+		area.add(fldChordNoteOffTolerance, constrCenter);
+		
+		// description
+		constrRight.gridy++;
+		JLabel descOffTol = new JLabel( Dict.get(Dict.CHORD_NOTE_OFF_TOLERANCE_D) );
+		area.add(descOffTol, constrRight);
+		
+		// velocity tolerance
+		// label
+		constrLeft.gridy++;
+		JLabel lblVeloTol = new JLabel( Dict.get(Dict.CHORD_VELOCITY_TOLERANCE) );
+		Laf.makeBold(lblVeloTol);
+		area.add(lblVeloTol, constrLeft);
+		
+		// field
+		constrCenter.gridy++;
+		fldChordVelocityTolerance.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
+		fldChordVelocityTolerance.addActionListener(controller);
+		area.add(fldChordVelocityTolerance, constrCenter);
+		
+		// description
+		constrRight.gridy++;
+		JLabel descVeloTol = new JLabel( Dict.get(Dict.CHORD_VELOCITY_TOLERANCE_D) );
+		area.add(descVeloTol, constrRight);
 		
 		return area;
 	}
@@ -554,6 +655,9 @@ public class DecompileConfigView extends JDialog {
 		keyBindingManager.addBindingsForFocus( fldDurationTickTolerance,  Dict.KEY_DC_TOL_DUR_TICK    );
 		keyBindingManager.addBindingsForFocus( fldDurationRatioTolerance, Dict.KEY_DC_TOL_DUR_RATIO   );
 		keyBindingManager.addBindingsForFocus( fldNextNoteOnTolerance,    Dict.KEY_DC_TOL_NEXT_ON     );
+		keyBindingManager.addBindingsForFocus( fldChordNoteOnTolerance,   Dict.KEY_DC_CRD_NOTE_ON     );
+		keyBindingManager.addBindingsForFocus( fldChordNoteOffTolerance,  Dict.KEY_DC_CRD_NOTE_OFF    );
+		keyBindingManager.addBindingsForFocus( fldChordVelocityTolerance, Dict.KEY_DC_CRD_VELOCITY    );
 		keyBindingManager.addBindingsForFocus( fldAddGlobalAtTick,        Dict.KEY_DC_FLD_GLOB_SINGLE );
 		keyBindingManager.addBindingsForFocus( fldAddGlobalsEachTick,     Dict.KEY_DC_FLD_GLOB_EACH   );
 		keyBindingManager.addBindingsForFocus( fldAddGlobalsStartTick,    Dict.KEY_DC_FLD_GLOB_FROM   );
@@ -566,11 +670,12 @@ public class DecompileConfigView extends JDialog {
 		keyBindingManager.addBindingsForComboboxOpen( cbxOrphanedSyllables, Dict.KEY_DC_KAR_ORPHANED );
 		
 		// checkbox
-		keyBindingManager.addBindingsForCheckbox( cbxAddTickComments, Dict.KEY_DC_ADD_TICK_COMMENTS );
-		keyBindingManager.addBindingsForCheckbox( cbxAddConfig,       Dict.KEY_DC_ADD_CONFIG        );
-		keyBindingManager.addBindingsForCheckbox( cbxAddScore,        Dict.KEY_DC_ADD_SCORE         );
-		keyBindingManager.addBindingsForCheckbox( cbxAddStatistics,   Dict.KEY_DC_ADD_STATISTICS    );
-		keyBindingManager.addBindingsForCheckbox( cbxKarOneChannel,   Dict.KEY_DC_KAR_ONE_CH        );
+		keyBindingManager.addBindingsForCheckbox( cbxAddTickComments,  Dict.KEY_DC_ADD_TICK_COMMENTS );
+		keyBindingManager.addBindingsForCheckbox( cbxAddConfig,        Dict.KEY_DC_ADD_CONFIG        );
+		keyBindingManager.addBindingsForCheckbox( cbxAddScore,         Dict.KEY_DC_ADD_SCORE         );
+		keyBindingManager.addBindingsForCheckbox( cbxAddStatistics,    Dict.KEY_DC_ADD_STATISTICS    );
+		keyBindingManager.addBindingsForCheckbox( cbxKarOneChannel,    Dict.KEY_DC_KAR_ONE_CH        );
+		keyBindingManager.addBindingsForCheckbox( cbxPredefinedChords, Dict.KEY_DC_CRD_PREDEFINED    );
 		
 		// buttons
 		keyBindingManager.addBindingsForButton( btnAddGlobalAtTick, Dict.KEY_DC_BTN_GLOB_SINGLE );

@@ -676,6 +676,10 @@ public class Dict {
 	public static final String KEY_DC_TOL_DUR_TICK          = "key_dc_tol_dur_tick";
 	public static final String KEY_DC_TOL_DUR_RATIO         = "key_dc_tol_dur_ratio";
 	public static final String KEY_DC_TOL_NEXT_ON           = "key_dc_tol_next_on";
+	public static final String KEY_DC_CRD_PREDEFINED        = "key_dc_crd_predefined";
+	public static final String KEY_DC_CRD_NOTE_ON           = "key_dc_crd_note_on";
+	public static final String KEY_DC_CRD_NOTE_OFF          = "key_dc_crd_note_off";
+	public static final String KEY_DC_CRD_VELOCITY          = "key_dc_crd_velocity";
 	public static final String KEY_DC_KAR_ORPHANED          = "key_dc_kar_orphaned";
 	public static final String KEY_DC_KAR_ONE_CH            = "key_dc_kar_one_ch";
 	public static final String KEY_DC_FLD_GLOB_SINGLE       = "key_dc_fld_glob_single";
@@ -743,7 +747,8 @@ public class Dict {
 	// DecompileConfigView
 	public static final String TITLE_DC_CONFIG             = "title_dc_config";
 	public static final String DC_CAT_DEBUG                = "dc_cat_debug";
-	public static final String DC_CAT_TOLERANCE            = "dc_cat_tolerance";
+	public static final String DC_CAT_NOTE_LENGTH          = "dc_cat_note_length";
+	public static final String DC_CAT_CHORDS               = "dc_cat_chords";
 	public static final String DC_CAT_KARAOKE              = "dc_cat_karaoke";
 	public static final String DC_CAT_SLICE                = "dc_cat_slice";
 	public static final String DC_ADD_TICK_COMMENT         = "dc_add_tick_comment";
@@ -756,6 +761,14 @@ public class Dict {
 	public static final String DURATION_RATIO_TOLERANCE_D  = "duration_ratio_tolerance_d";
 	public static final String NEXT_NOTE_ON_TOLERANCE      = "next_note_on_tolerance";
 	public static final String NEXT_NOTE_ON_TOLERANCE_D    = "next_note_on_tolerance_d";
+	public static final String USE_PRE_DEFINED_CHORDS      = "use_pre_defined_chords";
+	public static final String USE_PRE_DEFINED_CHORDS_D    = "use_pre_defined_chords_d";
+	public static final String CHORD_NOTE_ON_TOLERANCE     = "chord_note_on_tolerance";
+	public static final String CHORD_NOTE_ON_TOLERANCE_D   = "chord_note_on_tolerance_d";
+	public static final String CHORD_NOTE_OFF_TOLERANCE    = "chord_note_off_tolerance";
+	public static final String CHORD_NOTE_OFF_TOLERANCE_D  = "chord_note_off_tolerance_d";
+	public static final String CHORD_VELOCITY_TOLERANCE    = "chord_velocity_tolerance";
+	public static final String CHORD_VELOCITY_TOLERANCE_D  = "chord_velocity_tolerance_d";
 	public static final String ORPHANED_SYLLABLES          = "orphaned_syllables";
 	public static final String ORPHANED_SYLLABLES_D        = "orphaned_syllables_d";
 	public static final String DC_INLINE                   = "dc_inline";
@@ -1890,6 +1903,10 @@ public class Dict {
 		set( KEY_DC_TOL_DUR_TICK,          "Focus the text field for the Duration Tick Tolerance"                        );
 		set( KEY_DC_TOL_DUR_RATIO,         "Focus the text field for the Duration Ratio Tolerance"                       );
 		set( KEY_DC_TOL_NEXT_ON,           "Focus the text field for the Next Note-ON Tolerance"                         );
+		set( KEY_DC_CRD_PREDEFINED,        "Toggle Checkbox: Use Predefined Chords"                                      );
+		set( KEY_DC_CRD_NOTE_ON,           "Focus the text field for the chord Note-ON tolerance"                        );
+		set( KEY_DC_CRD_NOTE_OFF,          "Focus the text field for the chord Note-OFF tolerance"                       );
+		set( KEY_DC_CRD_VELOCITY,          "Focus the text field for the chord velocity tolerance"                       );
 		set( KEY_DC_KAR_ORPHANED,          "Open Orphaned Syllables Selection"                                           );
 		set( KEY_DC_KAR_ONE_CH,            "Toggle Checkbox: All Lyrics in One Channel"                                  );
 		set( KEY_DC_FLD_GLOB_SINGLE,       "Focus text field: Add one global cmd at tick..."                             );
@@ -1956,7 +1973,8 @@ public class Dict {
 		// DecompileConfigView
 		set( TITLE_DC_CONFIG,              "Midica - Decompilation Settings"                  );
 		set( DC_CAT_DEBUG,                 "Debugging"                                        );
-		set( DC_CAT_TOLERANCE,             "Tolerances"                                       );
+		set( DC_CAT_NOTE_LENGTH,           "Note Length Calculation"                          );
+		set( DC_CAT_CHORDS,                "Chords"                                           );
 		set( DC_CAT_KARAOKE,               "Karaoke Settings"                                 );
 		set( DC_CAT_SLICE,                 "Extra Global Commands"                            );
 		set( DC_ADD_TICK_COMMENT,          "Add Tick Comments"                                );
@@ -1969,6 +1987,14 @@ public class Dict {
 		set( DURATION_RATIO_TOLERANCE_D,   "Tolerance fraction for keeping a note's duration" );
 		set( NEXT_NOTE_ON_TOLERANCE,       "Next Note-ON Tolerance"                           );
 		set( NEXT_NOTE_ON_TOLERANCE_D,     "Tolerance in ticks to find out if the strategy 'next note-on' can be used" );
+		set( USE_PRE_DEFINED_CHORDS,       "Pre-defined Chords"                                    );
+		set( USE_PRE_DEFINED_CHORDS_D,     "Use Pre-defined Chords (instead of inline chords)"     );
+		set( CHORD_NOTE_ON_TOLERANCE,      "Note-ON tolerance"                                     );
+		set( CHORD_NOTE_ON_TOLERANCE_D,    "Note-ON tolerance (to be regarded as the same chord)"  );
+		set( CHORD_NOTE_OFF_TOLERANCE,     "Note-OFF tolerance"                                    );
+		set( CHORD_NOTE_OFF_TOLERANCE_D,   "Note-OFF tolerance (to be regarded as the same chord)" );
+		set( CHORD_VELOCITY_TOLERANCE,     "Velocity tolerance"                                    );
+		set( CHORD_VELOCITY_TOLERANCE_D,   "Velocity difference still regarded as the same chord"  );
 		set( ORPHANED_SYLLABLES,           "Orphaned Syllables"                                                        );
 		set( ORPHANED_SYLLABLES_D,         "How to treat syllables that appear in a tick without any note-on"          );
 		set( DC_INLINE,                    "Inline"                                                                    );

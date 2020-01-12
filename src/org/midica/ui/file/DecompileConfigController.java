@@ -119,6 +119,10 @@ public class DecompileConfigController implements WindowListener, DocumentListen
 		initWidgetConfig( Config.DC_DURATION_TICK_TOLERANCE,  view.fldDurationTickTolerance,  Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_DURATION_RATIO_TOLERANCE, view.fldDurationRatioTolerance, Float.class,   fromConfig );
 		initWidgetConfig( Config.DC_NEXT_NOTE_ON_TOLERANCE,   view.fldNextNoteOnTolerance,    Integer.class, fromConfig );
+		initWidgetConfig( Config.DC_USE_PRE_DEFINED_CHORDS,   view.cbxPredefinedChords,       Boolean.class, fromConfig );
+		initWidgetConfig( Config.DC_CHORD_NOTE_ON_TOLERANCE,  view.fldChordNoteOnTolerance,   Integer.class, fromConfig );
+		initWidgetConfig( Config.DC_CHORD_NOTE_OFF_TOLERANCE, view.fldChordNoteOffTolerance,  Integer.class, fromConfig );
+		initWidgetConfig( Config.DC_CHORD_VELOCITY_TOLERANCE, view.fldChordVelocityTolerance, Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_ORPHANED_SYLLABLES,       view.cbxOrphanedSyllables,      Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_KARAOKE_ONE_CHANNEL,      view.cbxKarOneChannel,          Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_EXTRA_GLOBALS_STR,        view.areaGlobalsStr,            String.class,  fromConfig );

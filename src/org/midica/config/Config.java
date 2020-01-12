@@ -168,6 +168,10 @@ public class Config {
 	public static final String DC_DURATION_TICK_TOLERANCE  = "dc_duration_tick_tolerance";
 	public static final String DC_DURATION_RATIO_TOLERANCE = "dc_duration_ratio_tolerance";
 	public static final String DC_NEXT_NOTE_ON_TOLERANCE   = "dc_next_note_on_tolerance";
+	public static final String DC_USE_PRE_DEFINED_CHORDS   = "dc_use_pre_defined_chords";
+	public static final String DC_CHORD_NOTE_ON_TOLERANCE  = "dc_chord_note_on_tolerance";
+	public static final String DC_CHORD_NOTE_OFF_TOLERANCE = "dc_chord_note_off_tolerance";
+	public static final String DC_CHORD_VELOCITY_TOLERANCE = "dc_chord_velocity_tolerance";
 	public static final String DC_ORPHANED_SYLLABLES       = "dc_orphaned_syllables";
 	public static final String DC_KARAOKE_ONE_CHANNEL      = "dc_karaoke_one_channel";
 	public static final String DC_EXTRA_GLOBALS_STR        = "dc_extra_globals_str";
@@ -273,6 +277,10 @@ public class Config {
 		dcDefaults.put( DC_DURATION_TICK_TOLERANCE,  "" + MidicaPLExporter.DEFAULT_DURATION_TICK_TOLERANCE  );
 		dcDefaults.put( DC_DURATION_RATIO_TOLERANCE, "" + MidicaPLExporter.DEFAULT_DURATION_RATIO_TOLERANCE );
 		dcDefaults.put( DC_NEXT_NOTE_ON_TOLERANCE,   "" + MidicaPLExporter.DEFAULT_NEXT_NOTE_ON_TOLERANCE   );
+		dcDefaults.put( DC_USE_PRE_DEFINED_CHORDS,   "" + MidicaPLExporter.DEFAULT_USE_PRE_DEFINED_CHORDS   );
+		dcDefaults.put( DC_CHORD_NOTE_ON_TOLERANCE,  "" + MidicaPLExporter.DEFAULT_CHORD_NOTE_ON_TOLERANCE  );
+		dcDefaults.put( DC_CHORD_NOTE_OFF_TOLERANCE, "" + MidicaPLExporter.DEFAULT_CHORD_NOTE_OFF_TOLERANCE );
+		dcDefaults.put( DC_CHORD_VELOCITY_TOLERANCE, "" + MidicaPLExporter.DEFAULT_CHORD_VELOCITY_TOLERANCE );
 		dcDefaults.put( DC_ORPHANED_SYLLABLES,       "" + MidicaPLExporter.DEFAULT_ORPHANED_SYLLABLES       );
 		dcDefaults.put( DC_KARAOKE_ONE_CHANNEL,      "" + MidicaPLExporter.DEFAULT_KARAOKE_ONE_CHANNEL      );
 		dcDefaults.put( DC_EXTRA_GLOBALS_STR,             MidicaPLExporter.DEFAULT_EXTRA_GLOBALS_STR        );
@@ -604,6 +612,10 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_DC_TOL_DUR_TICK,          KeyEvent.VK_T,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_TOL_DUR_RATIO,         KeyEvent.VK_R,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_TOL_NEXT_ON,           KeyEvent.VK_N,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_CRD_PREDEFINED,        KeyEvent.VK_P,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_CRD_NOTE_ON,           KeyEvent.VK_O,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
+		addDefaultKeyBinding( Dict.KEY_DC_CRD_NOTE_OFF,          KeyEvent.VK_F,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_CRD_VELOCITY,          KeyEvent.VK_V,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_DC_KAR_ORPHANED,          KeyEvent.VK_O,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_KAR_ONE_CH,            KeyEvent.VK_O,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_DC_FLD_GLOB_SINGLE,       KeyEvent.VK_A,        InputEvent.ALT_DOWN_MASK   );
@@ -617,7 +629,6 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_DC_RESTORE_SAVED,         KeyEvent.VK_R,        InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_DC_RESTORE_DEFAULT,       KeyEvent.VK_D,        InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_DC_SAVE,                  KeyEvent.VK_S,        InputEvent.CTRL_DOWN_MASK  );
-		
 		
 		// init key bindings with defaults
 		keyBindings = new TreeMap<>();
