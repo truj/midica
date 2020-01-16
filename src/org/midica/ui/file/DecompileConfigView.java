@@ -58,10 +58,13 @@ public class DecompileConfigView extends JDialog {
 	// widgets that change dc config values
 	JTextField              fldDurationTickTolerance;
 	JTextField              fldDurationRatioTolerance;
+	JTextField              fldMinDurToKeep;
 	JTextField              fldNextNoteOnTolerance;
+	JTextField              fldMaxTargetTicksOn;
 	JTextField              fldChordNoteOnTolerance;
 	JTextField              fldChordNoteOffTolerance;
 	JTextField              fldChordVelocityTolerance;
+	JComboBox<NamedInteger> cbxLengthStrategy;
 	JComboBox<NamedInteger> cbxOrphanedSyllables;
 	JCheckBox               cbxAddTickComments;
 	JCheckBox               cbxAddScore;
@@ -94,10 +97,13 @@ public class DecompileConfigView extends JDialog {
 		// init widgets
 		fldDurationTickTolerance  = new JTextField();
 		fldDurationRatioTolerance = new JTextField();
+		fldMinDurToKeep           = new JTextField();
 		fldNextNoteOnTolerance    = new JTextField();
+		fldMaxTargetTicksOn       = new JTextField();
 		fldChordNoteOnTolerance   = new JTextField();
 		fldChordNoteOffTolerance  = new JTextField();
 		fldChordVelocityTolerance = new JTextField();
+		cbxLengthStrategy         = new JComboBox<>();
 		cbxOrphanedSyllables      = new JComboBox<>();
 		cbxAddTickComments        = new JCheckBox( Dict.get(Dict.DC_ADD_TICK_COMMENT) );
 		cbxAddScore               = new JCheckBox( Dict.get(Dict.DC_ADD_SCORE) );
@@ -116,6 +122,7 @@ public class DecompileConfigView extends JDialog {
 		btnRestoreDefaults        = new MidicaButton( Dict.get(Dict.DC_RESTORE_DEFAULTS) );
 		btnRestore                = new MidicaButton( Dict.get(Dict.DC_RESTORE) );
 		btnSave                   = new MidicaButton( Dict.get(Dict.DC_SAVE) );
+		cbxLengthStrategy.setModel( DecompileConfigController.getComboboxModel(Config.DC_LENGTH_STRATEGY) );
 		cbxOrphanedSyllables.setModel( DecompileConfigController.getComboboxModel(Config.DC_ORPHANED_SYLLABLES) );
 		
 		// setup controller
@@ -234,18 +241,36 @@ public class DecompileConfigView extends JDialog {
 		GridBagConstraints constrCenter = constaints[1];
 		GridBagConstraints constrRight  = constaints[2];
 		
+		// length strategy
+		// label
+		JLabel lblStrategy = new JLabel( Dict.get(Dict.NOTE_LENGTH_STRATEGY) );
+		Laf.makeBold(lblStrategy);
+		area.add(lblStrategy, constrLeft);
+		
+		// combobox
+		cbxLengthStrategy.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
+		cbxLengthStrategy.addActionListener(controller);
+		area.add(cbxLengthStrategy, constrCenter);
+		
+		// description
+		JLabel descStrategy = new JLabel( Dict.get(Dict.NOTE_LENGTH_STRATEGY_D) );
+		area.add(descStrategy, constrRight);
+		
 		// duration tick tolerance
 		// label
+		constrLeft.gridy++;
 		JLabel lblTickTol = new JLabel( Dict.get(Dict.DURATION_TICK_TOLERANCE) );
 		Laf.makeBold(lblTickTol);
 		area.add(lblTickTol, constrLeft);
 		
 		// field
+		constrCenter.gridy++;
 		fldDurationTickTolerance.getDocument().addDocumentListener(controller);
 		fldDurationTickTolerance.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
 		area.add(fldDurationTickTolerance, constrCenter);
 		
 		// description
+		constrRight.gridy++;
 		JLabel descTickTol = new JLabel( Dict.get(Dict.DURATION_TICK_TOLERANCE_D) );
 		area.add(descTickTol, constrRight);
 		
@@ -267,6 +292,24 @@ public class DecompileConfigView extends JDialog {
 		JLabel descDurRatioTol = new JLabel( Dict.get(Dict.DURATION_RATIO_TOLERANCE_D) );
 		area.add(descDurRatioTol, constrRight);
 		
+		// duration ratio tolerance
+		// label
+		constrLeft.gridy++;
+		JLabel lblMinDuration = new JLabel( Dict.get(Dict.MIN_DURATION_TO_KEEP) );
+		Laf.makeBold(lblMinDuration);
+		area.add(lblMinDuration, constrLeft);
+		
+		// field
+		constrCenter.gridy++;
+		fldMinDurToKeep.getDocument().addDocumentListener(controller);
+		fldMinDurToKeep.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
+		area.add(fldMinDurToKeep, constrCenter);
+		
+		// description
+		constrRight.gridy++;
+		JLabel descMinDuration = new JLabel( Dict.get(Dict.MIN_DURATION_TO_KEEP_D) );
+		area.add(descMinDuration, constrRight);
+		
 		// next note-on tolerance
 		// label
 		constrLeft.gridy++;
@@ -284,6 +327,24 @@ public class DecompileConfigView extends JDialog {
 		constrRight.gridy++;
 		JLabel descNextOnTol = new JLabel( Dict.get(Dict.NEXT_NOTE_ON_TOLERANCE_D) );
 		area.add(descNextOnTol, constrRight);
+		
+		// max target ticks for next note on
+		// label
+		constrLeft.gridy++;
+		JLabel lblMaxTargetOn = new JLabel( Dict.get(Dict.MAX_TARGET_TICKS_NEXT_ON) );
+		Laf.makeBold(lblMaxTargetOn);
+		area.add(lblMaxTargetOn, constrLeft);
+		
+		// field
+		constrCenter.gridy++;
+		fldMaxTargetTicksOn.getDocument().addDocumentListener(controller);
+		fldMaxTargetTicksOn.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
+		area.add(fldMaxTargetTicksOn, constrCenter);
+		
+		// description
+		constrRight.gridy++;
+		JLabel descMaxTargetOn = new JLabel( Dict.get(Dict.MAX_TARGET_TICKS_NEXT_ON_D) );
+		area.add(descMaxTargetOn, constrRight);
 		
 		return area;
 	}
@@ -652,22 +713,25 @@ public class DecompileConfigView extends JDialog {
 		keyBindingManager.addBindingsForClose( Dict.KEY_DC_CONFIG_CLOSE );
 		
 		// text fields
-		keyBindingManager.addBindingsForFocus( fldDurationTickTolerance,  Dict.KEY_DC_TOL_DUR_TICK    );
-		keyBindingManager.addBindingsForFocus( fldDurationRatioTolerance, Dict.KEY_DC_TOL_DUR_RATIO   );
-		keyBindingManager.addBindingsForFocus( fldNextNoteOnTolerance,    Dict.KEY_DC_TOL_NEXT_ON     );
-		keyBindingManager.addBindingsForFocus( fldChordNoteOnTolerance,   Dict.KEY_DC_CRD_NOTE_ON     );
-		keyBindingManager.addBindingsForFocus( fldChordNoteOffTolerance,  Dict.KEY_DC_CRD_NOTE_OFF    );
-		keyBindingManager.addBindingsForFocus( fldChordVelocityTolerance, Dict.KEY_DC_CRD_VELOCITY    );
-		keyBindingManager.addBindingsForFocus( fldAddGlobalAtTick,        Dict.KEY_DC_FLD_GLOB_SINGLE );
-		keyBindingManager.addBindingsForFocus( fldAddGlobalsEachTick,     Dict.KEY_DC_FLD_GLOB_EACH   );
-		keyBindingManager.addBindingsForFocus( fldAddGlobalsStartTick,    Dict.KEY_DC_FLD_GLOB_FROM   );
-		keyBindingManager.addBindingsForFocus( fldAddGlobalsStopTick,     Dict.KEY_DC_FLD_GLOB_TO     );
+		keyBindingManager.addBindingsForFocus( fldDurationTickTolerance,  Dict.KEY_DC_TOL_DUR_TICK        );
+		keyBindingManager.addBindingsForFocus( fldDurationRatioTolerance, Dict.KEY_DC_TOL_DUR_RATIO       );
+		keyBindingManager.addBindingsForFocus( fldMinDurToKeep,           Dict.KEY_DC_MIN_DUR_TO_KEEP     );
+		keyBindingManager.addBindingsForFocus( fldNextNoteOnTolerance,    Dict.KEY_DC_TOL_NEXT_ON         );
+		keyBindingManager.addBindingsForFocus( fldMaxTargetTicksOn,       Dict.KEY_DC_MAX_TARGET_TICKS_ON );
+		keyBindingManager.addBindingsForFocus( fldChordNoteOnTolerance,   Dict.KEY_DC_CRD_NOTE_ON         );
+		keyBindingManager.addBindingsForFocus( fldChordNoteOffTolerance,  Dict.KEY_DC_CRD_NOTE_OFF        );
+		keyBindingManager.addBindingsForFocus( fldChordVelocityTolerance, Dict.KEY_DC_CRD_VELOCITY        );
+		keyBindingManager.addBindingsForFocus( fldAddGlobalAtTick,        Dict.KEY_DC_FLD_GLOB_SINGLE     );
+		keyBindingManager.addBindingsForFocus( fldAddGlobalsEachTick,     Dict.KEY_DC_FLD_GLOB_EACH       );
+		keyBindingManager.addBindingsForFocus( fldAddGlobalsStartTick,    Dict.KEY_DC_FLD_GLOB_FROM       );
+		keyBindingManager.addBindingsForFocus( fldAddGlobalsStopTick,     Dict.KEY_DC_FLD_GLOB_TO         );
 		
 		// text area
 		keyBindingManager.addBindingsForFocus( areaGlobalsStr, Dict.KEY_DC_AREA_GLOB_ALL );
 		
 		// combobox
-		keyBindingManager.addBindingsForComboboxOpen( cbxOrphanedSyllables, Dict.KEY_DC_KAR_ORPHANED );
+		keyBindingManager.addBindingsForComboboxOpen( cbxLengthStrategy,    Dict.KEY_DC_NOTE_LENGTH_STRATEGY );
+		keyBindingManager.addBindingsForComboboxOpen( cbxOrphanedSyllables, Dict.KEY_DC_KAR_ORPHANED         );
 		
 		// checkbox
 		keyBindingManager.addBindingsForCheckbox( cbxAddTickComments,  Dict.KEY_DC_ADD_TICK_COMMENTS );

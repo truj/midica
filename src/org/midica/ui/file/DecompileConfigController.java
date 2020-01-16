@@ -116,9 +116,12 @@ public class DecompileConfigController implements WindowListener, DocumentListen
 		initWidgetConfig( Config.DC_MUST_ADD_CONFIG,          view.cbxAddConfig,              Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_MUST_ADD_QUALITY_SCORE,   view.cbxAddScore,               Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_MUST_ADD_STATISTICS,      view.cbxAddStatistics,          Boolean.class, fromConfig );
+		initWidgetConfig( Config.DC_LENGTH_STRATEGY,          view.cbxLengthStrategy,         Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_DURATION_TICK_TOLERANCE,  view.fldDurationTickTolerance,  Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_DURATION_RATIO_TOLERANCE, view.fldDurationRatioTolerance, Float.class,   fromConfig );
+		initWidgetConfig( Config.DC_MIN_DURATION_TO_KEEP,     view.fldMinDurToKeep,           Float.class,   fromConfig );
 		initWidgetConfig( Config.DC_NEXT_NOTE_ON_TOLERANCE,   view.fldNextNoteOnTolerance,    Integer.class, fromConfig );
+		initWidgetConfig( Config.DC_MAX_TARGET_TICKS_ON,      view.fldMaxTargetTicksOn,       Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_USE_PRE_DEFINED_CHORDS,   view.cbxPredefinedChords,       Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_CHORD_NOTE_ON_TOLERANCE,  view.fldChordNoteOnTolerance,   Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_CHORD_NOTE_OFF_TOLERANCE, view.fldChordNoteOffTolerance,  Integer.class, fromConfig );
@@ -653,7 +656,17 @@ public class DecompileConfigController implements WindowListener, DocumentListen
 	 * @return the combobox model
 	 */
 	public static DefaultComboBoxModel<NamedInteger> getComboboxModel(String id) {
-		if (Config.DC_ORPHANED_SYLLABLES.equals(id)) {
+		if (Config.DC_LENGTH_STRATEGY.equals(id)) {
+			DefaultComboBoxModel<NamedInteger> model = new DefaultComboBoxModel<>();
+			model.addElement(new NamedInteger(Dict.get(Dict.DC_STRAT_NEXT_DURATION_PRESS), MidicaPLExporter.STRATEGY_NEXT_DURATION_PRESS, true));
+			model.addElement(new NamedInteger(Dict.get(Dict.DC_STRAT_DURATION_NEXT_PRESS), MidicaPLExporter.STRATEGY_DURATION_NEXT_PRESS, true));
+			model.addElement(new NamedInteger(Dict.get(Dict.DC_STRAT_NEXT_PRESS),          MidicaPLExporter.STRATEGY_NEXT_PRESS,          true));
+			model.addElement(new NamedInteger(Dict.get(Dict.DC_STRAT_DURATION_PRESS),      MidicaPLExporter.STRATEGY_DURATION_PRESS,      true));
+			model.addElement(new NamedInteger(Dict.get(Dict.DC_STRAT_PRESS),               MidicaPLExporter.STRATEGY_PRESS,               true));
+			
+			return model;
+		}
+		else if (Config.DC_ORPHANED_SYLLABLES.equals(id)) {
 			DefaultComboBoxModel<NamedInteger> model = new DefaultComboBoxModel<>();
 			model.addElement(new NamedInteger(Dict.get(Dict.DC_INLINE), MidicaPLExporter.INLINE, true));
 			model.addElement(new NamedInteger(Dict.get(Dict.DC_BLOCK),  MidicaPLExporter.BLOCK,  true));

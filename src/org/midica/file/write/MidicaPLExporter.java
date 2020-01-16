@@ -83,17 +83,25 @@ public class MidicaPLExporter extends Exporter {
 	private static final String NEW_LINE = System.getProperty("line.separator");
 	
 	// decompile constants
-	public static final byte INLINE = 1;
-	public static final byte BLOCK  = 2;
+	public static final byte INLINE                       = 1;
+	public static final byte BLOCK                        = 2;
+	public static final byte STRATEGY_NEXT_DURATION_PRESS = 1;
+	public static final byte STRATEGY_DURATION_NEXT_PRESS = 2;
+	public static final byte STRATEGY_NEXT_PRESS          = 3;
+	public static final byte STRATEGY_DURATION_PRESS      = 4;
+	public static final byte STRATEGY_PRESS               = 5;
 	
 	// decompile configuration defaults
 	public static final boolean DEFAULT_MUST_ADD_TICK_COMMENTS   = true;
 	public static final boolean DEFAULT_MUST_ADD_CONFIG          = true;
 	public static final boolean DEFAULT_MUST_ADD_QUALITY_SCORE   = true;
 	public static final boolean DEFAULT_MUST_ADD_STATISTICS      = true;
+	public static final byte    DEFAULT_LENGTH_STRATEGY          = STRATEGY_NEXT_DURATION_PRESS;
 	public static final long    DEFAULT_DURATION_TICK_TOLERANCE  = 2;
 	public static final float   DEFAULT_DURATION_RATIO_TOLERANCE = 0.014f;
+	public static final float   DEFAULT_MIN_DURATION_TO_KEEP     = 0.05f;
 	public static final long    DEFAULT_NEXT_NOTE_ON_TOLERANCE   = 3;
+	public static final long    DEFAULT_MAX_TARGET_TICKS_ON      = 3840; // 2 full notes
 	public static final boolean DEFAULT_USE_PRE_DEFINED_CHORDS   = true;
 	public static final long    DEFAULT_CHORD_NOTE_ON_TOLERANCE  = 0;
 	public static final long    DEFAULT_CHORD_NOTE_OFF_TOLERANCE = 0;
@@ -107,9 +115,13 @@ public class MidicaPLExporter extends Exporter {
 	private static boolean       MUST_ADD_CONFIG          = DEFAULT_MUST_ADD_CONFIG;
 	private static boolean       MUST_ADD_QUALITY_SCORE   = DEFAULT_MUST_ADD_QUALITY_SCORE;
 	private static boolean       MUST_ADD_STATISTICS      = DEFAULT_MUST_ADD_STATISTICS;
+	private static byte          LENGTH_STRATEGY          = DEFAULT_LENGTH_STRATEGY;
 	private static long          DURATION_TICK_TOLERANCE  = DEFAULT_DURATION_TICK_TOLERANCE;
 	private static float         DURATION_RATIO_TOLERANCE = DEFAULT_DURATION_RATIO_TOLERANCE;
+	private static float         MIN_DURATION_TO_KEEP     = DEFAULT_MIN_DURATION_TO_KEEP;
 	private static long          NEXT_NOTE_ON_TOLERANCE   = DEFAULT_NEXT_NOTE_ON_TOLERANCE;
+	private static long          MAX_TARGET_TICKS_ON      = DEFAULT_MAX_TARGET_TICKS_ON;
+	private static long          MAX_SOURCE_TICKS_ON      = 0L;
 	private static boolean       USE_PRE_DEFINED_CHORDS   = DEFAULT_USE_PRE_DEFINED_CHORDS;
 	private static long          CHORD_NOTE_ON_TOLERANCE  = DEFAULT_CHORD_NOTE_ON_TOLERANCE;
 	private static long          CHORD_NOTE_OFF_TOLERANCE = DEFAULT_CHORD_NOTE_OFF_TOLERANCE;
@@ -188,11 +200,8 @@ public class MidicaPLExporter extends Exporter {
 	 */
 	public ExportResult export(File file) throws ExportException {
 		
-		// refresh decompile config
-		refreshConfig();
-		
 		exportResult         = new ExportResult(true);
-		String targetCharset = ((ComboboxStringOption) ConfigComboboxModel.getModel(Config.CHARSET_EXPORT_MPL).getSelectedItem() ).getIdentifier();
+		String targetCharset = ((ComboboxStringOption) ConfigComboboxModel.getModel(Config.CHARSET_EXPORT_MPL).getSelectedItem()).getIdentifier();
 		
 		try {
 			
@@ -218,6 +227,12 @@ public class MidicaPLExporter extends Exporter {
 			chordCount       = new TreeMap<>();
 			chordsByBaseNote = new TreeMap<>();
 			
+			// get resolution
+			sourceResolution = MidiDevices.getSequence().getResolution();
+			
+			// refresh decompile config
+			refreshConfig();
+			
 			// initialize statistics
 			initStatistics();
 			
@@ -232,9 +247,6 @@ public class MidicaPLExporter extends Exporter {
 			
 			// fill the timeline with instrument changes and note events
 			slices = new ArrayList<>();
-			
-			// get resolution
-			sourceResolution = MidiDevices.getSequence().getResolution();
 			
 			// detect global commands and split the sequence into slices accordingly
 			splitSequence();
@@ -266,14 +278,19 @@ public class MidicaPLExporter extends Exporter {
 	 * Re-reads all config variables that are relevant for decompilation.
 	 */
 	private void refreshConfig() {
+		
+		// apply direct configuration
 		HashMap<String, String> sessionConfig = DecompileConfigController.getSessionConfig();
 		MUST_ADD_TICK_COMMENTS   = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_TICK_COMMENTS)   );
 		MUST_ADD_CONFIG          = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_CONFIG)          );
 		MUST_ADD_QUALITY_SCORE   = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_QUALITY_SCORE)   );
 		MUST_ADD_STATISTICS      = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_STATISTICS)      );
+		LENGTH_STRATEGY          = Byte.parseByte(       sessionConfig.get(Config.DC_LENGTH_STRATEGY)          );
 		DURATION_TICK_TOLERANCE  = Long.parseLong(       sessionConfig.get(Config.DC_DURATION_TICK_TOLERANCE)  );
 		DURATION_RATIO_TOLERANCE = Float.parseFloat(     sessionConfig.get(Config.DC_DURATION_RATIO_TOLERANCE) );
+		MIN_DURATION_TO_KEEP     = Float.parseFloat(     sessionConfig.get(Config.DC_MIN_DURATION_TO_KEEP)     );
 		NEXT_NOTE_ON_TOLERANCE   = Long.parseLong(       sessionConfig.get(Config.DC_NEXT_NOTE_ON_TOLERANCE)   );
+		MAX_TARGET_TICKS_ON      = Long.parseLong(       sessionConfig.get(Config.DC_MAX_TARGET_TICKS_ON)      );
 		USE_PRE_DEFINED_CHORDS   = Boolean.parseBoolean( sessionConfig.get(Config.DC_USE_PRE_DEFINED_CHORDS)   );
 		CHORD_NOTE_ON_TOLERANCE  = Long.parseLong(       sessionConfig.get(Config.DC_CHORD_NOTE_ON_TOLERANCE)  );
 		CHORD_NOTE_OFF_TOLERANCE = Long.parseLong(       sessionConfig.get(Config.DC_CHORD_NOTE_OFF_TOLERANCE) );
@@ -281,6 +298,9 @@ public class MidicaPLExporter extends Exporter {
 		ORPHANED_SYLLABLES       = Byte.parseByte(       sessionConfig.get(Config.DC_ORPHANED_SYLLABLES)       );
 		KARAOKE_ONE_CHANNEL      = Boolean.parseBoolean( sessionConfig.get(Config.DC_KARAOKE_ONE_CHANNEL)      );
 		EXTRA_GLOBALS            = DecompileConfigController.getExtraGlobalTicks();
+		
+		// apply indirect configuration
+		MAX_SOURCE_TICKS_ON = (MAX_TARGET_TICKS_ON * sourceResolution * 10 + 5) / (targetResolution * 10);
 	}
 	
 	/**
@@ -759,14 +779,16 @@ public class MidicaPLExporter extends Exporter {
 	}
 	
 	/**
-	 * Calculates the note length and duration percentage, according to the 3rd column
-	 * of a channel command.
+	 * Calculates the note length (according to the 3rd column of a channel command)
+	 * and duration percentage (duration option of a channel command).
 	 * 
 	 * Uses one of the following values:
 	 * 
 	 * - The length between note-ON and note-ON of the next note, if this is reasonable.
 	 * - The length according to the channel's current duration ratio.
 	 * - The lowest possible of the predefined values, that is higher than the note press length.
+	 * 
+	 * The priority of the actually chosen value to be used is controlled by the configuration.
 	 * 
 	 * @param onTick   Note-ON tick of the note.
 	 * @param offTick  Note-OFF tick of the note.
@@ -791,6 +813,9 @@ public class MidicaPLExporter extends Exporter {
 		float durationByDur  = calculateDuration(noteTicksByDur, pressTicks);
 		float durationDiff   = oldDuration > durationByDur ? oldDuration - durationByDur : durationByDur - oldDuration;
 		boolean canUseByDur  = durationDiff < DURATION_RATIO_TOLERANCE;
+		if (oldDuration < MIN_DURATION_TO_KEEP) {
+			canUseByDur = false;
+		}
 		
 		// 2nd strategy: calculate note length according to the next note-ON
 		long  noteTicksByOn = -1;
@@ -799,25 +824,40 @@ public class MidicaPLExporter extends Exporter {
 		if (nextNoteOnTick != null) {
 			noteTicksByOn   = nextNoteOnTick - onTick - NEXT_NOTE_ON_TOLERANCE;
 			noteTicksByOn   = getNoteLengthByPressTicks(noteTicksByOn);
-			durationByOn = calculateDuration(noteTicksByOn, pressTicks);
+			durationByOn    = calculateDuration(noteTicksByOn, pressTicks);
 		}
 		boolean canUseNextOn = noteTicksByOn > 0 && durationByOn > 0;
+		if (noteTicksByOn > MAX_SOURCE_TICKS_ON) {
+			canUseNextOn = false;
+		}
 		
-		// choose a strategy
-		if (canUseByDur || canUseNextOn) {
-			// TODO: find out which strategy to prefer
-			
-			if (canUseByDur) {
-				noteTicks     = noteTicksByDur;
-				durationRatio = durationByDur;
+		// apply strategy configuration
+		if (STRATEGY_NEXT_PRESS == LENGTH_STRATEGY || STRATEGY_PRESS == LENGTH_STRATEGY) {
+			canUseByDur = false;
+		}
+		if (STRATEGY_DURATION_PRESS == LENGTH_STRATEGY || STRATEGY_PRESS == LENGTH_STRATEGY) {
+			canUseNextOn = false;
+		}
+		if (canUseByDur && canUseNextOn) {
+			if (STRATEGY_NEXT_DURATION_PRESS == LENGTH_STRATEGY) {
+				canUseByDur = false;
 			}
-			else {
-				noteTicks     = noteTicksByOn;
-				durationRatio = durationByOn;
+			else if (STRATEGY_DURATION_NEXT_PRESS == LENGTH_STRATEGY) {
+				canUseNextOn = false;
 			}
 		}
+		
+		// apply strategy
+		if (canUseNextOn) {
+			noteTicks     = noteTicksByOn;
+			durationRatio = durationByOn;
+		}
+		else if (canUseByDur) {
+			noteTicks     = noteTicksByDur;
+			durationRatio = durationByDur;
+		}
 		else {
-			// 3rd strategy: calculate note length only by press length
+			// fallback strategy: calculate note length only by press length
 			noteTicks     = getNoteLengthByPressTicks(pressTicks);
 			durationRatio = calculateDuration(noteTicks, pressTicks);
 		}
@@ -1823,7 +1863,7 @@ public class MidicaPLExporter extends Exporter {
 	 * # Chooses the LAST note/chord command to be printed.
 	 * # Prints all lines apart from the last one, and adds the MULTIPLE option.
 	 * # Prints the last line, and adds the MULTIPLE option only if necessary.
-	 * # Increment current channel ticks (if the last element has no MULTIPLE option).
+	 * # Increments current channel ticks (if the last element has no MULTIPLE option).
 	 * 
 	 * Strategy to choose the LAST note/chord command:
 	 * 
@@ -1850,7 +1890,7 @@ public class MidicaPLExporter extends Exporter {
 	private String createNoteLines(Slice slice, byte channel, long tick, TreeMap<String, TreeMap<Byte, String>> events) {
 		StringBuilder lines = new StringBuilder("");
 		
-		// add rests, if necessary
+		// add rest, if necessary
 		Instrument instr  = instruments.get(channel);
 		long currentTicks = instr.getCurrentTicks();
 		if (tick > currentTicks) {
