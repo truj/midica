@@ -165,25 +165,25 @@ public class MidicaPLExporter extends Exporter {
 	/** lowest note  --  comma-separated note bytes (This structure is only needed for the sorting: lowest note first, then chord name) */
 	private static TreeMap<String, ArrayList<String>> chordsByBaseNote = null;
 	
-	// structures built by SequenceAnalyzer and KaraokeAnalyzer
-	private static TreeMap<Byte, TreeMap<Long, Byte[]>>                 instrumentHistory = null;
-	private static TreeMap<Byte, TreeMap<Long, String>>                 commentHistory    = null;
-	private static TreeMap<Byte, TreeMap<Long, TreeMap<Byte, Byte>>>    noteHistory       = null;
-	private static TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>> noteOnOff         = null;
-	private static TreeMap<Long, String>                                lyricsSyllables   = null;
+	/* ******************
+	 * instance fields
+	 ********************/
 	
 	/** channels that can be used for lyrics, sorted by priority */
-	ArrayList<Byte> lyricsChannels = null;
+	private ArrayList<Byte> lyricsChannels = null;
 	
 	/** Priority which channel to choose for a lyrics events, if we have different possibilities. */
-	ArrayList<Byte> karaokePriority = null;
+	private ArrayList<Byte> karaokePriority = null;
+	
+	// structures built by SequenceAnalyzer and KaraokeAnalyzer
+	private TreeMap<Byte, TreeMap<Long, Byte[]>>                 instrumentHistory = null;
+	private TreeMap<Byte, TreeMap<Long, String>>                 commentHistory    = null;
+	private TreeMap<Byte, TreeMap<Long, TreeMap<Byte, Byte>>>    noteHistory       = null;
+	private TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>> noteOnOff         = null;
+	private TreeMap<Long, String>                                lyricsSyllables   = null;
 	
 	/** stores statistics to estimate the decompilation quality */
-	private static TreeMap<Byte, TreeMap<Byte, Integer>> statistics = null;
-	
-	/* *******************
-	 * instance fields
-	 *********************/
+	private TreeMap<Byte, TreeMap<Byte, Integer>> statistics = null;
 	
 	/**
 	 * Creates a new MidicaPL exporter.
@@ -257,6 +257,7 @@ public class MidicaPLExporter extends Exporter {
 			
 			// fill slices
 			addInstrumentsToSlices();
+			groupNotes();
 			addNotesToSlices();
 			addLyricsToSlices();
 			
@@ -671,6 +672,122 @@ public class MidicaPLExporter extends Exporter {
 	}
 	
 	/**
+	 * Groups notes with note-on/note-off/velocity differences that are smaller
+	 * than the according tolerances.
+	 */
+	private void groupNotes() {
+		
+		// nothing to do?
+		if (0 == CHORD_NOTE_ON_TOLERANCE
+			&& 0 == CHORD_NOTE_OFF_TOLERANCE
+			&& 0 == CHORD_VELOCITY_TOLERANCE)
+			return;
+		
+		// clone the local copy of the structures to be modified
+		TreeMap<Byte, TreeMap<Long, TreeMap<Byte, Byte>>>    noteHistoryClone = new TreeMap<>();
+		TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>> noteOnOffClone   = (TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>>) noteOnOff.clone();
+		
+		// CHANNEL:
+		for (byte channel : noteHistory.keySet()) {
+			TreeMap<Long, TreeMap<Byte, Byte>>    channelHistoryOriginal = noteHistory.get(channel);
+			TreeMap<Long, TreeMap<Byte, Byte>>    channelHistoryClone    = new TreeMap<>();
+			TreeMap<Byte, TreeMap<Long, Boolean>> channelOnOffClone      = noteOnOffClone.get(channel);
+			
+			long skipUntil = -1;
+			
+			TICK:
+			for (Long tick : channelHistoryOriginal.keySet()) {
+				
+				if (tick <= skipUntil)
+					continue TICK;
+				
+				TreeMap<Byte, Byte> tickStructOriginal = channelHistoryOriginal.get(tick);
+				TreeMap<Byte, Byte> tickStructClone    = new TreeMap<>();
+				
+				// NOTE:
+				for (Entry<Byte, Byte> noteEntry : tickStructOriginal.entrySet()) {
+					byte note     = noteEntry.getKey();
+					byte velocity = noteEntry.getValue();
+					
+					// copy note to tick
+					tickStructClone.put(note, velocity);
+				}
+				
+				FUTURE_TICK:
+				for (Long futureTick = tick + 1; futureTick <= tick + CHORD_NOTE_ON_TOLERANCE; futureTick++) {
+					TreeMap<Byte, Byte> futureTickStruct = channelHistoryOriginal.get(futureTick);
+					if (null == futureTickStruct)
+						continue FUTURE_TICK;
+					
+					// copy notes to the first notes' tick
+					for (Entry<Byte, Byte> futureTickEntry : futureTickStruct.entrySet()) {
+						byte note     = futureTickEntry.getKey();
+						byte velocity = futureTickEntry.getValue();
+						tickStructClone.put(note, velocity);
+						
+						// update ON tick in the ON/OFF structure
+						Boolean onOff = channelOnOffClone.get(note).get(futureTick);
+						if (onOff != null && onOff) {
+							channelOnOffClone.get(note).remove(futureTick);
+							channelOnOffClone.get(note).put(tick, true);
+						}
+					}
+					
+					// don't process this tick again
+					skipUntil = futureTick;
+				}
+				
+				// TODO: adjust OFF TICK and velocity
+				TreeMap<String, Long[]> chordIds = new TreeMap<>();
+				NOTE:
+				for (Entry<Byte, Byte> tickEntry: tickStructClone.entrySet()) {
+					byte note     = tickEntry.getKey();
+					byte velocity = tickEntry.getValue();
+					long offTick  = channelOnOffClone.get(note).ceilingKey(tick + 1);
+					
+					String chordId = offTick + "/" + velocity;
+					
+					// already part of a chord?
+					if (chordIds.containsKey(chordId))
+						continue NOTE;
+					
+					// possible to become part of a chord?
+					for (Entry<String, Long[]> candidate : chordIds.entrySet()) {
+						Long[] values       = candidate.getValue();
+						long   crdOffTick   = values[0];
+						byte   crdVelocity  = (byte) (long) values[1];
+						long   diffOff      = Math.abs(crdOffTick  - offTick);
+						long   diffVelocity = Math.abs(crdVelocity - velocity);
+						if (diffOff <= CHORD_NOTE_OFF_TOLERANCE && diffVelocity <= CHORD_VELOCITY_TOLERANCE) {
+							if (diffOff != 0) {
+								channelOnOffClone.get(note).remove(offTick);
+								channelOnOffClone.get(note).put(crdOffTick, false);
+							}
+							if (diffVelocity != 0) {
+								tickEntry.setValue(crdVelocity);
+							}
+							continue NOTE;
+						}
+					}
+					
+					// create a new chord-ID
+					chordIds.put(chordId, new Long[]{offTick, (long) velocity});
+				}
+				
+				// copy tick to channel
+				channelHistoryClone.put(tick, tickStructClone);
+			}
+			
+			// copy channel to history
+			noteHistoryClone.put(channel, channelHistoryClone);
+		}
+		
+		// replace the local copy with the adjusted clone
+		noteHistory = noteHistoryClone;
+		noteOnOff   = noteOnOffClone;
+	}
+	
+	/**
 	 * Fills the timeline structures of the slices with note-on events regarding
 	 * chords and single notes.
 	 */
@@ -687,6 +804,7 @@ public class MidicaPLExporter extends Exporter {
 			for (Entry<Byte, TreeMap<Long, TreeMap<Byte, Byte>>> channelSet : sliceNoteHistory.entrySet()) {
 				byte                               channel        = channelSet.getKey();
 				TreeMap<Long, TreeMap<Byte, Byte>> channelHistory = channelSet.getValue();
+				
 				// TICK:
 				for (Entry<Long, TreeMap<Byte, Byte>> tickSet : channelHistory.entrySet()) {
 					long tick                      = tickSet.getKey();
@@ -694,11 +812,12 @@ public class MidicaPLExporter extends Exporter {
 					
 					// create notes structure for this tick
 					TreeMap<String, TreeMap<Byte, String>> notesStruct = new TreeMap<>();
+					
 					// NOTE:
 					for (Entry<Byte, Byte> noteSet : tickStruct.entrySet()) {
-						byte   note     = noteSet.getKey();
-						byte   velocity = noteSet.getValue();
-						Long   offTick  = sliceOnOff.get(channel).get(note).ceilingKey(tick + 1);
+						byte note     = noteSet.getKey();
+						byte velocity = noteSet.getValue();
+						Long offTick  = sliceOnOff.get(channel).get(note).ceilingKey(tick + 1);
 						
 						// TODO: handle the case that there is no offTick at all
 						// can happen if the MIDI is corrupt or uses all-notes-off / all-sounds-off instead of note-off
