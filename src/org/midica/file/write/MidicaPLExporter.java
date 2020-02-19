@@ -1755,7 +1755,7 @@ public class MidicaPLExporter extends Exporter {
 				restsPercent *= 100;
 				String restsPercentStr = String.format("%.2f", restsPercent);
 				if (MUST_ADD_STATISTICS)
-					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Rests/Total: " + subStat.get(STAT_REST_SKIPPED) + " (" + restsPercentStr + "%)" + NEW_LINE);
+					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Rests/Notes: " + rests + "/" + notes + " (" + restsPercentStr + "%)" + NEW_LINE);
 				markerCount++;
 				markerSum += (100.0D - restsPercent);
 			}
