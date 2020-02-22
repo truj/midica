@@ -214,7 +214,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "happy birthday to you,\nhappy birthday to you,\n\nhappy", getLyrics() );
 		
 		parse(getWorkingFile("block-tuplets"));
-		assertEquals( 3668, instruments.get(0).getCurrentTicks() );
+		assertEquals( 3668,  instruments.get(0).getCurrentTicks() );
+		assertEquals(  101,  instruments.get(0).getVelocity() );
+		assertEquals(  0.8f, instruments.get(0).getDurationRatio() );
 		
 		parse(getWorkingFile("drum-only-with-global"));
 		assertEquals( 960, instruments.get(9).getCurrentTicks() );
@@ -360,7 +362,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		// channel 0:
 		messages = getNoteOnOffMessagesByChannel(0);
 		assertEquals( 8, messages.size() );
-		for (SingleMessage msg : messages) {
+		{
 			int i = 0;
 			assertEquals( "0/0/90/c / 78",    messages.get(i++).toString() ); // c ON
 			assertEquals( "480/0/90/d / 78",  messages.get(i++).toString() ); // d ON
@@ -374,7 +376,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		// channel 1:
 		messages = getNoteOnOffMessagesByChannel(1);
 		assertEquals( 14, messages.size() );
-		for (SingleMessage msg : messages) {
+		{
 			int i = 0;
 			assertEquals( "0/1/91/c / 102",    messages.get(i++).toString() ); // c,d,e : c ON
 			assertEquals( "0/1/91/d / 102",    messages.get(i++).toString() ); // c,d,e : d ON
@@ -394,7 +396,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		// channel 2:
 		messages = getNoteOnOffMessagesByChannel(2);
 		assertEquals( 4, messages.size() );
-		for (SingleMessage msg : messages) {
+		{
 			int i = 0;
 			assertEquals( "0/2/92/c / 35",   messages.get(i++).toString() ); //            c ON
 			assertEquals( "479/2/82/c / 0",  messages.get(i++).toString() ); //            c OFF (correction)
@@ -404,20 +406,20 @@ class MidicaPLParserTest extends MidicaPLParser {
 		// channel 3:
 		messages = getNoteOnOffMessagesByChannel(3);
 		assertEquals( 4, messages.size() );
-		for (SingleMessage msg : messages) {
+		{
 			int i = 0;
 			assertEquals( "0/3/93/c / 65",   messages.get(i++).toString() ); // c ON
 			assertEquals( "479/3/83/c / 0",  messages.get(i++).toString() ); // c OFF (correction)
 			assertEquals( "480/3/93/c / 65", messages.get(i++).toString() ); // c ON
 			assertEquals( "960/3/83/c / 0",  messages.get(i++).toString() ); // c OFF
 		}
-		// different transpose level
+		// different transpose levels
 		setTransposeLevel((byte) 12);
 		parse(getWorkingFile("legato-correction"));
 		setTransposeLevel((byte) 0);
 		messages = getNoteOnOffMessagesByChannel(0);
 		assertEquals( 8, messages.size() );
-		for (SingleMessage msg : messages) {
+		{
 			int i = 0;
 			assertEquals( "0/0/90/c+ / 78",    messages.get(i++).toString() ); // c+ ON
 			assertEquals( "480/0/90/d+ / 78",  messages.get(i++).toString() ); // d+ ON
@@ -429,6 +431,134 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "3840/0/80/e+ / 0",  messages.get(i++).toString() ); // e+ OFF
 		}
 		
+		parse(getWorkingFile("patterns"));
+		// channel 0:
+		messages = getNoteOnOffMessagesByChannel(0);
+		assertEquals( 62, messages.size() );
+		{
+			int i = 0;
+			// PART 1: q+m as outer options, q+v+d as inner options
+			// pat_qvd, first loop run (outer q=2)
+			assertEquals( "0/0/90/c / 90",     messages.get(i++).toString() );  // c ON    v=90    pattern line 1
+			assertEquals( "0/0/90/c+3 / 90",   messages.get(i++).toString() );  // c+3 ON          channel cmd
+			assertEquals( "192/0/80/c+3 / 0",  messages.get(i++).toString() );  // c+3 OFF d=80%
+			assertEquals( "384/0/80/c / 0",    messages.get(i++).toString() );  // c OFF   d=80%
+			assertEquals( "480/0/90/e / 90",   messages.get(i++).toString() );  // e ON    v=90    pattern line 2
+			assertEquals( "672/0/80/e / 0",    messages.get(i++).toString() );  // e OFF   d=80%
+			assertEquals( "720/0/90/g / 127",  messages.get(i++).toString() );  // g ON    v=127   pattern line 3  inner: q=2
+			assertEquals( "732/0/80/g / 0",    messages.get(i++).toString() );  // g OFF   d=10%
+			assertEquals( "840/0/90/g / 127",  messages.get(i++).toString() );  // g ON    v=127   pattern line 3  inner: q=2
+			assertEquals( "852/0/80/g / 0",    messages.get(i++).toString() );  // g OFF   d=10%
+			assertEquals( "960/0/90/c / 127",  messages.get(i++).toString() );  // c ON    v=127   pattern line 4
+			assertEquals( "960/0/90/e / 127",  messages.get(i++).toString() );  // e ON    v=127   pattern line 4
+			assertEquals( "960/0/90/g / 127",  messages.get(i++).toString() );  // g ON    v=127   pattern line 4
+			assertEquals( "1008/0/80/c / 0",   messages.get(i++).toString() );  // c OFF   d=10%
+			assertEquals( "1008/0/80/e / 0",   messages.get(i++).toString() );  // e OFF   d=10%
+			assertEquals( "1008/0/80/g / 0",   messages.get(i++).toString() );  // g OFF   d=10%
+			// pat_qvd, second loop run (outer q=2)
+			assertEquals( "1440/0/90/c / 90",   messages.get(i++).toString() );  // c ON    v=90    pattern line 1
+			assertEquals( "1824/0/80/c / 0",    messages.get(i++).toString() );  // c OFF   d=80%
+			assertEquals( "1920/0/90/e / 90",   messages.get(i++).toString() );  // e ON    v=90    pattern line 2
+			assertEquals( "2112/0/80/e / 0",    messages.get(i++).toString() );  // e OFF   d=80%
+			assertEquals( "2160/0/90/g / 127",  messages.get(i++).toString() );  // g ON    v=127   pattern line 3  inner: q=2
+			assertEquals( "2172/0/80/g / 0",    messages.get(i++).toString() );  // g OFF   d=10%
+			assertEquals( "2280/0/90/g / 127",  messages.get(i++).toString() );  // g ON    v=127   pattern line 3  inner: q=2
+			assertEquals( "2292/0/80/g / 0",    messages.get(i++).toString() );  // g OFF   d=10%
+			assertEquals( "2400/0/90/c / 127",  messages.get(i++).toString() );  // c ON    v=127   pattern line 4
+			assertEquals( "2400/0/90/e / 127",  messages.get(i++).toString() );  // e ON    v=127   pattern line 4
+			assertEquals( "2400/0/90/g / 127",  messages.get(i++).toString() );  // g ON    v=127   pattern line 4
+			assertEquals( "2448/0/80/c / 0",    messages.get(i++).toString() );  // c OFF   d=10%
+			assertEquals( "2448/0/80/e / 0",    messages.get(i++).toString() );  // e OFF   d=10%
+			assertEquals( "2448/0/80/g / 0",    messages.get(i++).toString() );  // g OFF   d=10%
+			// PART 2: v+d+s as outer options, no inner options
+			// pat_simple, first call (no outer options)
+			assertEquals( "4080/0/90/a / 90",   messages.get(i++).toString() );  // a ON   v=90     channel cmd
+			assertEquals( "4464/0/80/a / 0",    messages.get(i++).toString() );  // a OFF  d=80%
+			assertEquals( "4560/0/90/a / 90",   messages.get(i++).toString() );  // a ON   v=90     pattern (pat_simple)
+			assertEquals( "4944/0/80/a / 0",    messages.get(i++).toString() );  // a OFF  d=80%
+			assertEquals( "5040/0/90/a / 90",   messages.get(i++).toString() );  // a ON   v=90     channel cmd
+			assertEquals( "5424/0/80/a / 0",    messages.get(i++).toString() );  // a OFF  d=80%
+			// pat_simple, second call (test outer v=50, d=60%, s=2)
+			assertEquals( "5520/0/90/b / 50",   messages.get(i++).toString() );  // b ON   v=50     pattern (pat_simple)
+			assertEquals( "5808/0/80/b / 0",    messages.get(i++).toString() );  // b OFF  d=60%
+			assertEquals( "6000/0/90/a / 50",   messages.get(i++).toString() );  // a ON   v=50     channel cmd
+			assertEquals( "6288/0/80/a / 0",    messages.get(i++).toString() );  // a OFF  d=60%
+			// PART 3: no outer options, m+tr as inner options
+			// pat_mtr
+			assertEquals( "6480/0/90/c / 50",   messages.get(i++).toString() );  // c ON            pattern line 1
+			assertEquals( "6480/0/90/d / 50",   messages.get(i++).toString() );  // d ON            pattern line 2
+			assertEquals( "6768/0/80/d / 0",    messages.get(i++).toString() );  // d OFF
+			assertEquals( "6960/0/90/d / 50",   messages.get(i++).toString() );  // d ON            pattern line 2
+			assertEquals( "7056/0/80/c / 0",    messages.get(i++).toString() );  // c OFF
+			assertEquals( "7248/0/80/d / 0",    messages.get(i++).toString() );  // d OFF
+			assertEquals( "7440/0/90/d / 50",   messages.get(i++).toString() );  // d ON            pattern line 2
+			assertEquals( "7728/0/80/d / 0",    messages.get(i++).toString() );  // d OFF
+			assertEquals( "7920/0/90/d / 50",   messages.get(i++).toString() );  // d ON            pattern line 2
+			assertEquals( "8208/0/80/d / 0",    messages.get(i++).toString() );  // d OFF
+			// PART 4: l+t as outer options, no inner options
+			// pat_simple, q=2, l=test_
+			assertEquals( "test ", getLyrics() );
+			assertEquals( "8400/0/90/a / 50",   messages.get(i++).toString() );  // c ON            pattern line 1
+			assertEquals( "8688/0/80/a / 0",    messages.get(i++).toString() );  // c OFF
+			assertEquals( "8880/0/90/a / 50",   messages.get(i++).toString() );  // c ON            q=2
+			assertEquals( "9168/0/80/a / 0",    messages.get(i++).toString() );  // c OFF
+			// pat_simple, called inside a block with t (triplet)
+			assertEquals( "9360/0/90/a / 50",   messages.get(i++).toString() );  // c ON            pattern line 1 (from block)
+			assertEquals( "9648/0/80/a / 0",    messages.get(i++).toString() );  // c OFF
+			assertEquals( "9840/0/90/a / 50",   messages.get(i++).toString() );  // c ON            q=2
+			assertEquals( "10128/0/80/a / 0",   messages.get(i++).toString() );  // c OFF
+			// channel command with q=2 + t (triplet)
+			assertEquals( "10320/0/90/a / 50",  messages.get(i++).toString() );  // c ON            channel cmd
+			assertEquals( "10512/0/80/a / 0",   messages.get(i++).toString() );  // c OFF
+			assertEquals( "10640/0/90/a / 50",  messages.get(i++).toString() );  // c ON            channel cmd
+			assertEquals( "10832/0/80/a / 0",   messages.get(i++).toString() );  // c OFF
+			assertEquals( 10960, instruments.get(0).getCurrentTicks() );
+		}
+		// channel 1:
+		messages = getNoteOnOffMessagesByChannel(1);
+		assertEquals( 24, messages.size() );
+		{
+			int i = 0;
+			assertEquals( "0/1/91/c / 64",    messages.get(i).toString()    ); // c /4
+			assertEquals( "480/1/91/d / 64",  messages.get(i+=2).toString() ); // d /8
+			assertEquals( "720/1/91/d / 64",  messages.get(i+=2).toString() ); // d /8
+			assertEquals( "960/1/91/c / 64",  messages.get(i+=2).toString() ); // c /4
+			assertEquals( "1440/1/91/d / 64", messages.get(i+=2).toString() ); // d /8
+			assertEquals( "1680/1/91/d / 64", messages.get(i+=2).toString() ); // d /8
+			assertEquals( "1920/1/91/c / 64", messages.get(i+=2).toString() ); // c /4
+			assertEquals( "2400/1/91/d / 64", messages.get(i+=2).toString() ); // d /8
+			assertEquals( "2640/1/91/d / 64", messages.get(i+=2).toString() ); // d /8
+			assertEquals( "2880/1/91/d / 64", messages.get(i+=2).toString() ); // d /4
+			assertEquals( "3360/1/91/c / 64", messages.get(i+=2).toString() ); // c /8
+			assertEquals( "3600/1/91/c / 64", messages.get(i+=2).toString() ); // c /8
+			assertEquals( 3840, instruments.get(1).getCurrentTicks() );
+		}
+		// channel 9:
+		messages = getNoteOnOffMessagesByChannel(9);
+		assertEquals( 12, messages.size() );
+		{
+			int i = 0;
+			assertEquals( "0/9/99/bass_drum_1 (bd1) / 64",     messages.get(i).toString()    ); // bd1 /4
+			assertEquals( "480/9/99/hi_hat_closed (hhc) / 64", messages.get(i+=2).toString() ); // hhc /8
+			assertEquals( "720/9/99/hi_hat_closed (hhc) / 64", messages.get(i+=2).toString() ); // hhc /8
+			assertEquals( "960/9/99/hi_hat_closed (hhc) / 64", messages.get(i+=2).toString() ); // hhc /4
+			assertEquals( "1440/9/99/bass_drum_1 (bd1) / 64",  messages.get(i+=2).toString() ); // bd1 /8
+			assertEquals( "1680/9/99/bass_drum_1 (bd1) / 64",  messages.get(i+=2).toString() ); // bd1 /8
+			assertEquals( 1920, instruments.get(9).getCurrentTicks() );
+		}
+		// channel 2:
+		messages = getNoteOnOffMessagesByChannel(2);
+		assertEquals( 12, messages.size() );
+		{
+			int i = 0;
+			assertEquals( "0/2/92/e / 64",    messages.get(i).toString()    ); // e /4
+			assertEquals( "480/2/92/c / 64",  messages.get(i+=2).toString() ); // c /8
+			assertEquals( "720/2/92/c / 64",  messages.get(i+=2).toString() ); // c /8
+			assertEquals( "960/2/92/e / 64",  messages.get(i+=2).toString() ); // e /4
+			assertEquals( "1440/2/92/c / 64", messages.get(i+=2).toString() ); // c /8
+			assertEquals( "1680/2/92/c / 64", messages.get(i+=2).toString() ); // c /8
+			assertEquals( 0, instruments.get(2).getCurrentTicks() ); // q=2, m
+		}
 	}
 	
 	/**
@@ -711,6 +841,10 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("channel-rest-missing-param")) );
 		assertEquals( 3, e.getLineNumber() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CH_CMD_NUM_OF_ARGS)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("channel-if")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHANNEL_INVALID_OPT) + "if") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instrument-in-instruments")) );
 		assertEquals( 4, e.getLineNumber() );
@@ -1134,6 +1268,43 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("global-partial-invalid-range-elem")) );
 		assertEquals( 3, e.getLineNumber() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PARTIAL_RANGE) + "2-3-4") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-inside-function")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-inside-block")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_UNMATCHED_OPEN)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-redefined")) );
+		assertEquals( 7, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_ALREADY_DEFINED) + "p1") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-def-with-second-arg")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_NUM_OF_ARGS)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-def-without-name")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_NUM_OF_ARGS)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-call-with-tremolo")) );
+		assertEquals( 7, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INVALID_OUTER_OPT) + "tremolo") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-with-shift")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INVALID_INNER_OPT) + "shift") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-call-index-wrong")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INDEX_INVALID)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-call-index-too-high")) );
+		assertEquals( 10, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH)) );
+		
 		
 //		System.out.println(e.getMessage() + "\n" + e.getFile().getName());
 	}

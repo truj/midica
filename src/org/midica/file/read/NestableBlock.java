@@ -21,7 +21,8 @@ import org.midica.config.Dict;
  */
 public class NestableBlock {
 	
-	private static Pattern plus = null;
+	private static Pattern plus        = null;
+	private static Pattern whitespaces = Pattern.compile("\\s+");
 	
 	private MidicaPLParser    parser    = null;
 	private boolean           multiple  = false;
@@ -254,11 +255,24 @@ public class NestableBlock {
 			// add tuplet to all summands inside of the duration column
 			// e.g. *1+/8 --> *1t4:3+/8t4:3
 			if (tuplet != null) {
-				String[] atoms = plus.split(tokens[2], -1);
-				for (int j=0; j < atoms.length; j++) {
-					atoms[j] += tuplet;
+				// separate duration from options
+				String[] durationAndOptions = whitespaces.split(tokens[2], 2);
+				
+				// pattern instead of duration? - ignore tuplets
+				if (MidicaPLParser.patterns.containsKey(durationAndOptions[0])) {
+					// ignore
 				}
-				tokens[2] = String.join(MidicaPLParser.LENGTH_PLUS, atoms);
+				else {
+					String[] atoms = plus.split(durationAndOptions[0], -1);
+					for (int j=0; j < atoms.length; j++) {
+						atoms[j] += tuplet;
+					}
+					tokens[2] = String.join(MidicaPLParser.LENGTH_PLUS, atoms);
+					
+					// add options again, if necessary
+					if (durationAndOptions.length > 1)
+						tokens[2] += " " + durationAndOptions[1];
+				}
 			}
 		}
 		catch (ParseException e) {

@@ -22,6 +22,8 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -64,8 +66,9 @@ public class MidicaPLParser extends SequenceParser {
 	private static final int MODE_DEFAULT      = 0;
 	private static final int MODE_INSTRUMENTS  = 1;
 	private static final int MODE_FUNCTION     = 2;
-	private static final int MODE_META         = 3;
-	private static final int MODE_SOFT_KARAOKE = 4;
+	private static final int MODE_PATTERN      = 3;
+	private static final int MODE_META         = 4;
+	private static final int MODE_SOFT_KARAOKE = 5;
 	
 	public static final  int COND_TYPE_NONE   = 0;
 	public static final  int COND_TYPE_IF     = 1;
@@ -145,6 +148,8 @@ public class MidicaPLParser extends SequenceParser {
 	public static String LYRICS_LF          = null;
 	public static String LYRICS_COMMA       = null;
 	public static String FUNCTION           = null;
+	public static String PATTERN            = null;
+	public static String PATTERN_INDEX_SEP  = null;
 	public static String PARAM_OPEN         = null;
 	public static String PARAM_CLOSE        = null;
 	public static String PARAM_SEPARATOR    = null;
@@ -202,9 +207,10 @@ public class MidicaPLParser extends SequenceParser {
 	
 	private   static HashMap<String, ArrayList<String>> fileCache            = null;
 	private   static HashMap<String, ArrayList<String>> functions            = null;
+	public    static HashMap<String, ArrayList<String>> patterns             = null;
 	private   static HashMap<String, File>              functionToFile       = null;
 	private   static HashMap<String, Integer>           functionToLineOffset = null;
-	private   static HashMap<String, HashSet<Integer>>  chords               = null;
+	private   static TreeMap<String, TreeSet<Integer>>  chords               = null;
 	private   static boolean                            instrumentsParsed    = false;
 	private   static HashMap<String, StringBuilder>     metaInfo             = null;
 	private   static HashMap<String, ArrayList<String>> softKaraokeInfo      = null;
@@ -233,8 +239,8 @@ public class MidicaPLParser extends SequenceParser {
 	private static boolean isDefineParsRun     = false; // parsing run for define commands
 	private static boolean isConstParsRun      = false; // parsing run for constant definitions
 	private static boolean isChInstMetaParsRun = false; // parsing run for chords, meta, instruments and block nesting
-	private static boolean isFuncNameParsRun   = false; // parsing run for defined function names
-	private static boolean isFuncParsRun       = false; // parsing run for functions
+	private static boolean isFuncNameParsRun   = false; // parsing run for defined function and pattern names
+	private static boolean isFuncParsRun       = false; // parsing run for functions and patterns
 	private static boolean isCondCheckParsRun  = false; // parsing run for pre-checks of if/elsif conditions
 	private static boolean isDefaultParsRun    = false; // final parsing run
 	
@@ -248,6 +254,8 @@ public class MidicaPLParser extends SequenceParser {
 	private int               currentMode         = MODE_DEFAULT;
 	private String            currentFunctionName = null;
 	private ArrayList<String> currentFunction     = null;
+	private String            currentPatternName  = null;
+	private ArrayList<String> currentPattern      = null;
 	private boolean           condChainOpened     = false; // current / last block had an if or elsif
 	private boolean           condChainHit        = false; // if / elsif chain had a hit
 	
@@ -348,6 +356,8 @@ public class MidicaPLParser extends SequenceParser {
 		LYRICS_LF          = Dict.getSyntax( Dict.SYNTAX_LYRICS_LF          );
 		LYRICS_COMMA       = Dict.getSyntax( Dict.SYNTAX_LYRICS_COMMA       );
 		FUNCTION           = Dict.getSyntax( Dict.SYNTAX_FUNCTION           );
+		PATTERN            = Dict.getSyntax( Dict.SYNTAX_PATTERN            );
+		PATTERN_INDEX_SEP  = Dict.getSyntax( Dict.SYNTAX_PATTERN_INDEX_SEP  );
 		PARAM_OPEN         = Dict.getSyntax( Dict.SYNTAX_PARAM_OPEN         );
 		PARAM_CLOSE        = Dict.getSyntax( Dict.SYNTAX_PARAM_CLOSE        );
 		PARAM_SEPARATOR    = Dict.getSyntax( Dict.SYNTAX_PARAM_SEPARATOR    );
@@ -529,7 +539,7 @@ public class MidicaPLParser extends SequenceParser {
 	}
 	
 	/**
-	 * Create patterns for regexes.
+	 * Create regex patterns.
 	 * This is called after the define run so that the syntax keywords cannot change any more.
 	 */
 	private void compilePatterns() {
@@ -837,7 +847,13 @@ public class MidicaPLParser extends SequenceParser {
 			return;
 		}
 		
-		checkIfCmdExists(tokens[0]);
+		if (MODE_PATTERN == currentMode && ! END.equals(tokens[0])) {
+			parsePatternCmd(tokens);     // line inside of a pattern definition
+			return;
+		}
+		else {
+			checkIfCmdExists(tokens[0]); // check for command or channel
+		}
 		
 		// replace note, instrument, percussion and drumkit names
 		if (tokens.length > 2) {
@@ -894,6 +910,20 @@ public class MidicaPLParser extends SequenceParser {
 				// we are inside an instruments definition block
 				parseInstrumentCmd(tokens, isFake);
 				return;
+			}
+			
+			// pattern call --> call this method (parseTokens()) once for each pattern line
+			if (tokens.length > 2) {
+				String[] subTokens = tokens[2].split( "\\s+", 2 );
+				if (patterns.containsKey(subTokens[0])) {
+					if (isFunct)
+						currentFunction.add(String.join(" ", tokens)); // add to function
+					else if (isBlock)
+						nestableBlkStack.peek().add(tokens); // add to block
+					else
+						parsePatternCall(tokens, subTokens, isFake);
+					return;
+				}
 			}
 			
 			// more than one note or chord? --> call this method (parseTokens()) once for each chord element
@@ -975,6 +1005,7 @@ public class MidicaPLParser extends SequenceParser {
 		// mode command (instruments, function, meta, soft karaoke, end)
 		else if (INSTRUMENTS.equals(tokens[0])
 			|| FUNCTION.equals(tokens[0])
+			|| PATTERN.equals(tokens[0])
 			|| META.equals(tokens[0])
 			|| META_SOFT_KARAOKE.equals(tokens[0])
 			|| END.equals(tokens[0])) {
@@ -1035,6 +1066,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( BLOCK_OPEN.equals(cmd)            ) {}
 		else if ( BLOCK_CLOSE.equals(cmd)           ) {}
 		else if ( FUNCTION.equals(cmd)              ) {}
+		else if ( PATTERN.equals(cmd)               ) {}
 		else if ( CHORD.equals(cmd)                 ) {}
 		else if ( CALL.equals(cmd)                  ) {}
 		else if ( INCLUDE.equals(cmd)               ) {}
@@ -1170,7 +1202,7 @@ public class MidicaPLParser extends SequenceParser {
 			if (END.equals(cmd) && (MODE_INSTRUMENTS == currentMode || MODE_META == currentMode || MODE_SOFT_KARAOKE == currentMode)) {
 				// handle later
 			}
-			else if (BLOCK_OPEN.equals(cmd) || BLOCK_CLOSE.equals(cmd) || FUNCTION.equals(cmd) || END.equals(cmd)) {
+			else if (BLOCK_OPEN.equals(cmd) || BLOCK_CLOSE.equals(cmd) || FUNCTION.equals(cmd) || PATTERN.equals(cmd) || END.equals(cmd)) {
 				trackNesting(cmd);
 				return true;
 			}
@@ -1231,9 +1263,9 @@ public class MidicaPLParser extends SequenceParser {
 			return true;
 		}
 		
-		// look for defined function names
+		// look for defined function/pattern names
 		if (isFuncNameParsRun) {
-			if (FUNCTION.equals(cmd)) {
+			if (FUNCTION.equals(cmd) || PATTERN.equals(cmd)) {
 				return false;
 			}
 			
@@ -1245,12 +1277,12 @@ public class MidicaPLParser extends SequenceParser {
 			return true;
 		}
 		
-		// parse functions
+		// parse functions/patterns
 		if (isFuncParsRun) {
-			if (FUNCTION.equals(cmd)) {
+			if (FUNCTION.equals(cmd) || PATTERN.equals(cmd)) {
 				return false;
 			}
-			if (MODE_FUNCTION == currentMode) {
+			if (MODE_FUNCTION == currentMode || MODE_PATTERN == currentMode) {
 				return false;
 			}
 			return true;
@@ -1289,7 +1321,11 @@ public class MidicaPLParser extends SequenceParser {
 				currentMode = MODE_FUNCTION;
 				return true;
 			}
-			else if (MODE_FUNCTION == currentMode) {
+			else if (PATTERN.equals(cmd)) {
+				currentMode = MODE_PATTERN;
+				return true;
+			}
+			else if (MODE_FUNCTION == currentMode || MODE_PATTERN == currentMode) {
 				if (END.equals(cmd)) {
 					currentMode = MODE_DEFAULT;
 				}
@@ -1319,6 +1355,8 @@ public class MidicaPLParser extends SequenceParser {
 			nestableBlkDepth--;
 		else if (FUNCTION.equals(cmd) && MODE_DEFAULT == currentMode)
 			currentMode = MODE_FUNCTION;
+		else if (PATTERN.equals(cmd) && MODE_DEFAULT == currentMode)
+			currentMode = MODE_PATTERN;
 		else if (META.equals(cmd) && MODE_DEFAULT == currentMode)
 			currentMode = MODE_META;
 		else if (META_SOFT_KARAOKE.equals(cmd) && MODE_META == currentMode)
@@ -1336,7 +1374,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * @throws ParseException if the check fails.
 	 */
 	private void checkNesting(String cmd) throws ParseException {
-		if (INSTRUMENTS.equals(cmd) || FUNCTION.equals(cmd) || META.equals(cmd) || END.equals(cmd)) {
+		if (INSTRUMENTS.equals(cmd) || FUNCTION.equals(cmd) || PATTERN.equals(cmd) || META.equals(cmd) || END.equals(cmd)) {
 			if (nestableBlkDepth > 0) {
 				throw new ParseException( Dict.get(Dict.ERROR_BLOCK_UNMATCHED_OPEN) );
 			}
@@ -1621,6 +1659,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * 
 	 * - INSTRUMENTS
 	 * - FUNCTION
+	 * - PATTERN
 	 * - META
 	 * - SOFT_KARAOKE
 	 * - END
@@ -1639,6 +1678,9 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		else if (FUNCTION.equals(cmd)) {
 			parseFUNCTION(tokens);
+		}
+		else if (PATTERN.equals(cmd)) {
+			parsePATTERN(tokens);
 		}
 		else if (INSTRUMENTS.equals(cmd)) {
 			if (1 == tokens.length ) {
@@ -1778,6 +1820,36 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		else
 			throw new ParseException( Dict.get(Dict.ERROR_FUNCTION_NUM_OF_ARGS) );
+	}
+	
+	/**
+	 * Parses a PATTERN command.
+	 * A PATTERN command is a mode command that opens a PATTERN definition.
+	 * 
+	 * @param tokens             Token array.
+	 * @throws ParseException    If the command cannot be parsed.
+	 */
+	private void parsePATTERN(String[] tokens) throws ParseException {
+		if (MODE_DEFAULT != currentMode) {
+			throw new ParseException( Dict.get(Dict.ERROR_PATTERN_NOT_ALLOWED_HERE) );
+		}
+		if (2 == tokens.length) {
+			currentMode        = MODE_PATTERN;
+			currentPatternName = tokens[1];
+			if (patterns.containsKey(currentPatternName)) {
+				throw new ParseException( Dict.get(Dict.ERROR_PATTERN_ALREADY_DEFINED) + currentPatternName );
+			}
+			
+			if (isFuncNameParsRun) {
+				return;
+			}
+			
+			// real function parsing run
+			currentPattern = new ArrayList<>();
+			patterns.put(currentPatternName, currentPattern);
+		}
+		else
+			throw new ParseException( Dict.get(Dict.ERROR_PATTERN_NUM_OF_ARGS) );
 	}
 	
 	/**
@@ -2021,7 +2093,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * @param tokens             Token array.
 	 * @throws ParseException    If the command cannot be parsed.
 	 */
-	private void parseCHORD( String[] tokens ) throws ParseException {
+	private void parseCHORD(String[] tokens) throws ParseException {
 		if (MODE_DEFAULT != currentMode) {
 			throw new ParseException( Dict.get(Dict.ERROR_CHORD_DEF_NOT_ALLOWED_HERE) );
 		}
@@ -2056,7 +2128,7 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// get and process chord elements
-		HashSet<Integer> chord = new HashSet<>();
+		TreeSet<Integer> chord = new TreeSet<>();
 		String[] notes = chordValue.split( "[" + CHORD_SEPARATOR + "\\s]+" ); // notes of the chord can be separated by CHORD_SEPARATOR (e,g, "=") and/or whitespace(s)
 		
 		for (String note : notes) {
@@ -2231,7 +2303,7 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// apply all lines of the called function
-		for (int m=0; m<quantity; m++) {
+		for (int i = 0; i < quantity; i++) {
 			
 			// reset line in stacks
 			traceElem.resetLine();
@@ -2271,6 +2343,265 @@ public class MidicaPLParser extends SequenceParser {
 		functionFileStack.pop();
 		paramStackIndexed.pop();
 		paramStackNamed.pop();
+	}
+	
+	/**
+	 * Parses a channel call with a pattern instead of a note length.
+	 * 
+	 * @param tokens             Token array.
+	 * @param subTokens          Token array of pattern and options.
+	 * @param isFake             **true**, if this is called inside a function definition or block
+	 * @throws ParseException    If something is wrong.
+	 */
+	private void parsePatternCall(String[] tokens, String[] subTokens, boolean isFake) throws ParseException {
+		
+		if (tokens.length < 3) {
+			throw new ParseException( Dict.get(Dict.ERROR_CH_CMD_NUM_OF_ARGS) );
+		}
+		
+		// get channel and pattern
+		int               channel      = toChannel(tokens[0]);
+		String            patternName  = subTokens[0];
+		ArrayList<String> patternLines = patterns.get(patternName);
+		
+		// remember channel state
+		Instrument instr = instruments.get(channel);
+		long  outerStartTicks = instr.getCurrentTicks();
+		int   outerVelocity   = instr.getVelocity();
+		float outerDuration   = instr.getDurationRatio();
+		
+		// process pattern call options (outer options)
+		boolean outerMultiple = false;
+		int     outerQuantity = 1;
+		int     outerShift    = 0;
+		String  outerSyllable = null;
+		if (subTokens.length > 1) {
+			ArrayList<CommandOption> callOptions = parseOptions(subTokens[1], false);
+			
+			for (CommandOption opt : callOptions) {
+				String optName = opt.getName();
+				
+				if (OPT_VELOCITY.equals(optName)) {
+					int velocity = opt.getVelocity();
+					if (! isFake)
+						instr.setVelocity(velocity);
+					outerVelocity = velocity;
+				}
+				else if (OPT_DURATION.equals(optName)) {
+					float durationRatio = opt.getDuration();
+					if (! isFake)
+						instr.setDurationRatio(durationRatio);
+					outerDuration = durationRatio;
+				}
+				else if (OPT_MULTIPLE.equals(optName)) {
+					outerMultiple = true;
+				}
+				else if (OPT_QUANTITY.equals(optName)) {
+					outerQuantity = opt.getQuantity();
+				}
+				else if (OPT_LYRICS.equals(optName)) {
+					outerSyllable = opt.getLyrics();
+					if (isSoftKaraoke && crlfSkPattern.matcher(outerSyllable).find()) {
+						throw new ParseException( Dict.get(Dict.ERROR_SK_SYLLABLE_CRLF_NOT_ALLOWED) );
+					}
+				}
+				else if (OPT_SHIFT.equals(optName)) {
+					outerShift += opt.getShift();
+				}
+				else
+					throw new ParseException( Dict.get(Dict.ERROR_PATTERN_INVALID_OUTER_OPT) + optName );
+			}
+		}
+		
+		// get notes belonging to the chord
+		ArrayList<Integer> notes = parseChord(tokens[1]);
+		if (null == notes) {
+			
+			// only one single note
+			notes = new ArrayList<>();
+			int note = parseNote(tokens[1]);
+			notes.add(note);
+		}
+		Integer[] noteNumbers = notes.toArray(new Integer[0]);
+		
+		// apply pattern lines
+		// OUTER_QUANTITY:
+		for (int i = 0; i < outerQuantity; i++) {
+			
+			if (! isFake && outerSyllable != null) {
+				applySyllable(outerSyllable, outerStartTicks);
+			}
+			
+			// PATTERN_LINE:
+			for (String patternLine : patternLines) {
+				String[]          patternTokens = patternLine.split("\\s+", 3);
+				String[]          indexStrings  = patternTokens[0].split(Pattern.quote(PATTERN_INDEX_SEP), -1);
+				ArrayList<String> lineNotes     = new ArrayList<String>();
+				
+				// process pattern line options (inner options)
+				boolean innerMultiple = false;
+				Integer innerQuantity = null;
+				Integer innerVelocity = null;
+				Float   innerDuration = null;
+				String  innerTremolo  = null;
+				if (patternTokens.length > 2) {
+					ArrayList<CommandOption> patternOptions = parseOptions(patternTokens[2], false);
+					
+					for (CommandOption opt : patternOptions) {
+						String optName = opt.getName();
+						
+						if (OPT_VELOCITY.equals(optName)) {
+							innerVelocity = opt.getVelocity();
+						}
+						else if (OPT_DURATION.equals(optName)) {
+							innerDuration = opt.getDuration();
+						}
+						else if (OPT_MULTIPLE.equals(optName)) {
+							innerMultiple = true;
+						}
+						else if (OPT_QUANTITY.equals(optName)) {
+							innerQuantity = opt.getQuantity();
+						}
+						else if (OPT_TREMOLO.equals(optName)) {
+							innerTremolo = opt.getValueString();
+						}
+						else
+							throw new ParseException( Dict.get(Dict.ERROR_PATTERN_INVALID_INNER_OPT) + optName );
+					}
+				}
+				
+				// INDEX:
+				for (String indexStr : indexStrings) {
+					try {
+						int index = Integer.parseInt(indexStr);
+						int note  = noteNumbers[index];
+						lineNotes.add(note + "");
+					}
+					catch (NumberFormatException e) {
+						throw new ParseException( Dict.get(Dict.ERROR_PATTERN_INDEX_INVALID) + indexStr );
+					}
+					catch (IndexOutOfBoundsException e) {
+						throw new ParseException( Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH) + indexStr );
+					}
+				}
+				
+				// construct resulting pattern line options
+				ArrayList<String> lineOptions = new ArrayList<String>();
+				if (innerMultiple) {
+					lineOptions.add(M);
+				}
+				if (innerQuantity != null) {
+					lineOptions.add(Q + OPT_ASSIGNER + innerQuantity);
+				}
+				if (innerVelocity != null) {
+					lineOptions.add(V + OPT_ASSIGNER + innerVelocity);
+				}
+				if (innerDuration != null) {
+					lineOptions.add(D + OPT_ASSIGNER + innerDuration);
+				}
+				if (innerTremolo != null) {
+					lineOptions.add(TR + OPT_ASSIGNER + innerTremolo);
+				}
+				if (outerShift != 0) {
+					lineOptions.add(S + OPT_ASSIGNER + outerShift);
+				}
+				
+				// construct resulting tokens for the current pattern line
+				ArrayList<String> lineTokens = new ArrayList<String>();
+				lineTokens.add(channel + "");
+				lineTokens.add(String.join(CHORD_SEPARATOR, lineNotes));
+				lineTokens.add(patternTokens[1]);
+				if (lineOptions.size() > 0) {
+					String patternAndOptions = lineTokens.get(2);
+					patternAndOptions += " " + String.join(OPT_SEPARATOR, lineOptions);
+					lineTokens.set(2, patternAndOptions);
+				}
+				
+				// parse the resulting line
+				parseTokens(lineTokens.toArray(new String[0]));
+			}
+			
+			// reset channel state (velocity + duration)
+			if (! isFake) {
+				instr.setVelocity(outerVelocity);
+				instr.setDurationRatio(outerDuration);
+			}
+		}
+		
+		// reset ticks, if needed
+		if (! isFake) {
+			if (outerMultiple)
+				instr.setCurrentTicks(outerStartTicks);
+		}
+	}
+	
+	/**
+	 * Parses a line inside of a pattern definition.
+	 * 
+	 * @param tokens  command tokens
+	 * @throws ParseException    if something is wrong.
+	 */
+	private void parsePatternCmd(String[] tokens) throws ParseException {
+		
+		if (tokens.length < 2) {
+			throw new ParseException( Dict.get(Dict.ERROR_PATTERN_NUM_OF_ARGS) );
+		}
+		
+		// check if indices are numbers
+		String[] indexStrings = tokens[0].split(Pattern.quote(PATTERN_INDEX_SEP), -1);
+		for (String indexStr : indexStrings) {
+			try {
+				Integer.parseInt(indexStr);
+			}
+			catch (NumberFormatException e) {
+				throw new ParseException( Dict.get(Dict.ERROR_PATTERN_INDEX_INVALID) + indexStr );
+			}
+		}
+		
+		// check options
+		if (tokens.length > 2) {
+			ArrayList<CommandOption> patternOptions = parseOptions(tokens[2], true);
+			
+			for (CommandOption opt : patternOptions) {
+				String optName = opt.getName();
+				
+				if (OPT_VELOCITY.equals(optName) || OPT_DURATION.equals(optName) || OPT_MULTIPLE.equals(optName)
+				 || OPT_QUANTITY.equals(optName) || OPT_TREMOLO.equals(optName)) {
+					// ok
+				}
+				else
+					throw new ParseException( Dict.get(Dict.ERROR_PATTERN_INVALID_INNER_OPT) + optName );
+			}
+		}
+		
+		// add line to pattern
+		currentPattern.add(String.join(" ", tokens));
+	}
+	
+	/**
+	 * Unescapes the given syllable and puts it into the MIDI sequence.
+	 * 
+	 * Takes care about SoftKaraoke.
+	 * 
+	 * @param syllable  the syllable to be unescaped.
+	 * @param tick      the tick when the syllable occurs.
+	 * @throws ParseException if a MIDI problem occurs.
+	 */
+	private void applySyllable(String syllable, long tick) throws ParseException {
+		syllable = syllable.replaceAll( Pattern.quote(LYRICS_SPACE), " "  );
+		syllable = syllable.replaceAll( Pattern.quote(LYRICS_CR),    "\r" );
+		syllable = syllable.replaceAll( Pattern.quote(LYRICS_LF),    "\n" );
+		syllable = syllable.replaceAll( Pattern.quote(LYRICS_COMMA), ","  );
+		
+		try {
+			if (isSoftKaraoke)
+				SequenceCreator.addMessageText(syllable, tick, 2);
+			else
+				SequenceCreator.addMessageLyrics(syllable, tick, false);
+		}
+		catch (InvalidMidiDataException e) {
+			throw new ParseException( Dict.get(Dict.ERROR_MIDI_PROBLEM) + e.getMessage() );
+		}
 	}
 	
 	/**
@@ -2639,6 +2970,8 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_LYRICS_LF.equals(cmdId)          ) LYRICS_LF          = cmdName;
 		else if ( Dict.SYNTAX_LYRICS_COMMA.equals(cmdId)       ) LYRICS_COMMA       = cmdName;
 		else if ( Dict.SYNTAX_FUNCTION.equals(cmdId)           ) FUNCTION           = cmdName;
+		else if ( Dict.SYNTAX_PATTERN.equals(cmdId)            ) PATTERN            = cmdName;
+		else if ( Dict.SYNTAX_PATTERN_INDEX_SEP.equals(cmdId)  ) PATTERN_INDEX_SEP  = cmdName;
 		else if ( Dict.SYNTAX_PARAM_OPEN.equals(cmdId)         ) PARAM_OPEN         = cmdName;
 		else if ( Dict.SYNTAX_PARAM_CLOSE.equals(cmdId)        ) PARAM_CLOSE        = cmdName;
 		else if ( Dict.SYNTAX_PARAM_SEPARATOR.equals(cmdId)    ) PARAM_SEPARATOR    = cmdName;
@@ -3327,13 +3660,26 @@ public class MidicaPLParser extends SequenceParser {
 		if (0 == subTokens.length)
 			throw new ParseException( Dict.get(Dict.ERROR_CH_CMD_NUM_OF_ARGS) );
 		
-		// process duration ()
+		// process duration
 		String durationStr = subTokens[0];
 		int duration;
-		if (isFake && varPattern.matcher(durationStr).find())
-			duration = 0; // variable: parse only in default mode
-		else
+		if (isFake) {
+			if (varPattern.matcher(durationStr).find()) {
+				duration = 0; // variable: parse only in default mode
+			}
+			else if (patterns.containsKey(durationStr)) {
+				duration = 0;
+			}
+			else {
+				duration = parseDuration(durationStr);
+			}
+		}
+		else if (patterns.containsKey(durationStr)) {
+			return;
+		}
+		else {
 			duration = parseDuration(durationStr);
+		}
 		
 		// allow drum-only sequences without an INSTRUMENTS block
 		if (! instrumentsParsed) {
@@ -3380,6 +3726,8 @@ public class MidicaPLParser extends SequenceParser {
 				else if (OPT_SHIFT.equals(optName)) {
 					shift += opt.getShift();
 				}
+				else
+					throw new ParseException( Dict.get(Dict.ERROR_CHANNEL_INVALID_OPT) + optName );
 			}
 		}
 		
@@ -3400,21 +3748,16 @@ public class MidicaPLParser extends SequenceParser {
 		int  velocity           = instr.getVelocity();
 		
 		try {
+			if (! isFake && syllable != null) {
+				applySyllable(syllable, instr.getCurrentTicks());
+			}
+			
 			NOTE_QUANTITY:
 			for (int i = 0; i < quantity; i++) {
 				int  currentDuration = duration;
 				int  currentTremolo  = tremolo;
 				long startTicks      = instr.getCurrentTicks();
-				if (! isFake && syllable != null) {
-					syllable = syllable.replaceAll( Pattern.quote(LYRICS_SPACE), " "  );
-					syllable = syllable.replaceAll( Pattern.quote(LYRICS_CR),    "\r" );
-					syllable = syllable.replaceAll( Pattern.quote(LYRICS_LF),    "\n" );
-					syllable = syllable.replaceAll( Pattern.quote(LYRICS_COMMA), ","  );
-					if (isSoftKaraoke)
-						SequenceCreator.addMessageText(syllable, startTicks, 2);
-					else
-						SequenceCreator.addMessageLyrics(syllable, startTicks, false);
-				}
+				
 				if (REST_VALUE == note) {
 					if (! isFake)
 						instr.incrementTicks( duration );
@@ -3479,7 +3822,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * Parses the options part of a command.
 	 * 
 	 * @param optString    The options string of the channel command to be parsed.
-	 * @param isFake       **true**, if this is called inside a function definition or block.
+	 * @param isFake       **true**, if this is called inside a function definition, pattern definition or block.
 	 * @return             All options and their values that have been found in the
 	 *                     provided options string.
 	 * @throws ParseException    If the command cannot be parsed.
@@ -3570,6 +3913,7 @@ public class MidicaPLParser extends SequenceParser {
 					throw new ParseException( Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName );
 				}
 				optName = OPT_TREMOLO;
+				optValue.setValueString(optParts[1]);
 				optValue.set( optName, parseDuration(optParts[1]) );
 			}
 			else if (S.equals(optName) || SHIFT.equals(optName)) {
@@ -3675,11 +4019,12 @@ public class MidicaPLParser extends SequenceParser {
 	 * consisting of any combination of the former.
 	 * 
 	 * @param token   The note/chord part of a channel command (second column).
-	 * @return a collection of all included notes, of **null**, if the token contains only a single note.
+	 * @return a collection of all included notes, or **null**, if the token contains only a single note.
+	 * @throws ParseException if one of the notes cannot be parsed.
 	 */
-	private HashSet<String> parseChord(String token) {
+	private ArrayList<Integer> parseChord(String token) throws ParseException {
 		if (token.matches(".*" + Pattern.quote(CHORD_SEPARATOR) + ".*") || chords.containsKey(token)) {
-			HashSet<String> chordElements = new HashSet<>();
+			ArrayList<Integer> chordElements = new ArrayList<>();
 			
 			// collect comma-separated inline chord parts
 			String[] inlineElements = token.split( Pattern.quote(CHORD_SEPARATOR) );
@@ -3688,12 +4033,16 @@ public class MidicaPLParser extends SequenceParser {
 				// collect predefined chord elements
 				if (chords.containsKey(inlineElement)) {
 					for (int note : chords.get(inlineElement)) {
-						chordElements.add(Integer.toString(note));
+						chordElements.add(note);
 					}
 				}
 				else {
-					// collect simple note
-					chordElements.add(inlineElement);
+					// collect simple note (or percussion instrument)
+					int note = Dict.getPercussion(inlineElement);
+					if (Dict.UNKNOWN_CODE == note) {
+						note = parseNote(inlineElement);
+					}
+					chordElements.add(note);
 				}
 			}
 			return chordElements;
@@ -3717,7 +4066,7 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// chord or not?
-		HashSet<String> chordElements = parseChord(tokens[1]);
+		ArrayList<Integer> chordElements = parseChord(tokens[1]);
 		if (null == chordElements) {
 			
 			// not a chord
@@ -3726,11 +4075,11 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// call this method again with each chord, adding the multiple option
 		int i = 1;
-		for (String chordElement : chordElements) {
+		for (Integer chordElement : chordElements) {
 			// create and process a new token array for each note of the chord
 			String[] subTokens = new String[3];
-			subTokens[0] = tokens[0];    // same channel
-			subTokens[1] = chordElement; // note name or number
+			subTokens[0] = tokens[0];         // same channel
+			subTokens[1] = chordElement + ""; // note name or number
 			if (chordElements.size() == i) {
 				// last note of the chord: use original options
 				subTokens[2] = tokens[2];
@@ -4077,6 +4426,7 @@ public class MidicaPLParser extends SequenceParser {
 		// reset fields
 		currentMode         = MODE_DEFAULT;
 		currentFunctionName = null;
+		currentPatternName  = null;
 		condChainOpened     = false;
 		condChainHit        = false;
 		
@@ -4102,9 +4452,10 @@ public class MidicaPLParser extends SequenceParser {
 			definedFunctionNames = new HashSet<>();
 			fileCache            = new HashMap<>();
 			functions            = new HashMap<>();
+			patterns             = new HashMap<>();
 			functionToFile       = new HashMap<>();
 			functionToLineOffset = new HashMap<>();
-			chords               = new HashMap<>();
+			chords               = new TreeMap<>();
 			nestableBlkDepth     = 0;
 			nestableBlkStack     = new ArrayDeque<>();
 			stackTrace           = new ArrayDeque<>();

@@ -19,8 +19,9 @@ package org.midica.file.read;
  */
 public class CommandOption {
 	
-	private String name  = null;
-	private Object value = null;
+	private String name          = null;
+	private Object value         = null;
+	private String valueAsString = null;
 	
 	/**
 	 * Initializes the option with a name and a value.
@@ -71,11 +72,30 @@ public class CommandOption {
 	}
 	
 	/**
+	 * Sets a string representation for the value.
+	 * Currently only used for tremolo (needed for patterns).
+	 * 
+	 * @param value  string representation of the option value
+	 */
+	public void setValueString(String value) {
+		valueAsString = value;
+	}
+	
+	/**
 	 * Returns the option name.
 	 * @return option name.
 	 */
 	public String getName() {
 		return name;
+	}
+	
+	/**
+	 * Returns the string representation of the value, if avaliable, or **null** otherwise.
+	 * 
+	 * @return the string representation of the value or **null**.
+	 */
+	public String getValueString() {
+		return valueAsString;
 	}
 	
 	/**

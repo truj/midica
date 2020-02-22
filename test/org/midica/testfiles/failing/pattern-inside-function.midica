@@ -1,0 +1,9 @@
+INCLUDE inc/instruments.midica
+
+FUNCTION
+	0 c /4
+	PATTERN
+		0 /4
+	END
+END
+

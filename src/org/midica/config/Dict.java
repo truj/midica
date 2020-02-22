@@ -89,6 +89,8 @@ public class Dict {
 	public static final String SYNTAX_BLOCK_OPEN         = "BLOCK_OPEN";
 	public static final String SYNTAX_BLOCK_CLOSE        = "BLOCK_CLOSE";
 	public static final String SYNTAX_FUNCTION           = "FUNCTION";
+	public static final String SYNTAX_PATTERN            = "PATTERN";
+	public static final String SYNTAX_PATTERN_INDEX_SEP  = "SYNTAX_PATTERN_INDEX_SEP";
 	public static final String SYNTAX_PARAM_OPEN         = "PARAM_OPEN";
 	public static final String SYNTAX_PARAM_CLOSE        = "PARAM_CLOSE";
 	public static final String SYNTAX_PARAM_SEPARATOR    = "PARAM_SEPARATOR";
@@ -1342,6 +1344,7 @@ public class Dict {
 	public static final String ERROR_SINGLE_INSTR_IN_INSTR_DEF   = "error_single_instr_in_instr_def";
 	public static final String ERROR_UNKNOWN_CMD                 = "error_unknown_cmd";
 	public static final String ERROR_CMD_END_WITHOUT_BEGIN       = "error_cmd_end_without_begin";
+	public static final String ERROR_CHANNEL_INVALID_OPT         = "error_channel_invalid_opt";
 	public static final String ERROR_BLOCK_INVALID_OPT           = "error_block_invalid_opt";
 	public static final String ERROR_BLOCK_UNMATCHED_CLOSE       = "error_block_unmatched_close";
 	public static final String ERROR_BLOCK_UNMATCHED_OPEN        = "error_block_unmatched_open";
@@ -1384,6 +1387,13 @@ public class Dict {
 	public static final String ERROR_SOUNDFONT_IO                = "error_soundfont_io";
 	public static final String ERROR_SOUNDFONT_ALREADY_PARSED    = "error_soundfont_already_parsed";
 	public static final String ERROR_FUNCTION_NUM_OF_ARGS        = "error_function_num_of_args";
+	public static final String ERROR_PATTERN_NOT_ALLOWED_HERE    = "error_pattern_not_allowed_here";
+	public static final String ERROR_PATTERN_ALREADY_DEFINED     = "error_pattern_already_defined";
+	public static final String ERROR_PATTERN_NUM_OF_ARGS         = "error_pattern_num_of_args";
+	public static final String ERROR_PATTERN_INVALID_OUTER_OPT   = "error_pattern_invalid_outer_opt";
+	public static final String ERROR_PATTERN_INVALID_INNER_OPT   = "error_pattern_invalid_inner_opt";
+	public static final String ERROR_PATTERN_INDEX_INVALID       = "error_pattern_index_invalid";
+	public static final String ERROR_PATTERN_INDEX_TOO_HIGH      = "error_pattern_index_too_high";
 	public static final String ERROR_META_NUM_OF_ARGS            = "error_meta_num_of_arts";
 	public static final String ERROR_META_UNKNOWN_CMD            = "error_meta_unknown_cmd";
 	public static final String ERROR_SOFT_KARAOKE_UNKNOWN_CMD    = "error_soft_karaoke_unknown_cmd";
@@ -2268,6 +2278,8 @@ public class Dict {
 		set( SYNTAX_BLOCK_OPEN,         "opens a nestable block"                           );
 		set( SYNTAX_BLOCK_CLOSE,        "closes a nestable block"                          );
 		set( SYNTAX_FUNCTION,           "function definition"                              );
+		set( SYNTAX_PATTERN,            "pattern definition"                               );
+		set( SYNTAX_PATTERN_INDEX_SEP,  "index separator inside of a pattern definition"   );
 		set( SYNTAX_PARAM_OPEN,         "opens a function parameter list"                  );
 		set( SYNTAX_PARAM_CLOSE,        "closes a function parameter list"                 );
 		set( SYNTAX_PARAM_SEPARATOR,    "separates parameters in a function call"          );
@@ -2691,6 +2703,7 @@ public class Dict {
 		set( ERROR_SINGLE_INSTR_IN_INSTR_DEF,     "instrument commands are not allowed inside an instrument definition block" );
 		set( ERROR_UNKNOWN_CMD,                   "unknown command: "                                                 );
 		set( ERROR_CMD_END_WITHOUT_BEGIN,         "there is no open block to be closed"                               );
+		set( ERROR_CHANNEL_INVALID_OPT,           "invalid channel option: "                                          );
 		set( ERROR_BLOCK_INVALID_OPT,             "invalid block option: "                                            );
 		set( ERROR_BLOCK_UNMATCHED_CLOSE,         "there is no open block to be closed"                               );
 		set( ERROR_BLOCK_UNMATCHED_OPEN,          "nestable block not closed"                                         );
@@ -2730,6 +2743,13 @@ public class Dict {
 		set( ERROR_SOUNDFONT_IO,                  "soundfont cannot be parsed:<br>"                                   );
 		set( ERROR_SOUNDFONT_ALREADY_PARSED,      "a soundfont can be included only once"                             );
 		set( ERROR_FUNCTION_NUM_OF_ARGS,          "wrong number of arguments in function command"                     );
+		set( ERROR_PATTERN_NOT_ALLOWED_HERE,      "a pattern definition is not allowed inside a block<br>maybe you forgot to close the block." );
+		set( ERROR_PATTERN_ALREADY_DEFINED,       "pattern name has been already defined: "                           );
+		set( ERROR_PATTERN_NUM_OF_ARGS,           "wrong number of arguments in pattern command"                      );
+		set( ERROR_PATTERN_INVALID_OUTER_OPT,     "in a channel commands with a pattern this option is not allowed: " );
+		set( ERROR_PATTERN_INVALID_INNER_OPT,     "invalid pattern option: "                                          );
+		set( ERROR_PATTERN_INDEX_INVALID,         "pattern index not a number: "                                      );
+		set( ERROR_PATTERN_INDEX_TOO_HIGH,        "pattern index too high: "                                          );
 		set( ERROR_META_NUM_OF_ARGS,              "no arguments allowed in meta command"                              );
 		set( ERROR_META_UNKNOWN_CMD,              "unknown meta command: "                                            );
 		set( ERROR_SOFT_KARAOKE_UNKNOWN_CMD,      "unknown soft karaoke command: "                                    );
@@ -2764,7 +2784,7 @@ public class Dict {
 		set( ERROR_MODE_INSTR_NUM_OF_ARGS,        "wrong number of arguments in mode command 'INSTRUMENTS'"           );
 		set( ERROR_NOTE_TOO_BIG,                  "note number too big: "                                             );
 		set( ERROR_NOTE_TOO_SMALL,                "note number too small: "                                           );
-		set( ERROR_NOTE_LENGTH_INVALID,           "invalid note length expression: "                                  );
+		set( ERROR_NOTE_LENGTH_INVALID,           "invalid note length expression or undefined pattern: "             );
 		set( ERROR_EMPTY_LENGTH_SUMMAND,          "empty summand in length string: "                                  );
 		set( ERROR_UNKNOWN_FUNCTION_CMD,          "unknown function command: "                                        ); // TODO: check
 		set( ERROR_INSTR_NUM_OF_ARGS,             "wrong number of arguments in instrument command"                   );
@@ -3241,6 +3261,8 @@ public class Dict {
 		setSyntax( SYNTAX_BLOCK_OPEN,        "{"             );
 		setSyntax( SYNTAX_BLOCK_CLOSE,       "}"             );
 		setSyntax( SYNTAX_FUNCTION,          "FUNCTION"      );
+		setSyntax( SYNTAX_PATTERN,           "PATTERN"       );
+		setSyntax( SYNTAX_PATTERN_INDEX_SEP, ","             );
 		setSyntax( SYNTAX_PARAM_OPEN,        "("             );
 		setSyntax( SYNTAX_PARAM_CLOSE,       ")"             );
 		setSyntax( SYNTAX_PARAM_SEPARATOR,   ","             );
@@ -3349,19 +3371,21 @@ public class Dict {
 		syntaxList = new ArrayList<SyntaxElement>();
 		
 		addSyntaxCategory( get(SYNTAX_CAT_DEFINITION) );
-		addSyntaxForInfoView( SYNTAX_DEFINE          );
-		addSyntaxForInfoView( SYNTAX_META            );
-		addSyntaxForInfoView( SYNTAX_FUNCTION        );
-		addSyntaxForInfoView( SYNTAX_END             );
-		addSyntaxForInfoView( SYNTAX_CHORD           );
-		addSyntaxForInfoView( SYNTAX_CHORD_ASSIGNER  );
-		addSyntaxForInfoView( SYNTAX_CHORD_SEPARATOR );
-		addSyntaxForInfoView( SYNTAX_INSTRUMENT      );
-		addSyntaxForInfoView( SYNTAX_INSTRUMENTS     );
-		addSyntaxForInfoView( SYNTAX_PROG_BANK_SEP   );
-		addSyntaxForInfoView( SYNTAX_BANK_SEP        );
-		addSyntaxForInfoView( SYNTAX_BLOCK_OPEN      );
-		addSyntaxForInfoView( SYNTAX_BLOCK_CLOSE     );
+		addSyntaxForInfoView( SYNTAX_DEFINE            );
+		addSyntaxForInfoView( SYNTAX_META              );
+		addSyntaxForInfoView( SYNTAX_FUNCTION          );
+		addSyntaxForInfoView( SYNTAX_END               );
+		addSyntaxForInfoView( SYNTAX_PATTERN           );
+		addSyntaxForInfoView( SYNTAX_PATTERN_INDEX_SEP );
+		addSyntaxForInfoView( SYNTAX_CHORD             );
+		addSyntaxForInfoView( SYNTAX_CHORD_ASSIGNER    );
+		addSyntaxForInfoView( SYNTAX_CHORD_SEPARATOR   );
+		addSyntaxForInfoView( SYNTAX_INSTRUMENT        );
+		addSyntaxForInfoView( SYNTAX_INSTRUMENTS       );
+		addSyntaxForInfoView( SYNTAX_PROG_BANK_SEP     );
+		addSyntaxForInfoView( SYNTAX_BANK_SEP          );
+		addSyntaxForInfoView( SYNTAX_BLOCK_OPEN        );
+		addSyntaxForInfoView( SYNTAX_BLOCK_CLOSE       );
 		
 		addSyntaxCategory( get(SYNTAX_CAT_EXECUTE) );
 		addSyntaxForInfoView( SYNTAX_CALL            );

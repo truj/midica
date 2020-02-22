@@ -87,30 +87,27 @@ END
 // guitar
 ///////////////////////////
 
+// define some guitar chords
+CHORD  amaj  a-, e, a,  c#+
+CHORD  dmaj  d,  a, d+, f#+
+
+// define a picking pattern for both chords
+PATTERN picking_pattern
+	0  /8
+	1  /8
+	2  /8
+	1  /8
+	3  /8
+	1  /8
+	2  /8
+	3  /8
+END
+
 FUNCTION guitar
-	CALL guitar_dmaj q=2
-	CALL guitar_amaj
-	CALL guitar_dmaj q=3
-	CALL guitar_amaj
-	CALL guitar_dmaj
-END
-FUNCTION guitar_amaj
-	1  a-   /8
-	1  e    /8
-	1  a    /8
-	1  e    /8
-	1  c#+  /8
-	1  e    /8
-	1  a    /8
-	1  c#+  /8
-END
-FUNCTION guitar_dmaj
-	1  d    /8
-	1  a    /8
-	1  d+   /8
-	1  a    /8
-	1  f#+  /8
-	1  a    /8
-	1  d+   /8
-	1  f#+  /8
+	// use the same pattern with both chords
+	1  dmaj  picking_pattern  q=2
+	1  amaj  picking_pattern
+	1  dmaj  picking_pattern  q=3
+	1  amaj  picking_pattern
+	1  dmaj  picking_pattern
 END

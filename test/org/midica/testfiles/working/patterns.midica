@@ -1,0 +1,154 @@
+INCLUDE inc/instruments.midica
+
+////////////////////////////////////////////////////////////
+// channel 0:
+////////////////////////////////////////////////////////////
+
+CHORD c_maj      c  d  e  f  g  a  b  c+
+CHORD c_maj_rev  c+ b  a  g  f  e  d  c
+
+PATTERN pat_qvd
+	0      /4
+	1      /8
+	2      /16  q=2, v=127, d=10%
+	0,1,2  /4
+END
+
+PATTERN pat_mtr
+	0      /2    m
+	1      /1    tr=/4
+END
+
+// change velocity and duration
+0  -  /4  m, v=90, d=80%
+
+
+// PART 1:
+// q+m as outer options, m+v+d as inner options
+0  c,e,g  pat_qvd  q=2, m
+0  c+3    /8
+0  -      *2
+
+// same as:
+// 0  c+3    /8     m, v=90, d=80%
+// 0  c      /4
+// 0  e      /8
+// 0  g      /4        v=127, d=10%
+// 0  c,e,g  /16
+// 0  c      /4        v=90, d=80%
+// 0  e      /8
+// 0  g      /16       v=127, d=10%
+// 0  c,e,g  /4
+
+// PART 2:
+// v+d as outer options, no inner options
+0  a  /4
+0  a  pat_simple
+0  a  /4
+0  a  pat_simple   v=50, d=60%, s=2
+0  a  /4
+
+// same as:
+// 0  a  /4   v=90, d=80%
+// 0  a  /4   v=90, d=80%
+// 0  a  /4   v=90, d=80%
+// 0  a  /4   v=50, d=60%
+// 0  a  /4   v=50, d=60%
+
+// PART 3:
+// m+tr as inner options
+0  c_maj  pat_mtr
+
+// same as:
+// 0  c  /2  m
+// 0  d  /4
+// 0  d  /4
+// 0  d  /4
+// 0  d  /4
+
+// PART 4:
+0  a  pat_simple  q=2, l=test_
+{ t
+	0  a  pat_simple  q=2
+	0  a  /4          q=2
+}
+
+// same as:
+// 0  c  /4  l=test_
+// 0  c  /4
+// 0  c  /4
+// 0  c  /4
+// 0  c  /4t
+// 0  c  /4t
+
+////////////////////////////////////////////////////////////
+// channel 1:
+////////////////////////////////////////////////////////////
+
+PATTERN pat_ch129
+	0  /4
+	1  /8  q=2
+END
+
+1  c_maj      pat_ch129
+1  c_maj_rev  pat_ch129
+1  c,d        pat_ch129
+1  d,c        pat_ch129
+
+// same as:
+// 0  c  /4
+// 0  d  /8
+// 0  d  /8
+// 0  c  /4
+// 0  d  /8
+// 0  d  /8
+// 0  c  /4
+// 0  d  /8
+// 0  d  /8
+// 0  d  /4
+// 0  c  /8
+// 0  c  /8
+
+////////////////////////////////////////////////////////////
+// channel 9:
+////////////////////////////////////////////////////////////
+
+p  bd1,hhc  pat_ch129
+p  hhc,bd1  pat_ch129
+
+// same as:
+// 0  bd1  /4
+// 0  hhc  /8
+// 0  hhc  /8
+// 0  hhc  /4
+// 0  bd1  /8
+// 0  bd1  /8
+
+////////////////////////////////////////////////////////////
+// channel 2:
+////////////////////////////////////////////////////////////
+
+FUNCTION func1
+	{
+		{
+			CALL func2
+		}
+	}
+END
+FUNCTION func2
+	{
+		{
+			2  e,c  pat_ch129  q=2, m
+		}
+	}
+END
+
+{
+	{
+		CALL func1
+	}
+}
+
+PATTERN pat_simple
+	0   /4
+END

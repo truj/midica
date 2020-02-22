@@ -1,0 +1,7 @@
+INCLUDE inc/instruments.midica
+
+PATTERN
+	0 /4
+END
+
+

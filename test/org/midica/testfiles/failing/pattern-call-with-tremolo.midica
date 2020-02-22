@@ -1,0 +1,7 @@
+INCLUDE inc/instruments.midica
+
+PATTERN pat
+	0 /1
+END
+
+0 c pat tr=/4
