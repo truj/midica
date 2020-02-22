@@ -1,5 +1,6 @@
 INSTRUMENTS
 	0    ACOUSTIC_GRAND_PIANO    Piano
-	1    VIOLIN                  Fiddle
+	1    VIOLIN                  Violin
 	2    HARMONICA               Harmonica
+	3    FIDDLE                  Fiddle
 END

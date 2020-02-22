@@ -848,7 +848,10 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		if (MODE_PATTERN == currentMode && ! END.equals(tokens[0])) {
-			parsePatternCmd(tokens);     // line inside of a pattern definition
+			// line inside of a pattern definition
+			if (! "".equals(tokens[0])) {    // line not empty?
+				parsePatternCmd(tokens);
+			}
 			return;
 		}
 		else {
@@ -2432,7 +2435,7 @@ public class MidicaPLParser extends SequenceParser {
 				applySyllable(outerSyllable, outerStartTicks);
 			}
 			
-			// PATTERN_LINE:
+			PATTERN_LINE:
 			for (String patternLine : patternLines) {
 				String[]          patternTokens = patternLine.split("\\s+", 3);
 				String[]          indexStrings  = patternTokens[0].split(Pattern.quote(PATTERN_INDEX_SEP), -1);
@@ -2467,6 +2470,15 @@ public class MidicaPLParser extends SequenceParser {
 						}
 						else
 							throw new ParseException( Dict.get(Dict.ERROR_PATTERN_INVALID_INNER_OPT) + optName );
+					}
+				}
+				
+				// blocks
+				String[] patLineTokens = whitespace.split(patternLine);
+				if (patLineTokens.length > 0) {
+					if (BLOCK_OPEN.equals(patLineTokens[0]) || BLOCK_CLOSE.equals(patLineTokens[0])) {
+						parseTokens(patLineTokens);
+						continue PATTERN_LINE;
 					}
 				}
 				
@@ -2543,7 +2555,12 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void parsePatternCmd(String[] tokens) throws ParseException {
 		
-		if (tokens.length < 2) {
+		if (BLOCK_OPEN.equals(tokens[0]) || BLOCK_CLOSE.equals(tokens[0])) {
+			// add block open/close to pattern
+			currentPattern.add(String.join(" ", tokens));
+			return;
+		}
+		else if (tokens.length < 2) {
 			throw new ParseException( Dict.get(Dict.ERROR_PATTERN_NUM_OF_ARGS) );
 		}
 		

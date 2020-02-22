@@ -559,6 +559,19 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "1680/2/92/c / 64", messages.get(i+=2).toString() ); // c /8
 			assertEquals( 0, instruments.get(2).getCurrentTicks() ); // q=2, m
 		}
+		// channel 3:
+		messages = getNoteOnOffMessagesByChannel(3);
+		assertEquals( 6, messages.size() );
+		{
+			int i = 0;
+			assertEquals( "0/3/93/c / 120",   messages.get(i++).toString() ); // c ON /4t
+			assertEquals( "0/3/93/e / 120",   messages.get(i++).toString() ); // e ON /8t
+			assertEquals( "152/3/83/e / 0",   messages.get(i++).toString() ); // e OFF /8t d=95%
+			assertEquals( "160/3/93/e / 120", messages.get(i++).toString() ); // e ON /8t
+			assertEquals( "304/3/83/c / 0",   messages.get(i++).toString() ); // c OFF /4t d=95%
+			assertEquals( "312/3/83/e / 0",   messages.get(i++).toString() ); // e OFF /8t d=95%
+			assertEquals( 320, instruments.get(3).getCurrentTicks() ); // /4t
+		}
 	}
 	
 	/**
