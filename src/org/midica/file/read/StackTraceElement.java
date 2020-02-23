@@ -21,6 +21,7 @@ import org.midica.config.Dict;
 public class StackTraceElement {
 	
 	private String  functionName   = null;
+	private String  patternName    = null;
 	private String  paramStr       = "";
 	private String  optionStr      = "";
 	private File    file           = null;
@@ -49,6 +50,16 @@ public class StackTraceElement {
 	 */
 	public void setFunctionName(String name) {
 		functionName = name;
+	}
+	
+	/**
+	 * Sets the pattern name.
+	 * To be called only if the causing channel command uses a pattern.
+	 * 
+	 * @param name pattern name
+	 */
+	public void setPatternName(String name) {
+		patternName = name;
 	}
 	
 	/**
@@ -137,6 +148,12 @@ public class StackTraceElement {
 			if ( ! "".equals(paramStr) ) {
 				optsOrParams += Dict.get(Dict.STACK_TRACE_PARAMS) + MidicaPLParser.PARAM_OPEN + paramStr + MidicaPLParser.PARAM_CLOSE + "<br>" + indentation;
 			}
+			if ( ! "".equals(optionStr) ) {
+				optsOrParams += Dict.get(Dict.STACK_TRACE_OPTIONS) + optionStr + "<br>" + indentation;
+			}
+		}
+		else if (patternName != null) {
+			action = Dict.get(Dict.STACK_TRACE_PATTERN) + patternName;
 			if ( ! "".equals(optionStr) ) {
 				optsOrParams += Dict.get(Dict.STACK_TRACE_OPTIONS) + optionStr + "<br>" + indentation;
 			}

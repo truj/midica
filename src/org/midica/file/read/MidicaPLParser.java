@@ -80,6 +80,7 @@ public class MidicaPLParser extends SequenceParser {
 	private static final int REST_VALUE = -1;
 	
 	private static final int MAX_RECURSION_DEPTH_FUNCTION =   30;
+	private static final int MAX_RECURSION_DEPTH_PATTERN  =    5;
 	private static final int MAX_RECURSION_DEPTH_CONST    = 1000;
 	private static final int MAX_RECURSION_DEPTH_VAR      = 1000;
 	
@@ -207,9 +208,11 @@ public class MidicaPLParser extends SequenceParser {
 	
 	private   static HashMap<String, ArrayList<String>> fileCache            = null;
 	private   static HashMap<String, ArrayList<String>> functions            = null;
-	public    static HashMap<String, ArrayList<String>> patterns             = null;
 	private   static HashMap<String, File>              functionToFile       = null;
 	private   static HashMap<String, Integer>           functionToLineOffset = null;
+	public    static HashMap<String, ArrayList<String>> patterns             = null;
+	private   static HashMap<String, File>              patternToFile        = null;
+	private   static HashMap<String, Integer>           patternToLineOffset  = null;
 	private   static TreeMap<String, TreeSet<Integer>>  chords               = null;
 	private   static boolean                            instrumentsParsed    = false;
 	private   static HashMap<String, StringBuilder>     metaInfo             = null;
@@ -225,6 +228,9 @@ public class MidicaPLParser extends SequenceParser {
 	private   static Deque<File>                        functionFileStack    = null;
 	private   static Deque<HashMap<String, String>>     paramStackNamed      = null;
 	private   static Deque<ArrayList<String>>           paramStackIndexed    = null;
+	private   static Deque<String>                      patternNameStack     = null;
+	private   static Deque<Integer>                     patternLineStack     = null;
+	private   static Deque<File>                        patternFileStack     = null;
 	private   static HashSet<String>                    redefinitions        = null;
 	private   static boolean                            soundfontParsed      = false;
 	protected static HashMap<String, String>            constants            = null;
@@ -849,9 +855,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		if (MODE_PATTERN == currentMode && ! END.equals(tokens[0])) {
 			// line inside of a pattern definition
-			if (! "".equals(tokens[0])) {    // line not empty?
-				parsePatternCmd(tokens);
-			}
+			parsePatternCmd(tokens);
 			return;
 		}
 		else {
@@ -1850,6 +1854,10 @@ public class MidicaPLParser extends SequenceParser {
 			// real function parsing run
 			currentPattern = new ArrayList<>();
 			patterns.put(currentPatternName, currentPattern);
+			
+			// add to stack
+			patternToFile.put(currentPatternName, file);
+			patternToLineOffset.put(currentPatternName, currentLineNumber);
 		}
 		else
 			throw new ParseException( Dict.get(Dict.ERROR_PATTERN_NUM_OF_ARGS) );
@@ -2046,6 +2054,12 @@ public class MidicaPLParser extends SequenceParser {
 				int offset = functionToLineOffset.get(functionName);
 				line = offset + functionLineStack.peek();
 				file = functionFileStack.peek();
+			}
+			if ( ! patternNameStack.isEmpty() ) {
+				String patternName = patternNameStack.peek();
+				int offset = patternToLineOffset.get(patternName);
+				line = offset + patternLineStack.peek();
+				file = patternFileStack.peek();
 			}
 			block.applyTupletsAndShifts(null, 0);
 			boolean mustPlay = true;
@@ -2367,6 +2381,11 @@ public class MidicaPLParser extends SequenceParser {
 		String            patternName  = subTokens[0];
 		ArrayList<String> patternLines = patterns.get(patternName);
 		
+		// init instruments if not yet done
+		if (! instrumentsParsed) {
+			postprocessInstruments();
+		}
+		
 		// remember channel state
 		Instrument instr = instruments.get(channel);
 		long  outerStartTicks = instr.getCurrentTicks();
@@ -2378,8 +2397,10 @@ public class MidicaPLParser extends SequenceParser {
 		int     outerQuantity = 1;
 		int     outerShift    = 0;
 		String  outerSyllable = null;
+		String  outerOptStr   = "";
 		if (subTokens.length > 1) {
-			ArrayList<CommandOption> callOptions = parseOptions(subTokens[1], false);
+			outerOptStr = subTokens[1];
+			ArrayList<CommandOption> callOptions = parseOptions(outerOptStr, false);
 			
 			for (CommandOption opt : callOptions) {
 				String optName = opt.getName();
@@ -2427,9 +2448,30 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		Integer[] noteNumbers = notes.toArray(new Integer[0]);
 		
+		// add params to call stack
+		File              file       = patternToFile.get(patternName);
+		int               lineOffset = patternToLineOffset.get(patternName);
+		StackTraceElement traceElem  = new StackTraceElement(file, lineOffset);
+		traceElem.setPatternName(patternName);
+		traceElem.setOptions(outerOptStr);
+		stackTrace.push(traceElem);
+		patternNameStack.push(patternName);
+		patternLineStack.push(0);
+		patternFileStack.push(file);
+		
+		// check recursion
+		if (patternNameStack.size() > MAX_RECURSION_DEPTH_PATTERN) {
+			throw new ParseException( Dict.get(Dict.ERROR_PATTERN_RECURSION_DEPTH) );
+		}
+		
 		// apply pattern lines
 		// OUTER_QUANTITY:
 		for (int i = 0; i < outerQuantity; i++) {
+			
+			// reset line in stacks
+			traceElem.resetLine();
+			patternLineStack.pop();
+			patternLineStack.push(0);
 			
 			if (! isFake && outerSyllable != null) {
 				applySyllable(outerSyllable, outerStartTicks);
@@ -2437,6 +2479,30 @@ public class MidicaPLParser extends SequenceParser {
 			
 			PATTERN_LINE:
 			for (String patternLine : patternLines) {
+				
+				// increment line in stacks
+				traceElem.incrementLine();
+				int lineNum = patternLineStack.pop();
+				patternLineStack.push(lineNum + 1);
+				
+				// special line inside the pattern?
+				String[] patLineTokens = whitespace.split(patternLine);
+				if (patLineTokens.length > 0) {
+					
+					// empty line?
+					if ("".equals(patLineTokens[0])) {
+						parseTokens(patLineTokens);
+						continue PATTERN_LINE;
+					}
+					
+					// block?
+					if (BLOCK_OPEN.equals(patLineTokens[0]) || BLOCK_CLOSE.equals(patLineTokens[0])) {
+						parseTokens(patLineTokens);
+						continue PATTERN_LINE;
+					}
+				}
+				
+				// from now on assume a normal pattern line, beginning with indices
 				String[]          patternTokens = patternLine.split("\\s+", 3);
 				String[]          indexStrings  = patternTokens[0].split(Pattern.quote(PATTERN_INDEX_SEP), -1);
 				ArrayList<String> lineNotes     = new ArrayList<String>();
@@ -2473,27 +2539,24 @@ public class MidicaPLParser extends SequenceParser {
 					}
 				}
 				
-				// blocks
-				String[] patLineTokens = whitespace.split(patternLine);
-				if (patLineTokens.length > 0) {
-					if (BLOCK_OPEN.equals(patLineTokens[0]) || BLOCK_CLOSE.equals(patLineTokens[0])) {
-						parseTokens(patLineTokens);
-						continue PATTERN_LINE;
-					}
+				// rest?
+				if (REST.equals(patLineTokens[0])) {
+					lineNotes.add(REST);
 				}
-				
-				// INDEX:
-				for (String indexStr : indexStrings) {
-					try {
-						int index = Integer.parseInt(indexStr);
-						int note  = noteNumbers[index];
-						lineNotes.add(note + "");
-					}
-					catch (NumberFormatException e) {
-						throw new ParseException( Dict.get(Dict.ERROR_PATTERN_INDEX_INVALID) + indexStr );
-					}
-					catch (IndexOutOfBoundsException e) {
-						throw new ParseException( Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH) + indexStr );
+				else {
+					// INDEX:
+					for (String indexStr : indexStrings) {
+						try {
+							int index = Integer.parseInt(indexStr);
+							int note  = noteNumbers[index];
+							lineNotes.add(note + "");
+						}
+						catch (NumberFormatException e) {
+							throw new ParseException( Dict.get(Dict.ERROR_PATTERN_INDEX_INVALID) + indexStr );
+						}
+						catch (IndexOutOfBoundsException e) {
+							throw new ParseException( Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH) + indexStr );
+						}
 					}
 				}
 				
@@ -2545,6 +2608,12 @@ public class MidicaPLParser extends SequenceParser {
 			if (outerMultiple)
 				instr.setCurrentTicks(outerStartTicks);
 		}
+		
+		// remove params from call stack
+		stackTrace.pop();
+		patternNameStack.pop();
+		patternLineStack.pop();
+		patternFileStack.pop();
 	}
 	
 	/**
@@ -2555,40 +2624,54 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void parsePatternCmd(String[] tokens) throws ParseException {
 		
-		if (BLOCK_OPEN.equals(tokens[0]) || BLOCK_CLOSE.equals(tokens[0])) {
-			// add block open/close to pattern
-			currentPattern.add(String.join(" ", tokens));
-			return;
+		// empty line?
+		if (tokens.length > 0 && "".equals(tokens[0])) {
+			// ok - must be added so that the line number in the stack trace is correct
 		}
-		else if (tokens.length < 2) {
-			throw new ParseException( Dict.get(Dict.ERROR_PATTERN_NUM_OF_ARGS) );
-		}
-		
-		// check if indices are numbers
-		String[] indexStrings = tokens[0].split(Pattern.quote(PATTERN_INDEX_SEP), -1);
-		for (String indexStr : indexStrings) {
-			try {
-				Integer.parseInt(indexStr);
-			}
-			catch (NumberFormatException e) {
-				throw new ParseException( Dict.get(Dict.ERROR_PATTERN_INDEX_INVALID) + indexStr );
-			}
-		}
-		
-		// check options
-		if (tokens.length > 2) {
-			ArrayList<CommandOption> patternOptions = parseOptions(tokens[2], true);
+		else if (tokens.length > 0) {
 			
-			for (CommandOption opt : patternOptions) {
-				String optName = opt.getName();
-				
-				if (OPT_VELOCITY.equals(optName) || OPT_DURATION.equals(optName) || OPT_MULTIPLE.equals(optName)
-				 || OPT_QUANTITY.equals(optName) || OPT_TREMOLO.equals(optName)) {
-					// ok
-				}
-				else
-					throw new ParseException( Dict.get(Dict.ERROR_PATTERN_INVALID_INNER_OPT) + optName );
+			// block?
+			if (BLOCK_OPEN.equals(tokens[0]) || BLOCK_CLOSE.equals(tokens[0])) {
+				// ok
 			}
+			else if (REST.equals(tokens[0])) {
+				// ok
+			}
+			else {
+				if (tokens.length < 2) {
+					throw new ParseException( Dict.get(Dict.ERROR_PATTERN_NUM_OF_ARGS) );
+				}
+				
+				// check if indices are numbers
+				String[] indexStrings = tokens[0].split(Pattern.quote(PATTERN_INDEX_SEP), -1);
+				for (String indexStr : indexStrings) {
+					try {
+						Integer.parseInt(indexStr);
+					}
+					catch (NumberFormatException e) {
+						throw new ParseException( Dict.get(Dict.ERROR_PATTERN_INDEX_INVALID) + indexStr );
+					}
+				}
+				
+				// check options
+				if (tokens.length > 2) {
+					ArrayList<CommandOption> patternOptions = parseOptions(tokens[2], true);
+					
+					for (CommandOption opt : patternOptions) {
+						String optName = opt.getName();
+						
+						if (OPT_VELOCITY.equals(optName) || OPT_DURATION.equals(optName) || OPT_MULTIPLE.equals(optName)
+						 || OPT_QUANTITY.equals(optName) || OPT_TREMOLO.equals(optName)) {
+							// ok
+						}
+						else
+							throw new ParseException( Dict.get(Dict.ERROR_PATTERN_INVALID_INNER_OPT) + optName );
+					}
+				}
+			}
+		}
+		else if (0 == tokens.length) {
+			throw new ParseException( "Pattern Error\nThis should not happen. Please report." );
 		}
 		
 		// add line to pattern
@@ -4469,9 +4552,11 @@ public class MidicaPLParser extends SequenceParser {
 			definedFunctionNames = new HashSet<>();
 			fileCache            = new HashMap<>();
 			functions            = new HashMap<>();
-			patterns             = new HashMap<>();
 			functionToFile       = new HashMap<>();
 			functionToLineOffset = new HashMap<>();
+			patterns             = new HashMap<>();
+			patternToFile        = new HashMap<>();
+			patternToLineOffset  = new HashMap<>();
 			chords               = new TreeMap<>();
 			nestableBlkDepth     = 0;
 			nestableBlkStack     = new ArrayDeque<>();
@@ -4481,6 +4566,9 @@ public class MidicaPLParser extends SequenceParser {
 			functionFileStack    = new ArrayDeque<>();
 			paramStackNamed      = new ArrayDeque<>();
 			paramStackIndexed    = new ArrayDeque<>();
+			patternNameStack     = new ArrayDeque<>();
+			patternLineStack     = new ArrayDeque<>();
+			patternFileStack     = new ArrayDeque<>();
 			redefinitions        = new HashSet<>();
 			soundfontParsed      = false;
 			isSoftKaraoke        = false;

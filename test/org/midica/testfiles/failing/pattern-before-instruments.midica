@@ -1,0 +1,6 @@
+
+PATTERN pat
+	0,1 /4
+END
+
+0  c,d  pat

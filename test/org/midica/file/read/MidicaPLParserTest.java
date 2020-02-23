@@ -572,6 +572,20 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "312/3/83/e / 0",   messages.get(i++).toString() ); // e OFF /8t d=95%
 			assertEquals( 320, instruments.get(3).getCurrentTicks() ); // /4t
 		}
+		// channel 4: pattern recursion and REST
+		messages = getNoteOnOffMessagesByChannel(4);
+		assertEquals( 6, messages.size() );
+		{
+			int i = 0;
+			assertEquals( "0/4/94/c / 64",   messages.get(i++).toString() ); // c ON
+			assertEquals( "456/4/84/c / 0",  messages.get(i++).toString() ); // c OFF /4  d=95%
+			// 1/8th REST
+			assertEquals( "720/4/94/e / 64", messages.get(i++).toString() ); // e ON /8
+			assertEquals( "720/4/94/f / 64", messages.get(i++).toString() ); // f ON /8
+			assertEquals( "948/4/84/e / 0",  messages.get(i++).toString() ); // e OFF /8t d=95%
+			assertEquals( "948/4/84/f / 0",  messages.get(i++).toString() ); // f OFF /8t d=95%
+			assertEquals( 960, instruments.get(4).getCurrentTicks() );
+		}
 	}
 	
 	/**
@@ -1317,6 +1331,39 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-call-index-too-high")) );
 		assertEquals( 10, e.getLineNumber() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-stacktrace")) );
+		assertEquals( 25, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_INVALID_OPT)) );
+		stackTrace = e.getStackTraceElements();
+		assertEquals( 5, stackTrace.size() );
+		assertEquals( "pattern-stacktrace.midica/5",     stackTrace.pop().toString() ); // block with invaid option
+		assertEquals( "pattern-stacktrace.midica/19",    stackTrace.pop().toString() ); // pattern call
+		assertEquals( "pattern-stacktrace.midica/24",    stackTrace.pop().toString() ); // CALL test()
+		assertEquals( "pattern-stacktrace.midica/23-25", stackTrace.pop().toString() ); // block
+		assertEquals( "pattern-stacktrace.midica/25",    stackTrace.pop().toString() ); // block execution
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-stacktrace-2")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_INVALID_OPT)) );
+		stackTrace = e.getStackTraceElements();
+		assertEquals( 8, stackTrace.size() );
+		assertEquals( "pat-st-incl.midica/4",            stackTrace.pop().toString() ); // block with invaid option
+		assertEquals( "pat-st-incl.midica/19",           stackTrace.pop().toString() ); // call inner pattern
+		assertEquals( "pat-st-incl.midica/17-21",        stackTrace.pop().toString() ); // block with m, q=2
+		assertEquals( "pat-st-incl.midica/15-24",        stackTrace.pop().toString() ); // block with t
+		assertEquals( "pat-st-incl.midica/24",           stackTrace.pop().toString() ); // block execution
+		assertEquals( "pattern-stacktrace-2.midica/5",   stackTrace.pop().toString() ); // call outer pattern
+		assertEquals( "pattern-stacktrace-2.midica/4-6", stackTrace.pop().toString() ); // block
+		assertEquals( "pattern-stacktrace-2.midica/6",   stackTrace.pop().toString() ); // block execution
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-recursion")) );
+		assertEquals( 13, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_RECURSION_DEPTH)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-before-instruments")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHANNEL_UNDEFINED).replaceFirst("%s", "0")) );
 		
 		
 //		System.out.println(e.getMessage() + "\n" + e.getFile().getName());

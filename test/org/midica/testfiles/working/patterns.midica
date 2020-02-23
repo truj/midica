@@ -7,6 +7,8 @@ INCLUDE inc/instruments.midica
 CHORD c_maj      c  d  e  f  g  a  b  c+
 CHORD c_maj_rev  c+ b  a  g  f  e  d  c
 
+////////////////////////////////////////////////////////////
+
 PATTERN pat_qvd
 	0      /4
 	1      /8
@@ -163,6 +165,23 @@ PATTERN pat_with_blocks
 END
 3  e,c  pat_with_blocks  v=120
 
+////////////////////////////////////////////////////////////
+// channel 4:
+////////////////////////////////////////////////////////////
+
+PATTERN pat_out
+	0    /4
+	3,2  pat_in
+END
+
+PATTERN pat_in
+	-    /8
+	0,1  /8
+END
+
+4  c,d,e,f  pat_out
+
+////////////////////////////////////////////////////////////
 
 PATTERN pat_simple
 	0   /4

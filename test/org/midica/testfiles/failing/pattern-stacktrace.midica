@@ -1,0 +1,25 @@
+INCLUDE inc/instruments.midica
+
+PATTERN pat
+	
+	{ t, l=test
+		
+		{ m, q=2
+			
+			0  /8
+			
+		}
+		
+		1  /4
+	}
+END
+
+FUNCTION test
+	
+	0  c,d  pat  q=2, m
+	
+END
+
+{
+	CALL test
+}

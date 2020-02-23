@@ -1,0 +1,26 @@
+
+PATTERN pat_in
+	
+	{ l=test
+		
+		0 /8
+		
+	}
+	
+END
+
+
+PATTERN pat_out
+	
+	{ t
+		
+		{ m, q=2
+			
+			0  pat_in
+			
+		}
+		
+		1  /4
+	}
+	
+END

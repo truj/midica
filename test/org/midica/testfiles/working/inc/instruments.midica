@@ -3,4 +3,5 @@ INSTRUMENTS
 	1    VIOLIN                  Violin
 	2    HARMONICA               Harmonica
 	3    FIDDLE                  Fiddle
+	4    STEEL_GUITAR            Western Guitar
 END

@@ -1394,6 +1394,7 @@ public class Dict {
 	public static final String ERROR_PATTERN_INVALID_INNER_OPT   = "error_pattern_invalid_inner_opt";
 	public static final String ERROR_PATTERN_INDEX_INVALID       = "error_pattern_index_invalid";
 	public static final String ERROR_PATTERN_INDEX_TOO_HIGH      = "error_pattern_index_too_high";
+	public static final String ERROR_PATTERN_RECURSION_DEPTH     = "error_pattern_recursion_depth";
 	public static final String ERROR_META_NUM_OF_ARGS            = "error_meta_num_of_arts";
 	public static final String ERROR_META_UNKNOWN_CMD            = "error_meta_unknown_cmd";
 	public static final String ERROR_SOFT_KARAOKE_UNKNOWN_CMD    = "error_soft_karaoke_unknown_cmd";
@@ -1485,6 +1486,7 @@ public class Dict {
 	public static final String STACK_TRACE_IN                   = "stack_trace_in";
 	public static final String STACK_TRACE_EXEC                 = "stack_trace_exec";
 	public static final String STACK_TRACE_FUNCTION             = "stack_trace_function";
+	public static final String STACK_TRACE_PATTERN              = "stack_trace_pattern";
 	
 	// WaitView
 	public static final String TITLE_WAIT                       = "title_wait";
@@ -2750,6 +2752,7 @@ public class Dict {
 		set( ERROR_PATTERN_INVALID_INNER_OPT,     "invalid pattern option: "                                          );
 		set( ERROR_PATTERN_INDEX_INVALID,         "pattern index not a number: "                                      );
 		set( ERROR_PATTERN_INDEX_TOO_HIGH,        "pattern index too high: "                                          );
+		set( ERROR_PATTERN_RECURSION_DEPTH,       "Recursion depth in pattern too big."                               );
 		set( ERROR_META_NUM_OF_ARGS,              "no arguments allowed in meta command"                              );
 		set( ERROR_META_UNKNOWN_CMD,              "unknown meta command: "                                            );
 		set( ERROR_SOFT_KARAOKE_UNKNOWN_CMD,      "unknown soft karaoke command: "                                    );
@@ -2844,6 +2847,7 @@ public class Dict {
 		set( STACK_TRACE_IN,                      "in"                                                                );
 		set( STACK_TRACE_EXEC,                    "Executed:"                                                         );
 		set( STACK_TRACE_FUNCTION,                "Function "                                                         );
+		set( STACK_TRACE_PATTERN,                 "Pattern "                                                          );
 		
 		// WaitView
 		set( TITLE_WAIT,                          "Please Wait"                                                       );
