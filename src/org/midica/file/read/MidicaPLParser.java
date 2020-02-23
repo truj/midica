@@ -220,6 +220,7 @@ public class MidicaPLParser extends SequenceParser {
 	private   static boolean                            frstInstrBlkOver     = false;
 	private   static String                             chosenCharset        = null;
 	private   static HashSet<String>                    definedFunctionNames = null;
+	private   static HashSet<String>                    definedPatternNames  = null;
 	private   static int                                nestableBlkDepth     = 0;
 	private   static Deque<NestableBlock>               nestableBlkStack     = null;
 	private   static Deque<StackTraceElement>           stackTrace           = null;
@@ -922,7 +923,7 @@ public class MidicaPLParser extends SequenceParser {
 			// pattern call --> call this method (parseTokens()) once for each pattern line
 			if (tokens.length > 2) {
 				String[] subTokens = tokens[2].split( "\\s+", 2 );
-				if (patterns.containsKey(subTokens[0])) {
+				if (definedPatternNames.contains(subTokens[0])) {
 					if (isFunct)
 						currentFunction.add(String.join(" ", tokens)); // add to function
 					else if (isBlock)
@@ -1847,7 +1848,9 @@ public class MidicaPLParser extends SequenceParser {
 				throw new ParseException( Dict.get(Dict.ERROR_PATTERN_ALREADY_DEFINED) + currentPatternName );
 			}
 			
+			// only collect the function name?
 			if (isFuncNameParsRun) {
+				definedPatternNames.add(currentPatternName);
 				return;
 			}
 			
@@ -4550,6 +4553,7 @@ public class MidicaPLParser extends SequenceParser {
 			isDefaultParsRun     = false;
 			instruments          = new ArrayList<>();
 			definedFunctionNames = new HashSet<>();
+			definedPatternNames  = new HashSet<>();
 			fileCache            = new HashMap<>();
 			functions            = new HashMap<>();
 			functionToFile       = new HashMap<>();
