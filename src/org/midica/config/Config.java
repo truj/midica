@@ -340,6 +340,7 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_PLAYER_TRANSPOSE_SLD,     KeyEvent.VK_T,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_VOL_FLD,        KeyEvent.VK_V,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_VOL_SLD,        KeyEvent.VK_V,        InputEvent.ALT_DOWN_MASK  | InputEvent.SHIFT_DOWN_MASK );
+		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_VOL_BTN,        KeyEvent.VK_A,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_00,             KeyEvent.VK_0,        0                          );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_01,             KeyEvent.VK_1,        0                          );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CH_02,             KeyEvent.VK_2,        0                          );

@@ -108,12 +108,13 @@ public class PlayerView extends JDialog {
 	public static final String NAME_SOLO        = "name_solo_";
 	
 	// action commands
-	public static final String CMD_REPARSE    = "cmd_reparse";
-	public static final String CMD_SOUNDCHECK = "cmd_soundcheck";
-	public static final String CMD_INFO       = "cmd_info";
-	public static final String CMD_JUMP       = "cmd_jump";
-	public static final String CMD_MEMORIZE   = "cmd_memorize";
-	public static final String CMD_SHOW_HIDE  = "cmd_show_hide_";
+	public static final String CMD_REPARSE      = "cmd_reparse";
+	public static final String CMD_SOUNDCHECK   = "cmd_soundcheck";
+	public static final String CMD_INFO         = "cmd_info";
+	public static final String CMD_JUMP         = "cmd_jump";
+	public static final String CMD_MEMORIZE     = "cmd_memorize";
+	public static final String CMD_SHOW_HIDE    = "cmd_show_hide_";
+	public static final String CMD_APPLY_TO_ALL = "cmd_apply_to_all_";
 	
 	// control button commands
 	public static final String CMD_STOP      = "cmd_stop";
@@ -190,6 +191,7 @@ public class PlayerView extends JDialog {
 	private ArrayList<FixedLabel>   channelComments       = null;
 	private ArrayList<MidicaSlider> channelVolumeSliders  = null;
 	private ArrayList<JTextField>   channelVolumeFields   = null;
+	private ArrayList<MidicaButton> channelApplyToAllBtn  = null;
 	
 	/**
 	 * Creates the player window.
@@ -801,6 +803,7 @@ public class PlayerView extends JDialog {
 		channelDetails        = new ArrayList<>();
 		channelVolumeSliders  = new ArrayList<>();
 		channelVolumeFields   = new ArrayList<>();
+		channelApplyToAllBtn  = new ArrayList<>();
 		
 		Container area = new Container();
 		
@@ -975,7 +978,7 @@ public class PlayerView extends JDialog {
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
-		area.setLayout( layout );
+		area.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
 		constraints.insets     = Laf.INSETS_IN;
@@ -993,29 +996,37 @@ public class PlayerView extends JDialog {
 		
 		// volume text field
 		constraints.gridx++;
-		JTextField fldChVol = new JTextField( "0" );
+		JTextField fldChVol = new JTextField("0");
 		fldChVol.setPreferredSize( new Dimension(CHANNEL_DETAIL_VOL_FLD_WIDTH, Laf.textFieldHeight) );
-		fldChVol.setName( NAME_CH_VOL + channel );
-		fldChVol.getDocument().putProperty( "name", NAME_CH_VOL + channel );
-		fldChVol.getDocument().addDocumentListener( controller );
-		fldChVol.addActionListener( controller );
-		area.add( fldChVol, constraints );
-		channelVolumeFields.add( fldChVol );
-		setTextFieldColor( fldChVol.getName(), Laf.COLOR_NORMAL );
+		fldChVol.setName(NAME_CH_VOL + channel);
+		fldChVol.getDocument().putProperty("name", NAME_CH_VOL + channel);
+		fldChVol.getDocument().addDocumentListener(controller);
+		fldChVol.addActionListener(controller);
+		area.add(fldChVol, constraints);
+		channelVolumeFields.add(fldChVol);
+		setTextFieldColor(fldChVol.getName(), Laf.COLOR_NORMAL);
+		
+		// apply to all button
+		constraints.gridx++;
+		MidicaButton applyToAllBtn = new MidicaButton( Dict.get(Dict.APPLY_TO_ALL_CHANNELS) );
+		applyToAllBtn.setActionCommand(CMD_APPLY_TO_ALL + channel);
+		applyToAllBtn.addActionListener(controller);
+		area.add(applyToAllBtn, constraints);
+		channelApplyToAllBtn.add(applyToAllBtn);
 		
 		// spacer
 		constraints.gridx++;
 		constraints.gridwidth = 2;
 		constraints.weightx   = 1;
-		area.add( new JLabel(""), constraints );
+		area.add(new JLabel(""), constraints);
 		
 		// slider
 		constraints.gridy++;
 		constraints.gridx     = 1;
 		constraints.gridwidth = 3;
-		MidicaSlider volSlider = createChannelVolumeSlider( channel );
-		area.add( volSlider, constraints );
-		channelVolumeSliders.add( volSlider );
+		MidicaSlider volSlider = createChannelVolumeSlider(channel);
+		area.add(volSlider, constraints);
+		channelVolumeSliders.add(volSlider);
 		
 		// note history label
 		constraints.gridy++;
@@ -1030,7 +1041,7 @@ public class PlayerView extends JDialog {
 		constraints.gridwidth = 3;
 		constraints.weightx   = 1;
 		constraints.weighty   = 1;
-		Component table       = createNoteHistoryTable( channel );
+		Component table       = createNoteHistoryTable(channel);
 		area.add(table, constraints);
 		
 		return area;
@@ -1576,21 +1587,6 @@ public class PlayerView extends JDialog {
 	}
 	
 	/**
-	 * Determines if one of the text fields is focused.
-	 * 
-	 * @return **true**, if one of the text fields is focused. Otherwise: returns **false**.
-	 */
-	public boolean isTextfieldFocussed() {
-		if ( fldJump.hasFocus() || fldVol.hasFocus() || fldTempo.hasFocus() || fldTranspose.hasFocus() )
-			return true;
-		for ( JTextField fld : channelVolumeFields )
-			if ( fld.hasFocus() )
-				return true;
-		
-		return false;
-	}
-	
-	/**
 	 * Shows or hides the channel or lyrics area according to the show-lyrics
 	 * checkbox.
 	 * 
@@ -1717,8 +1713,9 @@ public class PlayerView extends JDialog {
 		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(14), Dict.KEY_PLAYER_CH_14_S );
 		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(15), Dict.KEY_PLAYER_CH_15_S );
 		
-		keyBindingManager.addBindingsForFocusOfVisibleChannel( this.channelVolumeFields,  Dict.KEY_PLAYER_CH_VOL_FLD );
-		keyBindingManager.addBindingsForFocusOfVisibleChannel( this.channelVolumeSliders, Dict.KEY_PLAYER_CH_VOL_SLD );
+		keyBindingManager.addBindingsForFocusOfVisibleChannel(  this.channelVolumeSliders, Dict.KEY_PLAYER_CH_VOL_SLD );
+		keyBindingManager.addBindingsForFocusOfVisibleChannel(  this.channelVolumeFields,  Dict.KEY_PLAYER_CH_VOL_FLD );
+		keyBindingManager.addBindingsForButtonOfVisibleChannel( this.channelApplyToAllBtn, Dict.KEY_PLAYER_CH_VOL_BTN );
 		
 		// add key bindings for the lyrics checkbox
 		keyBindingManager.addBindingsForCheckbox( this.cbxLyrics, Dict.KEY_PLAYER_LYRICS );

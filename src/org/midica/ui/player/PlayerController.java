@@ -87,7 +87,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * @param e    The invoked action event.
 	 */
 	@Override
-	public void actionPerformed( ActionEvent e ) {
+	public void actionPerformed(ActionEvent e) {
 		String cmd = e.getActionCommand();
 		
 		// player control command button pushed
@@ -95,108 +95,120 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			|| PlayerView.CMD_STOP.equals(cmd) || PlayerView.CMD_REW.equals(cmd)
 			|| PlayerView.CMD_FWD.equals(cmd)  || PlayerView.CMD_FAST_REW.equals(cmd)
 			|| PlayerView.CMD_FAST_FWD.equals(cmd) ) {
-				performControlCommand( cmd );
+				performControlCommand(cmd);
 		}
 		
 		// button pushed for memorizing the current tickstamp
-		else if ( PlayerView.CMD_MEMORIZE.equals(cmd) ) {
+		else if (PlayerView.CMD_MEMORIZE.equals(cmd)) {
 			long pos = MidiDevices.getTickPosition();
-			view.setMemory( pos );
+			view.setMemory(pos);
 		}
 		
 		// button pushed for jumping to the memorized tickstamp
-		else if ( PlayerView.CMD_JUMP.equals(cmd) ) {
+		else if (PlayerView.CMD_JUMP.equals(cmd)) {
 			String memory = view.getMemory();
 			try {
-				long pos = Long.parseLong( memory );
-				MidiDevices.setTickPosition( pos );
-				view.setTextFieldColor( PlayerView.NAME_JUMP, Laf.COLOR_NORMAL );
+				long pos = Long.parseLong(memory);
+				MidiDevices.setTickPosition(pos);
+				view.setTextFieldColor(PlayerView.NAME_JUMP, Laf.COLOR_NORMAL);
 			}
-			catch( NumberFormatException ex ) {
+			catch(NumberFormatException ex) {
 			}
 		}
 		
 		// button pushed for reparsing the currently loaded file
-		else if ( PlayerView.CMD_REPARSE.equals(cmd) ) {
+		else if (PlayerView.CMD_REPARSE.equals(cmd)) {
 			reparse();
 		}
 		
-		else if ( PlayerView.CMD_SOUNDCHECK.equals(cmd) ) {
-			SoundcheckView.showSoundcheck( view );
+		else if (PlayerView.CMD_SOUNDCHECK.equals(cmd)) {
+			SoundcheckView.showSoundcheck(view);
 		}
 		
 		// button pushed to open the info window
-		else if ( PlayerView.CMD_INFO.equals(cmd) ) {
-			InfoView.showInfoWindow( view );
+		else if (PlayerView.CMD_INFO.equals(cmd)) {
+			InfoView.showInfoWindow(view);
 		}
 		
-		// butto pushed to show/hide the details of a channel
-		else if ( cmd.startsWith(PlayerView.CMD_SHOW_HIDE) ) {
-			cmd = cmd.replaceFirst( PlayerView.CMD_SHOW_HIDE, "" );
-			int channel = Integer.parseInt( cmd );
-			view.toggleChannelDetails( channel );
+		// button pushed to show/hide the details of a channel
+		else if (cmd.startsWith(PlayerView.CMD_SHOW_HIDE)) {
+			cmd = cmd.replaceFirst(PlayerView.CMD_SHOW_HIDE, "");
+			int channel = Integer.parseInt(cmd);
+			view.toggleChannelDetails(channel);
+		}
+		
+		// button pushed to apply the channel volume to all channels
+		else if (cmd.startsWith(PlayerView.CMD_APPLY_TO_ALL)) {
+			cmd = cmd.replaceFirst(PlayerView.CMD_APPLY_TO_ALL, "");
+			byte currentChannel = Byte.parseByte(cmd);
+			byte volume = MidiDevices.getChannelVolume(currentChannel);
+			for (byte channel = 0; channel < MidiDevices.NUMBER_OF_CHANNELS; channel++) {
+				view.setChannelVolumeField(channel, volume);
+				view.setChannelVolumeSlider(channel, volume);
+				MidiDevices.setChannelVolume(channel, volume, volume);
+			}
 		}
 		
 		// enter pressed in a text field
 		Component component = (Component) e.getSource();
-		if ( component instanceof JTextField ) {
+		if (component instanceof JTextField) {
 			String name = component.getName();
 			
 			try {
 				// jump text field
-				if ( PlayerView.NAME_JUMP.equals(name) ) {
+				if (PlayerView.NAME_JUMP.equals(name)) {
 					view.pressJumpButton();
 				}
 				
 				// master volume field
-				else if ( PlayerView.NAME_MASTER_VOL.equals(name) ) {
+				else if (PlayerView.NAME_MASTER_VOL.equals(name)) {
 					byte volume = view.getVolumeFromField(); // throws NumberFormatException
-					if ( volume < 0 || volume > 127 )
+					if (volume < 0 || volume > 127)
 						throw new NumberFormatException();
 					MidiDevices.setMasterVolume(volume, volume);
 					view.setMasterVolumeSlider(volume);
 				}
 				
 				// tempo field
-				else if ( PlayerView.NAME_TEMPO.equals(name) ) {
+				else if (PlayerView.NAME_TEMPO.equals(name)) {
 					float tempoFactor = view.getTempoFromField(); // throws NumberFormatException
-					if ( tempoFactor < 0 )
+					if (tempoFactor < 0)
 						throw new NumberFormatException();
-					MidiDevices.setTempo( tempoFactor );
-					view.setTempoSlider( tempoFactor );
+					MidiDevices.setTempo(tempoFactor);
+					view.setTempoSlider(tempoFactor);
 				}
 				
 				// transpose field
-				else if ( PlayerView.NAME_TRANSPOSE.equals(name) ) {
+				else if (PlayerView.NAME_TRANSPOSE.equals(name)) {
 					byte level = view.getTransposeFromField(); // throws NumberFormatException
-					if ( level < PlayerView.TRANSPOSE_MIN || level > PlayerView.TRANSPOSE_MAX )
+					if (level < PlayerView.TRANSPOSE_MIN || level > PlayerView.TRANSPOSE_MAX)
 						throw new NumberFormatException();
-					SequenceParser.setTransposeLevel( level );
-					view.setTransposeSlider( level );
+					SequenceParser.setTransposeLevel(level);
+					view.setTransposeSlider(level);
 					reparse();
 				}
 				
 				// channel volume field
-				else if ( name.startsWith(PlayerView.NAME_CH_VOL) ) {
-					String channelStr = name.replaceFirst( PlayerView.NAME_CH_VOL, "" );
-					byte channel = Byte.parseByte( channelStr );
-					byte volume = view.getChannelVolumeFromField( channel ); // throws NumberFormatException
-					if ( volume < -127 || volume > 127 )
+				else if (name.startsWith(PlayerView.NAME_CH_VOL)) {
+					String channelStr = name.replaceFirst(PlayerView.NAME_CH_VOL, "");
+					byte channel = Byte.parseByte(channelStr);
+					byte volume = view.getChannelVolumeFromField(channel); // throws NumberFormatException
+					if (volume < -127 || volume > 127)
 						throw new NumberFormatException();
-					view.setChannelVolumeSlider( channel, volume );
+					view.setChannelVolumeSlider(channel, volume);
 					MidiDevices.setChannelVolume(channel, volume, volume);
 				}
 				
 				// no exception yet, so the field has been set successfully
-				view.setTextFieldColor( name, Laf.COLOR_NORMAL );
+				view.setTextFieldColor(name, Laf.COLOR_NORMAL);
 			}
-			catch ( NumberFormatException ex ) {
+			catch (NumberFormatException ex) {
 			}
 		}
 	}
 	
 	@Override
-	public void windowActivated( WindowEvent e ) {
+	public void windowActivated(WindowEvent e) {
 	}
 	
 	/**
@@ -210,7 +222,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * @param e    Window activation event.
 	 */
 	@Override
-	public void windowClosing( WindowEvent e ) {
+	public void windowClosing(WindowEvent e) {
 		try {
 			SoundcheckView.close();
 			refresher.die();
@@ -218,25 +230,25 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 			MidiDevices.destroyDevices();
 			Midica.uiController.updateAfterPlayerClosed();
 		}
-		catch ( MidiUnavailableException ex ) {
-			showErrorMessage( ex );
+		catch (MidiUnavailableException ex) {
+			showErrorMessage(ex);
 		}
 	}
 	
 	@Override
-	public void windowClosed( WindowEvent e ) {
+	public void windowClosed(WindowEvent e) {
 	}
 	
 	@Override
-	public void windowDeactivated( WindowEvent e ) {
+	public void windowDeactivated(WindowEvent e) {
 	}
 	
 	@Override
-	public void windowDeiconified( WindowEvent e ) {
+	public void windowDeiconified(WindowEvent e) {
 	}
 	
 	@Override
-	public void windowIconified( WindowEvent e ) {
+	public void windowIconified(WindowEvent e) {
 	}
 	
 	/**
@@ -250,14 +262,14 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * @param e    Window deactivated event.
 	 */
 	@Override
-	public void windowOpened( WindowEvent e ) {
+	public void windowOpened(WindowEvent e) {
 		
 		// setup the midi devices while showing a wait dialog
 		try {
 			setupMidiDevices();
 		}
-		catch ( Exception ex ) {
-			showErrorMessage( ex );
+		catch (Exception ex) {
+			showErrorMessage(ex);
 		}
 		
 		// init tick labels and progress slider

@@ -247,6 +247,47 @@ public class KeyBindingManager {
 	}
 	
 	/**
+	 * Adds a key binding for a list of buttons to be pressed when possible.
+	 * All buttons use the same key binding ID but at most one of them is visible.
+	 * This is used for channel-based 'apply-to-all' buttons in the player window
+	 * that are only visible if the according channel has been opened.
+	 * The indices of the given buttons must match the channel number.
+	 * 
+	 * @param buttons  the list of buttons
+	 * @param id       the key binding ID
+	 */
+	public void addBindingsForButtonOfVisibleChannel(ArrayList<MidicaButton> buttons, String id) {
+		
+		// fill input map
+		addInputs(id);
+		
+		// tooltips
+		for (MidicaButton btn : buttons) {
+			addTooltip(btn, id, Dict.TT_KEY_BUTTON_PRESS);
+		}
+		
+		// fill action map
+		actionMap.put(id, new AbstractAction() {
+			
+			private static final long serialVersionUID = 1L;
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				if (mustIgnore(e))
+					return;
+				
+				for (MidicaButton btn : buttons) {
+					if (btn.isShowing()) {
+						btn.doClick();
+						return;
+					}
+				}
+			}
+		});
+	}
+	
+	/**
 	 * Adds a key binding for a combobox to be opened.
 	 * This is used for opening the config comboboxes in the main window.
 	 * 

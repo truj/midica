@@ -518,6 +518,7 @@ public class Dict {
 	public static final String KEY_PLAYER_TRANSPOSE_SLD     = "key_player_transpose_sld";
 	public static final String KEY_PLAYER_CH_VOL_FLD        = "key_player_ch_vol_fld";
 	public static final String KEY_PLAYER_CH_VOL_SLD        = "key_player_ch_vol_sld";
+	public static final String KEY_PLAYER_CH_VOL_BTN        = "key_player_ch_vol_btn";
 	public static final String KEY_PLAYER_CH_00             = "key_player_ch_00";
 	public static final String KEY_PLAYER_CH_01             = "key_player_ch_01";
 	public static final String KEY_PLAYER_CH_02             = "key_player_ch_02";
@@ -1581,6 +1582,7 @@ public class Dict {
 	public static final String CH_HEAD_INSTRUMENT               = "ch_head_instrument";
 	public static final String CH_HEAD_COMMENT                  = "ch_head_comment";
 	public static final String CH_DETAILS_VOLUME                = "ch_details_volume";
+	public static final String APPLY_TO_ALL_CHANNELS            = "apply_to_all_channels";
 	public static final String LBL_NOTE_HISTORY                 = "lbl_note_history";
 	public static final String COLUMN_VELOCITY                  = "column_velocity";
 	public static final String COLUMN_NUMBER                    = "column_number";
@@ -1769,6 +1771,7 @@ public class Dict {
 		set( KEY_PLAYER_TRANSPOSE_SLD,     "Focus the transpose slider"                                                  );
 		set( KEY_PLAYER_CH_VOL_FLD,        "Focus the channel volume text field"                                         );
 		set( KEY_PLAYER_CH_VOL_SLD,        "Focus the channel volume slider"                                             );
+		set( KEY_PLAYER_CH_VOL_BTN,        "Press the button to apply the channel volume to all channels"                );
 		set( KEY_PLAYER_CH_00,             "Toggle channel 0"                                                            );
 		set( KEY_PLAYER_CH_01,             "Toggle channel 1"                                                            );
 		set( KEY_PLAYER_CH_02,             "Toggle channel 2"                                                            );
@@ -2946,6 +2949,7 @@ public class Dict {
 		set( ACTIVITY_ACTIVE,                     "active"                     );
 		set( ACTIVITY_INACTIVE,                   "inactive"                   );
 		set( CH_DETAILS_VOLUME,                   "Volume"                     );
+		set( APPLY_TO_ALL_CHANNELS,               "apply to all channels"      );
 		set( LBL_NOTE_HISTORY,                    "<html>Note<br>History"      );
 		set( COLUMN_VELOCITY,                     "Velocity"                   );
 		set( COLUMN_NUMBER,                       "Number"                     );
