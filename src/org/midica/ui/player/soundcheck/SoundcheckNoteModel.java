@@ -8,32 +8,44 @@
 package org.midica.ui.player.soundcheck;
 
 import java.util.ArrayList;
-import java.util.Collections;
-
-import javax.swing.DefaultListModel;
 
 import org.midica.config.Dict;
-import org.midica.config.NamedInteger;
+import org.midica.ui.model.MidicaTableModel;
 
 /**
- * This class provides the model for the note/percussion list in the
+ * This class provides the model for the note/percussion table in the
  * soundcheck window.
  * 
  * @author Jan Trukenmüller
  */
-public class SoundcheckNoteModel extends DefaultListModel<NamedInteger> {
+public class SoundcheckNoteModel extends MidicaTableModel {
 	
 	private static final long serialVersionUID = 1L;
     
 	/** determins if a note or percussion list has to be displayed */
 	private boolean percussion = false;
 	
-	private ArrayList<NamedInteger> list = null;
+	private ArrayList<Integer> list = null;
 	
 	/**
 	 * Creates a model for the note/percussion list.
 	 */
 	public SoundcheckNoteModel() {
+
+		// table header
+		columnNames = new String[ 3 ];
+		columnNames[ 0 ] = Dict.get( Dict.SNDCHK_COL_NOTE_NUM   );
+		columnNames[ 1 ] = Dict.get( Dict.SNDCHK_COL_NOTE_NAME  );
+		columnNames[ 2 ] = Dict.get( Dict.SNDCHK_COL_NOTE_SHORT );
+		
+		columnClasses = new Class[ 3 ];
+		columnClasses[ 0 ] = Integer.class;
+		columnClasses[ 1 ] = String.class;
+		columnClasses[ 2 ] = String.class;
+		
+		list = new ArrayList<Integer>();
+		
+		init();
 	}
 	
 	/**
@@ -44,7 +56,7 @@ public class SoundcheckNoteModel extends DefaultListModel<NamedInteger> {
 	 * 
 	 * @param newPercussion  **true** to display percussion instruments, **false** to display notes.
 	 */
-	public void setPercussion( boolean newPercussion ) {
+	public void setPercussion(boolean newPercussion) {
 		percussion = newPercussion;
 	}
 	
@@ -59,47 +71,63 @@ public class SoundcheckNoteModel extends DefaultListModel<NamedInteger> {
 	}
 	
 	/**
-	 * (Re)fills the note/percussion list with either notes or
+	 * Returns the note/percussion number list.
+	 * 
+	 * @return the list.
+	 */
+	public ArrayList<Integer> getList() {
+		return list;
+	}
+	
+	/**
+	 * (Re)fills the note/percussion table with either notes or
 	 * percussion instruments - depending on the {@link #percussion} field.
 	 */
 	public void init() {
-		removeAllElements();
-		list = new ArrayList<NamedInteger>();
+		list.clear();
 		
 		if (percussion) {
-			// construct percussion options
-			
-			// get all keys in a sorted list
-			ArrayList<Integer> sortedPercussion = new ArrayList<Integer>();
-			for ( int key : Dict.getPercussionNotes() ) {
-				sortedPercussion.add( key );
-			}
-			Collections.sort( sortedPercussion );
-			
-			// get longest possible amount of characters for a short option
-			int shortOptChars = Dict.getPercussionShortIdLength();
-			
-			// construct and add each option
-			for ( int key : sortedPercussion ) {
-				StringBuilder name = new StringBuilder(Dict.getPercussionShortId(key));
-				int numSpaces      = shortOptChars - name.length();
-				for (int i = 0; i < numSpaces; i++)
-					name.append(" ");
-				name.append(" / ");
-				name.append( Dict.getPercussionLongId(key) );
-				NamedInteger option = new NamedInteger( name.toString(), key );
-				list.add( option );
-				addElement( option );
+			// add all known percussion ids
+			for (int num : Dict.getPercussionNotes()) {
+				list.add(num);
 			}
 		}
 		else {
-			// construct note options
-			for ( int i = 0; i < 128; i++ ) {
-				String name = Dict.getNote( i );
-				NamedInteger option = new NamedInteger( name, i );
-				list.add( option );
-				addElement( option );
+			// add all possible note numbers
+			for (int i = 0; i < 128; i++) {
+				list.add(i);
 			}
 		}
+		
+		// tell the table that it's data has changed.
+		super.fireTableDataChanged();
+	}
+	
+	@Override
+	public int getRowCount() {
+		if (null == list)
+			return 0;
+		return list.size();
+	}
+	
+	@Override
+	public Object getValueAt(int row, int col) {
+		if (0 == col) {
+			return list.get(row);
+		}
+		else if (1 == col) {
+			if (percussion)
+				return Dict.getPercussionShortId(list.get(row));
+			else
+				return Dict.getNote(list.get(row));
+		}
+		else if (2 == col) {
+			if (percussion)
+				return Dict.getPercussionLongId(list.get(row));
+			else
+				return "";
+		}
+		
+		return "-";
 	}
 }

@@ -1605,6 +1605,9 @@ public class Dict {
 	public static final String SNDCHK_COL_BANK                  = "sndchk_col_bank";
 	public static final String SNDCHK_COL_NAME_SF               = "sndchk_col_name_sf";
 	public static final String SNDCHK_COL_NAME_SYNTAX           = "sndchk_col_name_syntax";
+	public static final String SNDCHK_COL_NOTE_NUM              = "sndchk_col_note_num";
+	public static final String SNDCHK_COL_NOTE_NAME             = "sndchk_col_note_name";
+	public static final String SNDCHK_COL_NOTE_SHORT            = "sndchk_col_note_short";
 	
 	// string filter for tables
 	public static final String FILTER_ICON_TOOLTIP              = "filter_icon_tooltip";
@@ -1822,10 +1825,10 @@ public class Dict {
 		set( KEY_PLAYER_CH_15_S,           "Solo or Unsolo channel 15"                                                   );
 		set( KEY_SOUNDCHECK_CLOSE,         "Close the Soundcheck window"                                                 );
 		set( KEY_SOUNDCHECK_PLAY,          "Click the Play button"                                                       );
-		set( KEY_SOUNDCHECK_FILTER_INSTR,  "Open the Instruments Filter"                                                 );
-		set( KEY_SOUNDCHECK_FILTER_NOTE,   "Open the Note Filter"                                                        );
+		set( KEY_SOUNDCHECK_FILTER_INSTR,  "Open the Instruments/Drumkits Filter"                                        );
+		set( KEY_SOUNDCHECK_FILTER_NOTE,   "Open the Note/Percussion Filter"                                             );
 		set( KEY_SOUNDCHECK_INSTR,         "Focus the Instrument table"                                                  );
-		set( KEY_SOUNDCHECK_NOTE,          "Focus the Note list"                                                         );
+		set( KEY_SOUNDCHECK_NOTE,          "Focus the Note/Percussion table"                                             );
 		set( KEY_SOUNDCHECK_VOL_FLD,       "Focus the volume text field"                                                 );
 		set( KEY_SOUNDCHECK_VOL_SLD,       "Focus the volume slider"                                                     );
 		set( KEY_SOUNDCHECK_VEL_FLD,       "Focus the velocity text field"                                               );
@@ -2972,6 +2975,9 @@ public class Dict {
 		set( SNDCHK_COL_BANK,                "Bank"                            );
 		set( SNDCHK_COL_NAME_SF,             "Soundfont Name"                  );
 		set( SNDCHK_COL_NAME_SYNTAX,         "Syntax"                          );
+		set( SNDCHK_COL_NOTE_NUM,            "Number"                          );
+		set( SNDCHK_COL_NOTE_NAME,           "Name"                            );
+		set( SNDCHK_COL_NOTE_SHORT,          "Short ID"                        );
 		set( FILTER_ICON_TOOLTIP,            "Table Filter"                    );
 		set( FILTER_ICON_TOOLTIP_ACTIVE,     "Currently filtering"             );
 		set( FILTER_ICON_TOOLTIP_EMPTY,      "Currently empty"                 );
