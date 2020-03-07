@@ -61,7 +61,7 @@ public class UiView extends JFrame {
 	public static final String CMD_OPEN_SNDFNT_FILE    = "cmd_open_soundfont_file";
 	public static final String CMD_SHOW_INFO_WINDOW    = "cmd_show_info_window";
 	public static final String CMD_EXPORT_MIDI         = "cmd_export_midi";
-	public static final String CMD_EXPORT_MIDICAPL     = "cmd_export_midicapl";
+	public static final String CMD_EXPORT_DECOMPILE    = "cmd_export_decompile";
 	
 	// application icons
 	private static final String    APP_ICON_PATH = "org/midica/resources/app-icon.png";
@@ -90,7 +90,7 @@ public class UiView extends JFrame {
 	private MidicaButton                    btnSelectMidi          = null;
 	private MidicaButton                    btnSelectSoundfont     = null;
 	private MidicaButton                    btnExportMidi          = null;
-	private MidicaButton                    btnExportMidicaPL      = null;
+	private MidicaButton                    btnExportDecompile     = null;
 	private JCheckBox                       cbxRememberSf          = null;
 	private JCheckBox                       cbxRememberMidicapl    = null;
 	private JCheckBox                       cbxRememberMidi        = null;
@@ -102,13 +102,13 @@ public class UiView extends JFrame {
 	 * 
 	 * @param controller    Used as listener for all events.
 	 */
-	public UiView( UiController controller ) {
-		super( Dict.get(Dict.TITLE_MAIN_WINDOW) );
+	public UiView(UiController controller) {
+		super(Dict.get(Dict.TITLE_MAIN_WINDOW));
 		this.controller = controller;
-		addWindowListener( controller );
+		addWindowListener(controller);
 		
 		if (!Midica.isCliMode)
-			appIcon = new ImageIcon( ClassLoader.getSystemResource(APP_ICON_PATH) );
+			appIcon = new ImageIcon(ClassLoader.getSystemResource(APP_ICON_PATH));
 		
 		init();
 		addKeyBindings();
@@ -119,7 +119,7 @@ public class UiView extends JFrame {
 		}
 		
 		// set app icon
-		setIconImage( appIcon.getImage() );
+		setIconImage(appIcon.getImage());
 		
 		pack();
 		setVisible(true);
@@ -137,7 +137,7 @@ public class UiView extends JFrame {
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
-		content.setLayout( layout );
+		content.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.NONE;
 		constraints.insets     = Laf.INSETS_WNS;
@@ -147,12 +147,12 @@ public class UiView extends JFrame {
 		constraints.gridwidth  = 1;
 		
 		// left area (config and player)
-		content.add( createLeftArea(), constraints );
+		content.add(createLeftArea(), constraints);
 		
 		// right area (import and export)
 		constraints.insets = Laf.INSETS_ENS;
 		constraints.gridx++;
-		content.add( createRightArea(), constraints );
+		content.add(createRightArea(), constraints);
 	}
 	
 	/**
@@ -168,7 +168,7 @@ public class UiView extends JFrame {
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
-		area.setLayout( layout );
+		area.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
 		constraints.insets     = Laf.INSETS_IN;
@@ -178,11 +178,11 @@ public class UiView extends JFrame {
 		constraints.gridwidth  = 1;
 		
 		// config area
-		area.add( createConfigArea(), constraints );
+		area.add(createConfigArea(), constraints);
 		
 		// player area
 		constraints.gridy++;
-		area.add( createPlayerArea(), constraints );
+		area.add(createPlayerArea(), constraints);
 		
 		return area;
 	}
@@ -198,7 +198,7 @@ public class UiView extends JFrame {
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
-		area.setLayout( layout );
+		area.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
 		constraints.insets     = Laf.INSETS_IN;
@@ -208,11 +208,11 @@ public class UiView extends JFrame {
 		constraints.gridwidth  = 1;
 		
 		// import area
-		area.add( createImportArea(), constraints );
+		area.add(createImportArea(), constraints);
 		
 		// export area
 		constraints.gridy++;
-		area.add( createExportArea(), constraints );
+		area.add(createExportArea(), constraints);
 		
 		return area;
 	}
@@ -229,7 +229,7 @@ public class UiView extends JFrame {
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
-		area.setLayout( layout );
+		area.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
 		constraints.insets     = Laf.INSETS_IN;
@@ -239,123 +239,123 @@ public class UiView extends JFrame {
 		constraints.gridwidth  = 1;
 		
 		// gui language label
-		JLabel lblLanguage = new JLabel( Dict.get(Dict.LANGUAGE) );
+		JLabel lblLanguage = new JLabel(Dict.get(Dict.LANGUAGE));
 		Laf.makeBold(lblLanguage);
-		area.add( lblLanguage, constraints );
+		area.add(lblLanguage, constraints);
 		
 		// gui language selection
 		constraints.gridx++;
 		cbxGuiLang = new JComboBox<ComboboxStringOption>();
-		cbxGuiLang.setName( NAME_SELECT_LANGUAGE );
-		cbxGuiLang.setModel( ConfigComboboxModel.getModel(Config.LANGUAGE) );
-		cbxGuiLang.addActionListener( controller );
-		area.add( cbxGuiLang, constraints );
+		cbxGuiLang.setName(NAME_SELECT_LANGUAGE);
+		cbxGuiLang.setModel(ConfigComboboxModel.getModel(Config.LANGUAGE));
+		cbxGuiLang.addActionListener(controller);
+		area.add(cbxGuiLang, constraints);
 		
 		// note system label
 		constraints.gridx = 0;
 		constraints.gridy++;
-		JLabel lblNoteSys = new JLabel( Dict.get(Dict.NOTE_SYSTEM) );
+		JLabel lblNoteSys = new JLabel(Dict.get(Dict.NOTE_SYSTEM));
 		Laf.makeBold(lblNoteSys);
-		area.add( lblNoteSys, constraints );
+		area.add(lblNoteSys, constraints);
 		
 		// note system selection
 		constraints.gridx++;
 		cbxNoteSys = new JComboBox<ComboboxStringOption> ();
-		cbxNoteSys.setName( NAME_SELECT_SYSTEM );
-		cbxNoteSys.setModel( ConfigComboboxModel.getModel(Config.NOTE) );
-		cbxNoteSys.addActionListener( controller );
+		cbxNoteSys.setName(NAME_SELECT_SYSTEM);
+		cbxNoteSys.setModel(ConfigComboboxModel.getModel(Config.NOTE));
+		cbxNoteSys.addActionListener(controller);
 		
-		area.add( cbxNoteSys, constraints );
+		area.add(cbxNoteSys, constraints);
 		
 		// half tone label
 		constraints.gridx = 0;
 		constraints.gridy++;
-		JLabel lblHalfTone = new JLabel( Dict.get(Dict.HALF_TONE_SYMBOL) );
+		JLabel lblHalfTone = new JLabel(Dict.get(Dict.HALF_TONE_SYMBOL));
 		Laf.makeBold(lblHalfTone);
-		area.add( lblHalfTone, constraints );
+		area.add(lblHalfTone, constraints);
 		
 		// half tone selection
 		constraints.gridx++;
 		cbxHalfTone = new JComboBox<ComboboxStringOption>();
-		cbxHalfTone.setName( NAME_SELECT_HALF_TONE );
-		cbxHalfTone.setModel( ConfigComboboxModel.getModel(Config.HALF_TONE) );
-		cbxHalfTone.addActionListener( controller );
+		cbxHalfTone.setName(NAME_SELECT_HALF_TONE);
+		cbxHalfTone.setModel(ConfigComboboxModel.getModel(Config.HALF_TONE));
+		cbxHalfTone.addActionListener(controller);
 		
-		area.add( cbxHalfTone, constraints );
+		area.add(cbxHalfTone, constraints);
 		
 		// octave naming label
 		constraints.gridx = 0;
 		constraints.gridy++;
-		JLabel lblOctave = new JLabel( Dict.get(Dict.OCTAVE_NAMING) );
+		JLabel lblOctave = new JLabel(Dict.get(Dict.OCTAVE_NAMING));
 		Laf.makeBold(lblOctave);
-		area.add( lblOctave, constraints );
+		area.add(lblOctave, constraints);
 		
 		// octave selection
 		constraints.gridx++;
 		cbxOctave = new JComboBox<ComboboxStringOption>();
-		cbxOctave.setName( NAME_SELECT_OCTAVE );
-		cbxOctave.setModel( ConfigComboboxModel.getModel(Config.OCTAVE) );
-		cbxOctave.addActionListener( controller );
+		cbxOctave.setName(NAME_SELECT_OCTAVE);
+		cbxOctave.setModel(ConfigComboboxModel.getModel(Config.OCTAVE));
+		cbxOctave.addActionListener(controller);
 		
-		area.add( cbxOctave, constraints );
+		area.add(cbxOctave, constraints);
 		
 		// syntax label
 		constraints.gridx = 0;
 		constraints.gridy++;
-		JLabel lblSyntax = new JLabel( Dict.get(Dict.SYNTAX) );
+		JLabel lblSyntax = new JLabel(Dict.get(Dict.SYNTAX));
 		Laf.makeBold(lblSyntax);
-		area.add( lblSyntax, constraints );
+		area.add(lblSyntax, constraints);
 		
 		// syntax selection
 		constraints.gridx++;
 		cbxSyntax = new JComboBox<ComboboxStringOption>();
-		cbxSyntax.setName( NAME_SELECT_SYNTAX );
-		cbxSyntax.setModel( ConfigComboboxModel.getModel(Config.SYNTAX) );
-		cbxSyntax.addActionListener( controller );
+		cbxSyntax.setName(NAME_SELECT_SYNTAX);
+		cbxSyntax.setModel(ConfigComboboxModel.getModel(Config.SYNTAX));
+		cbxSyntax.addActionListener(controller);
 		
-		area.add( cbxSyntax, constraints );
+		area.add(cbxSyntax, constraints);
 		
 		// percussion label
 		constraints.gridx = 0;
 		constraints.gridy++;
-		JLabel lblPercussion = new JLabel( Dict.get(Dict.PERCUSSION) );
+		JLabel lblPercussion = new JLabel(Dict.get(Dict.PERCUSSION));
 		Laf.makeBold(lblPercussion);
-		area.add( lblPercussion, constraints );
+		area.add(lblPercussion, constraints);
 		
 		// percussion selection
 		constraints.gridx++;
 		cbxPercussion = new JComboBox<ComboboxStringOption>();
-		cbxPercussion.setName( NAME_SELECT_PERCUSSION );
-		cbxPercussion.setModel( ConfigComboboxModel.getModel(Config.PERCUSSION) );
-		cbxPercussion.addActionListener( controller );
+		cbxPercussion.setName(NAME_SELECT_PERCUSSION);
+		cbxPercussion.setModel(ConfigComboboxModel.getModel(Config.PERCUSSION));
+		cbxPercussion.addActionListener(controller);
 		
-		area.add( cbxPercussion, constraints );
+		area.add(cbxPercussion, constraints);
 		
 		// instrument naming label
 		constraints.gridx = 0;
 		constraints.gridy++;
-		JLabel lblInstrument = new JLabel( Dict.get(Dict.INSTRUMENT_IDS) );
+		JLabel lblInstrument = new JLabel(Dict.get(Dict.INSTRUMENT_IDS));
 		Laf.makeBold(lblInstrument);
-		area.add( lblInstrument, constraints );
+		area.add(lblInstrument, constraints);
 		
 		// instrument naming selection
 		constraints.gridx++;
 		cbxInstrument = new JComboBox<ComboboxStringOption>();
-		cbxInstrument.setName( NAME_SELECT_INSTRUMENT );
-		cbxInstrument.setModel( ConfigComboboxModel.getModel(Config.INSTRUMENT) );
-		cbxInstrument.addActionListener( controller );
+		cbxInstrument.setName(NAME_SELECT_INSTRUMENT);
+		cbxInstrument.setModel(ConfigComboboxModel.getModel(Config.INSTRUMENT));
+		cbxInstrument.addActionListener(controller);
 		
-		area.add( cbxInstrument, constraints );
+		area.add(cbxInstrument, constraints);
 		
 		// info button
 		constraints.gridx = 1;
 		constraints.gridy++;
 		constraints.gridwidth = 1;
-		btnInfo = new MidicaButton( Dict.get(Dict.SHOW_INFO) );
-		btnInfo.setActionCommand( CMD_SHOW_INFO_WINDOW );
-		btnInfo.addActionListener( controller );
+		btnInfo = new MidicaButton(Dict.get(Dict.SHOW_INFO));
+		btnInfo.setActionCommand(CMD_SHOW_INFO_WINDOW);
+		btnInfo.addActionListener(controller);
 		
-		area.add( btnInfo, constraints );
+		area.add(btnInfo, constraints);
 		
 		return area;
 	}
@@ -371,7 +371,7 @@ public class UiView extends JFrame {
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
-		area.setLayout( layout );
+		area.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
 		constraints.insets     = Laf.INSETS_IN;
@@ -384,10 +384,10 @@ public class UiView extends JFrame {
 		constraints.gridy++;
 		constraints.gridx   = 0;
 		constraints.weightx = 1;
-		btnPlayer = new MidicaButton( Dict.get(Dict.PLAYER_BUTTON), true );
-		btnPlayer.setActionCommand( CMD_START_PLAYER );
-		btnPlayer.addActionListener( controller );
-		area.add( btnPlayer, constraints );
+		btnPlayer = new MidicaButton(Dict.get(Dict.PLAYER_BUTTON), true);
+		btnPlayer.setActionCommand(CMD_START_PLAYER);
+		btnPlayer.addActionListener(controller);
+		area.add(btnPlayer, constraints);
 		
 		return area;
 	}
@@ -408,7 +408,7 @@ public class UiView extends JFrame {
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
-		area.setLayout( layout );
+		area.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
 		constraints.insets     = Laf.INSETS_IN;
@@ -420,141 +420,141 @@ public class UiView extends JFrame {
 		
 		// MidicaPL label
 		constraints.insets = Laf.INSETS_LBL_IMPORT_EXPORT;
-		JLabel lblMidicaPL = new JLabel( Dict.get(Dict.MIDICAPL_FILE) );
+		JLabel lblMidicaPL = new JLabel(Dict.get(Dict.MIDICAPL_FILE));
 		Laf.makeBold(lblMidicaPL);
-		area.add( lblMidicaPL, constraints );
+		area.add(lblMidicaPL, constraints);
 		constraints.insets = Laf.INSETS_IN;
 		
 		// file selector button
 		constraints.gridx++;
 		constraints.gridheight = 2;
-		btnSelectMidicaPL = new MidicaButton( Dict.get(Dict.CHOOSE_FILE) );
-		btnSelectMidicaPL.setActionCommand( CMD_OPEN_MIDICAPL_FILE );
-		btnSelectMidicaPL.addActionListener( controller );
-		area.add( btnSelectMidicaPL, constraints );
+		btnSelectMidicaPL = new MidicaButton(Dict.get(Dict.CHOOSE_FILE));
+		btnSelectMidicaPL.setActionCommand(CMD_OPEN_MIDICAPL_FILE);
+		btnSelectMidicaPL.addActionListener(controller);
+		area.add(btnSelectMidicaPL, constraints);
 		
 		// remember midicapl checkbox
 		constraints.insets = Laf.INSETS_LBL_IMPORT_EXPORT;
 		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.gridheight = 1;
-		cbxRememberMidicapl = new JCheckBox( Dict.get(Dict.REMEMBER_MPL) );
-		cbxRememberMidicapl.setToolTipText( Dict.get(Dict.REMEMBER_MPL_TT) );
-		cbxRememberMidicapl.addItemListener( controller );
-		String remember = Config.get( Config.REMEMBER_MIDICAPL );
-		if ( "true".equals(remember) ) {
-			cbxRememberMidicapl.setSelected( true );
+		cbxRememberMidicapl = new JCheckBox(Dict.get(Dict.REMEMBER_MPL));
+		cbxRememberMidicapl.setToolTipText(Dict.get(Dict.REMEMBER_MPL_TT));
+		cbxRememberMidicapl.addItemListener(controller);
+		String remember = Config.get(Config.REMEMBER_MIDICAPL);
+		if ("true".equals(remember)) {
+			cbxRememberMidicapl.setSelected(true);
 		}
-		cbxRememberMidicapl.setName( NAME_REMEMBER_MIDICAPL );
-		area.add( cbxRememberMidicapl, constraints );
+		cbxRememberMidicapl.setName(NAME_REMEMBER_MIDICAPL);
+		area.add(cbxRememberMidicapl, constraints);
 		constraints.insets = Laf.INSETS_IN;
 		
 		// chosen MidicaPL file name
 		constraints.gridy++;
 		constraints.gridwidth = 2;
-		lblChosenMidicaPLFile = new JLabel( Dict.get(Dict.UNCHOSEN_FILE) );
+		lblChosenMidicaPLFile = new JLabel(Dict.get(Dict.UNCHOSEN_FILE));
 		lblChosenMidicaPLFile.setPreferredSize(MAX_FILE_NAME_DIM);
-		area.add( lblChosenMidicaPLFile, constraints );
+		area.add(lblChosenMidicaPLFile, constraints);
 		String fileType = SequenceParser.getFileType();
 		String fileName = SequenceParser.getFileName();
-		if ( "midica".equals(fileType) ) {
-			lblChosenMidicaPLFile.setText( fileName );
+		if ("midica".equals(fileType)) {
+			lblChosenMidicaPLFile.setText(fileName);
 		}
 		
 		// line
 		constraints.gridy++;
-		area.add( Laf.createSeparator(), constraints );
+		area.add(Laf.createSeparator(), constraints);
 		
 		// midi label
 		constraints.insets = Laf.INSETS_LBL_IMPORT_EXPORT;
 		constraints.gridy++;
 		constraints.gridwidth = 1;
-		JLabel lblMidi = new JLabel( Dict.get(Dict.MIDI_FILE) );
+		JLabel lblMidi = new JLabel(Dict.get(Dict.MIDI_FILE));
 		Laf.makeBold(lblMidi);
-		area.add( lblMidi, constraints );
+		area.add(lblMidi, constraints);
 		constraints.insets = Laf.INSETS_IN;
 		
 		// file selector button
 		constraints.gridx++;
 		constraints.gridheight = 2;
-		btnSelectMidi = new MidicaButton( Dict.get(Dict.CHOOSE_FILE) );
-		btnSelectMidi.setActionCommand( CMD_OPEN_MIDI_FILE );
-		btnSelectMidi.addActionListener( controller );
-		area.add( btnSelectMidi, constraints );
+		btnSelectMidi = new MidicaButton(Dict.get(Dict.CHOOSE_FILE));
+		btnSelectMidi.setActionCommand(CMD_OPEN_MIDI_FILE);
+		btnSelectMidi.addActionListener(controller);
+		area.add(btnSelectMidi, constraints);
 		
 		// remember midicapl checkbox
 		constraints.insets = Laf.INSETS_LBL_IMPORT_EXPORT;
 		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.gridheight = 1;
-		cbxRememberMidi = new JCheckBox( Dict.get(Dict.REMEMBER_MID) );
-		cbxRememberMidi.setToolTipText( Dict.get(Dict.REMEMBER_MID_TT) );
-		cbxRememberMidi.addItemListener( controller );
-		remember = Config.get( Config.REMEMBER_MIDI );
-		if ( "true".equals(remember) ) {
-			cbxRememberMidi.setSelected( true );
+		cbxRememberMidi = new JCheckBox(Dict.get(Dict.REMEMBER_MID));
+		cbxRememberMidi.setToolTipText(Dict.get(Dict.REMEMBER_MID_TT));
+		cbxRememberMidi.addItemListener(controller);
+		remember = Config.get(Config.REMEMBER_MIDI);
+		if ("true".equals(remember)) {
+			cbxRememberMidi.setSelected(true);
 		}
-		cbxRememberMidi.setName( NAME_REMEMBER_MIDI );
-		area.add( cbxRememberMidi, constraints );
+		cbxRememberMidi.setName(NAME_REMEMBER_MIDI);
+		area.add(cbxRememberMidi, constraints);
 		constraints.insets = Laf.INSETS_IN;
 		
 		// chosen midi file name
 		constraints.gridx = 0;
 		constraints.gridy++;
 		constraints.gridwidth = 2;
-		lblChosenMidiFile = new JLabel( Dict.get(Dict.UNCHOSEN_FILE) );
+		lblChosenMidiFile = new JLabel(Dict.get(Dict.UNCHOSEN_FILE));
 		lblChosenMidiFile.setPreferredSize(MAX_FILE_NAME_DIM);
-		area.add( lblChosenMidiFile, constraints );
-		if ( "mid".equals(fileType) ) {
-			lblChosenMidiFile.setText( fileName );
+		area.add(lblChosenMidiFile, constraints);
+		if ("mid".equals(fileType)) {
+			lblChosenMidiFile.setText(fileName);
 		}
 		
 		// line
 		constraints.gridy++;
-		area.add( Laf.createSeparator(), constraints );
+		area.add(Laf.createSeparator(), constraints);
 		
 		// soundfont label
 		constraints.insets = Laf.INSETS_LBL_IMPORT_EXPORT;
 		constraints.gridy++;
 		constraints.gridwidth = 1;
-		JLabel lblSndFont = new JLabel( Dict.get(Dict.SOUNDFONT) );
+		JLabel lblSndFont = new JLabel(Dict.get(Dict.SOUNDFONT));
 		Laf.makeBold(lblSndFont);
-		area.add( lblSndFont, constraints );
+		area.add(lblSndFont, constraints);
 		constraints.insets = Laf.INSETS_IN;
 		
 		// file selector button
 		constraints.gridx++;
 		constraints.gridheight = 2;
-		btnSelectSoundfont = new MidicaButton( Dict.get(Dict.CHOOSE_FILE) );
-		btnSelectSoundfont.setActionCommand( CMD_OPEN_SNDFNT_FILE );
-		btnSelectSoundfont.addActionListener( controller );
-		area.add( btnSelectSoundfont, constraints );
+		btnSelectSoundfont = new MidicaButton(Dict.get(Dict.CHOOSE_FILE));
+		btnSelectSoundfont.setActionCommand(CMD_OPEN_SNDFNT_FILE);
+		btnSelectSoundfont.addActionListener(controller);
+		area.add(btnSelectSoundfont, constraints);
 		
 		// remember soundfont checkbox
 		constraints.insets = Laf.INSETS_LBL_IMPORT_EXPORT;
 		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.gridheight = 1;
-		cbxRememberSf = new JCheckBox( Dict.get(Dict.REMEMBER_SF) );
-		cbxRememberSf.setToolTipText( Dict.get(Dict.REMEMBER_SF_TT) );
-		cbxRememberSf.addItemListener( controller );
-		remember = Config.get( Config.REMEMBER_SF2 );
-		if ( "true".equals(remember) ) {
-			cbxRememberSf.setSelected( true );
+		cbxRememberSf = new JCheckBox(Dict.get(Dict.REMEMBER_SF));
+		cbxRememberSf.setToolTipText(Dict.get(Dict.REMEMBER_SF_TT));
+		cbxRememberSf.addItemListener(controller);
+		remember = Config.get(Config.REMEMBER_SF2);
+		if ("true".equals(remember)) {
+			cbxRememberSf.setSelected(true);
 		}
-		cbxRememberSf.setName( NAME_REMEMBER_SF );
-		area.add( cbxRememberSf, constraints );
+		cbxRememberSf.setName(NAME_REMEMBER_SF);
+		area.add(cbxRememberSf, constraints);
 		constraints.insets = Laf.INSETS_IN;
 		
 		// chosen soundfont file name
 		constraints.gridy++;
 		constraints.gridwidth = 2;
-		lblChosenSoundfontFile = new JLabel( Dict.get(Dict.UNCHOSEN_FILE) );
+		lblChosenSoundfontFile = new JLabel(Dict.get(Dict.UNCHOSEN_FILE));
 		lblChosenSoundfontFile.setPreferredSize(MAX_FILE_NAME_DIM);
-		area.add( lblChosenSoundfontFile, constraints );
+		area.add(lblChosenSoundfontFile, constraints);
 		String soundfontFileName = SoundfontParser.getFileName();
-		if ( soundfontFileName != null ) {
-			lblChosenSoundfontFile.setText( soundfontFileName );
+		if (soundfontFileName != null) {
+			lblChosenSoundfontFile.setText(soundfontFileName);
 		}
 		
 		return area;
@@ -571,7 +571,7 @@ public class UiView extends JFrame {
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
-		area.setLayout( layout );
+		area.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
 		constraints.insets     = Laf.INSETS_IN;
@@ -582,54 +582,54 @@ public class UiView extends JFrame {
 		constraints.weightx    = 1;
 		
 		// transpose level label
-		area.add( new JLabel(Dict.get(Dict.TRANSPOSE_LEVEL)), constraints );
+		area.add(new JLabel(Dict.get(Dict.TRANSPOSE_LEVEL)), constraints);
 		
 		// transpose level
 		constraints.gridx++;
 		lblTranspose = new JLabel();
 		Laf.makeBold(lblTranspose);
-		setTransposeLevel( 0 );
-		area.add( lblTranspose, constraints );
+		setTransposeLevel(0);
+		area.add(lblTranspose, constraints);
 		
 		// line
 		constraints.gridx = 0;
 		constraints.gridy++;
 		constraints.gridwidth = 2;
-		area.add( Laf.createSeparator(), constraints );
+		area.add(Laf.createSeparator(), constraints);
 		
 		// midi label
 		constraints.gridx = 0;
 		constraints.gridy++;
-		JLabel lblMidi = new JLabel( Dict.get(Dict.MIDI_EXPORT) );
+		JLabel lblMidi = new JLabel(Dict.get(Dict.MIDI_EXPORT));
 		Laf.makeBold(lblMidi);
-		area.add( lblMidi, constraints );
+		area.add(lblMidi, constraints);
 		
 		// file selector button
 		constraints.gridx++;
-		btnExportMidi = new MidicaButton( Dict.get(Dict.CHOOSE_FILE_EXPORT) );
-		btnExportMidi.setActionCommand( CMD_EXPORT_MIDI );
-		btnExportMidi.addActionListener( controller );
-		area.add( btnExportMidi, constraints );
+		btnExportMidi = new MidicaButton(Dict.get(Dict.CHOOSE_FILE_EXPORT));
+		btnExportMidi.setActionCommand(CMD_EXPORT_MIDI);
+		btnExportMidi.addActionListener(controller);
+		area.add(btnExportMidi, constraints);
 		
 		// line
 		constraints.gridx = 0;
 		constraints.gridy++;
 		constraints.gridwidth = 2;
-		area.add( Laf.createSeparator(), constraints );
+		area.add(Laf.createSeparator(), constraints);
 		
-		// MidicaPL label
+		// decompile label
 		constraints.gridwidth = 1;
 		constraints.gridy++;
-		JLabel lblMidicaPL = new JLabel( Dict.get(Dict.MIDICAPL_EXPORT) );
-		Laf.makeBold(lblMidicaPL);
-		area.add( lblMidicaPL, constraints );
+		JLabel lblDecompile = new JLabel(Dict.get(Dict.DECOMPILE_EXPORT));
+		Laf.makeBold(lblDecompile);
+		area.add(lblDecompile, constraints);
 		
 		// file selector button
 		constraints.gridx++;
-		btnExportMidicaPL = new MidicaButton( Dict.get(Dict.CHOOSE_FILE_EXPORT) );
-		btnExportMidicaPL.setActionCommand(CMD_EXPORT_MIDICAPL);
-		btnExportMidicaPL.addActionListener(controller);
-		area.add( btnExportMidicaPL, constraints );
+		btnExportDecompile = new MidicaButton(Dict.get(Dict.CHOOSE_FILE_EXPORT));
+		btnExportDecompile.setActionCommand(CMD_EXPORT_DECOMPILE);
+		btnExportDecompile.addActionListener(controller);
+		area.add(btnExportDecompile, constraints);
 		
 		return area;
 	}
@@ -667,7 +667,7 @@ public class UiView extends JFrame {
 	 */
 	public void close() {
 		dispose();
-		setVisible( false );
+		setVisible(false);
 	}
 	
 	/**
@@ -692,12 +692,12 @@ public class UiView extends JFrame {
 	 * 
 	 * @param level    Transpose level.
 	 */
-	public void setTransposeLevel( int level ) {
-		lblTranspose.setText( Integer.toString(level) );
-		if ( 0 == level )
-			lblTranspose.setForeground( Laf.COLOR_TRANSPOSE_DEFAULT );
+	public void setTransposeLevel(int level) {
+		lblTranspose.setText(Integer.toString(level));
+		if (0 == level)
+			lblTranspose.setForeground(Laf.COLOR_TRANSPOSE_DEFAULT);
 		else
-			lblTranspose.setForeground( Laf.COLOR_TRANSPOSE_CHANGED );
+			lblTranspose.setForeground(Laf.COLOR_TRANSPOSE_CHANGED);
 	}
 	
 	/**
@@ -706,16 +706,16 @@ public class UiView extends JFrame {
 	private void addKeyBindings() {
 		
 		// reset everything
-		keyBindingManager = new KeyBindingManager( this, this.getRootPane() );
+		keyBindingManager = new KeyBindingManager(this, this.getRootPane());
 		
 		// add key bindings to buttons
-		keyBindingManager.addBindingsForButton( this.btnInfo,            Dict.KEY_MAIN_INFO       );
-		keyBindingManager.addBindingsForButton( this.btnPlayer,          Dict.KEY_MAIN_PLAYER     );
-		keyBindingManager.addBindingsForButton( this.btnSelectMidicaPL,  Dict.KEY_MAIN_IMPORT_MPL );
-		keyBindingManager.addBindingsForButton( this.btnSelectMidi,      Dict.KEY_MAIN_IMPORT_MID );
-		keyBindingManager.addBindingsForButton( this.btnSelectSoundfont, Dict.KEY_MAIN_IMPORT_SF  );
-		keyBindingManager.addBindingsForButton( this.btnExportMidi,      Dict.KEY_MAIN_EXPORT_MID );
-		keyBindingManager.addBindingsForButton( this.btnExportMidicaPL,  Dict.KEY_MAIN_EXPORT_MPL );
+		keyBindingManager.addBindingsForButton( this.btnInfo,            Dict.KEY_MAIN_INFO             );
+		keyBindingManager.addBindingsForButton( this.btnPlayer,          Dict.KEY_MAIN_PLAYER           );
+		keyBindingManager.addBindingsForButton( this.btnSelectMidicaPL,  Dict.KEY_MAIN_IMPORT_MPL       );
+		keyBindingManager.addBindingsForButton( this.btnSelectMidi,      Dict.KEY_MAIN_IMPORT_MID       );
+		keyBindingManager.addBindingsForButton( this.btnSelectSoundfont, Dict.KEY_MAIN_IMPORT_SF        );
+		keyBindingManager.addBindingsForButton( this.btnExportMidi,      Dict.KEY_MAIN_EXPORT_MID       );
+		keyBindingManager.addBindingsForButton( this.btnExportDecompile, Dict.KEY_MAIN_EXPORT_DECOMPILE );
 		
 		// add key bindings to focus comboboxes
 		keyBindingManager.addBindingsForComboboxOpen( this.cbxGuiLang,    Dict.KEY_MAIN_CBX_LANGUAGE   );

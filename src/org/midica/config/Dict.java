@@ -486,7 +486,7 @@ public class Dict {
 	public static final String KEY_MAIN_IMPORT_MID          = "key_main_import_mid";
 	public static final String KEY_MAIN_IMPORT_SF           = "key_main_import_sf";
 	public static final String KEY_MAIN_EXPORT_MID          = "key_main_export_mid";
-	public static final String KEY_MAIN_EXPORT_MPL          = "key_main_export_mpl";
+	public static final String KEY_MAIN_EXPORT_DECOMPILE    = "key_main_export_decompile";
 	public static final String KEY_MAIN_CBX_LANGUAGE        = "key_main_cbx_language";
 	public static final String KEY_MAIN_CBX_NOTE            = "key_main_cbx_note";
 	public static final String KEY_MAIN_CBX_HALFTONE        = "key_main_cbx_halftone";
@@ -670,6 +670,9 @@ public class Dict {
 	public static final String KEY_MSG_CLOSE                = "key_msg_close";
 	public static final String KEY_STRING_FILTER_CLOSE      = "key_string_filter_close";
 	public static final String KEY_STRING_FILTER_CLEAR      = "key_string_filter_clear";
+	public static final String KEY_FILE_SELECT_CLOSE        = "key_file_select_close";
+	public static final String KEY_FILE_SELECTOR_MPL        = "key_file_selector_mpl";
+	public static final String KEY_FILE_SELECTOR_ALDA       = "key_file_selector_alda";
 	public static final String KEY_FILE_SELECT_DC_OPEN      = "key_file_select_dc_config_open";
 	public static final String KEY_DC_CONFIG_CLOSE          = "key_dc_config_close";
 	public static final String KEY_DC_ADD_TICK_COMMENTS     = "key_dc_add_tick_comments";
@@ -737,13 +740,15 @@ public class Dict {
 	public static final String CHOOSE_FILE                 = "choose_file";
 	public static final String CHOOSE_FILE_EXPORT          = "choose_file_export";
 	public static final String MIDI_EXPORT                 = "midi_export";
-	public static final String MIDICAPL_EXPORT             = "midicapl_export";
+	public static final String DECOMPILE_EXPORT            = "decompile_export";
 	public static final String CONF_ERROR_OK               = "conf_error_ok";
 	public static final String CONF_ERROR_ERROR            = "conf_error_error";
 	public static final String CONF_ERROR_HALFTONE_SYNTAX  = "conf_Error_halftone_syntax";
 	public static final String ERROR_NOT_YET_IMPLEMENTED   = "error_not_yet_implemented";
 	
 	// MidicaFileChooser
+	public static final String TAB_MIDICAPL                = "tab_midicapl";
+	public static final String TAB_ALDA                    = "tab_alda";
 	public static final String CHARSET                     = "charset";
 	public static final String CHARSET_DESC_MPL_READ       = "charset_desc_mpl_read";
 	public static final String CHARSET_DESC_MID_READ       = "charset_desc_mid_read";
@@ -1738,11 +1743,11 @@ public class Dict {
 		// key binding IDs
 		set( KEY_MAIN_INFO,                "Open Info & Config Details"                                                  );
 		set( KEY_MAIN_PLAYER,              "Open Player Window"                                                          );
-		set( KEY_MAIN_IMPORT_MPL,          "Open MidicaPL file"                                                          );
-		set( KEY_MAIN_IMPORT_MID,          "Open MIDI file"                                                              );
-		set( KEY_MAIN_IMPORT_SF,           "Open Soundfont file"                                                         );
-		set( KEY_MAIN_EXPORT_MID,          "Write MIDI file"                                                             );
-		set( KEY_MAIN_EXPORT_MPL,          "Write MidicaPL file"                                                         );
+		set( KEY_MAIN_IMPORT_MPL,          "Import MidicaPL file"                                                        );
+		set( KEY_MAIN_IMPORT_MID,          "Import MIDI file"                                                            );
+		set( KEY_MAIN_IMPORT_SF,           "Load Soundfont file"                                                         );
+		set( KEY_MAIN_EXPORT_MID,          "Export MIDI file"                                                            );
+		set( KEY_MAIN_EXPORT_DECOMPILE,    "Export Decompiled file"                                                      );
 		set( KEY_MAIN_CBX_LANGUAGE,        "Open Language Selection"                                                     );
 		set( KEY_MAIN_CBX_NOTE,            "Open Note System Selection"                                                  );
 		set( KEY_MAIN_CBX_HALFTONE,        "Open Half Tone Symbol Selection"                                             );
@@ -1927,6 +1932,9 @@ public class Dict {
 		set( KEY_STRING_FILTER_CLOSE,      "Close the table filter"                                                      );
 		set( KEY_STRING_FILTER_CLEAR,      "Clear the table filter"                                                      );
 		set( KEY_FILE_SELECT_DC_OPEN,      "Open the Decompile Configuration Window"                                     );
+		set( KEY_FILE_SELECT_CLOSE,        "Close the File Selector"                                                     );
+		set( KEY_FILE_SELECTOR_MPL,        "Select the MidicaPL Tab"                                                     );
+		set( KEY_FILE_SELECTOR_ALDA,       "Select the ALDA Tab"                                                         );
 		set( KEY_DC_CONFIG_CLOSE,          "Close the Decompile Configuration Window"                                    );
 		set( KEY_DC_ADD_TICK_COMMENTS,     "Toggle Checkbox: Add Tick Comments"                                          );
 		set( KEY_DC_ADD_CONFIG,            "Toggle Checkbox: Add Configuration"                                          );
@@ -1993,12 +2001,14 @@ public class Dict {
 		set( CHOOSE_FILE,                  "select file"                   );
 		set( CHOOSE_FILE_EXPORT,           "select file"                   );
 		set( MIDI_EXPORT,                  "Midi file"                     );
-		set( MIDICAPL_EXPORT,              "MidicaPL file"                 );
+		set( DECOMPILE_EXPORT,             "Decompile"                     );
 		set( CONF_ERROR_OK,                "Configuration OK"              );
 		set( CONF_ERROR_HALFTONE_SYNTAX,   "Chosen half tone symbol incompatible with chosen syntax" );
 		set( ERROR_NOT_YET_IMPLEMENTED,    "This functionality is not yet implemented" );
 		
-		// MidicaFileChooser
+		// FileSelector / MidicaFileChooser
+		set( TAB_MIDICAPL,             "MidicaPL"                                             );
+		set( TAB_ALDA,                 "ALDA"                                                 );
 		set( CHARSET,                  "Charset"                                              );
 		set( CHARSET_DESC_MPL_READ,    "Encoding of the source file."                         );
 		set( CHARSET_DESC_MID_READ,    "Default encoding of text-based messages in the source file. Used if neither a BOM nor a {@...} tag is found." );
@@ -3052,7 +3062,7 @@ public class Dict {
 		set( CHOOSE_FILE,                            "Öffnen"                                );
 		set( CHOOSE_FILE_EXPORT,                     "Speichern"                             );
 		set( MIDI_EXPORT,                            "Als MIDI exportieren"                  );
-		set( MIDICAPL_EXPORT,                        "Als .midica exportieren"               );
+		set( DECOMPILE_EXPORT,                       "Dekompilieren"                         );
 		set( ERROR_NOT_YET_IMPLEMENTED,              "Diese Funktionalität ist noch nicht fertig." );
 	}
 	

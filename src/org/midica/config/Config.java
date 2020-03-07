@@ -42,10 +42,10 @@ import org.midica.ui.model.MidicaTreeModel;
  */
 public class Config {
 	
-	public static final String DEFAULT_CHARSET_MPL        = Charset.defaultCharset().name();
-	public static final String DEFAULT_CHARSET_MID        = "ISO-8859-1";
-	public static final String DEFAULT_CHARSET_EXPORT_MPL = Charset.defaultCharset().name();
-	public static final String DEFAULT_CHARSET_EXPORT_MID = "ISO-8859-1";
+	public static final String DEFAULT_CHARSET_MPL         = Charset.defaultCharset().name();
+	public static final String DEFAULT_CHARSET_MID         = "ISO-8859-1";
+	public static final String DEFAULT_CHARSET_EXPORT_MPL  = Charset.defaultCharset().name();
+	public static final String DEFAULT_CHARSET_EXPORT_MID  = "ISO-8859-1";
 	
 	// keys for the config dropdown boxes
 	public static final String LANGUAGE   = "language";
@@ -57,17 +57,18 @@ public class Config {
 	public static final String INSTRUMENT = "instruments";
 	
 	// keys for directories and paths
-	public static final String DIRECTORY_MPL        = "directory_mpl";
-	public static final String DIRECTORY_MID        = "directory_mid";
-	public static final String DIRECTORY_SF2        = "directory_sf2";
-	public static final String DIRECTORY_EXPORT_MPL = "directory_export_mpl";
-	public static final String DIRECTORY_EXPORT_MID = "directory_export_mid";
-	public static final String PATH_SF2             = "path_sf2";
-	public static final String PATH_MIDICAPL        = "path_midicapl";
-	public static final String PATH_MIDI            = "path_midi";
-	public static final String REMEMBER_SF2         = "remember_sf2";
-	public static final String REMEMBER_MIDICAPL    = "remember_midicapl";
-	public static final String REMEMBER_MIDI        = "remember_midi";
+	public static final String DIRECTORY_MPL         = "directory_mpl";
+	public static final String DIRECTORY_MID         = "directory_mid";
+	public static final String DIRECTORY_SF2         = "directory_sf2";
+	public static final String DIRECTORY_EXPORT_MPL  = "directory_export_mpl";
+	public static final String DIRECTORY_EXPORT_MID  = "directory_export_mid";
+	public static final String DIRECTORY_EXPORT_ALDA = "directory_export_alda";
+	public static final String PATH_SF2              = "path_sf2";
+	public static final String PATH_MIDICAPL         = "path_midicapl";
+	public static final String PATH_MIDI             = "path_midi";
+	public static final String REMEMBER_SF2          = "remember_sf2";
+	public static final String REMEMBER_MIDICAPL     = "remember_midicapl";
+	public static final String REMEMBER_MIDI         = "remember_midi";
 	
 	// charsets
 	public static final String CHARSET_MPL        = "charset_mpl";
@@ -234,17 +235,18 @@ public class Config {
 		defaults.put( PERCUSSION,  CBX_PERC_EN_1                );
 		defaults.put( INSTRUMENT,  CBX_INSTR_EN_1               );
 		
-		defaults.put( DIRECTORY_MPL,        homeDir );
-		defaults.put( DIRECTORY_MID,        homeDir );
-		defaults.put( DIRECTORY_SF2,        homeDir );
-		defaults.put( DIRECTORY_EXPORT_MPL, homeDir );
-		defaults.put( DIRECTORY_EXPORT_MID, homeDir );
-		defaults.put( REMEMBER_MIDICAPL,    "false" );
-		defaults.put( REMEMBER_MIDI,        "false" );
-		defaults.put( REMEMBER_SF2,         "false" );
-		defaults.put( PATH_SF2,             ""      );
-		defaults.put( PATH_MIDICAPL,        ""      );
-		defaults.put( PATH_MIDI,            ""      );
+		defaults.put( DIRECTORY_MPL,         homeDir );
+		defaults.put( DIRECTORY_MID,         homeDir );
+		defaults.put( DIRECTORY_SF2,         homeDir );
+		defaults.put( DIRECTORY_EXPORT_MPL,  homeDir );
+		defaults.put( DIRECTORY_EXPORT_MID,  homeDir );
+		defaults.put( DIRECTORY_EXPORT_ALDA, homeDir );
+		defaults.put( REMEMBER_MIDICAPL,     "false" );
+		defaults.put( REMEMBER_MIDI,         "false" );
+		defaults.put( REMEMBER_SF2,          "false" );
+		defaults.put( PATH_SF2,              ""      );
+		defaults.put( PATH_MIDICAPL,         ""      );
+		defaults.put( PATH_MIDI,             ""      );
 		
 		defaults.put( CHARSET_MPL,        DEFAULT_CHARSET_MPL        );
 		defaults.put( CHARSET_MID,        DEFAULT_CHARSET_MID        );
@@ -307,7 +309,7 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_MAIN_IMPORT_MID,          KeyEvent.VK_M,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_MAIN_IMPORT_SF,           KeyEvent.VK_S,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_MAIN_EXPORT_MID,          KeyEvent.VK_S,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_MAIN_EXPORT_MPL,          KeyEvent.VK_E,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_MAIN_EXPORT_DECOMPILE,    KeyEvent.VK_E,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_LANGUAGE,        KeyEvent.VK_L,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_NOTE,            KeyEvent.VK_N,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_HALFTONE,        KeyEvent.VK_H,        InputEvent.ALT_DOWN_MASK   );
@@ -611,6 +613,11 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_STRING_FILTER_CLOSE,      KeyEvent.VK_ENTER,    0                          );
 		addDefaultKeyBinding( Dict.KEY_STRING_FILTER_CLEAR,      KeyEvent.VK_C,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECT_DC_OPEN,      KeyEvent.VK_C,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECT_CLOSE,        KeyEvent.VK_ESCAPE,   0                          );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_MPL,        KeyEvent.VK_0,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_MPL,        KeyEvent.VK_NUMPAD0,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_ALDA,       KeyEvent.VK_1,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_ALDA,       KeyEvent.VK_NUMPAD1,  InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONFIG_CLOSE,          KeyEvent.VK_ESCAPE,   0                          );
 		addDefaultKeyBinding( Dict.KEY_DC_ADD_TICK_COMMENTS,     KeyEvent.VK_C,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_DC_ADD_CONFIG,            KeyEvent.VK_C,        InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK );

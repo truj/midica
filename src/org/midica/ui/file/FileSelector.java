@@ -11,10 +11,15 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JTabbedPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import org.midica.config.Config;
 import org.midica.config.Dict;
@@ -35,6 +40,7 @@ public class FileSelector extends JDialog {
 	
 	// file types (NOT the same as file extensions)
 	public static final String FILE_TYPE_MPL       = "mpl";
+	public static final String FILE_TYPE_ALDA      = "alda";
 	public static final String FILE_TYPE_MIDI      = "midi";
 	public static final String FILE_TYPE_SOUNDFONT = "sf2";
 	public static final byte   READ                = 1;
@@ -43,8 +49,10 @@ public class FileSelector extends JDialog {
 	private String fileType;
 	private byte   filePurpose;
 	
-	MidicaFileChooser fileChooser = null;
-	UiController      controller  = null;
+	ArrayList<MidicaFileChooser>    fileChoosers = null;
+	UiController                    controller   = null;
+	private HashMap<String, String> tabs         = null;
+	private JTabbedPane             content      = null;
 	
 	/**
 	 * Creates a new file selector window.
@@ -66,17 +74,19 @@ public class FileSelector extends JDialog {
 	 *                       Possible values are **READ** or **WRITE**.
 	 */
 	public void init(String type, byte filePurpose) {
-		this.fileType    = type;
-		this.filePurpose = filePurpose;
+		this.fileType     = type;
+		this.filePurpose  = filePurpose;
+		this.fileChoosers = new ArrayList<>();
+		this.tabs         = new HashMap<>();
 		
 		String  directory     = "";
 		boolean charSetSelect = false;
 		if (READ == this.filePurpose) {
-    		if ( type.equals(FILE_TYPE_MIDI) ) {
+    		if (type.equals(FILE_TYPE_MIDI)) {
     			directory     = Config.get(Config.DIRECTORY_MID);
     			charSetSelect = true;
     		}
-    		else if ( type.equals(FILE_TYPE_SOUNDFONT) ) {
+    		else if (type.equals(FILE_TYPE_SOUNDFONT)) {
     			directory     = Config.get(Config.DIRECTORY_SF2);
     			charSetSelect = false;
     		}
@@ -86,31 +96,52 @@ public class FileSelector extends JDialog {
     		}
     	}
 		else {
-			if ( type.equals(FILE_TYPE_MIDI) ) {
+			if (type.equals(FILE_TYPE_MIDI)) {
     			directory     = Config.get(Config.DIRECTORY_EXPORT_MID);
     			charSetSelect = true;
 			}
     		else {
     			directory     = Config.get(Config.DIRECTORY_EXPORT_MPL);
     			charSetSelect = true;
+    			tabs.put(type, Dict.TAB_MIDICAPL);
     		}
 		}
-		fileChooser = new MidicaFileChooser(type, filePurpose, directory, charSetSelect, this);
 		
-		fileChooser.setFileFilter( new FileExtensionFilter(type) );
-		fileChooser.setAcceptAllFileFilterUsed(false);
-		fileChooser.addActionListener(controller);
-		add(fileChooser);
-		addKeyBindings();
-		pack();
-		setVisible(false);
+		// create the first file chooser
+		fileChoosers.add( new MidicaFileChooser(type, filePurpose, directory, charSetSelect, this) );
+		
+		// TODO: enable, if the ALDA decompiler is ready
+		// create more file choosers, if needed
+//		if (WRITE == this.filePurpose && FILE_TYPE_MPL.equals(type)) {
+//			type = FILE_TYPE_ALDA;
+//			fileChoosers.add(new MidicaFileChooser(
+//				FILE_TYPE_ALDA,
+//				filePurpose,
+//				Config.get(Config.DIRECTORY_EXPORT_ALDA),
+//				false,
+//				this
+//			));
+//			tabs.put(FILE_TYPE_ALDA, Dict.TAB_ALDA);
+//		}
+		
+		// complete file choosers
+		for (MidicaFileChooser chooser : fileChoosers) {
+			chooser.setFileFilter(new FileExtensionFilter(chooser.getType()));
+			chooser.setAcceptAllFileFilterUsed(false);
+			chooser.addActionListener(controller);
+		}
+		
+		// UI
+		initUI();
 		
 		// refresh directory when (re)activated
 		this.addWindowListener(new WindowListener() {
 			
 			@Override
 			public void windowActivated(WindowEvent e) {
-				fileChooser.rescanCurrentDirectory();
+				for (MidicaFileChooser chooser : fileChoosers) {
+					chooser.rescanCurrentDirectory();
+				}
 			}
 			
 			@Override
@@ -135,13 +166,64 @@ public class FileSelector extends JDialog {
 	}
 	
 	/**
+	 * Initializes the user interface.
+	 */
+	private void initUI() {
+		
+		// only one file chooser
+		if (1 == fileChoosers.size()) {
+			add(fileChoosers.get(0));
+		}
+		else {
+			// more than one file chooser - tabbed pane
+			content = new JTabbedPane(JTabbedPane.LEFT);
+			add(content);
+			
+			for (MidicaFileChooser chooser : fileChoosers) {
+				String tabString = Dict.get(tabs.get(chooser.getType()));
+				content.addTab(tabString, chooser);
+			}
+			
+			// add listener to change the file type according to the chosen tab
+			content.addChangeListener(new ChangeListener() {
+				@Override
+				public void stateChanged(ChangeEvent e) {
+					int index = content.getSelectedIndex();
+					fileType  = fileChoosers.get(index).getType();
+				}
+			});
+		}
+		
+		addKeyBindings();
+		pack();
+		setVisible(false);
+	}
+	
+	/**
+	 * Returns the file type.
+	 * 
+	 * @return file type.
+	 */
+	public String getFileType() {
+		return this.fileType;
+	}
+	
+	/**
 	 * Sets the directory of the chosen file in the config.
 	 * 
 	 * Remembers the directory of that file so that next time the selector defaults to the same
 	 * directory if the same file type for the same purpose is going to be opened.
 	 */
 	public void rememberDirectory() {
-		File file = fileChooser.getSelectedFile();
+		
+		// get the selected file from the right file chooser
+		File file = null;
+		for (MidicaFileChooser chooser : fileChoosers) {
+			if (fileType.equals(chooser.getType())) {
+				file = chooser.getSelectedFile();
+				break;
+			}
+		}
 		
 		// no file selected? - probably this is during startup after parsing an automatically
 		// parsed, remembered file
@@ -153,7 +235,7 @@ public class FileSelector extends JDialog {
 		try {
 			String directory = file.getParentFile().getCanonicalPath();
 			if (READ == this.filePurpose) {
-				if ( FILE_TYPE_MIDI.equals(fileType) )
+				if (FILE_TYPE_MIDI.equals(fileType))
 					Config.set(Config.DIRECTORY_MID, directory);
     			else if (FILE_TYPE_SOUNDFONT.equals(fileType))
     				Config.set(Config.DIRECTORY_SF2, directory);
@@ -163,6 +245,8 @@ public class FileSelector extends JDialog {
 			else {
 				if (FILE_TYPE_MIDI.equals(fileType))
 					Config.set(Config.DIRECTORY_EXPORT_MID, directory);
+				if (FILE_TYPE_ALDA.equals(fileType))
+					Config.set(Config.DIRECTORY_EXPORT_ALDA, directory);
 				else
     				Config.set(Config.DIRECTORY_EXPORT_MPL, directory);
 			}
@@ -179,10 +263,26 @@ public class FileSelector extends JDialog {
 		// reset everything
 		KeyBindingManager keyBindingManager = new KeyBindingManager(this, this.getRootPane());
 		
+		// close bindings
+		keyBindingManager.addBindingsForClose(Dict.KEY_FILE_SELECT_CLOSE);
+		
 		// open decompile config
-		JComponent icon = fileChooser.getWidgetByKeyBindingId(Dict.KEY_FILE_SELECT_DC_OPEN);
-		if (icon != null)
-			keyBindingManager.addBindingsForIconLabel(icon, Dict.KEY_FILE_SELECT_DC_OPEN);
+		ArrayList<JComponent> icons = new ArrayList<>();
+		for (MidicaFileChooser chooser : fileChoosers) {
+			JComponent icon = chooser.getDecompileConfigIcon();
+			if (icon != null)
+				icons.add(icon);
+		}
+		if (icons.size() > 0)
+			keyBindingManager.addBindingsForIconLabelOfVisibleTab(icons, Dict.KEY_FILE_SELECT_DC_OPEN);
+		
+		// add key binding to choose a tab
+		if (content != null) {
+			if (WRITE == this.filePurpose) {
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_MPL,  0 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_ALDA, 1 );
+			}
+		}
 		
 		// set input and action maps
 		keyBindingManager.postprocess();

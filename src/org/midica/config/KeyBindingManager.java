@@ -288,6 +288,52 @@ public class KeyBindingManager {
 	}
 	
 	/**
+	 * Adds a key binding for a list of icon labels to be pressed when possible.
+	 * All buttons use the same key binding ID but at most one of them is visible.
+	 * 
+	 * This is used for decompilation config icons in the decompilation file chooser.
+	 * Each target format has its own tab with its own icon.
+	 * The icon is only visible if the according tab is chosen.
+	 * 
+	 * @param icons    the list of icons
+	 * @param id       the key binding ID
+	 */
+	public void addBindingsForIconLabelOfVisibleTab(ArrayList<JComponent> icons, String id) {
+		
+		// fill input map
+		addInputs(id);
+		
+		// tooltips
+		for (JComponent c : icons) {
+			if (c instanceof DecompileConfigIcon)
+				addTooltip(c, id, Dict.TT_KEY_DC_CONFIG_OPEN);
+		}
+		
+		// fill action map
+		actionMap.put(id, new AbstractAction() {
+			
+			private static final long serialVersionUID = 1L;
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				if (mustIgnore(e))
+					return;
+				
+				for (JComponent c : icons) {
+					if (c instanceof DecompileConfigIcon) {
+						DecompileConfigIcon icon = (DecompileConfigIcon) c;
+						if (icon.isShowing()) {
+							icon.open();
+							return;
+						}
+					}
+				}
+			}
+		});
+	}
+	
+	/**
 	 * Adds a key binding for a combobox to be opened.
 	 * This is used for opening the config comboboxes in the main window.
 	 * 

@@ -21,7 +21,6 @@ import javax.swing.Box.Filler;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -54,8 +53,10 @@ public class MidicaFileChooser extends JFileChooser {
 	
 	private FileSelector parentWindow = null;
 	
-	private String type    = null;
-	private int    purpose = -1;
+	private String  type           = null;
+	private byte    purpose        = -1;
+	private boolean needCharsetSel = false;
+	private boolean needDCIcon     = false;
 	
 	// widgets for the charset description line
 	private JLabel    lblCharsetDescSpacer = null;
@@ -80,44 +81,49 @@ public class MidicaFileChooser extends JFileChooser {
 	 *                    be shown. Otherwise **false**.
 	 * @param parent      the parent window (only needed for the MidicaPL exporter)
 	 */
-	public MidicaFileChooser(String type, int purpose, String directory, boolean charsetSel, FileSelector parent) {
+	public MidicaFileChooser(String type, byte purpose, String directory, boolean charsetSel, FileSelector parent) {
 		super(directory);
 		
-		this.type         = type;
-		this.purpose      = purpose;
-		this.parentWindow = parent;
+		this.type           = type;
+		this.purpose        = purpose;
+		this.parentWindow   = parent;
+		this.needCharsetSel = charsetSel;
+		this.needDCIcon     = FileSelector.WRITE == purpose && ! FileSelector.FILE_TYPE_MIDI.equals(type);
 		
 		if (Laf.isNimbus)
 			changeButtonColors();
 		
-		// insert the charset combobox
-		if (charsetSel) {
-			insertCharsetSelectionWidgets();
+		// insert the charset combobox and/or the decompile config icon
+		if (needCharsetSel || needDCIcon) {
+			insertExtraWidgets();
 		}
 	}
 	
 	/**
-	 * Returns the requested component, if available, or otherwise **null**.
+	 * Returns the file type.
 	 * 
-	 * @param id  key binding ID
-	 * @return the component or **null**
+	 * @return file type.
 	 */
-	public JComponent getWidgetByKeyBindingId(String id) {
-		if (Dict.KEY_FILE_SELECT_DC_OPEN.equals(id))
-			return decompileConfigIcon;
-		
-		// fallback
-		return null;
+	public String getType() {
+		return type;
 	}
 	
 	/**
-	 * Creates the new widgets. These are:
+	 * Returns the decompile config icon, if available, or otherwise **null**.
+	 * 
+	 * @return the icon or **null**
+	 */
+	public DecompileConfigIcon getDecompileConfigIcon() {
+		return decompileConfigIcon;
+	}
+	
+	/**
+	 * Creates the new widgets, needed for the charset selection. These are:
 	 * 
 	 * - The area with the charset description.
 	 * - The area with the charset label and charset combobox.
-	 * - The button to open the decompile config window (only for the MPL export file chooser)
 	 */
-	private void createWidgets() {
+	private void createCharsetWidgets() {
 		
 		// file type specific initializations
 		String configKey     = null;
@@ -169,13 +175,13 @@ public class MidicaFileChooser extends JFileChooser {
 			
 			// add option to model
 			ComboboxStringOption option = new ComboboxStringOption(name, name);
-			cbxOptions.add( option );
+			cbxOptions.add(option);
 			
 			// remember configured and default option for the preselection
-			if ( name.equals(configuredCsName) ) {
+			if (name.equals(configuredCsName)) {
 				configuredCs = option;
 			}
-			if ( name.equals(defaultCsName) ) {
+			if (name.equals(defaultCsName)) {
 				defaultCs = option;
 			}
 		}
@@ -186,21 +192,21 @@ public class MidicaFileChooser extends JFileChooser {
 		
 		// create the description panel
 		charsetDescArea = new JPanel();
-		charsetDescArea.setLayout( new BoxLayout(charsetDescArea, BoxLayout.X_AXIS) );
+		charsetDescArea.setLayout(new BoxLayout(charsetDescArea, BoxLayout.X_AXIS));
 		
 		// add the spacer and description labels
 		lblCharsetDescSpacer = new JLabel("");
 		charsetDescArea.add(lblCharsetDescSpacer);
-		lblCharsetDesc = new FlowLabel( Dict.get(descLangKey), CHARSET_DESC_CHARS, CHARSET_DESC_PREF_WIDTH );
+		lblCharsetDesc = new FlowLabel(Dict.get(descLangKey), CHARSET_DESC_CHARS, CHARSET_DESC_PREF_WIDTH);
 		lblCharsetDesc.makeFontLookLikeLabel();
 		charsetDescArea.add(lblCharsetDesc);
 		
 		// create the combobox panel
 		charsetArea = new JPanel();
-		charsetArea.setLayout( new BoxLayout(charsetArea, BoxLayout.X_AXIS) );
+		charsetArea.setLayout(new BoxLayout(charsetArea, BoxLayout.X_AXIS));
 		
 		// create and add the label
-		lblCharset = new JLabel( Dict.get(Dict.CHARSET) + ":" );
+		lblCharset = new JLabel(Dict.get(Dict.CHARSET) + ":");
 		charsetArea.add(lblCharset);
 		
 		// create and add the combobox
@@ -208,26 +214,33 @@ public class MidicaFileChooser extends JFileChooser {
 		cbxCharset.setModel(model);
 		cbxCharset.setSelectedItem(configuredCs);
 		charsetArea.add(cbxCharset);
-		
-		// create the decompile config button
-		if (FileSelector.WRITE == purpose && FileSelector.FILE_TYPE_MPL.equals(type)) {
-			decompileConfigIcon = new DecompileConfigIcon(parentWindow);
-		}
 	}
 	
 	/**
-	 * Creates the charset-related widgets and inserts them into the right
+	 * Creates extra widgets and inserts them into the right
 	 * places inside the parent file chooser.
+	 * 
+	 * The extra widgets are:
+	 * 
+	 * - charset-related widgets
+	 * - decompile configuration icon
 	 * 
 	 * The code in this method is really ugly but necessary because
 	 * {@link JFileChooser} doesn't provide any other possibility to
 	 * select a charset.
 	 */
-	private void insertCharsetSelectionWidgets() {
+	private void insertExtraWidgets() {
 		
-		// create label and combobox for the charset selection and put them
-		// into the newly created charsetArea panel
-		createWidgets();
+		// create charset widgets, if needed (label and combobox)
+		// (and put them into the newly created charsetArea panel)
+		if (needCharsetSel) {
+			createCharsetWidgets();
+		}
+		
+		// create decompile icon, if needed
+		if (needDCIcon) {
+			decompileConfigIcon = new DecompileConfigIcon(parentWindow);
+		}
 		
 		// Get the component containing:
 		// - file name label and text field  (index 0)
@@ -249,18 +262,20 @@ public class MidicaFileChooser extends JFileChooser {
 		JLabel       lblOrig      = (JLabel)       fileTypeArea.getComponent( 0 );
 		JComboBox<?> cbxOrig      = (JComboBox<?>) fileTypeArea.getComponent( 1 );
 		
-		// 3. Take over the label dimensions.
-		lblCharsetDescSpacer.setMinimumSize( lblOrig.getMinimumSize() );
-		lblCharsetDescSpacer.setMaximumSize( lblOrig.getMaximumSize() );
-		lblCharsetDescSpacer.setPreferredSize( lblOrig.getPreferredSize() );
-		lblCharset.setMinimumSize( lblOrig.getMinimumSize() );
-		lblCharset.setMaximumSize( lblOrig.getMaximumSize() );
-		lblCharset.setPreferredSize( lblOrig.getPreferredSize() );
-		
-		// 4. Take over the combobox dimensions.
-		cbxCharset.setMinimumSize( cbxOrig.getMinimumSize() );
-		cbxCharset.setMaximumSize( cbxOrig.getMaximumSize() );
-		cbxCharset.setPreferredSize( cbxOrig.getPreferredSize() );
+		if (needCharsetSel) {
+			// 3. Take over the label dimensions.
+			lblCharsetDescSpacer.setMinimumSize( lblOrig.getMinimumSize() );
+			lblCharsetDescSpacer.setMaximumSize( lblOrig.getMaximumSize() );
+			lblCharsetDescSpacer.setPreferredSize( lblOrig.getPreferredSize() );
+			lblCharset.setMinimumSize( lblOrig.getMinimumSize() );
+			lblCharset.setMaximumSize( lblOrig.getMaximumSize() );
+			lblCharset.setPreferredSize( lblOrig.getPreferredSize() );
+			
+			// 4. Take over the combobox dimensions.
+			cbxCharset.setMinimumSize( cbxOrig.getMinimumSize() );
+			cbxCharset.setMaximumSize( cbxOrig.getMaximumSize() );
+			cbxCharset.setPreferredSize( cbxOrig.getPreferredSize() );
+		}
 		
 		// remember and remove all elements
 		Component[]          components    = fileAttrArea.getComponents();
@@ -272,7 +287,7 @@ public class MidicaFileChooser extends JFileChooser {
 		
 		// decompile config icon - add it to the button area
 		Container decompileArea = null;
-		if (FileSelector.WRITE == purpose && FileSelector.FILE_TYPE_MPL.equals(type)) {
+		if (needDCIcon) {
 			
 			// copy the dimensions of the "file name" label
 			Container fileArea = (Container) componentList.get(0);      // file name label + text field
@@ -284,7 +299,7 @@ public class MidicaFileChooser extends JFileChooser {
 			
 			// create the decompilation area
 			decompileArea = new JPanel();
-			decompileArea.setLayout( new BoxLayout(decompileArea, BoxLayout.X_AXIS) );
+			decompileArea.setLayout(new BoxLayout(decompileArea, BoxLayout.X_AXIS));
 			
 			// add elements (spacer, icon, spacer)
 			decompileArea.add(spacer);
@@ -296,11 +311,13 @@ public class MidicaFileChooser extends JFileChooser {
 		fileAttrArea.add( componentList.get(0) ); // file name label and text field
 		fileAttrArea.add( componentList.get(1) ); // original filler
 		fileAttrArea.add( componentList.get(2) ); // file type label and combobox
-		fileAttrArea.add( fillerA              ); // cloned filler
-		fileAttrArea.add( charsetDescArea      ); // charset description
-		fileAttrArea.add( fillerB              ); // cloned filler
-		fileAttrArea.add( charsetArea          ); // charset label and combobox
-		if (FileSelector.WRITE == purpose && FileSelector.FILE_TYPE_MPL.equals(type)) {
+		if (needCharsetSel) {
+			fileAttrArea.add( fillerA         ); // cloned filler
+			fileAttrArea.add( charsetDescArea ); // charset description
+			fileAttrArea.add( fillerB         ); // cloned filler
+			fileAttrArea.add( charsetArea     ); // charset label and combobox
+		}
+		if (needDCIcon) {
 			fileAttrArea.add( fillerC       ); // cloned filler
 			fileAttrArea.add( decompileArea ); // decompile config icon
 		}
@@ -328,7 +345,7 @@ public class MidicaFileChooser extends JFileChooser {
 		Container iconButtonArea = (Container) firstArea.getComponent( 0 );
 		
 		// from this container, change all buttons and toggle buttons
-		for ( Component c : iconButtonArea.getComponents() ) {
+		for (Component c : iconButtonArea.getComponents()) {
 			if (c instanceof AbstractButton) {
 				AbstractButton button = (AbstractButton) c;
 				Laf.applyLafToButton(button, false);
