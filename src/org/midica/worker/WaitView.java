@@ -16,6 +16,7 @@ import java.awt.Window;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 
+import org.midica.config.Cli;
 import org.midica.config.Dict;
 import org.midica.config.Laf;
 
@@ -43,11 +44,11 @@ public class WaitView extends JDialog {
 	 * @param owner    The parent window (owner).
 	 */
 	public WaitView(Window owner) {
-		super( owner, Dict.get(Dict.TITLE_WAIT) );
-		setPreferredSize( new Dimension(MIN_WIDTH, MIN_HEIGHT) );
+		super(owner, Dict.get(Dict.TITLE_WAIT));
+		setPreferredSize(new Dimension(MIN_WIDTH, MIN_HEIGHT));
 		
 		// don't let the user close this window
-		setDefaultCloseOperation( JDialog.DO_NOTHING_ON_CLOSE );
+		setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		
 		// show the window in the center of the parent window
 		setLocationRelativeTo(owner);
@@ -58,13 +59,13 @@ public class WaitView extends JDialog {
 	 * 
 	 * @param msg    Message to be displayed.
 	 */
-	public void init( String msg ) {
+	public void init(String msg) {
 		// content
 		content = getContentPane();
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
-		content.setLayout( layout );
+		content.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
 		constraints.insets     = Laf.INSETS_ALL;
@@ -76,20 +77,24 @@ public class WaitView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// message
-		JLabel label = new JLabel( msg );
-		content.add( label, constraints );
+		JLabel label = new JLabel(msg);
+		content.add(label, constraints);
+		
+		if (Cli.isCliMode) {
+			return;
+		}
 		
 		// show the window
 		pack();
-		setModal( true );
-		setVisible( true ); // this method is blocking
+		setModal(true);
+		setVisible(true); // this method is blocking
 	}
 	
 	/**
 	 * Closes the window.
 	 */
 	public void close() {
-		setVisible( false );
+		setVisible(false);
 		dispose();
 	}
 }

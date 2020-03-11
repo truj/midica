@@ -9,6 +9,7 @@ package org.midica;
 
 import javax.swing.SwingUtilities;
 
+import org.midica.config.Cli;
 import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.config.Laf;
@@ -25,7 +26,7 @@ public class Midica {
 	public static final int VERSION_MAJOR = 0;
 	
 	/** Minor version number. This is intended to be incremented automatically by precommit.pl. */
-	public static final int VERSION_MINOR = 1583951264;
+	public static final int VERSION_MINOR = 1583952461;
 	
 	/** Full version string. */
 	public static final String VERSION = VERSION_MAJOR + "." + VERSION_MINOR;
@@ -42,12 +43,6 @@ public class Midica {
 	/** Controller of the main window */
 	public static UiController uiController;
 	
-	/** CLI mode (command line interface) without GUI - e.g. for unit tests */
-	public static boolean isCliMode = false;
-	
-	/** Determins if the local config file shall be used or not. */
-	public static boolean useLocalConfig = true;
-	
 	/**
 	 * The entry method which is launched on program startup.
 	 * 
@@ -56,13 +51,15 @@ public class Midica {
 	public static void main(String[] args) {
 		
 		// command line arguments
-		processCmdLineArgs(args);
+		Cli.processArguments(args);
 		
 		// init config
 		Config.init();
 		
 		// init look and feel
-		Laf.init();
+		if (! Cli.isCliMode) {
+			Laf.init();
+		}
 		
 		// initialize dictionaries
 		Dict.init();
@@ -76,51 +73,23 @@ public class Midica {
 				}
 			}
 		});
-	}
-	
-	/**
-	 * Processes command line arguments.
-	 * 
-	 * @param args command line arguments.
-	 */
-	private static void processCmdLineArgs(String[] args) {
-		for (String arg : args) {
-			if ("--cli".equals(arg)) {
-				isCliMode = true;
-			}
-			else if ("--ignore-local-config".equals(arg)) {
-				useLocalConfig = false;
-			}
-			else if ("--help".equals(arg)) {
-				help(true);
-			}
-			else {
-				help(false);
-			}
-		}
-	}
-	
-	/**
-	 * Prints a hepl message and exits.
-	 * The exit code is 0, if called with `--help`.
-	 * Otherwise the parameters are regarded as erroneous and the exit code is 1.
-	 * 
-	 * @param isHelpRequested **true**, if called with `--help` on the command line
-	 */
-	private static void help(boolean isHelpRequested) {
 		
-		StringBuilder msg = new StringBuilder("Options:\n");
-		msg.append("--help                : Print this message.\n");
-		msg.append("--cli                 : Run in CLI mode (command line interface) without GUI.\n");
-		msg.append("--ignore-local-config : Doesn't use local config file. Use default config.\n");
+		// import/export, if requested
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				if (Cli.isImport) {
+					Cli.importFile(uiController);
+					if (Cli.isExport) {
+						Cli.exportFile(uiController);
+					}
+				}
+			}
+		});
 		
-		if (isHelpRequested) {
-			System.out.println(msg);
+		// finish
+		if (!Cli.keepAlive) {
 			System.exit(0);
-		}
-		else {
-			System.err.println(msg);
-			System.exit(64);
 		}
 	}
 }

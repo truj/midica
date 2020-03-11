@@ -23,6 +23,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.SwingWorker;
 
+import org.midica.config.Cli;
 import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.read.IParser;
@@ -324,7 +325,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	 * @param type  File type.
 	 * @param file  Selected file.
 	 */
-	private void parseChosenFile(String type, File file) {
+	public void parseChosenFile(String type, File file) {
 		
 		initSelectorsIfNotYetDone();
 		
@@ -453,7 +454,6 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			charsetKey = Config.CHARSET_EXPORT_MPL;
 			exporter   = new MidicaPLExporter();
 		}
-		// TODO: enable, if the ALDA decompiler is ready
 //		else if (FileSelector.FILE_TYPE_ALDA.equals(type)) {
 //			exporter = new AldaExporter();
 //		}
@@ -487,11 +487,22 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	}
 	
 	/**
-	 * Opens an error message window showing the given message.
+	 * Opens an error message window showing the given message, if in GUI mode.
+	 * In CLI mode, prints the message to STDERR.
 	 * 
 	 * @param message    Error message.
 	 */
 	private void showErrorMessage(String message) {
+		
+		if (Cli.isCliMode) {
+			message = message.replaceAll( "<br>",     "\n" );
+			message = message.replaceAll( "</?b>",    ""   );
+			message = message.replaceAll( "</?html>", ""   );
+			message = message.replaceAll( "&nbsp;",   " "  );
+			System.err.println(message);
+			return;
+		}
+		
 		// errorMsg.init cannot be invoked by 'new ErrorMsgView()' because it's modal.
 		// That means setVisible() is blocking. So 'new' would not return until the
 		// error message window is closed.
@@ -508,7 +519,12 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	 * 
 	 * @param result    Export result containing warnings and errors of a file export.
 	 */
-	private void showExportResult (ExportResult result) {
+	private void showExportResult(ExportResult result) {
+		
+		if (Cli.isCliMode) {
+			return;
+		}
+		
 		// same problem like in showErrorMessage()
 		ExportResultView warningView = new ExportResultView(view);
 		warningView.init(result);
@@ -626,14 +642,20 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 				parseChosenFile(FileSelector.FILE_TYPE_SOUNDFONT, new File(soundfontPath));
 			}
 			
-			// load MidicaPL, if needed
-			if ("true".equals(rememberMidicapl) && ! midicaplPath.equals("")) {
-				parseChosenFile(FileSelector.FILE_TYPE_MPL, new File(midicaplPath));
+			if (Cli.isImport) {
+				// file already imported - don't import again
 			}
-			
-			// load MIDI, if needed
-			if ("true".equals(rememberMidi) && ! midiPath.equals("")) {
-				parseChosenFile(FileSelector.FILE_TYPE_MIDI, new File(midiPath));
+			else {
+				
+				// load MidicaPL, if needed
+				if ("true".equals(rememberMidicapl) && ! midicaplPath.equals("")) {
+					parseChosenFile(FileSelector.FILE_TYPE_MPL, new File(midicaplPath));
+				}
+				
+				// load MIDI, if needed
+				if ("true".equals(rememberMidi) && ! midiPath.equals("")) {
+					parseChosenFile(FileSelector.FILE_TYPE_MIDI, new File(midiPath));
+				}
 			}
 		}
 	}

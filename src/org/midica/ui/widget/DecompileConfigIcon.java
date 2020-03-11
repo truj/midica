@@ -15,7 +15,7 @@ import javax.swing.JLabel;
 import javax.swing.border.Border;
 import javax.swing.border.LineBorder;
 
-import org.midica.Midica;
+import org.midica.config.Cli;
 import org.midica.config.Dict;
 import org.midica.config.KeyBindingManager;
 import org.midica.config.Laf;
@@ -55,9 +55,9 @@ public class DecompileConfigIcon extends JLabel {
 	 */
 	public DecompileConfigIcon(JDialog owner) {
 		winOwner = owner;
-		if (!Midica.isCliMode) {
+		if (!Cli.isCliMode) {
 			iconWrong = new ImageIcon( ClassLoader.getSystemResource(pathIconWrong) );
-			iconOk    = new ImageIcon( ClassLoader.getSystemResource(pathIconOk)  );
+			iconOk    = new ImageIcon( ClassLoader.getSystemResource(pathIconOk)    );
 		}
 		setIcon(iconOk);
 		setOpaque(true);

@@ -21,7 +21,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import org.midica.Midica;
+import org.midica.config.Cli;
 import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.config.KeyBindingManager;
@@ -107,14 +107,14 @@ public class UiView extends JFrame {
 		this.controller = controller;
 		addWindowListener(controller);
 		
-		if (!Midica.isCliMode)
+		if (!Cli.isCliMode)
 			appIcon = new ImageIcon(ClassLoader.getSystemResource(APP_ICON_PATH));
 		
 		init();
 		addKeyBindings();
 		
 		// don't show the window in CLI mode
-		if (Midica.isCliMode) {
+		if (Cli.isCliMode) {
 			return;
 		}
 		
@@ -730,4 +730,3 @@ public class UiView extends JFrame {
 		keyBindingManager.postprocess();
 	}
 }
-

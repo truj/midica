@@ -206,7 +206,7 @@ public class Config {
 		
 		String homeDir  = System.getProperty( "user.home" );
 		String fileName = ".midica.conf";
-		if (Midica.useLocalConfig) {
+		if (Cli.useLocalConfig) {
 			configFile = new File( homeDir + File.separator + fileName );
 		}
 		
@@ -680,7 +680,7 @@ public class Config {
 	 */
 	private static void readConfigFile() {
 		
-		if (! Midica.useLocalConfig) {
+		if (! Cli.useLocalConfig) {
 			return;
 		}
 		
@@ -715,7 +715,7 @@ public class Config {
 	 */
 	public static void writeConfigFile() {
 		
-		if (! Midica.useLocalConfig) {
+		if (! Cli.useLocalConfig) {
 			return;
 		}
 		

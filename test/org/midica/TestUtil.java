@@ -37,6 +37,7 @@ public class TestUtil {
 		String[] args = {
 			"--cli",
 			"--ignore-local-config",
+			"--keep-alive"
 		};
 		Midica.main(args);
 		
