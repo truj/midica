@@ -52,18 +52,22 @@ public abstract class Decompiler extends Exporter {
 	 * constants
 	 *******************/
 	
+	// formats
+	protected static final byte MIDICA = 1;
+	protected static final byte ALDA   = 2;
+	
 	// event types
-	public static final byte ET_INSTR = 1; // instrument change
-	public static final byte ET_NOTES = 2; // notes or chords (or an inline rest with syllable)
+	protected static final byte ET_INSTR = 1; // instrument change
+	protected static final byte ET_NOTES = 2; // notes or chords (or an inline rest with syllable)
 	
 	// note properties
-	public static final byte NP_VELOCITY = 1; // velocity option
-	public static final byte NP_OFF_TICK = 2; // note-off tick
-	public static final byte NP_END_TICK = 3; // tick at end of note
-	public static final byte NP_LENGTH   = 4; // length column as MidicaPL length
-	public static final byte NP_DURATION = 5; // duration option as float number
-	public static final byte NP_MULTIPLE = 6; // multiple option (value ignored)
-	public static final byte NP_LYRICS   = 7; // lyrics option
+	protected static final byte NP_VELOCITY = 1; // velocity option
+	protected static final byte NP_OFF_TICK = 2; // note-off tick
+	protected static final byte NP_END_TICK = 3; // tick at end of note
+	protected static final byte NP_LENGTH   = 4; // length column as MidicaPL length
+	protected static final byte NP_DURATION = 5; // duration option as float number
+	protected static final byte NP_MULTIPLE = 6; // multiple option (value ignored)
+	protected static final byte NP_LYRICS   = 7; // lyrics option
 	
 	// constants for statistics about the decompilation quality
 	protected static final byte STAT_TOTAL           = 17;
@@ -112,6 +116,8 @@ public abstract class Decompiler extends Exporter {
 	 * class fields
 	 *******************/
 	
+	protected static int format = -1;
+	
 	// decompile configuration
 	protected static boolean       MUST_ADD_TICK_COMMENTS   = DEFAULT_MUST_ADD_TICK_COMMENTS;
 	protected static boolean       MUST_ADD_CONFIG          = DEFAULT_MUST_ADD_CONFIG;
@@ -138,7 +144,8 @@ public abstract class Decompiler extends Exporter {
 	protected static boolean      isSoftKaraoke    = false;
 	
 	/** stores the current state of each channel */
-	protected static ArrayList<Instrument> instruments = null;
+	protected static ArrayList<Instrument>       instrumentsByChannel = null;
+	protected static TreeMap<String, Instrument> instrumentsByName    = null;
 	
 	protected static TreeMap<Long, String> noteLength = null;
 	protected static TreeMap<Long, String> restLength = null;
@@ -183,14 +190,25 @@ public abstract class Decompiler extends Exporter {
 	/**
 	 * Initializes format-specific data structures.
 	 */
-	public abstract void init();
+	protected abstract void init();
 	
 	/**
 	 * Creates the format-specific string to be written to the exported file.
 	 * 
 	 * @return the output file content.
 	 */
-	public abstract String createOutput();
+	protected abstract String createOutput();
+	
+	/**
+	 * Creates a rest.
+	 * 
+	 * @param channel    MIDI channel
+	 * @param ticks      tick length of the rest to create
+	 * @param beginTick  used for the tick comment (negative value: don't include a tick comment)
+	 * @param syllable   a lyrics syllable or (in most cases): **null**
+	 * @return the channel command containing the rest.
+	 */
+	protected abstract String createRest(byte channel, long ticks, long beginTick, String syllable);
 	
 	/**
 	 * Calculates which tick length corresponds to which note length.
@@ -198,7 +216,7 @@ public abstract class Decompiler extends Exporter {
 	 * 
 	 * @return Mapping between tick length and note length for the syntax.
 	 */
-	public abstract TreeMap<Long, String> initNoteLengths();
+	protected abstract TreeMap<Long, String> initNoteLengths();
 	
 	/**
 	 * Calculates which tick length corresponds to which rest length.
@@ -213,7 +231,7 @@ public abstract class Decompiler extends Exporter {
 	 * 
 	 * @return Mapping between tick length and rest length for the syntax.
 	 */
-	public abstract TreeMap<Long, String> initRestLengths();
+	protected abstract TreeMap<Long, String> initRestLengths();
 	
 	/**
 	 * Exports a MidicaPL source file.
@@ -360,10 +378,12 @@ public abstract class Decompiler extends Exporter {
 	}
 	
 	/**
-	 * Initializes and resets the instruments structure so that the channel configurations can be tracked.
+	 * Initializes and resets the instruments structures so that
+	 * their configurations can be tracked.
 	 */
 	private void initInstruments() {
-		instruments = new ArrayList<>();
+		instrumentsByName    = new TreeMap<>();
+		instrumentsByChannel = new ArrayList<>();
 		// CHANNEL:
 		for (byte channel = 0; channel < 16; channel++) {
 			// regard only the lowest tick >= 0
@@ -376,7 +396,7 @@ public abstract class Decompiler extends Exporter {
 				instrNumber = channelConfig[2];
 			}
 			Instrument instr = new Instrument(channel, instrNumber, null, isAutomatic);
-			instruments.add(instr);
+			instrumentsByChannel.add(instr);
 		}
 	}
 	
@@ -421,7 +441,7 @@ public abstract class Decompiler extends Exporter {
 		for (byte channel = 0; channel < 16; channel++) {
 			
 			// no notes?
-			if (instruments.get(channel).autoChannel)
+			if (instrumentsByChannel.get(channel).autoChannel)
 				continue;
 			
 			channelMatches.put(channel, 0);
@@ -1017,5 +1037,239 @@ public abstract class Decompiler extends Exporter {
 			byte channel = lyricsChannels.get(0);
 			slice.addSyllableRest(tick, syllable, channel, ORPHANED_SYLLABLES, sourceResolution);
 		}
+	}
+	
+	/**
+	 * Calculates the tick length of a note, based on the current MIDI
+	 * sequence's resolution and in relation to a quarter note.
+	 * The given factor and divisor influences the resulting note length.
+	 * If factor and divisor are the same, the resulting length is exactly
+	 * one quarter note.
+	 * 
+	 * @param factor     the factor to multiply the quarter note with
+	 * @param divisor    the divisor to divide the quarter note with
+	 * @return mathematically rounded result of resolution * factor / divisor
+	 */
+	protected int calculateTicks(int factor, int divisor) {
+		return (sourceResolution * factor * 10 + 5) / (divisor * 10);
+	}
+	
+	/**
+	 * Splits a note or rest length into several lengths that can be used for a length sum.
+	 * 
+	 * @param ticks   total tick length of the note or rest length
+	 * @param isRest  **true** for a rest, **false** for a note.
+	 * @return the single lengths in ticks.
+	 */
+	protected ArrayList<Long> getLengthsForSum(long ticks, boolean isRest) {
+		ArrayList<Long> elements = new ArrayList<>();
+		
+		// init
+		TreeMap<Long, String> structure = isRest ? restLength : noteLength;
+		long ticksLeft = ticks;
+		
+		// fill elements
+		while (true) {
+			Long restTicks = structure.floorKey(ticksLeft);
+			
+			// continuing makes no sence?
+			if (null == restTicks || 0 == ticksLeft || restTicks <= 0)
+				break;
+			
+			// add summand
+			ticksLeft -= restTicks;
+			elements.add(restTicks);
+		}
+		
+		return elements;
+	}
+	
+	/**
+	 * Calculates the note length string and duration percentage of a note (or chord).
+	 * 
+	 * - the **note length string** is the 3rd column of a MidicaPL channel command or the
+	 *   number following the note in ALDA.
+	 * - the **duration percentage** is the duration option of a MidicaPL channel command or
+	 *   the quantization attribute in ALDA
+	 * 
+	 * For the calculation, one one of the following values is used:
+	 * 
+	 * - The length between note-ON and note-ON of the next note, if this is reasonable.
+	 * - The length according to the channel's current duration ratio.
+	 * - The lowest possible of the predefined values, that is higher than the note press length.
+	 * 
+	 * The priority of the actually chosen value to be used is controlled by the configuration.
+	 * 
+	 * @param onTick   Note-ON tick of the note.
+	 * @param offTick  Note-OFF tick of the note.
+	 * @return the following values:
+	 * 
+	 * - note length in ticks (according to the source resolution)
+	 * - duration in percent (rounded mathematically)
+	 */
+	protected long[] getNoteLengthProperties(long onTick, long offTick, byte channel) {
+		
+		long  pressTicks = offTick - onTick;
+		long  noteTicks;
+		float durationRatio;
+		
+		// TODO: Handle the case of different durations in the same tick,
+		// TODO: because than instruments.get(channel).getDurationRatio() will already be outdated.
+		
+		// 1st strategy: calculate note length according to the current duration ratio
+		float oldDuration    = instrumentsByChannel.get(channel).getDurationRatio();
+		long  noteTicksByDur = (long) ((pressTicks / (double) oldDuration)) - DURATION_TICK_TOLERANCE;
+		noteTicksByDur       = getNoteLengthByPressTicks(noteTicksByDur);
+		float durationByDur  = calculateDuration(noteTicksByDur, pressTicks);
+		float durationDiff   = oldDuration > durationByDur ? oldDuration - durationByDur : durationByDur - oldDuration;
+		boolean canUseByDur  = durationDiff < DURATION_RATIO_TOLERANCE;
+		if (oldDuration < MIN_DURATION_TO_KEEP) {
+			canUseByDur = false;
+		}
+		
+		// 2nd strategy: calculate note length according to the next note-ON
+		long  noteTicksByOn = -1;
+		float durationByOn  = -1;
+		Long nextNoteOnTick = noteHistory.get(channel).ceilingKey(onTick + 1);
+		if (nextNoteOnTick != null) {
+			noteTicksByOn   = nextNoteOnTick - onTick - NEXT_NOTE_ON_TOLERANCE;
+			noteTicksByOn   = getNoteLengthByPressTicks(noteTicksByOn);
+			durationByOn    = calculateDuration(noteTicksByOn, pressTicks);
+		}
+		boolean canUseNextOn = noteTicksByOn > 0 && durationByOn > 0;
+		if (noteTicksByOn > MAX_SOURCE_TICKS_ON) {
+			canUseNextOn = false;
+		}
+		
+		// apply strategy configuration
+		if (STRATEGY_NEXT_PRESS == LENGTH_STRATEGY || STRATEGY_PRESS == LENGTH_STRATEGY) {
+			canUseByDur = false;
+		}
+		if (STRATEGY_DURATION_PRESS == LENGTH_STRATEGY || STRATEGY_PRESS == LENGTH_STRATEGY) {
+			canUseNextOn = false;
+		}
+		if (canUseByDur && canUseNextOn) {
+			if (STRATEGY_NEXT_DURATION_PRESS == LENGTH_STRATEGY) {
+				canUseByDur = false;
+			}
+			else if (STRATEGY_DURATION_NEXT_PRESS == LENGTH_STRATEGY) {
+				canUseNextOn = false;
+			}
+		}
+		
+		// apply strategy
+		if (canUseNextOn) {
+			noteTicks     = noteTicksByOn;
+			durationRatio = durationByOn;
+		}
+		else if (canUseByDur) {
+			noteTicks     = noteTicksByDur;
+			durationRatio = durationByDur;
+		}
+		else {
+			// fallback strategy: calculate note length only by press length
+			noteTicks     = getNoteLengthByPressTicks(pressTicks);
+			durationRatio = calculateDuration(noteTicks, pressTicks);
+		}
+		
+		// calculate duration ratio
+		long durationPercent = ((long) ((durationRatio * 100  + 0.5f) * 10) / 10);
+		
+		// pack result
+		long[] result = {
+			noteTicks,
+			durationPercent,
+		};
+		return result;
+	}
+	
+	/**
+	 * Guesses the theoretical note length just by choosing the next possible pre-defined length.
+	 * 
+	 * @param ticks  tick difference between note-ON and note-OFF.
+	 * @return the guessed note length.
+	 */
+	private long getNoteLengthByPressTicks(long ticks) {
+		
+		// init
+		long ticksLeft   = ticks;
+		long totalLength = 0L;
+		
+		// sum up
+		while (true) {
+			Long length = noteLength.ceilingKey(ticks); // next highest length
+			if (null == length)
+				length = noteLength.floorKey(ticks); // highest possible element
+			
+			totalLength += length;
+			ticksLeft   -= length;
+			
+			if (ticksLeft <= 0)
+				break;
+		}
+		
+		return totalLength;
+	}
+	
+	/**
+	 * Calculates the duration ratio.
+	 * 
+	 * @param noteTicks   full (theoretical) note length in ticks
+	 * @param pressTicks  number of ticks that the note is pressed (from note-ON to note-OFF)
+	 * @return the duration ratio
+	 */
+	private static float calculateDuration(long noteTicks, long pressTicks) {
+		double duration = ((double) pressTicks / (double) noteTicks);
+		return (float) duration;
+	}
+	
+	/**
+	 * Creates a rest before a new slice begins, if necessary.
+	 * 
+	 * The rest is only necessary if no channel has reached the slice's begin tick yet.
+	 * 
+	 * With the slice's beginning, all channels are synchronized. Therefore the rest is
+	 * only necessary in one channel.
+	 * 
+	 * Steps:
+	 * 
+	 * - calculation of the furthest tick
+	 * - choosing the according channel
+	 * - adding the rest in this channel
+	 * 
+	 * @param slice  the sequence slice
+	 * @return the created rest, or an empty string if no rest is created.
+	 */
+	protected String createRestBeforeSlice(Slice slice) {
+		StringBuilder restStr = new StringBuilder("");
+		
+		// choose a channel
+		long maxTick = Instrument.getMaxCurrentTicks(instrumentsByChannel);
+		Instrument chosenInstr = null;
+		for (Instrument instr : instrumentsByChannel) {
+			
+			// ignore automatic channels
+			if (instr.autoChannel)
+				continue;
+			
+			// furthest channel found?
+			if (maxTick == instr.getCurrentTicks()) {
+				chosenInstr = instr;
+				break;
+			}
+		}
+		
+		// no notes? - default to the percussion channel
+		if (null == chosenInstr)
+			chosenInstr = instrumentsByChannel.get(9);
+		
+		// get missing ticks
+		long missingTicks = slice.getBeginTick() - chosenInstr.getCurrentTicks();
+		if (missingTicks > 0) {
+			byte channel = (byte) chosenInstr.channel;
+			restStr.append( createRest(channel, missingTicks, -1, null) );
+		}
+		
+		return restStr.toString();
 	}
 }

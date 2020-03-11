@@ -42,6 +42,10 @@ public class Instrument implements Comparable<Instrument> {
 	/** Minimum remaining note length after applying the duration ratio */
 	private static final long MIN_NOTE_LENGTH = 1;
 	
+	// constants for foreign languages (e.g. alda)
+	private static final byte   DEFAULT_OCTAVE      = 4;
+	private static final String DEFAULT_NOTE_LENGTH = "4";
+	
 	/** Channel number as defined by the MIDI specification. Between 0 and 15. */
 	public final int channel;
 	/** Instrument number as defined by the MIDI specification. Between 0 and 127. */
@@ -71,6 +75,10 @@ public class Instrument implements Comparable<Instrument> {
 	private long currentTicks = MIN_CURRENT_TICKS;
 	/** Ratio between key press duration and note length duration */
 	private float durationRatio = DEFAULT_DURATION_RATIO;
+	
+	// fields for foreign languages (e.g. alda)
+	private byte   octave     = DEFAULT_OCTAVE;
+	private String noteLength = DEFAULT_NOTE_LENGTH;
 	
 	/**
 	 * Creates a new Instrument object representing a channel during the parsing or export
@@ -322,5 +330,41 @@ public class Instrument implements Comparable<Instrument> {
 	 */
 	public int getBankLSB() {
 		return bankLSB;
+	}
+	
+	/**
+	 * Returns the currently configured octave.
+	 * 
+	 * @return octave
+	 */
+	public byte getOctave() {
+		return octave;
+	}
+	
+	/**
+	 * Sets the octave of the channel.
+	 * 
+	 * @param octave  New octave of the channel.
+	 */
+	public void setOctave(byte octave) {
+		this.octave = octave;
+	}
+	
+	/**
+	 * Returns the currently configured note length.
+	 * 
+	 * @return note length
+	 */
+	public String getNoteLength() {
+		return noteLength;
+	}
+	
+	/**
+	 * Sets the note length of the channel.
+	 * 
+	 * @param noteLength  New note length of the channel.
+	 */
+	public void setNoteLength(String noteLength) {
+		this.noteLength = noteLength;
 	}
 }

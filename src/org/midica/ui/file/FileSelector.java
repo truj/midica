@@ -110,19 +110,18 @@ public class FileSelector extends JDialog {
 		// create the first file chooser
 		fileChoosers.add( new MidicaFileChooser(type, filePurpose, directory, charSetSelect, this) );
 		
-		// TODO: enable, if the ALDA decompiler is ready
 		// create more file choosers, if needed
-//		if (WRITE == this.filePurpose && FILE_TYPE_MPL.equals(type)) {
-//			type = FILE_TYPE_ALDA;
-//			fileChoosers.add(new MidicaFileChooser(
-//				FILE_TYPE_ALDA,
-//				filePurpose,
-//				Config.get(Config.DIRECTORY_EXPORT_ALDA),
-//				false,
-//				this
-//			));
-//			tabs.put(FILE_TYPE_ALDA, Dict.TAB_ALDA);
-//		}
+		if (WRITE == this.filePurpose && FILE_TYPE_MPL.equals(type)) {
+			type = FILE_TYPE_ALDA;
+			fileChoosers.add(new MidicaFileChooser(
+				FILE_TYPE_ALDA,
+				filePurpose,
+				Config.get(Config.DIRECTORY_EXPORT_ALDA),
+				false,
+				this
+			));
+			tabs.put(FILE_TYPE_ALDA, Dict.TAB_ALDA);
+		}
 		
 		// complete file choosers
 		for (MidicaFileChooser chooser : fileChoosers) {
