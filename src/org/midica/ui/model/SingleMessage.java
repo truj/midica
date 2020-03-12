@@ -122,30 +122,30 @@ public class SingleMessage implements IMessageType, Comparable<SingleMessage> {
 	public int compareTo(SingleMessage other) {
 		
 		// sort by tickstamp first
-		Long tick      = (Long) getOption( IMessageType.OPT_TICK );
-		Long otherTick = (Long) other.getOption( IMessageType.OPT_TICK );
-		int  result    = tick.compareTo( otherTick );
+		Long tick      = (Long) getOption(IMessageType.OPT_TICK);
+		Long otherTick = (Long) other.getOption(IMessageType.OPT_TICK);
+		int  result    = tick.compareTo(otherTick);
 		if (result != 0) {
 			return result;
 		}
 		
 		// sort by track number
-		Integer track      = (Integer) getOption( IMessageType.OPT_TRACK );
-		Integer otherTrack = (Integer) other.getOption( IMessageType.OPT_TRACK );
-		result             = track.compareTo( otherTrack );
+		Integer track      = (Integer) getOption(IMessageType.OPT_TRACK);
+		Integer otherTrack = (Integer) other.getOption(IMessageType.OPT_TRACK);
+		result             = track.compareTo(otherTrack);
 		if (result != 0) {
 			return result;
 		}
 		
 		// both NOTE-ON or both NOTE-OFF? - sort by note number
-		String status         = (String) getOption( IMessageType.OPT_STATUS_BYTE );
-		String otherStatus    = (String) other.getOption( IMessageType.OPT_STATUS_BYTE );
+		String status         = (String) getOption(IMessageType.OPT_STATUS_BYTE);
+		String otherStatus    = (String) other.getOption(IMessageType.OPT_STATUS_BYTE);
 		char   cmdNibble      = status.charAt(0);
 		char   otherCmdNibble = otherStatus.charAt(0);
 		if (cmdNibble == otherCmdNibble) {
 			if ('8' == cmdNibble || '9' == cmdNibble) {
-				byte[] msgBytes      = (byte[]) getOption( IMessageType.OPT_MESSAGE );
-				byte[] otherMsgBytes = (byte[]) other.getOption( IMessageType.OPT_MESSAGE );
+				byte[] msgBytes      = (byte[]) getOption(IMessageType.OPT_MESSAGE);
+				byte[] otherMsgBytes = (byte[]) other.getOption(IMessageType.OPT_MESSAGE);
 				if (msgBytes[1] < otherMsgBytes[1])
 					return -1;
 				else if (msgBytes[1] > otherMsgBytes[1])
@@ -154,9 +154,9 @@ public class SingleMessage implements IMessageType, Comparable<SingleMessage> {
 		}
 		
 		// sort by message number inside the track
-		Integer msgNum      = (Integer) getOption( IMessageType.OPT_MSG_NUM );
-		Integer otherMsgNum = (Integer) other.getOption( IMessageType.OPT_MSG_NUM );
-		result              = msgNum.compareTo( otherMsgNum );
+		Integer msgNum      = (Integer) getOption(IMessageType.OPT_MSG_NUM);
+		Integer otherMsgNum = (Integer) other.getOption(IMessageType.OPT_MSG_NUM);
+		result              = msgNum.compareTo(otherMsgNum);
 		if (result != 0) {
 			return result;
 		}
@@ -176,30 +176,30 @@ public class SingleMessage implements IMessageType, Comparable<SingleMessage> {
 	public String getType() {
 		
 		// get reverse tree path
-		MidicaTreeNode leaf  = (MidicaTreeNode) getOption( IMessageType.OPT_LEAF_NODE );
+		MidicaTreeNode leaf  = (MidicaTreeNode) getOption(IMessageType.OPT_LEAF_NODE);
 		TreeNode[]     paths = leaf.getPath();
 		
 		// remove the first (root) element
-		TreeNode[] reducedPaths = Arrays.copyOfRange( paths, 1, paths.length );
+		TreeNode[] reducedPaths = Arrays.copyOfRange(paths, 1, paths.length);
 		
 		// get it in reverse order
-		List<TreeNode> nodes = Arrays.asList( reducedPaths );
-		Collections.reverse( nodes );
+		List<TreeNode> nodes = Arrays.asList(reducedPaths);
+		Collections.reverse(nodes);
 		
 		// construct type string
-		StringBuilder text = new StringBuilder( "" );
-		for ( TreeNode bareNode : nodes ) {
+		StringBuilder text = new StringBuilder("");
+		for (TreeNode bareNode : nodes) {
 			MidicaTreeNode node = (MidicaTreeNode) bareNode;
 			String         name = node.getName();
 			
 			// leaf node
-			if ( 0 == text.length() ) {
-				text.append( "<html>" + name );
+			if (0 == text.length()) {
+				text.append("<html>" + name);
 			}
 			
 			// another node
 			else {
-				text.append( " <span style=\"color: #dd0000; font-size: 105%; font-weight: bold; \"> &larr; </span> " + name );
+				text.append(" <span style=\"color: #dd0000; font-size: 105%; font-weight: bold; \"> &larr; </span> " + name);
 			}
 		}
 		
@@ -218,24 +218,24 @@ public class SingleMessage implements IMessageType, Comparable<SingleMessage> {
 	public String getTypeTooltip() {
 		
 		// get tree path
-		MidicaTreeNode leaf  = (MidicaTreeNode) getOption( IMessageType.OPT_LEAF_NODE );
+		MidicaTreeNode leaf  = (MidicaTreeNode) getOption(IMessageType.OPT_LEAF_NODE);
 		TreeNode[]     paths = leaf.getPath();
 		
 		// construct tooltip text
-		StringBuilder text = new StringBuilder( "<html>" );
+		StringBuilder text = new StringBuilder("<html>");
 		int i = 0;
-		for ( TreeNode path : paths ) {
+		for (TreeNode path : paths) {
 			MidicaTreeNode node = (MidicaTreeNode) path;
 			
 			// add indentation
-			text.append( "<tt>" );
-			for ( int j = 0; j < i; j++ ) {
-				text.append( "&nbsp; &nbsp;" );
+			text.append("<tt>");
+			for (int j = 0; j < i; j++) {
+				text.append("&nbsp; &nbsp;");
 			}
 			i++;
 			
 			// add the node
-			text.append( "</tt>" + node.getName() + "<br>" );
+			text.append("</tt>" + node.getName() + "<br>");
 		}
 		
 		return text.toString();
@@ -246,10 +246,34 @@ public class SingleMessage implements IMessageType, Comparable<SingleMessage> {
 	 */
 	@Override
 	public String toString() {
-		return (Long) getOption(IMessageType.OPT_TICK)
-			+ "/" + (Integer) getOption(IMessageType.OPT_CHANNEL)
-			+ "/" + (String) getOption(IMessageType.OPT_STATUS_BYTE)
-			+ "/" + (String) getOption(IMessageType.OPT_SUMMARY)
-			;
+		
+		// probably a SHORT message (used in MidicaPLParserTest)
+		if (getOption(IMessageType.OPT_CHANNEL) != null && getOption(IMessageType.OPT_SUMMARY) != null) {
+			return (Long) getOption(IMessageType.OPT_TICK)
+				+ "/" + (Integer) getOption(IMessageType.OPT_CHANNEL)
+				+ "/" + (String) getOption(IMessageType.OPT_STATUS_BYTE)
+				+ "/" + (String) getOption(IMessageType.OPT_SUMMARY)
+				;
+		}
+		
+		// probably a META message
+		else if (getOption(IMessageType.OPT_META_TYPE) != null) {
+			return "M:" + (Long) getOption(IMessageType.OPT_TICK)
+				+ "/" + (String) getOption(IMessageType.OPT_META_TYPE)
+				+ "/" + (String) getOption(IMessageType.OPT_SUMMARY)
+				;
+		}
+		
+		// probably a SYSEX message
+		else if (getOption(IMessageType.OPT_SYSEX_CHANNEL) != null && getOption(IMessageType.OPT_VENDOR_ID) != null) {
+			return "SX:" + (Long) getOption(IMessageType.OPT_TICK)
+				+ "/" + (String) getOption(IMessageType.OPT_SYSEX_CHANNEL)
+				+ "/" + (String) getOption(IMessageType.OPT_VENDOR_ID)
+				+ "/" + (String) getOption(IMessageType.OPT_SUB_ID_1)
+				+ "/" + (String) getOption(IMessageType.OPT_SUB_ID_2)
+				;
+		}
+		
+		return "unknown message type";
 	}
 }

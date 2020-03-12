@@ -36,6 +36,8 @@ public class MessageClassifier {
 	private static final String MSG_LVL_1_SORT_SYS_RT   = "4";
 	private static final String MSG_LVL_1_SORT_META     = "5";
 	
+	private static final int INVALID_BYTE = 0xF7;
+	
 	/**
 	 * Private constructor because this class is only used statically.
 	 */
@@ -781,12 +783,12 @@ public class MessageClassifier {
 		path.add( msgLvl2 );
 		
 		// level 3 node
-		byte    vendorByte    = (byte) 0xFF; // invalid
+		int     vendorByte    = INVALID_BYTE;
 		boolean isUniversal   = false;
 		boolean isRealTime    = false;
 		boolean isEducational = false;
 		if (msgLength > 1) {
-			vendorByte = content[ 0 ];
+			vendorByte = (content[0] & 0xFF);
 			
 			// universal, non real time
 			if (0x7E == vendorByte) {
@@ -869,40 +871,57 @@ public class MessageClassifier {
 			details.put( IMessageType.OPT_VENDOR_NAME, vendorTxt );
 		}
 		
-		// level 4 and 5 nodes for universal vendors
+		// level 4, 5 and 6 nodes for universal vendors
 		if (isUniversal) {
 			
 			// get channel and sub id 1 and 2
-			int  restLength   = msgLength - 2; // without status byte and vendor byte
-			byte sysExChannel = (byte) 0xFF; // invalid
-			byte subId1       = (byte) 0xFF; // invalid
-			byte subId2       = (byte) 0xFF; // invalid
+			int restLength   = msgLength - 2; // without status byte and vendor byte
+			int sysExChannel = INVALID_BYTE;
+			int subId1       = INVALID_BYTE;
+			int subId2       = INVALID_BYTE;
 			if (restLength >= 1) {
-				sysExChannel = content[ 1 ];
+				sysExChannel = (content[1] & 0xFF);
 			}
 			if (restLength >= 2) {
-				subId1 = content[ 2 ];
+				subId1 = (content[2] & 0xFF);
 			}
 			if (restLength >= 3) {
-				subId2 = content[ 3 ];
+				subId2 = (content[3] & 0xFF);
 			}
 			
 			// level 4 node
 			String   mainTypeID  = String.format( "%02X", subId1 );
-			String   mainTypeStr = ((byte) 0xFF) == subId1 ? "-" : subId1 + "";
-			String[] texts       = getLvl45UniversalSysexTxt( isRealTime, subId1, subId2 );
-			String[] msgLvl4     = { mainTypeID, texts[0], mainTypeStr };
+			String   mainTypeStr = INVALID_BYTE == subId1 ? "-" : subId1 + "";
+			String[] texts       = getLvl456UniversalSysexTxt(isRealTime, subId1, subId2);
+			String[] msgLvl4     = {mainTypeID, texts[0], mainTypeStr};
 			path.add( msgLvl4 );
 			
 			// level 5 node
-			if (texts.length >= 3) {
-				String   subTypeID  = String.format( "%02X", subId2 );
-				String   subTypeStr = texts[ 2 ];
-				if (! "-".equals(subTypeStr)) {  // real number?
-					subTypeStr = subId2 + "";    // decimal instead of hex
+			if (3 == texts.length) {
+				String subTypeID  = String.format("%02X", subId2);
+				String subTypeStr = texts[2];
+				if (! "-".equals(subTypeStr)) {        // real number?
+					subTypeStr = subId2 + ""; // decimal instead of hex
 				}
-				String[] msgLvl5    = { subTypeID, texts[1], subTypeStr };
-				path.add( msgLvl5 );
+				String[] msgLvl5 = {subTypeID, texts[1], subTypeStr};
+				path.add(msgLvl5);
+			}
+			
+			// level 5 and 6 node (MIDI-CI)
+			else if (texts.length >= 4) {
+				// level 5
+				int      nibbleHex  = subId2 >>> 4;   // first hex digit (e.g. 0x3)
+				int      nibbleDec  = nibbleHex * 16; // lowest possible decimal value (0x30 == 48)
+				String   subTypeID  = nibbleHex + "0";
+				String   subTypeStr = nibbleDec + "-" + (nibbleDec + 0x0F);
+				String[] msgLvl5    = {subTypeID, texts[1], subTypeStr};
+				path.add(msgLvl5);
+				
+				// level 6
+				subTypeID  = String.format("0x%02X", subId2);
+				subTypeStr = subId2 + ""; // decimal
+				String[] msgLvl6 = {subTypeID, texts[2], subTypeStr};
+				path.add(msgLvl6);
 			}
 			
 			// add channel to details
@@ -910,19 +929,27 @@ public class MessageClassifier {
 			if (0x7F == sysExChannel) {
 				sysExChannelID += " (" + Dict.get( Dict.BROADCAST_MSG ) + ")";
 			}
-			else if (((byte) 0xFF) == sysExChannel) {
+			else if (INVALID_BYTE == sysExChannel) {
 				sysExChannelID = "-";
 			}
 			distinctDetails.put( IMessageType.OPT_SYSEX_CHANNEL, sysExChannelID );
 			
 			// add Sub-IDs to details
-			String sub1Str = ((byte) 0xFF) == subId1 ? "-" : String.format( "0x%02X", subId1 );
+			String sub1Str = INVALID_BYTE == subId1 ? "-" : String.format("0x%02X", subId1);
 			String sub2Str = "-";
 			if (texts.length > 2 && ! "-".equals(texts[2])) {
-				sub2Str = "0x" + texts[ 2 ];
+				sub2Str = "0x" + texts[2];
 			}
-			details.put( IMessageType.OPT_SUB_ID_1, sub1Str );
-			details.put( IMessageType.OPT_SUB_ID_2, sub2Str );
+			if (texts.length > 3 && ! "-".equals(texts[2])) {
+				sub2Str = "0x" + texts[3];
+				
+				// MIDI-CI? - add MIDI channel
+				if (0x0D  == subId1 && sysExChannel < 0x10) {
+					details.put(IMessageType.OPT_CHANNEL, (int) sysExChannel);
+				}
+			}
+			details.put(IMessageType.OPT_SUB_ID_1, sub1Str);
+			details.put(IMessageType.OPT_SUB_ID_2, sub2Str);
 		}
 		
 		// get general details
@@ -946,8 +973,8 @@ public class MessageClassifier {
 			leaf.setDistinctOption(  detailEntry.getKey(), (Comparable<?>) detailEntry.getValue() );
 			singleMessage.setOption( detailEntry.getKey(), detailEntry.getValue() );
 		}
-		singleMessage.setOption( IMessageType.OPT_LEAF_NODE, leaf );
-		singleMessage.setOption( IMessageType.OPT_MESSAGE, message );
+		singleMessage.setOption( IMessageType.OPT_LEAF_NODE, leaf    );
+		singleMessage.setOption( IMessageType.OPT_MESSAGE,   message );
 	}
 	
 	/**
@@ -1434,36 +1461,45 @@ public class MessageClassifier {
 	}
 	
 	/**
-	 * Returns the level 4 and 5 node names of universal SysEx messages.
-	 * A level 5 node name is not always available - depending on the
+	 * Returns the level 4, 5, and 6 node names of universal SysEx messages.
+	 * 
+	 * A level 5 or 6 node name is not always available - depending on the
 	 * given **Sub-ID 1**.
 	 * 
 	 * - Level 4: SysEx main type, defined by **Sub-ID 1**.
 	 * - Level 5: SysEx sub type, defined by **Sub-ID 2**.
+	 * - Level 6: MIDI-CI sub type, defined by **Sub-ID 2** (if **Sub-ID 1 = 0x0D**).
 	 * 
-	 * The returned array consists of 1 or 3 elements:
+	 * The returned array consists of 1, 3 or 4 elements:
 	 * 
 	 * - 1st element: level 4 text (main type)
 	 * - 2nd element: level 5 text (sub type)
-	 * - 3rd element: the given **Sub-ID 2** as a Hex value
+	 * - 3rd element:
+	 *     - level 6 text, if avaliable, or otherwise:
+	 *     - the given **Sub-ID 2** as a Hex value
+	 * - 4th element: the given **Sub-ID 2** as a Hex value (only if level 6 is available)
 	 * 
 	 * The 2nd and 3rd element are only returned if **Sub-ID 1** allows
 	 * a sub type.
 	 * 
+	 * The 4th element is only available for MIDI-CI messages.
+	 * 
 	 * @param isRealTime  **true** for Real Time messages, **false** for Non Real Time messages.
 	 * @param sub1        **Sub-ID 1** (4th byte of the message)
 	 * @param sub2        **Sub-ID 2** (5th byte of the message)
-	 * @return level 4 and 5 text and Sub-ID 2, as described above.
+	 * @return level 4, 5 and 6 text and Sub-ID 2, as described above.
 	 */
-	private static final String[] getLvl45UniversalSysexTxt(boolean isRealTime, byte sub1, byte sub2) {
+	private static final String[] getLvl456UniversalSysexTxt(boolean isRealTime, int sub1, int sub2) {
 		
 		// init fallback
 		boolean hasLvl5 = false;
+		boolean hasLvl6 = false;
 		String  l4Txt   = Dict.get( Dict.UNKNOWN );
 		String  l5Txt   = l4Txt;
+		String  l6Txt   = l4Txt;
 		
 		// invalid sub ID 1 (message too short)
-		if (((byte) 0xFF) == sub1) {
+		if (INVALID_BYTE == sub1) {
 			l4Txt = Dict.get( Dict.INVALID_MSG );
 		}
 		
@@ -1658,6 +1694,57 @@ public class MessageClassifier {
 				l4Txt   = Dict.get( Dict.MSG4_SX_NU_MIDI_VISUAL_CTRL );
 				l5Txt   = Dict.get( Dict.MSG5_SXNC_MVC_CMD           );
 			}
+			else if (0x0D == sub1) { // MIDI-CI Message
+				hasLvl5 = true;
+				l4Txt   = Dict.get( Dict.MSG4_SX_NU_MIDI_CI );
+				if      (sub2 < 0x10) l5Txt = Dict.get( Dict.MSG5_SXND_CI_RESERVED );
+				else if (sub2 < 0x20) {
+					l5Txt   = Dict.get( Dict.MSG5_SXND_CI_PROTO_NEGO );
+					hasLvl6 = true;
+					if      (0x10 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND10_INIT_PROTO_NEGO   );
+					else if (0x11 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND11_INIT_PROTO_REPL   );
+					else if (0x12 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND12_SET_NEW_PROTO     );
+					else if (0x13 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND13_TEST_NEW_PROT_ITR );
+					else if (0x14 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND14_TEST_NEW_PROT_RTI );
+					else if (0x15 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND15_CONF_NEW_PROT_EST );
+				}
+				else if (sub2 < 0x30) {
+					l5Txt   = Dict.get( Dict.MSG5_SXND_CI_PROF_CONF );
+					hasLvl6 = true;
+					if      (0x20 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND20_PROF_INQ         );
+					else if (0x21 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND21_PROF_INQ_REPL    );
+					else if (0x22 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND22_SET_PROF_ON      );
+					else if (0x23 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND23_SET_PROF_OFF     );
+					else if (0x24 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND24_PROF_ENABL_RPRT  );
+					else if (0x25 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND25_PROF_DISABL_RPRT );
+					else if (0x2F == sub2) l6Txt = Dict.get( Dict.MSG6_SXND2F_PROF_SPEC_DATA   );
+				}
+				else if (sub2 < 0x40) {
+					l5Txt   = Dict.get( Dict.MSG5_SXND_CI_PROP_EXCH );
+					hasLvl6 = true;
+					if      (0x30 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND30_PROP_EXCH_CAP_INQ  );
+					else if (0x31 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND31_PROP_EXCH_CAP_REPL );
+					else if (0x32 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND32_HAS_PROP_DATA_INQ  );
+					else if (0x33 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND33_HAS_PROP_DATA_REPL );
+					else if (0x34 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND34_GET_PROP_DATA_INQ  );
+					else if (0x35 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND35_GET_PROP_DATA_REPL );
+					else if (0x36 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND36_SET_PROP_DATA_INQ  );
+					else if (0x37 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND37_SET_PROP_DATA_REPL );
+					else if (0x38 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND38_SUBSCRIPTION       );
+					else if (0x39 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND39_SUBSCRIPTION_REPL  );
+					else if (0x3F == sub2) l6Txt = Dict.get( Dict.MSG6_SXND3F_NOTIFY             );
+					
+				}
+				else if (sub2 < 0x70) l5Txt = Dict.get( Dict.MSG5_SXND_CI_RESERVED );
+				else if (sub2 < 0x80) {
+					l5Txt = Dict.get( Dict.MSG5_SXND_CI_MGMT_MSG );
+					hasLvl6 = true;
+					if      (0x70 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND70_DISCOVERY      );
+					else if (0x71 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND71_DISCOVERY_RESP );
+					else if (0x7E == sub2) l6Txt = Dict.get( Dict.MSG6_SXND7E_INVAL_MUID     );
+					else if (0x7F == sub2) l6Txt = Dict.get( Dict.MSG6_SXND7F_NAK            );
+				}
+			}
 			else if (0x7B == sub1) {
 				l4Txt = Dict.get( Dict.MSG4_SX_NU_END_OF_FILE );
 			}
@@ -1675,10 +1762,14 @@ public class MessageClassifier {
 			}
 		}
 		
-		// node 4 and 5 - pack and return the result
+		// node 4 and 5 (and 6) - pack and return the result
 		if (hasLvl5) {
-			String[] result = { l4Txt, l5Txt, String.format("%02X", sub2) };
-			if (((byte) 0xFF) == sub2) {
+			if (hasLvl6) {
+				String[] result = {l4Txt, l5Txt, l6Txt, String.format("%02X", sub2)};
+				return result;
+			}
+			String[] result = {l4Txt, l5Txt, String.format("%02X", sub2)};
+			if (INVALID_BYTE == sub2) {
 				// invalid sub ID 2 (message too short)
 				result[ 1 ] = Dict.get( Dict.INVALID_MSG );
 				result[ 2 ] = "-";

@@ -1182,6 +1182,7 @@ public class Dict {
 	public static final String MSG4_SX_NU_CANCEL           = "msg4_sx_nu_cancel";
 	public static final String MSG4_SX_NU_NAK              = "msg4_sx_nu_nak";
 	public static final String MSG4_SX_NU_ACK              = "msg4_sx_nu_ack";
+	public static final String MSG4_SX_NU_MIDI_CI          = "msg5_sx_nu_midi_ci";             // MSG5_SXND_*  MSG6_SXND??_*
 	public static final String MSG4_SX_RU_MIDI_TIME_CODE   = "msg4_sx_ru_midi_time_code";      // MSG5_SXR1_*
 	public static final String MSG4_SX_RU_MIDI_SHOW_CTRL   = "msg4_sx_ru_midi_show_ctrl";      // MSG5_SXR2_*
 	public static final String MSG4_SX_RU_NOTATION_INFO    = "msg4_sx_ru_nonation_info";       // MSG5_SXR3_*
@@ -1249,6 +1250,11 @@ public class Dict {
 	public static final String MSG5_SXNB_OPEN_SEL_CONT     = "msg5_sxnb_open_sel_cont";
 	public static final String MSG5_SXNB_CLOSE_FILE        = "msg5_sxnb_close_file";
 	public static final String MSG5_SXNC_MVC_CMD           = "msg5_sxnc_mvc_cmd";
+	public static final String MSG5_SXND_CI_RESERVED       = "msg5_sxnd_ci_reserved";
+	public static final String MSG5_SXND_CI_PROTO_NEGO     = "msg5_sxnd_ci_proto_nego";        // MSG6_SXND1?_*
+	public static final String MSG5_SXND_CI_PROF_CONF      = "msg5_sxnd_ci_prof_conf";         // MSG6_SXND2?_*
+	public static final String MSG5_SXND_CI_PROP_EXCH      = "msg5_sxnd_ci_prop_exch";         // MSG6_SXND3?_*
+	public static final String MSG5_SXND_CI_MGMT_MSG       = "msg5_sxnd_ci_mgmt_msg";          // MSG6_SXND7?_*
 	
 	public static final String MSG5_SXR1_FULL_MSG          = "msg5_sxr1_full_msg";
 	public static final String MSG5_SXR1_USER_BITS         = "msg5_sxr1_user_bits";
@@ -1296,6 +1302,36 @@ public class Dict {
 	public static final String MSG5_SXR9_CHANNEL_PRESSURE  = "msg5_sxr9_channel_pressure";
 	public static final String MSG5_SXR9_POLY_KEY_PRESSURE = "msg5_sxr9_poly_key_pressure";
 	public static final String MSG5_SXR9_CTRL              = "msg5_sxr9_ctrl";
+	
+	// MIDI messages for InfoView - level 6
+	public static final String MSG6_SXND10_INIT_PROTO_NEGO   = "msg6_sxnd10_init_proto_nego";
+	public static final String MSG6_SXND11_INIT_PROTO_REPL   = "msg6_sxnd11_init_proto_repl";
+	public static final String MSG6_SXND12_SET_NEW_PROTO     = "msg6_sxnd12_set_new_proto";
+	public static final String MSG6_SXND13_TEST_NEW_PROT_ITR = "msg6_sxnd13_test_new_proto_itr";
+	public static final String MSG6_SXND14_TEST_NEW_PROT_RTI = "msg6_sxnd14_test_new_proto_rti";
+	public static final String MSG6_SXND15_CONF_NEW_PROT_EST = "msg6_sxnd15_conf_new_proto_est";
+	public static final String MSG6_SXND20_PROF_INQ          = "msg6_sxnd20_prof_inq";
+	public static final String MSG6_SXND21_PROF_INQ_REPL     = "msg6_sxnd21_prof_inq_repl";
+	public static final String MSG6_SXND22_SET_PROF_ON       = "msg6_sxnd22_prof_on";
+	public static final String MSG6_SXND23_SET_PROF_OFF      = "msg6_sxnd23_prof_off";
+	public static final String MSG6_SXND24_PROF_ENABL_RPRT   = "msg6_sxnd24_enabl_rprt";
+	public static final String MSG6_SXND25_PROF_DISABL_RPRT  = "msg6_sxnd25_disabl_rprt";
+	public static final String MSG6_SXND2F_PROF_SPEC_DATA    = "msg6_sxnd2f_spec_data";
+	public static final String MSG6_SXND30_PROP_EXCH_CAP_INQ  = "msg6_sxnd30_prop_exch_cap_inq";
+	public static final String MSG6_SXND31_PROP_EXCH_CAP_REPL = "msg6_sxnd31_prop_exch_cap_repl";
+	public static final String MSG6_SXND32_HAS_PROP_DATA_INQ  = "msg6_sxnd32_has_prop_data_inq";
+	public static final String MSG6_SXND33_HAS_PROP_DATA_REPL = "msg6_sxnd33_has_prop_data_repl";
+	public static final String MSG6_SXND34_GET_PROP_DATA_INQ  = "msg6_sxnd34_get_prop_data_inq";
+	public static final String MSG6_SXND35_GET_PROP_DATA_REPL = "msg6_sxnd35_get_prop_data_repl";
+	public static final String MSG6_SXND36_SET_PROP_DATA_INQ  = "msg6_sxnd36_set_prop_data_inq";
+	public static final String MSG6_SXND37_SET_PROP_DATA_REPL = "msg6_sxnd37_set_prop_data_repl";
+	public static final String MSG6_SXND38_SUBSCRIPTION       = "msg6_sxnd38_subscription";
+	public static final String MSG6_SXND39_SUBSCRIPTION_REPL  = "msg6_sxnd39_subscription_repl";
+	public static final String MSG6_SXND3F_NOTIFY             = "msg6_sxnd3f_notify";
+	public static final String MSG6_SXND70_DISCOVERY          = "msg6_sxnd70_discovery";
+	public static final String MSG6_SXND71_DISCOVERY_RESP     = "msg6_sxnd71_discovery_repl";
+	public static final String MSG6_SXND7E_INVAL_MUID         = "msg6_sxnd7e_inval_muid";
+	public static final String MSG6_SXND7F_NAK                = "msg6_sxnd7f_nak";
 	
 	// MessageClassifier: message description
 	public static final String MSG_DESC_MEANING            = "msg_desc_meaning";
@@ -2558,6 +2594,7 @@ public class Dict {
 		set( MSG4_SX_NU_CANCEL,           "Cancel"                                         );
 		set( MSG4_SX_NU_NAK,              "NAK"                                            );
 		set( MSG4_SX_NU_ACK,              "ACK"                                            );
+		set( MSG4_SX_NU_MIDI_CI,          "MIDI 2.0 Capability Inquiry"                    );
 		set( MSG4_SX_RU_MIDI_TIME_CODE,   "MIDI Time Code"                                 );
 		set( MSG4_SX_RU_MIDI_SHOW_CTRL,   "MIDI Show Control"                              );
 		set( MSG4_SX_RU_NOTATION_INFO,    "Notation Information"                           );
@@ -2619,6 +2656,11 @@ public class Dict {
 		set( MSG5_SXNB_OPEN_SEL_CONT,     "Open File and Select Contents"                  );
 		set( MSG5_SXNB_CLOSE_FILE,        "Close File"                                     );
 		set( MSG5_SXNC_MVC_CMD,           "MVC Command"                                    );
+		set( MSG5_SXND_CI_RESERVED,       "Reserved"                                       );
+		set( MSG5_SXND_CI_PROTO_NEGO,     "Protocol Negotiation"                           );
+		set( MSG5_SXND_CI_PROF_CONF,      "Profile Configuration"                          );
+		set( MSG5_SXND_CI_PROP_EXCH,      "Property Exchange"                              );
+		set( MSG5_SXND_CI_MGMT_MSG,       "Management"                                     );
 		set( MSG5_SXR1_FULL_MSG,          "Full Message (Full Frame)"                      );
 		set( MSG5_SXR1_USER_BITS,         "User Bits"                                      );
 		set( MSG5_SXR2_MSC_EXT,           "MSC Extensions"                                 );
@@ -2665,6 +2707,34 @@ public class Dict {
 		set( MSG5_SXR9_CHANNEL_PRESSURE,  "Channel Pressure (Aftertouch)"                  );
 		set( MSG5_SXR9_POLY_KEY_PRESSURE, "Polyphonic Key Pressure (Aftertouch)"           );
 		set( MSG5_SXR9_CTRL,              "Controller (Control Change)"                    );
+		set( MSG6_SXND10_INIT_PROTO_NEGO,   "Initiate Protocol Negotiation"                );
+		set( MSG6_SXND11_INIT_PROTO_REPL,   "Reply to Initiate Protocol Negotiation"       );
+		set( MSG6_SXND12_SET_NEW_PROTO,     "Set New Select Protocol"                      );
+		set( MSG6_SXND13_TEST_NEW_PROT_ITR, "Test New Protocol Initiator to Responder"     );
+		set( MSG6_SXND14_TEST_NEW_PROT_RTI, "Test New Protocol Responder to Initiator"     );
+		set( MSG6_SXND15_CONF_NEW_PROT_EST, "Confirmation Protocol Established"            );
+		set( MSG6_SXND20_PROF_INQ,          "Profile Inquiry"                              );
+		set( MSG6_SXND21_PROF_INQ_REPL,     "Reply to Profile Inquiry"                     );
+		set( MSG6_SXND22_SET_PROF_ON,       "Set Profile On"                               );
+		set( MSG6_SXND23_SET_PROF_OFF,      "Set Profile Off"                              );
+		set( MSG6_SXND24_PROF_ENABL_RPRT,   "Profile Enabled Report"                       );
+		set( MSG6_SXND25_PROF_DISABL_RPRT,  "Profile Disabled Report"                      );
+		set( MSG6_SXND2F_PROF_SPEC_DATA,    "Profile Specific Data"                        );
+		set( MSG6_SXND30_PROP_EXCH_CAP_INQ,  "Inquiry: Property Exchange Capabilities"     );
+		set( MSG6_SXND31_PROP_EXCH_CAP_REPL, "Reply to Property Exchange Capabilities"     );
+		set( MSG6_SXND32_HAS_PROP_DATA_INQ,  "Inquiry: Has Property Data (Reserved)"       );
+		set( MSG6_SXND33_HAS_PROP_DATA_REPL, "Reply to Has Property Data (Reserved)"       );
+		set( MSG6_SXND34_GET_PROP_DATA_INQ,  "Inquiry: Get Property Data"                  );
+		set( MSG6_SXND35_GET_PROP_DATA_REPL, "Reply to Get Property Data"                  );
+		set( MSG6_SXND36_SET_PROP_DATA_INQ,  "Inquiry: Set Property Data"                  );
+		set( MSG6_SXND37_SET_PROP_DATA_REPL, "Reply to Set Property Data"                  );
+		set( MSG6_SXND38_SUBSCRIPTION,       "Subscription"                                );
+		set( MSG6_SXND39_SUBSCRIPTION_REPL,  "Reply to Subscription"                       );
+		set( MSG6_SXND3F_NOTIFY,             "Notify"                                      );
+		set( MSG6_SXND70_DISCOVERY,          "Discovery"                                   );
+		set( MSG6_SXND71_DISCOVERY_RESP,     "Reply to Discovery"                          );
+		set( MSG6_SXND7E_INVAL_MUID,         "Invalidate MUID"                             );
+		set( MSG6_SXND7F_NAK,                "NAK"                                         );
 		
 		// MessageClassifier: message description
 		set( MSG_DESC_MEANING,            "Meaning: "                                      );
