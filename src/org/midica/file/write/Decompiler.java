@@ -25,6 +25,7 @@ import javax.sound.midi.MidiEvent;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.Track;
 
+import org.midica.config.Cli;
 import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.Instrument;
@@ -234,9 +235,10 @@ public abstract class Decompiler extends Exporter {
 	protected abstract TreeMap<Long, String> initRestLengths();
 	
 	/**
-	 * Exports a MidicaPL source file.
+	 * Decompiles a MIDI sequence and writes the result either into the given file
+	 * or to the standard output.
 	 * 
-	 * @param  file  MidicaPL source file.
+	 * @param  file    target file to be written.
 	 * @return warnings that occured during the export.
 	 * @throws ExportException if the file can not be exported correctly.
 	 */
@@ -250,14 +252,22 @@ public abstract class Decompiler extends Exporter {
 		
 		try {
 			
-			// create file writer and store it in this.writer
-			if ( ! createFile(file) )
-				return new ExportResult(false);
-			
-			// open file for writing
-			FileOutputStream   fos    = new FileOutputStream(file);
-			OutputStreamWriter osw    = new OutputStreamWriter(fos, targetCharset);
-			BufferedWriter     writer = new BufferedWriter(osw);
+			// file or STDOUT?
+			OutputStreamWriter osw;
+			if (null == file && Cli.exportToStdout) {
+				osw = new OutputStreamWriter(System.out, targetCharset);
+			}
+			else {
+				// create file writer and store it in this.writer
+				if ( ! createFile(file) )
+					return new ExportResult(false);
+				
+				// open file for writing
+				FileOutputStream fos = new FileOutputStream(file);
+				osw  = new OutputStreamWriter(fos, targetCharset);
+				BufferedWriter writer = new BufferedWriter(osw);
+			}
+			BufferedWriter writer = new BufferedWriter(osw);
 			
 			// get pre-parsed data structures
 			HashMap<String, Object> histories = SequenceAnalyzer.getHistories();

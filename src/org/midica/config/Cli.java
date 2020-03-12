@@ -32,13 +32,12 @@ public class Cli {
 	/** Determins if the process shall stay alive (or exit) after all cli-related work is done. */
 	public static boolean keepAlive = true;
 	
-	public static String  exportErrorMsg = null;
-	
 	// import/export related fields
 	public  static boolean useSoundfont   = false;
 	public  static boolean isImport       = false;
 	public  static boolean isExport       = false;
 	public  static boolean exportToStdout = false;
+	public  static String  exportErrorMsg = null;
 	private static String  soundfontPath  = null;
 	private static String  importPathMpl  = null;
 	private static String  importPathMidi = null;
@@ -258,6 +257,8 @@ public class Cli {
 			importType = null;
 		}
 		if (importPath != null && importType != null) {
+			
+			// import
 			File importFile = new File(importPath);
 			uiController.parseChosenFile(importType, importFile);
 			
@@ -274,22 +275,21 @@ public class Cli {
 	 * @param uiController    the UI controller
 	 */
 	public static void exportFile(UiController uiController) {
-		String  exportPath;
-		String  exportType;
-		boolean toStdout = false;
+		String exportPath;
+		String exportType;
 		if (exportPathMpl != null) {
-			exportPath = exportPathMpl;
-			exportType = FileSelector.FILE_TYPE_MPL;
-			toStdout   = "-".equals(exportPath);
+			exportPath     = exportPathMpl;
+			exportType     = FileSelector.FILE_TYPE_MPL;
+			exportToStdout = "-".equals(exportPath);
 		}
 		else if (exportPathMidi != null) {
 			exportPath = exportPathMidi;
 			exportType = FileSelector.FILE_TYPE_MIDI;
 		}
 		else if (exportPathAlda != null) {
-			exportPath = exportPathMidi;
-			exportType = FileSelector.FILE_TYPE_ALDA;
-			toStdout   = "-".equals(exportPath);
+			exportPath     = exportPathAlda;
+			exportType     = FileSelector.FILE_TYPE_ALDA;
+			exportToStdout = "-".equals(exportPath);
 		}
 		else {
 			exportPath = null;
@@ -297,12 +297,12 @@ public class Cli {
 		}
 		if (exportPath != null && exportType != null) {
 			File exportFile;
-			if (toStdout)
+			if (exportToStdout)
 				exportFile = null;
 			else
 				exportFile = new File(exportPath);
 			
-			// TODO: STDOUT (toStdout)
+			// export
 			uiController.exportChosenFile(exportType, exportFile);
 			
 			// export failed?
