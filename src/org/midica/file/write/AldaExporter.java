@@ -8,8 +8,6 @@
 package org.midica.file.write;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
@@ -30,6 +28,7 @@ public class AldaExporter extends Decompiler {
 	private int                          currentSliceNumber = 0;
 	private Instrument                   currentInstrument  = null;
 	private TreeMap<Instrument, Integer> usedInSlice        = new TreeMap<>();
+	private String                       currentKeySig      = "0/0";
 //	private HashSet<Byte>               usedChannels    = new HashSet<>();
 //	private HashMap<String, Instrument> usedInstruments = new HashMap<>();
 	
@@ -81,7 +80,6 @@ public class AldaExporter extends Decompiler {
 		
 		// SLICE:
 		for (Slice slice : slices) {
-			currentSliceNumber++;
 			
 			// if necessary: add rest from current tick to the slice's begin tick
 			output.append( createRestBeforeSlice(slice) );
@@ -103,6 +101,8 @@ public class AldaExporter extends Decompiler {
 				// normal commands
 				output.append( createCommandsFromTimeline(slice, channel) );
 			}
+			
+			currentSliceNumber++;
 		}
 		
 		// config
@@ -452,7 +452,7 @@ public class AldaExporter extends Decompiler {
 //	}
 	
 	/**
-	 * Synchronizes all instruments and creates a string with global commands for the given slice.
+	 * Creates a string with global commands for the given slice.
 	 * 
 	 * Global commands are:
 	 * 
@@ -466,22 +466,18 @@ public class AldaExporter extends Decompiler {
 	private String createGlobalCommands(Slice slice) {
 		StringBuilder result = new StringBuilder("");
 		
-		// synchronize: set all channels to the highest tick
-		// TODO: use instrumentsByName instead
-		// TODO: move down
-		long maxTick = Instrument.getMaxCurrentTicks(instrumentsByChannel);
-		for (Instrument instr : instrumentsByChannel) {
-			instr.setCurrentTicks(maxTick);
-		}
-		
 		// tick comment
 //		result.append( createTickComment(slice.getBeginTick(), false) );
+		
+		result.append(NEW_LINE);
+		result.append("# SLICE " + currentSliceNumber);
+		result.append(NEW_LINE + NEW_LINE);
 		
 		// create global commands
 		TreeMap<String, String> globalCmds = slice.getGlobalCommands();
 		if (0 == globalCmds.size()) {
 			if (slice.getBeginTick() > 0) {
-				result.append(MidicaPLParser.GLOBAL + NEW_LINE + NEW_LINE);
+				// nothing more to do
 			}
 		}
 		else {
@@ -489,14 +485,22 @@ public class AldaExporter extends Decompiler {
 				String value = globalCmds.get(cmdId);
 				
 				// get global command
-				String globalCmd = MidicaPLParser.TEMPO;
-				if ("time".equals(cmdId))
-					globalCmd = MidicaPLParser.TIME_SIG;
-				else if ("key".equals(cmdId))
-					globalCmd = MidicaPLParser.KEY_SIG;
+				String globalCmd;
+				if ("tempo".equals(cmdId)) {
+					globalCmd = "tempo";
+				}
+				else if ("key".equals(cmdId)) {
+					globalCmd     = "key-signature";
+					currentKeySig = value;
+					value         = getKeySignature(value);
+					initNoteNames();
+				}
+				else {
+					continue;
+				}
 				
 				// append command
-				result.append(MidicaPLParser.GLOBAL + "\t" + globalCmd + "\t" + value + NEW_LINE);
+				result.append("(" + globalCmd + "! " + value + ")");
 			}
 			result.append(NEW_LINE);
 		}
@@ -1066,6 +1070,8 @@ public class AldaExporter extends Decompiler {
 		noteNames.clear();
 		noteOctaves.clear();
 		
+		// TODO: use currentKeySig
+		
 		ArrayList<String> baseNotes = new ArrayList<>();
 		baseNotes.add("c");
 		baseNotes.add("c+");
@@ -1095,5 +1101,64 @@ public class AldaExporter extends Decompiler {
 			}
 			oct++;
 		}
+	}
+	
+	// TODO: docu
+	private String getKeySignature(String raw) {
+		
+		String[] parts = raw.split("/", 2);
+		
+		int sharpsOrFlats = Integer.parseInt(parts[0]);
+		int tonality      = Integer.parseInt(parts[1]);
+		
+		// tonality
+		boolean isMajor     = 0 == tonality;
+		boolean isMinor     = 1 == tonality;
+		int     note        = -1;
+		String  noteStr     = null;
+		String  tonalityStr = null;
+		
+		if (isMajor) {
+			tonalityStr = "major";
+			if      (0  == sharpsOrFlats) noteStr = "c";        // C maj
+			else if (1  == sharpsOrFlats) noteStr = "g";        // G maj
+			else if (2  == sharpsOrFlats) noteStr = "d";        // D maj
+			else if (3  == sharpsOrFlats) noteStr = "a";        // A maj
+			else if (4  == sharpsOrFlats) noteStr = "e";        // E maj
+			else if (5  == sharpsOrFlats) noteStr = "b";        // B maj
+			else if (6  == sharpsOrFlats) noteStr = "f :sharp"; // F# maj
+			else if (7  == sharpsOrFlats) noteStr = "c :sharp"; // C# maj
+			else if (-1 == sharpsOrFlats) noteStr = "f";        // F maj
+			else if (-2 == sharpsOrFlats) noteStr = "b :flat";  // Bb maj
+			else if (-3 == sharpsOrFlats) noteStr = "e :flat";  // Eb maj
+			else if (-4 == sharpsOrFlats) noteStr = "a :flat";  // Ab maj
+			else if (-5 == sharpsOrFlats) noteStr = "d :flat";  // Db maj
+			else if (-6 == sharpsOrFlats) noteStr = "g :flat";  // Gb maj
+			else if (-7 == sharpsOrFlats) noteStr = "c :flat";  // Cb maj
+		}
+		else if (isMinor) {
+			tonalityStr = "minor";
+			if      (0  == sharpsOrFlats) noteStr = "a";        // A min
+			else if (1  == sharpsOrFlats) noteStr = "e";        // E min
+			else if (2  == sharpsOrFlats) noteStr = "b";        // B min
+			else if (3  == sharpsOrFlats) noteStr = "f :sharp"; // F# min
+			else if (4  == sharpsOrFlats) noteStr = "c :sharp"; // C# min
+			else if (5  == sharpsOrFlats) noteStr = "g :sharp"; // G# min
+			else if (6  == sharpsOrFlats) noteStr = "d :sharp"; // D# min
+			else if (7  == sharpsOrFlats) noteStr = "a :sharp"; // A# min
+			else if (-1 == sharpsOrFlats) noteStr = "d";        // D min
+			else if (-2 == sharpsOrFlats) noteStr = "g";        // G min
+			else if (-3 == sharpsOrFlats) noteStr = "c";        // C min
+			else if (-4 == sharpsOrFlats) noteStr = "f";        // F min
+			else if (-5 == sharpsOrFlats) noteStr = "b :flat";  // Bb min
+			else if (-6 == sharpsOrFlats) noteStr = "e :flat";  // Eb min
+			else if (-7 == sharpsOrFlats) noteStr = "a :flat";  // Ab min
+		}
+		
+		// invalid?
+		if (null == noteStr || null == tonalityStr)
+			return null;
+		
+		return "[:" + noteStr + " :" + tonalityStr + "]";
 	}
 }

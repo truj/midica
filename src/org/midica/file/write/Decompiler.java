@@ -607,6 +607,8 @@ public abstract class Decompiler extends Exporter {
 						String[] noteAndTonality = MessageClassifier.getKeySignature(sharpsOrFlats, tonality);
 						cmdId = "key";
 						value = noteAndTonality[0] + MidicaPLParser.KEY_SEPARATOR + noteAndTonality[1];
+						if (ALDA == format)
+							value = sharpsOrFlats + "/" + tonality;
 					}
 					else if (MidiListener.META_TIME_SIGNATURE == type) {
 						int numerator   = data[0];
@@ -614,6 +616,8 @@ public abstract class Decompiler extends Exporter {
 						int denominator = (int) Math.pow(2, exp);
 						cmdId           = "time";
 						value           = numerator + MidicaPLParser.TIME_SIG_SLASH + denominator;
+						if (ALDA == format) // not supported?
+							continue;
 					}
 					
 					// global command found?
