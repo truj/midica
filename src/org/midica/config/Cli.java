@@ -206,7 +206,7 @@ public class Cli {
 		msg.append("--import-midi=PATH    : Import from the specified MIDI file.\n");
 		msg.append("--export-midi=PATH    : Export to the specified MIDI file.\n");
 		msg.append("--export=PATH         : Export to the specified MidicaPL file. (*)\n");
-//		msg.append("--export-alda=PATH    : Export to the specified ALDA file. (*)\n");
+		msg.append("--export-alda=PATH    : Export to the specified ALDA file. (*)\n");
 		msg.append("\n");
 		msg.append("(*) A file is exported to STDOUT if the export PATH is a dash (-).\n");
 		msg.append("    E.g. --export=-");

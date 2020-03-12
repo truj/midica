@@ -32,6 +32,7 @@ import org.midica.file.read.MidicaPLParser;
 import org.midica.file.read.ParseException;
 import org.midica.file.read.SequenceParser;
 import org.midica.file.read.SoundfontParser;
+import org.midica.file.write.AldaExporter;
 import org.midica.file.write.ExportException;
 import org.midica.file.write.Exporter;
 import org.midica.file.write.MidiExporter;
@@ -454,9 +455,9 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			charsetKey = Config.CHARSET_EXPORT_MPL;
 			exporter   = new MidicaPLExporter();
 		}
-//		else if (FileSelector.FILE_TYPE_ALDA.equals(type)) {
-//			exporter = new AldaExporter();
-//		}
+		else if (FileSelector.FILE_TYPE_ALDA.equals(type)) {
+			exporter = new AldaExporter();
+		}
 		else if (FileSelector.FILE_TYPE_MIDI.equals(type)) {
 			selector   = midiExportSelector;
 			charsetKey = Config.CHARSET_EXPORT_MID;
