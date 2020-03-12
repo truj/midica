@@ -13,6 +13,7 @@ import java.io.IOException;
 import javax.swing.JOptionPane;
 
 import org.midica.Midica;
+import org.midica.config.Cli;
 import org.midica.config.Dict;
 import org.midica.ui.file.ExportResult;
 
@@ -35,32 +36,36 @@ public abstract class Exporter {
 	 * @return true, if the file can be written. Otherwise: false.
 	 * @throws ExportException if the file is not writable.
 	 */
-	protected boolean createFile( File file ) throws ExportException {
+	protected boolean createFile(File file) throws ExportException {
 		
 		try {
-    		
 			// file exists already?
     		if ( ! file.createNewFile() ) {
-    			int mayOverwrite = ConfirmDialog.confirm(
-    				Midica.uiController.getView(),
-    				Dict.get(Dict.OVERWRITE_FILE),
-    				Dict.get(Dict.TITLE_CONFIRMATION)
-    			);
-    			if ( JOptionPane.YES_OPTION != mayOverwrite )
+    			int mayOverwrite;
+    			if (Cli.isCliMode) {
+    				mayOverwrite = JOptionPane.YES_OPTION;
+    			}
+    			else {
+	    			mayOverwrite = ConfirmDialog.confirm(
+	    				Midica.uiController.getView(),
+	    				Dict.get(Dict.OVERWRITE_FILE),
+	    				Dict.get(Dict.TITLE_CONFIRMATION)
+	    			);
+    			}
+    			if (mayOverwrite != JOptionPane.YES_OPTION)
     				return false;
     		}
     		
     		// writable
     		if ( ! file.canWrite() )
-    			throw new ExportException( Dict.get(Dict.ERROR_FILE_NOT_WRITABLE) );
+    			throw new ExportException(Dict.get(Dict.ERROR_FILE_NOT_WRITABLE));
     		
     		return true;
     		
 		}
-		catch ( IOException e ) {
-			throw new ExportException( e.getMessage() );
+		catch (IOException e) {
+			throw new ExportException(e.getMessage());
 		}
-		
 	}
 	
 	/**
@@ -70,5 +75,5 @@ public abstract class Exporter {
 	 * @return                   Warnings that occured during the export.
 	 * @throws  ExportException  If the file can not be exported correctly.
 	 */
-	public abstract ExportResult export( File file ) throws ExportException;
+	public abstract ExportResult export(File file) throws ExportException;
 }

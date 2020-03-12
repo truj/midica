@@ -59,15 +59,15 @@ public class SoundfontParser implements IParser {
 	 * @param file             Soundfont file chosen by the user.
 	 * @throws ParseException  If the file can not be loaded correctly.
 	 */
-	public void parse( File file ) throws ParseException {
+	public void parse(File file) throws ParseException {
 		
 		// reset file - in case the parsing fails
 		soundfontFile = null;
 		
 		try {
 			// load the soundfont
-			soundfont = MidiSystem.getSoundbank( file );
-			MidiDevices.setSoundfont( soundfont );
+			soundfont = MidiSystem.getSoundbank(file);
+			MidiDevices.setSoundfont(soundfont);
 			
 			// read it and build up data structures
 			parseSoundfontInstruments();
@@ -77,11 +77,11 @@ public class SoundfontParser implements IParser {
 			// parsing successful - save the file info
 			soundfontFile = file;
 		}
-		catch ( InvalidMidiDataException e ) {
-			throw new ParseException( e.getMessage() );
+		catch (InvalidMidiDataException e) {
+			throw new ParseException(e.getMessage());
 		}
-		catch ( IOException e ) {
-			throw new ParseException( e.getMessage() );
+		catch (IOException e) {
+			throw new ParseException(e.getMessage());
 		}
 	}
 	
@@ -93,7 +93,7 @@ public class SoundfontParser implements IParser {
 	 * @return the soundfont file name or **null**.
 	 */
 	public static String getFileName() {
-		if ( null == soundfontFile ) {
+		if (null == soundfontFile) {
 			return null;
 		}
 		return soundfontFile.getName();
@@ -107,7 +107,7 @@ public class SoundfontParser implements IParser {
 	 * @return the soundfont file path or **null**.
 	 */
 	public static String getFilePath() {
-		if ( null == soundfontFile ) {
+		if (null == soundfontFile) {
 			return null;
 		}
 		try {
@@ -126,14 +126,14 @@ public class SoundfontParser implements IParser {
 	public static HashMap<String, String> getSoundfontInfo() {
 		
 		// parse, if not yet done
-		if ( null == generalInfo ) {
+		if (null == generalInfo) {
 			
 			// The soundfont info parsing relies on the other data structures.
 			// so we have to parse them first, before building up the info
 			// structure itself.
-			if (  null == soundfontInstruments )
+			if (null == soundfontInstruments)
 				parseSoundfontInstruments();
-			if ( null == soundfontResources )
+			if (null == soundfontResources)
 				parseSoundfontResources();
 			
 			// Now we can parse the info.
@@ -151,7 +151,7 @@ public class SoundfontParser implements IParser {
 	public static ArrayList<HashMap<String, String>> getSoundfontInstruments() {
 		
 		// parse, if not yet done
-		if ( null == soundfontInstruments )
+		if (null == soundfontInstruments)
 			parseSoundfontInstruments();
 		
 		return soundfontInstruments;
@@ -164,7 +164,7 @@ public class SoundfontParser implements IParser {
 	 */
 	public static ArrayList<HashMap<String, Object>> getSoundfontResources() {
 		// parse, if not yet done
-		if ( null == soundfontResources )
+		if (null == soundfontResources)
 			parseSoundfontResources();
 		
 		return soundfontResources;
@@ -179,7 +179,7 @@ public class SoundfontParser implements IParser {
 		Soundbank soundfont = MidiDevices.getSoundfont();
 		
 		// no soundfont loaded?
-		if ( null == soundfont ) {
+		if (null == soundfont) {
 			generalInfo.put( "name",                     "-" );
 			generalInfo.put( "version",                  "-" );
 			generalInfo.put( "vendor",                   "-" );
@@ -206,7 +206,7 @@ public class SoundfontParser implements IParser {
 		}
 		
 		// get general information
-		String unknown     = Dict.get( Dict.UNKNOWN );
+		String unknown     = Dict.get(Dict.UNKNOWN);
 		String name        = soundfont.getName();
 		String version     = soundfont.getVersion();
 		String vendor      = soundfont.getVendor();
@@ -247,16 +247,16 @@ public class SoundfontParser implements IParser {
 		int drumSingleCount   = 0;
 		int drumMultiCount    = 0;
 		int unknownInstrCount = 0;
-		if ( soundfontInstruments != null ) {
-			for ( HashMap<String, String> instrument : soundfontInstruments ) {
-				String type = instrument.get( "type" );
-				if ( "chromatic".equals(type) )
+		if (soundfontInstruments != null) {
+			for (HashMap<String, String> instrument : soundfontInstruments) {
+				String type = instrument.get("type");
+				if ("chromatic".equals(type))
 					chromaticCount++;
-				else if ( "drumkit_single".equals(type) )
+				else if ("drumkit_single".equals(type))
 					drumSingleCount++;
-				else if ( "drumkit_multi".equals(type) )
+				else if ("drumkit_multi".equals(type))
 					drumMultiCount++;
-				else if ( "-".equals(type) )
+				else if ("-".equals(type))
 					unknownInstrCount++;
 			}
 		}
@@ -272,29 +272,29 @@ public class SoundfontParser implements IParser {
 		long   framesCount     = 0;
 		double secondsCount    = 0;
 		long   bytesCount      = 0;
-		if ( soundfontResources != null ) {
-			for ( HashMap<String, Object> resource : soundfontResources ) {
-				String type = (String) resource.get( "type" );
-				if ( "Layer".equals(type) )
+		if (soundfontResources != null) {
+			for (HashMap<String, Object> resource : soundfontResources) {
+				String type = (String) resource.get("type");
+				if ("Layer".equals(type))
 					layerCount++;
-				else if ( "Sample".equals(type) )
+				else if ("Sample".equals(type))
 					sampleCount++;
-				else if ( "-".equals(type) )
+				else if ("-".equals(type))
 					unknownResCount++;
 				
 				// count frames, seconds and bytes
-				if ( "Sample".equals(type) ) {
+				if ("Sample".equals(type)) {
 					
-					Object frames = resource.get( "frame_length" );
-					if ( frames != null )
+					Object frames = resource.get("frame_length");
+					if (frames != null)
 						framesCount += (Long) frames;
 					
-					Object seconds = resource.get( "seconds" );
-					if ( seconds != null )
+					Object seconds = resource.get("seconds");
+					if (seconds != null)
 						secondsCount += (Double) seconds;
 					
-					Object bytes = resource.get( "bytes" );
-					if ( bytes != null )
+					Object bytes = resource.get("bytes");
+					if (bytes != null)
 						bytesCount += (Long) bytes;
 				}
 			}
@@ -313,17 +313,17 @@ public class SoundfontParser implements IParser {
 		try {
 			avgFrames = (float) framesCount / sampleCount;
 		}
-		catch ( ArithmeticException e ) {
+		catch (ArithmeticException e) {
 		}
 		try {
 			avgSeconds = secondsCount / sampleCount;
 		}
-		catch ( ArithmeticException e ) {
+		catch (ArithmeticException e) {
 		}
 		try {
 			avgBytes = (float) framesCount / sampleCount;
 		}
-		catch ( ArithmeticException e ) {
+		catch (ArithmeticException e) {
 		}
 		generalInfo.put( "frames_avg",  String.format("%.2f", avgFrames)  );
 		generalInfo.put( "seconds_avg", String.format("%.2f", avgSeconds) );
@@ -346,16 +346,16 @@ public class SoundfontParser implements IParser {
 		boolean needCategoryUnknown       = false;
 		
 		// no soundfont loaded?
-		if ( null == soundfont )
+		if (null == soundfont)
 			return;
 		
 		// collect instruments
 		Instrument[] instruments = soundfont.getInstruments();
-		for ( int i=0; i < instruments.length; i++ ) {
+		for (int i=0; i < instruments.length; i++) {
 			
 			// add general instrument data
 			HashMap<String, String> instrument = new HashMap<String, String>();
-			soundfontInstruments.add( instrument );
+			soundfontInstruments.add(instrument);
 			Instrument midiInstr = instruments[ i ];
 			Patch      patch     = midiInstr.getPatch();
 			int        bank      = patch.getBank();
@@ -370,10 +370,10 @@ public class SoundfontParser implements IParser {
 			
 			// prepare syntax
 			String syntaxDrum = Dict.getDrumkit(program);
-			if ( Dict.get(Dict.UNKNOWN_INSTRUMENT).equals(syntaxDrum) )
+			if (Dict.get(Dict.UNKNOWN_INSTRUMENT).equals(syntaxDrum))
 				syntaxDrum = instrument.get("program");
 			String syntaxChrom = Dict.getInstrument(program);
-			if ( Dict.get(Dict.UNKNOWN_DRUMKIT_NAME).equals(syntaxChrom) )
+			if (Dict.get(Dict.UNKNOWN_DRUMKIT_NAME).equals(syntaxChrom))
 				syntaxChrom = instrument.get("program");
 			String postfix = "";
 			if (bankLsb != 0)
@@ -408,69 +408,69 @@ public class SoundfontParser implements IParser {
 			boolean            hasChromaticChannel = false;
 			boolean            hasDrumChannel      = false;
 			ArrayList<Integer> channels            = new ArrayList<Integer>();
-			for ( int channel = 0; channel < sf2Channels.length; channel++ ) {
+			for (int channel = 0; channel < sf2Channels.length; channel++) {
 				
 				// channel not supported?
 				if ( ! sf2Channels[channel] )
 					continue;
 				
 				// remember the channel
-				channels.add( channel );
+				channels.add(channel);
 				
 				// remember if channel 9 or another one is supported
-				if ( 9 == channel )
+				if (9 == channel)
 					hasDrumChannel = true;
 				else
 					hasChromaticChannel = true;
 			}
-			instrument.put( "channels", makeNumberRangeString(channels) ); // e.g. "0-9,10-15"
+			instrument.put("channels", makeNumberRangeString(channels)); // e.g. "0-9,10-15"
 			StringBuilder channelsStr = new StringBuilder();
-			for ( int channel : channels ) {
-				if ( 0 == channelsStr.length() )
-					channelsStr.append( channel );
+			for (int channel : channels) {
+				if (0 == channelsStr.length())
+					channelsStr.append(channel);
 				else
-					channelsStr.append( "," + channel );
+					channelsStr.append("," + channel);
 			}
-			instrument.put( "channels_long", channelsStr.toString() ); // e.g. "0,1,2,3,4,5,6,7,8,10,11,12,13,14,15"
+			instrument.put("channels_long", channelsStr.toString()); // e.g. "0,1,2,3,4,5,6,7,8,10,11,12,13,14,15"
 			
 			// add syntax name
 			String syntax = hasDrumChannel ? syntaxDrum : syntaxChrom;
-			instrument.put( "syntax", syntax );
+			instrument.put("syntax", syntax);
 			
 			// process keys
 			ArrayList<Integer> keys = new ArrayList<Integer>();
-			for ( int key = 0; key < sf2keys.length; key++ ) {
+			for (int key = 0; key < sf2keys.length; key++) {
 				
 				// key not available?
-				if ( null == sf2keys[key] )
+				if (null == sf2keys[key])
 					continue;
 				
 				// remember the key
-				keys.add( key );
+				keys.add(key);
 			}
-			instrument.put( "keys", makeNumberRangeString(keys) );
+			instrument.put("keys", makeNumberRangeString(keys));
 			
 			// Get the type: chromatic, single channel drum kit
 			// or multi channel drum kit.
-			if ( hasDrumChannel && hasChromaticChannel ) {
+			if (hasDrumChannel && hasChromaticChannel) {
 				needCategoryDrumkitMulti = true;
-				instrument.put( "type", "drumkit_multi" );
+				instrument.put("type", "drumkit_multi");
 				continue;
 			}
-			else if ( hasDrumChannel && ! hasChromaticChannel ) {
+			else if (hasDrumChannel && ! hasChromaticChannel) {
 				needCategoryDrumkitSingle = true;
-				instrument.put( "type", "drumkit_single" );
+				instrument.put("type", "drumkit_single");
 				continue;
 			}
-			else if ( hasChromaticChannel && ! hasDrumChannel ) {
+			else if (hasChromaticChannel && ! hasDrumChannel) {
 				needCategoryChromatic = true;
-				instrument.put( "type", "chromatic" );
+				instrument.put("type", "chromatic");
 				continue;
 			}
 			
 			// no channels at all
 			needCategoryUnknown = true;
-			instrument.put( "type", "-" );
+			instrument.put("type", "-");
 		}
 		
 		// add categories
@@ -479,28 +479,28 @@ public class SoundfontParser implements IParser {
 			category.put( "category", "category" );
 			category.put( "type",     "category_chromatic" );
 			category.put( "name",     Dict.get(Dict.SF_INSTR_CAT_CHROMATIC) );
-			soundfontInstruments.add( category );
+			soundfontInstruments.add(category);
 		}
 		if (needCategoryDrumkitSingle) {
 			HashMap<String, String> category = new HashMap<String, String>();
 			category.put( "category", "category" );
 			category.put( "type",     "category_drumkit_single" );
 			category.put( "name",     Dict.get(Dict.SF_INSTR_CAT_DRUMKIT_SINGLE) );
-			soundfontInstruments.add( category );
+			soundfontInstruments.add(category);
 		}
 		if (needCategoryDrumkitMulti) {
 			HashMap<String, String> category = new HashMap<String, String>();
 			category.put( "category", "category" );
 			category.put( "type",     "category_drumkit_multi" );
 			category.put( "name",     Dict.get(Dict.SF_INSTR_CAT_DRUMKIT_MULTI) );
-			soundfontInstruments.add( category );
+			soundfontInstruments.add(category);
 		}
 		if (needCategoryUnknown) {
 			HashMap<String, String> category = new HashMap<String, String>();
 			category.put( "category", "category" );
 			category.put( "type",     "category_unknown" );
 			category.put( "name",     Dict.get(Dict.SF_INSTR_CAT_UNKNOWN) );
-			soundfontInstruments.add( category );
+			soundfontInstruments.add(category);
 		}
 		
 		// sort instruments
@@ -524,37 +524,37 @@ public class SoundfontParser implements IParser {
 			}
 			
 			@Override
-			public int compare( HashMap<String, String> instrA, HashMap<String, String> instrB ) {
+			public int compare(HashMap<String, String> instrA, HashMap<String, String> instrB) {
 				
 				// first priority: type
-				int priorityA = typePriority.get( instrA.get("type") );
-				int priorityB = typePriority.get( instrB.get("type") );
-				if ( priorityA > priorityB )
+				int priorityA = typePriority.get(instrA.get("type"));
+				int priorityB = typePriority.get(instrB.get("type"));
+				if (priorityA > priorityB)
 					return -1;
-				else if ( priorityA < priorityB )
+				else if (priorityA < priorityB)
 					return 1;
 				
 				// second priority: program number
-				int programA = Integer.parseInt( instrA.get("program") );
-				int programB = Integer.parseInt( instrB.get("program") );
-				if ( programA < programB )
+				int programA = Integer.parseInt(instrA.get("program"));
+				int programB = Integer.parseInt(instrB.get("program"));
+				if (programA < programB)
 					return -1;
-				else if ( programA > programB )
+				else if (programA > programB)
 					return 1;
 				
 				// third priority: bank number
-				int bankA = Integer.parseInt( instrA.get("bank") );
-				int bankB = Integer.parseInt( instrB.get("bank") );
-				if ( bankA < bankB )
+				int bankA = Integer.parseInt(instrA.get("bank"));
+				int bankB = Integer.parseInt(instrB.get("bank"));
+				if (bankA < bankB)
 					return -1;
-				else if ( bankA > bankB )
+				else if (bankA > bankB)
 					return 1;
 				
 				// default compare result
 				return 0;
 			}
 		};
-		Collections.sort( soundfontInstruments, instrumentComparator );
+		Collections.sort(soundfontInstruments, instrumentComparator);
 		
 		return;
 	}
@@ -572,15 +572,15 @@ public class SoundfontParser implements IParser {
 		boolean needCategoryUnknown = false;
 		
 		// no soundfont loaded?
-		if ( null == soundfont )
+		if (null == soundfont)
 			return;
 		
 		// collect resources
 		SoundbankResource[] resources = soundfont.getResources();
-		for ( int i=0; i < resources.length; i++ ) {
+		for (int i=0; i < resources.length; i++) {
 			
 			HashMap<String, Object> resource = new HashMap<String, Object>();
-			soundfontResources.add( resource );
+			soundfontResources.add(resource);
 			
 			// apply general information and defaults
 			resource.put( "index",        i );
@@ -591,13 +591,13 @@ public class SoundfontParser implements IParser {
 			resource.put( "format",       "-" );
 			resource.put( "frame_length", 0   );
 			String  classDesc      = resources[i].toString();
-			Pattern pattern        = Pattern.compile( "^(.+?):.*" );
-			Matcher matcher        = pattern.matcher( classDesc );
+			Pattern pattern        = Pattern.compile("^(.+?):.*");
+			Matcher matcher        = pattern.matcher(classDesc);
 			String  identifiedType = null;
-			if ( matcher.matches() ) {
-				String type = matcher.group( 1 );
-				if ( "Layer".equals(type) ) {
-					resource.put( "type", "Layer" );
+			if (matcher.matches()) {
+				String type = matcher.group(1);
+				if ("Layer".equals(type)) {
+					resource.put("type", "Layer");
 					needCategoryLayer = true;
 					identifiedType    = type;
 				}
@@ -605,7 +605,7 @@ public class SoundfontParser implements IParser {
 			
 			// apply null-class information
 			Class<?> dataClass = resources[ i ].getDataClass();
-			if ( null == dataClass ) {
+			if (null == dataClass) {
 				resource.put( "class",        "null" );
 				resource.put( "class_detail", "null" );
 			}
@@ -613,21 +613,21 @@ public class SoundfontParser implements IParser {
 			// apply class name information
 			else {
 				String fullClassName = dataClass.getCanonicalName();
-				Pattern classPattern = Pattern.compile( ".+\\.([^.]+)$" );
-				Matcher classMatcher = classPattern.matcher( fullClassName );
-				if ( classMatcher.matches() ) {
-					resource.put( "class", classMatcher.group(1) );
+				Pattern classPattern = Pattern.compile(".+\\.([^.]+)$");
+				Matcher classMatcher = classPattern.matcher(fullClassName);
+				if (classMatcher.matches()) {
+					resource.put("class", classMatcher.group(1));
 				}
 				else {
-					resource.put( "class", fullClassName );
+					resource.put("class", fullClassName);
 				}
-				resource.put( "class_detail", fullClassName );
+				resource.put("class_detail", fullClassName);
 			}
 			
 			// apply class-dependant information
-			if ( dataClass == AudioInputStream.class ) {
+			if (dataClass == AudioInputStream.class) {
 				
-				resource.put( "type", "Sample" );
+				resource.put("type", "Sample");
 				needCategorySample = true;
 				identifiedType     = "Sample";
 				
@@ -640,16 +640,16 @@ public class SoundfontParser implements IParser {
 				float            frameRate    = format.getFrameRate();
 				int              frameSize    = format.getFrameSize();
 				int              bitRate      = format.getSampleSizeInBits();
-				String           frameKHz     = String.format( "%.1f", frameRate / 1000 );
-				double           seconds      = ( frameCount + 0.0 ) / frameRate;
+				String           frameKHz     = String.format("%.1f", frameRate / 1000);
+				double           seconds      = (frameCount + 0.0) / frameRate;
 				int              channels     = format.getChannels();
 				long             bytes        = frameCount * frameSize * channels;
 				
 				// construct a frame length details field (for the frames tooltip text)
-				String lengthDetail = frameCount + " " + Dict.get( Dict.FRAMES ) + ", "
-				                    + String.format( "%.2f", seconds ) + " "
-				                    + Dict.get( Dict.SEC ) + ", "
-				                    + bytes + " " + Dict.get( Dict.BYTES );
+				String lengthDetail = frameCount + " " + Dict.get(Dict.FRAMES) + ", "
+				                    + String.format("%.2f", seconds) + " "
+				                    + Dict.get(Dict.SEC) + ", "
+				                    + bytes + " " + Dict.get(Dict.BYTES);
 				
 				// construct a format summary field (for the format tooltip text)
 				String monoStereo = 2 == channels ? "s" : "m"; // m=mono, s=stereo
@@ -668,12 +668,12 @@ public class SoundfontParser implements IParser {
 				try {
 	                stream.close();
                 }
-                catch ( IOException e ) {
+                catch (IOException e) {
                 }
 			}
 			
 			// We failed to guess the type?
-			if ( null == identifiedType )
+			if (null == identifiedType)
 				needCategoryUnknown = true;
 		}
 		
@@ -683,21 +683,21 @@ public class SoundfontParser implements IParser {
 			category.put( "category", "category" );
 			category.put( "type",     "category_sample" );
 			category.put( "name",     Dict.get(Dict.SF_RESOURCE_CAT_SAMPLE) );
-			soundfontResources.add( category );
+			soundfontResources.add(category);
 		}
 		if (needCategoryLayer) {
 			HashMap<String, Object> category = new HashMap<String, Object>();
 			category.put( "category", "category" );
 			category.put( "type",     "category_layer" );
 			category.put( "name",     Dict.get(Dict.SF_RESOURCE_CAT_LAYER) );
-			soundfontResources.add( category );
+			soundfontResources.add(category);
 		}
 		if (needCategoryUnknown) {
 			HashMap<String, Object> category = new HashMap<String, Object>();
 			category.put( "category", "category" );
 			category.put( "type",     "category_unknown" );
 			category.put( "name",     Dict.get(Dict.SF_RESOURCE_CAT_UNKNOWN) );
-			soundfontResources.add( category );
+			soundfontResources.add(category);
 		}
 		
 		// sort resources
@@ -719,29 +719,29 @@ public class SoundfontParser implements IParser {
 			}
 			
 			@Override
-			public int compare( HashMap<String, Object> resourceA, HashMap<String, Object> resourceB ) {
+			public int compare(HashMap<String, Object> resourceA, HashMap<String, Object> resourceB) {
 				
 				// first priority: type
-				int priorityA = typePriority.get( resourceA.get("type") );
-				int priorityB = typePriority.get( resourceB.get("type") );
-				if ( priorityA > priorityB )
+				int priorityA = typePriority.get(resourceA.get("type"));
+				int priorityB = typePriority.get(resourceB.get("type"));
+				if (priorityA > priorityB)
 					return -1;
-				else if ( priorityA < priorityB )
+				else if (priorityA < priorityB)
 					return 1;
 				
 				// second priority: index
 				int programA = (Integer) resourceA.get("index");
 				int programB = (Integer) resourceB.get("index");
-				if ( programA < programB )
+				if (programA < programB)
 					return -1;
-				else if ( programA > programB )
+				else if (programA > programB)
 					return 1;
 				
 				// default compare result
 				return 0;
 			}
 		};
-		Collections.sort( soundfontResources, instrumentComparator );
+		Collections.sort(soundfontResources, instrumentComparator);
 		
 		return;
 	}
@@ -755,7 +755,7 @@ public class SoundfontParser implements IParser {
 	 * @param list  Sorted list of numbers.
 	 * @return Compressed but still human-readable range string.
 	 */
-	private static String makeNumberRangeString( ArrayList<Integer> list ) {
+	private static String makeNumberRangeString(ArrayList<Integer> list) {
 		
 		String result = "";
 		
@@ -764,11 +764,11 @@ public class SoundfontParser implements IParser {
 		int lastSeen      = -1; // last number we saw in the list
 		
 		// walk through the list
-		for ( int i : list ) {
+		for (int i : list) {
 			
 			// very first number?
 			if (lastWritten < 0) {
-				result = Integer.toString( i );
+				result = Integer.toString(i);
 				lastWritten = i;
 				lastSeen    = i;
 				
@@ -776,7 +776,7 @@ public class SoundfontParser implements IParser {
 			}
 			
 			// normal incrementation?
-			if ( i == lastSeen + 1 ) {
+			if (i == lastSeen + 1) {
 				
 				// more numbers can follow. Do not yet write anything.
 				lastSeen = i;
@@ -787,8 +787,8 @@ public class SoundfontParser implements IParser {
 			// There was a gap.
 			
 			// Does the last range have only one number?
-			if ( lastSeen == lastWritten ) {
-				result      = result + ", " + Integer.toString( i );
+			if (lastSeen == lastWritten) {
+				result      = result + ", " + Integer.toString(i);
 				lastWritten = i;
 				lastSeen    = i;
 				
@@ -796,23 +796,23 @@ public class SoundfontParser implements IParser {
 			}
 			
 			// The last range had more than one number.
-			result      = result + "-" + Integer.toString( lastSeen ) + ", " + Integer.toString( i );
+			result      = result + "-" + Integer.toString(lastSeen) + ", " + Integer.toString(i);
 			lastWritten = i;
 			lastSeen    = i;
 		}
 		
 		// list was empty?
-		if ( lastWritten < 0 )
+		if (lastWritten < 0)
 			return result;
 		
 		// close the list
 		
 		// Does the last range have only one number?
-		if ( lastSeen == lastWritten )
+		if (lastSeen == lastWritten)
 			return result;
 		
 		// The last range had more than one number.
-		result = result + "-" + Integer.toString( lastSeen );
+		result = result + "-" + Integer.toString(lastSeen);
 		
 		return result;
 	}

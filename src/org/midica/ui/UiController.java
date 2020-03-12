@@ -445,7 +445,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	 * @param type  File type.
 	 * @param file  Selected file.
 	 */
-	private void exportChosenFile(String type, File file) {
+	public void exportChosenFile(String type, File file) {
 		
 		FileSelector selector   = decompileExportSelector;
 		String       charsetKey = null;
@@ -468,7 +468,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		selector.setVisible(false);
 		try {
 			ExportResult result = exporter.export(file);
-			if (result.isSuccessful()) {
+			if (result.isSuccessful() && ! Cli.isCliMode) {
 				showExportResult(result);
 				
 				// set chosen charset in the config
@@ -482,7 +482,10 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			}
 		}
 		catch (ExportException ex) {
-			showErrorMessage(ex.getErrorMessage());
+			if (Cli.isCliMode)
+				Cli.exportErrorMsg = ex.getErrorMessage();
+			else
+				showErrorMessage(ex.getErrorMessage());
 		}
 	}
 	
@@ -638,8 +641,10 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		synchronized(UiController.class) {
 			
 			// load soundfont, if needed
-			if ("true".equals(rememberSf) && ! soundfontPath.equals("")) {
-				parseChosenFile(FileSelector.FILE_TYPE_SOUNDFONT, new File(soundfontPath));
+			if (!Cli.useSoundfont) {
+				if ("true".equals(rememberSf) && ! soundfontPath.equals("")) {
+					parseChosenFile(FileSelector.FILE_TYPE_SOUNDFONT, new File(soundfontPath));
+				}
 			}
 			
 			if (Cli.isImport) {

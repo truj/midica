@@ -26,7 +26,7 @@ public class Midica {
 	public static final int VERSION_MAJOR = 0;
 	
 	/** Minor version number. This is intended to be incremented automatically by precommit.pl. */
-	public static final int VERSION_MINOR = 1583952461;
+	public static final int VERSION_MINOR = 1584039624;
 	
 	/** Full version string. */
 	public static final String VERSION = VERSION_MAJOR + "." + VERSION_MINOR;
@@ -51,7 +51,7 @@ public class Midica {
 	public static void main(String[] args) {
 		
 		// command line arguments
-		Cli.processArguments(args);
+		Cli.parseArguments(args);
 		
 		// init config
 		Config.init();
@@ -78,6 +78,9 @@ public class Midica {
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
+				if (Cli.useSoundfont) {
+					Cli.loadSoundfont(uiController);
+				}
 				if (Cli.isImport) {
 					Cli.importFile(uiController);
 					if (Cli.isExport) {
@@ -88,8 +91,13 @@ public class Midica {
 		});
 		
 		// finish
-		if (!Cli.keepAlive) {
-			System.exit(0);
-		}
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				if (!Cli.keepAlive) {
+					System.exit(0);
+				}
+			}
+		});
 	}
 }
