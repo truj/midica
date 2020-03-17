@@ -10,9 +10,9 @@ package org.midica.file.write;
 import java.util.ArrayList;
 import java.util.Map.Entry;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.midica.file.Instrument;
-import org.midica.file.read.MidicaPLParser;
 
 /**
  * This class is used to export the currently loaded MIDI sequence as an ALDA source file.
@@ -25,12 +25,10 @@ public class AldaExporter extends Decompiler {
 	public static ArrayList<String> noteNames       = new ArrayList<>();
 	public static ArrayList<Byte>   noteOctaves     = new ArrayList<>();
 	
-	private int                          currentSliceNumber = 0;
-	private Instrument                   currentInstrument  = null;
-	private TreeMap<Instrument, Integer> usedInSlice        = new TreeMap<>();
-	private String                       currentKeySig      = "0/0";
-//	private HashSet<Byte>               usedChannels    = new HashSet<>();
-//	private HashMap<String, Instrument> usedInstruments = new HashMap<>();
+	private int                 currentSliceNumber = 0;
+	private Instrument          currentInstrument  = null;
+	private TreeSet<Instrument> usedInSlice        = null;
+	private String              currentKeySig      = null;
 	
 	/**
 	 * Creates a new MidicaPL exporter.
@@ -43,6 +41,8 @@ public class AldaExporter extends Decompiler {
 	 * Initializes MidicaPL specific data structures.
 	 */
 	public void init() {
+		currentSliceNumber = 0;
+		currentKeySig      = "0/0";
 		initInstrumentNames();
 		initNoteNames();
 	}
@@ -69,17 +69,10 @@ public class AldaExporter extends Decompiler {
 	public String createOutput() {
 		StringBuilder output = new StringBuilder();
 		
-		// META block
-//		output.append( createMetaBlock() );
-		
-		// initial INSTRUMENTS block (tick 0)
-//		output.append( createInitialInstrumentsBlock() );
-		
-//		// add chord definitions
-//		output.append( createChordDefinitions() );
-		
 		// SLICE:
 		for (Slice slice : slices) {
+			
+			usedInSlice = new TreeSet<>();
 			
 			// if necessary: add rest from current tick to the slice's begin tick
 			output.append( createRestBeforeSlice(slice) );
@@ -87,8 +80,8 @@ public class AldaExporter extends Decompiler {
 				output.append( createMarker() );
 			}
 			
-			// global commands
-			output.append( createGlobalCommands(slice) );
+			// global attributes
+			output.append( createGlobalAttributes(slice) );
 			
 			// channel commands and instrument changes
 			for (byte channel = 0; channel < 16; channel++) {
@@ -168,11 +161,11 @@ public class AldaExporter extends Decompiler {
 						String summandStr = noteLength.get(summand);
 						summandStrings.add(summandStr);
 //						incrementStats(STAT_NOTE_SUMMANDS, channel);
-						if (summandStr.endsWith(MidicaPLParser.TRIPLET)) {
+//						if (summandStr.endsWith(MidicaPLParser.TRIPLET)) {
 //							incrementStats(STAT_NOTE_TRIPLETS, channel);
-						}
+//						}
 					}
-					String lengthStr = String.join(MidicaPLParser.LENGTH_PLUS, summandStrings);
+					String lengthStr = String.join("~", summandStrings);
 					
 					// add note length / duration to timeline
 					params.put( NP_LENGTH,   lengthStr    );
@@ -182,7 +175,7 @@ public class AldaExporter extends Decompiler {
 //					incrementStats(STAT_NOTES, channel);
 				}
 				
-				// write MidicaPL
+				// write ALDA
 				lines.append( createChordNotes(slice, channel, tick, events.get(ET_NOTES)) );
 			}
 		}
@@ -211,7 +204,7 @@ public class AldaExporter extends Decompiler {
 		
 		// get program number
 		byte program = 0; // default = piano
-		Byte[] instrConfig = instrumentHistory.get(channel).get(tick);
+		Byte[] instrConfig = instrumentHistory.get(channel).floorEntry(tick).getValue();
 		if (instrConfig != null) {
 			program = instrConfig[2];
 		}
@@ -237,7 +230,7 @@ public class AldaExporter extends Decompiler {
 		content.append(":" + NEW_LINE + "\t");
 		
 		// synchronize data structures
-		instrumentsByChannel.add(channel, currentInstrument);
+		instrumentsByChannel.set(channel, currentInstrument);
 		
 		return content.toString();
 	}
@@ -452,25 +445,26 @@ public class AldaExporter extends Decompiler {
 //	}
 	
 	/**
-	 * Creates a string with global commands for the given slice.
+	 * Creates a string with global attributes for the given slice.
 	 * 
-	 * Global commands are:
+	 * Global attributes are:
 	 * 
 	 * - tempo changes
-	 * - time signature
 	 * - key signature
 	 * 
 	 * @param slice  the sequence slice
-	 * @return the created string (or an empty string, if the slice doesn't contain any global commands)
+	 * @return the created string (or an empty string, if the slice doesn't contain any global attributes)
 	 */
-	private String createGlobalCommands(Slice slice) {
+	private String createGlobalAttributes(Slice slice) {
 		StringBuilder result = new StringBuilder("");
 		
 		// tick comment
 //		result.append( createTickComment(slice.getBeginTick(), false) );
 		
-		result.append(NEW_LINE);
-		result.append("# SLICE " + currentSliceNumber);
+		if (MUST_ADD_TICK_COMMENTS) {
+			result.append(NEW_LINE);
+			result.append("# SLICE " + currentSliceNumber);
+		}
 		result.append(NEW_LINE + NEW_LINE);
 		
 		// create global commands
@@ -492,7 +486,7 @@ public class AldaExporter extends Decompiler {
 				else if ("key".equals(cmdId)) {
 					globalCmd     = "key-signature";
 					currentKeySig = value;
-					value         = getKeySignature(value);
+					value         = getKeySignature();
 					initNoteNames();
 				}
 				else {
@@ -543,169 +537,184 @@ public class AldaExporter extends Decompiler {
 	// TODO: adjust docu to ALDA
 	// TODO: change docu about the strategy
 	private String createChordNotes(Slice slice, byte channel, long tick, TreeMap<String, TreeMap<Byte, String>> events) {
-		StringBuilder lines = new StringBuilder("");
+		StringBuilder content = new StringBuilder("");
+		boolean needSpace = true;
+		
+		// first usage in the current slice?
+		Instrument instr = instrumentsByChannel.get(channel);
+		if (!usedInSlice.contains(instr)) {
+			
+			// switch instrument, if necessary
+			if (currentInstrument != instr) {
+				content.append( createInstrumentChange(channel, tick) );
+				instr = currentInstrument;
+				needSpace = false;
+			}
+			
+			usedInSlice.add(instr);
+		}
+		
+		// jump to marker, if necessary
+		Slice currentSlice   = slices.get(currentSliceNumber);
+		long  sliceBeginTick = currentSlice.getBeginTick();
+		if (instr.getCurrentTicks() < sliceBeginTick) {
+			if (needSpace) {
+				content.append(" ");
+				needSpace = false;
+			}
+			content.append("@slice-" + currentSliceNumber + " ");
+			instr.setCurrentTicks(sliceBeginTick);
+		}
 		
 		// add rest, if necessary
-		Instrument instr  = instrumentsByChannel.get(channel);
 		long currentTicks = instr.getCurrentTicks();
 		if (tick > currentTicks) {
+			if (needSpace) {
+				content.append(" ");
+				needSpace = false;
+			}
 			long restTicks = tick - currentTicks;
-//			lines.append( createRest(channel, restTicks, tick, null) );
+			content.append( createRest(channel, restTicks, tick, null) );
 			instr.setCurrentTicks(tick);
 		}
 		
-		// get the LAST note/chord to be printed.
-		Long   nextOnTick            = noteHistory.get(channel).ceilingKey(tick + 1);
-		long   sliceEndTick          = slice.getEndTick();
-		String lastNoteOrCrdName     = null;
-		long   highestFittingEndTick = -1;
+		// add space, if needed
+		if (needSpace) {
+			content.append(" ");
+		}
+		
+		// get the note-OFF tick of the shortest note
+		Long chordOffTick = null;
 		for (Entry<String, TreeMap<Byte, String>> noteSet : events.entrySet()) {
-			String name = noteSet.getKey();
 			TreeMap<Byte, String> note = noteSet.getValue();
-			
 			long endTick = Long.parseLong(note.get(NP_END_TICK));
-			
-			// next note-ON exists?
-			if (nextOnTick != null) {
-				
-				// next note-ON is in the same slice?
-				if (nextOnTick <= sliceEndTick) {
-					
-					// note/chord fits before next note-ON?
-					if (nextOnTick >= endTick) {
-						
-						// no better candidate found yet?
-						if (endTick > highestFittingEndTick) {
-							highestFittingEndTick = endTick;
-							lastNoteOrCrdName     = name;
-						}
-					}
-				}
-			}
-			// no next note-ON but note/chord fits into the slice?
-			else if (endTick <= sliceEndTick) {
-				
-				// no better candidate found yet?
-				if (endTick > highestFittingEndTick) {
-					highestFittingEndTick = endTick;
-					lastNoteOrCrdName     = name;
-				}
+			if (null == chordOffTick || endTick < chordOffTick) {
+				chordOffTick = endTick;
 			}
 		}
 		
-		// get notes/chords in the right order
-		ArrayList<String> noteOrCrdNames = new ArrayList<>();
+		// need a rest inside the cord?
+		Long restEndTick  = null;
+		Long nextOnTick   = noteHistory.get(channel).ceilingKey(tick + 1);
+		long sliceEndTick = slice.getEndTick();
+		if (nextOnTick != null && chordOffTick > nextOnTick) {
+			restEndTick = nextOnTick;
+		}
+		else if (chordOffTick > sliceEndTick) {
+			restEndTick = sliceEndTick;
+		}
+		
+		// collect the notes
+		ArrayList<String> notes = new ArrayList<>();
 		for (Entry<String, TreeMap<Byte, String>> noteSet : events.entrySet()) {
 			String name = noteSet.getKey();
-			
-			// skip the line to be printed last
-			if (lastNoteOrCrdName != null && name.equals(lastNoteOrCrdName))
-				continue;
-			
-			noteOrCrdNames.add(name);
+			TreeMap<Byte, String> properties = events.get(name);
+			notes.add( createNote(channel, properties) );
 		}
-		if (lastNoteOrCrdName != null) {
-			noteOrCrdNames.add(lastNoteOrCrdName);
-		}
+		content.append(String.join("/", notes));
 		
-		// create the lines
-		int i = 0;
-		for (String name : noteOrCrdNames) {
-			i++;
-			TreeMap<Byte, String> note = events.get(name);
-			
-			// add multiple option, if necessary
-			if (-1 == highestFittingEndTick || i < noteOrCrdNames.size()) {
-				note.put(NP_MULTIPLE, null);
-			}
-			lines.append( createSingleNote(channel, name, note, tick) );
+		if (restEndTick != null) {
+			// create rest inside the chord
+			String rest = createRest(channel, restEndTick - tick, tick, null)
+				.replaceFirst(" ", ""); // don't need the leading space here
+			content.append("/" + rest);
+			chordOffTick = restEndTick;
 		}
 		
 		// increment ticks, if necessary
-		if (highestFittingEndTick > 0) {
-			instr.setCurrentTicks(highestFittingEndTick);
-		}
+		instr.setCurrentTicks(chordOffTick);
 		
-		return lines.toString();
+		return content.toString();
 	}
 	
 	/**
-	 * Prints a single channel command for a note or chord.
-	 * (Or a rest with a syllable, if orphaned syllables are configured as INLINE.)
+	 * Prints a single note.
 	 * 
-	 * @param channel    MIDI channel
-	 * @param noteName   note or chord name
-	 * @param noteOrCrd  note properties (from the slice's timeline)
-	 * @param tick       MIDI tickstamp.
-	 * @return the created line.
+	 * The note may be a part of a chord or a single note.
+	 * 
+	 * Parts of the note are:
+	 * 
+	 * - attributes, if needed
+	 * - octave switch, if needed
+	 * - name
+	 * - length, if needed
+	 * 
+	 * @param channel       MIDI channel
+	 * @param properties    note properties (from the slice's timeline)
+	 * @return the created note.
 	 */
-	// TODO: adjust docu to ALDA
-	private String createSingleNote(byte channel, String noteName, TreeMap<Byte, String> noteOrCrd, long tick) {
-		StringBuilder line = new StringBuilder("");
+	// TODO: add attribute details
+	private String createNote(byte channel, TreeMap<Byte, String> properties) {
+		StringBuilder content = new StringBuilder("");
 		
 		Instrument instr = instrumentsByChannel.get(channel);
 		
-		// main part of the command
-		line.append(channel + "\t" + noteName + "\t" + noteOrCrd.get(NP_LENGTH));
-		
-		// get options that must be appended
-		ArrayList<String> options = new ArrayList<>();
-		{
-			// multiple
-			if (noteOrCrd.containsKey(NP_MULTIPLE)) {
-				options.add(MidicaPLParser.M);
-//				incrementStats(STAT_NOTE_MULTIPLE, channel);
-			}
-			
-			// duration and velocity
-			if ( ! noteName.equals(MidicaPLParser.REST) ) {
-				
-				// duration
-				float duration           = Float.parseFloat( noteOrCrd.get(NP_DURATION) ) / 100;
-				float oldDuration        = instr.getDurationRatio();
-				int   durationPercent    = (int) ((duration    * 1000 + 0.5f) / 10);
-				int   oldDurationPercent = (int) ((oldDuration * 1000 + 0.5f) / 10);
-				if (durationPercent != oldDurationPercent) {
-					// don't allow 0%
-					String durationPercentStr = durationPercent + "";
-					if (durationPercent < 1) {
-						durationPercentStr = "0.5";
-						duration = 0.005f;
-					}
-					options.add(MidicaPLParser.D + MidicaPLParser.OPT_ASSIGNER + durationPercentStr + MidicaPLParser.DURATION_PERCENT);
-					instr.setDurationRatio(duration);
-//					incrementStats(STAT_NOTE_DURATIONS, channel);
-				}
-				
-				// velocity
-				int velocity    = Integer.parseInt( noteOrCrd.get(NP_VELOCITY) );
-				int oldVelocity = instr.getVelocity();
-				if (velocity != oldVelocity) {
-					options.add(MidicaPLParser.V + MidicaPLParser.OPT_ASSIGNER + velocity);
-					instr.setVelocity(velocity);
-//					incrementStats(STAT_NOTE_VELOCITIES, channel);
-				}
-			}
-			
-			// add syllable, if needed
-//			if (noteOrCrd.containsKey(NP_LYRICS)) {
-//				String syllable = noteOrCrd.get(NP_LYRICS);
-//				syllable = escapeSyllable(syllable);
-//				options.add(MidicaPLParser.L + MidicaPLParser.OPT_ASSIGNER + syllable);
+		// get attributes to be changed
+//		ArrayList<String> options = new ArrayList<>();
+//		{
+//			// duration and velocity
+//			if ( ! properties.get(NP_NOTE_NUM).equals(MidicaPLParser.REST) ) {
+//				
+//				// duration
+//				float duration           = Float.parseFloat( properties.get(NP_DURATION) ) / 100;
+//				float oldDuration        = instr.getDurationRatio();
+//				int   durationPercent    = (int) ((duration    * 1000 + 0.5f) / 10);
+//				int   oldDurationPercent = (int) ((oldDuration * 1000 + 0.5f) / 10);
+//				if (durationPercent != oldDurationPercent) {
+//					// don't allow 0%
+//					String durationPercentStr = durationPercent + "";
+//					if (durationPercent < 1) {
+//						durationPercentStr = "0.5";
+//						duration = 0.005f;
+//					}
+//					options.add(MidicaPLParser.D + MidicaPLParser.OPT_ASSIGNER + durationPercentStr + MidicaPLParser.DURATION_PERCENT);
+//					instr.setDurationRatio(duration);
+////					incrementStats(STAT_NOTE_DURATIONS, channel);
+//				}
+//				
+//				// velocity
+//				int velocity    = Integer.parseInt( properties.get(NP_VELOCITY) );
+//				int oldVelocity = instr.getVelocity();
+//				if (velocity != oldVelocity) {
+//					options.add(MidicaPLParser.V + MidicaPLParser.OPT_ASSIGNER + velocity);
+//					instr.setVelocity(velocity);
+////					incrementStats(STAT_NOTE_VELOCITIES, channel);
+//				}
 //			}
-		}
+//		}
 		
 		// append options
-		if (options.size() > 0) {
-			String optionsStr = String.join(MidicaPLParser.OPT_SEPARATOR + " ", options);
-			line.append("\t" + optionsStr);
+//		if (options.size() > 0) {
+//			String optionsStr = String.join(MidicaPLParser.OPT_SEPARATOR + " ", options);
+//			content.append("\t" + optionsStr);
+//		}
+		
+		// switch octave, if needed
+		int  noteNum   = Integer.parseInt(properties.get(NP_NOTE_NUM));
+		byte oldOctave = instr.getOctave();
+		byte newOctave = noteOctaves.get(noteNum);
+		if (instr.getOctave() != newOctave) {
+			String changer = newOctave < oldOctave ? "<" : ">";
+			int    diff    = Math.abs(newOctave - oldOctave);
+			for (int i = 0; i < diff; i++) {
+				content.append(changer);
+			}
+			instr.setOctave(newOctave);
 		}
 		
-		// finish the line
-//		line.append( createTickComment(tick, true) );
-		line.append(NEW_LINE);
+		// note name
+		String noteName = noteNames.get(noteNum);
+		content.append(noteName);
 		
-		return line.toString();
+		// switch note length, if needed
+		String oldLength = instr.getNoteLength();
+		String newLength = properties.get(NP_LENGTH);
+		if (! oldLength.equals(newLength)) {
+			content.append(newLength);
+			instr.setNoteLength(newLength);
+		}
+		
+		return content.toString();
 	}
 	
 	/**
@@ -722,7 +731,7 @@ public class AldaExporter extends Decompiler {
 		
 		// switch instrument, if necessary
 		if (currentInstrument != instrumentsByChannel.get(channel))
-			createInstrumentChange(channel, beginTick);
+			content.append( createInstrumentChange(channel, beginTick + ticks - 1) );
 		else
 			content.append(" ");
 		
@@ -763,7 +772,21 @@ public class AldaExporter extends Decompiler {
 	 */
 	protected String createMarker() {
 		StringBuilder content = new StringBuilder("");
-		content.append(" %slice-" + currentSliceNumber + NEW_LINE);
+		
+		// switch instrument if necessary
+		long maxTick       = Instrument.getMaxCurrentTicks(instrumentsByChannel);
+		long curInstrTicks = currentInstrument.getCurrentTicks();
+		if (maxTick > curInstrTicks) {
+			Instrument furthestInstr = getFurthestInstrument();
+			byte channel = (byte) furthestInstr.channel;
+			content.append( createInstrumentChange(channel, maxTick - 1) );
+		}
+		else {
+			content.append(" ");
+		}
+		
+		// create the marker
+		content.append("%slice-" + currentSliceNumber + NEW_LINE);
 		return content.toString();
 	}
 	
@@ -828,23 +851,23 @@ public class AldaExporter extends Decompiler {
 		noteLength.put( length1,  "1"  );
 		noteLength.put( length1d, "1." );
 		
-		// 2 full notes
-		long length_m2  = calculateTicks( 8,     1 );
-		long length_m2d = calculateTicks( 8 * 3, 2 );
-		noteLength.put( length_m2,  "0.5"  );
-		noteLength.put( length_m2d, "0.5." );
-		
-		// 4 full notes
-		long length_m4  = calculateTicks( 16,     1 );
-		long length_m4d = calculateTicks( 16 * 3, 2 );
-		noteLength.put( length_m4,  "0.25"  );
-		noteLength.put( length_m4d, "0.25." );
-		
-		// 8 full notes
-		long length_m8  = calculateTicks( 32,     1 );
-		long length_m8d = calculateTicks( 32 * 3, 2 );
-		noteLength.put( length_m8,  "0.125"  );
-		noteLength.put( length_m8d, "0.125." );
+//		// 2 full notes
+//		long length_m2  = calculateTicks( 8,     1 );
+//		long length_m2d = calculateTicks( 8 * 3, 2 );
+//		noteLength.put( length_m2,  "0.5"  );
+//		noteLength.put( length_m2d, "0.5." );
+//		
+//		// 4 full notes
+//		long length_m4  = calculateTicks( 16,     1 );
+//		long length_m4d = calculateTicks( 16 * 3, 2 );
+//		noteLength.put( length_m4,  "0.25"  );
+//		noteLength.put( length_m4d, "0.25." );
+//		
+//		// 8 full notes
+//		long length_m8  = calculateTicks( 32,     1 );
+//		long length_m8d = calculateTicks( 32 * 3, 2 );
+//		noteLength.put( length_m8,  "0.125"  );
+//		noteLength.put( length_m8d, "0.125." );
 		
 		return noteLength;
 	}
@@ -933,145 +956,150 @@ public class AldaExporter extends Decompiler {
 	private void initInstrumentNames() {
 		instrumentNames.clear();
 		
-		instrumentNames.add(   0, "piano"                           );
-		instrumentNames.add(   1, "midi-bright-acoustic-piano"      );
-		instrumentNames.add(   2, "midi-electric-grand-piano"       );
-		instrumentNames.add(   3, "midi-honky-tonk-piano"           );
-		instrumentNames.add(   4, "midi-electric-piano-1"           );
-		instrumentNames.add(   5, "midi-electric-piano-2"           );
-		instrumentNames.add(   6, "harpsichord"                     );
-		instrumentNames.add(   7, "clavinet"                        );
-		instrumentNames.add(   8, "celesta"                         );
-		instrumentNames.add(   9, "glockenspiel"                    );
-		instrumentNames.add(  10, "music-box"                       );
-		instrumentNames.add(  11, "vibraphone"                      );
-		instrumentNames.add(  12, "marimba"                         );
-		instrumentNames.add(  13, "xylophone"                       );
-		instrumentNames.add(  14, "tubular-bells"                   );
-		instrumentNames.add(  15, "dulcimer"                        );
-		instrumentNames.add(  16, "midi-drawbar-organ"              );
-		instrumentNames.add(  17, "midi-percussive-organ"           );
-		instrumentNames.add(  18, "midi-rock-organ"                 );
-		instrumentNames.add(  19, "organ"                           );
-		instrumentNames.add(  20, "midi-reed-organ"                 );
-		instrumentNames.add(  21, "accordion"                       );
-		instrumentNames.add(  22, "harmonica"                       );
-		instrumentNames.add(  23, "midi-tango-accordion"            );
-		instrumentNames.add(  24, "guitar"                          );
-		instrumentNames.add(  25, "midi-acoustic-guitar-steel"      );
-		instrumentNames.add(  26, "midi-electric-guitar-jazz"       );
-		instrumentNames.add(  27, "electric-guitar-clean"           );
-		instrumentNames.add(  28, "midi-electric-guitar-palm-muted" );
-		instrumentNames.add(  29, "electric-guitar-overdrive"       );
-		instrumentNames.add(  30, "electric-guitar-distorted"       );
-		instrumentNames.add(  31, "electric-guitar-harmonics"       );
-		instrumentNames.add(  32, "acoustic-bass"                   );
-		instrumentNames.add(  33, "electric-bass"                   );
-		instrumentNames.add(  34, "electric-bass-pick"              );
-		instrumentNames.add(  35, "fretless-bass"                   );
-		instrumentNames.add(  36, "midi-bass-slap"                  );
-		instrumentNames.add(  37, "midi-bass-pop"                   );
-		instrumentNames.add(  38, "midi-synth-bass-1"               );
-		instrumentNames.add(  39, "midi-synth-bass-2"               );
-		instrumentNames.add(  40, "violin"                          );
-		instrumentNames.add(  41, "viola"                           );
-		instrumentNames.add(  42, "cello"                           );
-		instrumentNames.add(  43, "contrabass"                      );
-		instrumentNames.add(  44, "midi-tremolo-strings"            );
-		instrumentNames.add(  45, "midi-pizzicato-strings"          );
-		instrumentNames.add(  46, "harp"                            );
-		instrumentNames.add(  47, "timpani"                         );
-		instrumentNames.add(  48, "midi-string-ensemble-1"          );
-		instrumentNames.add(  49, "midi-string-ensemble-2"          );
-		instrumentNames.add(  50, "midi-synth-strings-1"            );
-		instrumentNames.add(  51, "midi-synth-strings-2"            );
-		instrumentNames.add(  52, "midi-choir-aahs"                 );
-		instrumentNames.add(  53, "midi-voice-oohs"                 );
-		instrumentNames.add(  54, "midi-synth-voice"                );
-		instrumentNames.add(  55, "midi-orchestra-hit"              );
-		instrumentNames.add(  56, "trumpet"                         );
-		instrumentNames.add(  57, "trombone"                        );
-		instrumentNames.add(  58, "tuba"                            );
-		instrumentNames.add(  59, "midi-muted-trumpet"              );
-		instrumentNames.add(  60, "french-horn"                     );
-		instrumentNames.add(  61, "midi-brass-section"              );
-		instrumentNames.add(  62, "midi-synth-brass-1"              );
-		instrumentNames.add(  63, "midi-synth-brass-2"              );
-		instrumentNames.add(  64, "soprano-sax"                     );
-		instrumentNames.add(  65, "alto-sax"                        );
-		instrumentNames.add(  66, "tenor-sax"                       );
-		instrumentNames.add(  67, "bari-sax"                        );
-		instrumentNames.add(  68, "oboe"                            );
-		instrumentNames.add(  69, "english-horn"                    );
-		instrumentNames.add(  70, "bassoon"                         );
-		instrumentNames.add(  71, "clarinet"                        );
-		instrumentNames.add(  72, "piccolo"                         );
-		instrumentNames.add(  73, "flute"                           );
-		instrumentNames.add(  74, "recorder"                        );
-		instrumentNames.add(  75, "pan-flute"                       );
-		instrumentNames.add(  76, "bottle"                          );
-		instrumentNames.add(  77, "shakuhachi"                      );
-		instrumentNames.add(  78, "whistle"                         );
-		instrumentNames.add(  79, "ocarina"                         );
-		instrumentNames.add(  80, "square"                          );
-		instrumentNames.add(  81, "sawtooth"                        );
-		instrumentNames.add(  82, "calliope"                        );
-		instrumentNames.add(  83, "chiff"                           );
-		instrumentNames.add(  84, "charang"                         );
-		instrumentNames.add(  85, "midi-solo-vox"                   );
-		instrumentNames.add(  86, "midi-fifths"                     );
-		instrumentNames.add(  87, "midi-bass-and-lead"              );
-		instrumentNames.add(  88, "midi-pad-new-age"                );
-		instrumentNames.add(  89, "midi-pad-warm"                   );
-		instrumentNames.add(  90, "midi-pad-polysynth"              );
-		instrumentNames.add(  91, "midi-pad-choir"                  );
-		instrumentNames.add(  92, "midi-pad-bowed"                  );
-		instrumentNames.add(  93, "midi-pad-metallic"               );
-		instrumentNames.add(  94, "midi-pad-halo"                   );
-		instrumentNames.add(  95, "midi-pad-sweep"                  );
-		instrumentNames.add(  96, "midi-fx-ice-rain"                );
-		instrumentNames.add(  97, "midi-soundtrack"                 );
-		instrumentNames.add(  98, "midi-crystal"                    );
-		instrumentNames.add(  99, "midi-atmosphere"                 );
-		instrumentNames.add( 100, "midi-brightness"                 );
-		instrumentNames.add( 101, "midi-goblins"                    );
-		instrumentNames.add( 102, "midi-echoes"                     );
-		instrumentNames.add( 103, "midi-sci-fi"                     );
-		instrumentNames.add( 104, "sitar"                           );
-		instrumentNames.add( 105, "banjo"                           );
-		instrumentNames.add( 106, "shamisen"                        );
-		instrumentNames.add( 107, "koto"                            );
-		instrumentNames.add( 108, "kalimba"                         );
-		instrumentNames.add( 109, "bagpipes"                        );
-		instrumentNames.add( 110, "midi-fiddle"                     );
-		instrumentNames.add( 111, "shanai"                          );
-		instrumentNames.add( 112, "midi-tinkle-bell"                );
-		instrumentNames.add( 113, "midi-agogo"                      );
-		instrumentNames.add( 114, "steel-drums"                     );
-		instrumentNames.add( 115, "midi-woodblock"                  );
-		instrumentNames.add( 116, "midi-taiko-drum"                 );
-		instrumentNames.add( 117, "midi-melodic-tom"                );
-		instrumentNames.add( 118, "midi-synth-drum"                 );
-		instrumentNames.add( 119, "midi-reverse-cymbal"             );
-		instrumentNames.add( 120, "midi-guitar-fret-noise"          );
-		instrumentNames.add( 121, "midi-breath-noise"               );
-		instrumentNames.add( 122, "midi-seashore"                   );
-		instrumentNames.add( 123, "midi-bird-tweet"                 );
-		instrumentNames.add( 124, "midi-telephone-ring"             );
-		instrumentNames.add( 125, "midi-helicopter"                 );
-		instrumentNames.add( 126, "midi-applause"                   );
-		instrumentNames.add( 127, "midi-gunshot"                    );
+		instrumentNames.add("piano");                           //   0
+		instrumentNames.add("midi-bright-acoustic-piano");      //   1
+		instrumentNames.add("midi-electric-grand-piano");       //   2
+		instrumentNames.add("midi-honky-tonk-piano");           //   3
+		instrumentNames.add("midi-electric-piano-1");           //   4
+		instrumentNames.add("midi-electric-piano-2");           //   5
+		instrumentNames.add("harpsichord");                     //   6
+		instrumentNames.add("clavinet");                        //   7
+		instrumentNames.add("celesta");                         //   8
+		instrumentNames.add("glockenspiel");                    //   9
+		instrumentNames.add("music-box");                       //  10
+		instrumentNames.add("vibraphone");                      //  11
+		instrumentNames.add("marimba");                         //  12
+		instrumentNames.add("xylophone");                       //  13
+		instrumentNames.add("tubular-bells");                   //  14
+		instrumentNames.add("dulcimer");                        //  15
+		instrumentNames.add("midi-drawbar-organ");              //  16
+		instrumentNames.add("midi-percussive-organ");           //  17
+		instrumentNames.add("midi-rock-organ");                 //  18
+		instrumentNames.add("organ");                           //  19
+		instrumentNames.add("midi-reed-organ");                 //  20
+		instrumentNames.add("accordion");                       //  21
+		instrumentNames.add("harmonica");                       //  22
+		instrumentNames.add("midi-tango-accordion");            //  23
+		instrumentNames.add("guitar");                          //  24
+		instrumentNames.add("midi-acoustic-guitar-steel");      //  25
+		instrumentNames.add("midi-electric-guitar-jazz");       //  26
+		instrumentNames.add("electric-guitar-clean");           //  27
+		instrumentNames.add("midi-electric-guitar-palm-muted"); //  28
+		instrumentNames.add("electric-guitar-overdrive");       //  29
+		instrumentNames.add("electric-guitar-distorted");       //  30
+		instrumentNames.add("electric-guitar-harmonics");       //  31
+		instrumentNames.add("acoustic-bass");                   //  32
+		instrumentNames.add("electric-bass");                   //  33
+		instrumentNames.add("electric-bass-pick");              //  34
+		instrumentNames.add("fretless-bass");                   //  35
+		instrumentNames.add("midi-bass-slap");                  //  36
+		instrumentNames.add("midi-bass-pop");                   //  37
+		instrumentNames.add("midi-synth-bass-1");               //  38
+		instrumentNames.add("midi-synth-bass-2");               //  39
+		instrumentNames.add("violin");                          //  40
+		instrumentNames.add("viola");                           //  41
+		instrumentNames.add("cello");                           //  42
+		instrumentNames.add("contrabass");                      //  43
+		instrumentNames.add("midi-tremolo-strings");            //  44
+		instrumentNames.add("midi-pizzicato-strings");          //  45
+		instrumentNames.add("harp");                            //  46
+		instrumentNames.add("timpani");                         //  47
+		instrumentNames.add("midi-string-ensemble-1");          //  48
+		instrumentNames.add("midi-string-ensemble-2");          //  49
+		instrumentNames.add("midi-synth-strings-1");            //  50
+		instrumentNames.add("midi-synth-strings-2");            //  51
+		instrumentNames.add("midi-choir-aahs");                 //  52
+		instrumentNames.add("midi-voice-oohs");                 //  53
+		instrumentNames.add("midi-synth-voice");                //  54
+		instrumentNames.add("midi-orchestra-hit");              //  55
+		instrumentNames.add("trumpet");                         //  56
+		instrumentNames.add("trombone");                        //  57
+		instrumentNames.add("tuba");                            //  58
+		instrumentNames.add("midi-muted-trumpet");              //  59
+		instrumentNames.add("french-horn");                     //  60
+		instrumentNames.add("midi-brass-section");              //  61
+		instrumentNames.add("midi-synth-brass-1");              //  62
+		instrumentNames.add("midi-synth-brass-2");              //  63
+		instrumentNames.add("soprano-sax");                     //  64
+		instrumentNames.add("alto-sax");                        //  65
+		instrumentNames.add("tenor-sax");                       //  66
+		instrumentNames.add("bari-sax");                        //  67
+		instrumentNames.add("oboe");                            //  68
+		instrumentNames.add("english-horn");                    //  69
+		instrumentNames.add("bassoon");                         //  70
+		instrumentNames.add("clarinet");                        //  71
+		instrumentNames.add("piccolo");                         //  72
+		instrumentNames.add("flute");                           //  73
+		instrumentNames.add("recorder");                        //  74
+		instrumentNames.add("pan-flute");                       //  75
+		instrumentNames.add("bottle");                          //  76
+		instrumentNames.add("shakuhachi");                      //  77
+		instrumentNames.add("whistle");                         //  78
+		instrumentNames.add("ocarina");                         //  79
+		instrumentNames.add("square");                          //  80
+		instrumentNames.add("sawtooth");                        //  81
+		instrumentNames.add("calliope");                        //  82
+		instrumentNames.add("chiff");                           //  83
+		instrumentNames.add("charang");                         //  84
+		instrumentNames.add("midi-solo-vox");                   //  85
+		instrumentNames.add("midi-fifths");                     //  86
+		instrumentNames.add("midi-bass-and-lead");              //  87
+		instrumentNames.add("midi-pad-new-age");                //  88
+		instrumentNames.add("midi-pad-warm");                   //  89
+		instrumentNames.add("midi-pad-polysynth");              //  90
+		instrumentNames.add("midi-pad-choir");                  //  91
+		instrumentNames.add("midi-pad-bowed");                  //  92
+		instrumentNames.add("midi-pad-metallic");               //  93
+		instrumentNames.add("midi-pad-halo");                   //  94
+		instrumentNames.add("midi-pad-sweep");                  //  95
+		instrumentNames.add("midi-fx-ice-rain");                //  96
+		instrumentNames.add("midi-soundtrack");                 //  97
+		instrumentNames.add("midi-crystal");                    //  98
+		instrumentNames.add("midi-atmosphere");                 //  99
+		instrumentNames.add("midi-brightness");                 // 100
+		instrumentNames.add("midi-goblins");                    // 101
+		instrumentNames.add("midi-echoes");                     // 102
+		instrumentNames.add("midi-sci-fi");                     // 103
+		instrumentNames.add("sitar");                           // 104
+		instrumentNames.add("banjo");                           // 105
+		instrumentNames.add("shamisen");                        // 106
+		instrumentNames.add("koto");                            // 107
+		instrumentNames.add("kalimba");                         // 108
+		instrumentNames.add("bagpipes");                        // 109
+		instrumentNames.add("midi-fiddle");                     // 110
+		instrumentNames.add("shanai");                          // 111
+		instrumentNames.add("midi-tinkle-bell");                // 112
+		instrumentNames.add("midi-agogo");                      // 113
+		instrumentNames.add("steel-drums");                     // 114
+		instrumentNames.add("midi-woodblock");                  // 115
+		instrumentNames.add("midi-taiko-drum");                 // 116
+		instrumentNames.add("midi-melodic-tom");                // 117
+		instrumentNames.add("midi-synth-drum");                 // 118
+		instrumentNames.add("midi-reverse-cymbal");             // 119
+		instrumentNames.add("midi-guitar-fret-noise");          // 120
+		instrumentNames.add("midi-breath-noise");               // 121
+		instrumentNames.add("midi-seashore");                   // 122
+		instrumentNames.add("midi-bird-tweet");                 // 123
+		instrumentNames.add("midi-telephone-ring");             // 124
+		instrumentNames.add("midi-helicopter");                 // 125
+		instrumentNames.add("midi-applause");                   // 126
+		instrumentNames.add("midi-gunshot");                    // 127
 	}
 	
 	/**
 	 * Initializes all possible MIDI note numbers with an ALDA instrument and octave name.
+	 * Takes the current key signature into account.
 	 */
 	private void initNoteNames() {
 		noteNames.clear();
 		noteOctaves.clear();
 		
-		// TODO: use currentKeySig
+		// get sharps/flats
+		String[] shaFlaTon     = currentKeySig.split("/", 2);
+		int      sharpsOrFlats = Integer.parseInt(shaFlaTon[0]);
 		
+		// create base names (without octaves)
+		// begin with the default: no sharps or flats (C maj / A min)
 		ArrayList<String> baseNotes = new ArrayList<>();
 		baseNotes.add("c");
 		baseNotes.add("c+");
@@ -1086,14 +1114,76 @@ public class AldaExporter extends Decompiler {
 		baseNotes.add("a+");
 		baseNotes.add("b");
 		
+		// sharps
+		if (sharpsOrFlats > 0) {
+			
+			// G maj / E min
+			baseNotes.set(5, "f_");
+			baseNotes.set(6, "f");
+			if (sharpsOrFlats > 1) { // D maj / B min
+				baseNotes.set(0, "c_");
+				baseNotes.set(1, "c");
+			}
+			if (sharpsOrFlats > 2) { // A maj / F# min
+				baseNotes.set(7, "g_");
+				baseNotes.set(8, "g");
+			}
+			if (sharpsOrFlats > 3) { // E maj / C# min
+				baseNotes.set(2, "d_");
+				baseNotes.set(3, "d");
+			}
+			if (sharpsOrFlats > 4) { // B maj / G# min
+				baseNotes.set(9, "a_");
+				baseNotes.set(10, "a");
+			}
+			if (sharpsOrFlats > 5) { // F# maj / D# min
+				baseNotes.set(4, "e_");
+				baseNotes.set(5, "e");
+			}
+			if (sharpsOrFlats > 6) { // C# maj / A# min
+				baseNotes.set(11, "b_");
+			}
+		}
+		
+		// flats
+		else if (sharpsOrFlats < 0) {
+			// F maj / D min
+			baseNotes.set(10, "b");
+			baseNotes.set(11, "b_");
+			if (sharpsOrFlats < -1) { // Bb maj / G min
+				baseNotes.set(3, "e");
+				baseNotes.set(4, "e_");
+			}
+			if (sharpsOrFlats < -2) { // Eb maj / C min
+				baseNotes.set(8, "a");
+				baseNotes.set(9, "a_");
+			}
+			if (sharpsOrFlats < -3) { // Ab maj / F min
+				baseNotes.set(1, "d");
+				baseNotes.set(2, "d_");
+			}
+			if (sharpsOrFlats < -4) { // Db maj / Bb min
+				baseNotes.set(6, "g");
+				baseNotes.set(7, "g_");
+			}
+			if (sharpsOrFlats < -5) { // Gb maj / Eb min
+				baseNotes.set(0, "c_");
+			}
+			if (sharpsOrFlats < -6) { // Cb maj / Ab min
+				baseNotes.set(4, "f");
+				baseNotes.set(5, "f_");
+			}
+		}
+		
+		// build up the resulting structures: add octaves
 		byte num = 0;
 		byte oct = -1;
 		NOTES:
 		while (true) {
 			for (String baseName : baseNotes) {
 				
-				noteNames.add(num, baseName);
-				noteOctaves.add(num, oct);
+				noteNames.add(baseName);
+				noteOctaves.add(oct);
 				
 				if (127 == num)
 					break NOTES;
@@ -1103,10 +1193,14 @@ public class AldaExporter extends Decompiler {
 		}
 	}
 	
-	// TODO: docu
-	private String getKeySignature(String raw) {
+	/**
+	 * Calculates and returns the value for the key signature attribute.
+	 * 
+	 * @return the key signature
+	 */
+	private String getKeySignature() {
 		
-		String[] parts = raw.split("/", 2);
+		String[] parts = currentKeySig.split("/", 2);
 		
 		int sharpsOrFlats = Integer.parseInt(parts[0]);
 		int tonality      = Integer.parseInt(parts[1]);
@@ -1114,7 +1208,6 @@ public class AldaExporter extends Decompiler {
 		// tonality
 		boolean isMajor     = 0 == tonality;
 		boolean isMinor     = 1 == tonality;
-		int     note        = -1;
 		String  noteStr     = null;
 		String  tonalityStr = null;
 		

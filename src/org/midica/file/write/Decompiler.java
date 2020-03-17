@@ -69,6 +69,7 @@ public abstract class Decompiler extends Exporter {
 	protected static final byte NP_DURATION = 5; // duration option as float number
 	protected static final byte NP_MULTIPLE = 6; // multiple option (value ignored)
 	protected static final byte NP_LYRICS   = 7; // lyrics option
+	protected static final byte NP_NOTE_NUM = 8; // MIDI note number
 	
 	// constants for statistics about the decompilation quality
 	protected static final byte STAT_TOTAL           = 17;
@@ -844,6 +845,7 @@ public abstract class Decompiler extends Exporter {
 						TreeMap<Byte, String> noteStruct = new TreeMap<>();
 						noteStruct.put( NP_VELOCITY, velocity + "" );
 						noteStruct.put( NP_OFF_TICK, offTick  + "" );
+						noteStruct.put( NP_NOTE_NUM, note     + "" );
 						
 						// add to the tick notes
 						String noteName = Dict.getNote((int) note);
@@ -910,6 +912,11 @@ public abstract class Decompiler extends Exporter {
 			chordNotes.add(note);
 		}
 		
+		boolean useInlineChords = ! USE_PRE_DEFINED_CHORDS;
+		if (ALDA == format) {
+			useInlineChords = true;
+		}
+		
 		// check if there are notes that we can combine to chords
 		for (Entry<String, TreeSet<Byte>> noteSet : chordCandidates.entrySet()) {
 			TreeSet<Byte> chordNotes = noteSet.getValue();
@@ -934,7 +941,7 @@ public abstract class Decompiler extends Exporter {
 							noteName = note + "";
 						}
 					}
-					if (isPercussion || ! USE_PRE_DEFINED_CHORDS) {
+					if (isPercussion || useInlineChords) {
 						inlineChord.add(noteName);
 					}
 					
@@ -954,7 +961,7 @@ public abstract class Decompiler extends Exporter {
 				
 				// chord not yet available?
 				String chordName = chords.get(chordKey.toString());
-				if (isPercussion || ! USE_PRE_DEFINED_CHORDS) {
+				if (isPercussion || useInlineChords) {
 					chordName = String.join(MidicaPLParser.CHORD_SEPARATOR, inlineChord);
 				}
 				else {
@@ -1258,6 +1265,31 @@ public abstract class Decompiler extends Exporter {
 		StringBuilder restStr = new StringBuilder("");
 		
 		// choose a channel
+		Instrument chosenInstr = getFurthestInstrument();
+		
+		// no notes? - default to the percussion channel
+		if (null == chosenInstr)
+			chosenInstr = instrumentsByChannel.get(9);
+		
+		// get missing ticks
+		long missingTicks = slice.getBeginTick() - chosenInstr.getCurrentTicks();
+		if (missingTicks > 0) {
+			byte channel = (byte) chosenInstr.channel;
+			restStr.append( createRest(channel, missingTicks, -1, null) );
+		}
+		
+		return restStr.toString();
+	}
+	
+	/**
+	 * Calculates and returns the most advanced instrument.
+	 * (Advanced in terms of "current ticks").
+	 * 
+	 * Returns **null**, if no instrument is used at all.
+	 * 
+	 * @return the most advanced instrument, or **null**
+	 */
+	protected Instrument getFurthestInstrument() {
 		long maxTick = Instrument.getMaxCurrentTicks(instrumentsByChannel);
 		Instrument chosenInstr = null;
 		for (Instrument instr : instrumentsByChannel) {
@@ -1273,17 +1305,6 @@ public abstract class Decompiler extends Exporter {
 			}
 		}
 		
-		// no notes? - default to the percussion channel
-		if (null == chosenInstr)
-			chosenInstr = instrumentsByChannel.get(9);
-		
-		// get missing ticks
-		long missingTicks = slice.getBeginTick() - chosenInstr.getCurrentTicks();
-		if (missingTicks > 0) {
-			byte channel = (byte) chosenInstr.channel;
-			restStr.append( createRest(channel, missingTicks, -1, null) );
-		}
-		
-		return restStr.toString();
+		return chosenInstr;
 	}
 }

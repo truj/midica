@@ -161,7 +161,7 @@ public class Slice {
 	 * @param channel  MIDI channel
 	 */
 	public void addInstrChange(long tick, int channel) {
-		addToTimeline(tick, channel, MidicaPLExporter.ET_INSTR, null);
+		addToTimeline(tick, channel, Decompiler.ET_INSTR, null);
 	}
 	
 	/**
@@ -172,7 +172,7 @@ public class Slice {
 	 * @param notesOrChords  all notes and chords that begin at this channel and tick
 	 */
 	public void addNotesToTimeline(long tick, byte channel, TreeMap<String, TreeMap<Byte, String>> notesOrChords) {
-		addToTimeline(tick, channel, MidicaPLExporter.ET_NOTES, notesOrChords);
+		addToTimeline(tick, channel, Decompiler.ET_NOTES, notesOrChords);
 	}
 	
 	/**
@@ -188,13 +188,13 @@ public class Slice {
 	 * @param tick        MIDI tick
 	 * @param syllable    Lyrics syllable for Karaoke
 	 * @param channel     MIDI channel
-	 * @param orphaned    either {@link MidicaPLExporter#INLINE} or {@link MidicaPLExporter#BLOCK}
+	 * @param orphaned    either {@link Decompiler#INLINE} or {@link Decompiler#BLOCK}
 	 * @param resolution  source resolution of the sequence
 	 */
 	public void addSyllableRest(long tick, String syllable, byte channel, byte orphaned, long resolution) {
 		
 		// add the rest inside a nestable block
-		if (MidicaPLExporter.BLOCK == orphaned) {
+		if (Decompiler.BLOCK == orphaned) {
 			syllableRestTimeline.put(tick, syllable);
 		}
 		else {
@@ -209,16 +209,16 @@ public class Slice {
 			
 			// add the rest
 			TreeMap<String, TreeMap<Byte, String>> notes = new TreeMap<>();
-			events.put(MidicaPLExporter.ET_NOTES, notes);
+			events.put(Decompiler.ET_NOTES, notes);
 			TreeMap<Byte, String> rest = new TreeMap<>();
 			notes.put(MidicaPLParser.REST, rest);
 			
 			// add properties to the rest
-			rest.put(MidicaPLExporter.NP_LYRICS, syllable);
+			rest.put(Decompiler.NP_LYRICS, syllable);
 			Long nextNoteOnTick = noteHistory.get(channel).ceilingKey(tick + 1);
 			if (null == nextNoteOnTick)
 				nextNoteOnTick = tick + resolution;
-			rest.put(MidicaPLExporter.NP_OFF_TICK, nextNoteOnTick + "");
+			rest.put(Decompiler.NP_OFF_TICK, nextNoteOnTick + "");
 		}
 	}
 	
