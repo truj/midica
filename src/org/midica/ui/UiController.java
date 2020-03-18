@@ -65,11 +65,9 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	public static final String FILE_PURPOSE_EXPORT  = "export";
 	
 	private UiView          view                    = null;
-	private FileSelector    mplSelector             = null;
-	private FileSelector    midiSelector            = null;
+	private FileSelector    importSelector          = null;
 	private FileSelector    soundfontSelector       = null;
-	private FileSelector    midiExportSelector      = null;
-	private FileSelector    decompileExportSelector = null;
+	private FileSelector    exportSelector          = null;
 	private MidicaPLParser  mplParser               = null;
 	private MidiParser      midiParser              = null;
 	private SoundfontParser soundfontParser         = null;
@@ -109,25 +107,17 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	 * Initializes all possible types of {@link FileSelector}s.
 	 */
 	private void initSelectorsIfNotYetDone() {
-		if (null == mplSelector) {
-			mplSelector = new FileSelector(view, this);
-			mplSelector.init(FileSelector.FILE_TYPE_MPL, FileSelector.READ);
-		}
-		if (null == midiSelector) {
-			midiSelector = new FileSelector(view, this);
-			midiSelector.init(FileSelector.FILE_TYPE_MIDI, FileSelector.READ);
+		if (null == importSelector) {
+			importSelector = new FileSelector(view, this);
+			importSelector.init(FileSelector.FILE_TYPE_MPL, FileSelector.READ);
 		}
 		if (null == soundfontSelector) {
 			soundfontSelector = new FileSelector(view, this);
 			soundfontSelector.init(FileSelector.FILE_TYPE_SOUNDFONT, FileSelector.READ);
 		}
-		if (null == midiExportSelector) {
-			midiExportSelector = new FileSelector(view, this);
-			midiExportSelector.init(FileSelector.FILE_TYPE_MIDI, FileSelector.WRITE);
-		}
-		if (null == decompileExportSelector) {
-			decompileExportSelector = new FileSelector(view, this);
-			decompileExportSelector.init(FileSelector.FILE_TYPE_MPL, FileSelector.WRITE);
+		if (null == exportSelector) {
+			exportSelector = new FileSelector(view, this);
+			exportSelector.init(FileSelector.FILE_TYPE_MIDI, FileSelector.WRITE);
 		}
 	}
 	
@@ -170,15 +160,9 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		}
 		
 		// button pressed: open MidicaPL file
-		else if (UiView.CMD_OPEN_MIDICAPL_FILE.equals(cmd)) {
+		else if (UiView.CMD_IMPORT.equals(cmd)) {
 			currentFilePurpose = FILE_PURPOSE_PARSE;
-			mplSelector.setVisible(true);
-		}
-		
-		// button pressed: open MIDI file
-		else if (UiView.CMD_OPEN_MIDI_FILE.equals(cmd)) {
-			currentFilePurpose = FILE_PURPOSE_PARSE;
-			midiSelector.setVisible(true);
+			importSelector.setVisible(true);
 		}
 		
 		// button pressed: open soundfont file
@@ -187,14 +171,9 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			soundfontSelector.setVisible(true);
 		}
 		
-		// button pressed: export MIDI file
-		else if (UiView.CMD_EXPORT_MIDI.equals(cmd)) {
-			openExportFileSelector(cmd);
-		}
-		
-		// button pressed: export MidicaPL file
-		else if (UiView.CMD_EXPORT_DECOMPILE.equals(cmd)) {
-			openExportFileSelector(cmd);
+		// button pressed: export file
+		else if (UiView.CMD_EXPORT.equals(cmd)) {
+			openExportFileSelector();
 		}
 		
 		// file chosen with the file selector
@@ -211,20 +190,18 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		
 		// cancel or ESC in FileChooser pressed
 		else if (CMD_CANCELED.equals(cmd)) {
-			mplSelector.setVisible(false);
-			midiSelector.setVisible(false);
+			importSelector.setVisible(false);
 			soundfontSelector.setVisible(false);
-			midiExportSelector.setVisible(false);
-			decompileExportSelector.setVisible(false);
+			exportSelector.setVisible(false);
 		}
 		
 		// button pressed: start player
 		else if (UiView.CMD_START_PLAYER.equals(cmd)) {
 			if (MidiDevices.isSequenceSet()) {
-				if (FileSelector.FILE_TYPE_MIDI.equals(currentFileType))
-					player = new PlayerView(view, midiParser, currentFile);
-				else
+				if (FileSelector.FILE_TYPE_MPL.equals(currentFileType))
 					player = new PlayerView(view, mplParser, currentFile);
+				else if (FileSelector.FILE_TYPE_MIDI.equals(currentFileType))
+					player = new PlayerView(view, midiParser, currentFile);
 			}
 			else {
 				showErrorMessage(Dict.get(Dict.ERROR_SEQUENCE_NOT_SET));
@@ -256,6 +233,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		
 		// find out the config variables to change
 		String rememberConfigKey = "";
+		String typeConfigVal     = "";
 		String pathConfigKey     = "";
 		String path              = "";
 		
@@ -265,15 +243,19 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			pathConfigKey     = Config.PATH_SF2;
 			path              = SoundfontParser.getFilePath();
 		}
-		else if (UiView.NAME_REMEMBER_MIDICAPL.equals(name)) {
-			rememberConfigKey = Config.REMEMBER_MIDICAPL;
-			pathConfigKey     = Config.PATH_MIDICAPL;
-			path              = MidicaPLParser.getFilePath();
-		}
-		else if (UiView.NAME_REMEMBER_MIDI.equals(name)) {
-			rememberConfigKey = Config.REMEMBER_MIDI;
-			pathConfigKey     = Config.PATH_MIDI;
-			path              = MidiParser.getFilePath();
+		else if (UiView.NAME_REMEMBER_IMPORT.equals(name)) {
+			rememberConfigKey = Config.REMEMBER_IMPORT;
+			if (FileSelector.FILE_TYPE_MPL.equals(currentFileType)) {
+				pathConfigKey = Config.PATH_MIDICAPL;
+				path          = MidicaPLParser.getFilePath();
+				typeConfigVal = FileSelector.FILE_TYPE_MPL;
+				
+			}
+			else if (FileSelector.FILE_TYPE_MIDI.equals(currentFileType)) {
+				pathConfigKey = Config.PATH_MIDI;
+				path          = MidiParser.getFilePath();
+				typeConfigVal = FileSelector.FILE_TYPE_MIDI;
+			}
 		}
 		
 		// save in config
@@ -281,14 +263,13 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			// remember checkbox state in the config
 			Config.set(rememberConfigKey, "true");
 			
-			// remember file path, if a file is loaded!
+			// remember file path and type, if a file is loaded!
 			if (path != null) {
 				Config.set(pathConfigKey, path);
 			}
-			
-			// make sure that the checkboxes remember-midi and remember-midicapl
-			// are never checked both at the same time
-			view.rememberCheckboxChecked(name);
+			if (!typeConfigVal.equals("")) {
+				Config.set(Config.IMPORT_TYPE, typeConfigVal);
+			}
 		}
 		else {
 			Config.set( rememberConfigKey, "false" );
@@ -301,21 +282,15 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	 * the file to be exported.
 	 * 
 	 * If no MIDI sequence is set, shows an error message instead of opening the file selector.
-	 * 
-	 * @param cmd The action command of the pressed button.
 	 */
-	private void openExportFileSelector(String cmd) {
+	private void openExportFileSelector() {
 		
 		if ( ! MidiDevices.isSequenceSet() ) {
 			showErrorMessage(Dict.get(Dict.ERROR_SEQUENCE_NOT_SET));
 			return;
 		}
-		
 		currentFilePurpose = FILE_PURPOSE_EXPORT;
-		if (UiView.CMD_EXPORT_MIDI.equals(cmd))
-			midiExportSelector.setVisible(true);
-		else if (UiView.CMD_EXPORT_DECOMPILE.equals(cmd))
-			decompileExportSelector.setVisible(true);
+		exportSelector.setVisible(true);
 	}
 	
 	/**
@@ -336,17 +311,20 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		IParser      parser;
 		FileSelector selector;
 		String       charsetKey = null;
+		String       pathKey    = null;
 		if (FileSelector.FILE_TYPE_MPL.equals(type)) {
 			parser     = mplParser;
-			selector   = mplSelector;
+			selector   = importSelector;
 			waitMsg    = Dict.get(Dict.WAIT_PARSE_MPL);
 			charsetKey = Config.CHARSET_MPL;
+			pathKey    = Config.PATH_MIDICAPL;
 		}
 		else if (FileSelector.FILE_TYPE_MIDI.equals(type)) {
 			parser     = midiParser;
-			selector   = midiSelector;
+			selector   = importSelector;
 			waitMsg    = Dict.get(Dict.WAIT_PARSE_MID);
 			charsetKey = Config.CHARSET_MID;
+			pathKey    = Config.PATH_MIDI;
 		}
 		else if (FileSelector.FILE_TYPE_SOUNDFONT.equals(type)) {
 			parser   = soundfontParser;
@@ -360,8 +338,9 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		// Reset the filename for the case that it cannot be parsed.
 		// But don't do that for soundfonts because the last successfully
 		// parsed soundfont file will stay valid.
-		if ( ! FileSelector.FILE_TYPE_SOUNDFONT.equals(type) )
+		if (! FileSelector.FILE_TYPE_SOUNDFONT.equals(type)) {
 			displayFilename(type, Dict.get(Dict.UNCHOSEN_FILE));
+		}
 		
 		// close file selector
 		selector.setVisible(false);
@@ -386,8 +365,13 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			
 			// show the filename of the successfully parsed file
 			displayFilename(type, file.getName());
-			if ( FileSelector.FILE_TYPE_MPL.equals(type)
-			  || FileSelector.FILE_TYPE_MIDI.equals(type) ) {
+			if (FileSelector.FILE_TYPE_SOUNDFONT.equals(type)) {
+				String remember = Config.get(Config.REMEMBER_SF2);
+				if ("true".equals(remember)) {
+					Config.set(Config.PATH_SF2, file.getAbsolutePath());
+				}
+			}
+			else {
 				// store the file for later reparsing
 				currentFile     = file;
 				currentFileType = type;
@@ -399,20 +383,10 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 				}
 				
 				// remember file path in the config, if necessary
-				String mustRemember = Config.get(Config.REMEMBER_MIDICAPL);
-				String pathKey      = Config.PATH_MIDICAPL;
-				if (FileSelector.FILE_TYPE_MIDI.equals(type)) {
-					mustRemember = Config.get(Config.REMEMBER_MIDI);
-					pathKey      = Config.PATH_MIDI;
-				}
+				String mustRemember = Config.get(Config.REMEMBER_IMPORT);
 				if (mustRemember.equals("true")) {
 					Config.set(pathKey, file.getAbsolutePath());
-				}
-			}
-			else if (FileSelector.FILE_TYPE_SOUNDFONT.equals(type)) {
-				String remember = Config.get(Config.REMEMBER_SF2);
-				if ("true".equals(remember)) {
-					Config.set(Config.PATH_SF2, file.getAbsolutePath());
+					Config.set(Config.IMPORT_TYPE, type);
 				}
 			}
 			
@@ -448,9 +422,8 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	 */
 	public void exportChosenFile(String type, File file) {
 		
-		FileSelector selector   = decompileExportSelector;
-		String       charsetKey = null;
-		Exporter     exporter   = null;
+		String   charsetKey = null;
+		Exporter exporter   = null;
 		if (FileSelector.FILE_TYPE_MPL.equals(type)) {
 			charsetKey = Config.CHARSET_EXPORT_MPL;
 			exporter   = new MidicaPLExporter();
@@ -459,14 +432,13 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			exporter = new AldaExporter();
 		}
 		else if (FileSelector.FILE_TYPE_MIDI.equals(type)) {
-			selector   = midiExportSelector;
 			charsetKey = Config.CHARSET_EXPORT_MID;
 			exporter   = new MidiExporter();
 		}
 		else {
 			return;
 		}
-		selector.setVisible(false);
+		exportSelector.setVisible(false);
 		try {
 			ExportResult result = exporter.export(file);
 			if (result.isSuccessful() && ! Cli.isCliMode) {
@@ -479,7 +451,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 				}
 				
 				// set export directory in the config
-				selector.rememberDirectory();
+				exportSelector.rememberDirectory();
 			}
 		}
 		catch (ExportException ex) {
@@ -535,27 +507,36 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	}
 	
 	/**
-	 * Displays the imported file name in the right field (according to the file type).
+	 * Displays the parsed sequence or soundfont file name.
+	 * In case of a sequence, also displays the file type.
 	 * 
 	 * @param type        File type.
 	 * @param filename    File name.
 	 */
 	private void displayFilename(String type, String filename) {
+		boolean notImported = ! FileSelector.FILE_TYPE_SOUNDFONT.equals(type)
+			&& filename.equals(Dict.get(Dict.UNCHOSEN_FILE));
+		
 		if (FileSelector.FILE_TYPE_MPL.equals(type)) {
-			// show MidicaPL file
-			view.getChosenMidicaPLFileLbl().setText(filename);
-			// hide Midi file
-			view.getChosenMidiFileLbl().setText(Dict.get(Dict.UNCHOSEN_FILE));
+			// show imported file
+			view.getImportedFileLbl().setText(filename);
+			view.getImportedFileTypeLbl().setText(Dict.get(Dict.IMPORTED_TYPE_MPL));
 		}
 		else if (FileSelector.FILE_TYPE_MIDI.equals(type)) {
-			// show Midi file
-			view.getChosenMidiFileLbl().setText(filename);
-			// hide MidicaPL file
-			view.getChosenMidicaPLFileLbl().setText(Dict.get(Dict.UNCHOSEN_FILE));
+			view.getImportedFileLbl().setText(filename);
+			view.getImportedFileTypeLbl().setText(Dict.get(Dict.IMPORTED_TYPE_MIDI));
+		}
+		else if (FileSelector.FILE_TYPE_ALDA.equals(type)) {
+			view.getImportedFileLbl().setText(filename);
+			view.getImportedFileTypeLbl().setText(Dict.get(Dict.IMPORTED_TYPE_ALDA));
 		}
 		else if (FileSelector.FILE_TYPE_SOUNDFONT.equals(type))
 			// show soundfont file
 			view.getChosenSoundfontFileLbl().setText(filename);
+		
+		// don't display the file type if no file is imported
+		if (notImported)
+			view.getImportedFileTypeLbl().setText(Dict.get(Dict.UNCHOSEN_FILE));
 	}
 	
 	/**
@@ -629,12 +610,12 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		}
 		
 		// check config
-		String rememberSf       = Config.get( Config.REMEMBER_SF2      );
-		String soundfontPath    = Config.get( Config.PATH_SF2          );
-		String rememberMidicapl = Config.get( Config.REMEMBER_MIDICAPL );
-		String midicaplPath     = Config.get( Config.PATH_MIDICAPL     );
-		String rememberMidi     = Config.get( Config.REMEMBER_MIDI     );
-		String midiPath         = Config.get( Config.PATH_MIDI         );
+		String rememberSf     = Config.get( Config.REMEMBER_SF2    );
+		String soundfontPath  = Config.get( Config.PATH_SF2        );
+		String rememberImport = Config.get( Config.REMEMBER_IMPORT );
+		String midicaplPath   = Config.get( Config.PATH_MIDICAPL   );
+		String midiPath       = Config.get( Config.PATH_MIDI       );
+		String importType     = Config.get( Config.IMPORT_TYPE     );
 		
 		// Wait until Midica.uiController is not null any more.
 		// Otherwise a remembered file could be parsed faster (race condition) and
@@ -653,14 +634,15 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			}
 			else {
 				
-				// load MidicaPL, if needed
-				if ("true".equals(rememberMidicapl) && ! midicaplPath.equals("")) {
-					parseChosenFile(FileSelector.FILE_TYPE_MPL, new File(midicaplPath));
-				}
-				
-				// load MIDI, if needed
-				if ("true".equals(rememberMidi) && ! midiPath.equals("")) {
-					parseChosenFile(FileSelector.FILE_TYPE_MIDI, new File(midiPath));
+				// load sequence, if needed
+				if ("true".equals(rememberImport)) {
+					
+					if (FileSelector.FILE_TYPE_MPL.equals(importType) && ! midicaplPath.equals("")) {
+						parseChosenFile(FileSelector.FILE_TYPE_MPL, new File(midicaplPath));
+					}
+					else if (FileSelector.FILE_TYPE_MIDI.equals(importType) && ! midiPath.equals("")) {
+						parseChosenFile(FileSelector.FILE_TYPE_MIDI, new File(midiPath));
+					}
 				}
 			}
 		}

@@ -200,6 +200,9 @@ public class Cli {
 		msg.append("--keep-alive          : Don't exit, even if --cli has been used.\n");
 		msg.append("                        Mainly used for unit tests.\n");
 		msg.append("--ignore-local-config : Doesn't use local config file. Use default config.\n");
+		msg.append("                        Without this argument the config is read from and\n");
+		msg.append("                        written into the file '.midica.conf' in the current\n");
+		msg.append("                        user's home directory.\n");
 		msg.append("--soundfont=PATH      : Use the specified soundfont file.\n");
 		msg.append("--import=PATH         : Import from the specified MidicaPL file.\n");
 		msg.append("--import-midi=PATH    : Import from the specified MIDI file.\n");

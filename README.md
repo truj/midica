@@ -1,5 +1,17 @@
 <img src="img/logo.svg" title="Midica Logo" width="300">
 
+[Get Started](#get-started)
+|
+[Features](#features-of-the-midica-application-itself)
+|
+[Screenshots](#screenshots)
+|
+[Programming](#programming-with-midica)
+|
+[CLI](#command-line-interface)
+|
+[Contribute](#contributing)
+
 Midica is an interpreter for a Music Programming Language.
 It translates source code to MIDI.
 
@@ -33,6 +45,7 @@ You write your songs in plain text files using the text editor of your choice. M
 - **Exporting MIDI sequences**
     - As MIDI files
     - As MidicaPL files (experimental)
+    - As ALDA files (experimental)
 - **Integrated MIDI player** featuring:
     - Regulation of volume, tempo and pitch transposition
     - Memorizing a position in the MIDI sequence and jumping back to that position
@@ -71,7 +84,9 @@ The third one shows the player in Karaoke mode.
 <img src="img/player.png" title="Midica Player">
 <img src="img/karaoke.png" title="Karaoke Mode">
 
-# MidicaPL (Midica's Music programming language)
+# Programming with Midica
+
+Midica has its own Music Programming Language: MidicaPL.
 
 You can find a MidicaPL tutorial here:
 
@@ -122,6 +137,45 @@ This results in a MIDI sequence like this:
 
 <img src="img/example-score.svg" title="Example Score">
 
+# Command Line Interface
+
+By default (without arguments) Midica is started in GUI mode.
+But you can provide command line arguments:
+
+```
+java -jar midica.jar [ARGUMENTS]
+```
+
+You can see all available arguments with `--help`:
+
+```
+java -jar midica.jar --help
+```
+
+This explains which arguments are available and how they work:
+
+```
+ARGUMENTS:
+--help                : Print this message.
+--cli                 : Run in CLI mode (command line interface) without GUI.
+                        Exits after all CLI related work is done.
+--keep-alive          : Don't exit, even if --cli has been used.
+                        Mainly used for unit tests.
+--ignore-local-config : Doesn't use local config file. Use default config.
+                        Without this argument the config is read from and
+                        written into the file '.midica.conf' in the current
+                        user's home directory.
+--soundfont=PATH      : Use the specified soundfont file.
+--import=PATH         : Import from the specified MidicaPL file.
+--import-midi=PATH    : Import from the specified MIDI file.
+--export-midi=PATH    : Export to the specified MIDI file.
+--export=PATH         : Export to the specified MidicaPL file. (*)
+--export-alda=PATH    : Export to the specified ALDA file. (*)
+
+(*) A file is exported to STDOUT if the export PATH is a dash (-).
+    E.g. --export=-
+```
+
 # Contributing
 
-If you want to contribute, please check the [Readme file for Developers](https://github.com/truj/midica/blob/master/build_helper/README.md).
+If you want to contribute, please check the [Readme file for Developers](build_helper/README.md).

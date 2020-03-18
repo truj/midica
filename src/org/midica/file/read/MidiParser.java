@@ -73,28 +73,30 @@ public class MidiParser extends SequenceParser {
 	 * 
 	 * @param file  MIDI file to be parsed.
 	 */
-	public void parse( File file ) throws ParseException {
+	public void parse(File file) throws ParseException {
 		
 		// reset file name and file type
-		preprocess( file );
+		preprocess(file);
 		
 		isProducedByMidica = false;
 		midiFileCharset    = null;
 		
 		// get chosen charset
-		chosenCharset = ((ComboboxStringOption) ConfigComboboxModel.getModel( Config.CHARSET_MID ).getSelectedItem() ).getIdentifier();
+		ConfigComboboxModel charsetModel = ConfigComboboxModel.getModel(Config.CHARSET_MID);
+		ComboboxStringOption chosenOption = (ComboboxStringOption) charsetModel.getSelectedItem();
+		chosenCharset = chosenOption.getIdentifier();
 		
 		try {
-			Sequence sequence = MidiSystem.getSequence( file );
-			createSequence( sequence );
-			postprocessSequence( sequence, "mid", chosenCharset ); // we want to analyze the loaded sequence - not the created one
+			Sequence sequence = MidiSystem.getSequence(file);
+			createSequence(sequence);
+			postprocessSequence(sequence, "mid", chosenCharset); // we want to analyze the loaded sequence - not the created one
 		}
-		catch ( InvalidMidiDataException e ) {
-			throw new ParseException( e.getMessage() );
+		catch (InvalidMidiDataException e) {
+			throw new ParseException(e.getMessage());
 		}
-		catch ( IOException e ) {
+		catch (IOException e) {
 			e.printStackTrace();
-			throw new ParseException( e.getMessage() );
+			throw new ParseException(e.getMessage());
 		}
 	}
 	
@@ -107,39 +109,39 @@ public class MidiParser extends SequenceParser {
 	 * @throws ParseException            If the input file can not be parsed correctly.
 	 * @throws InvalidMidiDataException  If the created sequence is invalid.
 	 */
-	private void createSequence( Sequence sequence ) throws ParseException, InvalidMidiDataException {
+	private void createSequence(Sequence sequence) throws ParseException, InvalidMidiDataException {
 		
 		// process global parameters and initialize the sequence to create
 		float divisionType = sequence.getDivisionType();
-		if ( Sequence.PPQ != divisionType )
-			throw new ParseException( Dict.get(Dict.ERROR_ONLY_PPQ_SUPPORTED) );
+		if (Sequence.PPQ != divisionType)
+			throw new ParseException(Dict.get(Dict.ERROR_ONLY_PPQ_SUPPORTED));
 		int resolution = sequence.getResolution();
 		try {
-			SequenceCreator.reset( resolution, chosenCharset );
+			SequenceCreator.reset(resolution, chosenCharset);
 			// init percussion channel comment
-			SequenceCreator.initChannel( 9, 0, Dict.get(Dict.PERCUSSION_CHANNEL), SequenceCreator.NOW );
+			SequenceCreator.initChannel(9, 0, Dict.get(Dict.PERCUSSION_CHANNEL), SequenceCreator.NOW);
 		}
-		catch ( InvalidMidiDataException e ) {
-			throw new ParseException( e.getMessage() );
+		catch (InvalidMidiDataException e) {
+			throw new ParseException(e.getMessage());
 		}
 		
 		int trackNum = 0;
 		TRACK:
-		for ( Track t : sequence.getTracks() ) {
+		for (Track t : sequence.getTracks()) {
 			EVENT:
-			for ( int i=0; i < t.size(); i++ ) {
-				MidiEvent   event = t.get( i );
+			for (int i=0; i < t.size(); i++) {
+				MidiEvent   event = t.get(i);
 				long        tick  = event.getTick();
 				MidiMessage msg   = event.getMessage();
 				
-				if ( msg instanceof MetaMessage ) {
-					processMetaMessage( (MetaMessage) msg, tick, trackNum );
+				if (msg instanceof MetaMessage) {
+					processMetaMessage((MetaMessage) msg, tick, trackNum);
 				}
-				else if ( msg instanceof ShortMessage ) {
-					processShortMessage( (ShortMessage) msg, tick );
+				else if (msg instanceof ShortMessage) {
+					processShortMessage((ShortMessage) msg, tick);
 				}
-				else if ( msg instanceof SysexMessage ) {
-					processSysexMessage( (SysexMessage) msg, tick );
+				else if (msg instanceof SysexMessage) {
+					processSysexMessage((SysexMessage) msg, tick);
 				}
 				else {
 				}
@@ -160,16 +162,16 @@ public class MidiParser extends SequenceParser {
 	 * @param origTrack  Original track number.
 	 * @throws InvalidMidiDataException
 	 */
-	private void processMetaMessage( MetaMessage msg, long tick, int origTrack ) throws InvalidMidiDataException {
+	private void processMetaMessage(MetaMessage msg, long tick, int origTrack) throws InvalidMidiDataException {
 		int track = 0; // default track for generic messages
 		int type  = msg.getType();
 		
 		// lyrics: track 2
-		if ( MidiListener.META_LYRICS == type ) {
+		if (MidiListener.META_LYRICS == type) {
 			track = 2;
 			
 			// produced by midica?
-			String text = CharsetUtils.getTextFromBytes( msg.getData(), chosenCharset, midiFileCharset );
+			String text = CharsetUtils.getTextFromBytes(msg.getData(), chosenCharset, midiFileCharset);
 			HashMap<String, String> info = lyricUtil.getSongInfo(text);
 			if (info != null && info.containsKey(LyricUtil.SOFTWARE)) {
 				String value = info.get(LyricUtil.SOFTWARE);
@@ -180,8 +182,8 @@ public class MidiParser extends SequenceParser {
 		}
 		
 		// text: further checks needed
-		else if ( MidiListener.META_TEXT == type ) {
-			String text = CharsetUtils.getTextFromBytes( msg.getData(), chosenCharset, midiFileCharset );
+		else if (MidiListener.META_TEXT == type) {
+			String text = CharsetUtils.getTextFromBytes(msg.getData(), chosenCharset, midiFileCharset);
 			
 			// karaoke meta information for track 1
 			if ( text.startsWith("@K")
@@ -198,20 +200,20 @@ public class MidiParser extends SequenceParser {
 		
 		// instrument comment - keep original track number because that
 		// determins the channel number
-		else if ( MidiListener.META_INSTRUMENT_NAME == type && isProducedByMidica ) {
+		else if (MidiListener.META_INSTRUMENT_NAME == type && isProducedByMidica) {
 			track = origTrack;
 		}
 		
 		// add the message to the right track
-		SequenceCreator.addMessageToTrack( msg, track, tick );
+		SequenceCreator.addMessageToTrack(msg, track, tick);
 		
 		// charset switch in a TEXT or LYRICS event?
-		if ( MidiListener.META_LYRICS == type || MidiListener.META_TEXT == type ) {
+		if (MidiListener.META_LYRICS == type || MidiListener.META_TEXT == type) {
 
 			// charset definition?
-			String text       = CharsetUtils.getTextFromBytes( msg.getData(), chosenCharset, midiFileCharset );
-			String newCharset = CharsetUtils.findCharsetSwitch( text );
-			if ( newCharset != null ) {
+			String text       = CharsetUtils.getTextFromBytes(msg.getData(), chosenCharset, midiFileCharset);
+			String newCharset = CharsetUtils.findCharsetSwitch(text);
+			if (newCharset != null) {
 				midiFileCharset = newCharset;
 			}
 		}
@@ -225,7 +227,7 @@ public class MidiParser extends SequenceParser {
 	 * @param tick  Tickstamp of the message's occurrence.
 	 */
 	private void processSysexMessage(SysexMessage msg, long tick) {
-		SequenceCreator.addMessageGeneric( msg, tick );
+		SequenceCreator.addMessageGeneric(msg, tick);
 	}
 	
 	/**
@@ -242,37 +244,37 @@ public class MidiParser extends SequenceParser {
 	 * @throws InvalidMidiDataException
 	 * @throws ParseException
 	 */
-	private void processShortMessage( ShortMessage msg, long tick ) throws InvalidMidiDataException, ParseException {
+	private void processShortMessage(ShortMessage msg, long tick) throws InvalidMidiDataException, ParseException {
 		int cmd      = msg.getCommand();
 		int channel  = msg.getChannel();
 		int note     = msg.getData1();
 		int velocity = msg.getData2();
-		if ( channel < 0 || channel > 15 ) {
+		if (channel < 0 || channel > 15) {
 			// not a channel command
-			SequenceCreator.addMessageGeneric( msg, tick );
+			SequenceCreator.addMessageGeneric(msg, tick);
 			return;
 		}
 		
-		if ( ShortMessage.NOTE_ON == cmd && velocity > 0 ) {
+		if (ShortMessage.NOTE_ON == cmd && velocity > 0) {
 			
 			// note on
-			note = transpose( note, channel );
+			note = transpose(note, channel);
 			// TODO: delete (used to debug channel velocity changes in "And then there was silence")
 //			if (9==channel&&tick>99000) {
 //				System.out.println("channel: "+channel+", note: "+note+", tick:"+tick+", vel: "+velocity);
 //			}
-			SequenceCreator.addMessageNoteON( channel, note, tick, velocity );
+			SequenceCreator.addMessageNoteON(channel, note, tick, velocity);
 		}
-		else if ( ShortMessage.NOTE_OFF == cmd || (ShortMessage.NOTE_ON == cmd && 0 == velocity) ) {
+		else if (ShortMessage.NOTE_OFF == cmd || (ShortMessage.NOTE_ON == cmd && 0 == velocity)) {
 			
 			// note off
-			note = transpose( note, channel );
-			SequenceCreator.addMessageNoteOFF( channel, note, tick );
+			note = transpose(note, channel);
+			SequenceCreator.addMessageNoteOFF(channel, note, tick);
 		}
 		
 		else {
 			// another channel command
-			SequenceCreator.addMessageGeneric( msg, channel, tick );
+			SequenceCreator.addMessageGeneric(msg, channel, tick);
 		}
 	}
 }

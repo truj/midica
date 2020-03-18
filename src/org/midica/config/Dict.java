@@ -482,11 +482,9 @@ public class Dict {
 	// key binding IDs
 	public static final String KEY_MAIN_INFO                = "key_main_info";
 	public static final String KEY_MAIN_PLAYER              = "key_main_player";
-	public static final String KEY_MAIN_IMPORT_MPL          = "key_main_import_mpl";
-	public static final String KEY_MAIN_IMPORT_MID          = "key_main_import_mid";
+	public static final String KEY_MAIN_IMPORT              = "key_main_import";
 	public static final String KEY_MAIN_IMPORT_SF           = "key_main_import_sf";
-	public static final String KEY_MAIN_EXPORT_MID          = "key_main_export_mid";
-	public static final String KEY_MAIN_EXPORT_DECOMPILE    = "key_main_export_decompile";
+	public static final String KEY_MAIN_EXPORT              = "key_main_export";
 	public static final String KEY_MAIN_CBX_LANGUAGE        = "key_main_cbx_language";
 	public static final String KEY_MAIN_CBX_NOTE            = "key_main_cbx_note";
 	public static final String KEY_MAIN_CBX_HALFTONE        = "key_main_cbx_halftone";
@@ -671,6 +669,7 @@ public class Dict {
 	public static final String KEY_STRING_FILTER_CLOSE      = "key_string_filter_close";
 	public static final String KEY_STRING_FILTER_CLEAR      = "key_string_filter_clear";
 	public static final String KEY_FILE_SELECT_CLOSE        = "key_file_select_close";
+	public static final String KEY_FILE_SELECTOR_MID        = "key_file_selector_mid";
 	public static final String KEY_FILE_SELECTOR_MPL        = "key_file_selector_mpl";
 	public static final String KEY_FILE_SELECTOR_ALDA       = "key_file_selector_alda";
 	public static final String KEY_FILE_SELECT_DC_OPEN      = "key_file_select_dc_config_open";
@@ -725,8 +724,12 @@ public class Dict {
 	public static final String EXPORT                      = "export";
 	public static final String TRANSPOSE_LEVEL             = "transpose_level";
 	public static final String PLAYER                      = "player";
-	public static final String MIDICAPL_FILE               = "midicapl_file";
-	public static final String MIDI_FILE                   = "midi_file";
+	public static final String IMPORT_FILE                 = "import_file";
+	public static final String IMPORTED_FILE               = "imported_file";
+	public static final String IMPORTED_TYPE               = "imported_type";
+	public static final String IMPORTED_TYPE_MIDI          = "imported_type_midi";
+	public static final String IMPORTED_TYPE_MPL           = "imported_type_mpl";
+	public static final String IMPORTED_TYPE_ALDA          = "imported_type_alda";
 	public static final String SOUNDFONT                   = "soundfont";
 	public static final String REMEMBER_SF                 = "remember_sf";
 	public static final String REMEMBER_SF_TT              = "remember_sf_tt";
@@ -739,14 +742,14 @@ public class Dict {
 	public static final String SF_LOADED_BY_SOURCE         = "sf_loaded_by_source";
 	public static final String CHOOSE_FILE                 = "choose_file";
 	public static final String CHOOSE_FILE_EXPORT          = "choose_file_export";
-	public static final String MIDI_EXPORT                 = "midi_export";
-	public static final String DECOMPILE_EXPORT            = "decompile_export";
+	public static final String EXPORT_FILE                 = "export_file";
 	public static final String CONF_ERROR_OK               = "conf_error_ok";
 	public static final String CONF_ERROR_ERROR            = "conf_error_error";
 	public static final String CONF_ERROR_HALFTONE_SYNTAX  = "conf_Error_halftone_syntax";
 	public static final String ERROR_NOT_YET_IMPLEMENTED   = "error_not_yet_implemented";
 	
 	// MidicaFileChooser
+	public static final String TAB_MIDI                    = "tab_midi";
 	public static final String TAB_MIDICAPL                = "tab_midicapl";
 	public static final String TAB_ALDA                    = "tab_alda";
 	public static final String CHARSET                     = "charset";
@@ -1779,11 +1782,9 @@ public class Dict {
 		// key binding IDs
 		set( KEY_MAIN_INFO,                "Open Info & Config Details"                                                  );
 		set( KEY_MAIN_PLAYER,              "Open Player Window"                                                          );
-		set( KEY_MAIN_IMPORT_MPL,          "Import MidicaPL file"                                                        );
-		set( KEY_MAIN_IMPORT_MID,          "Import MIDI file"                                                            );
+		set( KEY_MAIN_IMPORT,              "Import File"                                                                 );
 		set( KEY_MAIN_IMPORT_SF,           "Load Soundfont file"                                                         );
-		set( KEY_MAIN_EXPORT_MID,          "Export MIDI file"                                                            );
-		set( KEY_MAIN_EXPORT_DECOMPILE,    "Export Decompiled file"                                                      );
+		set( KEY_MAIN_EXPORT,              "Export file"                                                                 );
 		set( KEY_MAIN_CBX_LANGUAGE,        "Open Language Selection"                                                     );
 		set( KEY_MAIN_CBX_NOTE,            "Open Note System Selection"                                                  );
 		set( KEY_MAIN_CBX_HALFTONE,        "Open Half Tone Symbol Selection"                                             );
@@ -1969,6 +1970,7 @@ public class Dict {
 		set( KEY_STRING_FILTER_CLEAR,      "Clear the table filter"                                                      );
 		set( KEY_FILE_SELECT_DC_OPEN,      "Open the Decompile Configuration Window"                                     );
 		set( KEY_FILE_SELECT_CLOSE,        "Close the File Selector"                                                     );
+		set( KEY_FILE_SELECTOR_MID,        "Select the MIDI Tab"                                                         );
 		set( KEY_FILE_SELECTOR_MPL,        "Select the MidicaPL Tab"                                                     );
 		set( KEY_FILE_SELECTOR_ALDA,       "Select the ALDA Tab"                                                         );
 		set( KEY_DC_CONFIG_CLOSE,          "Close the Decompile Configuration Window"                                    );
@@ -2017,13 +2019,17 @@ public class Dict {
 		set( PLAYER,                       "Player"                        );
 		set( EXPORT,                       "Export"                        );
 		set( TRANSPOSE_LEVEL,              "Transpose Level"               );
-		set( MIDICAPL_FILE,                "MidicaPL file"                 );
+		set( IMPORT_FILE,                  "Import file"                   );
+		set( IMPORTED_FILE,                "Imported file"                 );
+		set( IMPORTED_TYPE,                "File Type"                     );
+		set( IMPORTED_TYPE_MIDI,           "MIDI"                          );
+		set( IMPORTED_TYPE_MPL,            "MidicaPL"                      );
+		set( IMPORTED_TYPE_ALDA,           "ALDA"                          );
 		set( UNKNOWN_NOTE_NAME,            "unknown"                       );
 		set( UNKNOWN_PERCUSSION_NAME,      "unknown"                       );
 		set( UNKNOWN_DRUMKIT_NAME,         "unknown"                       );
 		set( UNKNOWN_SYNTAX,               "?"                             );
 		set( UNKNOWN_INSTRUMENT,           "unknown"                       );
-		set( MIDI_FILE,                    "Midi file"                     );
 		set( SOUNDFONT,                    "Soundfont"                     );
 		set( REMEMBER_SF,                  "Remember"                      );
 		set( REMEMBER_SF_TT,               "Load the chosen soundfont automatically at the next startup" );
@@ -2036,13 +2042,13 @@ public class Dict {
 		set( SF_LOADED_BY_SOURCE,          "[loaded by MidicaPL file]"     );
 		set( CHOOSE_FILE,                  "select file"                   );
 		set( CHOOSE_FILE_EXPORT,           "select file"                   );
-		set( MIDI_EXPORT,                  "Midi file"                     );
-		set( DECOMPILE_EXPORT,             "Decompile"                     );
+		set( EXPORT_FILE,                  "Export file"                   );
 		set( CONF_ERROR_OK,                "Configuration OK"              );
 		set( CONF_ERROR_HALFTONE_SYNTAX,   "Chosen half tone symbol incompatible with chosen syntax" );
 		set( ERROR_NOT_YET_IMPLEMENTED,    "This functionality is not yet implemented" );
 		
 		// FileSelector / MidicaFileChooser
+		set( TAB_MIDI,                 "MIDI"                                                 );
 		set( TAB_MIDICAPL,             "MidicaPL"                                             );
 		set( TAB_ALDA,                 "ALDA"                                                 );
 		set( CHARSET,                  "Charset"                                              );
@@ -3118,21 +3124,24 @@ public class Dict {
 		set( PLAYER,                                 "Abspielen"                             );
 		set( EXPORT,                                 "Speichern"                             );
 		set( TRANSPOSE_LEVEL,                        "Transposition:"                        );
-		set( MIDICAPL_FILE,                          "MidicaPL-Datei"                        );
+		set( IMPORT_FILE,                            "Datei importieren"                     );
+		set( IMPORTED_FILE,                          "Name"                                  );
+		set( IMPORTED_TYPE,                          "Typ"                                   );
+		set( IMPORTED_TYPE_MIDI,                     "MIDI"                                  );
+		set( IMPORTED_TYPE_MPL,                      "MidicaPL"                              );
+		set( IMPORTED_TYPE_ALDA,                     "ALDA"                                  );
 		set( UNKNOWN_NOTE_NAME,                      "unbekannt"                             );
 		set( UNKNOWN_PERCUSSION_NAME,                "unbekannt"                             );
 		set( UNKNOWN_DRUMKIT_NAME,                   "unbekannt"                             );
 		set( UNKNOWN_SYNTAX,                         "?"                                     );
 		set( UNKNOWN_INSTRUMENT,                     "unbekannt"                             );
-		set( MIDI_FILE,                              "Midi-Datei"                            );
 		set( SOUNDFONT,                              "Soundfont-Datei"                       );
 		set( PLAYER_BUTTON,                          "Abspielen"                             );
 		set( UNCHOSEN_FILE,                          "keine Datei geladen"                   );
 		set( SF_LOADED_BY_SOURCE,                    "[durch MidicaPL-Datei geladen]"        );
 		set( CHOOSE_FILE,                            "Öffnen"                                );
 		set( CHOOSE_FILE_EXPORT,                     "Speichern"                             );
-		set( MIDI_EXPORT,                            "Als MIDI exportieren"                  );
-		set( DECOMPILE_EXPORT,                       "Dekompilieren"                         );
+		set( EXPORT_FILE,                            "Exportieren"                           );
 		set( ERROR_NOT_YET_IMPLEMENTED,              "Diese Funktionalität ist noch nicht fertig." );
 	}
 	

@@ -26,8 +26,8 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.midica.Midica;
 import org.midica.file.write.MidicaPLExporter;
+import org.midica.ui.file.FileSelector;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
 import org.midica.ui.model.MidicaTreeModel;
@@ -67,8 +67,8 @@ public class Config {
 	public static final String PATH_MIDICAPL         = "path_midicapl";
 	public static final String PATH_MIDI             = "path_midi";
 	public static final String REMEMBER_SF2          = "remember_sf2";
-	public static final String REMEMBER_MIDICAPL     = "remember_midicapl";
-	public static final String REMEMBER_MIDI         = "remember_midi";
+	public static final String REMEMBER_IMPORT       = "remember_import";
+	public static final String IMPORT_TYPE           = "import_type";
 	
 	// charsets
 	public static final String CHARSET_MPL        = "charset_mpl";
@@ -241,12 +241,12 @@ public class Config {
 		defaults.put( DIRECTORY_EXPORT_MPL,  homeDir );
 		defaults.put( DIRECTORY_EXPORT_MID,  homeDir );
 		defaults.put( DIRECTORY_EXPORT_ALDA, homeDir );
-		defaults.put( REMEMBER_MIDICAPL,     "false" );
-		defaults.put( REMEMBER_MIDI,         "false" );
+		defaults.put( REMEMBER_IMPORT,       "false" );
 		defaults.put( REMEMBER_SF2,          "false" );
 		defaults.put( PATH_SF2,              ""      );
 		defaults.put( PATH_MIDICAPL,         ""      );
 		defaults.put( PATH_MIDI,             ""      );
+		defaults.put( IMPORT_TYPE,           FileSelector.FILE_TYPE_MPL );
 		
 		defaults.put( CHARSET_MPL,        DEFAULT_CHARSET_MPL        );
 		defaults.put( CHARSET_MID,        DEFAULT_CHARSET_MID        );
@@ -305,11 +305,9 @@ public class Config {
 		defaultBindings = new TreeMap<>();
 		addDefaultKeyBinding( Dict.KEY_MAIN_INFO,                KeyEvent.VK_I,        0                          );
 		addDefaultKeyBinding( Dict.KEY_MAIN_PLAYER,              KeyEvent.VK_P,        0                          );
-		addDefaultKeyBinding( Dict.KEY_MAIN_IMPORT_MPL,          KeyEvent.VK_O,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_MAIN_IMPORT_MID,          KeyEvent.VK_M,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_MAIN_IMPORT,              KeyEvent.VK_O,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_MAIN_IMPORT_SF,           KeyEvent.VK_S,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
-		addDefaultKeyBinding( Dict.KEY_MAIN_EXPORT_MID,          KeyEvent.VK_S,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_MAIN_EXPORT_DECOMPILE,    KeyEvent.VK_E,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_MAIN_EXPORT,              KeyEvent.VK_S,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_LANGUAGE,        KeyEvent.VK_L,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_NOTE,            KeyEvent.VK_N,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_HALFTONE,        KeyEvent.VK_H,        InputEvent.ALT_DOWN_MASK   );
@@ -614,10 +612,12 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_STRING_FILTER_CLEAR,      KeyEvent.VK_C,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECT_DC_OPEN,      KeyEvent.VK_C,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECT_CLOSE,        KeyEvent.VK_ESCAPE,   0                          );
-		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_MPL,        KeyEvent.VK_0,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_MPL,        KeyEvent.VK_NUMPAD0,  InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_ALDA,       KeyEvent.VK_1,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_ALDA,       KeyEvent.VK_NUMPAD1,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_MID,        KeyEvent.VK_0,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_MID,        KeyEvent.VK_NUMPAD0,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_MPL,        KeyEvent.VK_1,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_MPL,        KeyEvent.VK_NUMPAD1,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_ALDA,       KeyEvent.VK_2,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_ALDA,       KeyEvent.VK_NUMPAD2,  InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONFIG_CLOSE,          KeyEvent.VK_ESCAPE,   0                          );
 		addDefaultKeyBinding( Dict.KEY_DC_ADD_TICK_COMMENTS,     KeyEvent.VK_C,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_DC_ADD_CONFIG,            KeyEvent.VK_C,        InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK );
