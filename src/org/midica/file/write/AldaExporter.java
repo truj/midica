@@ -131,6 +131,11 @@ public class AldaExporter extends Decompiler {
 		StringBuilder lines = new StringBuilder();
 		TreeMap<Long, TreeMap<Byte, TreeMap<String, TreeMap<Byte, String>>>> timeline = slice.getTimeline(channel);
 		
+		// add one empty line between channels
+		if (! timeline.isEmpty()) {
+			lines.append(NEW_LINE);
+		}
+		
 		// TICK:
 		for (Entry<Long, TreeMap<Byte, TreeMap<String, TreeMap<Byte, String>>>> timelineSet : timeline.entrySet()) {
 			long tick = timelineSet.getKey();
@@ -178,11 +183,6 @@ public class AldaExporter extends Decompiler {
 				// write ALDA
 				lines.append( createChordNotes(slice, channel, tick, events.get(ET_NOTES)) );
 			}
-		}
-		
-		// add one empty line between channels
-		if ( ! timeline.isEmpty() ) {
-			lines.append(NEW_LINE);
 		}
 		
 		return lines.toString();
@@ -562,19 +562,17 @@ public class AldaExporter extends Decompiler {
 				content.append(" ");
 				needSpace = false;
 			}
-			content.append("@slice-" + currentSliceNumber + " ");
+			content.append("@slice-" + currentSliceNumber);
+			needSpace = true;
 			instr.setCurrentTicks(sliceBeginTick);
 		}
 		
 		// add rest, if necessary
 		long currentTicks = instr.getCurrentTicks();
 		if (tick > currentTicks) {
-			if (needSpace) {
-				content.append(" ");
-				needSpace = false;
-			}
 			long restTicks = tick - currentTicks;
 			content.append( createRest(channel, restTicks, tick, null) );
+			needSpace = true;
 			instr.setCurrentTicks(tick);
 		}
 		
@@ -587,7 +585,7 @@ public class AldaExporter extends Decompiler {
 		Long chordOffTick = null;
 		for (Entry<String, TreeMap<Byte, String>> noteSet : events.entrySet()) {
 			TreeMap<Byte, String> note = noteSet.getValue();
-			long endTick = Long.parseLong(note.get(NP_END_TICK));
+			long endTick = Long.parseLong(note.get(NP_END_TICK)); // TODO: off-tick too high (2880 instead of 1824)
 			if (null == chordOffTick || endTick < chordOffTick) {
 				chordOffTick = endTick;
 			}
@@ -600,8 +598,10 @@ public class AldaExporter extends Decompiler {
 		if (nextOnTick != null && chordOffTick > nextOnTick) {
 			restEndTick = nextOnTick;
 		}
-		else if (chordOffTick > sliceEndTick) {
-			restEndTick = sliceEndTick;
+		if (chordOffTick > sliceEndTick) {
+			if (restEndTick != null && restEndTick > sliceEndTick) {
+				restEndTick = sliceEndTick;
+			}
 		}
 		
 		// collect the notes

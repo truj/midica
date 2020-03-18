@@ -1273,7 +1273,7 @@ public abstract class Decompiler extends Exporter {
 		
 		// get missing ticks
 		long missingTicks = slice.getBeginTick() - chosenInstr.getCurrentTicks();
-		if (missingTicks > 0) {
+		if (missingTicks > 0) { // TODO: debug this: -40 ???
 			byte channel = (byte) chosenInstr.channel;
 			restStr.append( createRest(channel, missingTicks, -1, null) );
 		}
