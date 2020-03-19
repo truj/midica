@@ -568,7 +568,7 @@ public class Dict {
 	public static final String KEY_SOUNDCHECK_CLOSE         = "key_soundcheck_close";
 	public static final String KEY_SOUNDCHECK_PLAY          = "key_soundcheck_play";
 	public static final String KEY_SOUNDCHECK_FILTER_INSTR  = "key_soundcheck_filter_instr";
-	public static final String KEY_SOUNDCHECK_FILTER_NOTE   = "key_soundcheck_filter_note"; // TODO: implement
+	public static final String KEY_SOUNDCHECK_FILTER_NOTE   = "key_soundcheck_filter_note";
 	public static final String KEY_SOUNDCHECK_INSTR         = "key_soundcheck_instr";
 	public static final String KEY_SOUNDCHECK_NOTE          = "key_soundcheck_note";
 	public static final String KEY_SOUNDCHECK_VOL_FLD       = "key_soundcheck_vol_fld";
@@ -669,10 +669,15 @@ public class Dict {
 	public static final String KEY_STRING_FILTER_CLOSE      = "key_string_filter_close";
 	public static final String KEY_STRING_FILTER_CLEAR      = "key_string_filter_clear";
 	public static final String KEY_FILE_SELECT_CLOSE        = "key_file_select_close";
-	public static final String KEY_FILE_SELECTOR_MID        = "key_file_selector_mid";
-	public static final String KEY_FILE_SELECTOR_MPL        = "key_file_selector_mpl";
-	public static final String KEY_FILE_SELECTOR_ALDA       = "key_file_selector_alda";
+	public static final String KEY_FILE_SELECT_CHARSET_CBX  = "key_file_select_charset_cbx";
+	public static final String KEY_FILE_SELECT_FOREIGN_EXE  = "key_file_select_foreign_exe";
 	public static final String KEY_FILE_SELECT_DC_OPEN      = "key_file_select_dc_config_open";
+	public static final String KEY_FILE_SELECTOR_IMP_MPL    = "key_file_selector_imp_mpl";
+	public static final String KEY_FILE_SELECTOR_IMP_MID    = "key_file_selector_imp_mid";
+	public static final String KEY_FILE_SELECTOR_IMP_ALDA   = "key_file_selector_imp_alda";
+	public static final String KEY_FILE_SELECTOR_EXP_MID    = "key_file_selector_exp_mid";
+	public static final String KEY_FILE_SELECTOR_EXP_MPL    = "key_file_selector_exp_mpl";
+	public static final String KEY_FILE_SELECTOR_EXP_ALDA   = "key_file_selector_exp_alda";
 	public static final String KEY_DC_CONFIG_CLOSE          = "key_dc_config_close";
 	public static final String KEY_DC_ADD_TICK_COMMENTS     = "key_dc_add_tick_comments";
 	public static final String KEY_DC_ADD_CONFIG            = "key_dc_config";
@@ -731,6 +736,7 @@ public class Dict {
 	public static final String IMPORTED_TYPE_MPL           = "imported_type_mpl";
 	public static final String IMPORTED_TYPE_ALDA          = "imported_type_alda";
 	public static final String SOUNDFONT                   = "soundfont";
+	public static final String CURRENT_SOUNDFONT           = "current_soundfont";
 	public static final String REMEMBER_SF                 = "remember_sf";
 	public static final String REMEMBER_SF_TT              = "remember_sf_tt";
 	public static final String REMEMBER_MPL                = "remember_mpl";
@@ -757,6 +763,17 @@ public class Dict {
 	public static final String CHARSET_DESC_MID_READ       = "charset_desc_mid_read";
 	public static final String CHARSET_DESC_MPL_WRITE      = "charset_desc_mpl_write";
 	public static final String CHARSET_DESC_MID_WRITE      = "charset_desc_mid_write";
+	public static final String FOREIGN_PROG                = "foreign_prog";
+	public static final String FOREIGN_PROG_DESC           = "foreign_prog_desc";
+	public static final String FOREIGN_PROG_ALDA           = "foreign_prog_alda";
+	public static final String FOREIGN_PROG_MSCORE         = "foreign_prog_mscore";
+	
+	// Foreign
+	public static final String FOREIGN_CREATE_TMPFILE      = "foreign_create_tmpfile";
+	public static final String FOREIGN_EX_CODE             = "foreign_ex_code";
+	public static final String FOREIGN_EX_INTERRUPTED      = "foreign_ex_interrupted";
+	public static final String FOREIGN_EX_EXECUTE          = "foreign_ex_execute";
+	public static final String FOREIGN_EX_NO_EXE           = "foreign_ex_no_exe";
 	
 	// DecompileConfigView
 	public static final String TITLE_DC_CONFIG              = "title_dc_config";
@@ -1538,6 +1555,7 @@ public class Dict {
 	public static final String WAIT_PARSE_MPL                   = "wait_parse_mpl";
 	public static final String WAIT_PARSE_MID                   = "wait_parse_mid";
 	public static final String WAIT_PARSE_SF2                   = "wait_parse_sf2";
+	public static final String WAIT_PARSE_ALDA                  = "wait_parse_alda";
 	public static final String WAIT_REPARSE                     = "wait_reparse";
 	public static final String WAIT_SETUP_DEVICES               = "wait_setup_devices";
 	
@@ -1968,11 +1986,16 @@ public class Dict {
 		set( KEY_MSG_CLOSE,                "Close the message window"                                                    );
 		set( KEY_STRING_FILTER_CLOSE,      "Close the table filter"                                                      );
 		set( KEY_STRING_FILTER_CLEAR,      "Clear the table filter"                                                      );
-		set( KEY_FILE_SELECT_DC_OPEN,      "Open the Decompile Configuration Window"                                     );
 		set( KEY_FILE_SELECT_CLOSE,        "Close the File Selector"                                                     );
-		set( KEY_FILE_SELECTOR_MID,        "Select the MIDI Tab"                                                         );
-		set( KEY_FILE_SELECTOR_MPL,        "Select the MidicaPL Tab"                                                     );
-		set( KEY_FILE_SELECTOR_ALDA,       "Select the ALDA Tab"                                                         );
+		set( KEY_FILE_SELECT_CHARSET_CBX,  "Open the combobox to select the charset"                                     );
+		set( KEY_FILE_SELECT_FOREIGN_EXE,  "Focus the Text field for the Command or full Path of the foreign program"    );
+		set( KEY_FILE_SELECT_DC_OPEN,      "Open the Decompile Configuration Window"                                     );
+		set( KEY_FILE_SELECTOR_IMP_MPL,    "In the IMPORT selector, select the MidicaPL Tab"                             );
+		set( KEY_FILE_SELECTOR_IMP_MID,    "In the IMPORT selector, select the MIDI Tab"                                 );
+		set( KEY_FILE_SELECTOR_IMP_ALDA,   "In the IMPORT selector, select the ALDA Tab"                                 );
+		set( KEY_FILE_SELECTOR_EXP_MID,    "In the EXPORT selector, select the MIDI Tab"                                 );
+		set( KEY_FILE_SELECTOR_EXP_MPL,    "In the EXPORT selector, select the MidicaPL Tab"                             );
+		set( KEY_FILE_SELECTOR_EXP_ALDA,   "In the EXPORT selector, select the ALDA Tab"                                 );
 		set( KEY_DC_CONFIG_CLOSE,          "Close the Decompile Configuration Window"                                    );
 		set( KEY_DC_ADD_TICK_COMMENTS,     "Toggle Checkbox: Add Tick Comments"                                          );
 		set( KEY_DC_ADD_CONFIG,            "Toggle Checkbox: Add Configuration"                                          );
@@ -2031,6 +2054,7 @@ public class Dict {
 		set( UNKNOWN_SYNTAX,               "?"                             );
 		set( UNKNOWN_INSTRUMENT,           "unknown"                       );
 		set( SOUNDFONT,                    "Soundfont"                     );
+		set( CURRENT_SOUNDFONT,            "Current Soundfont"             );
 		set( REMEMBER_SF,                  "Remember"                      );
 		set( REMEMBER_SF_TT,               "Load the chosen soundfont automatically at the next startup" );
 		set( REMEMBER_MPL,                 "Remember"                      );
@@ -2056,6 +2080,17 @@ public class Dict {
 		set( CHARSET_DESC_MID_READ,    "Default encoding of text-based messages in the source file. Used if neither a BOM nor a {@...} tag is found." );
 		set( CHARSET_DESC_MPL_WRITE,   "Encoding of the file to be saved."                    );
 		set( CHARSET_DESC_MID_WRITE,   "Encoding for text-based messages in the target file." );
+		set( FOREIGN_PROG,             "Program"                                              );
+		set( FOREIGN_PROG_DESC,        "Command or full path to the program %s:"              );
+		set( FOREIGN_PROG_ALDA,        "ALDA"                                                 );
+		set( FOREIGN_PROG_MSCORE,      "MuseScore"                                            );
+		
+		// Foreign
+		set( FOREIGN_CREATE_TMPFILE, "Failed to create temporary file '%s'. Error Message: "  );
+		set( FOREIGN_EX_CODE,        "<html><b>The following command failed:</b><br>%s<br><br><b>Exit Code:</b><br>%s<br><br><b>Standard error:</b><br>%s<br><br><b>Standard output:</b><br>%s" );
+		set( FOREIGN_EX_INTERRUPTED, "%s has been interrupted"                                );
+		set( FOREIGN_EX_EXECUTE,     "<html>Failed to execute %s.<br>Make sure that %s is installed.<br>Make sure that the command or path is correct.<br>The failing command or path was:<br><b>%s</b>" );
+		set( FOREIGN_EX_NO_EXE,      "<html>Cannot start %s without a command or path.<br>Please enter a command or path in the file chooser." );
 		
 		// DecompileConfigView
 		set( TITLE_DC_CONFIG,              "Midica - Decompilation Settings"                  );
@@ -2946,6 +2981,7 @@ public class Dict {
 		set( WAIT_PARSE_MPL,                      "Parsing the MidicaPL file..."                                      );
 		set( WAIT_PARSE_MID,                      "Parsing the MIDI file..."                                          );
 		set( WAIT_PARSE_SF2,                      "Parsing the Soundfont"                                             );
+		set( WAIT_PARSE_ALDA,                     "Importing the file using ALDA"                                     );
 		set( WAIT_REPARSE,                        "Reloading the File"                                                );
 		set( WAIT_SETUP_DEVICES,                  "Setting up MIDI devices and loading Soundfont"                     );
 		
@@ -3136,6 +3172,7 @@ public class Dict {
 		set( UNKNOWN_SYNTAX,                         "?"                                     );
 		set( UNKNOWN_INSTRUMENT,                     "unbekannt"                             );
 		set( SOUNDFONT,                              "Soundfont-Datei"                       );
+		set( CURRENT_SOUNDFONT,                      "Momentanes Soundfont"                  );
 		set( PLAYER_BUTTON,                          "Abspielen"                             );
 		set( UNCHOSEN_FILE,                          "keine Datei geladen"                   );
 		set( SF_LOADED_BY_SOURCE,                    "[durch MidicaPL-Datei geladen]"        );

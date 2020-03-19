@@ -23,12 +23,19 @@ import org.midica.ui.info.InfoView;
  * 
  * Derived classes are:
  * 
- * - {@link MidiParser} (parses a MIDI file; extension: .mid)
- * - {@link MidicaPLParser} (parses a MidicaPL file; extension: .midica)
+ * - {@link MidicaPLParser} (parses a MidicaPL file)
+ * - {@link MidiParser} (parses a MIDI file)
+ * - Other parsers, derived by {@link MidiParser} (use an external tool to create a temporary midi file and parse this file)
  * 
  * @author Jan Trukenmüller
  */
 public abstract class SequenceParser implements IParser {
+	
+	private static final int FORMAT_NONE      = -1;
+	public  static final int FORMAT_MIDICAPL  =  1;
+	public  static final int FORMAT_MIDI      =  2;
+	public  static final int FORMAT_ALDA      =  3;
+	public  static final int FORMAT_MUSESCORE =  4;
 	
 	/**
 	 * Defines how much the parsed input has to be transposed.
@@ -37,8 +44,8 @@ public abstract class SequenceParser implements IParser {
 	 */
 	protected static byte transposeLevel = 0;
 	
-	/** Type of the last successfully parsed file. Either "midica" or "mid". */
-	private static String fileType = null;
+	/** Type of the last successfully parsed file, according to one of the FORMAT_... fields. */
+	private static int fileFormat = FORMAT_NONE;
 	
 	/** Last successfully parsed file. */
 	private static File sequenceFile = null;
@@ -65,7 +72,7 @@ public abstract class SequenceParser implements IParser {
 	 * 
 	 * @param level Transpose level
 	 */
-	public static void setTransposeLevel( byte level ) {
+	public static void setTransposeLevel(byte level) {
 		transposeLevel = level;
 	}
 	
@@ -81,23 +88,23 @@ public abstract class SequenceParser implements IParser {
 	 * @throws ParseException  If the transposition would cause an invalid target note with
 	 *                         a value lower than 0 or higher than 127.
 	 */
-	protected int transpose( int note, int channel ) throws ParseException {
+	protected int transpose(int note, int channel) throws ParseException {
 		
 		// don't transpose percussions
-		if ( 9 == channel )
+		if (9 == channel)
 			return note;
 		
 		note += transposeLevel;
-		if ( note < 0 )
-			throw new ParseException( Dict.get(Dict.ERROR_NOTE_TOO_SMALL) + note );
-		if ( note > 127 )
-			throw new ParseException( Dict.get(Dict.ERROR_NOTE_TOO_BIG) + note );
+		if (note < 0)
+			throw new ParseException(Dict.get(Dict.ERROR_NOTE_TOO_SMALL) + note);
+		if (note > 127)
+			throw new ParseException(Dict.get(Dict.ERROR_NOTE_TOO_BIG) + note);
 		
 		return note;
 	}
 	
 	/**
-	 * Resets the file name and type.
+	 * Resets the file name and format.
 	 * Remembers the file to be parsed so that it can be marked as successful
 	 * later.
 	 * 
@@ -105,8 +112,8 @@ public abstract class SequenceParser implements IParser {
 	 * 
 	 * @param file  The file to be parsed.
 	 */
-	protected void preprocess( File file ) {
-		fileType     = null;
+	protected void preprocess(File file) {
+		fileFormat   = FORMAT_NONE;
 		sequenceFile = null;
 		currentFile  = file;
 		SequenceAnalyzer.reset();
@@ -127,45 +134,45 @@ public abstract class SequenceParser implements IParser {
 	 * will be analyzed while the sequence created by the
 	 * {@link SequenceCreator} will be published.
 	 * 
-	 * @param seq     The MIDI sequence to be analyzed.
-	 * @param type    "mid" or "midica", depending on the parser class.
-	 * @param charset The charset that has been chosen in the file chooser.
+	 * @param seq        The MIDI sequence to be analyzed.
+	 * @param format     one of the FORMAT_... fields, depending on the derived parser class.
+	 * @param charset    The charset that has been chosen in the file chooser.
 	 * @throws ParseException if a marker event cannot be created during
 	 *                        the postprocessing of the analyzing process
 	 */
-	protected void postprocessSequence( Sequence seq, String type, String charset ) throws ParseException {
+	protected void postprocessSequence(Sequence seq, int format, String charset) throws ParseException {
 		
 		// analyze sequence and add marker events
-		SequenceAnalyzer.analyze( seq, charset );
+		SequenceAnalyzer.analyze(seq, charset);
 		
 		// publich successfully parsed file
 		sequenceFile = currentFile;
-		fileType     = type;
-		MidiDevices.setSequence( SequenceCreator.getSequence() );
+		fileFormat   = format;
+		MidiDevices.setSequence(SequenceCreator.getSequence());
 	}
 	
 	/**
-	 * Returns the type of the successfully parsed file.
+	 * Returns the format of the successfully parsed file.
 	 * 
-	 * @return the file type.
+	 * @return the file format.
 	 */
-	public static String getFileType() {
-		return fileType;
+	public static int getFileFormat() {
+		return fileFormat;
 	}
 	
 	/**
 	 * Returns the absolute path of the successfully parsed file, if it matches the requested type.
 	 * Returns **null**, if the requested type doesn't match or no file has been parsed successfully.
 	 * 
-	 * @param type    **midica** or **mid**
+	 * @param  format    format type (according to one of the FORMAT_... fields)
 	 * @return file path or **null**.
 	 */
-	public static String getFilePath(String type) {
+	public static String getFilePath(int format) {
 		if (null == sequenceFile)
 			return null;
-		if (fileType == null)
+		if (FORMAT_NONE == fileFormat)
 			return null;
-		if (fileType.equals(type))
+		if (format == fileFormat)
 			return sequenceFile.getAbsolutePath();
 		return null;
 	}
@@ -176,7 +183,7 @@ public abstract class SequenceParser implements IParser {
 	 * @return the parsed file name if available, or **null** otherwise.
 	 */
 	public static String getFileName() {
-		if ( null == sequenceFile ) {
+		if (null == sequenceFile) {
 			return null;
 		}
 		return sequenceFile.getName();

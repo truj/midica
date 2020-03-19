@@ -51,21 +51,21 @@ public class MidiParser extends SequenceParser {
 	public static final int CTRL_CHANGE_PAN              = 10;
 	
 	private boolean isProducedByMidica = false;
-	private String  midiFileCharset    = null;
 	
-	private String chosenCharset = null;
+	protected String midiFileCharset = null;
+	protected String chosenCharset   = null;
 	
 	private static LyricUtil lyricUtil = LyricUtil.getInstance();
 	
 	/**
-	 * Returns the absolute path of the successfully parsed MIDI file.
+	 * Returns the absolute path of the successfully parsed file.
 	 * Returns **null**, if no file has been successfully parsed or the successfully parsed file
 	 * is not a MIDI file.
 	 * 
 	 * @return file path or **null**.
 	 */
 	public static String getFilePath() {
-		return getFilePath("mid");
+		return getFilePath(FORMAT_MIDI);
 	}
 	
 	/**
@@ -89,7 +89,7 @@ public class MidiParser extends SequenceParser {
 		try {
 			Sequence sequence = MidiSystem.getSequence(file);
 			createSequence(sequence);
-			postprocessSequence(sequence, "mid", chosenCharset); // we want to analyze the loaded sequence - not the created one
+			postprocessSequence(sequence, FORMAT_MIDI, chosenCharset); // we want to analyze the loaded sequence - not the created one
 		}
 		catch (InvalidMidiDataException e) {
 			throw new ParseException(e.getMessage());
@@ -109,7 +109,7 @@ public class MidiParser extends SequenceParser {
 	 * @throws ParseException            If the input file can not be parsed correctly.
 	 * @throws InvalidMidiDataException  If the created sequence is invalid.
 	 */
-	private void createSequence(Sequence sequence) throws ParseException, InvalidMidiDataException {
+	protected void createSequence(Sequence sequence) throws ParseException, InvalidMidiDataException {
 		
 		// process global parameters and initialize the sequence to create
 		float divisionType = sequence.getDivisionType();

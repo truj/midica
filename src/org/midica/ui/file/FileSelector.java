@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -102,18 +103,31 @@ public class FileSelector extends JDialog {
 		}
 		
 		// create the first file chooser
-		fileChoosers.add( new MidicaFileChooser(type, filePurpose, directory, charSetSelect, this) );
+		fileChoosers.add(new MidicaFileChooser(
+			type, filePurpose, directory, charSetSelect, null, this
+		));
 		
 		// create more file choosers, if needed
 		if (READ == this.filePurpose && ! type.equals(FILE_TYPE_SOUNDFONT)) {
 			fileChoosers.add(new MidicaFileChooser(
 				FILE_TYPE_MIDI,
 				filePurpose,
-				Config.get(Config.DIRECTORY_EXPORT_MID),
+				Config.get(Config.DIRECTORY_MID),
 				true,
+				null,
 				this
 			));
 			tabs.put(FILE_TYPE_MIDI, Dict.TAB_MIDI);
+			
+			fileChoosers.add(new MidicaFileChooser(
+				FILE_TYPE_ALDA,
+				filePurpose,
+				Config.get(Config.DIRECTORY_ALDA),
+				false,
+				Config.EXEC_PATH_IMP_ALDA,
+				this
+			));
+			tabs.put(FILE_TYPE_ALDA, Dict.TAB_ALDA);
 		}
 		else if (WRITE == this.filePurpose) {
 			fileChoosers.add(new MidicaFileChooser(
@@ -121,6 +135,7 @@ public class FileSelector extends JDialog {
 				filePurpose,
 				Config.get(Config.DIRECTORY_EXPORT_MPL),
 				true,
+				null,
 				this
 			));
 			tabs.put(FILE_TYPE_MPL, Dict.TAB_MIDICAPL);
@@ -130,6 +145,7 @@ public class FileSelector extends JDialog {
 				filePurpose,
 				Config.get(Config.DIRECTORY_EXPORT_ALDA),
 				false,
+				null,
 				this
 			));
 			tabs.put(FILE_TYPE_ALDA, Dict.TAB_ALDA);
@@ -181,7 +197,7 @@ public class FileSelector extends JDialog {
 	 */
 	private void initUI() {
 		
-		// only one file chooser
+		// only one file chooser? - add it directly
 		if (1 == fileChoosers.size()) {
 			add(fileChoosers.get(0));
 		}
@@ -250,6 +266,8 @@ public class FileSelector extends JDialog {
     				Config.set(Config.DIRECTORY_MPL, directory);
 				else if (FILE_TYPE_MIDI.equals(fileType))
 					Config.set(Config.DIRECTORY_MID, directory);
+				else if (FILE_TYPE_ALDA.equals(fileType))
+					Config.set(Config.DIRECTORY_ALDA, directory);
     			else if (FILE_TYPE_SOUNDFONT.equals(fileType))
     				Config.set(Config.DIRECTORY_SF2, directory);
     		}
@@ -277,22 +295,39 @@ public class FileSelector extends JDialog {
 		// close bindings
 		keyBindingManager.addBindingsForClose(Dict.KEY_FILE_SELECT_CLOSE);
 		
-		// open decompile config
-		ArrayList<JComponent> icons = new ArrayList<>();
+		// open charset combobox / focus execution command / open decompile config
+		ArrayList<JComboBox<?>> cbxs   = new ArrayList<>();
+		ArrayList<JComponent>   fields = new ArrayList<>();
+		ArrayList<JComponent>   icons  = new ArrayList<>();
 		for (MidicaFileChooser chooser : fileChoosers) {
-			JComponent icon = chooser.getDecompileConfigIcon();
+			JComboBox<?> cbx  = chooser.getCharsetSelectionCbx();
+			JComponent   fld  = chooser.getForeignExecField();
+			JComponent   icon = chooser.getDecompileConfigIcon();
+			if (cbx != null)
+				cbxs.add(cbx);
+			if (fld != null)
+				fields.add(fld);
 			if (icon != null)
 				icons.add(icon);
 		}
+		if (cbxs.size() > 0)
+			keyBindingManager.addBindingsForComboboxOfVisibleElement(cbxs, Dict.KEY_FILE_SELECT_CHARSET_CBX);
+		if (fields.size() > 0)
+			keyBindingManager.addBindingsForFocusOfVisibleElement(fields, Dict.KEY_FILE_SELECT_FOREIGN_EXE);
 		if (icons.size() > 0)
 			keyBindingManager.addBindingsForIconLabelOfVisibleTab(icons, Dict.KEY_FILE_SELECT_DC_OPEN);
 		
 		// add key binding to choose a tab
 		if (content != null) {
-			if (WRITE == this.filePurpose) {
-				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_MID,  0 );
-				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_MPL,  1 );
-				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_ALDA, 2 );
+			if (READ == this.filePurpose) {
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_MPL,  0 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_MID,  1 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_ALDA, 2 );
+			}
+			else {
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_MID,  0 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_MPL,  1 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_ALDA, 2 );
 			}
 		}
 		

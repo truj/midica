@@ -274,7 +274,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * @return file path or **null**.
 	 */
 	public static String getFilePath() {
-		return getFilePath("midica");
+		return getFilePath(FORMAT_MIDICAPL);
 	}
 	
 	/**
@@ -541,7 +541,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// EOF has been reached
 		if (isRootParser) {
-			postprocessSequence( SequenceCreator.getSequence(), "midica", chosenCharset );
+			postprocessSequence(SequenceCreator.getSequence(), FORMAT_MIDICAPL, chosenCharset);
 		}
 	}
 	

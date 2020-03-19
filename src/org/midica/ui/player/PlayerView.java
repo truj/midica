@@ -1713,9 +1713,9 @@ public class PlayerView extends JDialog {
 		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(14), Dict.KEY_PLAYER_CH_14_S );
 		keyBindingManager.addBindingsForCheckbox( this.soloCbx.get(15), Dict.KEY_PLAYER_CH_15_S );
 		
-		keyBindingManager.addBindingsForFocusOfVisibleChannel(  this.channelVolumeSliders, Dict.KEY_PLAYER_CH_VOL_SLD );
-		keyBindingManager.addBindingsForFocusOfVisibleChannel(  this.channelVolumeFields,  Dict.KEY_PLAYER_CH_VOL_FLD );
-		keyBindingManager.addBindingsForButtonOfVisibleChannel( this.channelApplyToAllBtn, Dict.KEY_PLAYER_CH_VOL_BTN );
+		keyBindingManager.addBindingsForFocusOfVisibleElement(  this.channelVolumeSliders, Dict.KEY_PLAYER_CH_VOL_SLD );
+		keyBindingManager.addBindingsForFocusOfVisibleElement(  this.channelVolumeFields,  Dict.KEY_PLAYER_CH_VOL_FLD );
+		keyBindingManager.addBindingsForButtonOfVisibleElement( this.channelApplyToAllBtn, Dict.KEY_PLAYER_CH_VOL_BTN );
 		
 		// add key bindings for the lyrics checkbox
 		keyBindingManager.addBindingsForCheckbox( this.cbxLyrics, Dict.KEY_PLAYER_LYRICS );

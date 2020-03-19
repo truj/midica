@@ -489,6 +489,9 @@ public class UiView extends JFrame {
 		lblChosenImportedType = new JLabel(Dict.get(Dict.UNCHOSEN_FILE));
 		area.add(lblChosenImportedType, constraints);
 		
+		// make sure that the file type/name labels are correct, even after a language change
+		controller.updateImportedFileTypeAndName();
+		
 		return area;
 	}
 	
@@ -544,9 +547,20 @@ public class UiView extends JFrame {
 		area.add(cbxRememberSf, constraints);
 		constraints.insets = Laf.INSETS_IN;
 		
-		// chosen soundfont file name
+		// line
 		constraints.gridy++;
 		constraints.gridwidth = 2;
+		area.add(Laf.createSeparator(), constraints);
+		
+		// file name label
+		constraints.gridy++;
+		JLabel lblImportedFile = new JLabel(Dict.get(Dict.CURRENT_SOUNDFONT));
+		Laf.makeBold(lblImportedFile);
+		area.add(lblImportedFile, constraints);
+		constraints.insets = Laf.INSETS_IN;
+		
+		// chosen soundfont file name
+		constraints.gridy++;
 		lblChosenSoundfontFile = new JLabel(Dict.get(Dict.UNCHOSEN_FILE));
 		lblChosenSoundfontFile.setPreferredSize(MAX_FILE_NAME_DIM);
 		area.add(lblChosenSoundfontFile, constraints);

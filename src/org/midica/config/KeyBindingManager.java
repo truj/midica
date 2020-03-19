@@ -208,7 +208,7 @@ public class KeyBindingManager {
 	 * @param components  the list of components
 	 * @param id          the key binding ID
 	 */
-	public void addBindingsForFocusOfVisibleChannel(ArrayList<?> components, String id) {
+	public void addBindingsForFocusOfVisibleElement(ArrayList<?> components, String id) {
 		
 		// fill input map
 		addInputs(id);
@@ -256,7 +256,7 @@ public class KeyBindingManager {
 	 * @param buttons  the list of buttons
 	 * @param id       the key binding ID
 	 */
-	public void addBindingsForButtonOfVisibleChannel(ArrayList<MidicaButton> buttons, String id) {
+	public void addBindingsForButtonOfVisibleElement(ArrayList<MidicaButton> buttons, String id) {
 		
 		// fill input map
 		addInputs(id);
@@ -280,6 +280,46 @@ public class KeyBindingManager {
 				for (MidicaButton btn : buttons) {
 					if (btn.isShowing()) {
 						btn.doClick();
+						return;
+					}
+				}
+			}
+		});
+	}
+	
+	/**
+	 * Adds a key binding for a list of comboboxes to be opened when possible.
+	 * All comboboxes use the same key binding ID but at most one of them is visible.
+	 * This is used for charset comboboxes in file choosers with multiple tabs.
+	 * 
+	 * @param comboboxes    the list of comboboxes
+	 * @param id            the key binding ID
+	 */
+	public void addBindingsForComboboxOfVisibleElement(ArrayList<JComboBox<?>> comboboxes, String id) {
+		
+		// fill input map
+		addInputs(id);
+		
+		// tooltips
+		for (JComboBox<?> cbx : comboboxes) {
+			addTooltip(cbx, id, Dict.TT_KEY_CBX_OPEN);
+		}
+		
+		// fill action map
+		actionMap.put(id, new AbstractAction() {
+			
+			private static final long serialVersionUID = 1L;
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				if (mustIgnore(e))
+					return;
+				
+				for (JComboBox<?> cbx : comboboxes) {
+					if (cbx.isShowing()) {
+						cbx.requestFocus();
+						cbx.showPopup();
 						return;
 					}
 				}

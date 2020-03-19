@@ -21,11 +21,13 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import org.midica.config.Cli;
 import org.midica.config.Config;
 import org.midica.config.Dict;
+import org.midica.file.read.AldaImporter;
 import org.midica.file.read.IParser;
 import org.midica.file.read.MidiParser;
 import org.midica.file.read.MidicaPLParser;
@@ -70,6 +72,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	private FileSelector    exportSelector          = null;
 	private MidicaPLParser  mplParser               = null;
 	private MidiParser      midiParser              = null;
+	private AldaImporter    aldaImporter            = null;
 	private SoundfontParser soundfontParser         = null;
 	private PlayerView      player                  = null;
 	private File            currentFile             = null;
@@ -83,6 +86,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	public UiController() {
 		mplParser       = new MidicaPLParser(true);
 		midiParser      = new MidiParser();
+		aldaImporter    = new AldaImporter();
 		soundfontParser = new SoundfontParser();
 		
 		// initView() must be called after the parsers are created.
@@ -202,6 +206,8 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 					player = new PlayerView(view, mplParser, currentFile);
 				else if (FileSelector.FILE_TYPE_MIDI.equals(currentFileType))
 					player = new PlayerView(view, midiParser, currentFile);
+				else if (FileSelector.FILE_TYPE_ALDA.equals(currentFileType))
+					player = new PlayerView(view, aldaImporter, currentFile);
 			}
 			else {
 				showErrorMessage(Dict.get(Dict.ERROR_SEQUENCE_NOT_SET));
@@ -249,12 +255,16 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 				pathConfigKey = Config.PATH_MIDICAPL;
 				path          = MidicaPLParser.getFilePath();
 				typeConfigVal = FileSelector.FILE_TYPE_MPL;
-				
 			}
 			else if (FileSelector.FILE_TYPE_MIDI.equals(currentFileType)) {
 				pathConfigKey = Config.PATH_MIDI;
 				path          = MidiParser.getFilePath();
 				typeConfigVal = FileSelector.FILE_TYPE_MIDI;
+			}
+			else if (FileSelector.FILE_TYPE_ALDA.equals(currentFileType)) {
+				pathConfigKey = Config.PATH_ALDA;
+				path          = AldaImporter.getFilePath();
+				typeConfigVal = FileSelector.FILE_TYPE_ALDA;
 			}
 		}
 		
@@ -325,6 +335,12 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			waitMsg    = Dict.get(Dict.WAIT_PARSE_MID);
 			charsetKey = Config.CHARSET_MID;
 			pathKey    = Config.PATH_MIDI;
+		}
+		else if (FileSelector.FILE_TYPE_ALDA.equals(type)) {
+			parser     = aldaImporter;
+			selector   = importSelector;
+			waitMsg    = Dict.get(Dict.WAIT_PARSE_ALDA);
+			pathKey    = Config.PATH_ALDA;
 		}
 		else if (FileSelector.FILE_TYPE_SOUNDFONT.equals(type)) {
 			parser   = soundfontParser;
@@ -507,6 +523,29 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	}
 	
 	/**
+	 * Update the labels for the imported sequence file name and type, if any sequence is loaded.
+	 * 
+	 * This is needed only in case of language switches to make sure that the correct files are still displayed.
+	 */
+	public void updateImportedFileTypeAndName() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				String filename = SequenceParser.getFileName();
+				if (filename != null) {
+					view.getImportedFileLbl().setText(filename);
+					if (FileSelector.FILE_TYPE_MPL.equals(currentFileType))
+						view.getImportedFileTypeLbl().setText(Dict.get(Dict.IMPORTED_TYPE_MPL));
+					else if (FileSelector.FILE_TYPE_MIDI.equals(currentFileType))
+						view.getImportedFileTypeLbl().setText(Dict.get(Dict.IMPORTED_TYPE_MPL));
+					else if (FileSelector.FILE_TYPE_ALDA.equals(currentFileType))
+						view.getImportedFileTypeLbl().setText(Dict.get(Dict.IMPORTED_TYPE_ALDA));
+				}
+			}
+		});
+	}
+	
+	/**
 	 * Displays the parsed sequence or soundfont file name.
 	 * In case of a sequence, also displays the file type.
 	 * 
@@ -615,6 +654,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		String rememberImport = Config.get( Config.REMEMBER_IMPORT );
 		String midicaplPath   = Config.get( Config.PATH_MIDICAPL   );
 		String midiPath       = Config.get( Config.PATH_MIDI       );
+		String aldaPath       = Config.get( Config.PATH_ALDA       );
 		String importType     = Config.get( Config.IMPORT_TYPE     );
 		
 		// Wait until Midica.uiController is not null any more.
@@ -637,12 +677,12 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 				// load sequence, if needed
 				if ("true".equals(rememberImport)) {
 					
-					if (FileSelector.FILE_TYPE_MPL.equals(importType) && ! midicaplPath.equals("")) {
+					if (FileSelector.FILE_TYPE_MPL.equals(importType) && ! midicaplPath.equals(""))
 						parseChosenFile(FileSelector.FILE_TYPE_MPL, new File(midicaplPath));
-					}
-					else if (FileSelector.FILE_TYPE_MIDI.equals(importType) && ! midiPath.equals("")) {
+					else if (FileSelector.FILE_TYPE_MIDI.equals(importType) && ! midiPath.equals(""))
 						parseChosenFile(FileSelector.FILE_TYPE_MIDI, new File(midiPath));
-					}
+					else if (FileSelector.FILE_TYPE_ALDA.equals(importType) && ! aldaPath.equals(""))
+						parseChosenFile(FileSelector.FILE_TYPE_ALDA, new File(aldaPath));
 				}
 			}
 		}

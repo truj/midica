@@ -56,9 +56,10 @@ public class Config {
 	public static final String PERCUSSION = "percussion";
 	public static final String INSTRUMENT = "instruments";
 	
-	// keys for directories and paths
+	// keys for directories, paths and file choose tabs
 	public static final String DIRECTORY_MPL         = "directory_mpl";
 	public static final String DIRECTORY_MID         = "directory_mid";
+	public static final String DIRECTORY_ALDA        = "directory_alda";
 	public static final String DIRECTORY_SF2         = "directory_sf2";
 	public static final String DIRECTORY_EXPORT_MPL  = "directory_export_mpl";
 	public static final String DIRECTORY_EXPORT_MID  = "directory_export_mid";
@@ -66,9 +67,15 @@ public class Config {
 	public static final String PATH_SF2              = "path_sf2";
 	public static final String PATH_MIDICAPL         = "path_midicapl";
 	public static final String PATH_MIDI             = "path_midi";
+	public static final String PATH_ALDA             = "path_alda";
+	public static final String EXEC_PATH_IMP_ALDA    = "exec_path_imp_alda";
+	public static final String EXEC_PATH_IMP_MSCORE  = "exec_path_imp_mscore";
+	public static final String EXEC_PATH_EXP_MSCORE  = "exec_path_exp_mscore";
 	public static final String REMEMBER_SF2          = "remember_sf2";
 	public static final String REMEMBER_IMPORT       = "remember_import";
 	public static final String IMPORT_TYPE           = "import_type";
+	public static final String TAB_FILE_IMPORT       = "tab_file_import";
+	public static final String TAB_FILE_EXPORT       = "tab_file_export";
 	
 	// charsets
 	public static final String CHARSET_MPL        = "charset_mpl";
@@ -235,18 +242,25 @@ public class Config {
 		defaults.put( PERCUSSION,  CBX_PERC_EN_1                );
 		defaults.put( INSTRUMENT,  CBX_INSTR_EN_1               );
 		
-		defaults.put( DIRECTORY_MPL,         homeDir );
-		defaults.put( DIRECTORY_MID,         homeDir );
-		defaults.put( DIRECTORY_SF2,         homeDir );
-		defaults.put( DIRECTORY_EXPORT_MPL,  homeDir );
-		defaults.put( DIRECTORY_EXPORT_MID,  homeDir );
-		defaults.put( DIRECTORY_EXPORT_ALDA, homeDir );
-		defaults.put( REMEMBER_IMPORT,       "false" );
-		defaults.put( REMEMBER_SF2,          "false" );
-		defaults.put( PATH_SF2,              ""      );
-		defaults.put( PATH_MIDICAPL,         ""      );
-		defaults.put( PATH_MIDI,             ""      );
+		defaults.put( DIRECTORY_MPL,         homeDir      );
+		defaults.put( DIRECTORY_MID,         homeDir      );
+		defaults.put( DIRECTORY_ALDA,        homeDir      );
+		defaults.put( DIRECTORY_SF2,         homeDir      );
+		defaults.put( DIRECTORY_EXPORT_MPL,  homeDir      );
+		defaults.put( DIRECTORY_EXPORT_MID,  homeDir      );
+		defaults.put( DIRECTORY_EXPORT_ALDA, homeDir      );
+		defaults.put( REMEMBER_IMPORT,       "false"      );
+		defaults.put( REMEMBER_SF2,          "false"      );
+		defaults.put( PATH_SF2,              ""           );
+		defaults.put( PATH_MIDICAPL,         ""           );
+		defaults.put( PATH_MIDI,             ""           );
+		defaults.put( PATH_ALDA,             ""           );
+		defaults.put( EXEC_PATH_IMP_ALDA,    "alda"       );
+		defaults.put( EXEC_PATH_IMP_MSCORE,  "musescore3" );
+		defaults.put( EXEC_PATH_EXP_MSCORE,  "musescore3" );
 		defaults.put( IMPORT_TYPE,           FileSelector.FILE_TYPE_MPL );
+		defaults.put( TAB_FILE_IMPORT,       "0"          );
+		defaults.put( TAB_FILE_EXPORT,       "0"          );
 		
 		defaults.put( CHARSET_MPL,        DEFAULT_CHARSET_MPL        );
 		defaults.put( CHARSET_MID,        DEFAULT_CHARSET_MID        );
@@ -610,14 +624,22 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_STRING_FILTER_CLOSE,      KeyEvent.VK_ESCAPE,   0                          );
 		addDefaultKeyBinding( Dict.KEY_STRING_FILTER_CLOSE,      KeyEvent.VK_ENTER,    0                          );
 		addDefaultKeyBinding( Dict.KEY_STRING_FILTER_CLEAR,      KeyEvent.VK_C,        InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_FILE_SELECT_DC_OPEN,      KeyEvent.VK_C,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECT_CLOSE,        KeyEvent.VK_ESCAPE,   0                          );
-		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_MID,        KeyEvent.VK_0,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_MID,        KeyEvent.VK_NUMPAD0,  InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_MPL,        KeyEvent.VK_1,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_MPL,        KeyEvent.VK_NUMPAD1,  InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_ALDA,       KeyEvent.VK_2,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_ALDA,       KeyEvent.VK_NUMPAD2,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECT_CHARSET_CBX,  KeyEvent.VK_C,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECT_FOREIGN_EXE,  KeyEvent.VK_P,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECT_DC_OPEN,      KeyEvent.VK_D,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_IMP_MPL,    KeyEvent.VK_1,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_IMP_MPL,    KeyEvent.VK_NUMPAD1,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_IMP_MID,    KeyEvent.VK_2,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_IMP_MID,    KeyEvent.VK_NUMPAD2,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_IMP_ALDA,   KeyEvent.VK_3,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_IMP_ALDA,   KeyEvent.VK_NUMPAD3,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_MID,    KeyEvent.VK_1,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_MID,    KeyEvent.VK_NUMPAD1,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_MPL,    KeyEvent.VK_2,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_MPL,    KeyEvent.VK_NUMPAD2,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_ALDA,   KeyEvent.VK_3,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_ALDA,   KeyEvent.VK_NUMPAD3,  InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONFIG_CLOSE,          KeyEvent.VK_ESCAPE,   0                          );
 		addDefaultKeyBinding( Dict.KEY_DC_ADD_TICK_COMMENTS,     KeyEvent.VK_C,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_DC_ADD_CONFIG,            KeyEvent.VK_C,        InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK );
