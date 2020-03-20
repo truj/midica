@@ -141,6 +141,11 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 		else if (cmd.startsWith(PlayerView.CMD_APPLY_TO_ALL)) {
 			cmd = cmd.replaceFirst(PlayerView.CMD_APPLY_TO_ALL, "");
 			byte currentChannel = Byte.parseByte(cmd);
+			
+			// apply volume from text field, if possible
+			view.pressEnterOnChannelVolumeTextField(currentChannel);
+			
+			// second: get the changed channel volume and apply it to all channels
 			byte volume = MidiDevices.getChannelVolume(currentChannel);
 			for (byte channel = 0; channel < MidiDevices.NUMBER_OF_CHANNELS; channel++) {
 				view.setChannelVolumeField(channel, volume);

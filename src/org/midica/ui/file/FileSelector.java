@@ -219,6 +219,37 @@ public class FileSelector extends JDialog {
 					fileType  = fileChoosers.get(index).getType();
 				}
 			});
+			
+			// get configured index
+			int index;
+			try {
+				if (READ == this.filePurpose)
+					index = Integer.parseInt(Config.get(Config.TAB_FILE_IMPORT));
+				else
+					index = Integer.parseInt(Config.get(Config.TAB_FILE_EXPORT));
+			}
+			catch (NumberFormatException e) {
+				index = 0;
+			}
+			
+			// set configured index
+			try {
+				content.setSelectedIndex(index);
+			}
+			catch (IndexOutOfBoundsException e) {
+			}
+			
+			// remember tab changes
+			content.addChangeListener(new ChangeListener() {
+				@Override
+				public void stateChanged(ChangeEvent e) {
+					int index = content.getSelectedIndex();
+					if (READ == filePurpose)
+						Config.set(Config.TAB_FILE_IMPORT, index + "");
+					else
+						Config.set(Config.TAB_FILE_EXPORT, index + "");
+				}
+			});
 		}
 		
 		addKeyBindings();

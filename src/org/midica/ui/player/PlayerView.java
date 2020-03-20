@@ -1301,6 +1301,17 @@ public class PlayerView extends JDialog {
 	}
 	
 	/**
+	 * Fakes pressing ENTER in the channel volume text field.
+	 * Used between pressing the "apply to all" button and reading the volume of the current channel.
+	 * So the user doesn't need to press ENTER himself.
+	 * 
+	 * @param channel  MIDI channel.
+	 */
+	public void pressEnterOnChannelVolumeTextField(int channel) {
+		channelVolumeFields.get(channel).postActionEvent();
+	}
+	
+	/**
 	 * Sets the tick and time maximum values in the top right corner and the maximum value of the progress slider.
 	 * 
 	 * @param tickLength  Length of the MIDI stream in ticks.
