@@ -50,7 +50,7 @@ public final class Tempo {
 	/**
 	 * Converts BPM (beats per minute) into MPQ (microseconds per quarter note).
 	 * 
-	 * @param tempo  the tempo in BPM
+	 * @param bpm    the tempo in BPM
 	 * @return tempo in MPQ
 	 */
 	public static final int bpmToMpq(int bpm) {

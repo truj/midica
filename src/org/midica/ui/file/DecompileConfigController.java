@@ -191,7 +191,7 @@ public class DecompileConfigController implements WindowListener, DocumentListen
 	 * Sets the given widget to the given value.
 	 * 
 	 * @param widget    the widget to be adjusted
-	 * @param valueObj  the value
+	 * @param valueStr  the value
 	 */
 	private void setWidget(JComponent widget, String valueStr) {
 		if (widget instanceof JTextField) {

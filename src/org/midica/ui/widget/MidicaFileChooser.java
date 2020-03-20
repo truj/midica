@@ -76,14 +76,14 @@ public class MidicaFileChooser extends JFileChooser {
 	/**
 	 * Creates a new file chooser defaulting to the given directory.
 	 * 
-	 * @param type           File type.
-	 * @param purpose        **1**: read; **2**: write
-	 * @param directory      Default directory.
-	 * @param charsetSel     **true**, if the the charset selection combobox shall
-	 *                       be shown. Otherwise **false**.
-	 * @param foreignExec    **true** to show an input field where the command/path
-	 *                       of a foreign program can be changed
-	 * @param parent         the parent window (only needed for the MidicaPL exporter)
+	 * @param type                 File type.
+	 * @param purpose              **1**: read; **2**: write
+	 * @param directory            Default directory.
+	 * @param charsetSel           **true**, if the the charset selection combobox shall
+	 *                             be shown. Otherwise **false**.
+	 * @param confKeyForeignExe    config key for the foreign executable command or path, if a
+	 *                             foreign program is needed. Otherwise: **null**.
+	 * @param parent               the parent window (only needed for the MidicaPL exporter)
 	 */
 	public MidicaFileChooser(String type, byte purpose, String directory, boolean charsetSel,
 			String confKeyForeignExe, FileSelector parent) {
