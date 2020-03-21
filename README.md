@@ -15,7 +15,8 @@
 Midica is an interpreter for a Music Programming Language.
 It translates source code to MIDI.
 
-But it can also be used as a MIDI Player, MIDI compiler, MIDI decompiler, MIDI Karaoke Player or a MIDI File Analyzer.
+But it can also be used as a MIDI Player, MIDI compiler, MIDI decompiler, Karaoke Player, ALDA player
+or a MIDI File Analyzer.
 
 You write music with the easy-to-learn programming language "MidicaPL".  
 You can use the same techniques like in regular programming, like:
@@ -34,7 +35,8 @@ You write your songs in plain text files using the text editor of your choice. M
 - Download the file `midica-VERSION.jar`.
 - Start Midica using the command: `java -jar midica-VERSION.jar`
 - Download one of the [example files](examples/) or create your own file and save it with the file extension `.midica`.
-- In the Midica application, load this file by pressing the upper right button `select file` and choose this file.
+- In the Midica application, load this file by pressing the upper right button `select file`.
+- Switch to the MidicaPL tab (it's the default tab) and choose this file.
 - Press the button `Start Player` and play the sequence
 
 # Features of the Midica Application itself
@@ -42,6 +44,7 @@ You write your songs in plain text files using the text editor of your choice. M
 - **Loading and playing** MIDI sequences from:
     - MidicaPL files
     - MIDI files
+    - ALDA files (if ALDA is installed)
 - **Exporting MIDI sequences**
     - As MIDI files
     - As MidicaPL files (experimental)
@@ -168,6 +171,8 @@ ARGUMENTS:
 --soundfont=PATH      : Use the specified soundfont file.
 --import=PATH         : Import from the specified MidicaPL file.
 --import-midi=PATH    : Import from the specified MIDI file.
+--import-alda=PATH    : Import from the specified ALDA file by calling the
+                        alda program. (ALDA Needs to be installed.)
 --export-midi=PATH    : Export to the specified MIDI file.
 --export=PATH         : Export to the specified MidicaPL file. (*)
 --export-alda=PATH    : Export to the specified ALDA file. (*)

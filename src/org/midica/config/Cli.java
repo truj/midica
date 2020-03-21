@@ -41,6 +41,7 @@ public class Cli {
 	private static String  soundfontPath  = null;
 	private static String  importPathMpl  = null;
 	private static String  importPathMidi = null;
+	private static String  importPathAlda = null;
 	private static String  exportPathMpl  = null;
 	private static String  exportPathMidi = null;
 	private static String  exportPathAlda = null;
@@ -108,6 +109,9 @@ public class Cli {
 					}
 					else if ("import-midi".equals(option)) {
 						importPathMidi = path;
+					}
+					else if ("import-alda".equals(option)) {
+						importPathAlda = path;
 					}
 					else {
 						help(false, "Unknown import format: --" + option);
@@ -206,6 +210,8 @@ public class Cli {
 		msg.append("--soundfont=PATH      : Use the specified soundfont file.\n");
 		msg.append("--import=PATH         : Import from the specified MidicaPL file.\n");
 		msg.append("--import-midi=PATH    : Import from the specified MIDI file.\n");
+		msg.append("--import-alda=PATH    : Import from the specified ALDA file by calling the\n");
+		msg.append("                        alda program. (ALDA Needs to be installed.)\n");
 		msg.append("--export-midi=PATH    : Export to the specified MIDI file.\n");
 		msg.append("--export=PATH         : Export to the specified MidicaPL file. (*)\n");
 		msg.append("--export-alda=PATH    : Export to the specified ALDA file. (*)\n");
@@ -254,6 +260,10 @@ public class Cli {
 		else if (importPathMidi != null) {
 			importPath = importPathMidi;
 			importType = FileSelector.FILE_TYPE_MIDI;
+		}
+		else if (importPathAlda != null) {
+			importPath = importPathAlda;
+			importType = FileSelector.FILE_TYPE_ALDA;
 		}
 		else {
 			importPath = null;

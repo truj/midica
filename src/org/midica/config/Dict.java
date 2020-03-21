@@ -2087,7 +2087,7 @@ public class Dict {
 		
 		// Foreign
 		set( FOREIGN_CREATE_TMPFILE, "Failed to create temporary file '%s'. Error Message: "  );
-		set( FOREIGN_EX_CODE,        "<html><b>The following command failed:</b><br>%s<br><br><b>Exit Code:</b><br>%s<br><br><b>Standard error:</b><br>%s<br><br><b>Standard output:</b><br>%s" );
+		set( FOREIGN_EX_CODE,        "<html><b>The following command failed:</b><br>%s<br><br><b>Exit Code:</b><br>%s<br><br><b>Standard error:</b><br>%s<br><br><b>Standard output:</b><br>%s<br>" );
 		set( FOREIGN_EX_INTERRUPTED, "%s has been interrupted"                                );
 		set( FOREIGN_EX_EXECUTE,     "<html>Failed to execute %s.<br>Make sure that %s is installed.<br>Make sure that the command or path is correct.<br>The failing command or path was:<br><b>%s</b>" );
 		set( FOREIGN_EX_NO_EXE,      "<html>Cannot start %s without a command or path.<br>Please enter a command or path in the file chooser." );
