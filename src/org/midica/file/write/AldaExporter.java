@@ -203,7 +203,7 @@ public class AldaExporter extends Decompiler {
 		}
 		
 		// get instrument name and alias
-		String instrName = instrumentNames.get(program);
+		String instrName = 9 == channel ? "percussion" : instrumentNames.get(program);
 		String alias     = instrName + "-ch" + channel;
 		
 		// alias has been used before?
@@ -441,6 +441,7 @@ public class AldaExporter extends Decompiler {
 			int velocity    = Integer.parseInt(properties.get(NP_VELOCITY));
 			int oldVelocity = instr.getVelocity();
 			if (velocity != oldVelocity) {
+				velocity = (velocity * 1000 + 5) / 1270;
 				attributes.add("(vol " + velocity + ")");
 				instr.setVelocity(velocity);
 				incrementStats(STAT_NOTE_VELOCITIES, channel);
