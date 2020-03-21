@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -1056,7 +1057,11 @@ public abstract class Decompiler extends Exporter {
 			// If we reach this point, there is no matching note/chord.
 			// Add the syllable to the slice using a rest.
 			byte channel = lyricsChannels.get(0);
-			slice.addSyllableRest(tick, syllable, channel, ORPHANED_SYLLABLES, sourceResolution);
+			byte orphanedSyllables = ORPHANED_SYLLABLES;
+			if (ALDA == format) {
+				orphanedSyllables = BLOCK;
+			}
+			slice.addSyllableRest(tick, syllable, channel, orphanedSyllables, sourceResolution);
 		}
 	}
 	
@@ -1273,7 +1278,7 @@ public abstract class Decompiler extends Exporter {
 		
 		// get missing ticks
 		long missingTicks = slice.getBeginTick() - chosenInstr.getCurrentTicks();
-		if (missingTicks > 0) { // TODO: debug this: -40 ???
+		if (missingTicks > 0) {
 			byte channel = (byte) chosenInstr.channel;
 			restStr.append( createRest(channel, missingTicks, -1, null) );
 		}
@@ -1306,5 +1311,242 @@ public abstract class Decompiler extends Exporter {
 		}
 		
 		return chosenInstr;
+	}
+	
+	/**
+	 * Increments the statistics for the channel and total.
+	 * 
+	 * @param type     statistics type
+	 * @param channel  MIDI channel
+	 */
+	protected void incrementStats(Byte type, Byte channel) {
+		int channelValue = statistics.get(channel).get(type);
+		int totalValue   = statistics.get(STAT_TOTAL).get(type);
+		
+		statistics.get(channel).put(type, channelValue + 1);
+		statistics.get(STAT_TOTAL).put(type, totalValue + 1);
+	}
+	
+	/**
+	 * Creates the statistics to be printed at the end of the produced file.
+	 * 
+	 * @return statistics block
+	 */
+	protected String createStatistics() {
+		StringBuilder statLines = new StringBuilder("");
+		String comment = getCommentSymbol();
+		
+		if (MUST_ADD_STATISTICS)
+			statLines.append(comment + " " + "STATISTICS:" + NEW_LINE);
+		
+		// channels
+		for (byte channel = 0; channel < 16; channel++) {
+			TreeMap<Byte, Integer> channelStats = statistics.get(channel);
+			
+			// nothing to do?
+			if (0 == channelStats.get(STAT_NOTES) && 0 == channelStats.get(STAT_RESTS))
+				continue;
+			
+			if (MUST_ADD_STATISTICS)
+				statLines.append(comment + " Channel " + channel + ":" + NEW_LINE);
+			statLines.append( createStatisticPart(channelStats, false) );
+		}
+		
+		// total
+		if (MUST_ADD_STATISTICS)
+			statLines.append(comment + " TOTAL:" + NEW_LINE);
+		statLines.append( createStatisticPart(statistics.get(STAT_TOTAL), true) );
+		
+		return statLines.toString();
+	}
+	
+	/**
+	 * Creates the statistics for one part (either a channel or total).
+	 * 
+	 * @param subStat  statistic structure for the part (channel or total)
+	 * @param isTotal  **true**, if this is for the total statistics, **false** for channel statistics
+	 * @return the created statistics.
+	 */
+	private String createStatisticPart(TreeMap<Byte,Integer> subStat, boolean isTotal) {
+		StringBuilder stats = new StringBuilder("");
+		String comment = getCommentSymbol();
+		
+		// markers for the quality score
+		int    markerCount = 0;
+		double markerSum   = 0;
+		
+		// rests
+		{
+			int rests = subStat.get(STAT_RESTS);
+			if (MUST_ADD_STATISTICS)
+				stats.append(comment + "\t" + "Rests: " + rests + NEW_LINE);
+			
+			// rests / notes
+			int notes = subStat.get(STAT_NOTES);
+			if (notes > 0) {
+				double restsPercent = ((double) rests) / ((double) (notes));
+				restsPercent *= 100;
+				String restsPercentStr = String.format("%.2f", restsPercent);
+				if (MUST_ADD_STATISTICS)
+					stats.append(comment + "\t\t" + "Rests/Notes: " + rests + "/" + notes + " (" + restsPercentStr + "%)" + NEW_LINE);
+				markerCount++;
+				markerSum += (100.0D - restsPercent);
+			}
+			
+			if (rests > 0) {
+				
+				// rests skipped
+				double restsSkipped = ((double) subStat.get(STAT_REST_SKIPPED)) / ((double) rests);
+				restsSkipped *= 100;
+				String restsSkippedStr = String.format("%.2f", restsSkipped);
+				if (MUST_ADD_STATISTICS)
+					stats.append(comment + "\t\t" + "Skipped: " + subStat.get(STAT_REST_SKIPPED) + " (" + restsSkippedStr + "%)" + NEW_LINE);
+				markerCount++;
+				markerSum += (100.0D - restsSkipped);
+				
+				// rest summands
+				int    summands        = subStat.get(STAT_REST_SUMMANDS);
+				double summandsPercent = ((double) summands) / ((double) rests);
+				summandsPercent *= 100;
+				String summandsPercentStr = String.format("%.2f", summandsPercent);
+				if (MUST_ADD_STATISTICS)
+					stats.append(comment + "\t\t" + "Summands: " + summands + " (" + summandsPercentStr + "%)" + NEW_LINE);
+				markerCount++;
+				markerSum += 100.0D - (summandsPercent - 100.0D);
+				
+				// rest triplets
+				if (summands > 0) {
+					int triplets = subStat.get(STAT_REST_TRIPLETS);
+					double tripletsPercent = ((double) triplets) / ((double) summands);
+					tripletsPercent *= 100;
+					String tripletsStr = String.format("%.2f", tripletsPercent);
+					if (MUST_ADD_STATISTICS)
+						stats.append(comment + "\t\t" + "Triplets: " + triplets + " (" + tripletsStr + "%)" + NEW_LINE);
+					markerCount++;
+					markerSum += (100.0D - tripletsPercent);
+				}
+			}
+		}
+		
+		// notes
+		{
+			int notes = subStat.get(STAT_NOTES);
+			if (MUST_ADD_STATISTICS)
+				stats.append(comment + "\t" + "Notes: " + notes + NEW_LINE);
+			if (notes > 0) {
+				
+				// note summands
+				int    summands    = subStat.get(STAT_NOTE_SUMMANDS);
+				double summandsPercent = ((double) summands) / ((double) notes);
+				summandsPercent *= 100;
+				String summandsPercentStr = String.format("%.2f", summandsPercent);
+				if (MUST_ADD_STATISTICS)
+					stats.append(comment + "\t\t" + "Summands: " + summands + " (" + summandsPercentStr + "%)" + NEW_LINE);
+				markerCount++;
+				markerSum += 100.0D - (summandsPercent - 100.0D);
+				
+				// note triplets
+				if (summands > 0) {
+					int triplets = subStat.get(STAT_NOTE_TRIPLETS);
+					double tripletsPercent = ((double) triplets) / ((double) summands);
+					tripletsPercent *= 100;
+					String tripletsStr = String.format("%.2f", tripletsPercent);
+					if (MUST_ADD_STATISTICS)
+						stats.append(comment + "\t\t" + "Triplets: " + triplets + " (" + tripletsStr + "%)" + NEW_LINE);
+					markerCount++;
+					markerSum += (100.0D - tripletsPercent);
+				}
+				
+				// velocity changes
+				int    velocities    = subStat.get(STAT_NOTE_VELOCITIES);
+				double velocitiesPercent = ((double) velocities) / ((double) notes);
+				velocitiesPercent *= 100;
+				String velocitiesPercentStr = String.format("%.2f", velocitiesPercent);
+				if (MUST_ADD_STATISTICS)
+					stats.append(comment + "\t\t" + "Velocity changes: " + velocities + " (" + velocitiesPercentStr + "%)" + NEW_LINE);
+				markerCount++;
+				markerSum += (100.0D - velocitiesPercent);
+				
+				// duration changes
+				int    durations   = subStat.get(STAT_NOTE_DURATIONS);
+				double durationPercent = ((double) durations) / ((double) notes);
+				durationPercent *= 100;
+				String durationPercentStr = String.format("%.2f", durationPercent);
+				if (MUST_ADD_STATISTICS)
+					stats.append(comment + "\t\t" + "Duration changes: " + durations + " (" + durationPercentStr + "%)" + NEW_LINE);
+				markerCount++;
+				markerSum += (100.0D - durationPercent);
+				
+				// multiple option
+				int    multiple        = subStat.get(STAT_NOTE_MULTIPLE);
+				double multiplePercent = ((double) multiple) / ((double) notes);
+				multiplePercent *= 100;
+				String multiplePercentStr = String.format("%.2f", multiplePercent);
+				if (MUST_ADD_STATISTICS)
+					stats.append(comment + "\t\t" + "Multiple option: " + multiple + " (" + multiplePercentStr + "%)" + NEW_LINE);
+				markerCount++;
+				markerSum += (100.0D - multiplePercent);
+			}
+		}
+		
+		// quality score
+		if (isTotal) {
+			if (MUST_ADD_STATISTICS && MUST_ADD_QUALITY_SCORE)
+				stats.append(comment + NEW_LINE);
+			double totalScore = ((double) markerSum) / markerCount;
+			String totalScoreStr = String.format("%.2f", totalScore);
+			if (MUST_ADD_QUALITY_SCORE)
+				stats.append(comment + " QUALITY SCORE: " + totalScoreStr + NEW_LINE);
+		}
+		
+		// empty line
+		if (MUST_ADD_STATISTICS || MUST_ADD_QUALITY_SCORE) {
+			if (isTotal)
+				stats.append(NEW_LINE);
+			else if (MUST_ADD_STATISTICS)
+				stats.append(comment + NEW_LINE);
+		}
+		
+		return stats.toString();
+	}
+	
+	/**
+	 * Creates the block with configuration variables that has been used for decompilation.
+	 * 
+	 * @return configuration block
+	 */
+	protected String createConfig() {
+		StringBuilder statLines = new StringBuilder("");
+		String comment = getCommentSymbol();
+		
+		if ( ! MUST_ADD_CONFIG )
+			return statLines.toString();
+		
+		// headline
+		statLines.append(comment + " " + "CONFIGURATION:" + NEW_LINE);
+		statLines.append(comment + NEW_LINE);
+		
+		// config values
+		HashMap<String, String> sessionConfig = DecompileConfigController.getSessionConfig();
+		ArrayList<String> configKeys = new ArrayList<String>(sessionConfig.keySet());
+		Collections.sort(configKeys);
+		for (String key : configKeys) {
+			String value = sessionConfig.get(key);
+			statLines.append(comment + " " + key + "\t" + value + NEW_LINE);
+		}
+		statLines.append(NEW_LINE + NEW_LINE);
+		
+		return statLines.toString();
+	}
+	
+	/**
+	 * Returns the comment symbol of the current format.
+	 * 
+	 * @return comment symbol.
+	 */
+	private String getCommentSymbol() {
+		if (ALDA == format)
+			return "#";
+		return MidicaPLParser.COMMENT;
 	}
 }

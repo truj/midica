@@ -9,6 +9,8 @@ package org.midica.file.write;
 
 import java.util.ArrayList;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -30,6 +32,8 @@ public class AldaExporter extends Decompiler {
 	private TreeSet<Instrument> usedInSlice        = null;
 	private String              currentKeySig      = null;
 	
+	private static Pattern tripletPattern = Pattern.compile("(\\d+)$");
+	
 	/**
 	 * Creates a new MidicaPL exporter.
 	 */
@@ -46,20 +50,6 @@ public class AldaExporter extends Decompiler {
 		initInstrumentNames();
 		initNoteNames();
 	}
-	
-//	/**
-//	 * Increments the statistics for the channel and total.
-//	 * 
-//	 * @param type     statistics type
-//	 * @param channel  MIDI channel
-//	 */
-//	private void incrementStats(Byte type, Byte channel) {
-//		int channelValue = statistics.get(channel).get(type);
-//		int totalValue   = statistics.get(STAT_TOTAL).get(type);
-//		
-//		statistics.get(channel).put(type, channelValue + 1);
-//		statistics.get(STAT_TOTAL).put(type, totalValue + 1);
-//	}
 	
 	/**
 	 * Creates the MidicaPL string to be written into the export file.
@@ -85,13 +75,6 @@ public class AldaExporter extends Decompiler {
 			
 			// channel commands and instrument changes
 			for (byte channel = 0; channel < 16; channel++) {
-				
-//				// block with rests that are only used for syllables that don't have a note
-//				if (slice.hasSyllableRests() && channel == lyricsChannels.get(0)) {
-//					output.append( createSyllableRestsBlock(slice) );
-//				}
-				
-				// normal commands
 				output.append( createCommandsFromTimeline(slice, channel) );
 			}
 			
@@ -99,10 +82,14 @@ public class AldaExporter extends Decompiler {
 		}
 		
 		// config
-//		output.append( createConfig() );
+		if (MUST_ADD_CONFIG) {
+			output.append(NEW_LINE + NEW_LINE + createConfig());
+		}
 		
 		// statistics
-//		output.append( createStatistics() );
+		if (MUST_ADD_STATISTICS) {
+			output.append(createStatistics());
+		}
 		
 		return output.toString();
 	}
@@ -165,10 +152,17 @@ public class AldaExporter extends Decompiler {
 					for (Long summand : summands) {
 						String summandStr = noteLength.get(summand);
 						summandStrings.add(summandStr);
-//						incrementStats(STAT_NOTE_SUMMANDS, channel);
-//						if (summandStr.endsWith(MidicaPLParser.TRIPLET)) {
-//							incrementStats(STAT_NOTE_TRIPLETS, channel);
-//						}
+						
+						// statistics
+						incrementStats(STAT_NOTE_SUMMANDS, channel);
+						Matcher tripletMatcher = tripletPattern.matcher(summandStr);
+						if (tripletMatcher.matches()) {
+							String lengthStr = tripletMatcher.group(1);
+							int summandLength = Integer.parseInt(lengthStr);
+							if (0 == summandLength % 3) {
+								incrementStats(STAT_NOTE_TRIPLETS, channel);
+							}
+						}
 					}
 					String lengthStr = String.join("~", summandStrings);
 					
@@ -176,8 +170,7 @@ public class AldaExporter extends Decompiler {
 					params.put( NP_LENGTH,   lengthStr    );
 					params.put( NP_END_TICK, endTick + "" );
 					params.put( NP_DURATION, durationPerc );
-					
-//					incrementStats(STAT_NOTES, channel);
+					incrementStats(STAT_NOTES, channel);
 				}
 				
 				// write ALDA
@@ -236,215 +229,6 @@ public class AldaExporter extends Decompiler {
 	}
 	
 	/**
-	 * Creates the block with configuration variables that has been used for decompilation.
-	 * 
-	 * @return configuration block
-	 */
-//	private String createConfig() {
-//		StringBuilder statLines = new StringBuilder("");
-//		
-//		if ( ! MUST_ADD_CONFIG )
-//			return statLines.toString();
-//		
-//		// headline
-//		statLines.append(MidicaPLParser.COMMENT + " " + "CONFIGURATION:" + NEW_LINE);
-//		statLines.append(MidicaPLParser.COMMENT + NEW_LINE);
-//		
-//		// config values
-//		HashMap<String, String> sessionConfig = DecompileConfigController.getSessionConfig();
-//		ArrayList<String> configKeys = new ArrayList<String>(sessionConfig.keySet());
-//		Collections.sort(configKeys);
-//		for (String key : configKeys) {
-//			String value = sessionConfig.get(key);
-//			statLines.append(MidicaPLParser.COMMENT + " " + key + "\t" + value + NEW_LINE);
-//		}
-//		statLines.append(NEW_LINE + NEW_LINE);
-//		
-//		return statLines.toString();
-//	}
-	
-	/**
-	 * Creates the statistics to be printed at the end of the produced file.
-	 * 
-	 * @return statistics block
-	 */
-//	private String createStatistics() {
-//		StringBuilder statLines = new StringBuilder("");
-//		
-//		if (MUST_ADD_STATISTICS)
-//			statLines.append(MidicaPLParser.COMMENT + " " + "STATISTICS:" + NEW_LINE);
-//		
-//		// channels
-//		for (byte channel = 0; channel < 16; channel++) {
-//			TreeMap<Byte, Integer> channelStats = statistics.get(channel);
-//			
-//			// nothing to do?
-//			if (0 == channelStats.get(STAT_NOTES) && 0 == channelStats.get(STAT_RESTS))
-//				continue;
-//			
-//			if (MUST_ADD_STATISTICS)
-//				statLines.append(MidicaPLParser.COMMENT + " Channel " + channel + ":" + NEW_LINE);
-//			statLines.append( createStatisticPart(channelStats, false) );
-//		}
-//		
-//		// total
-//		if (MUST_ADD_STATISTICS)
-//			statLines.append(MidicaPLParser.COMMENT + " TOTAL:" + NEW_LINE);
-//		statLines.append( createStatisticPart(statistics.get(STAT_TOTAL), true) );
-//		
-//		return statLines.toString();
-//	}
-	
-	/**
-	 * Creates the statistics for one part (either a channel or total).
-	 * 
-	 * @param subStat  statistic structure for the part (channel or total)
-	 * @param isTotal  **true**, if this is for the total statistics, **false** for channel statistics
-	 * @return the created statistics.
-	 */
-//	private String createStatisticPart(TreeMap<Byte,Integer> subStat, boolean isTotal) {
-//		StringBuilder stats = new StringBuilder("");
-//		
-//		// markers for the quality score
-//		int    markerCount = 0;
-//		double markerSum   = 0;
-//		
-//		// rests
-//		{
-//			int rests = subStat.get(STAT_RESTS);
-//			if (MUST_ADD_STATISTICS)
-//				stats.append(MidicaPLParser.COMMENT + "\t" + "Rests: " + rests + NEW_LINE);
-//			
-//			// rests / notes
-//			int notes = subStat.get(STAT_NOTES);
-//			if (notes > 0) {
-//				double restsPercent = ((double) rests) / ((double) (notes));
-//				restsPercent *= 100;
-//				String restsPercentStr = String.format("%.2f", restsPercent);
-//				if (MUST_ADD_STATISTICS)
-//					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Rests/Notes: " + rests + "/" + notes + " (" + restsPercentStr + "%)" + NEW_LINE);
-//				markerCount++;
-//				markerSum += (100.0D - restsPercent);
-//			}
-//			
-//			if (rests > 0) {
-//				
-//				// rests skipped
-//				double restsSkipped = ((double) subStat.get(STAT_REST_SKIPPED)) / ((double) rests);
-//				restsSkipped *= 100;
-//				String restsSkippedStr = String.format("%.2f", restsSkipped);
-//				if (MUST_ADD_STATISTICS)
-//					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Skipped: " + subStat.get(STAT_REST_SKIPPED) + " (" + restsSkippedStr + "%)" + NEW_LINE);
-//				markerCount++;
-//				markerSum += (100.0D - restsSkipped);
-//				
-//				// rest summands
-//				int    summands        = subStat.get(STAT_REST_SUMMANDS);
-//				double summandsPercent = ((double) summands) / ((double) rests);
-//				summandsPercent *= 100;
-//				String summandsPercentStr = String.format("%.2f", summandsPercent);
-//				if (MUST_ADD_STATISTICS)
-//					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Summands: " + summands + " (" + summandsPercentStr + "%)" + NEW_LINE);
-//				markerCount++;
-//				markerSum += 100.0D - (summandsPercent - 100.0D);
-//				
-//				// rest triplets
-//				if (summands > 0) {
-//					int triplets = subStat.get(STAT_REST_TRIPLETS);
-//					double tripletsPercent = ((double) triplets) / ((double) summands);
-//					tripletsPercent *= 100;
-//					String tripletsStr = String.format("%.2f", tripletsPercent);
-//					if (MUST_ADD_STATISTICS)
-//						stats.append(MidicaPLParser.COMMENT + "\t\t" + "Triplets: " + triplets + " (" + tripletsStr + "%)" + NEW_LINE);
-//					markerCount++;
-//					markerSum += (100.0D - tripletsPercent);
-//				}
-//			}
-//		}
-//		
-//		// notes
-//		{
-//			int notes = subStat.get(STAT_NOTES);
-//			if (MUST_ADD_STATISTICS)
-//				stats.append(MidicaPLParser.COMMENT + "\t" + "Notes: " + notes + NEW_LINE);
-//			if (notes > 0) {
-//				
-//				// note summands
-//				int    summands    = subStat.get(STAT_NOTE_SUMMANDS);
-//				double summandsPercent = ((double) summands) / ((double) notes);
-//				summandsPercent *= 100;
-//				String summandsPercentStr = String.format("%.2f", summandsPercent);
-//				if (MUST_ADD_STATISTICS)
-//					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Summands: " + summands + " (" + summandsPercentStr + "%)" + NEW_LINE);
-//				markerCount++;
-//				markerSum += 100.0D - (summandsPercent - 100.0D);
-//				
-//				// note triplets
-//				if (summands > 0) {
-//					int triplets = subStat.get(STAT_NOTE_TRIPLETS);
-//					double tripletsPercent = ((double) triplets) / ((double) summands);
-//					tripletsPercent *= 100;
-//					String tripletsStr = String.format("%.2f", tripletsPercent);
-//					if (MUST_ADD_STATISTICS)
-//						stats.append(MidicaPLParser.COMMENT + "\t\t" + "Triplets: " + triplets + " (" + tripletsStr + "%)" + NEW_LINE);
-//					markerCount++;
-//					markerSum += (100.0D - tripletsPercent);
-//				}
-//				
-//				// velocity changes
-//				int    velocities    = subStat.get(STAT_NOTE_VELOCITIES);
-//				double velocitiesPercent = ((double) velocities) / ((double) notes);
-//				velocitiesPercent *= 100;
-//				String velocitiesPercentStr = String.format("%.2f", velocitiesPercent);
-//				if (MUST_ADD_STATISTICS)
-//					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Velocity changes: " + velocities + " (" + velocitiesPercentStr + "%)" + NEW_LINE);
-//				markerCount++;
-//				markerSum += (100.0D - velocitiesPercent);
-//				
-//				// duration changes
-//				int    durations   = subStat.get(STAT_NOTE_DURATIONS);
-//				double durationPercent = ((double) durations) / ((double) notes);
-//				durationPercent *= 100;
-//				String durationPercentStr = String.format("%.2f", durationPercent);
-//				if (MUST_ADD_STATISTICS)
-//					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Duration changes: " + durations + " (" + durationPercentStr + "%)" + NEW_LINE);
-//				markerCount++;
-//				markerSum += (100.0D - durationPercent);
-//				
-//				// multiple option
-//				int    multiple        = subStat.get(STAT_NOTE_MULTIPLE);
-//				double multiplePercent = ((double) multiple) / ((double) notes);
-//				multiplePercent *= 100;
-//				String multiplePercentStr = String.format("%.2f", multiplePercent);
-//				if (MUST_ADD_STATISTICS)
-//					stats.append(MidicaPLParser.COMMENT + "\t\t" + "Multiple option: " + multiple + " (" + multiplePercentStr + "%)" + NEW_LINE);
-//				markerCount++;
-//				markerSum += (100.0D - multiplePercent);
-//			}
-//		}
-//		
-//		// quality score
-//		if (isTotal) {
-//			if (MUST_ADD_STATISTICS && MUST_ADD_QUALITY_SCORE)
-//				stats.append(MidicaPLParser.COMMENT + NEW_LINE);
-//			double totalScore = ((double) markerSum) / markerCount;
-//			String totalScoreStr = String.format("%.2f", totalScore);
-//			if (MUST_ADD_QUALITY_SCORE)
-//				stats.append(MidicaPLParser.COMMENT + " QUALITY SCORE: " + totalScoreStr + NEW_LINE);
-//		}
-//		
-//		// empty line
-//		if (MUST_ADD_STATISTICS || MUST_ADD_QUALITY_SCORE) {
-//			if (isTotal)
-//				stats.append(NEW_LINE);
-//			else if (MUST_ADD_STATISTICS)
-//				stats.append(MidicaPLParser.COMMENT + NEW_LINE);
-//		}
-//		
-//		return stats.toString();
-//	}
-	
-	/**
 	 * Creates a string with global attributes for the given slice.
 	 * 
 	 * Global attributes are:
@@ -458,12 +242,9 @@ public class AldaExporter extends Decompiler {
 	private String createGlobalAttributes(Slice slice) {
 		StringBuilder result = new StringBuilder("");
 		
-		// tick comment
-//		result.append( createTickComment(slice.getBeginTick(), false) );
-		
 		if (MUST_ADD_TICK_COMMENTS) {
 			result.append(NEW_LINE);
-			result.append("# SLICE " + currentSliceNumber);
+			result.append("# SLICE " + currentSliceNumber + " (tick: " + slice.getBeginTick() + ")");
 		}
 		result.append(NEW_LINE + NEW_LINE);
 		
@@ -484,7 +265,7 @@ public class AldaExporter extends Decompiler {
 					globalCmd = "tempo";
 				}
 				else if ("key".equals(cmdId)) {
-					globalCmd     = "key-signature";
+					globalCmd     = "key-sig";
 					currentKeySig = value;
 					value         = getKeySignature();
 					initNoteNames();
@@ -507,26 +288,12 @@ public class AldaExporter extends Decompiler {
 	 * 
 	 * Steps:
 	 * 
-	 * # If necessary, adds a REST so that the current tick is reached.
-	 * # Chooses the LAST note/chord command to be printed.
-	 * # Prints all lines apart from the last one, and adds the MULTIPLE option.
-	 * # Prints the last line, and adds the MULTIPLE option only if necessary.
-	 * # Increments current channel ticks (if the last element has no MULTIPLE option).
-	 * 
-	 * Strategy to choose the LAST note/chord command:
-	 * 
-	 * # Choose a note/chord ending in the same tick when the next note/chord starts, if available and in the same slice.
-	 *     - no MULTIPLE option needed for the last note/chord
-	 *     - no rests are necessary
-	 * # Choose a note/chord ending at the end of the slice, if possible, and not later than the next ON-tick
-	 *     - no MULTIPLE option needed for the last note/chord
-	 *     - rests must be added LATER but not now
-	 * # Choose the longest note/chord ending BEFORE the NEXT note/chord starts, if available.
-	 *     - no MULTIPLE option needed for the last note/chord
-	 *     - rest(s) must be added
-	 * # Choose any other note/chord.
-	 *     - all chords/notes need the MULTIPLE option, even the last one.
-	 *     - rest(s) must be added
+	 * # If necessary, creates an instrument change
+	 * # If necessary, jumps to the marker at the begin of the current slice
+	 * # If necessary, adds a REST to reach the current tick.
+	 * # Checks the note-END tick of the shortest note
+	 * # Adds a (smaller) rest to the chord, if the lowest END tick is further than the next ON tick or the slice's end
+	 * # Prints all notes and (if necessary) the rest
 	 * 
 	 * @param slice    the sequence slice
 	 * @param channel  MIDI channel
@@ -534,8 +301,6 @@ public class AldaExporter extends Decompiler {
 	 * @param events   All notes/chords with the same note-ON tick in the same channel (comes from the slice's timeline)
 	 * @return the created note lines.
 	 */
-	// TODO: adjust docu to ALDA
-	// TODO: change docu about the strategy
 	private String createChordNotes(Slice slice, byte channel, long tick, TreeMap<String, TreeMap<Byte, String>> events) {
 		StringBuilder content = new StringBuilder("");
 		boolean needSpace = true;
@@ -581,13 +346,13 @@ public class AldaExporter extends Decompiler {
 			content.append(" ");
 		}
 		
-		// get the note-OFF tick of the shortest note
-		Long chordOffTick = null;
+		// get the note length END tick of the shortest note
+		Long chordEndTick = null;
 		for (Entry<String, TreeMap<Byte, String>> noteSet : events.entrySet()) {
 			TreeMap<Byte, String> note = noteSet.getValue();
-			long endTick = Long.parseLong(note.get(NP_END_TICK)); // TODO: off-tick too high (2880 instead of 1824)
-			if (null == chordOffTick || endTick < chordOffTick) {
-				chordOffTick = endTick;
+			long endTick = Long.parseLong(note.get(NP_END_TICK));
+			if (null == chordEndTick || endTick < chordEndTick) {
+				chordEndTick = endTick;
 			}
 		}
 		
@@ -595,10 +360,10 @@ public class AldaExporter extends Decompiler {
 		Long restEndTick  = null;
 		Long nextOnTick   = noteHistory.get(channel).ceilingKey(tick + 1);
 		long sliceEndTick = slice.getEndTick();
-		if (nextOnTick != null && chordOffTick > nextOnTick) {
+		if (nextOnTick != null && chordEndTick > nextOnTick) {
 			restEndTick = nextOnTick;
 		}
-		if (chordOffTick > sliceEndTick) {
+		if (chordEndTick > sliceEndTick) {
 			if (restEndTick != null && restEndTick > sliceEndTick) {
 				restEndTick = sliceEndTick;
 			}
@@ -613,16 +378,16 @@ public class AldaExporter extends Decompiler {
 		}
 		content.append(String.join("/", notes));
 		
+		// create rest inside the chord
 		if (restEndTick != null) {
-			// create rest inside the chord
 			String rest = createRest(channel, restEndTick - tick, tick, null)
 				.replaceFirst(" ", ""); // don't need the leading space here
 			content.append("/" + rest);
-			chordOffTick = restEndTick;
+			chordEndTick = restEndTick;
 		}
 		
 		// increment ticks, if necessary
-		instr.setCurrentTicks(chordOffTick);
+		instr.setCurrentTicks(chordEndTick);
 		
 		return content.toString();
 	}
@@ -634,7 +399,7 @@ public class AldaExporter extends Decompiler {
 	 * 
 	 * Parts of the note are:
 	 * 
-	 * - attributes, if needed
+	 * - attributes, if needed (quant, vol)
 	 * - octave switch, if needed
 	 * - name
 	 * - length, if needed
@@ -643,51 +408,50 @@ public class AldaExporter extends Decompiler {
 	 * @param properties    note properties (from the slice's timeline)
 	 * @return the created note.
 	 */
-	// TODO: add attribute details
 	private String createNote(byte channel, TreeMap<Byte, String> properties) {
 		StringBuilder content = new StringBuilder("");
 		
 		Instrument instr = instrumentsByChannel.get(channel);
 		
-		// get attributes to be changed
-//		ArrayList<String> options = new ArrayList<>();
-//		{
-//			// duration and velocity
-//			if ( ! properties.get(NP_NOTE_NUM).equals(MidicaPLParser.REST) ) {
-//				
-//				// duration
-//				float duration           = Float.parseFloat( properties.get(NP_DURATION) ) / 100;
-//				float oldDuration        = instr.getDurationRatio();
-//				int   durationPercent    = (int) ((duration    * 1000 + 0.5f) / 10);
-//				int   oldDurationPercent = (int) ((oldDuration * 1000 + 0.5f) / 10);
-//				if (durationPercent != oldDurationPercent) {
-//					// don't allow 0%
-//					String durationPercentStr = durationPercent + "";
-//					if (durationPercent < 1) {
-//						durationPercentStr = "0.5";
-//						duration = 0.005f;
-//					}
-//					options.add(MidicaPLParser.D + MidicaPLParser.OPT_ASSIGNER + durationPercentStr + MidicaPLParser.DURATION_PERCENT);
-//					instr.setDurationRatio(duration);
-////					incrementStats(STAT_NOTE_DURATIONS, channel);
-//				}
-//				
-//				// velocity
-//				int velocity    = Integer.parseInt( properties.get(NP_VELOCITY) );
-//				int oldVelocity = instr.getVelocity();
-//				if (velocity != oldVelocity) {
-//					options.add(MidicaPLParser.V + MidicaPLParser.OPT_ASSIGNER + velocity);
-//					instr.setVelocity(velocity);
-////					incrementStats(STAT_NOTE_VELOCITIES, channel);
-//				}
-//			}
-//		}
+		// TODO: add the following attributes:
+		// pan       == panning
+		// track-vol == track-volume
 		
-		// append options
-//		if (options.size() > 0) {
-//			String optionsStr = String.join(MidicaPLParser.OPT_SEPARATOR + " ", options);
-//			content.append("\t" + optionsStr);
-//		}
+		// get attributes to be changed
+		ArrayList<String> attributes = new ArrayList<>();
+		{
+			// quantization
+			float duration           = Float.parseFloat(properties.get(NP_DURATION)) / 100;
+			float oldDuration        = instr.getDurationRatio();
+			int   durationPercent    = (int) ((duration    * 1000 + 0.5f) / 10);
+			int   oldDurationPercent = (int) ((oldDuration * 1000 + 0.5f) / 10);
+			if (durationPercent != oldDurationPercent) {
+				// don't allow 0%
+				String durationPercentStr = durationPercent + "";
+				if (durationPercent < 1) {
+					durationPercentStr = "1";
+					duration = 0.01f;
+				}
+				attributes.add("(quant " + durationPercentStr + ")");
+				instr.setDurationRatio(duration);
+				incrementStats(STAT_NOTE_DURATIONS, channel);
+			}
+			
+			// velocity
+			int velocity    = Integer.parseInt(properties.get(NP_VELOCITY));
+			int oldVelocity = instr.getVelocity();
+			if (velocity != oldVelocity) {
+				attributes.add("(vol " + velocity + ")");
+				instr.setVelocity(velocity);
+				incrementStats(STAT_NOTE_VELOCITIES, channel);
+			}
+		}
+		
+		// add attributes
+		if (attributes.size() > 0) {
+			String attributesStr = String.join(" ", attributes);
+			content.append(attributesStr + " ");
+		}
 		
 		// switch octave, if needed
 		int  noteNum   = Integer.parseInt(properties.get(NP_NOTE_NUM));
@@ -743,23 +507,31 @@ public class AldaExporter extends Decompiler {
 		for (Long length : lengthElements) {
 			String summandStr = restLength.get(length);
 			lengthSummands.add(summandStr);
-//			incrementStats(STAT_REST_SUMMANDS, channel);
-//			if (summandStr.endsWith(MidicaPLParser.TRIPLET)) {
-//				incrementStats(STAT_REST_TRIPLETS, channel);
-//			}
+			
+			// statistics
+			incrementStats(STAT_REST_SUMMANDS, channel);
+			Matcher tripletMatcher = tripletPattern.matcher(summandStr);
+			if (tripletMatcher.matches()) {
+				String lengthStr = tripletMatcher.group(1);
+				int summandLength = Integer.parseInt(lengthStr);
+				if (0 == summandLength % 3) {
+					incrementStats(STAT_REST_TRIPLETS, channel);
+				}
+			}
 		}
 		
 		// add rest
 		if (lengthSummands.size() > 0) {
 			String length = String.join("~", lengthSummands);
-//			incrementStats(STAT_RESTS, channel);
 			content.append("r" + length);
+			currentInstrument.setNoteLength(length);
+			incrementStats(STAT_RESTS, channel);
 		}
 		else {
 			// TODO: Dict
 			// TODO: add warning
 			System.err.println("rest too small to be handled: " + ticks + " ticks");
-//			incrementStats(STAT_REST_SKIPPED, channel);
+			incrementStats(STAT_REST_SKIPPED, channel);
 		}
 		
 		return content.toString();
@@ -851,24 +623,6 @@ public class AldaExporter extends Decompiler {
 		noteLength.put( length1,  "1"  );
 		noteLength.put( length1d, "1." );
 		
-//		// 2 full notes
-//		long length_m2  = calculateTicks( 8,     1 );
-//		long length_m2d = calculateTicks( 8 * 3, 2 );
-//		noteLength.put( length_m2,  "0.5"  );
-//		noteLength.put( length_m2d, "0.5." );
-//		
-//		// 4 full notes
-//		long length_m4  = calculateTicks( 16,     1 );
-//		long length_m4d = calculateTicks( 16 * 3, 2 );
-//		noteLength.put( length_m4,  "0.25"  );
-//		noteLength.put( length_m4d, "0.25." );
-//		
-//		// 8 full notes
-//		long length_m8  = calculateTicks( 32,     1 );
-//		long length_m8d = calculateTicks( 32 * 3, 2 );
-//		noteLength.put( length_m8,  "0.125"  );
-//		noteLength.put( length_m8d, "0.125." );
-		
 		return noteLength;
 	}
 	
@@ -918,37 +672,6 @@ public class AldaExporter extends Decompiler {
 		
 		return restLength;
 	}
-	
-	/**
-	 * Creates a comment giving the current tick - if configured accordingly.
-	 * 
-	 * Adds a line break, if **must_append** is **true**.
-	 * 
-	 * @param tick        MIDI tickstamp.
-	 * @param mustAppend  **true** for a comment to be appended to a line; **false** for a full-line comment.
-	 * @return the comment string.
-	 */
-//	private String createTickComment(long tick, boolean mustAppend) {
-//		
-//		// convert source tick to target tick
-//		long targetTick = (tick * targetResolution * 10 + 5) / (sourceResolution * 10);
-//		
-//		String comment = "";
-//		if (MUST_ADD_TICK_COMMENTS) {
-//			if (mustAppend)
-//				comment = "\t\t\t\t";
-//			
-//			comment += MidicaPLParser.COMMENT + " "
-//				+ Dict.get(Dict.EXPORTER_TICK)  + " "
-//				+ tick
-//				+ " ==> "
-//				+ targetTick;
-//		}
-//		
-//		if (mustAppend)
-//			return comment;
-//		return comment + NEW_LINE;
-//	}
 	
 	/**
 	 * Initializes all possible MIDI instrument numbers with an ALDA instrument name.
