@@ -441,9 +441,9 @@ public class AldaExporter extends Decompiler {
 			int velocity    = Integer.parseInt(properties.get(NP_VELOCITY));
 			int oldVelocity = instr.getVelocity();
 			if (velocity != oldVelocity) {
+				instr.setVelocity(velocity);
 				velocity = (velocity * 1000 + 5) / 1270;
 				attributes.add("(vol " + velocity + ")");
-				instr.setVelocity(velocity);
 				incrementStats(STAT_NOTE_VELOCITIES, channel);
 			}
 		}
