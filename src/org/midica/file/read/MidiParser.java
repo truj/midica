@@ -90,6 +90,10 @@ public class MidiParser extends SequenceParser {
 			Sequence sequence = MidiSystem.getSequence(file);
 			createSequence(sequence);
 			postprocessSequence(sequence, FORMAT_MIDI, chosenCharset); // we want to analyze the loaded sequence - not the created one
+			
+			// Many MIDI files out there contain channel volume messages.
+			// Transform them into expression messages.
+			replaceChannelVolume();
 		}
 		catch (InvalidMidiDataException e) {
 			throw new ParseException(e.getMessage());
@@ -126,9 +130,7 @@ public class MidiParser extends SequenceParser {
 		}
 		
 		int trackNum = 0;
-		TRACK:
 		for (Track t : sequence.getTracks()) {
-			EVENT:
 			for (int i=0; i < t.size(); i++) {
 				MidiEvent   event = t.get(i);
 				long        tick  = event.getTick();
@@ -259,10 +261,6 @@ public class MidiParser extends SequenceParser {
 			
 			// note on
 			note = transpose(note, channel);
-			// TODO: delete (used to debug channel velocity changes in "And then there was silence")
-//			if (9==channel&&tick>99000) {
-//				System.out.println("channel: "+channel+", note: "+note+", tick:"+tick+", vel: "+velocity);
-//			}
 			SequenceCreator.addMessageNoteON(channel, note, tick, velocity);
 		}
 		else if (ShortMessage.NOTE_OFF == cmd || (ShortMessage.NOTE_ON == cmd && 0 == velocity)) {
@@ -275,6 +273,50 @@ public class MidiParser extends SequenceParser {
 		else {
 			// another channel command
 			SequenceCreator.addMessageGeneric(msg, channel, tick);
+		}
+	}
+	
+	/**
+	 * Replaces all channel volume events in the successfully parsed sequence
+	 * by an according expression message.
+	 * 
+	 * Problem:
+	 * 
+	 * Many MIDI files contain channel volume messages (MSB Controller 0x07, LSB Controller 0x27).
+	 * These interfere with setting the channel volume in the player.
+	 * 
+	 * Solution:
+	 * 
+	 * - Replace controller 0x07 (channel volume MSB) with controller 0x0B (expression MSB)
+	 * - Replace controller 0x27 (channel volume MSB) with controller 0x2B (expression MSB)
+	 * 
+	 * The messages are replaced only in the CREATED sequence (the one that's used by the player).
+	 * The original sequence (used by the analyzer) stays untouched.
+	 * 
+	 * @throws InvalidMidiDataException if the transformation to expression fails
+	 */
+	protected void replaceChannelVolume() throws InvalidMidiDataException {
+		
+		Sequence seq = SequenceCreator.getSequence();
+		for (Track track : seq.getTracks()) {
+			for (int i=0; i < track.size(); i++) {
+				MidiEvent   event        = track.get(i);
+				MidiMessage msg          = event.getMessage();
+				int         status       = msg.getStatus();
+				boolean     isCtrlChange = ShortMessage.CONTROL_CHANGE == (status & 0b1111_0000);
+				
+				// control change message?
+				if (isCtrlChange) {
+					ShortMessage sMsg = (ShortMessage) msg;
+					int controller = sMsg.getData1();
+					
+					// channel volume MSB or LSB?
+					if (0x07 == controller || 0x27 == controller) {
+						controller += 4;
+						sMsg.setMessage(status, controller, sMsg.getData2());
+					}
+				}
+			}
 		}
 	}
 }
