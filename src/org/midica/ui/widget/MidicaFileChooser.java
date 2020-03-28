@@ -52,8 +52,11 @@ public class MidicaFileChooser extends JFileChooser {
 	private static final long serialVersionUID = 1L;
 	
 	// fields for the charset description / foreign executable description
-	private static final int DESC_CHARS      = 53; // characters per line
-	private static final int DESC_PREF_WIDTH =  1; // fake value (ignored by the layout manager)
+	private static final int DESC_CHARS       = 60; // characters per line
+	private static final int DESC_PREF_WIDTH  =  1; // fake value (ignored by the layout manager)
+	
+	// make the left elements of our own widgets so many pixels wider than the file name label
+	private static final int WIDTH_CORRECTION = 3;
 	
 	private FileSelector parentWindow = null;
 	
@@ -148,14 +151,14 @@ public class MidicaFileChooser extends JFileChooser {
 	 * - The area with the charset description.
 	 * - The area with the charset label and charset combobox.
 	 * 
+	 * @param leftElement     file name label (used to copy the dimension)
+	 * @param rightElement    file type combobox (used to copy the dimension)
 	 * @return the created areas:
 	 * 
-	 * - spacer left from the charset description label
-	 * - charset label left from the combobox
 	 * - area containing the spacer and the charset description label
 	 * - area containing the charset combobox and its label
 	 */
-	private JComponent[] createCharsetWidgets() {
+	private JComponent[] createCharsetAreas(Component leftElement, Component rightElement) {
 		
 		// file type specific initializations
 		String configKey     = null;
@@ -247,7 +250,23 @@ public class MidicaFileChooser extends JFileChooser {
 		cbxCharset.setSelectedItem(configuredCs);
 		charsetArea.add(cbxCharset);
 		
-		return new JComponent[] {lblCharsetDescSpacer, lblCharset, charsetDescArea, charsetArea};
+		// copy dimensions
+		Dimension leftDimCorrected = leftElement.getPreferredSize();
+		leftDimCorrected.width += WIDTH_CORRECTION;
+		lblCharsetDescSpacer.setMinimumSize(leftElement.getMinimumSize());
+		lblCharsetDescSpacer.setMaximumSize(leftElement.getMaximumSize());
+		lblCharsetDescSpacer.setPreferredSize(leftDimCorrected);
+		lblCharset.setMinimumSize(leftElement.getMinimumSize());
+		lblCharset.setMaximumSize(leftElement.getMaximumSize());
+		lblCharset.setPreferredSize(leftElement.getPreferredSize());
+		lblCharsetDesc.setMinimumSize(rightElement.getMinimumSize());
+		lblCharsetDesc.setMaximumSize(rightElement.getMaximumSize());
+		lblCharsetDesc.setPreferredSize(rightElement.getPreferredSize());
+		cbxCharset.setMinimumSize(rightElement.getMinimumSize());
+		cbxCharset.setMaximumSize(rightElement.getMaximumSize());
+		cbxCharset.setPreferredSize(rightElement.getPreferredSize());
+		
+		return new JComponent[] {charsetDescArea, charsetArea};
 	}
 	
 	/**
@@ -257,23 +276,25 @@ public class MidicaFileChooser extends JFileChooser {
 	 * - The area with the program description.
 	 * - The area with the program label and text field.
 	 * 
-	 *@return the created areas:
+	 * @param leftElement     file name label (used to copy the dimension)
+	 * @param rightElement    file type combobox (used to copy the dimension)
+	 * @return the created areas:
 	 * 
-	 * - spacer left from the command/path description label
-	 * - program label left from the text field
 	 * - area containing the spacer and the command/path description label
 	 * - area containing the text field and its label
 	 */
-	private JComponent[] createForeignExeWidgets() {
+	private JComponent[] createForeignExeAreas(Component leftElement, Component rightElement) {
 		
 		// program specific config
 		String progName = null;
-		if (FileSelector.FILE_TYPE_ALDA.equals(type)) {
+		if (FileSelector.FILE_TYPE_ALDA.equals(type))
 			progName = Dict.get(Dict.FOREIGN_PROG_ALDA);
-		}
-		else if (FileSelector.FILE_TYPE_ALDA.equals(type)) {
-			progName = Dict.get(Dict.FOREIGN_PROG_MSCORE);
-		}
+		else if (FileSelector.FILE_TYPE_ABC.equals(type))
+			progName = Dict.get(Dict.FOREIGN_PROG_ABCMIDI);
+		else if (FileSelector.FILE_TYPE_LY.equals(type))
+			progName = Dict.get(Dict.FOREIGN_PROG_LY);
+		else
+			progName = "[[TRANSLATION MISSING, PLEASE REPORT THIS BUG]]";
 		String progDesc = String.format(Dict.get(Dict.FOREIGN_PROG_DESC), progName);
 		
 		// create the description panel
@@ -315,28 +336,84 @@ public class MidicaFileChooser extends JFileChooser {
 			}
 		});
 		
-		return new JComponent[] {lblExeDescSpacer, lblExec, exeDescArea, execArea};
+		// copy dimensions
+		Dimension leftDimCorrected = leftElement.getPreferredSize();
+		leftDimCorrected.width += WIDTH_CORRECTION;
+		lblExeDescSpacer.setMinimumSize(leftElement.getMinimumSize());
+		lblExeDescSpacer.setMaximumSize(leftElement.getMaximumSize());
+		lblExeDescSpacer.setPreferredSize(leftDimCorrected);
+		lblExec.setMinimumSize(leftElement.getMinimumSize());
+		lblExec.setMaximumSize(leftElement.getMaximumSize());
+		lblExec.setPreferredSize(leftElement.getPreferredSize());
+		lblExeDesc.setMinimumSize(rightElement.getMinimumSize());
+		lblExeDesc.setMaximumSize(rightElement.getMaximumSize());
+		lblExeDesc.setPreferredSize(rightElement.getPreferredSize());
+		fldForeignExec.setMinimumSize(rightElement.getMinimumSize());
+		fldForeignExec.setMaximumSize(rightElement.getMaximumSize());
+		fldForeignExec.setPreferredSize(rightElement.getPreferredSize());
+		
+		return new JComponent[] {exeDescArea, execArea};
+	}
+	
+	/**
+	 * Creates widgets for the URL of the foreign program.
+	 * 
+	 * These are:
+	 * 
+	 * - the URL label
+	 * - the link
+	 * 
+	 * @param url            the URL to the foreign program
+	 * @param leftElement    file name label (used to copy the dimension)
+	 * @return the created classes:
+	 * 
+	 * - the container with the created widgets (URL label and link)
+	 */
+	private JComponent createForeignUrlArea(String url, Component leftElement) {
+		
+		// container
+		JPanel content = new JPanel();
+		content.setLayout(new BoxLayout(content, BoxLayout.X_AXIS));
+		
+		// label
+		JLabel lblUrl = new JLabel(Dict.get(Dict.FOREIGN_URL) + ":");
+		content.add(lblUrl);
+		
+		// url
+		LinkLabel lblLink = new LinkLabel(url);
+		content.add(lblLink);
+		
+		// copy dimensions
+		Dimension leftDimCorrected = leftElement.getPreferredSize();
+		leftDimCorrected.width += WIDTH_CORRECTION;
+		lblUrl.setMinimumSize(leftElement.getMinimumSize());
+		lblUrl.setMaximumSize(leftElement.getMaximumSize());
+		lblUrl.setPreferredSize(leftDimCorrected);
+		
+		return content;
 	}
 	
 	/**
 	 * Creates the decompilation area.
 	 * It consists of a spacer on the left side and the icon on the right side.
 	 * 
-	 * @param fileArea    container containing file label and text field
+	 * @param leftElement    file name label (used to copy the dimension)
 	 * @return the created area
 	 */
-	private Container createDecompileArea(Container fileArea) {
+	private Container createDecompileArea(Component leftElement) {
 		
 		// copy the dimensions of the "file name" label
-		Component lbl      = (Component) fileArea.getComponent(0);  // file name label
-		Dimension lblDim   = lbl.getPreferredSize();
-		lblDim.width += 3;
+		Dimension leftDimCorrected = leftElement.getPreferredSize();
+		leftDimCorrected.width += WIDTH_CORRECTION;
 		JLabel spacer = new JLabel("");
-		spacer.setPreferredSize(lblDim);
+		spacer.setPreferredSize(leftDimCorrected);
 		
 		// create the decompilation area
 		JPanel decompileArea = new JPanel();
 		decompileArea.setLayout(new BoxLayout(decompileArea, BoxLayout.X_AXIS));
+		
+		// create the decompile config icon
+		decompileConfigIcon = new DecompileConfigIcon(parentWindow);
 		
 		// add elements (spacer, icon, spacer)
 		decompileArea.add(spacer);
@@ -354,17 +431,14 @@ public class MidicaFileChooser extends JFileChooser {
 	 * 
 	 * - charset-related widgets
 	 * - decompile configuration icon
+	 * - widgets related to a foreign program (command or full path)
+	 * - foreign program URL, if available
 	 * 
 	 * The code in this method is really ugly but necessary because
 	 * {@link JFileChooser} doesn't provide any other possibility to
-	 * select a charset.
+	 * add extra elements.
 	 */
 	private void insertExtraWidgets() {
-		
-		// create decompile icon, if needed
-		if (needDCIcon) {
-			decompileConfigIcon = new DecompileConfigIcon(parentWindow);
-		}
 		
 		// Get the component containing:
 		// - file name label and text field  (index 0)
@@ -375,62 +449,22 @@ public class MidicaFileChooser extends JFileChooser {
 		
 		// From this component:
 		
-		// - 1. Take over the filler dimensions.
+		// Step 1: Take over the filler dimensions.
 		Filler f       = (Filler) fileAttrArea.getComponent( 1 );
 		Filler fillerA = new Filler( f.getMinimumSize(), f.getPreferredSize(), f.getMaximumSize() );
 		Filler fillerB = new Filler( f.getMinimumSize(), f.getPreferredSize(), f.getMaximumSize() );
 		Filler fillerC = new Filler( f.getMinimumSize(), f.getPreferredSize(), f.getMaximumSize() );
 		Filler fillerD = new Filler( f.getMinimumSize(), f.getPreferredSize(), f.getMaximumSize() );
 		Filler fillerE = new Filler( f.getMinimumSize(), f.getPreferredSize(), f.getMaximumSize() );
+		Filler fillerF = new Filler( f.getMinimumSize(), f.getPreferredSize(), f.getMaximumSize() );
 		
-		// 2. Get the file type label and combobox.
-		JPanel       fileTypeArea = (JPanel)       fileAttrArea.getComponent( 2 );
-		JLabel       lblOrig      = (JLabel)       fileTypeArea.getComponent( 0 );
-		JComboBox<?> cbxOrig      = (JComboBox<?>) fileTypeArea.getComponent( 1 );
+		// Step 2: Get the file type label (left) and combobox (right).
+		//         So we can copy dimensions from them later.
+		JPanel       fileTypeArea  = (JPanel)       fileAttrArea.getComponent( 2 );
+		JLabel       leftElemOrig  = (JLabel)       fileTypeArea.getComponent( 0 );
+		JComboBox<?> rightElemOrig = (JComboBox<?>) fileTypeArea.getComponent( 1 );
 		
-		// add charset widgets, if needed
-		JComponent[] charsetWidgets = null;
-		if (needCharsetSel) {
-			
-			// create charset widgets
-			charsetWidgets = createCharsetWidgets();
-			
-			// 3. Take over the label dimensions.
-			charsetWidgets[0].setMinimumSize( lblOrig.getMinimumSize() ); // spacer left from the charset description
-			charsetWidgets[0].setMaximumSize( lblOrig.getMaximumSize() );
-			charsetWidgets[0].setPreferredSize( lblOrig.getPreferredSize() );
-			charsetWidgets[1].setMinimumSize( lblOrig.getMinimumSize() ); // charset label
-			charsetWidgets[1].setMaximumSize( lblOrig.getMaximumSize() );
-			charsetWidgets[1].setPreferredSize( lblOrig.getPreferredSize() );
-			
-			// 4. Take over the combobox dimensions.
-			cbxCharset.setMinimumSize( cbxOrig.getMinimumSize() );
-			cbxCharset.setMaximumSize( cbxOrig.getMaximumSize() );
-			cbxCharset.setPreferredSize( cbxOrig.getPreferredSize() );
-		}
-		
-		// create widgets to change the foreign executable path
-		JComponent[] foreignExeWidgets = null;
-		if (needForeignExe) {
-			
-			// create foreign executable widgets
-			foreignExeWidgets = createForeignExeWidgets();
-			
-			// 3. Take over the label dimensions.
-			foreignExeWidgets[0].setMinimumSize( lblOrig.getMinimumSize() ); // spacer left from the exec description
-			foreignExeWidgets[0].setMaximumSize( lblOrig.getMaximumSize() );
-			foreignExeWidgets[0].setPreferredSize( lblOrig.getPreferredSize() );
-			foreignExeWidgets[1].setMinimumSize( lblOrig.getMinimumSize() ); // exec label
-			foreignExeWidgets[1].setMaximumSize( lblOrig.getMaximumSize() );
-			foreignExeWidgets[1].setPreferredSize( lblOrig.getPreferredSize() );
-			
-			// 4. Take over the textfield dimensions.
-			fldForeignExec.setMinimumSize( cbxOrig.getMinimumSize() );
-			fldForeignExec.setMaximumSize( cbxOrig.getMaximumSize() );
-			fldForeignExec.setPreferredSize( cbxOrig.getPreferredSize() );
-		}
-		
-		// remember and remove all elements
+		// Step 3: Remember and remove all elements
 		Component[]          components    = fileAttrArea.getComponents();
 		ArrayList<Component> componentList = new ArrayList<>();
 		for (Component c : components) {
@@ -438,31 +472,43 @@ public class MidicaFileChooser extends JFileChooser {
 			fileAttrArea.remove(c);
 		}
 		
-		// decompile config icon - add it to the button area
-		Container decompileArea = null;
-		if (needDCIcon) {
-			// componentList.get(0) == file name label + text field
-			decompileArea = createDecompileArea((Container) componentList.get(0));
-		}
-		
-		// add the elements again, but also add our own fillers and panels
+		// Step 4: Add the elements again, but also add our own fillers and panels
 		fileAttrArea.add( componentList.get(0) ); // file name label and text field
 		fileAttrArea.add( componentList.get(1) ); // original filler
 		fileAttrArea.add( componentList.get(2) ); // file type label and combobox
 		if (needCharsetSel) {
-			fileAttrArea.add( fillerA           ); // cloned filler
-			fileAttrArea.add( charsetWidgets[2] ); // charset description
-			fileAttrArea.add( fillerB           ); // cloned filler
-			fileAttrArea.add( charsetWidgets[3] ); // charset label and combobox
+			
+			// add charset widgets, if needed (and copy the dimensions from the original elements)
+			JComponent[] charsetAreas = createCharsetAreas(leftElemOrig, rightElemOrig);
+			
+			fileAttrArea.add( fillerA         ); // cloned filler
+			fileAttrArea.add( charsetAreas[0] ); // charset description
+			fileAttrArea.add( fillerB         ); // cloned filler
+			fileAttrArea.add( charsetAreas[1] ); // charset label and combobox
 		}
 		if (needForeignExe) {
-			fileAttrArea.add( fillerC              ); // cloned filler
-			fileAttrArea.add( foreignExeWidgets[2] ); // charset description
-			fileAttrArea.add( fillerD              ); // cloned filler
-			fileAttrArea.add( foreignExeWidgets[3] ); // charset label and combobox
+			
+			// create widgets to change the foreign executable path (and copy the dimensions from the original elements)
+			JComponent[] foreignExeAreas = createForeignExeAreas(leftElemOrig, rightElemOrig);
+			
+			fileAttrArea.add( fillerC            ); // cloned filler
+			fileAttrArea.add( foreignExeAreas[0] ); // program description
+			fileAttrArea.add( fillerD            ); // cloned filler
+			fileAttrArea.add( foreignExeAreas[1] ); // program label and text field
+			
+			String url = Dict.getForeignProgramUrl(confKeyForeignExe);
+			if (url != null) {
+				
+				// create widgets to change the foreign executable path (and copy the dimensions from the original elements)
+				JComponent foreignUrlArea = createForeignUrlArea(url, leftElemOrig);
+				
+				fileAttrArea.add( fillerE        ); // cloned filler
+				fileAttrArea.add( foreignUrlArea ); // program url and label
+			}
 		}
 		if (needDCIcon) {
-			fileAttrArea.add( fillerE       ); // cloned filler
+			Container decompileArea = createDecompileArea(leftElemOrig);
+			fileAttrArea.add( fillerF       ); // cloned filler
 			fileAttrArea.add( decompileArea ); // decompile config icon
 		}
 		fileAttrArea.add( componentList.get(3) ); // open and cancel buttons
@@ -555,6 +601,14 @@ public class MidicaFileChooser extends JFileChooser {
 	 */
 	private void execPathChanged() {
 		String path = fldForeignExec.getText();
-		Config.set(Config.EXEC_PATH_IMP_ALDA, path);
+		if (FileSelector.FILE_TYPE_ALDA.equals(type)) {
+			Config.set(Config.EXEC_PATH_IMP_ALDA, path);
+		}
+		else if (FileSelector.FILE_TYPE_ABC.equals(type)) {
+			Config.set(Config.EXEC_PATH_IMP_ABC, path);
+		}
+		else if (FileSelector.FILE_TYPE_LY.equals(type)) {
+			Config.set(Config.EXEC_PATH_IMP_LY, path);
+		}
 	}
 }

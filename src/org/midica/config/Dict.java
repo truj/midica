@@ -675,6 +675,8 @@ public class Dict {
 	public static final String KEY_FILE_SELECTOR_IMP_MPL    = "key_file_selector_imp_mpl";
 	public static final String KEY_FILE_SELECTOR_IMP_MID    = "key_file_selector_imp_mid";
 	public static final String KEY_FILE_SELECTOR_IMP_ALDA   = "key_file_selector_imp_alda";
+	public static final String KEY_FILE_SELECTOR_IMP_ABC    = "key_file_selector_imp_abc";
+	public static final String KEY_FILE_SELECTOR_IMP_LY     = "key_file_selector_imp_ly";
 	public static final String KEY_FILE_SELECTOR_EXP_MID    = "key_file_selector_exp_mid";
 	public static final String KEY_FILE_SELECTOR_EXP_MPL    = "key_file_selector_exp_mpl";
 	public static final String KEY_FILE_SELECTOR_EXP_ALDA   = "key_file_selector_exp_alda";
@@ -735,6 +737,8 @@ public class Dict {
 	public static final String IMPORTED_TYPE_MIDI          = "imported_type_midi";
 	public static final String IMPORTED_TYPE_MPL           = "imported_type_mpl";
 	public static final String IMPORTED_TYPE_ALDA          = "imported_type_alda";
+	public static final String IMPORTED_TYPE_ABC           = "imported_type_abc";
+	public static final String IMPORTED_TYPE_LY            = "imported_type_ly";
 	public static final String SOUNDFONT                   = "soundfont";
 	public static final String CURRENT_SOUNDFONT           = "current_soundfont";
 	public static final String REMEMBER_SF                 = "remember_sf";
@@ -758,17 +762,24 @@ public class Dict {
 	public static final String TAB_MIDI                    = "tab_midi";
 	public static final String TAB_MIDICAPL                = "tab_midicapl";
 	public static final String TAB_ALDA                    = "tab_alda";
+	public static final String TAB_ABC                     = "tab_abc";
+	public static final String TAB_LY                      = "tab_ly";
 	public static final String CHARSET                     = "charset";
 	public static final String CHARSET_DESC_MPL_READ       = "charset_desc_mpl_read";
 	public static final String CHARSET_DESC_MID_READ       = "charset_desc_mid_read";
 	public static final String CHARSET_DESC_MPL_WRITE      = "charset_desc_mpl_write";
 	public static final String CHARSET_DESC_MID_WRITE      = "charset_desc_mid_write";
+	public static final String FOREIGN_URL                 = "foreign_url";
 	public static final String FOREIGN_PROG                = "foreign_prog";
 	public static final String FOREIGN_PROG_DESC           = "foreign_prog_desc";
 	public static final String FOREIGN_PROG_ALDA           = "foreign_prog_alda";
+	public static final String FOREIGN_PROG_ABCMIDI        = "foreign_prog_abcmidi";
+	public static final String FOREIGN_PROG_LY             = "foreign_prog_ly";
 	public static final String FOREIGN_PROG_MSCORE         = "foreign_prog_mscore";
 	
 	// Foreign
+	public static final String FOREIGN_CREATE_TMPDIR       = "foreign_create_tmpdir";
+	public static final String FOREIGN_READ_TMPDIR         = "foreign_read_tmpdir";
 	public static final String FOREIGN_CREATE_TMPFILE      = "foreign_create_tmpfile";
 	public static final String FOREIGN_EX_CODE             = "foreign_ex_code";
 	public static final String FOREIGN_EX_INTERRUPTED      = "foreign_ex_interrupted";
@@ -1529,6 +1540,11 @@ public class Dict {
 	public static final String ERROR_COND_EMPTY_ELEM_IN_IN_LIST  = "error_cond_empty_elem_in_in_list";
 	public static final String ERROR_CALL_IF_MUST_BE_ALONE       = "error_call_if_must_be_alone";
 	
+	// LilypondImporter
+	public static final String ERROR_LILYPOND_NO_MIDI_FILE       = "error_lilypond_no_midi_file";
+	public static final String ERROR_WRONG_DIVISION_TYPE         = "error_wrong_division_type";
+	public static final String ERROR_DIFFERENT_RESOLUTION        = "error_different_resolution";
+	
 	// NestableBlock
 	public static final String ERROR_BLOCK_ARG_ALREADY_SET      = "error_block_arg_already_set";
 	
@@ -1555,7 +1571,7 @@ public class Dict {
 	public static final String WAIT_PARSE_MPL                   = "wait_parse_mpl";
 	public static final String WAIT_PARSE_MID                   = "wait_parse_mid";
 	public static final String WAIT_PARSE_SF2                   = "wait_parse_sf2";
-	public static final String WAIT_PARSE_ALDA                  = "wait_parse_alda";
+	public static final String WAIT_PARSE_FOREIGN               = "wait_parse_foreign";
 	public static final String WAIT_REPARSE                     = "wait_reparse";
 	public static final String WAIT_SETUP_DEVICES               = "wait_setup_devices";
 	
@@ -1993,6 +2009,8 @@ public class Dict {
 		set( KEY_FILE_SELECTOR_IMP_MPL,    "In the IMPORT selector, select the MidicaPL Tab"                             );
 		set( KEY_FILE_SELECTOR_IMP_MID,    "In the IMPORT selector, select the MIDI Tab"                                 );
 		set( KEY_FILE_SELECTOR_IMP_ALDA,   "In the IMPORT selector, select the ALDA Tab"                                 );
+		set( KEY_FILE_SELECTOR_IMP_ABC,    "In the IMPORT selector, select the ABC Tab"                                  );
+		set( KEY_FILE_SELECTOR_IMP_LY,     "In the IMPORT selector, select the LilyPond Tab"                             );
 		set( KEY_FILE_SELECTOR_EXP_MID,    "In the EXPORT selector, select the MIDI Tab"                                 );
 		set( KEY_FILE_SELECTOR_EXP_MPL,    "In the EXPORT selector, select the MidicaPL Tab"                             );
 		set( KEY_FILE_SELECTOR_EXP_ALDA,   "In the EXPORT selector, select the ALDA Tab"                                 );
@@ -2048,6 +2066,8 @@ public class Dict {
 		set( IMPORTED_TYPE_MIDI,           "MIDI"                          );
 		set( IMPORTED_TYPE_MPL,            "MidicaPL"                      );
 		set( IMPORTED_TYPE_ALDA,           "ALDA"                          );
+		set( IMPORTED_TYPE_ABC,            "ABC"                           );
+		set( IMPORTED_TYPE_LY,             "LilyPond"                      );
 		set( UNKNOWN_NOTE_NAME,            "unknown"                       );
 		set( UNKNOWN_PERCUSSION_NAME,      "unknown"                       );
 		set( UNKNOWN_DRUMKIT_NAME,         "unknown"                       );
@@ -2075,18 +2095,25 @@ public class Dict {
 		set( TAB_MIDI,                 "MIDI"                                                 );
 		set( TAB_MIDICAPL,             "MidicaPL"                                             );
 		set( TAB_ALDA,                 "ALDA"                                                 );
+		set( TAB_ABC,                  "ABC"                                                  );
+		set( TAB_LY,                   "LilyPond"                                             );
 		set( CHARSET,                  "Charset"                                              );
-		set( CHARSET_DESC_MPL_READ,    "Encoding of the source file."                         );
-		set( CHARSET_DESC_MID_READ,    "Default encoding of text-based messages in the source file. Used if neither a BOM nor a {@...} tag is found." );
-		set( CHARSET_DESC_MPL_WRITE,   "Encoding of the file to be saved."                    );
-		set( CHARSET_DESC_MID_WRITE,   "Encoding for text-based messages in the target file." );
+		set( CHARSET_DESC_MPL_READ,    "Encoding of the source file:"                         );
+		set( CHARSET_DESC_MID_READ,    "Default encoding of text-based messages in the source file. Used if neither a BOM nor a {@...} tag is found:" );
+		set( CHARSET_DESC_MPL_WRITE,   "Encoding of the file to be saved:"                    );
+		set( CHARSET_DESC_MID_WRITE,   "Encoding for text-based messages in the target file:" );
+		set( FOREIGN_URL,              "URL"                                                  );
 		set( FOREIGN_PROG,             "Program"                                              );
 		set( FOREIGN_PROG_DESC,        "Command or full path to the program %s:"              );
 		set( FOREIGN_PROG_ALDA,        "ALDA"                                                 );
+		set( FOREIGN_PROG_ABCMIDI,     "abcMIDI"                                              );
+		set( FOREIGN_PROG_LY,          "LilyPond"                                             );
 		set( FOREIGN_PROG_MSCORE,      "MuseScore"                                            );
 		
 		// Foreign
-		set( FOREIGN_CREATE_TMPFILE, "Failed to create temporary file '%s'. Error Message: "  );
+		set( FOREIGN_CREATE_TMPDIR,  "Failed to create temporary directory. Error Message: "  );
+		set( FOREIGN_READ_TMPDIR,    "Failed to read temporary directory. Error Message: "    );
+		set( FOREIGN_CREATE_TMPFILE, "Failed to create temporary file. Error Message: "       );
 		set( FOREIGN_EX_CODE,        "<html><b>The following command failed:</b><br>%s<br><br><b>Exit Code:</b><br>%s<br><br><b>Standard error:</b><br>%s<br><br><b>Standard output:</b><br>%s<br>" );
 		set( FOREIGN_EX_INTERRUPTED, "%s has been interrupted"                                );
 		set( FOREIGN_EX_EXECUTE,     "<html>Failed to execute %s.<br>Make sure that %s is installed.<br>Make sure that the command or path is correct.<br>The failing command or path was:<br><b>%s</b>" );
@@ -2955,6 +2982,11 @@ public class Dict {
 		set( ERROR_COND_EMPTY_ELEM_IN_IN_LIST,    "Empty element in 'in' list: "                                      );
 		set( ERROR_CALL_IF_MUST_BE_ALONE,         "block option 'if' cannot be combined with another if"              );
 		
+		// LilypondImporter
+		set( ERROR_LILYPOND_NO_MIDI_FILE,         "<html>LilyPond didn't create any MIDI file.<br>Did you forget to include a \\midi block?" );
+		set( ERROR_WRONG_DIVISION_TYPE,           "Wrong division type. Only PPQ allowed."                            );
+		set( ERROR_DIFFERENT_RESOLUTION,          "Temporary MIDI files have different resolutions."                  );
+		
 		// NestableBlock
 		set( ERROR_BLOCK_ARG_ALREADY_SET,         "Block argument has already been set before: "                      );
 		
@@ -2981,7 +3013,7 @@ public class Dict {
 		set( WAIT_PARSE_MPL,                      "Parsing the MidicaPL file..."                                      );
 		set( WAIT_PARSE_MID,                      "Parsing the MIDI file..."                                          );
 		set( WAIT_PARSE_SF2,                      "Parsing the Soundfont"                                             );
-		set( WAIT_PARSE_ALDA,                     "Importing the file using ALDA"                                     );
+		set( WAIT_PARSE_FOREIGN,                  "Importing the file using %s"                                       );
 		set( WAIT_REPARSE,                        "Reloading the File"                                                );
 		set( WAIT_SETUP_DEVICES,                  "Setting up MIDI devices and loading Soundfont"                     );
 		
@@ -3166,6 +3198,8 @@ public class Dict {
 		set( IMPORTED_TYPE_MIDI,                     "MIDI"                                  );
 		set( IMPORTED_TYPE_MPL,                      "MidicaPL"                              );
 		set( IMPORTED_TYPE_ALDA,                     "ALDA"                                  );
+		set( IMPORTED_TYPE_ABC,                      "ABC"                                   );
+		set( IMPORTED_TYPE_LY,                       "LilyPond"                              );
 		set( UNKNOWN_NOTE_NAME,                      "unbekannt"                             );
 		set( UNKNOWN_PERCUSSION_NAME,                "unbekannt"                             );
 		set( UNKNOWN_DRUMKIT_NAME,                   "unbekannt"                             );
@@ -5157,5 +5191,25 @@ public class Dict {
 		if ( Config.CBX_HALFTONE_ID_BEMOLLE.equals(configuredHalfTone) ) { return true; }
 		if ( Config.CBX_HALFTONE_ID_DES.equals(configuredHalfTone)     ) { return true; }
 		return false;
+	}
+	
+	/**
+	 * Returns the URL to a foreign program if there is any URL available.
+	 * Otherwise, returns **null**.
+	 * 
+	 * @param id    the configuration ID of the executable command, like defined in {@link Config}.
+	 * @return the URL or **null**.
+	 */
+	public static String getForeignProgramUrl(String id) {
+		if (Config.EXEC_PATH_IMP_ALDA.equals(id))
+			return "https://github.com/alda-lang/alda";
+		if (Config.EXEC_PATH_IMP_ABC.equals(id))
+			return "https://ifdo.ca/~seymour/runabc/top.html";
+		if (Config.EXEC_PATH_IMP_LY.equals(id))
+			return "https://lilypond.org/";
+		if (Config.EXEC_PATH_IMP_MSCORE.equals(id))
+			return "https://musescore.org/";
+		else
+			return null;
 	}
 }

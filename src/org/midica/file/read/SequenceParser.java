@@ -35,7 +35,9 @@ public abstract class SequenceParser implements IParser {
 	public  static final int FORMAT_MIDICAPL  =  1;
 	public  static final int FORMAT_MIDI      =  2;
 	public  static final int FORMAT_ALDA      =  3;
-	public  static final int FORMAT_MUSESCORE =  4;
+	public  static final int FORMAT_ABC       =  4;
+	public  static final int FORMAT_LY        =  5;
+	public  static final int FORMAT_MUSESCORE =  6;
 	
 	/**
 	 * Defines how much the parsed input has to be transposed.

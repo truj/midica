@@ -15,8 +15,8 @@
 Midica is an interpreter for a Music Programming Language.
 It translates source code to MIDI.
 
-But it can also be used as a MIDI Player, MIDI compiler, MIDI decompiler, Karaoke Player, ALDA player
-or a MIDI File Analyzer.
+But it can also be used as a MIDI Player, MIDI compiler, MIDI decompiler, Karaoke Player, ALDA player,
+ABC player, LilyPond Player or a MIDI File Analyzer.
 
 You write music with the easy-to-learn programming language "MidicaPL".  
 You can use the same techniques like in regular programming, like:
@@ -44,7 +44,9 @@ You write your songs in plain text files using the text editor of your choice. M
 - **Loading and playing** MIDI sequences from:
     - MidicaPL files
     - MIDI files
-    - ALDA files (if ALDA is installed)
+    - ALDA files (if [ALDA](/alda-lang/alda) is installed)
+    - ABC files (if [abcMIDI](https://ifdo.ca/~seymour/runabc/top.html) is installed)
+    - LilyPond files (if [LilyPond](https://lilypond.org/) is installed)
 - **Exporting MIDI sequences**
     - As MIDI files
     - As MidicaPL files (experimental)
@@ -159,23 +161,27 @@ This explains which arguments are available and how they work:
 
 ```
 ARGUMENTS:
---help                : Print this message.
---cli                 : Run in CLI mode (command line interface) without GUI.
-                        Exits after all CLI related work is done.
---keep-alive          : Don't exit, even if --cli has been used.
-                        Mainly used for unit tests.
---ignore-local-config : Doesn't use local config file. Use default config.
-                        Without this argument the config is read from and
-                        written into the file '.midica.conf' in the current
-                        user's home directory.
---soundfont=PATH      : Use the specified soundfont file.
---import=PATH         : Import from the specified MidicaPL file.
---import-midi=PATH    : Import from the specified MIDI file.
---import-alda=PATH    : Import from the specified ALDA file by calling the
-                        alda program. (ALDA Needs to be installed.)
---export-midi=PATH    : Export to the specified MIDI file.
---export=PATH         : Export to the specified MidicaPL file. (*)
---export-alda=PATH    : Export to the specified ALDA file. (*)
+--help                 : Print this message.
+--cli                  : Run in CLI mode (command line interface) without GUI.
+                         Exits after all CLI related work is done.
+--keep-alive           : Don't exit, even if --cli has been used.
+                         Mainly used for unit tests.
+--ignore-local-config  : Doesn't use local config file. Use default config.
+                         Without this argument the config is read from and
+                         written into the file '.midica.conf' in the current
+                         user's home directory.
+--soundfont=PATH       : Use the specified soundfont file.
+--import=PATH          : Import from the specified MidicaPL file.
+--import-midi=PATH     : Import from the specified MIDI file.
+--import-alda=PATH     : Import from the specified ALDA file by calling the
+                         alda program. (ALDA needs to be installed.)
+--import-abc=PATH      : Import from the specified ABC file by calling
+                         midi2abc. (abcMIDI needs to be installed.)
+--import-lilypond=PATH : Import from the specified LilyPond file by calling
+                         lilypond. (LilyPond needs to be installed.)
+--export-midi=PATH     : Export to the specified MIDI file.
+--export=PATH          : Export to the specified MidicaPL file. (*)
+--export-alda=PATH     : Export to the specified ALDA file. (*)
 
 (*) A file is exported to STDOUT if the export PATH is a dash (-).
     E.g. --export=-

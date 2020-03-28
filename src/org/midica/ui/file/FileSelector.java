@@ -42,7 +42,9 @@ public class FileSelector extends JDialog {
 	// file types (NOT the same as file extensions)
 	public static final String FILE_TYPE_MPL       = "mpl";
 	public static final String FILE_TYPE_ALDA      = "alda";
+	public static final String FILE_TYPE_ABC       = "abc";
 	public static final String FILE_TYPE_MIDI      = "midi";
+	public static final String FILE_TYPE_LY        = "ly";
 	public static final String FILE_TYPE_SOUNDFONT = "sf2";
 	public static final byte   READ                = 1;
 	public static final byte   WRITE               = 2;
@@ -128,6 +130,26 @@ public class FileSelector extends JDialog {
 				this
 			));
 			tabs.put(FILE_TYPE_ALDA, Dict.TAB_ALDA);
+			
+			fileChoosers.add(new MidicaFileChooser(
+				FILE_TYPE_ABC,
+				filePurpose,
+				Config.get(Config.DIRECTORY_ABC),
+				false,
+				Config.EXEC_PATH_IMP_ABC,
+				this
+			));
+			tabs.put(FILE_TYPE_ABC, Dict.TAB_ABC);
+			
+			fileChoosers.add(new MidicaFileChooser(
+				FILE_TYPE_LY,
+				filePurpose,
+				Config.get(Config.DIRECTORY_LY),
+				false,
+				Config.EXEC_PATH_IMP_LY,
+				this
+			));
+			tabs.put(FILE_TYPE_LY, Dict.TAB_LY);
 		}
 		else if (WRITE == this.filePurpose) {
 			fileChoosers.add(new MidicaFileChooser(
@@ -299,6 +321,10 @@ public class FileSelector extends JDialog {
 					Config.set(Config.DIRECTORY_MID, directory);
 				else if (FILE_TYPE_ALDA.equals(fileType))
 					Config.set(Config.DIRECTORY_ALDA, directory);
+				else if (FILE_TYPE_ABC.equals(fileType))
+					Config.set(Config.DIRECTORY_ABC, directory);
+				else if (FILE_TYPE_LY.equals(fileType))
+					Config.set(Config.DIRECTORY_LY, directory);
     			else if (FILE_TYPE_SOUNDFONT.equals(fileType))
     				Config.set(Config.DIRECTORY_SF2, directory);
     		}
@@ -354,6 +380,8 @@ public class FileSelector extends JDialog {
 				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_MPL,  0 );
 				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_MID,  1 );
 				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_ALDA, 2 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_ABC,  3 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_LY,   4 );
 			}
 			else {
 				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_MID,  0 );

@@ -28,16 +28,110 @@ import org.midica.config.Dict;
 public class Foreign {
 	
 	/**
+	 * Creates a temporary directory.
+	 * 
+	 * @return the temporary directory
+	 * @throws ForeignException if something goes wrong
+	 */
+	public static Path createTempDirectory() throws ForeignException {
+		
+		Path path = null;
+		try {
+			path = Files.createTempDirectory(null);
+		}
+		catch (IOException e) {
+			throw new ForeignException(Dict.get(Dict.FOREIGN_CREATE_TMPDIR));
+		}
+		
+		File dir = null;
+		try {
+			dir = path.toFile();
+			dir.deleteOnExit();
+		}
+		catch (UnsupportedOperationException e) {
+			throw new ForeignException(Dict.get(Dict.FOREIGN_CREATE_TMPDIR));
+		}
+		
+		return path;
+	}
+	
+	/**
+	 * Returns all files inside the given temp directory.
+	 * 
+	 * @param dirPath  temp directory to be read
+	 * @return all files in the given directory.
+	 * @throws ForeignException if something goes wrong
+	 */
+	public static File[] getFiles(Path dirPath) throws ForeignException {
+		File[] files = null;
+		try {
+			File dir = dirPath.toFile();
+			files = dir.listFiles();
+		}
+		catch (Exception e) {
+			throw new ForeignException(Dict.get(Dict.FOREIGN_READ_TMPDIR));
+		}
+		
+		return files;
+	}
+	
+	/**
+	 * Removes the given temp directory.
+	 * 
+	 * @param dir    the directory to remove
+	 */
+	public static void deleteTempDir(Path dir) {
+		try {
+			File directory = dir.toFile();
+			
+			// TODO: add recursive deletion, as soon as we need this
+			
+			// delete the directory
+			directory.delete();
+		}
+		catch (Exception e) {
+			// ignore exceptions
+		}
+	}
+	
+	/**
 	 * Creates a temporary file to be used for MIDI import or export.
 	 * 
 	 * @return the temporary file
 	 * @throws ForeignException if something goes wrong
 	 */
 	public static File createTempMidiFile() throws ForeignException {
+		return createTempFile("mid", null);
+	}
+	
+	/**
+	 * Creates a temporary file.
+	 * 
+	 * @param extension    file extension (without the dot) - may be null
+	 * @param parentDir    parent directory or **null**, if the directory doesn't matter
+	 * @return the temporary file
+	 * @throws ForeignException if something goes wrong
+	 */
+	public static File createTempFile(String extension, Path parentDir) throws ForeignException {
 		
 		Path path = null;
 		try {
-			path = Files.createTempFile(null, ".mid");
+			if (parentDir != null) {
+				if (null == extension)
+					path = Files.createTempFile(parentDir, null, null);
+				else if ("".equals(extension))
+					path = Files.createTempFile(parentDir, null, "");
+				else
+					path = Files.createTempFile(parentDir, null, "." + extension);
+			}
+			else {
+				if (null == extension)
+					path = Files.createTempFile(null, null);
+				else if ("".equals(extension))
+					path = Files.createTempFile(null, "");
+				else
+					path = Files.createTempFile(null, "." + extension);
+			}
 		}
 		catch (IOException e) {
 			throw new ForeignException(Dict.get(Dict.FOREIGN_CREATE_TMPFILE));
@@ -117,10 +211,10 @@ public class Foreign {
 					BufferedReader outReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
 					String line;
 					while ((line = errReader.readLine()) != null) {
-						stdErr += line;
+						stdErr += line + "<br>";
 					}
 					while ((line = outReader.readLine()) != null) {
-						stdOut += line;
+						stdOut += line + "<br>";
 					}
 					
 					// get the command string for the error message
