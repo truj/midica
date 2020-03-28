@@ -1540,6 +1540,9 @@ public class Dict {
 	public static final String ERROR_COND_EMPTY_ELEM_IN_IN_LIST  = "error_cond_empty_elem_in_in_list";
 	public static final String ERROR_CALL_IF_MUST_BE_ALONE       = "error_call_if_must_be_alone";
 	
+	// AldaImporter
+	public static final String ERROR_ALDA_NO_MIDI_FILE           = "error_alda_no_midi_file";
+	
 	// LilypondImporter
 	public static final String ERROR_LILYPOND_NO_MIDI_FILE       = "error_lilypond_no_midi_file";
 	public static final String ERROR_WRONG_DIVISION_TYPE         = "error_wrong_division_type";
@@ -2981,6 +2984,9 @@ public class Dict {
 		set( ERROR_COND_WHITESPACE_IN_IN_ELEM,    "Invalid whitespace in list element: "                              );
 		set( ERROR_COND_EMPTY_ELEM_IN_IN_LIST,    "Empty element in 'in' list: "                                      );
 		set( ERROR_CALL_IF_MUST_BE_ALONE,         "block option 'if' cannot be combined with another if"              );
+		
+		// AldaImporter
+		set( ERROR_ALDA_NO_MIDI_FILE,             "ALDA failed to create a MIDI file."                                );
 		
 		// LilypondImporter
 		set( ERROR_LILYPOND_NO_MIDI_FILE,         "<html>LilyPond didn't create any MIDI file.<br>Did you forget to include a \\midi block?" );

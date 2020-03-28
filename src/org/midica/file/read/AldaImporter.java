@@ -67,12 +67,18 @@ public class AldaImporter extends MidiParser {
 			String[] aldaUp = {execPath, "up"};
 			Foreign.execute(aldaUp, programName, true);
 			
-			// create temp midi file
+			// get a temp file path
 			File tempfile = Foreign.createTempMidiFile();
+			Foreign.deleteTempFile(tempfile);
 			
 			// convert from the ALDA file to the tempfile
 			String[] aldaConvert = {execPath, "export", "-f", file.getAbsolutePath(), "-o", tempfile.getAbsolutePath()};
 			Foreign.execute(aldaConvert, programName, false);
+			
+			// due to an ALDA bug sometimes the exit code is successul even if no MIDI file was created
+			if (!tempfile.exists()) {
+				throw new ParseException(Dict.get(Dict.ERROR_ALDA_NO_MIDI_FILE));
+			}
 			
 			// get MIDI from tempfile
 			Sequence sequence = MidiSystem.getSequence(tempfile);
