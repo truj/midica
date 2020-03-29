@@ -118,7 +118,7 @@ public class Cli {
 					else if ("import-abc".equals(option)) {
 						importPathAbc = path;
 					}
-					else if ("import-lilypond".equals(option)) {
+					else if ("import-ly".equals(option)) {
 						importPathLy = path;
 					}
 					else {
@@ -206,27 +206,27 @@ public class Cli {
 			msg.append("==============================================================================\n");
 		}
 		msg.append("ARGUMENTS:\n");
-		msg.append("--help                 : Print this message.\n");
-		msg.append("--cli                  : Run in CLI mode (command line interface) without GUI.\n");
-		msg.append("                         Exits after all CLI related work is done.\n");
-		msg.append("--keep-alive           : Don't exit, even if --cli has been used.\n");
-		msg.append("                         Mainly used for unit tests.\n");
-		msg.append("--ignore-local-config  : Doesn't use local config file. Use default config.\n");
-		msg.append("                         Without this argument the config is read from and\n");
-		msg.append("                         written into the file '.midica.conf' in the current\n");
-		msg.append("                         user's home directory.\n");
-		msg.append("--soundfont=PATH       : Use the specified soundfont file.\n");
-		msg.append("--import=PATH          : Import from the specified MidicaPL file.\n");
-		msg.append("--import-midi=PATH     : Import from the specified MIDI file.\n");
-		msg.append("--import-alda=PATH     : Import from the specified ALDA file by calling the\n");
-		msg.append("                         alda program. (ALDA needs to be installed.)\n");
-		msg.append("--import-abc=PATH      : Import from the specified ABC file by calling\n");
-		msg.append("                         midi2abc. (abcMIDI needs to be installed.)\n");
-		msg.append("--import-lilypond=PATH : Import from the specified LilyPond file by calling\n");
-		msg.append("                         lilypond. (LilyPond needs to be installed.)\n");
-		msg.append("--export-midi=PATH     : Export to the specified MIDI file.\n");
-		msg.append("--export=PATH          : Export to the specified MidicaPL file. (*)\n");
-		msg.append("--export-alda=PATH     : Export to the specified ALDA file. (*)\n");
+		msg.append("--help                : Print this message.\n");
+		msg.append("--cli                 : Run in CLI mode (command line interface) without GUI.\n");
+		msg.append("                        Exits after all CLI related work is done.\n");
+		msg.append("--keep-alive          : Don't exit, even if --cli has been used.\n");
+		msg.append("                        Mainly used for unit tests.\n");
+		msg.append("--ignore-local-config : Doesn't use local config file. Use default config.\n");
+		msg.append("                        Without this argument the config is read from and\n");
+		msg.append("                        written into the file '.midica.conf' in the current\n");
+		msg.append("                        user's home directory.\n");
+		msg.append("--soundfont=PATH      : Use the specified soundfont file.\n");
+		msg.append("--import=PATH         : Import from the specified MidicaPL file.\n");
+		msg.append("--import-midi=PATH    : Import from the specified MIDI file.\n");
+		msg.append("--import-alda=PATH    : Import from the specified ALDA file by calling the\n");
+		msg.append("                        alda program. (ALDA needs to be installed.)\n");
+		msg.append("--import-abc=PATH     : Import from the specified ABC file by calling\n");
+		msg.append("                        midi2abc. (abcMIDI needs to be installed.)\n");
+		msg.append("--import-ly=PATH      : Import from the specified LilyPond file by calling\n");
+		msg.append("                        lilypond. (LilyPond needs to be installed.)\n");
+		msg.append("--export-midi=PATH    : Export to the specified MIDI file.\n");
+		msg.append("--export=PATH         : Export to the specified MidicaPL file. (*)\n");
+		msg.append("--export-alda=PATH    : Export to the specified ALDA file. (*)\n");
 		msg.append("\n");
 		msg.append("(*) A file is exported to STDOUT if the export PATH is a dash (-).\n");
 		msg.append("    E.g. --export=-");

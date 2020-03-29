@@ -161,27 +161,27 @@ This explains which arguments are available and how they work:
 
 ```
 ARGUMENTS:
---help                 : Print this message.
---cli                  : Run in CLI mode (command line interface) without GUI.
-                         Exits after all CLI related work is done.
---keep-alive           : Don't exit, even if --cli has been used.
-                         Mainly used for unit tests.
---ignore-local-config  : Doesn't use local config file. Use default config.
-                         Without this argument the config is read from and
-                         written into the file '.midica.conf' in the current
-                         user's home directory.
---soundfont=PATH       : Use the specified soundfont file.
---import=PATH          : Import from the specified MidicaPL file.
---import-midi=PATH     : Import from the specified MIDI file.
---import-alda=PATH     : Import from the specified ALDA file by calling the
-                         alda program. (ALDA needs to be installed.)
---import-abc=PATH      : Import from the specified ABC file by calling
-                         midi2abc. (abcMIDI needs to be installed.)
---import-lilypond=PATH : Import from the specified LilyPond file by calling
-                         lilypond. (LilyPond needs to be installed.)
---export-midi=PATH     : Export to the specified MIDI file.
---export=PATH          : Export to the specified MidicaPL file. (*)
---export-alda=PATH     : Export to the specified ALDA file. (*)
+--help                : Print this message.
+--cli                 : Run in CLI mode (command line interface) without GUI.
+                        Exits after all CLI related work is done.
+--keep-alive          : Don't exit, even if --cli has been used.
+                        Mainly used for unit tests.
+--ignore-local-config : Doesn't use local config file. Use default config.
+                        Without this argument the config is read from and
+                        written into the file '.midica.conf' in the current
+                        user's home directory.
+--soundfont=PATH      : Use the specified soundfont file.
+--import=PATH         : Import from the specified MidicaPL file.
+--import-midi=PATH    : Import from the specified MIDI file.
+--import-alda=PATH    : Import from the specified ALDA file by calling the
+                        alda program. (ALDA needs to be installed.)
+--import-abc=PATH     : Import from the specified ABC file by calling
+                        midi2abc. (abcMIDI needs to be installed.)
+--import-ly=PATH      : Import from the specified LilyPond file by calling
+                        lilypond. (LilyPond needs to be installed.)
+--export-midi=PATH    : Export to the specified MIDI file.
+--export=PATH         : Export to the specified MidicaPL file. (*)
+--export-alda=PATH    : Export to the specified ALDA file. (*)
 
 (*) A file is exported to STDOUT if the export PATH is a dash (-).
     E.g. --export=-
