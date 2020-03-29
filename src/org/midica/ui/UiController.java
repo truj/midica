@@ -500,6 +500,11 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 				
 				// set export directory in the config
 				exportSelector.rememberDirectory();
+				
+				// directly import the exported file, if needed
+				if (exportSelector.mustDirectlyImport()) {
+					parseChosenFile(type, file);
+				}
 			}
 		}
 		catch (ExportException ex) {

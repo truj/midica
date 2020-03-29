@@ -22,6 +22,7 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -66,12 +67,16 @@ public class MidicaFileChooser extends JFileChooser {
 	private boolean needForeignExe    = false;
 	private String  confKeyForeignExe = null;
 	private boolean needDCIcon        = false;
+	private boolean needDirectImport  = false;
 	
 	// charset selection combobox
 	private JComboBox<ComboboxStringOption> cbxCharset = null;
 	
 	// decompile config icon
 	private DecompileConfigIcon decompileConfigIcon = null;
+	
+	// direct import checkbox
+	private JCheckBox cbxDirectImport = null;
 	
 	// foreign executable text field
 	private JTextField fldForeignExec = null;
@@ -99,12 +104,13 @@ public class MidicaFileChooser extends JFileChooser {
 		this.confKeyForeignExe = confKeyForeignExe;
 		this.needDCIcon        = FileSelector.WRITE == purpose && ! FileSelector.FILE_TYPE_MIDI.equals(type);
 		this.needForeignExe    = confKeyForeignExe != null;
+		this.needDirectImport  = FileSelector.WRITE == purpose && ! FileSelector.FILE_TYPE_MIDI.equals(type);
 		
 		if (Laf.isNimbus)
 			changeButtonColors();
 		
 		// insert the charset combobox and/or the decompile config icon
-		if (needCharsetSel || needDCIcon || needForeignExe) {
+		if (needCharsetSel || needDCIcon || needForeignExe || needDirectImport) {
 			insertExtraWidgets();
 		}
 	}
@@ -143,6 +149,19 @@ public class MidicaFileChooser extends JFileChooser {
 	 */
 	public JTextField getForeignExecField() {
 		return fldForeignExec;
+	}
+	
+	/**
+	 * Returns **true** if the direct import checkbox is available and checked.
+	 * Returns **false** if the checkbox is not available or not checked.
+	 * 
+	 * @return **true** if the exported file should be imported directly, otherwise **false**.
+	 */
+	public boolean mustDirectlyImport() {
+		if (null == cbxDirectImport)
+			return false;
+		
+		return cbxDirectImport.isSelected();
 	}
 	
 	/**
@@ -424,6 +443,35 @@ public class MidicaFileChooser extends JFileChooser {
 	}
 	
 	/**
+	 * Creates the direct import area.
+	 * It consists of a spacer on the left side and the (labelled) checkbox on the right side.
+	 * 
+	 * @param leftElement    file name label (used to copy the dimension)
+	 * @return the created area
+	 */
+	private Container createDirectImportArea(Component leftElement) {
+		
+		// copy the dimensions of the "file name" label
+		Dimension leftDim = leftElement.getPreferredSize();
+		JLabel spacer = new JLabel("");
+		spacer.setPreferredSize(leftDim);
+		
+		// create the direct import area
+		JPanel directImportArea = new JPanel();
+		directImportArea.setLayout(new BoxLayout(directImportArea, BoxLayout.X_AXIS));
+		
+		// create the decompile config icon
+		cbxDirectImport = new JCheckBox(Dict.get(Dict.DIRECT_IMPORT));
+		
+		// add elements (spacer, checkbox, spacer)
+		directImportArea.add(spacer);
+		directImportArea.add(cbxDirectImport);
+		directImportArea.add(Box.createHorizontalGlue());
+		
+		return directImportArea;
+	}
+	
+	/**
 	 * Creates extra widgets and inserts them into the right
 	 * places inside the parent file chooser.
 	 * 
@@ -457,6 +505,7 @@ public class MidicaFileChooser extends JFileChooser {
 		Filler fillerD = new Filler( f.getMinimumSize(), f.getPreferredSize(), f.getMaximumSize() );
 		Filler fillerE = new Filler( f.getMinimumSize(), f.getPreferredSize(), f.getMaximumSize() );
 		Filler fillerF = new Filler( f.getMinimumSize(), f.getPreferredSize(), f.getMaximumSize() );
+		Filler fillerG = new Filler( f.getMinimumSize(), f.getPreferredSize(), f.getMaximumSize() );
 		
 		// Step 2: Get the file type label (left) and combobox (right).
 		//         So we can copy dimensions from them later.
@@ -510,6 +559,11 @@ public class MidicaFileChooser extends JFileChooser {
 			Container decompileArea = createDecompileArea(leftElemOrig);
 			fileAttrArea.add( fillerF       ); // cloned filler
 			fileAttrArea.add( decompileArea ); // decompile config icon
+		}
+		if (needDirectImport) {
+			Container directImportArea = createDirectImportArea(leftElemOrig);
+			fileAttrArea.add( fillerG          ); // cloned filler
+			fileAttrArea.add( directImportArea ); // direct import checkbox
 		}
 		fileAttrArea.add( componentList.get(3) ); // open and cancel buttons
 	}

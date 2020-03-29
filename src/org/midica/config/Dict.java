@@ -776,6 +776,7 @@ public class Dict {
 	public static final String FOREIGN_PROG_ABCMIDI        = "foreign_prog_abcmidi";
 	public static final String FOREIGN_PROG_LY             = "foreign_prog_ly";
 	public static final String FOREIGN_PROG_MSCORE         = "foreign_prog_mscore";
+	public static final String DIRECT_IMPORT               = "direct_import";
 	
 	// Foreign
 	public static final String FOREIGN_CREATE_TMPDIR       = "foreign_create_tmpdir";
@@ -2112,6 +2113,7 @@ public class Dict {
 		set( FOREIGN_PROG_ABCMIDI,     "abcMIDI"                                              );
 		set( FOREIGN_PROG_LY,          "LilyPond"                                             );
 		set( FOREIGN_PROG_MSCORE,      "MuseScore"                                            );
+		set( DIRECT_IMPORT,            "Directly import the exported file"                    );
 		
 		// Foreign
 		set( FOREIGN_CREATE_TMPDIR,  "Failed to create temporary directory. Error Message: "  );
@@ -2986,7 +2988,7 @@ public class Dict {
 		set( ERROR_CALL_IF_MUST_BE_ALONE,         "block option 'if' cannot be combined with another if"              );
 		
 		// AldaImporter
-		set( ERROR_ALDA_NO_MIDI_FILE,             "ALDA failed to create a MIDI file."                                );
+		set( ERROR_ALDA_NO_MIDI_FILE,             "<html>ALDA failed to create a MIDI file.<br>In most cases that means:<br>Too many Instruments." );
 		
 		// LilypondImporter
 		set( ERROR_LILYPOND_NO_MIDI_FILE,         "<html>LilyPond didn't create any MIDI file.<br>Did you forget to include a \\midi block?" );

@@ -215,6 +215,18 @@ public class FileSelector extends JDialog {
 	}
 	
 	/**
+	 * Returns **true** if the currently selected file chooser has a checked 'direct import' checkbox.
+	 * Returns **false** if no such checkbox is available in the file chooser, of if the checkbox is
+	 * not checked.
+	 * 
+	 * @return **true** if the exported file should be imported directly, otherwise **false**.
+	 */
+	public boolean mustDirectlyImport() {
+		int index = content.getSelectedIndex();
+		return fileChoosers.get(index).mustDirectlyImport();
+	}
+	
+	/**
 	 * Initializes the user interface.
 	 */
 	private void initUI() {
