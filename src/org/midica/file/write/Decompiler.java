@@ -266,8 +266,7 @@ public abstract class Decompiler extends Exporter {
 				
 				// open file for writing
 				FileOutputStream fos = new FileOutputStream(file);
-				osw  = new OutputStreamWriter(fos, targetCharset);
-				BufferedWriter writer = new BufferedWriter(osw);
+				osw = new OutputStreamWriter(fos, targetCharset);
 			}
 			BufferedWriter writer = new BufferedWriter(osw);
 			

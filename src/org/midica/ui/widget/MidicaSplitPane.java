@@ -27,8 +27,8 @@ public class MidicaSplitPane extends JSplitPane {
 	/**
 	 * Creates a new split pane.
 	 */
-	public MidicaSplitPane( int orientation ) {
-		super( orientation );
+	public MidicaSplitPane(int orientation) {
+		super(orientation);
 	}
 	
 	/**
@@ -39,9 +39,9 @@ public class MidicaSplitPane extends JSplitPane {
 	 *                         to **1.0** (bottom of right)
 	 */
 	@Override
-	public void setDividerLocation( double dividerLocation ) {
+	public void setDividerLocation(double dividerLocation) {
 		this.dividerLocation = dividerLocation;
-		super.setDividerLocation( dividerLocation );
+		super.setDividerLocation(dividerLocation);
 	}
 	
 	/**
@@ -59,7 +59,7 @@ public class MidicaSplitPane extends JSplitPane {
 			return;
 		
 		// Set the divider location to the remembered value.
-		super.setDividerLocation( dividerLocation );
+		super.setDividerLocation(dividerLocation);
 		firstValidateDone = true;
 	}
 }

@@ -44,7 +44,7 @@ You write your songs in plain text files using the text editor of your choice. M
 - **Loading and playing** MIDI sequences from:
     - MidicaPL files
     - MIDI files
-    - ALDA files (if [ALDA](/alda-lang/alda) is installed)
+    - ALDA files (if [ALDA](https://github.com/alda-lang/alda) is installed)
     - ABC files (if [abcMIDI](https://ifdo.ca/~seymour/runabc/top.html) is installed)
     - LilyPond files (if [LilyPond](https://lilypond.org/) is installed)
 - **Exporting MIDI sequences**

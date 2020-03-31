@@ -376,6 +376,7 @@ public class DecompileConfigController implements WindowListener, DocumentListen
 				String     value     = dcDefaults.get(id);
 				restoreDefaultConfig(id, value, curWidget);
 			}
+			extraGlobalTicks = new TreeSet<Long>();
 		}
 		
 		// save settings
