@@ -382,7 +382,11 @@ public class AldaExporter extends Decompiler {
 		if (restEndTick != null) {
 			String rest = createRest(channel, restEndTick - tick, tick, null)
 				.replaceFirst(" ", ""); // don't need the leading space here
-			content.append("/" + rest);
+			
+			// rest created? - doesn't work if we don't have enough rest ticks
+			if (! "".equals(rest)) {
+				content.append("/" + rest);
+			}
 			chordEndTick = restEndTick;
 		}
 		
