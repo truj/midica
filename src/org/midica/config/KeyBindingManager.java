@@ -683,6 +683,10 @@ public class KeyBindingManager {
 			addTooltip(c, id, Dict.TT_KEY_CBX_TOGGLE);
 		else if (c instanceof JTextField)
 			addTooltip(c, id, Dict.TT_KEY_TXT_FLD_FOCUS);
+		else if (c instanceof JTextArea)
+			addTooltip(c, id, Dict.TT_KEY_TXT_AREA_FOCUS);
+		else if (c instanceof JComboBox<?>)
+			addTooltip(c, id, Dict.TT_KEY_CBX_OPEN);
 		
 		// remember bindings and fill input map
 		rememberTabBindings(id);
@@ -1226,6 +1230,20 @@ public class KeyBindingManager {
 										JTextField fld = (JTextField) comp;
 										if (fld.isFocusable()) {
 											fld.requestFocus();
+										}
+									}
+									else if (comp instanceof JTextArea) {
+										JTextArea area = (JTextArea) comp;
+										if (area.isFocusable()) {
+											area.requestFocus();
+										}
+									}
+									else if (comp instanceof JComboBox<?>) {
+										JComboBox<?> cbx = (JComboBox<?>) comp;
+										if (cbx.isShowing()) {
+											cbx.requestFocus();
+											cbx.showPopup();
+											return;
 										}
 									}
 									

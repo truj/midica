@@ -18,6 +18,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
@@ -80,9 +81,12 @@ public class DecompileConfigView extends JDialog {
 	MidicaButton            btnAddGlobalAtTick;
 	MidicaButton            btnAddGlobalTicks;
 	MidicaButton            btnAllTicks;
-	MidicaButton            btnRestoreDefaults; // use hard-coded default
-	MidicaButton            btnRestore;         // use config from file
-	MidicaButton            btnSave;            // copy session config to config file
+	
+	// other widgets or elements
+	JTabbedPane  tabs;
+	MidicaButton btnRestoreDefaults; // use hard-coded default
+	MidicaButton btnRestore;         // use config from file
+	MidicaButton btnSave;            // copy session config to config file
 	
 	/**
 	 * Creates the window for the decompile configuration.
@@ -147,46 +151,72 @@ public class DecompileConfigView extends JDialog {
 	 * Initializes the content of the window.
 	 */
 	private void init() {
-		Container content = getContentPane();
 		
-		// layout
-		content.setLayout(new GridBagLayout());
+		// create top-level container
+		JPanel content = new JPanel();
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill       = GridBagConstraints.HORIZONTAL;
+		content.setLayout(new GridBagLayout());
+		constraints.fill       = GridBagConstraints.BOTH;
 		constraints.insets     = Laf.INSETS_NWE;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
-		constraints.weightx    = 0;
-		constraints.weighty    = 0;
+		constraints.weightx    = 1;
+		constraints.weighty    = 1;
 		
-		// debug
-		content.add(createDebugArea(), constraints);
+		// create and add tabs
+		tabs = new JTabbedPane(JTabbedPane.LEFT);
+		tabs.add( Dict.get(Dict.DC_TAB_DEBUG),       createDebugArea()      );
+		tabs.add( Dict.get(Dict.DC_TAB_NOTE_LENGTH), createNoteLengthArea() );
+		tabs.add( Dict.get(Dict.DC_TAB_CHORDS),      createChordArea()      );
+		tabs.add( Dict.get(Dict.DC_TAB_KARAOKE),     createKaraokeArea()    );
+		tabs.add( Dict.get(Dict.DC_TAB_SLICE),       createSliceArea()      );
+		content.add(tabs, constraints);
 		
-		// note length calculation
-		constraints.insets = Laf.INSETS_WE;
+		// separator
 		constraints.gridy++;
-		content.add(createNoteLengthArea(), constraints);
+		constraints.weighty = 0;
+		constraints.insets  = Laf.INSETS_ZERO;
+		content.add(Laf.createSeparator(), constraints);
 		
-		// chords
-		constraints.insets = Laf.INSETS_WE;
+		// create and add buttons
 		constraints.gridy++;
-		content.add(createChordArea(), constraints);
+		constraints.weightx = 0;
+		constraints.insets  = Laf.INSETS_SWE;
+		Container buttonArea = createButtonArea();
+		content.add(buttonArea, constraints);
 		
-		// karaoke
-		constraints.insets = Laf.INSETS_WE;
-		constraints.gridy++;
-		content.add(createKaraokeArea(), constraints);
+		add(content);
+	}
+	
+	/**
+	 * Wraps the given content of a tab inside another container.
+	 * This is used to position the tab content correctly inside the tab.
+	 * 
+	 * @param area    the area to be wrapped
+	 * @return the wrapped area.
+	 */
+	private Container wrapTabContent(Container area) {
 		
-		// extra slices
-		constraints.gridy++;
-		content.add(createSliceArea(), constraints);
+		// outer container and layout
+		JPanel content = new JPanel();
+		GridBagConstraints constraints = new GridBagConstraints();
+		content.setLayout(new GridBagLayout());
+		constraints.fill       = GridBagConstraints.NONE;
+		constraints.insets     = Laf.INSETS_ALL;
+		constraints.gridx      = 0;
+		constraints.gridy      = 0;
+		constraints.gridheight = 1;
+		constraints.gridwidth  = 1;
+		constraints.weightx    = 1;
+		constraints.weighty    = 1;
+		constraints.anchor     = GridBagConstraints.NORTHWEST;
 		
-		// buttons
-		constraints.insets = Laf.INSETS_SWE;
-		constraints.gridy++;
-		content.add(createButtonArea(), constraints);
+		// wrap it
+		content.add(area, constraints);
+		
+		return content;
 	}
 	
 	/**
@@ -195,34 +225,33 @@ public class DecompileConfigView extends JDialog {
 	 * @return the created area
 	 */
 	private Container createDebugArea() {
-		JPanel area = new JPanel();
-		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.DC_CAT_DEBUG)) );
 		
 		// layout
+		JPanel area = new JPanel();
 		area.setLayout(new GridBagLayout());
 		GridBagConstraints[] constaints = createConstraintsForArea();
 		GridBagConstraints constrLeft   = constaints[0];
-		GridBagConstraints constrCenter = constaints[1];
-		GridBagConstraints constrRight  = constaints[2];
 		
 		// tick comments
 		cbxAddTickComments.addActionListener(controller);
 		area.add(cbxAddTickComments, constrLeft);
 		
 		// config
+		constrLeft.gridy++;
 		cbxAddConfig.addActionListener(controller);
-		area.add(cbxAddConfig, constrCenter);
+		area.add(cbxAddConfig, constrLeft);
 		
 		// score
+		constrLeft.gridy++;
 		cbxAddScore.addActionListener(controller);
-		area.add(cbxAddScore, constrRight);
+		area.add(cbxAddScore, constrLeft);
 		
 		// statistics
 		constrLeft.gridy++;
 		cbxAddStatistics.addActionListener(controller);
 		area.add(cbxAddStatistics, constrLeft);
 		
-		return area;
+		return wrapTabContent(area);
 	}
 	
 	/**
@@ -231,10 +260,9 @@ public class DecompileConfigView extends JDialog {
 	 * @return the created area
 	 */
 	private Container createNoteLengthArea() {
-		JPanel area = new JPanel();
-		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.DC_CAT_NOTE_LENGTH)) );
 		
 		// layout
+		JPanel area = new JPanel();
 		area.setLayout(new GridBagLayout());
 		GridBagConstraints[] constaints = createConstraintsForArea();
 		GridBagConstraints constrLeft   = constaints[0];
@@ -346,7 +374,7 @@ public class DecompileConfigView extends JDialog {
 		JLabel descMaxTargetOn = new JLabel( Dict.get(Dict.MAX_TARGET_TICKS_NEXT_ON_D) );
 		area.add(descMaxTargetOn, constrRight);
 		
-		return area;
+		return wrapTabContent(area);
 	}
 	
 	/**
@@ -355,10 +383,9 @@ public class DecompileConfigView extends JDialog {
 	 * @return the created area
 	 */
 	private Container createChordArea() {
-		JPanel area = new JPanel();
-		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.DC_CAT_CHORDS)) );
 		
 		// layout
+		JPanel area = new JPanel();
 		area.setLayout(new GridBagLayout());
 		GridBagConstraints[] constaints = createConstraintsForArea();
 		GridBagConstraints constrLeft   = constaints[0];
@@ -434,7 +461,7 @@ public class DecompileConfigView extends JDialog {
 		JLabel descVeloTol = new JLabel( Dict.get(Dict.CHORD_VELOCITY_TOLERANCE_D) );
 		area.add(descVeloTol, constrRight);
 		
-		return area;
+		return wrapTabContent(area);
 	}
 	
 	/**
@@ -443,10 +470,9 @@ public class DecompileConfigView extends JDialog {
 	 * @return the created area
 	 */
 	private Container createKaraokeArea() {
-		JPanel area = new JPanel();
-		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.DC_CAT_KARAOKE)) );
 		
 		// layout
+		JPanel area = new JPanel();
 		area.setLayout(new GridBagLayout());
 		GridBagConstraints[] constaints = createConstraintsForArea();
 		GridBagConstraints constrLeft   = constaints[0];
@@ -486,7 +512,7 @@ public class DecompileConfigView extends JDialog {
 		JLabel descNextOnTol = new JLabel( Dict.get(Dict.KAR_ONE_CHANNEL_D) );
 		area.add(descNextOnTol, constrRight);
 		
-		return area;
+		return wrapTabContent(area);
 	}
 	
 	/**
@@ -495,10 +521,9 @@ public class DecompileConfigView extends JDialog {
 	 * @return the created area
 	 */
 	private Container createSliceArea() {
-		JPanel area = new JPanel();
-		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.DC_CAT_SLICE)) );
 		
 		// layout
+		JPanel area = new JPanel();
 		area.setLayout(new GridBagLayout());
 		GridBagConstraints[] constaints = createConstraintsForArea();
 		GridBagConstraints constrLeft   = constaints[0];
@@ -613,7 +638,7 @@ public class DecompileConfigView extends JDialog {
 		btnAllTicks.addActionListener(controller);
 		area.add(btnAllTicks, constrRight);
 		
-		return area;
+		return wrapTabContent(area);
 	}
 	
 	/**
@@ -712,39 +737,48 @@ public class DecompileConfigView extends JDialog {
 		// close bindings
 		keyBindingManager.addBindingsForClose( Dict.KEY_DC_CONFIG_CLOSE );
 		
-		// text fields
-		keyBindingManager.addBindingsForFocus( fldDurationTickTolerance,  Dict.KEY_DC_TOL_DUR_TICK        );
-		keyBindingManager.addBindingsForFocus( fldDurationRatioTolerance, Dict.KEY_DC_TOL_DUR_RATIO       );
-		keyBindingManager.addBindingsForFocus( fldMinDurToKeep,           Dict.KEY_DC_MIN_DUR_TO_KEEP     );
-		keyBindingManager.addBindingsForFocus( fldNextNoteOnTolerance,    Dict.KEY_DC_TOL_NEXT_ON         );
-		keyBindingManager.addBindingsForFocus( fldMaxTargetTicksOn,       Dict.KEY_DC_MAX_TARGET_TICKS_ON );
-		keyBindingManager.addBindingsForFocus( fldChordNoteOnTolerance,   Dict.KEY_DC_CRD_NOTE_ON         );
-		keyBindingManager.addBindingsForFocus( fldChordNoteOffTolerance,  Dict.KEY_DC_CRD_NOTE_OFF        );
-		keyBindingManager.addBindingsForFocus( fldChordVelocityTolerance, Dict.KEY_DC_CRD_VELOCITY        );
-		keyBindingManager.addBindingsForFocus( fldAddGlobalAtTick,        Dict.KEY_DC_FLD_GLOB_SINGLE     );
-		keyBindingManager.addBindingsForFocus( fldAddGlobalsEachTick,     Dict.KEY_DC_FLD_GLOB_EACH       );
-		keyBindingManager.addBindingsForFocus( fldAddGlobalsStartTick,    Dict.KEY_DC_FLD_GLOB_FROM       );
-		keyBindingManager.addBindingsForFocus( fldAddGlobalsStopTick,     Dict.KEY_DC_FLD_GLOB_TO         );
+		// tab bindings
+		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_TAB_DEBUG,        0 );
+		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_TAB_NOTE_LENGTH,  1 );
+		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_TAB_CHORDS,       2 );
+		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_TAB_KARAOKE,      3 );
+		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_TAB_SLICES,       4 );
 		
-		// text area
-		keyBindingManager.addBindingsForFocus( areaGlobalsStr, Dict.KEY_DC_AREA_GLOB_ALL );
+		// debug tab
+		keyBindingManager.addBindingsForTabLevel3( cbxAddTickComments, Dict.KEY_DC_ADD_TICK_COMMENTS );
+		keyBindingManager.addBindingsForTabLevel3( cbxAddConfig,       Dict.KEY_DC_ADD_CONFIG        );
+		keyBindingManager.addBindingsForTabLevel3( cbxAddScore,        Dict.KEY_DC_ADD_SCORE         );
+		keyBindingManager.addBindingsForTabLevel3( cbxAddStatistics,   Dict.KEY_DC_ADD_STATISTICS    );
 		
-		// combobox
-		keyBindingManager.addBindingsForComboboxOpen( cbxLengthStrategy,    Dict.KEY_DC_NOTE_LENGTH_STRATEGY );
-		keyBindingManager.addBindingsForComboboxOpen( cbxOrphanedSyllables, Dict.KEY_DC_KAR_ORPHANED         );
+		// note length tab
+		keyBindingManager.addBindingsForTabLevel3( cbxLengthStrategy,         Dict.KEY_DC_NOTE_LENGTH_STRATEGY );
+		keyBindingManager.addBindingsForTabLevel3( fldDurationTickTolerance,  Dict.KEY_DC_TOL_DUR_TICK         );
+		keyBindingManager.addBindingsForTabLevel3( fldDurationRatioTolerance, Dict.KEY_DC_TOL_DUR_RATIO        );
+		keyBindingManager.addBindingsForTabLevel3( fldMinDurToKeep,           Dict.KEY_DC_MIN_DUR_TO_KEEP      );
+		keyBindingManager.addBindingsForTabLevel3( fldNextNoteOnTolerance,    Dict.KEY_DC_TOL_NEXT_ON          );
+		keyBindingManager.addBindingsForTabLevel3( fldMaxTargetTicksOn,       Dict.KEY_DC_MAX_TARGET_TICKS_ON  );
 		
-		// checkbox
-		keyBindingManager.addBindingsForCheckbox( cbxAddTickComments,  Dict.KEY_DC_ADD_TICK_COMMENTS );
-		keyBindingManager.addBindingsForCheckbox( cbxAddConfig,        Dict.KEY_DC_ADD_CONFIG        );
-		keyBindingManager.addBindingsForCheckbox( cbxAddScore,         Dict.KEY_DC_ADD_SCORE         );
-		keyBindingManager.addBindingsForCheckbox( cbxAddStatistics,    Dict.KEY_DC_ADD_STATISTICS    );
-		keyBindingManager.addBindingsForCheckbox( cbxKarOneChannel,    Dict.KEY_DC_KAR_ONE_CH        );
-		keyBindingManager.addBindingsForCheckbox( cbxPredefinedChords, Dict.KEY_DC_CRD_PREDEFINED    );
+		// chords tab
+		keyBindingManager.addBindingsForTabLevel3( cbxPredefinedChords,       Dict.KEY_DC_CRD_PREDEFINED );
+		keyBindingManager.addBindingsForTabLevel3( fldChordNoteOnTolerance,   Dict.KEY_DC_CRD_NOTE_ON    );
+		keyBindingManager.addBindingsForTabLevel3( fldChordNoteOffTolerance,  Dict.KEY_DC_CRD_NOTE_OFF   );
+		keyBindingManager.addBindingsForTabLevel3( fldChordVelocityTolerance, Dict.KEY_DC_CRD_VELOCITY   );
 		
-		// buttons
-		keyBindingManager.addBindingsForButton( btnAddGlobalAtTick, Dict.KEY_DC_BTN_GLOB_SINGLE );
-		keyBindingManager.addBindingsForButton( btnAddGlobalTicks,  Dict.KEY_DC_BTN_GLOB_RANGE  );
-		keyBindingManager.addBindingsForButton( btnAllTicks,        Dict.KEY_DC_BTN_GLOB_ALL    );
+		// karaoke tab
+		keyBindingManager.addBindingsForTabLevel3( cbxOrphanedSyllables, Dict.KEY_DC_KAR_ORPHANED );
+		keyBindingManager.addBindingsForTabLevel3( cbxKarOneChannel,     Dict.KEY_DC_KAR_ONE_CH   );
+		
+		// slices
+		keyBindingManager.addBindingsForTabLevel3( fldAddGlobalAtTick,     Dict.KEY_DC_FLD_GLOB_SINGLE );
+		keyBindingManager.addBindingsForTabLevel3( btnAddGlobalAtTick,     Dict.KEY_DC_BTN_GLOB_SINGLE );
+		keyBindingManager.addBindingsForTabLevel3( fldAddGlobalsEachTick,  Dict.KEY_DC_FLD_GLOB_EACH   );
+		keyBindingManager.addBindingsForTabLevel3( fldAddGlobalsStartTick, Dict.KEY_DC_FLD_GLOB_FROM   );
+		keyBindingManager.addBindingsForTabLevel3( fldAddGlobalsStopTick,  Dict.KEY_DC_FLD_GLOB_TO     );
+		keyBindingManager.addBindingsForTabLevel3( btnAddGlobalTicks,      Dict.KEY_DC_BTN_GLOB_RANGE  );
+		keyBindingManager.addBindingsForTabLevel3( areaGlobalsStr,         Dict.KEY_DC_AREA_GLOB_ALL   );
+		keyBindingManager.addBindingsForTabLevel3( btnAllTicks,            Dict.KEY_DC_BTN_GLOB_ALL    );
+		
+		// restore/save buttons
 		keyBindingManager.addBindingsForButton( btnSave,            Dict.KEY_DC_SAVE            );
 		keyBindingManager.addBindingsForButton( btnRestore,         Dict.KEY_DC_RESTORE_SAVED   );
 		keyBindingManager.addBindingsForButton( btnRestoreDefaults, Dict.KEY_DC_RESTORE_DEFAULT );

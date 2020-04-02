@@ -681,6 +681,11 @@ public class Dict {
 	public static final String KEY_FILE_SELECTOR_EXP_MPL    = "key_file_selector_exp_mpl";
 	public static final String KEY_FILE_SELECTOR_EXP_ALDA   = "key_file_selector_exp_alda";
 	public static final String KEY_DC_CONFIG_CLOSE          = "key_dc_config_close";
+	public static final String KEY_DC_TAB_DEBUG             = "key_dc_tab_debug";
+	public static final String KEY_DC_TAB_NOTE_LENGTH       = "key_dc_tab_note_length";
+	public static final String KEY_DC_TAB_CHORDS            = "key_dc_tab_chords";
+	public static final String KEY_DC_TAB_KARAOKE           = "key_dc_tab_karaoke";
+	public static final String KEY_DC_TAB_SLICES            = "key_dc_tab_slices";
 	public static final String KEY_DC_ADD_TICK_COMMENTS     = "key_dc_add_tick_comments";
 	public static final String KEY_DC_ADD_CONFIG            = "key_dc_config";
 	public static final String KEY_DC_ADD_SCORE             = "key_dc_add_score";
@@ -789,11 +794,11 @@ public class Dict {
 	
 	// DecompileConfigView
 	public static final String TITLE_DC_CONFIG              = "title_dc_config";
-	public static final String DC_CAT_DEBUG                 = "dc_cat_debug";
-	public static final String DC_CAT_NOTE_LENGTH           = "dc_cat_note_length";
-	public static final String DC_CAT_CHORDS                = "dc_cat_chords";
-	public static final String DC_CAT_KARAOKE               = "dc_cat_karaoke";
-	public static final String DC_CAT_SLICE                 = "dc_cat_slice";
+	public static final String DC_TAB_DEBUG                 = "dc_tab_debug";
+	public static final String DC_TAB_NOTE_LENGTH           = "dc_tab_note_length";
+	public static final String DC_TAB_CHORDS                = "dc_tab_chords";
+	public static final String DC_TAB_KARAOKE               = "dc_tab_karaoke";
+	public static final String DC_TAB_SLICE                 = "dc_tab_slice";
 	public static final String DC_ADD_TICK_COMMENT          = "dc_add_tick_comment";
 	public static final String DC_ADD_CONFIG                = "dc_add_config";
 	public static final String DC_ADD_SCORE                 = "dc_add_score";
@@ -2019,6 +2024,11 @@ public class Dict {
 		set( KEY_FILE_SELECTOR_EXP_MPL,    "In the EXPORT selector, select the MidicaPL Tab"                             );
 		set( KEY_FILE_SELECTOR_EXP_ALDA,   "In the EXPORT selector, select the ALDA Tab"                                 );
 		set( KEY_DC_CONFIG_CLOSE,          "Close the Decompile Configuration Window"                                    );
+		set( KEY_DC_TAB_DEBUG,             "Select the Debug tab in the decompile config window"                         );
+		set( KEY_DC_TAB_NOTE_LENGTH,       "Select the Note Length tab in the decompile config window"                   );
+		set( KEY_DC_TAB_CHORDS,            "Select the Chords tab in the decompile config window"                        );
+		set( KEY_DC_TAB_KARAOKE,           "Select the Karaoke tab in the decompile config window"                       );
+		set( KEY_DC_TAB_SLICES,            "Select the Extra Slices tab in the decompile config window"                  );
 		set( KEY_DC_ADD_TICK_COMMENTS,     "Toggle Checkbox: Add Tick Comments"                                          );
 		set( KEY_DC_ADD_CONFIG,            "Toggle Checkbox: Add Configuration"                                          );
 		set( KEY_DC_ADD_SCORE,             "Toggle Checkbox: Add Quality Score"                                          );
@@ -2126,11 +2136,11 @@ public class Dict {
 		
 		// DecompileConfigView
 		set( TITLE_DC_CONFIG,              "Midica - Decompilation Settings"                  );
-		set( DC_CAT_DEBUG,                 "Debugging"                                        );
-		set( DC_CAT_NOTE_LENGTH,           "Note Length Calculation"                          );
-		set( DC_CAT_CHORDS,                "Chords"                                           );
-		set( DC_CAT_KARAOKE,               "Karaoke Settings"                                 );
-		set( DC_CAT_SLICE,                 "Extra Global Commands"                            );
+		set( DC_TAB_DEBUG,                 "Debugging"                                        );
+		set( DC_TAB_NOTE_LENGTH,           "Note Length Calculation"                          );
+		set( DC_TAB_CHORDS,                "Chords"                                           );
+		set( DC_TAB_KARAOKE,               "Karaoke Settings"                                 );
+		set( DC_TAB_SLICE,                 "Extra Slices"                                     );
 		set( DC_ADD_TICK_COMMENT,          "Add Tick Comments"                                );
 		set( DC_ADD_CONFIG,                "Add Configuration"                                );
 		set( DC_ADD_SCORE,                 "Add Quality Score"                                );
