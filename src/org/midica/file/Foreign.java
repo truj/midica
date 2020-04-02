@@ -196,6 +196,19 @@ public class Foreign {
 		try {
 			Process process = pb.start();
 			
+			// get STDERR and STDOUT
+			String stdErr = "";
+			String stdOut = "";
+			BufferedReader errReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
+			BufferedReader outReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+			String line;
+			while ((line = errReader.readLine()) != null) {
+				stdErr += line + "<br>";
+			}
+			while ((line = outReader.readLine()) != null) {
+				stdOut += line + "<br>";
+			}
+			
 			try {
 				int exitCode = process.waitFor();
 				
@@ -203,19 +216,6 @@ public class Foreign {
 					return;
 				
 				if (exitCode != 0) {
-					
-					// get STDERR and STDOUT
-					String stdErr = "";
-					String stdOut = "";
-					BufferedReader errReader = new BufferedReader(new InputStreamReader(process.getErrorStream()));
-					BufferedReader outReader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-					String line;
-					while ((line = errReader.readLine()) != null) {
-						stdErr += line + "<br>";
-					}
-					while ((line = outReader.readLine()) != null) {
-						stdOut += line + "<br>";
-					}
 					
 					// get the command string for the error message
 					StringBuilder composedCmd = new StringBuilder(cmd.get(0));
