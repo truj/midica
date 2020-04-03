@@ -33,6 +33,7 @@ import org.midica.file.read.IParser;
 import org.midica.file.read.LilypondImporter;
 import org.midica.file.read.MidiParser;
 import org.midica.file.read.MidicaPLParser;
+import org.midica.file.read.MusescoreImporter;
 import org.midica.file.read.ParseException;
 import org.midica.file.read.SequenceParser;
 import org.midica.file.read.SoundfontParser;
@@ -68,20 +69,21 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	public static final String FILE_PURPOSE_PARSE   = "parse";
 	public static final String FILE_PURPOSE_EXPORT  = "export";
 	
-	private UiView           view                    = null;
-	private FileSelector     importSelector          = null;
-	private FileSelector     soundfontSelector       = null;
-	private FileSelector     exportSelector          = null;
-	private MidicaPLParser   mplParser               = null;
-	private MidiParser       midiParser              = null;
-	private AldaImporter     aldaImporter            = null;
-	private AbcImporter      abcImporter             = null;
-	private LilypondImporter lyImporter              = null;
-	private SoundfontParser  soundfontParser         = null;
-	private PlayerView       player                  = null;
-	private File             currentFile             = null;
-	private String           currentFileType         = null;
-	private String           currentFilePurpose      = FILE_PURPOSE_PARSE;
+	private UiView            view                    = null;
+	private FileSelector      importSelector          = null;
+	private FileSelector      soundfontSelector       = null;
+	private FileSelector      exportSelector          = null;
+	private MidicaPLParser    mplParser               = null;
+	private MidiParser        midiParser              = null;
+	private AldaImporter      aldaImporter            = null;
+	private AbcImporter       abcImporter             = null;
+	private LilypondImporter  lyImporter              = null;
+	private MusescoreImporter mscoreImporter          = null;
+	private SoundfontParser   soundfontParser         = null;
+	private PlayerView        player                  = null;
+	private File              currentFile             = null;
+	private String            currentFileType         = null;
+	private String            currentFilePurpose      = FILE_PURPOSE_PARSE;
 	
 	/**
 	 * Sets up the UI of the main window by initializing the {@link UiView}
@@ -93,6 +95,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		aldaImporter    = new AldaImporter();
 		abcImporter     = new AbcImporter();
 		lyImporter      = new LilypondImporter();
+		mscoreImporter  = new MusescoreImporter();
 		soundfontParser = new SoundfontParser();
 		
 		// initView() must be called after the parsers are created.
@@ -146,6 +149,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	public void soundfontLoadedBySourceCode() {
 		String text = Dict.get(Dict.SF_LOADED_BY_SOURCE);
 		view.getChosenSoundfontFileLbl().setText(text);
+		view.getChosenSoundfontFileLbl().setToolTipText(text);
 	}
 	
 	/**
@@ -218,6 +222,8 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 					player = new PlayerView(view, abcImporter, currentFile);
 				else if (FileSelector.FILE_TYPE_LY.equals(currentFileType))
 					player = new PlayerView(view, lyImporter, currentFile);
+				else if (FileSelector.FILE_TYPE_MSCORE_IMP.equals(currentFileType))
+					player = new PlayerView(view, mscoreImporter, currentFile);
 			}
 			else {
 				showErrorMessage(Dict.get(Dict.ERROR_SEQUENCE_NOT_SET));
@@ -285,6 +291,11 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 				pathConfigKey = Config.PATH_LY;
 				path          = LilypondImporter.getFilePath();
 				typeConfigVal = FileSelector.FILE_TYPE_LY;
+			}
+			else if (FileSelector.FILE_TYPE_MSCORE_IMP.equals(currentFileType)) {
+				pathConfigKey = Config.PATH_MSCORE;
+				path          = MusescoreImporter.getFilePath();
+				typeConfigVal = FileSelector.FILE_TYPE_MSCORE_IMP;
 			}
 		}
 		
@@ -373,6 +384,12 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			selector   = importSelector;
 			waitMsg    = String.format(Dict.get(Dict.WAIT_PARSE_FOREIGN), Dict.get(Dict.FOREIGN_PROG_LY));
 			pathKey    = Config.PATH_LY;
+		}
+		else if (FileSelector.FILE_TYPE_MSCORE_IMP.equals(type)) {
+			parser     = mscoreImporter;
+			selector   = importSelector;
+			waitMsg    = String.format(Dict.get(Dict.WAIT_PARSE_FOREIGN), Dict.get(Dict.FOREIGN_PROG_MSCORE));
+			pathKey    = Config.PATH_MSCORE;
 		}
 		else if (FileSelector.FILE_TYPE_SOUNDFONT.equals(type)) {
 			parser   = soundfontParser;
@@ -571,6 +588,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 				String filename = SequenceParser.getFileName();
 				if (filename != null) {
 					view.getImportedFileLbl().setText(filename);
+					view.getImportedFileLbl().setToolTipText(filename);
 					if (FileSelector.FILE_TYPE_MPL.equals(currentFileType))
 						view.getImportedFileTypeLbl().setText(Dict.get(Dict.IMPORTED_TYPE_MPL));
 					else if (FileSelector.FILE_TYPE_MIDI.equals(currentFileType))
@@ -581,6 +599,8 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 						view.getImportedFileTypeLbl().setText(Dict.get(Dict.IMPORTED_TYPE_ABC));
 					else if (FileSelector.FILE_TYPE_LY.equals(currentFileType))
 						view.getImportedFileTypeLbl().setText(Dict.get(Dict.IMPORTED_TYPE_LY));
+					else if (FileSelector.FILE_TYPE_MSCORE_IMP.equals(currentFileType))
+						view.getImportedFileTypeLbl().setText(Dict.get(Dict.IMPORTED_TYPE_MSCORE));
 				}
 			}
 		});
@@ -618,13 +638,24 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			view.getImportedFileLbl().setText(filename);
 			view.getImportedFileTypeLbl().setText(Dict.get(Dict.IMPORTED_TYPE_LY));
 		}
-		else if (FileSelector.FILE_TYPE_SOUNDFONT.equals(type))
+		else if (FileSelector.FILE_TYPE_MSCORE_IMP.equals(type)) {
+			view.getImportedFileLbl().setText(filename);
+			view.getImportedFileTypeLbl().setText(Dict.get(Dict.IMPORTED_TYPE_MSCORE));
+		}
+		else if (FileSelector.FILE_TYPE_SOUNDFONT.equals(type)) {
 			// show soundfont file
 			view.getChosenSoundfontFileLbl().setText(filename);
+			view.getChosenSoundfontFileLbl().setToolTipText(filename);
+		}
 		
 		// don't display the file type if no file is imported
-		if (notImported)
+		if (notImported) {
 			view.getImportedFileTypeLbl().setText(Dict.get(Dict.UNCHOSEN_FILE));
+			view.getImportedFileLbl().setToolTipText(null);
+		}
+		else {
+			view.getImportedFileLbl().setToolTipText(filename);
+		}
 	}
 	
 	/**
@@ -706,6 +737,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		String aldaPath       = Config.get( Config.PATH_ALDA       );
 		String abcPath        = Config.get( Config.PATH_ABC        );
 		String lyPath         = Config.get( Config.PATH_LY         );
+		String mscorePath     = Config.get( Config.PATH_MSCORE     );
 		String importType     = Config.get( Config.IMPORT_TYPE     );
 		
 		// Wait until Midica.uiController is not null any more.
@@ -738,6 +770,8 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 						parseChosenFile(FileSelector.FILE_TYPE_ABC, new File(abcPath));
 					else if (FileSelector.FILE_TYPE_LY.equals(importType) && ! lyPath.equals(""))
 						parseChosenFile(FileSelector.FILE_TYPE_LY, new File(lyPath));
+					else if (FileSelector.FILE_TYPE_MSCORE_IMP.equals(importType) && ! mscorePath.equals(""))
+						parseChosenFile(FileSelector.FILE_TYPE_MSCORE_IMP, new File(mscorePath));
 				}
 			}
 		}

@@ -33,20 +33,21 @@ public class Cli {
 	public static boolean keepAlive = true;
 	
 	// import/export related fields
-	public  static boolean useSoundfont   = false;
-	public  static boolean isImport       = false;
-	public  static boolean isExport       = false;
-	public  static boolean exportToStdout = false;
-	public  static String  exportErrorMsg = null;
-	private static String  soundfontPath  = null;
-	private static String  importPathMpl  = null;
-	private static String  importPathMidi = null;
-	private static String  importPathAlda = null;
-	private static String  importPathAbc  = null;
-	private static String  importPathLy   = null;
-	private static String  exportPathMpl  = null;
-	private static String  exportPathMidi = null;
-	private static String  exportPathAlda = null;
+	public  static boolean useSoundfont     = false;
+	public  static boolean isImport         = false;
+	public  static boolean isExport         = false;
+	public  static boolean exportToStdout   = false;
+	public  static String  exportErrorMsg   = null;
+	private static String  soundfontPath    = null;
+	private static String  importPathMpl    = null;
+	private static String  importPathMidi   = null;
+	private static String  importPathAlda   = null;
+	private static String  importPathAbc    = null;
+	private static String  importPathLy     = null;
+	private static String  importPathMscore = null;
+	private static String  exportPathMpl    = null;
+	private static String  exportPathMidi   = null;
+	private static String  exportPathAlda   = null;
 	
 	/**
 	 * This class is only used statically so a public constructor is not needed.
@@ -120,6 +121,9 @@ public class Cli {
 					}
 					else if ("import-ly".equals(option)) {
 						importPathLy = path;
+					}
+					else if ("import-mscore".equals(option)) {
+						importPathMscore = path;
 					}
 					else {
 						help(false, "Unknown import format: --" + option);
@@ -224,6 +228,8 @@ public class Cli {
 		msg.append("                        midi2abc. (abcMIDI needs to be installed.)\n");
 		msg.append("--import-ly=PATH      : Import from the specified LilyPond file by calling\n");
 		msg.append("                        lilypond. (LilyPond needs to be installed.)\n");
+		msg.append("--import-mscore=PATH  : Import from the specified file using MuseScore\n");
+		msg.append("                        (MuseScore needs to be installed.)\n");
 		msg.append("--export-midi=PATH    : Export to the specified MIDI file.\n");
 		msg.append("--export=PATH         : Export to the specified MidicaPL file. (*)\n");
 		msg.append("--export-alda=PATH    : Export to the specified ALDA file. (*)\n");
@@ -284,6 +290,10 @@ public class Cli {
 		else if (importPathLy != null) {
 			importPath = importPathLy;
 			importType = FileSelector.FILE_TYPE_LY;
+		}
+		else if (importPathMscore != null) {
+			importPath = importPathMscore;
+			importType = FileSelector.FILE_TYPE_MSCORE_IMP;
 		}
 		else {
 			importPath = null;

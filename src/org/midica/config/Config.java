@@ -62,6 +62,7 @@ public class Config {
 	public static final String DIRECTORY_ALDA        = "directory_alda";
 	public static final String DIRECTORY_ABC         = "directory_abc";
 	public static final String DIRECTORY_LY          = "directory_ly";
+	public static final String DIRECTORY_MSCORE      = "directory_mscore";
 	public static final String DIRECTORY_SF2         = "directory_sf2";
 	public static final String DIRECTORY_EXPORT_MPL  = "directory_export_mpl";
 	public static final String DIRECTORY_EXPORT_MID  = "directory_export_mid";
@@ -72,6 +73,7 @@ public class Config {
 	public static final String PATH_ALDA             = "path_alda";
 	public static final String PATH_ABC              = "path_abc";
 	public static final String PATH_LY               = "path_ly";
+	public static final String PATH_MSCORE           = "path_mscore";
 	public static final String EXEC_PATH_IMP_ALDA    = "exec_path_imp_alda";
 	public static final String EXEC_PATH_IMP_ABC     = "exec_path_imp_abc";
 	public static final String EXEC_PATH_IMP_LY      = "exec_path_imp_ly";
@@ -253,6 +255,7 @@ public class Config {
 		defaults.put( DIRECTORY_ALDA,        homeDir      );
 		defaults.put( DIRECTORY_ABC,         homeDir      );
 		defaults.put( DIRECTORY_LY,          homeDir      );
+		defaults.put( DIRECTORY_MSCORE,      homeDir      );
 		defaults.put( DIRECTORY_SF2,         homeDir      );
 		defaults.put( DIRECTORY_EXPORT_MPL,  homeDir      );
 		defaults.put( DIRECTORY_EXPORT_MID,  homeDir      );
@@ -265,6 +268,7 @@ public class Config {
 		defaults.put( PATH_ALDA,             ""           );
 		defaults.put( PATH_ABC,              ""           );
 		defaults.put( PATH_LY,               ""           );
+		defaults.put( PATH_MSCORE,           ""           );
 		defaults.put( EXEC_PATH_IMP_ALDA,    "alda"       );
 		defaults.put( EXEC_PATH_IMP_ABC,     "abc2midi"   );
 		defaults.put( EXEC_PATH_IMP_LY,      "lilypond"   );
@@ -660,6 +664,10 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_IMP_LY,     KeyEvent.VK_NUMPAD5,  0                          );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_IMP_LY,     KeyEvent.VK_5,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_IMP_LY,     KeyEvent.VK_NUMPAD5,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_IMP_MSCORE, KeyEvent.VK_6,        0                          );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_IMP_MSCORE, KeyEvent.VK_NUMPAD6,  0                          );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_IMP_MSCORE, KeyEvent.VK_6,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_IMP_MSCORE, KeyEvent.VK_NUMPAD6,  InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_MID,    KeyEvent.VK_1,        0                          );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_MID,    KeyEvent.VK_NUMPAD1,  0                          );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_MID,    KeyEvent.VK_1,        InputEvent.CTRL_DOWN_MASK  );

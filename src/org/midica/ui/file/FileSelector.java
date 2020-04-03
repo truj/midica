@@ -40,14 +40,16 @@ public class FileSelector extends JDialog {
 	private static final long serialVersionUID = 1L;
 	
 	// file types (NOT the same as file extensions)
-	public static final String FILE_TYPE_MPL       = "mpl";
-	public static final String FILE_TYPE_ALDA      = "alda";
-	public static final String FILE_TYPE_ABC       = "abc";
-	public static final String FILE_TYPE_MIDI      = "midi";
-	public static final String FILE_TYPE_LY        = "ly";
-	public static final String FILE_TYPE_SOUNDFONT = "sf2";
-	public static final byte   READ                = 1;
-	public static final byte   WRITE               = 2;
+	public static final String FILE_TYPE_MPL        = "mpl";
+	public static final String FILE_TYPE_ALDA       = "alda";
+	public static final String FILE_TYPE_ABC        = "abc";
+	public static final String FILE_TYPE_MIDI       = "midi";
+	public static final String FILE_TYPE_LY         = "ly";
+	public static final String FILE_TYPE_MSCORE_IMP = "mscore_import";
+	public static final String FILE_TYPE_MSCORE_EXP = "mscore_export";
+	public static final String FILE_TYPE_SOUNDFONT  = "sf2";
+	public static final byte   READ                 = 1;
+	public static final byte   WRITE                = 2;
 	
 	private String fileType;
 	private byte   filePurpose;
@@ -150,6 +152,16 @@ public class FileSelector extends JDialog {
 				this
 			));
 			tabs.put(FILE_TYPE_LY, Dict.TAB_LY);
+			
+			fileChoosers.add(new MidicaFileChooser(
+				FILE_TYPE_MSCORE_IMP,
+				filePurpose,
+				Config.get(Config.DIRECTORY_MSCORE),
+				false,
+				Config.EXEC_PATH_IMP_MSCORE,
+				this
+			));
+			tabs.put(FILE_TYPE_MSCORE_IMP, Dict.TAB_MSCORE);
 		}
 		else if (WRITE == this.filePurpose) {
 			fileChoosers.add(new MidicaFileChooser(
@@ -337,6 +349,8 @@ public class FileSelector extends JDialog {
 					Config.set(Config.DIRECTORY_ABC, directory);
 				else if (FILE_TYPE_LY.equals(fileType))
 					Config.set(Config.DIRECTORY_LY, directory);
+				else if (FILE_TYPE_MSCORE_IMP.equals(fileType))
+					Config.set(Config.DIRECTORY_MSCORE, directory);
     			else if (FILE_TYPE_SOUNDFONT.equals(fileType))
     				Config.set(Config.DIRECTORY_SF2, directory);
     		}
@@ -389,11 +403,12 @@ public class FileSelector extends JDialog {
 		// add key binding to choose a tab
 		if (content != null) {
 			if (READ == this.filePurpose) {
-				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_MPL,  0 );
-				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_MID,  1 );
-				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_ALDA, 2 );
-				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_ABC,  3 );
-				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_LY,   4 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_MPL,    0 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_MID,    1 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_ALDA,   2 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_ABC,    3 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_LY,     4 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_MSCORE, 5 );
 			}
 			else {
 				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_MID,  0 );

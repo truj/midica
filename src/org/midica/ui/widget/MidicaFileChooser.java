@@ -312,6 +312,8 @@ public class MidicaFileChooser extends JFileChooser {
 			progName = Dict.get(Dict.FOREIGN_PROG_ABCMIDI);
 		else if (FileSelector.FILE_TYPE_LY.equals(type))
 			progName = Dict.get(Dict.FOREIGN_PROG_LY);
+		else if (FileSelector.FILE_TYPE_MSCORE_IMP.equals(type))
+			progName = Dict.get(Dict.FOREIGN_PROG_MSCORE);
 		else
 			progName = "[[TRANSLATION MISSING, PLEASE REPORT THIS BUG]]";
 		String progDesc = String.format(Dict.get(Dict.FOREIGN_PROG_DESC), progName);
@@ -663,6 +665,9 @@ public class MidicaFileChooser extends JFileChooser {
 		}
 		else if (FileSelector.FILE_TYPE_LY.equals(type)) {
 			Config.set(Config.EXEC_PATH_IMP_LY, path);
+		}
+		else if (FileSelector.FILE_TYPE_MSCORE_IMP.equals(type)) {
+			Config.set(Config.EXEC_PATH_IMP_MSCORE, path);
 		}
 	}
 }

@@ -567,6 +567,7 @@ public class UiView extends JFrame {
 		String soundfontFileName = SoundfontParser.getFileName();
 		if (soundfontFileName != null) {
 			lblChosenSoundfontFile.setText(soundfontFileName);
+			lblChosenSoundfontFile.setToolTipText(soundfontFileName);
 		}
 		
 		return area;

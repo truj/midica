@@ -68,6 +68,41 @@ public class FileExtensionFilter extends FileFilter {
 		else if (FileSelector.FILE_TYPE_LY.equals(type)) {
 			allowedExtensions.add("ly");
 		}
+		else if (FileSelector.FILE_TYPE_MSCORE_IMP.equals(type)) {
+			allowedExtensions.add("mscz");
+			allowedExtensions.add("mscx");
+			allowedExtensions.add("mxl");
+			allowedExtensions.add("musicxml");
+			allowedExtensions.add("xml");
+			allowedExtensions.add("cap");
+			allowedExtensions.add("capx");
+			allowedExtensions.add("ove");
+			allowedExtensions.add("scw");
+			allowedExtensions.add("bww");
+			allowedExtensions.add("gtp");
+			allowedExtensions.add("gp3");
+			allowedExtensions.add("gp4");
+			allowedExtensions.add("gp5");
+			allowedExtensions.add("ptb");
+			// .mid / .midi / .kar : can be imported directly without MuseScore
+			// .sgu                : doesn't contain notes, only chord names
+			// .mgu                : always causes a MuseScore crash
+			// .gpx                : always causes a MuseScore crash
+			// .pdf                : doesn't contain notes, only graphics
+			// .md                 : produces unusable MIDI output
+		}
+		else if (FileSelector.FILE_TYPE_MSCORE_EXP.equals(type)) {
+			allowedExtensions.add("pdf");
+			allowedExtensions.add("png");
+			allowedExtensions.add("svg");
+			allowedExtensions.add("wav");
+			allowedExtensions.add("flac");
+			allowedExtensions.add("ogg");
+			allowedExtensions.add("mp3");
+			allowedExtensions.add("mxl");
+			allowedExtensions.add("musicxml");
+			allowedExtensions.add("mscx");
+		}
 		
 		// init filter patterns
 		patterns  = new ArrayList<Pattern>();

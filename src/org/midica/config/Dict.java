@@ -677,6 +677,7 @@ public class Dict {
 	public static final String KEY_FILE_SELECTOR_IMP_ALDA   = "key_file_selector_imp_alda";
 	public static final String KEY_FILE_SELECTOR_IMP_ABC    = "key_file_selector_imp_abc";
 	public static final String KEY_FILE_SELECTOR_IMP_LY     = "key_file_selector_imp_ly";
+	public static final String KEY_FILE_SELECTOR_IMP_MSCORE = "key_file_selector_imp_mscore";
 	public static final String KEY_FILE_SELECTOR_EXP_MID    = "key_file_selector_exp_mid";
 	public static final String KEY_FILE_SELECTOR_EXP_MPL    = "key_file_selector_exp_mpl";
 	public static final String KEY_FILE_SELECTOR_EXP_ALDA   = "key_file_selector_exp_alda";
@@ -744,6 +745,7 @@ public class Dict {
 	public static final String IMPORTED_TYPE_ALDA          = "imported_type_alda";
 	public static final String IMPORTED_TYPE_ABC           = "imported_type_abc";
 	public static final String IMPORTED_TYPE_LY            = "imported_type_ly";
+	public static final String IMPORTED_TYPE_MSCORE        = "imported_type_mscore";
 	public static final String SOUNDFONT                   = "soundfont";
 	public static final String CURRENT_SOUNDFONT           = "current_soundfont";
 	public static final String REMEMBER_SF                 = "remember_sf";
@@ -769,6 +771,7 @@ public class Dict {
 	public static final String TAB_ALDA                    = "tab_alda";
 	public static final String TAB_ABC                     = "tab_abc";
 	public static final String TAB_LY                      = "tab_ly";
+	public static final String TAB_MSCORE                  = "tab_mscore";
 	public static final String CHARSET                     = "charset";
 	public static final String CHARSET_DESC_MPL_READ       = "charset_desc_mpl_read";
 	public static final String CHARSET_DESC_MID_READ       = "charset_desc_mid_read";
@@ -2020,6 +2023,7 @@ public class Dict {
 		set( KEY_FILE_SELECTOR_IMP_ALDA,   "In the IMPORT selector, select the ALDA Tab"                                 );
 		set( KEY_FILE_SELECTOR_IMP_ABC,    "In the IMPORT selector, select the ABC Tab"                                  );
 		set( KEY_FILE_SELECTOR_IMP_LY,     "In the IMPORT selector, select the LilyPond Tab"                             );
+		set( KEY_FILE_SELECTOR_IMP_MSCORE, "In the IMPORT selector, select the MuscScore Tab"                            );
 		set( KEY_FILE_SELECTOR_EXP_MID,    "In the EXPORT selector, select the MIDI Tab"                                 );
 		set( KEY_FILE_SELECTOR_EXP_MPL,    "In the EXPORT selector, select the MidicaPL Tab"                             );
 		set( KEY_FILE_SELECTOR_EXP_ALDA,   "In the EXPORT selector, select the ALDA Tab"                                 );
@@ -2082,6 +2086,7 @@ public class Dict {
 		set( IMPORTED_TYPE_ALDA,           "ALDA"                          );
 		set( IMPORTED_TYPE_ABC,            "ABC"                           );
 		set( IMPORTED_TYPE_LY,             "LilyPond"                      );
+		set( IMPORTED_TYPE_MSCORE,         "Imported by MuseScore"         );
 		set( UNKNOWN_NOTE_NAME,            "unknown"                       );
 		set( UNKNOWN_PERCUSSION_NAME,      "unknown"                       );
 		set( UNKNOWN_DRUMKIT_NAME,         "unknown"                       );
@@ -2111,6 +2116,7 @@ public class Dict {
 		set( TAB_ALDA,                 "ALDA"                                                 );
 		set( TAB_ABC,                  "ABC"                                                  );
 		set( TAB_LY,                   "LilyPond"                                             );
+		set( TAB_MSCORE,               "MuseScore"                                            );
 		set( CHARSET,                  "Charset"                                              );
 		set( CHARSET_DESC_MPL_READ,    "Encoding of the source file:"                         );
 		set( CHARSET_DESC_MID_READ,    "Default encoding of text-based messages in the source file. Used if neither a BOM nor a {@...} tag is found:" );
@@ -3218,6 +3224,7 @@ public class Dict {
 		set( IMPORTED_TYPE_ALDA,                     "ALDA"                                  );
 		set( IMPORTED_TYPE_ABC,                      "ABC"                                   );
 		set( IMPORTED_TYPE_LY,                       "LilyPond"                              );
+		set( IMPORTED_TYPE_MSCORE,                   "Von MuseScore importiert"              );
 		set( UNKNOWN_NOTE_NAME,                      "unbekannt"                             );
 		set( UNKNOWN_PERCUSSION_NAME,                "unbekannt"                             );
 		set( UNKNOWN_DRUMKIT_NAME,                   "unbekannt"                             );

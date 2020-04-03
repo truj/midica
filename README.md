@@ -15,11 +15,12 @@
 Midica is an interpreter for a Music Programming Language.
 It translates source code to MIDI.
 
-But it can also be used as a MIDI Player, MIDI compiler, MIDI decompiler, Karaoke Player, ALDA player,
-ABC player, LilyPond Player or a MIDI File Analyzer.
+But it can also be used as a MIDI Player, MIDI compiler or decompiler, Karaoke Player, ALDA Player,
+ABC Player, LilyPond Player or a MIDI File Analyzer.
 
-You write music with the easy-to-learn programming language "MidicaPL".  
-You can use the same techniques like in regular programming, like:
+You write music with one of the supported languages (MidicaPL, ALDA or ABC).  
+
+The built-in music programming language MidicaPL supports the same techniques as regular programming languages, like:
 
 - Variables and Constants
 - Functions
@@ -28,16 +29,22 @@ You can use the same techniques like in regular programming, like:
 - Including Libraries
 - Code Comments
 
-You write your songs in plain text files using the text editor of your choice. Midica transforms these files into MIDI.
+You write your songs in plain text files using the text editor of your choice. Midica converts these files into MIDI or plays them directly.
 
 # Get started
-- Install Java Runtume Environment (JRE) version 1.7 or higher.
-- Download the file `midica-VERSION.jar`.
-- Start Midica using the command: `java -jar midica-VERSION.jar`
-- Download one of the [example files](examples/) or create your own file and save it with the file extension `.midica`.
-- In the Midica application, load this file by pressing the upper right button `select file`.
-- Switch to the MidicaPL tab (it's the default tab) and choose this file.
-- Press the button `Start Player` and play the sequence
+1. Install Java Runtume Environment (JRE) version 1.7 or higher.
+2. Download the file `midica-VERSION.jar`.
+3. Start Midica using the command: `java -jar midica-VERSION.jar`
+4. Download one of the [example files](examples/) or create your own file and save it with the file extension `.midica`.
+5. In the Midica application, load this file by pressing the upper right button `select file`.
+6. Switch to the MidicaPL tab (it's the default tab) and choose this file.
+7. Press the button `Start Player` and play the sequence
+
+If you prefer to write your music in ALDA or ABC, you need to:
+
+- Install [ALDA](https://github.com/alda-lang/alda) or [abcMIDI](https://ifdo.ca/~seymour/runabc/top.html)
+- In Step 4: Download an [ALDA example](https://github.com/alda-lang/alda-core/tree/master/examples) or [ABC example](https://abcnotation.com/search) or create your own file with the extension `.alda` or `.abc`.
+- In Step 6: Switch to the ALDA or ABC tab (any maybe adjust the program path).
 
 # Features of the Midica Application itself
 
@@ -47,6 +54,7 @@ You write your songs in plain text files using the text editor of your choice. M
     - ALDA files (if [ALDA](https://github.com/alda-lang/alda) is installed)
     - ABC files (if [abcMIDI](https://ifdo.ca/~seymour/runabc/top.html) is installed)
     - LilyPond files (if [LilyPond](https://lilypond.org/) is installed)
+    - MusicXML, MuseScore, Guitar Pro, Capella, Bagpipe Music Writer, Sonicscores (Overture / Score Writer), PowerTab (if [MuseScore](https://musescore.org/) is installed)
 - **Exporting MIDI sequences**
     - As MIDI files
     - As MidicaPL files (experimental)
@@ -57,11 +65,14 @@ You write your songs in plain text files using the text editor of your choice. M
     - Channel Overview (showing current instrument and channel activity)
     - Channel Detail viewer (Note name and number, volume and tick, channel by channel)
     - Channel configuration (Volume, Mute and Solo configurable channel by channel)
-    - Quick reloading and reparsing of a loaded MidicaPL script
+    - Quick reloading and reparsing of a loaded file
 - **Karaoke Player**
     - Integrated as a part of the MIDI player
     - displaying syllables in different colors for future and past
     - displaying syllables in italic, shortly before they must be sung
+- **Converter**
+    - converts various formats to MIDI (MidicaPL, ALDA, ABC, LilyPond, MusicXML, MuseScore, Guitar Pro, Capella, Bagpipe, Overture, Score Writer, PowerTab)
+    - converts MIDI to various formats (MidicaPL, ALDA)
 - **Soundfonts**
     - Loading Soundfonts and using them for playback
     - Analyzing Soundfont contents
@@ -91,7 +102,7 @@ The third one shows the player in Karaoke mode.
 
 # Programming with Midica
 
-Midica has its own Music Programming Language: MidicaPL.
+Midica has its own Music Programming Language: MidicaPL. But alternatively you can also code in [ALDA](https://github.com/alda-lang/alda/blob/master/doc/index.md) or [ABC](https://abcnotation.com/learn).
 
 You can find a MidicaPL tutorial here:
 
@@ -179,6 +190,8 @@ ARGUMENTS:
                         midi2abc. (abcMIDI needs to be installed.)
 --import-ly=PATH      : Import from the specified LilyPond file by calling
                         lilypond. (LilyPond needs to be installed.)
+--import-mscore=PATH  : Import from the specified file using MuseScore
+                        (MuseScore needs to be installed.)
 --export-midi=PATH    : Export to the specified MIDI file.
 --export=PATH         : Export to the specified MidicaPL file. (*)
 --export-alda=PATH    : Export to the specified ALDA file. (*)
