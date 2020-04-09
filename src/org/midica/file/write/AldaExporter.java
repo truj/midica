@@ -673,41 +673,6 @@ public class AldaExporter extends Decompiler {
 	}
 	
 	/**
-	 * Calculates which tick length corresponds to which rest length.
-	 * 
-	 * Creates the same structure as {@link #initNoteLengths()} but adds
-	 * a few shorter lengths as well.
-	 * 
-	 * This is needed because rests should be less tolerant than notes.
-	 * 
-	 * This enables us to use more common lengths for notes but let the
-	 * exported sequence be still as close as possible to the original one.
-	 * 
-	 * @return Mapping between tick length and rest length for the syntax.
-	 */
-	public TreeMap<Long, String> initRestLengths() {
-		TreeMap<Long, String> restLength = (TreeMap<Long, String>) noteLength.clone();
-		
-		// 1/64
-		long length64 = calculateTicks(1, 16);
-		restLength.put(length64, 64 + "");
-		
-		// 1/128
-		long length128 = calculateTicks(1, 32);
-		restLength.put(length128, 128 + "");
-		
-		// 1/256
-		long length256 = calculateTicks(1, 64);
-		restLength.put(length256, 256 + "");
-		
-		// 1/512
-		long length512 = calculateTicks(1, 128);
-		restLength.put(length512, 512 + "");
-		
-		return restLength;
-	}
-	
-	/**
 	 * Initializes all possible MIDI instrument numbers with an ALDA instrument name.
 	 */
 	private void initInstrumentNames() {
