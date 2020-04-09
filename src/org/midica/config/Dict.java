@@ -685,6 +685,7 @@ public class Dict {
 	public static final String KEY_DC_TAB_DEBUG             = "key_dc_tab_debug";
 	public static final String KEY_DC_TAB_NOTE_LENGTH       = "key_dc_tab_note_length";
 	public static final String KEY_DC_TAB_CHORDS            = "key_dc_tab_chords";
+	public static final String KEY_DC_TAB_NOTE_REST         = "key_dc_tab_note_rest";
 	public static final String KEY_DC_TAB_KARAOKE           = "key_dc_tab_karaoke";
 	public static final String KEY_DC_TAB_SLICES            = "key_dc_tab_slices";
 	public static final String KEY_DC_ADD_TICK_COMMENTS     = "key_dc_add_tick_comments";
@@ -692,15 +693,19 @@ public class Dict {
 	public static final String KEY_DC_ADD_SCORE             = "key_dc_add_score";
 	public static final String KEY_DC_ADD_STATISTICS        = "key_dc_add_statistics";
 	public static final String KEY_DC_NOTE_LENGTH_STRATEGY  = "key_dc_note_length_strategy";
+	public static final String KEY_DC_MAX_TARGET_TICKS_ON   = "key_dc_max_target_ticks_on";
+	public static final String KEY_DC_TOL_NEXT_ON           = "key_dc_tol_next_on";
+	public static final String KEY_DC_MIN_DUR_TO_KEEP       = "key_dc_min_dur_to_keep";
 	public static final String KEY_DC_TOL_DUR_TICK          = "key_dc_tol_dur_tick";
 	public static final String KEY_DC_TOL_DUR_RATIO         = "key_dc_tol_dur_ratio";
-	public static final String KEY_DC_MIN_DUR_TO_KEEP       = "key_dc_min_dur_to_keep";
-	public static final String KEY_DC_TOL_NEXT_ON           = "key_dc_tol_next_on";
-	public static final String KEY_DC_MAX_TARGET_TICKS_ON   = "key_dc_max_target_ticks_on";
 	public static final String KEY_DC_CRD_PREDEFINED        = "key_dc_crd_predefined";
 	public static final String KEY_DC_CRD_NOTE_ON           = "key_dc_crd_note_on";
 	public static final String KEY_DC_CRD_NOTE_OFF          = "key_dc_crd_note_off";
 	public static final String KEY_DC_CRD_VELOCITY          = "key_dc_crd_velocity";
+	public static final String KEY_DC_USE_DOT_NOTES         = "key_dc_use_dot_notes";
+	public static final String KEY_DC_USE_DOT_RESTS         = "key_dc_use_dot_rests";
+	public static final String KEY_DC_USE_TRIP_NOTES        = "key_dc_use_trip_notes";
+	public static final String KEY_DC_USE_TRIP_RESTS        = "key_dc_use_trip_rests";
 	public static final String KEY_DC_KAR_ORPHANED          = "key_dc_kar_orphaned";
 	public static final String KEY_DC_KAR_ONE_CH            = "key_dc_kar_one_ch";
 	public static final String KEY_DC_FLD_GLOB_SINGLE       = "key_dc_fld_glob_single";
@@ -800,24 +805,29 @@ public class Dict {
 	public static final String DC_TAB_DEBUG                 = "dc_tab_debug";
 	public static final String DC_TAB_NOTE_LENGTH           = "dc_tab_note_length";
 	public static final String DC_TAB_CHORDS                = "dc_tab_chords";
+	public static final String DC_TAB_NOTE_REST             = "dc_tab_note_rest";
 	public static final String DC_TAB_KARAOKE               = "dc_tab_karaoke";
 	public static final String DC_TAB_SLICE                 = "dc_tab_slice";
+	public static final String DC_TABINFO_DEBUG             = "dc_tabinfo_debug";
+	public static final String DC_TABINFO_NOTE_LENGTH       = "dc_tabinfo_note_length";
+	public static final String DC_TABINFO_CHORDS            = "dc_tabinfo_chords";
+	public static final String DC_TABINFO_NOTE_REST         = "dc_tabinfo_note_rest";
+	public static final String DC_TABINFO_KARAOKE           = "dc_tabinfo_karaoke";
+	public static final String DC_TABINFO_SLICE             = "dc_tabinfo_slice";
 	public static final String DC_ADD_TICK_COMMENT          = "dc_add_tick_comment";
 	public static final String DC_ADD_CONFIG                = "dc_add_config";
 	public static final String DC_ADD_SCORE                 = "dc_add_score";
 	public static final String DC_ADD_STATISTICS            = "dc_add_statistics";
 	public static final String NOTE_LENGTH_STRATEGY         = "note_length_strategy";
-	public static final String NOTE_LENGTH_STRATEGY_D       = "note_length_strategy_d";
+	public static final String MAX_TARGET_TICKS_NEXT_ON     = "max_target_ticks_next_on";
+	public static final String NEXT_NOTE_ON_TOLERANCE       = "next_note_on_tolerance";
+	public static final String NEXT_NOTE_ON_TOLERANCE_D     = "next_note_on_tolerance_d";
+	public static final String MIN_DURATION_TO_KEEP         = "min_duration_to_keep";
+	public static final String MIN_DURATION_TO_KEEP_D       = "min_duration_to_keep_d";
 	public static final String DURATION_TICK_TOLERANCE      = "duration_tick_tolerance";
 	public static final String DURATION_TICK_TOLERANCE_D    = "duration_tick_tolerance_d";
 	public static final String DURATION_RATIO_TOLERANCE     = "duration_ratio_tolerance";
 	public static final String DURATION_RATIO_TOLERANCE_D   = "duration_ratio_tolerance_d";
-	public static final String MIN_DURATION_TO_KEEP         = "min_duration_to_keep";
-	public static final String MIN_DURATION_TO_KEEP_D       = "min_duration_to_keep_d";
-	public static final String NEXT_NOTE_ON_TOLERANCE       = "next_note_on_tolerance";
-	public static final String NEXT_NOTE_ON_TOLERANCE_D     = "next_note_on_tolerance_d";
-	public static final String MAX_TARGET_TICKS_NEXT_ON     = "max_target_ticks_next_on";
-	public static final String MAX_TARGET_TICKS_NEXT_ON_D   = "max_target_ticks_next_on_d";
 	public static final String USE_PRE_DEFINED_CHORDS       = "use_pre_defined_chords";
 	public static final String USE_PRE_DEFINED_CHORDS_D     = "use_pre_defined_chords_d";
 	public static final String CHORD_NOTE_ON_TOLERANCE      = "chord_note_on_tolerance";
@@ -826,6 +836,10 @@ public class Dict {
 	public static final String CHORD_NOTE_OFF_TOLERANCE_D   = "chord_note_off_tolerance_d";
 	public static final String CHORD_VELOCITY_TOLERANCE     = "chord_velocity_tolerance";
 	public static final String CHORD_VELOCITY_TOLERANCE_D   = "chord_velocity_tolerance_d";
+	public static final String USE_DOTTED_NOTES             = "use_dotted_notes";
+	public static final String USE_DOTTED_RESTS             = "use_dotted_rests";
+	public static final String USE_TRIPLETTED_NOTES         = "use_tripletted_notes";
+	public static final String USE_TRIPLETTED_RESTS         = "use_tripletted_rests";
 	public static final String ORPHANED_SYLLABLES           = "orphaned_syllables";
 	public static final String ORPHANED_SYLLABLES_D         = "orphaned_syllables_d";
 	public static final String DC_INLINE                    = "dc_inline";
@@ -848,6 +862,8 @@ public class Dict {
 	public static final String DC_RESTORE                   = "dc_restore";
 	public static final String DC_RESTORE_DEFAULTS          = "dc_restore_defaults";
 	public static final String DC_SAVE                      = "dc_save";
+	public static final String CHANGED_IN_CONF_FILE         = "changed_in_conf_file";
+	public static final String TICKS_FOR_TARGET_PPQ         = "ticks_for_target_ppq";
 	
 	// InfoView
 	public static final String TITLE_INFO_VIEW             = "title_info_view";
@@ -2031,6 +2047,7 @@ public class Dict {
 		set( KEY_DC_TAB_DEBUG,             "Select the Debug tab in the decompile config window"                         );
 		set( KEY_DC_TAB_NOTE_LENGTH,       "Select the Note Length tab in the decompile config window"                   );
 		set( KEY_DC_TAB_CHORDS,            "Select the Chords tab in the decompile config window"                        );
+		set( KEY_DC_TAB_NOTE_REST,         "Select the Notes/Rests tab in the decompile config window"                   );
 		set( KEY_DC_TAB_KARAOKE,           "Select the Karaoke tab in the decompile config window"                       );
 		set( KEY_DC_TAB_SLICES,            "Select the Extra Slices tab in the decompile config window"                  );
 		set( KEY_DC_ADD_TICK_COMMENTS,     "Toggle Checkbox: Add Tick Comments"                                          );
@@ -2038,24 +2055,28 @@ public class Dict {
 		set( KEY_DC_ADD_SCORE,             "Toggle Checkbox: Add Quality Score"                                          );
 		set( KEY_DC_ADD_STATISTICS,        "Toggle Checkbox: Add Statistics"                                             );
 		set( KEY_DC_NOTE_LENGTH_STRATEGY,  "Open Selection: Note Length Strategy"                                        );
+		set( KEY_DC_MAX_TARGET_TICKS_ON,   "Focus the text field for the Max target ticks"                               );
+		set( KEY_DC_TOL_NEXT_ON,           "Focus the text field for the Next Note-ON Tolerance"                         );
+		set( KEY_DC_MIN_DUR_TO_KEEP,       "Focus the text field for the Min Duration to keep"                           );
 		set( KEY_DC_TOL_DUR_TICK,          "Focus the text field for the Duration Tick Tolerance"                        );
 		set( KEY_DC_TOL_DUR_RATIO,         "Focus the text field for the Duration Ratio Tolerance"                       );
-		set( KEY_DC_MIN_DUR_TO_KEEP,       "Focus the text field for the Min Duration to keep"                           );
-		set( KEY_DC_TOL_NEXT_ON,           "Focus the text field for the Next Note-ON Tolerance"                         );
-		set( KEY_DC_MAX_TARGET_TICKS_ON,   "Focus the text field for the Max target ticks"                               );
 		set( KEY_DC_CRD_PREDEFINED,        "Toggle Checkbox: Use Predefined Chords"                                      );
-		set( KEY_DC_CRD_NOTE_ON,           "Focus the text field for the chord Note-ON tolerance"                        );
-		set( KEY_DC_CRD_NOTE_OFF,          "Focus the text field for the chord Note-OFF tolerance"                       );
+		set( KEY_DC_CRD_NOTE_ON,           "Focus the text field for the chord Note-ON tick tolerance"                   );
+		set( KEY_DC_CRD_NOTE_OFF,          "Focus the text field for the chord Note-OFF tick tolerance"                  );
 		set( KEY_DC_CRD_VELOCITY,          "Focus the text field for the chord velocity tolerance"                       );
+		set( KEY_DC_USE_DOT_NOTES,         "Toggle Checkbox: Use dotted notes"                                           );
+		set( KEY_DC_USE_DOT_RESTS,         "Toggle Checkbox: Use dotted rests"                                           );
+		set( KEY_DC_USE_TRIP_NOTES,        "Toggle Checkbox: Use tripletted notes"                                       );
+		set( KEY_DC_USE_TRIP_RESTS,        "Toggle Checkbox: Use tripletted rests"                                       );
 		set( KEY_DC_KAR_ORPHANED,          "Open Orphaned Syllables Selection"                                           );
 		set( KEY_DC_KAR_ONE_CH,            "Toggle Checkbox: All Lyrics in One Channel"                                  );
-		set( KEY_DC_FLD_GLOB_SINGLE,       "Focus text field: Add one global cmd at tick..."                             );
+		set( KEY_DC_FLD_GLOB_SINGLE,       "Focus text field: Add one split at tick..."                                  );
 		set( KEY_DC_BTN_GLOB_SINGLE,       "Press Button: Add Single Tick"                                               );
-		set( KEY_DC_FLD_GLOB_EACH,         "Focus text field: Add many global commands (distance)"                       );
-		set( KEY_DC_FLD_GLOB_FROM,         "Focus text field: Add many global commands (from)"                           );
-		set( KEY_DC_FLD_GLOB_TO,           "Focus text field: Add many global commands (to)"                             );
-		set( KEY_DC_BTN_GLOB_RANGE,        "Press Button: Add many global commands"                                      );
-		set( KEY_DC_AREA_GLOB_ALL,         "Focus text area: All Global Command Ticks"                                   );
+		set( KEY_DC_FLD_GLOB_EACH,         "Focus text field: Add many splits (distance)"                                );
+		set( KEY_DC_FLD_GLOB_FROM,         "Focus text field: Add many splits (from)"                                    );
+		set( KEY_DC_FLD_GLOB_TO,           "Focus text field: Add many splits (to)"                                      );
+		set( KEY_DC_BTN_GLOB_RANGE,        "Press Button: Add many splits"                                               );
+		set( KEY_DC_AREA_GLOB_ALL,         "Focus text area: Edit Extra Split Ticks Directly"                            );
 		set( KEY_DC_BTN_GLOB_ALL,          "Press Button: Update Ticks"                                                  );
 		set( KEY_DC_RESTORE_SAVED,         "Press the button to restore saved decompile config"                          );
 		set( KEY_DC_RESTORE_DEFAULT,       "Press the button to restore default decompile config"                        );
@@ -2145,45 +2166,78 @@ public class Dict {
 		set( DC_TAB_DEBUG,                 "Debugging"                                        );
 		set( DC_TAB_NOTE_LENGTH,           "Note Length Calculation"                          );
 		set( DC_TAB_CHORDS,                "Chords"                                           );
+		set( DC_TAB_NOTE_REST,             "Notes / Rests"                                    );
 		set( DC_TAB_KARAOKE,               "Karaoke Settings"                                 );
 		set( DC_TAB_SLICE,                 "Extra Slices"                                     );
+		set( DC_TABINFO_DEBUG,             "<html>Settings to control additional debugging information that's added as code comments in the target file."
+		                                 + "<br>The resulting MIDI sequence is not affected by these settings." );
+		set( DC_TABINFO_NOTE_LENGTH,       "<html>Settings to control how a note length is calculated. Therefore the following strategies can be used:"
+		                                 + "<br><b>&mdash; Next ON:</b> Adjusts the note length so that it ends as late as possible before the following note begins."
+		                                 + "<br><b>&mdash; Duration*:</b> Tries to avoid a duration change, if possible. The note length is adjusted as close as possible to the previous note's duration."
+		                                 + "<br><b>&mdash; Press length:</b> Uses the press length (Note-ON to Note-OFF) and chooses the lowest possible length with at least this number of ticks."
+		                                 + "<br>The priority combobox configures which strategy to prefer if more than one is possible."
+		                                 + "<br>The other fields can be used to fine-tune the <b>Next ON</b> and <b>Duration</b> strategy."
+		                                 + "<br><b>*</b> In ALDA the duration is called 'quantization'" );
+		set( DC_TABINFO_CHORDS,            "<html>Settings to control chords."
+		                                 + "<br>Pre-defined chords are only used for MidicaPL, otherwise ignored."
+		                                 + "<br>The other settings control how different the properties of two notes can be to be still regarded as a part of the same chord." );
+		set( DC_TABINFO_NOTE_REST,         "<html>Settings to control which note or rest lengths to use" );
+		set( DC_TABINFO_KARAOKE,           "<html>Karaoke-related settings. Only used by the MidicaPL decompiler. Otherwise ignored."
+		                                 + "<br><br>Orphaned Syllables are always implemented as an option of a rest."
+		                                 + "<br>This rest can either be between the other notes (inline)"
+		                                 + "<br>or in a block at the slice's beginning, consisting only of rests."
+		                                 + "<br><b>Inline</b> is more accurate and keeps the lyrics more or less together. But it causes more 'multiple' parameters and rests."
+		                                 + "<br><b>Block</b> produces cleaner code regarding the notes. But the placement of the lyrics is less precise."
+		                                 + "<br>inside the sequence of normal notes."
+		                                 + "<br><br>Using only one channel for all the lyrics makes the code more readable."
+		                                 + "<br>But it could result in more orphaned syllables and so more rests and/or 'multiple' options are needed." );
+		set( DC_TABINFO_SLICE,             "<html>Settings to add extra slices."
+		                                 + "<br>By default the sequence is split into slices in each tick that contains certain META messages."
+		                                 + "<br>Here you can add extra splitting for certain ticks." );
 		set( DC_ADD_TICK_COMMENT,          "Add Tick Comments"                                );
 		set( DC_ADD_CONFIG,                "Add Configuration"                                );
 		set( DC_ADD_SCORE,                 "Add Quality Score"                                );
 		set( DC_ADD_STATISTICS,            "Add Quality Statistics"                           );
 		set( NOTE_LENGTH_STRATEGY,         "Priority of strategies"                           );
-		set( NOTE_LENGTH_STRATEGY_D,       "Which strategy to prefer, if possible"            );
-		set( DURATION_TICK_TOLERANCE,      "Duration Tick Tolerance"                          );
-		set( DURATION_TICK_TOLERANCE_D,    "Tolerance in Ticks for keeping a note's duration" );
-		set( DURATION_RATIO_TOLERANCE,     "Duration Ratio Tolerance"                         );
-		set( DURATION_RATIO_TOLERANCE_D,   "Tolerance fraction for keeping a note's duration" );
-		set( MIN_DURATION_TO_KEEP,         "Min Duration to keep"                             );
-		set( MIN_DURATION_TO_KEEP_D,       "Minimum Duration for using the duration strategy" );
-		set( NEXT_NOTE_ON_TOLERANCE,       "Next Note-ON Tolerance"                           );
-		set( NEXT_NOTE_ON_TOLERANCE_D,     "Tolerance in ticks to find out if the strategy 'next note-on' can be used" );
-		set( MAX_TARGET_TICKS_NEXT_ON,     "Max length ticks for Next-ON"                     );
-		set( MAX_TARGET_TICKS_NEXT_ON_D,   "Max note length in target ticks for using the Next-ON strategy" );
-		set( USE_PRE_DEFINED_CHORDS,       "Pre-defined Chords"                                    );
-		set( USE_PRE_DEFINED_CHORDS_D,     "Use Pre-defined Chords (instead of inline chords)"     );
-		set( CHORD_NOTE_ON_TOLERANCE,      "Note-ON tolerance"                                     );
-		set( CHORD_NOTE_ON_TOLERANCE_D,    "Note-ON tolerance (to be regarded as the same chord)"  );
-		set( CHORD_NOTE_OFF_TOLERANCE,     "Note-OFF tolerance"                                    );
-		set( CHORD_NOTE_OFF_TOLERANCE_D,   "Note-OFF tolerance (to be regarded as the same chord)" );
-		set( CHORD_VELOCITY_TOLERANCE,     "Velocity tolerance"                                    );
-		set( CHORD_VELOCITY_TOLERANCE_D,   "Velocity difference still regarded as the same chord"  );
+		set( MAX_TARGET_TICKS_NEXT_ON,     "<html>Maximum note length for<br>the 'Next ON' strategy" );
+		set( NEXT_NOTE_ON_TOLERANCE,       "Next Note-ON Tolerance" );
+		set( NEXT_NOTE_ON_TOLERANCE_D,     "<html>If the length, calculated with the <b>Next ON</b> strategy, is so many ticks longer"
+		                                 + "<br>than a note length <b>L</b>, then <b>L</b> is still used instead of the next longer note length." );
+		set( MIN_DURATION_TO_KEEP,         "Minimum Duration to keep" );
+		set( MIN_DURATION_TO_KEEP_D,       "<html>Minimum Duration for using the duration strategy."
+		                                 + "<br>1.0 = 100%; &nbsp; 0.1 = 10%; &nbsp; 0.01 = 1%" );
+		set( DURATION_TICK_TOLERANCE,      "Duration Tick Tolerance" );
+		set( DURATION_TICK_TOLERANCE_D,    "<html>If the length, calculated with the <b>Duration</b> strategy, is so many ticks longer"
+		                                 + "<br>than a note length <b>L</b>, then <b>L</b> is still used instead of the next longer note length." );
+		set( DURATION_RATIO_TOLERANCE,     "Duration Ratio Tolerance" );
+		set( DURATION_RATIO_TOLERANCE_D,   "<html>The duration is not changed, if the difference between the old duration and the"
+		                                 + "<br>duration calculated with the <b>Duration</b> strategy is smaller than this value."
+		                                 + "<br>0.1 = 10%; &nbsp; 0.01 = 1%; &nbsp; 0.001 = 0.1%" );
+		set( USE_PRE_DEFINED_CHORDS,       "Pre-defined Chords"                                                        );
+		set( USE_PRE_DEFINED_CHORDS_D,     "Use Pre-defined Chords (instead of inline chords)"                         );
+		set( CHORD_NOTE_ON_TOLERANCE,      "Note-ON tolerance"                                                         );
+		set( CHORD_NOTE_ON_TOLERANCE_D,    "Maximum Note-ON tick difference (still regarded as the same chord)"        );
+		set( CHORD_NOTE_OFF_TOLERANCE,     "Note-OFF tolerance"                                                        );
+		set( CHORD_NOTE_OFF_TOLERANCE_D,   "Maximum Note-OFF tick difference (still regarded as the same chord)"       );
+		set( CHORD_VELOCITY_TOLERANCE,     "Velocity tolerance"                                                        );
+		set( CHORD_VELOCITY_TOLERANCE_D,   "Maximum Velocity difference (still regarded as the same chord)"            );
+		set( USE_DOTTED_NOTES,             "Use dotted notes"                                                          );
+		set( USE_DOTTED_RESTS,             "Use dotted rests"                                                          );
+		set( USE_TRIPLETTED_NOTES,         "Use tripletted notes"                                                      );
+		set( USE_TRIPLETTED_RESTS,         "Use tripletted rests"                                                      );
 		set( ORPHANED_SYLLABLES,           "Orphaned Syllables"                                                        );
 		set( ORPHANED_SYLLABLES_D,         "How to treat syllables that appear in a tick without any note-on"          );
 		set( DC_INLINE,                    "Inline"                                                                    );
 		set( DC_BLOCK,                     "Block"                                                                     );
-		set( DC_STRAT_NEXT_DURATION_PRESS, "Next ON / Duration / Press length"                                         );
-		set( DC_STRAT_DURATION_NEXT_PRESS, "Duration / Next ON / Press length"                                         );
-		set( DC_STRAT_NEXT_PRESS,          "Next ON / Press length"                                                    );
-		set( DC_STRAT_DURATION_PRESS,      "Duration / Press length"                                                   );
+		set( DC_STRAT_NEXT_DURATION_PRESS, "<html><b>1.</b> Next ON, &nbsp;&nbsp;<b>2.</b> Duration,&nbsp;&nbsp;<b>3.</b> Press length" );
+		set( DC_STRAT_DURATION_NEXT_PRESS, "<html><b>1.</b> Duration,&nbsp;&nbsp;<b>2.</b> Next ON, &nbsp;&nbsp;<b>3.</b> Press length" );
+		set( DC_STRAT_NEXT_PRESS,          "<html><b>1.</b> Next ON, &nbsp;&nbsp;<b>2.</b> Press length"               );
+		set( DC_STRAT_DURATION_PRESS,      "<html><b>1.</b> Duration,&nbsp;&nbsp;<b>2.</b> Press length"               );
 		set( DC_STRAT_PRESS,               "Press length only"                                                         );
 		set( KAR_ONE_CHANNEL,              "All Lyrics in one channel"                                                 );
 		set( KAR_ONE_CHANNEL_D,            "If checked, all lyrics are put to the same channel"                        );
-		set( ADD_GLOBAL_AT_TICK,           "Add one global command at tick:"                                           );
-		set( ADD_GLOBAL_EACH,              "Add many global commands. Tick distance:"                                  );
+		set( ADD_GLOBAL_AT_TICK,           "Add one split at tick:"                                                    );
+		set( ADD_GLOBAL_EACH,              "Add many splits. Tick distance:"                                           );
 		set( ADD_GLOBAL_FROM,              "...starting from tick:"                                                    );
 		set( ADD_GLOBAL_TO,                "...ending not later than tick:"                                            );
 		set( DC_ALL_TICKS,                 "Edit directly"                                                             );
@@ -2193,6 +2247,8 @@ public class Dict {
 		set( DC_RESTORE,                   "Restore saved settings"                                                    );
 		set( DC_RESTORE_DEFAULTS,          "Restore default settings"                                                  );
 		set( DC_SAVE,                      "Save settings"                                                             );
+		set( CHANGED_IN_CONF_FILE,         "Manually changed in Config file"                                           );
+		set( TICKS_FOR_TARGET_PPQ,         "ticks @ 480 PPQ"                                                           );
 		
 		// InfoView
 		set( TITLE_INFO_VIEW,                        "Midica Info"                   );

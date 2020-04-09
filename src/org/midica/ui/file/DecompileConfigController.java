@@ -16,6 +16,7 @@ import java.awt.event.FocusListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.TreeSet;
@@ -117,15 +118,19 @@ public class DecompileConfigController implements WindowListener, DocumentListen
 		initWidgetConfig( Config.DC_MUST_ADD_QUALITY_SCORE,   view.cbxAddScore,               Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_MUST_ADD_STATISTICS,      view.cbxAddStatistics,          Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_LENGTH_STRATEGY,          view.cbxLengthStrategy,         Integer.class, fromConfig );
+		initWidgetConfig( Config.DC_MAX_TARGET_TICKS_ON,      view.cbxMaxTargetTicksOn,       Integer.class, fromConfig );
+		initWidgetConfig( Config.DC_NEXT_NOTE_ON_TOLERANCE,   view.fldNextNoteOnTolerance,    Integer.class, fromConfig );
+		initWidgetConfig( Config.DC_MIN_DURATION_TO_KEEP,     view.fldMinDurToKeep,           Float.class,   fromConfig );
 		initWidgetConfig( Config.DC_DURATION_TICK_TOLERANCE,  view.fldDurationTickTolerance,  Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_DURATION_RATIO_TOLERANCE, view.fldDurationRatioTolerance, Float.class,   fromConfig );
-		initWidgetConfig( Config.DC_MIN_DURATION_TO_KEEP,     view.fldMinDurToKeep,           Float.class,   fromConfig );
-		initWidgetConfig( Config.DC_NEXT_NOTE_ON_TOLERANCE,   view.fldNextNoteOnTolerance,    Integer.class, fromConfig );
-		initWidgetConfig( Config.DC_MAX_TARGET_TICKS_ON,      view.fldMaxTargetTicksOn,       Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_USE_PRE_DEFINED_CHORDS,   view.cbxPredefinedChords,       Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_CHORD_NOTE_ON_TOLERANCE,  view.fldChordNoteOnTolerance,   Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_CHORD_NOTE_OFF_TOLERANCE, view.fldChordNoteOffTolerance,  Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_CHORD_VELOCITY_TOLERANCE, view.fldChordVelocityTolerance, Integer.class, fromConfig );
+		initWidgetConfig( Config.DC_USE_DOTTED_NOTES,         view.cbxUseDottedNote,          Boolean.class, fromConfig );
+		initWidgetConfig( Config.DC_USE_DOTTED_RESTS,         view.cbxUseDottedRest,          Boolean.class, fromConfig );
+		initWidgetConfig( Config.DC_USE_TRIPLETTED_NOTES,     view.cbxUseTriplettedNote,      Boolean.class, fromConfig );
+		initWidgetConfig( Config.DC_USE_TRIPLETTED_RESTS,     view.cbxUseTriplettedRest,      Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_ORPHANED_SYLLABLES,       view.cbxOrphanedSyllables,      Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_KARAOKE_ONE_CHANNEL,      view.cbxKarOneChannel,          Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_EXTRA_GLOBALS_STR,        view.areaGlobalsStr,            String.class,  fromConfig );
@@ -134,7 +139,7 @@ public class DecompileConfigController implements WindowListener, DocumentListen
 		if (fromConfig) {
 			for (String id : sessionConfig.keySet()) {
 				JComponent widget = configWidgets.get(id);
-				setWidget(widget, Config.get(id));
+				setWidget(widget, getSavedConfigValue(id));
 			}
 			
 			// extra ticks
@@ -170,8 +175,9 @@ public class DecompileConfigController implements WindowListener, DocumentListen
 		configKeys.add(id);
 		configClasses.put(id, type);
 		configWidgets.put(id, widget);
+		
 		if (fromConfig) {
-			sessionConfig.put(id, Config.get(id));
+			sessionConfig.put(id, getSavedConfigValue(id));
 		}
 	}
 	
@@ -657,8 +663,8 @@ public class DecompileConfigController implements WindowListener, DocumentListen
 	 * @return the combobox model
 	 */
 	public static DefaultComboBoxModel<NamedInteger> getComboboxModel(String id) {
+		DefaultComboBoxModel<NamedInteger> model = new DefaultComboBoxModel<>();
 		if (Config.DC_LENGTH_STRATEGY.equals(id)) {
-			DefaultComboBoxModel<NamedInteger> model = new DefaultComboBoxModel<>();
 			model.addElement(new NamedInteger(Dict.get(Dict.DC_STRAT_NEXT_DURATION_PRESS), MidicaPLExporter.STRATEGY_NEXT_DURATION_PRESS, true));
 			model.addElement(new NamedInteger(Dict.get(Dict.DC_STRAT_DURATION_NEXT_PRESS), MidicaPLExporter.STRATEGY_DURATION_NEXT_PRESS, true));
 			model.addElement(new NamedInteger(Dict.get(Dict.DC_STRAT_NEXT_PRESS),          MidicaPLExporter.STRATEGY_NEXT_PRESS,          true));
@@ -668,13 +674,79 @@ public class DecompileConfigController implements WindowListener, DocumentListen
 			return model;
 		}
 		else if (Config.DC_ORPHANED_SYLLABLES.equals(id)) {
-			DefaultComboBoxModel<NamedInteger> model = new DefaultComboBoxModel<>();
 			model.addElement(new NamedInteger(Dict.get(Dict.DC_INLINE), MidicaPLExporter.INLINE, true));
 			model.addElement(new NamedInteger(Dict.get(Dict.DC_BLOCK),  MidicaPLExporter.BLOCK,  true));
 			
 			return model;
 		}
+		else if (Config.DC_MAX_TARGET_TICKS_ON.equals(id)) {
+			String noteLengths[] = {
+				Dict.SYNTAX_32, Dict.SYNTAX_16, Dict.SYNTAX_8,  Dict.SYNTAX_4,   Dict.SYNTAX_2, Dict.SYNTAX_1,
+				Dict.SYNTAX_M2, Dict.SYNTAX_M4, Dict.SYNTAX_M8, Dict.SYNTAX_M16, Dict.SYNTAX_M32,
+			};
+			Integer tickLengths[] = {
+				60,   120,  240,   480,   960, 1920,
+				3840, 7680, 15360, 30720, 61440,
+			};
+			for (int i = 0; i < noteLengths.length; i++) {
+				model.addElement(getMaxNoteLengthCbxModelElement(tickLengths[i], Dict.getSyntax(noteLengths[i])));
+			}
+			Integer savedVal = null;
+			try {
+				savedVal = Integer.parseInt(Config.get(id));
+			}
+			catch (NumberFormatException e) {
+			}
+			if (savedVal != null && ! Arrays.asList(tickLengths).contains(savedVal)) {
+				model.addElement(getMaxNoteLengthCbxModelElement(savedVal, Dict.get(Dict.CHANGED_IN_CONF_FILE)));
+				
+			}
+			return model;
+		}
 		
 		return null;
+	}
+	
+	/**
+	 * Creates a numbered integer that can be put into the combobox model for the max note length combobox.
+	 * 
+	 * @param ticks         note length in ticks of the target resolution (480 PPQ)
+	 * @param lengthName    note length name or description
+	 * @return the created element.
+	 */
+	private static NamedInteger getMaxNoteLengthCbxModelElement(int ticks, String lengthName) {
+		return new NamedInteger(
+			"<html>"
+			+ "<b>" + lengthName + "</b> &nbsp;&mdash; "
+			+ ticks + " " + Dict.get(Dict.TICKS_FOR_TARGET_PPQ),
+			ticks,
+			true
+		);
+	}
+	
+	/**
+	 * Returns the saved config value of the given decompile config ID.
+	 * If the saved config value is not valid, the default config value is used instead.
+	 * 
+	 * @param id    the config ID
+	 * @return the configured value, if the check succeeds, or otherwise the default value
+	 */
+	private static String getSavedConfigValue(String id) {
+		
+		String valueStr = Config.get(id);
+		
+		Class<?> type = configClasses.get(id);
+		try {
+			if (type == Integer.class)
+				Integer.parseInt(valueStr);
+			else if (type == Float.class)
+				Float.parseFloat(valueStr);
+		}
+		catch (NumberFormatException e) {
+			// use default instead
+			valueStr = Config.getDefaultDecompileConfig().get(id);
+		}
+		
+		return valueStr;
 	}
 }

@@ -102,15 +102,19 @@ public abstract class Decompiler extends Exporter {
 	public static final boolean DEFAULT_MUST_ADD_QUALITY_SCORE   = true;
 	public static final boolean DEFAULT_MUST_ADD_STATISTICS      = true;
 	public static final byte    DEFAULT_LENGTH_STRATEGY          = STRATEGY_NEXT_DURATION_PRESS;
+	public static final long    DEFAULT_MAX_TARGET_TICKS_ON      = 3840; // 2 full notes
+	public static final long    DEFAULT_NEXT_NOTE_ON_TOLERANCE   = 3;
+	public static final float   DEFAULT_MIN_DURATION_TO_KEEP     = 0.05f;
 	public static final long    DEFAULT_DURATION_TICK_TOLERANCE  = 2;
 	public static final float   DEFAULT_DURATION_RATIO_TOLERANCE = 0.014f;
-	public static final float   DEFAULT_MIN_DURATION_TO_KEEP     = 0.05f;
-	public static final long    DEFAULT_NEXT_NOTE_ON_TOLERANCE   = 3;
-	public static final long    DEFAULT_MAX_TARGET_TICKS_ON      = 3840; // 2 full notes
 	public static final boolean DEFAULT_USE_PRE_DEFINED_CHORDS   = true;
 	public static final long    DEFAULT_CHORD_NOTE_ON_TOLERANCE  = 0;
 	public static final long    DEFAULT_CHORD_NOTE_OFF_TOLERANCE = 0;
 	public static final long    DEFAULT_CHORD_VELOCITY_TOLERANCE = 0;
+	public static final boolean DEFAULT_USE_DOTTED_NOTES         = true;
+	public static final boolean DEFAULT_USE_DOTTED_RESTS         = true;
+	public static final boolean DEFAULT_USE_TRIPLETTED_NOTES     = true;
+	public static final boolean DEFAULT_USE_TRIPLETTED_RESTS     = true;
 	public static final byte    DEFAULT_ORPHANED_SYLLABLES       = INLINE;
 	public static final boolean DEFAULT_KARAOKE_ONE_CHANNEL      = false;
 	public static final String  DEFAULT_EXTRA_GLOBALS_STR        = "";
@@ -127,16 +131,20 @@ public abstract class Decompiler extends Exporter {
 	protected static boolean       MUST_ADD_QUALITY_SCORE   = DEFAULT_MUST_ADD_QUALITY_SCORE;
 	protected static boolean       MUST_ADD_STATISTICS      = DEFAULT_MUST_ADD_STATISTICS;
 	protected static byte          LENGTH_STRATEGY          = DEFAULT_LENGTH_STRATEGY;
-	protected static long          DURATION_TICK_TOLERANCE  = DEFAULT_DURATION_TICK_TOLERANCE;
-	protected static float         DURATION_RATIO_TOLERANCE = DEFAULT_DURATION_RATIO_TOLERANCE;
-	protected static float         MIN_DURATION_TO_KEEP     = DEFAULT_MIN_DURATION_TO_KEEP;
-	protected static long          NEXT_NOTE_ON_TOLERANCE   = DEFAULT_NEXT_NOTE_ON_TOLERANCE;
 	protected static long          MAX_TARGET_TICKS_ON      = DEFAULT_MAX_TARGET_TICKS_ON;
 	protected static long          MAX_SOURCE_TICKS_ON      = 0L;
+	protected static long          NEXT_NOTE_ON_TOLERANCE   = DEFAULT_NEXT_NOTE_ON_TOLERANCE;
+	protected static float         MIN_DURATION_TO_KEEP     = DEFAULT_MIN_DURATION_TO_KEEP;
+	protected static long          DURATION_TICK_TOLERANCE  = DEFAULT_DURATION_TICK_TOLERANCE;
+	protected static float         DURATION_RATIO_TOLERANCE = DEFAULT_DURATION_RATIO_TOLERANCE;
 	protected static boolean       USE_PRE_DEFINED_CHORDS   = DEFAULT_USE_PRE_DEFINED_CHORDS;
 	protected static long          CHORD_NOTE_ON_TOLERANCE  = DEFAULT_CHORD_NOTE_ON_TOLERANCE;
 	protected static long          CHORD_NOTE_OFF_TOLERANCE = DEFAULT_CHORD_NOTE_OFF_TOLERANCE;
 	protected static long          CHORD_VELOCITY_TOLERANCE = DEFAULT_CHORD_VELOCITY_TOLERANCE;
+	protected static boolean       USE_DOTTED_NOTES         = DEFAULT_USE_DOTTED_NOTES;
+	protected static boolean       USE_DOTTED_RESTS         = DEFAULT_USE_DOTTED_RESTS;
+	protected static boolean       USE_TRIPLETTED_NOTES     = DEFAULT_USE_TRIPLETTED_NOTES;
+	protected static boolean       USE_TRIPLETTED_RESTS     = DEFAULT_USE_TRIPLETTED_RESTS;
 	protected static byte          ORPHANED_SYLLABLES       = DEFAULT_ORPHANED_SYLLABLES;
 	protected static boolean       KARAOKE_ONE_CHANNEL      = DEFAULT_KARAOKE_ONE_CHANNEL;
 	protected static TreeSet<Long> EXTRA_GLOBALS            = null;
@@ -214,27 +222,13 @@ public abstract class Decompiler extends Exporter {
 	protected abstract String createRest(byte channel, long ticks, long beginTick, String syllable);
 	
 	/**
-	 * Calculates which tick length corresponds to which note length.
+	 * Calculates which tick length corresponds to which note or rest length.
 	 * That depends on the resolution of the current MIDI sequence.
 	 * 
+	 * @param rest    **true** to initialize REST lengths, **false** for NOTE lengths
 	 * @return Mapping between tick length and note length for the syntax.
 	 */
-	protected abstract TreeMap<Long, String> initNoteLengths();
-	
-	/**
-	 * Calculates which tick length corresponds to which rest length.
-	 * 
-	 * Creates the same structure as {@link #initNoteLengths()} but adds
-	 * a few shorter lengths as well.
-	 * 
-	 * This is needed because rests should be less tolerant than notes.
-	 * 
-	 * This enables us to use more common lengths for notes but let the
-	 * exported sequence be still as close as possible to the original one.
-	 * 
-	 * @return Mapping between tick length and rest length for the syntax.
-	 */
-	protected abstract TreeMap<Long, String> initRestLengths();
+	protected abstract TreeMap<Long, String> initLengths(boolean rest);
 	
 	/**
 	 * Decompiles a MIDI sequence and writes the result either into the given file
@@ -308,8 +302,8 @@ public abstract class Decompiler extends Exporter {
 			splitSequence();
 			
 			// calculate what tick length corresponds to what note length
-			noteLength = initNoteLengths();
-			restLength = initRestLengths();
+			noteLength = initLengths(false);
+			restLength = initLengths(true);
 			
 			// fill slices
 			addInstrumentsToSlices();
@@ -343,15 +337,19 @@ public abstract class Decompiler extends Exporter {
 		MUST_ADD_QUALITY_SCORE   = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_QUALITY_SCORE)   );
 		MUST_ADD_STATISTICS      = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_STATISTICS)      );
 		LENGTH_STRATEGY          = Byte.parseByte(       sessionConfig.get(Config.DC_LENGTH_STRATEGY)          );
+		MAX_TARGET_TICKS_ON      = Long.parseLong(       sessionConfig.get(Config.DC_MAX_TARGET_TICKS_ON)      );
+		NEXT_NOTE_ON_TOLERANCE   = Long.parseLong(       sessionConfig.get(Config.DC_NEXT_NOTE_ON_TOLERANCE)   );
+		MIN_DURATION_TO_KEEP     = Float.parseFloat(     sessionConfig.get(Config.DC_MIN_DURATION_TO_KEEP)     );
 		DURATION_TICK_TOLERANCE  = Long.parseLong(       sessionConfig.get(Config.DC_DURATION_TICK_TOLERANCE)  );
 		DURATION_RATIO_TOLERANCE = Float.parseFloat(     sessionConfig.get(Config.DC_DURATION_RATIO_TOLERANCE) );
-		MIN_DURATION_TO_KEEP     = Float.parseFloat(     sessionConfig.get(Config.DC_MIN_DURATION_TO_KEEP)     );
-		NEXT_NOTE_ON_TOLERANCE   = Long.parseLong(       sessionConfig.get(Config.DC_NEXT_NOTE_ON_TOLERANCE)   );
-		MAX_TARGET_TICKS_ON      = Long.parseLong(       sessionConfig.get(Config.DC_MAX_TARGET_TICKS_ON)      );
 		USE_PRE_DEFINED_CHORDS   = Boolean.parseBoolean( sessionConfig.get(Config.DC_USE_PRE_DEFINED_CHORDS)   );
 		CHORD_NOTE_ON_TOLERANCE  = Long.parseLong(       sessionConfig.get(Config.DC_CHORD_NOTE_ON_TOLERANCE)  );
 		CHORD_NOTE_OFF_TOLERANCE = Long.parseLong(       sessionConfig.get(Config.DC_CHORD_NOTE_OFF_TOLERANCE) );
 		CHORD_VELOCITY_TOLERANCE = Long.parseLong(       sessionConfig.get(Config.DC_CHORD_VELOCITY_TOLERANCE) );
+		USE_DOTTED_NOTES         = Boolean.parseBoolean( sessionConfig.get(Config.DC_USE_DOTTED_NOTES)         );
+		USE_DOTTED_RESTS         = Boolean.parseBoolean( sessionConfig.get(Config.DC_USE_DOTTED_RESTS)         );
+		USE_TRIPLETTED_NOTES     = Boolean.parseBoolean( sessionConfig.get(Config.DC_USE_TRIPLETTED_NOTES)     );
+		USE_TRIPLETTED_RESTS     = Boolean.parseBoolean( sessionConfig.get(Config.DC_USE_TRIPLETTED_RESTS)     );
 		ORPHANED_SYLLABLES       = Byte.parseByte(       sessionConfig.get(Config.DC_ORPHANED_SYLLABLES)       );
 		KARAOKE_ONE_CHANNEL      = Boolean.parseBoolean( sessionConfig.get(Config.DC_KARAOKE_ONE_CHANNEL)      );
 		EXTRA_GLOBALS            = DecompileConfigController.getExtraGlobalTicks();
@@ -1148,7 +1146,8 @@ public abstract class Decompiler extends Exporter {
 		float durationByDur  = calculateDuration(noteTicksByDur, pressTicks);
 		float durationDiff   = oldDuration > durationByDur ? oldDuration - durationByDur : durationByDur - oldDuration;
 		boolean canUseByDur  = durationDiff < DURATION_RATIO_TOLERANCE;
-		if (oldDuration < MIN_DURATION_TO_KEEP) {
+		durationByDur        = oldDuration;
+		if (durationByDur < MIN_DURATION_TO_KEEP) {
 			canUseByDur = false;
 		}
 		

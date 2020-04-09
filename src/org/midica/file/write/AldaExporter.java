@@ -568,67 +568,96 @@ public class AldaExporter extends Decompiler {
 	}
 	
 	/**
-	 * Calculates which tick length corresponds to which note length.
+	 * Calculates which tick length corresponds to which note or rest length.
 	 * That depends on the resolution of the current MIDI sequence.
 	 * 
+	 * The created rest lengths will contain a view more very short lengths.
+	 * This is needed because rests should be less tolerant than notes.
+	 * 
+	 * This enables us to use more common lengths for notes but let the
+	 * exported sequence be still as close as possible to the original one.
+	 * 
+	 * @param rest    **true** to initialize REST lengths, **false** for NOTE lengths
 	 * @return Mapping between tick length and note length for the syntax.
 	 */
-	public TreeMap<Long, String> initNoteLengths() {
+	public TreeMap<Long, String> initLengths(boolean rest) {
 		
-		TreeMap<Long, String> noteLength = new TreeMap<>();
+		boolean useDots     = rest ? USE_DOTTED_RESTS     : USE_DOTTED_NOTES;
+		boolean useTriplets = rest ? USE_TRIPLETTED_RESTS : USE_TRIPLETTED_NOTES;
+		
+		TreeMap<Long, String> lengthToSymbol = new TreeMap<>();
+		
+		// use very small lengths only for rests
+		if (rest) {
+			// 1/512
+			long length512 = calculateTicks(1, 128);
+			lengthToSymbol.put(length512, 512 + "");
+			
+			// 1/256
+			long length256 = calculateTicks(1, 64);
+			lengthToSymbol.put(length256, 256 + "");
+			
+			// 1/128
+			long length128 = calculateTicks(1, 32);
+			lengthToSymbol.put(length128, 128 + "");
+			
+			// 1/64
+			long length64 = calculateTicks(1, 16);
+			lengthToSymbol.put(length64, 64 + "");
+		}
 		
 		// 32th
 		long length32t = calculateTicks( 2, 8 * 3 ); // inside a triplet
 		long length32  = calculateTicks( 1, 8     ); // normal length
 		long length32d = calculateTicks( 3, 8 * 2 ); // dotted length
 		long base      = 32;
-		noteLength.put( length32t, getTriplet(base) ); // triplet
-		noteLength.put( length32,  base + ""        ); // normal
-		noteLength.put( length32d, base + "."       ); // dotted
+		if (useTriplets) lengthToSymbol.put( length32t, getTriplet(base) ); // triplet
+		                 lengthToSymbol.put( length32,  base + ""        ); // normal
+		if (useDots)     lengthToSymbol.put( length32d, base + "."       ); // dotted
 		
 		// 16th
 		base = 16;
 		long length16t = calculateTicks( 2, 4 * 3 );
 		long length16  = calculateTicks( 1, 4     );
 		long length16d = calculateTicks( 3, 4 * 2 );
-		noteLength.put( length16t, getTriplet(base) );
-		noteLength.put( length16,  base + ""        );
-		noteLength.put( length16d, base + "."       );
+		if (useTriplets) lengthToSymbol.put( length16t, getTriplet(base) );
+		                 lengthToSymbol.put( length16,  base + ""        );
+		if (useDots)     lengthToSymbol.put( length16d, base + "."       );
 		
 		// 8th
 		base = 8;
 		long length8t = calculateTicks( 2, 2 * 3 );
 		long length8  = calculateTicks( 1, 2     );
 		long length8d = calculateTicks( 3, 2 * 2 );
-		noteLength.put( length8t, getTriplet(base) );
-		noteLength.put( length8,  base + ""        );
-		noteLength.put( length8d, base + "."       );
+		if (useTriplets) lengthToSymbol.put( length8t, getTriplet(base) );
+		                 lengthToSymbol.put( length8,  base + ""        );
+		if (useDots)     lengthToSymbol.put( length8d, base + "."       );
 		
 		// quarter
 		base = 4;
 		long length4t = calculateTicks( 2, 3 );
 		long length4  = calculateTicks( 1, 1 );
 		long length4d = calculateTicks( 3, 2 );
-		noteLength.put( length4t, getTriplet(base) );
-		noteLength.put( length4,  base + ""        );
-		noteLength.put( length4d, base + "."       );
+		if (useTriplets) lengthToSymbol.put( length4t, getTriplet(base) );
+		                 lengthToSymbol.put( length4,  base + ""        );
+		if (useDots)     lengthToSymbol.put( length4d, base + "."       );
 		
 		// half
 		base = 2;
 		long length2t = calculateTicks( 2 * 2, 3 );
 		long length2  = calculateTicks( 2,     1 );
 		long length2d = calculateTicks( 2 * 3, 2 );
-		noteLength.put( length2t, getTriplet(base) );
-		noteLength.put( length2,  base + ""        );
-		noteLength.put( length2d, base + "."       );
+		if (useTriplets) lengthToSymbol.put( length2t, getTriplet(base) );
+		                 lengthToSymbol.put( length2,  base + ""        );
+		if (useDots)     lengthToSymbol.put( length2d, base + "."       );
 		
 		// full
 		long length1  = calculateTicks( 4,     1 );
 		long length1d = calculateTicks( 4 * 3, 2 );
-		noteLength.put( length1,  "1"  );
-		noteLength.put( length1d, "1." );
+		             lengthToSymbol.put( length1,  "1"  );
+		if (useDots) lengthToSymbol.put( length1d, "1." );
 		
-		return noteLength;
+		return lengthToSymbol;
 	}
 	
 	/**
