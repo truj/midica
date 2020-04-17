@@ -969,8 +969,16 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 11, e.getLineNumber() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND)) );
 		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-else-without-if-2")) );
+		assertEquals( 12, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND)) );
+		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-else-without-if-nested")) );
 		assertEquals( 13, e.getLineNumber() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-else-without-if-nested-2")) );
+		assertEquals( 14, e.getLineNumber() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-elsif")) );

@@ -2067,7 +2067,11 @@ public class MidicaPLParser extends SequenceParser {
 			block.applyTupletsAndShifts(null, 0);
 			boolean mustPlay = true;
 			try {
-				if (conditionType != COND_TYPE_NONE) {
+				if (COND_TYPE_NONE == conditionType) {
+					condChainHit    = false;
+					condChainOpened = false;
+				}
+				else {
 					if (COND_TYPE_IF == conditionType) {
 						condChainHit = false;
 					}

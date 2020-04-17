@@ -375,7 +375,11 @@ public class NestableBlock {
 						if (childCondition != null) {
 							childCondition = parser.replaceVariables(childCondition);
 						}
-						if (childConditionType != MidicaPLParser.COND_TYPE_NONE) {
+						if (MidicaPLParser.COND_TYPE_NONE == childConditionType) {
+							condChainOpened = false;
+							condChainHit    = false;
+						}
+						else {
 							if (MidicaPLParser.COND_TYPE_IF == childConditionType) {
 								condChainHit = false;
 							}
