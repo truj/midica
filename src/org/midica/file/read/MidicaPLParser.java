@@ -2492,6 +2492,11 @@ public class MidicaPLParser extends SequenceParser {
 				int lineNum = patternLineStack.pop();
 				patternLineStack.push(lineNum + 1);
 				
+				// replace variables
+				currentLineContent = patternLine;
+				patternLine        = replaceVariables(patternLine);
+				currentLineContent = patternLine;
+				
 				// special line inside the pattern?
 				String[] patLineTokens = whitespace.split(patternLine);
 				if (patLineTokens.length > 0) {
@@ -4006,8 +4011,13 @@ public class MidicaPLParser extends SequenceParser {
 					optValue.set(optName, TRIPLET);
 				}
 				else {
-					Pattern pattern = Pattern.compile("^\\d+" + Pattern.quote(TUPLET_FOR) + "\\d+$");
-					if (pattern.matcher(optParts[1]).matches()) {
+					Pattern pattern = Pattern.compile("^(\\d+)" + Pattern.quote(TUPLET_FOR) + "(\\d+)$");
+					Matcher matcher = pattern.matcher(optParts[1]);
+					if (matcher.matches()) {
+						String num1 = matcher.group(1);
+						String num2 = matcher.group(2);
+						if ("0".equals(num1) || "0".equals(num2))
+							throw new ParseException( Dict.get(Dict.ERROR_TUPLET_INVALID) + optParts[1] );
 						optValue.set( optName, optParts[1] );
 					}
 					else {

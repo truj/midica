@@ -79,6 +79,17 @@ public class ParseException extends Exception {
 	}
 	
 	/**
+	 * Returns the content of the line causing the exception.
+	 * 
+	 * This is only used for unit tests.
+	 * 
+	 * @return line content
+	 */
+	public String getLineContent() {
+		return lineContent;
+	}
+	
+	/**
 	 * Marks this exeption as being caused by if/elsif/else conditions of a nestable block.
 	 */
 	public void setCausedByBlockConditions() {
