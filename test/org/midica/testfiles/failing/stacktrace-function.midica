@@ -1,0 +1,49 @@
+INCLUDE inc/instruments.midica
+
+// stack-trace
+// 
+// - func(foo, bar)
+//   - fun1(foo, bar)
+//     - fun2(f=foo, b=baz)
+//       - fun3(...,/4)
+//         - OK
+//       - fun3(...,-)
+//         - ERROR
+
+CALL func(foo, bar)
+
+FUNCTION func
+	CALL fun1(0, f,e,d,c)    // fun1(foo, bar)
+END
+
+FUNCTION fun1
+
+	{
+	
+		{
+		
+			$[0]  $[1],$[2]    /4
+			CALL fun2($[0],$[1],$[2],f=foo)
+			CALL fun2($[0],$[1],$[2],f=bar)
+		}
+		
+	}
+	
+END
+
+FUNCTION fun2
+	{
+		$[0]  $[1],$[2]   /4
+		{ if ${f} == foo
+			CALL  fun3($[0],$[1],$[2],/4)
+		}
+		{ else
+			CALL  fun3($[0],$[1],$[2],-)
+		}
+	}
+END
+
+FUNCTION fun3
+	$[0]  $[1],$[2]  $[3]
+END
+

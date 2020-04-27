@@ -182,6 +182,69 @@ END
 4  c,d,e,f  pat_out
 
 ////////////////////////////////////////////////////////////
+// channel 5:
+////////////////////////////////////////////////////////////
+
+PATTERN upstroke_number
+	{ m
+		0  $[1] m
+		-  $[0]
+		1  $[1] m
+		-  $[0]
+		2  $[1] m
+		-  $[0]
+		3  $[1] m
+		-  $[0]
+	}
+	- $[1]
+END
+PATTERN upstroke_name
+	{
+		0  ${length}   m
+		-  ${distance}
+		1  ${length}   m
+		-  ${distance}
+		2  ${length}   m
+		-  ${distance}
+		3  ${length}   m
+		-  ${distance}
+	} m
+	- ${length}
+END
+5  f,e,d,c  upstroke_number ( /32 , /1 )
+5  -  /1
+5  f,e,d,c  upstroke_number ( /32 , /1 )  q=2
+5  -  /1
+5  f,e,d,c  upstroke_name(distance=/32,length=/1)  q=2
+5  -  /1
+5  f,e,d,c  cond_pattern(foo)     // if     ==> f
+5  f,e,d,c  cond_pattern(bar=123) // elsif  ==> e
+5  f,e,d,c  cond_pattern(bar)     // else   ==> d
+CALL try_cond(foo)                // if     ==> f
+
+FUNCTION try_cond
+	{
+		{
+			5  f,e,d,c  cond_pattern ( $[0] )
+		}
+	}
+END
+PATTERN cond_pattern
+	{ if $[0] == foo
+		0 nested( /1, and, some, more = params )
+	}
+	{ elsif ${bar}
+		1 /1
+	}
+	{ else
+		2 /1
+	}
+END
+PATTERN nested
+	0 $[0]
+END
+
+////////////////////////////////////////////////////////////
 
 PATTERN pat_simple
 	0   /4

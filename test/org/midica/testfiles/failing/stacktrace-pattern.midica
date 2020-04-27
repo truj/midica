@@ -1,0 +1,49 @@
+INCLUDE inc/instruments.midica
+
+// stack-trace
+// 
+// - func(foo, bar)
+//   - pat1(foo, bar)
+//     - pat2(f=foo, b=baz)
+//       - pat3(/4)
+//         - OK
+//       - pat3(-)
+//         - ERROR
+
+CALL func(foo, bar)
+
+FUNCTION func
+	0  f,e,d,c  pat1($[0], $[1])    // pat1(foo, bar)
+END
+
+PATTERN pat1
+
+	{
+	
+		{
+		
+			0,1    /4
+			0,1,2  pat2( f = $[0], b = $[1] )    // pat2(f=foo, b=baz)
+			0,1,2  pat2( f = bar, b = $[1] )     // pat2(f=bar, b=baz)
+		}
+		
+	}
+	
+END
+
+PATTERN pat2
+	{
+		0,1    /4
+		{ if ${f} == foo
+			0,1,2  pat3(/4)
+		}
+		{ else
+			0,1,2  pat3(-)
+		}
+	}
+END
+
+PATTERN pat3
+	0,1,2  $[0]
+END
+

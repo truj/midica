@@ -586,6 +586,88 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "948/4/84/f / 0",  messages.get(i++).toString() ); // f OFF /8t d=95%
 			assertEquals( 960, instruments.get(4).getCurrentTicks() );
 		}
+		// channel 5: pattern with parameters
+		messages = getNoteOnOffMessagesByChannel(5);
+		assertEquals( 48, messages.size() );
+		{
+			int i = 0;
+			// downstroke[number], length: /1 (1920 ticks); distance: /32 (60 ticks)
+			assertEquals( "0/5/95/f / 64",   messages.get(i++).toString() ); // f ON
+			assertEquals( "60/5/95/e / 64",  messages.get(i++).toString() ); // e ON
+			assertEquals( "120/5/95/d / 64", messages.get(i++).toString() ); // d ON
+			assertEquals( "180/5/95/c / 64", messages.get(i++).toString() ); // c ON
+			
+			assertEquals( "1824/5/85/f / 0", messages.get(i++).toString() ); // f OFF /1  d=95%
+			assertEquals( "1884/5/85/e / 0", messages.get(i++).toString() ); // e OFF /1  d=95%
+			assertEquals( "1944/5/85/d / 0", messages.get(i++).toString() ); // d OFF /1  d=95%
+			assertEquals( "2004/5/85/c / 0", messages.get(i++).toString() ); // c OFF /1  d=95%
+			
+			// /1 REST
+			
+			// downstroke[number], length: /1 (1920 ticks); distance: /32 (60 ticks)
+			assertEquals( "3840/5/95/f / 64", messages.get(i++).toString() ); // f ON
+			assertEquals( "3900/5/95/e / 64", messages.get(i++).toString() ); // e ON
+			assertEquals( "3960/5/95/d / 64", messages.get(i++).toString() ); // d ON
+			assertEquals( "4020/5/95/c / 64", messages.get(i++).toString() ); // c ON
+			
+			assertEquals( "5664/5/85/f / 0",  messages.get(i++).toString() ); // f OFF /1  d=95%
+			assertEquals( "5724/5/85/e / 0",  messages.get(i++).toString() ); // e OFF /1  d=95%
+			// ON/OFF overlapping with the second run (q=2)
+			assertEquals( "5760/5/95/f / 64", messages.get(i++).toString() ); // f ON
+			assertEquals( "5784/5/85/d / 0",  messages.get(i++).toString() ); // d OFF /1  d=95%
+			assertEquals( "5820/5/95/e / 64", messages.get(i++).toString() ); // e ON
+			assertEquals( "5844/5/85/c / 0",  messages.get(i++).toString() ); // c OFF /1  d=95%
+			assertEquals( "5880/5/95/d / 64", messages.get(i++).toString() ); // d ON
+			assertEquals( "5940/5/95/c / 64", messages.get(i++).toString() ); // c ON
+			
+			assertEquals( "7584/5/85/f / 0",  messages.get(i++).toString() ); // f OFF /1  d=95%
+			assertEquals( "7644/5/85/e / 0",  messages.get(i++).toString() ); // e OFF /1  d=95%
+			assertEquals( "7704/5/85/d / 0",  messages.get(i++).toString() ); // d OFF /1  d=95%
+			assertEquals( "7764/5/85/c / 0",  messages.get(i++).toString() ); // c OFF /1  d=95%
+			
+			// /1 REST
+			
+			// downstroke{name}, length: /1 (1920 ticks); distance: /32 (60 ticks)
+			assertEquals( "9600/5/95/f / 64", messages.get(i++).toString() ); // f ON
+			assertEquals( "9660/5/95/e / 64", messages.get(i++).toString() ); // e ON
+			assertEquals( "9720/5/95/d / 64", messages.get(i++).toString() ); // d ON
+			assertEquals( "9780/5/95/c / 64", messages.get(i++).toString() ); // c ON
+			
+			assertEquals( "11424/5/85/f / 0",  messages.get(i++).toString() ); // f OFF /1  d=95%
+			assertEquals( "11484/5/85/e / 0",  messages.get(i++).toString() ); // e OFF /1  d=95%
+			// ON/OFF overlapping with the second run (q=2)
+			assertEquals( "11520/5/95/f / 64", messages.get(i++).toString() ); // f ON
+			assertEquals( "11544/5/85/d / 0",  messages.get(i++).toString() ); // d OFF /1  d=95%
+			assertEquals( "11580/5/95/e / 64", messages.get(i++).toString() ); // e ON
+			assertEquals( "11604/5/85/c / 0",  messages.get(i++).toString() ); // c OFF /1  d=95%
+			assertEquals( "11640/5/95/d / 64", messages.get(i++).toString() ); // d ON
+			assertEquals( "11700/5/95/c / 64", messages.get(i++).toString() ); // c ON
+			
+			assertEquals( "13344/5/85/f / 0",  messages.get(i++).toString() ); // f OFF /1  d=95%
+			assertEquals( "13404/5/85/e / 0",  messages.get(i++).toString() ); // e OFF /1  d=95%
+			assertEquals( "13464/5/85/d / 0",  messages.get(i++).toString() ); // d OFF /1  d=95%
+			assertEquals( "13524/5/85/c / 0",  messages.get(i++).toString() ); // c OFF /1  d=95%
+			
+			// /1 REST
+			
+			// cond_pattern(foo): if ==> f
+			assertEquals( "15360/5/95/f / 64", messages.get(i++).toString() ); // f ON
+			assertEquals( "17184/5/85/f / 0",  messages.get(i++).toString() ); // f OFF /1  d=95%
+			
+			// cond_pattern(bar=123): elsif ==> e
+			assertEquals( "17280/5/95/e / 64", messages.get(i++).toString() ); // e ON
+			assertEquals( "19104/5/85/e / 0",  messages.get(i++).toString() ); // e OFF /1  d=95%
+			
+			// cond_pattern(bar): else ==> d
+			assertEquals( "19200/5/95/d / 64", messages.get(i++).toString() ); // d ON
+			assertEquals( "21024/5/85/d / 0",  messages.get(i++).toString() ); // d OFF /1  d=95%
+			
+			// try_cond(foo) ==> cond_pattern(foo): if ==> f
+			assertEquals( "21120/5/95/f / 64", messages.get(i++).toString() ); // f ON
+			assertEquals( "22944/5/85/f / 0",  messages.get(i++).toString() ); // f OFF /1  d=95%
+			
+			assertEquals( 23040, instruments.get(5).getCurrentTicks() );
+		}
 	}
 	
 	/**
@@ -1563,7 +1645,41 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "pattern-stacktrace-2.midica/4-6", stackTrace.pop().toString() ); // block
 		assertEquals( "pattern-stacktrace-2.midica/6",   stackTrace.pop().toString() ); // block execution
 		
-//		System.out.println(e.getMessage() + "\n" + e.getFile().getName());
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("stacktrace-function")) );
+		assertEquals( 13, e.getLineNumber() );
+		assertEquals( "0 f,e -", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOTE_LENGTH_INVALID) + "-") );
+		stackTrace = e.getStackTraceElements();
+		assertEquals( 11, stackTrace.size() );
+		assertEquals( "stacktrace-function.midica/47",    stackTrace.pop().toString() ); // channel cmd with invalid note length
+		assertEquals( "stacktrace-function.midica/41",    stackTrace.pop().toString() ); // CALL fun3(...,-) from fun2()
+		assertEquals( "stacktrace-function.midica/40-42", stackTrace.pop().toString() ); // else-block
+		assertEquals( "stacktrace-function.midica/35-43", stackTrace.pop().toString() ); // block
+		assertEquals( "stacktrace-function.midica/43",    stackTrace.pop().toString() ); // block execution
+		assertEquals( "stacktrace-function.midica/27",    stackTrace.pop().toString() ); // CALL fun2(...,f=bar)
+		assertEquals( "stacktrace-function.midica/23-28", stackTrace.pop().toString() ); // block
+		assertEquals( "stacktrace-function.midica/21-30", stackTrace.pop().toString() ); // block
+		assertEquals( "stacktrace-function.midica/30",    stackTrace.pop().toString() ); // block execution
+		assertEquals( "stacktrace-function.midica/16",    stackTrace.pop().toString() ); // CALL fun1(...) from func()
+		assertEquals( "stacktrace-function.midica/13",    stackTrace.pop().toString() ); // CALL func(...)
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("stacktrace-pattern")) );
+		assertEquals( 13, e.getLineNumber() );
+		assertEquals( "0,1,2 -", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOTE_LENGTH_INVALID) + "-") );
+		stackTrace = e.getStackTraceElements();
+		assertEquals( 11, stackTrace.size() );
+		assertEquals( "stacktrace-pattern.midica/47",    stackTrace.pop().toString() ); // channel cmd with invalid note length
+		assertEquals( "stacktrace-pattern.midica/41",    stackTrace.pop().toString() ); // CALL pat3(-) from pat2()
+		assertEquals( "stacktrace-pattern.midica/40-42", stackTrace.pop().toString() ); // else-block
+		assertEquals( "stacktrace-pattern.midica/35-43", stackTrace.pop().toString() ); // block
+		assertEquals( "stacktrace-pattern.midica/43",    stackTrace.pop().toString() ); // block execution
+		assertEquals( "stacktrace-pattern.midica/27",    stackTrace.pop().toString() ); // CALL pat2(f=bar, ...)
+		assertEquals( "stacktrace-pattern.midica/23-28", stackTrace.pop().toString() ); // block
+		assertEquals( "stacktrace-pattern.midica/21-30", stackTrace.pop().toString() ); // block
+		assertEquals( "stacktrace-pattern.midica/30",    stackTrace.pop().toString() ); // block execution
+		assertEquals( "stacktrace-pattern.midica/16",    stackTrace.pop().toString() ); // CALL pat1(...) from func()
+		assertEquals( "stacktrace-pattern.midica/13",    stackTrace.pop().toString() ); // CALL func(...)
 	}
 	
 	/**

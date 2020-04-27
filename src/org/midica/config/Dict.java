@@ -2479,10 +2479,10 @@ public class Dict {
 		set( SYNTAX_FUNCTION,           "function definition"                              );
 		set( SYNTAX_PATTERN,            "pattern definition"                               );
 		set( SYNTAX_PATTERN_INDEX_SEP,  "index separator inside of a pattern definition"   );
-		set( SYNTAX_PARAM_OPEN,         "opens a function parameter list"                  );
-		set( SYNTAX_PARAM_CLOSE,        "closes a function parameter list"                 );
-		set( SYNTAX_PARAM_SEPARATOR,    "separates parameters in a function call"          );
-		set( SYNTAX_PARAM_ASSIGNER,     "assignes named parameters in a function call"     );
+		set( SYNTAX_PARAM_OPEN,         "opens a parameter list (in a function or pattern call)"  );
+		set( SYNTAX_PARAM_CLOSE,        "closes a parameter list (in a function or pattern call)" );
+		set( SYNTAX_PARAM_SEPARATOR,    "separates parameters in a function or pattern call"      );
+		set( SYNTAX_PARAM_ASSIGNER,     "assignes named parameters in a function or pattern call" );
 		set( SYNTAX_CALL,               "function execution"                               );
 		set( SYNTAX_INSTRUMENT,         "instrument switch for one single channel"         );
 		set( SYNTAX_INSTRUMENTS,        "definition of instruments"                        );
@@ -3002,9 +3002,9 @@ public class Dict {
 		set( ERROR_CALL_NUM_OF_ARGS,              "wrong number of arguments in function call command"                );
 		set( ERROR_CALL_UNKNOWN_OPT,              "unknown option for function call command: "                        );
 		set( ERROR_CALL_SYNTAX,                   "invalid syntax in call command"                                    );
-		set( ERROR_CALL_EMPTY_PARAM,              "empty call parameter in parameter list: "                          );
-		set( ERROR_CALL_PARAM_NAME_EMPTY,         "empty named call parameter in parameter list: "                    );
-		set( ERROR_CALL_PARAM_VALUE_EMPTY,        "value of named call parameter is empty: "                          );
+		set( ERROR_CALL_EMPTY_PARAM,              "empty parameter in parameter list: "                               );
+		set( ERROR_CALL_PARAM_NAME_EMPTY,         "empty named parameter in parameter list: "                         );
+		set( ERROR_CALL_PARAM_VALUE_EMPTY,        "value of named parameter is empty: "                               );
 		set( ERROR_CALL_PARAM_NAME_WITH_SPEC,     "parameter name contains special characters: "                      );
 		set( ERROR_CALL_DUPLICATE_PARAM_NAME,     "duplicate parameter name: "                                        );
 		set( ERROR_CALL_PARAM_MORE_ASSIGNERS,     "named parameter must not contain more than one assign symbol: "    );

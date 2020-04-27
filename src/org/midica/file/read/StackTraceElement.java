@@ -20,15 +20,15 @@ import org.midica.config.Dict;
  */
 public class StackTraceElement {
 	
-	private String  functionName   = null;
-	private String  patternName    = null;
-	private String  paramStr       = "";
-	private String  optionStr      = "";
-	private File    file           = null;
-	private int     lineOffset     = 0;
-	private int     line           = 0;
-	private int     lineBlockOpen  = 0;
-	private int     lineBlockClose = 0;
+	private String functionName   = null;
+	private String patternName    = null;
+	private String paramStr       = "";
+	private String optionStr      = "";
+	private File   file           = null;
+	private int    lineOffset     = 0;
+	private int    line           = 0;
+	private int    lineBlockOpen  = 0;
+	private int    lineBlockClose = 0;
 	
 	/**
 	 * Creates a new stack trace element.
@@ -154,6 +154,9 @@ public class StackTraceElement {
 		}
 		else if (patternName != null) {
 			action = Dict.get(Dict.STACK_TRACE_PATTERN) + patternName;
+			if ( ! "".equals(paramStr) ) {
+				optsOrParams += Dict.get(Dict.STACK_TRACE_PARAMS) + MidicaPLParser.PARAM_OPEN + paramStr + MidicaPLParser.PARAM_CLOSE + "<br>" + indentation;
+			}
 			if ( ! "".equals(optionStr) ) {
 				optsOrParams += Dict.get(Dict.STACK_TRACE_OPTIONS) + optionStr + "<br>" + indentation;
 			}

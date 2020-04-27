@@ -242,6 +242,7 @@ public class MidicaPLParser extends SequenceParser {
 	private   static Pattern                            condInPattern        = null;
 	private   static Pattern                            crlfSkPattern        = null;
 	private   static boolean                            isSoftKaraoke        = false;
+	private   static boolean                            isPatternSubChord    = false;
 	
 	private static boolean isDefineParsRun     = false; // parsing run for define commands
 	private static boolean isConstParsRun      = false; // parsing run for constant definitions
@@ -577,9 +578,9 @@ public class MidicaPLParser extends SequenceParser {
 			+ ")"
 		);
 		
-		// match function calls
+		// match function or pattern calls
 		callPattern = Pattern.compile(
-			  "^([^"                      // function name, consisting of all characters except:
+			  "^([^"                      // function/pattern name, consisting of all characters except:
 			+ "\\s"                       // - whitespace
 			+ Pattern.quote(PARAM_OPEN)   // - (
 			+ Pattern.quote(PARAM_CLOSE)  // - )
@@ -856,7 +857,8 @@ public class MidicaPLParser extends SequenceParser {
 		
 		if (MODE_PATTERN == currentMode && ! END.equals(tokens[0])) {
 			// line inside of a pattern definition
-			parsePatternCmd(tokens);
+			
+			parsePatternLine(tokens);
 			return;
 		}
 		else {
@@ -922,28 +924,37 @@ public class MidicaPLParser extends SequenceParser {
 			
 			// pattern call --> call this method (parseTokens()) once for each pattern line
 			if (tokens.length > 2) {
-				String[] subTokens = tokens[2].split( "\\s+", 2 );
-				if (definedPatternNames.contains(subTokens[0])) {
+				Matcher patCallMatcher = callPattern.matcher(tokens[2]);
+				String  patternName    = null;
+				if (patCallMatcher.matches()) {
+					patternName = patCallMatcher.group(1);
+				}
+				if (patternName != null && definedPatternNames.contains(patternName)) {
 					if (isFunct)
 						currentFunction.add(String.join(" ", tokens)); // add to function
 					else if (isBlock)
 						nestableBlkStack.peek().add(tokens); // add to block
-					else
-						parsePatternCall(tokens, subTokens, isFake);
+					parsePatternCall(tokens, isFake);
 					return;
 				}
 			}
 			
 			// more than one note or chord? --> call this method (parseTokens()) once for each chord element
-			if (parseChordNotes(tokens)) {
+			if (! isBlock && parseChordNotes(tokens)) {
 				return;
 			}
 			
 			// channel command with a single note
 			if (isFunct)
 				currentFunction.add(String.join(" ", tokens)); // add to function
-			else if (isBlock)
+			else if (isBlock) {
 				nestableBlkStack.peek().add(tokens); // add to block
+				
+				// Ensure that a chord in a block in a pattern is not added more than once.
+				// Otherwise, the stacktrace line numbers would be wrong.
+				if (isPatternSubChord)
+					return;
+			}
 			
 			// apply or fake command
 			parseChannelCmd(tokens, isFake);
@@ -1298,9 +1309,12 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// pre-checks if/elsif conditions
 		if (isCondCheckParsRun) {
+			
+			// function call or nestable block
 			if (BLOCK_OPEN.equals(cmd) || BLOCK_CLOSE.equals(cmd) || CALL.equals(cmd)) {
 				return false;
 			}
+			
 			return true;
 		}
 		
@@ -2079,7 +2093,7 @@ public class MidicaPLParser extends SequenceParser {
 					// check if-elsif-else
 					if (COND_TYPE_ELSIF == conditionType || COND_TYPE_ELSE == conditionType) {
 						if ( ! condChainOpened )
-						throw new ParseException( Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND) );
+							throw new ParseException( Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND) );
 					}
 					if (COND_TYPE_ELSE == conditionType)
 						mustPlay = ! condChainHit;
@@ -2182,7 +2196,7 @@ public class MidicaPLParser extends SequenceParser {
 		String functionName = null;
 		String paramString  = null;
 		String optionString = null;
-		Matcher callMatcher = callPattern.matcher( tokens[1] );
+		Matcher callMatcher = callPattern.matcher(tokens[1]);
 		if (callMatcher.matches()) {
 			functionName = callMatcher.group( 1 );
 			paramString  = callMatcher.group( 3 );
@@ -2235,62 +2249,9 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// parse parameters
-		HashMap<String, String> paramsNamed   = new HashMap<>();
-		ArrayList<String>       paramsIndexed = new ArrayList<>();
-		if ( paramString != null && ! "".equals(paramString) ) {
-			paramString = clean(paramString);
-			String[] params = paramString.split("\\s*" + Pattern.quote(PARAM_SEPARATOR) + "\\s*", -1);
-			for (String rawParam : params) {
-				if ("".equals(rawParam)) {
-					throw new ParseException( Dict.get(Dict.ERROR_CALL_EMPTY_PARAM) + paramString );
-				}
-				
-				// save as indexed param?
-				Matcher wsMatcher = whitespace.matcher(rawParam);
-				if (wsMatcher.find()) {
-					paramsIndexed.add(null);
-				}
-				else {
-					paramsIndexed.add(rawParam);
-				}
-				
-				// parameter contains assigner? (e.g. ...,a=b,...)
-				String[] paramParts = rawParam.split("\\s*" + Pattern.quote(PARAM_ASSIGNER) + "\\s*", -1);
-				if (1 == paramParts.length) {
-					// indexed
-					// nothing more to do here
-				}
-				else if (2 == paramParts.length) {
-					// named
-					String name  = paramParts[0];
-					String value = paramParts[1];
-					if ("".equals(name)) {
-						throw new ParseException( Dict.get(Dict.ERROR_CALL_PARAM_NAME_EMPTY) + paramString );
-					}
-					else if ("".equals(value)) {
-						throw new ParseException( Dict.get(Dict.ERROR_CALL_PARAM_VALUE_EMPTY) + name );
-					}
-					
-					// don't allow special characters in parameter names
-					Pattern paramNamePatt    = Pattern.compile("[^\\w]");
-					Matcher paramNameMatcher = paramNamePatt.matcher(name);
-					if (paramNameMatcher.find()) {
-						throw new ParseException( Dict.get(Dict.ERROR_CALL_PARAM_NAME_WITH_SPEC) + name );
-					}
-					
-					// duplicate param name?
-					if (paramsNamed.containsKey(name)) {
-						throw new ParseException( Dict.get(Dict.ERROR_CALL_DUPLICATE_PARAM_NAME) + name );
-					}
-					
-					// add named param
-					paramsNamed.put(name, value);
-				}
-				else {
-					throw new ParseException( Dict.get(Dict.ERROR_CALL_PARAM_MORE_ASSIGNERS) + rawParam );
-				}
-			}
-		}
+		Object[] parsedParams = parseParameters(paramString);
+		ArrayList<String>       paramsIndexed = (ArrayList<String>)       parsedParams[0];
+		HashMap<String, String> paramsNamed   = (HashMap<String, String>) parsedParams[1];
 		
 		// only fake?
 		if (isFake) {
@@ -2372,20 +2333,35 @@ public class MidicaPLParser extends SequenceParser {
 	/**
 	 * Parses a channel call with a pattern instead of a note length.
 	 * 
-	 * @param tokens             Token array.
-	 * @param subTokens          Token array of pattern and options.
-	 * @param isFake             **true**, if this is called inside a function definition or block
-	 * @throws ParseException    If something is wrong.
+	 * @param tokens    Token array.
+	 * @param isFake    **true**, if this is called inside a function definition or block
+	 * @throws ParseException if something is wrong.
 	 */
-	private void parsePatternCall(String[] tokens, String[] subTokens, boolean isFake) throws ParseException {
+	private void parsePatternCall(String[] tokens, boolean isFake) throws ParseException {
+		
+		// care about whitespaces in pattern parameters
+		tokens = reorganizePatternCallTokens(tokens, 2);
 		
 		if (tokens.length < 3) {
 			throw new ParseException( Dict.get(Dict.ERROR_CH_CMD_NUM_OF_ARGS) );
 		}
 		
-		// get channel and pattern
+		// parse call
+		String  patternName    = null;
+		String  paramString    = null;
+		String  outerOptStr    = null;
+		Matcher patCallMatcher = callPattern.matcher(tokens[2]);
+		if (patCallMatcher.matches()) {
+			patternName  = patCallMatcher.group( 1 );
+			paramString  = patCallMatcher.group( 3 );
+			outerOptStr  = patCallMatcher.group( 4 );
+		}
+		else {
+			throw new ParseException( "Pattern Call Error\nThis should not happen. Please report." );
+		}
+		
+		// get channel and pattern content
 		int               channel      = toChannel(tokens[0]);
-		String            patternName  = subTokens[0];
 		ArrayList<String> patternLines = patterns.get(patternName);
 		
 		// init instruments if not yet done
@@ -2404,9 +2380,7 @@ public class MidicaPLParser extends SequenceParser {
 		int     outerQuantity = 1;
 		int     outerShift    = 0;
 		String  outerSyllable = null;
-		String  outerOptStr   = "";
-		if (subTokens.length > 1) {
-			outerOptStr = subTokens[1];
+		if (outerOptStr != null) {
 			ArrayList<CommandOption> callOptions = parseOptions(outerOptStr, false);
 			
 			for (CommandOption opt : callOptions) {
@@ -2455,16 +2429,29 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		Integer[] noteNumbers = notes.toArray(new Integer[0]);
 		
+		// parse parameters
+		Object[] parsedParams = parseParameters(paramString);
+		ArrayList<String>       paramsIndexed = (ArrayList<String>)       parsedParams[0];
+		HashMap<String, String> paramsNamed   = (HashMap<String, String>) parsedParams[1];
+		
+		// only fake?
+		if (isFake) {
+			return;
+		}
+		
 		// add params to call stack
 		File              file       = patternToFile.get(patternName);
 		int               lineOffset = patternToLineOffset.get(patternName);
 		StackTraceElement traceElem  = new StackTraceElement(file, lineOffset);
 		traceElem.setPatternName(patternName);
+		traceElem.setParams(paramString);
 		traceElem.setOptions(outerOptStr);
 		stackTrace.push(traceElem);
 		patternNameStack.push(patternName);
 		patternLineStack.push(0);
 		patternFileStack.push(file);
+		paramStackIndexed.push(paramsIndexed);
+		paramStackNamed.push(paramsNamed);
 		
 		// check recursion
 		if (patternNameStack.size() > MAX_RECURSION_DEPTH_PATTERN) {
@@ -2515,9 +2502,10 @@ public class MidicaPLParser extends SequenceParser {
 				}
 				
 				// from now on assume a normal pattern line, beginning with indices
-				String[]          patternTokens = patternLine.split("\\s+", 3);
-				String[]          indexStrings  = patternTokens[0].split(Pattern.quote(PATTERN_INDEX_SEP), -1);
-				ArrayList<String> lineNotes     = new ArrayList<String>();
+				String[] patternTokens         = patternLine.split("\\s+", 3);
+				patternTokens                  = reorganizePatternCallTokens(patternTokens, 1); // for nested pattern calls
+				String[]          indexStrings = patternTokens[0].split(Pattern.quote(PATTERN_INDEX_SEP), -1);
+				ArrayList<String> lineNotes    = new ArrayList<String>();
 				
 				// process pattern line options (inner options)
 				boolean innerMultiple = false;
@@ -2605,7 +2593,9 @@ public class MidicaPLParser extends SequenceParser {
 				}
 				
 				// parse the resulting line
+				isPatternSubChord = lineNotes.size() > 1;
 				parseTokens(lineTokens.toArray(new String[0]));
+				isPatternSubChord = false;
 			}
 			
 			// reset channel state (velocity + duration)
@@ -2626,6 +2616,82 @@ public class MidicaPLParser extends SequenceParser {
 		patternNameStack.pop();
 		patternLineStack.pop();
 		patternFileStack.pop();
+		paramStackIndexed.pop();
+		paramStackNamed.pop();
+	}
+	
+	/**
+	 * Parses (indexed and named) parameters of a function call or a pattern usage.
+	 * 
+	 * Returns the indexed parameters in index 0 and the named parameters in index 1
+	 * of the returned array.
+	 * 
+	 * - Indexed parameters: {@link ArrayList<String>}
+	 * - Named parameters: {@link HashMap<String, String>}
+	 * 
+	 * @param paramStr    the parameter string
+	 * @return indexed and named parameters as described above.
+	 * @throws ParseException if something is wrong with the parameter string.
+	 */
+	private Object[] parseParameters(String paramStr) throws ParseException {
+		ArrayList<String>       paramsIndexed = new ArrayList<>();
+		HashMap<String, String> paramsNamed   = new HashMap<>();
+		
+		if (paramStr != null && ! "".equals(paramStr)) {
+			paramStr = clean(paramStr);
+			String[] params = paramStr.split("\\s*" + Pattern.quote(PARAM_SEPARATOR) + "\\s*", -1);
+			for (String rawParam : params) {
+				if ("".equals(rawParam)) {
+					throw new ParseException( Dict.get(Dict.ERROR_CALL_EMPTY_PARAM) + paramStr );
+				}
+				
+				// save as indexed param?
+				if (whitespace.matcher(rawParam).find()) {
+					paramsIndexed.add(null);
+				}
+				else {
+					paramsIndexed.add(rawParam);
+				}
+				
+				// parameter contains assigner? (e.g. ...,a=b,...)
+				String[] paramParts = rawParam.split("\\s*" + Pattern.quote(PARAM_ASSIGNER) + "\\s*", -1);
+				if (1 == paramParts.length) {
+					// indexed
+					// nothing more to do here
+				}
+				else if (2 == paramParts.length) {
+					// named
+					String name  = paramParts[0];
+					String value = paramParts[1];
+					if ("".equals(name)) {
+						throw new ParseException( Dict.get(Dict.ERROR_CALL_PARAM_NAME_EMPTY) + paramStr );
+					}
+					else if ("".equals(value)) {
+						throw new ParseException( Dict.get(Dict.ERROR_CALL_PARAM_VALUE_EMPTY) + name );
+					}
+					
+					// don't allow special characters in parameter names
+					Pattern paramNamePatt    = Pattern.compile("[^\\w]");
+					Matcher paramNameMatcher = paramNamePatt.matcher(name);
+					if (paramNameMatcher.find()) {
+						throw new ParseException( Dict.get(Dict.ERROR_CALL_PARAM_NAME_WITH_SPEC) + name );
+					}
+					
+					// duplicate param name?
+					if (paramsNamed.containsKey(name)) {
+						throw new ParseException( Dict.get(Dict.ERROR_CALL_DUPLICATE_PARAM_NAME) + name );
+					}
+					
+					// add named param
+					paramsNamed.put(name, value);
+				}
+				else {
+					throw new ParseException( Dict.get(Dict.ERROR_CALL_PARAM_MORE_ASSIGNERS) + rawParam );
+				}
+			}
+		}
+		
+		return new Object[]{paramsIndexed, paramsNamed};
 	}
 	
 	/**
@@ -2634,7 +2700,10 @@ public class MidicaPLParser extends SequenceParser {
 	 * @param tokens  command tokens
 	 * @throws ParseException    if something is wrong.
 	 */
-	private void parsePatternCmd(String[] tokens) throws ParseException {
+	private void parsePatternLine(String[] tokens) throws ParseException {
+		
+		// nested pattern? - care about whitespaces in nested pattern call parameters
+		tokens = reorganizePatternCallTokens(tokens, 1);
 		
 		// empty line?
 		if (tokens.length > 0 && "".equals(tokens[0])) {
@@ -2688,6 +2757,67 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// add line to pattern
 		currentPattern.add(String.join(" ", tokens));
+	}
+	
+	/**
+	 * Ensured that (nested or real) pattern call tokens contain the pattern call
+	 * and the options token in the right position.
+	 * 
+	 * For real pattern calls:
+	 * 
+	 * - index 0: channel
+	 * - index 1: chord
+	 * - index 2: pattern call
+	 * - index 3: options
+	 * 
+	 * For nested pattern calls:
+	 * 
+	 * - index 0: chord
+	 * - index 1: pattern call
+	 * - index 2: options
+	 * 
+	 * @param tokens         tokens to be checked or changed
+	 * @param indexOffset    pattern call index (**2** for real calls, **1** for nested calls)
+	 * @return the corrected tokens, if changed, or the original tokens, if no change was necessary.
+	 */
+	private String[] reorganizePatternCallTokens(String[] tokens, int indexOffset) {
+		
+		int iPat = indexOffset;      // index containing the pattern call
+		int iOpt = indexOffset + 1;  // index containing the options
+		
+		// no whitespaces to be handled?
+		if (tokens.length <= indexOffset + 1) {
+			return tokens;
+		}
+		
+		String  last2columns   = tokens[iPat] + " " + tokens[iOpt];
+		Matcher patCallMatcher = callPattern.matcher(last2columns);
+		if (patCallMatcher.matches()) {
+			String patternName = patCallMatcher.group( 1 );
+			String paramString = patCallMatcher.group( 3 );
+			String options     = patCallMatcher.group( 4 );
+			
+			// unknown pattern name (probably a duration) - don't change anything
+			if (! definedPatternNames.contains(patternName)) {
+				return tokens;
+			}
+			
+			// apply pattern corrections
+			if (null == options) {
+				if (iPat == 1)
+					tokens = new String[] {tokens[0], last2columns};
+				else if (iPat == 2)
+					tokens = new String[] {tokens[0], tokens[1], last2columns};
+			}
+			else {
+				if (null == paramString)
+					paramString = "";
+				tokens[iPat] = patternName + PARAM_OPEN + paramString + PARAM_CLOSE;
+				tokens[iOpt] = options;
+			}
+		}
+		
+		return tokens;
 	}
 	
 	/**
@@ -2856,8 +2986,7 @@ public class MidicaPLParser extends SequenceParser {
 			}
 			
 			// note or chord
-			Matcher matcher = whitespace.matcher( tokens[2] );
-			if (matcher.find())
+			if (whitespace.matcher(tokens[2]).find())
 				line += MidicaPLParser.OPT_SEPARATOR + shiftOptionStr;
 			else
 				line += " " + shiftOptionStr;
@@ -3350,7 +3479,7 @@ public class MidicaPLParser extends SequenceParser {
 						if (null == params) {
 							throw new ParseException( Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + varName );
 						}
-						if (index <= params.size()) {
+						if (index < params.size()) {
 							varValue = params.get(index);
 						}
 					}
@@ -4590,6 +4719,7 @@ public class MidicaPLParser extends SequenceParser {
 			redefinitions        = new HashSet<>();
 			soundfontParsed      = false;
 			isSoftKaraoke        = false;
+			isPatternSubChord    = false;
 			constants            = new HashMap<>();
 			variables            = new HashMap<>();
 			varPattern           = null;
