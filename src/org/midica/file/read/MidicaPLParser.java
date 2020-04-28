@@ -2626,8 +2626,8 @@ public class MidicaPLParser extends SequenceParser {
 	 * Returns the indexed parameters in index 0 and the named parameters in index 1
 	 * of the returned array.
 	 * 
-	 * - Indexed parameters: {@link ArrayList<String>}
-	 * - Named parameters: {@link HashMap<String, String>}
+	 * - Indexed parameters: ArrayList<String>
+	 * - Named parameters: HashMap<String, String>
 	 * 
 	 * @param paramStr    the parameter string
 	 * @return indexed and named parameters as described above.

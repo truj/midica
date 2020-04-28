@@ -14,6 +14,7 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
 
+import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -132,7 +133,7 @@ public class UiView extends JFrame {
 		GridBagLayout layout = new GridBagLayout();
 		content.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill       = GridBagConstraints.NONE;
+		constraints.fill       = GridBagConstraints.BOTH;
 		constraints.insets     = Laf.INSETS_WNS;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
@@ -145,7 +146,6 @@ public class UiView extends JFrame {
 		// right area (import and export)
 		constraints.gridx++;
 		constraints.insets = Laf.INSETS_ENS;
-		constraints.fill   = GridBagConstraints.BOTH;
 		content.add(createRightArea(), constraints);
 	}
 	
@@ -164,22 +164,28 @@ public class UiView extends JFrame {
 		GridBagLayout layout = new GridBagLayout();
 		area.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.fill       = GridBagConstraints.HORIZONTAL;
 		constraints.insets     = Laf.INSETS_IN;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 1;
-		constraints.weighty    = 1;
-		constraints.anchor     = GridBagConstraints.NORTH;
+		constraints.weighty    = 0;
 		
 		// config area
 		area.add(createConfigArea(), constraints);
 		
+		// spacer
+		constraints.gridy++;
+		constraints.insets  = Laf.INSETS_ZERO;
+		constraints.weighty = 1;
+		area.add(Box.createGlue(), constraints);
+		
 		// player area
 		constraints.gridy++;
-		constraints.anchor = GridBagConstraints.SOUTH;
+		constraints.insets  = Laf.INSETS_IN;
+		constraints.weighty = 0;
 		area.add(createPlayerArea(), constraints);
 		
 		return area;
@@ -198,27 +204,40 @@ public class UiView extends JFrame {
 		GridBagLayout layout = new GridBagLayout();
 		area.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
-		constraints.fill       = GridBagConstraints.BOTH;
+		constraints.fill       = GridBagConstraints.HORIZONTAL;
 		constraints.insets     = Laf.INSETS_IN;
 		constraints.gridx      = 0;
 		constraints.gridy      = 0;
 		constraints.gridheight = 1;
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 1;
-		constraints.weighty    = 1;
-		constraints.anchor     = GridBagConstraints.NORTH;
+		constraints.weighty    = 0;
 		
 		// import area
 		area.add(createImportArea(), constraints);
 		
+		// spacer
+		constraints.gridy++;
+		constraints.insets  = Laf.INSETS_ZERO;
+		constraints.weighty = 1;
+		area.add(Box.createGlue(), constraints);
+		
 		// soundfont area
 		constraints.gridy++;
-		constraints.anchor = GridBagConstraints.EAST;
+		constraints.insets  = Laf.INSETS_IN;
+		constraints.weighty = 0;
 		area.add(createSoundfontArea(), constraints);
+		
+		// spacer
+		constraints.gridy++;
+		constraints.insets  = Laf.INSETS_ZERO;
+		constraints.weighty = 1;
+		area.add(Box.createGlue(), constraints);
 		
 		// export area
 		constraints.gridy++;
-		constraints.anchor = GridBagConstraints.SOUTH;
+		constraints.insets  = Laf.INSETS_IN;
+		constraints.weighty = 0;
 		area.add(createExportArea(), constraints);
 		
 		return area;
