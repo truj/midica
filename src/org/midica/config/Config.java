@@ -223,13 +223,13 @@ public class Config {
 	 */
 	public static void init() {
 		
-		String homeDir  = System.getProperty( "user.home" );
+		String homeDir  = System.getProperty("user.home");
 		String fileName = ".midica.conf";
 		if (Cli.useLocalConfig) {
-			configFile = new File( homeDir + File.separator + fileName );
+			configFile = new File(homeDir + File.separator + fileName);
 		}
 		
-		restoreDefaults( homeDir );
+		restoreDefaults(homeDir);
 		readConfigFile();
 		
 		initComboBoxes();
@@ -769,7 +769,7 @@ public class Config {
 			defaultBindings.put(id, bindings);
 		}
 		
-		bindings.add( new KeyBinding(keyCode, mods) );
+		bindings.add(new KeyBinding(keyCode, mods));
 	}
 	
 	/**
@@ -819,7 +819,7 @@ public class Config {
 		
 		try {
 			// create file if not yet done
-			if ( ! configFile.canWrite() ) {
+			if (! configFile.canWrite()) {
 				configFile.createNewFile();
 			}
 			
@@ -870,7 +870,7 @@ public class Config {
 	 * @param line The line of the config file to be parsed
 	 */
 	private static void parseConfig(String line) {
-		line = line.replaceFirst( "\\s+$", "" ); // eliminate trailing whitespaces
+		line = line.replaceFirst("\\s+$", ""); // eliminate trailing whitespaces
 		String[] splitted = line.split(" ", 2);
 		try {
 			String name = splitted[0];
@@ -894,7 +894,7 @@ public class Config {
 				TreeSet<KeyBinding> bindings = new TreeSet<>();
 				String[] bindingStr = value.split(",");
 				
-				if ( ! "".equals(value) ) {
+				if (! "".equals(value)) {
 					for (String keycodeAndMods : bindingStr) {
 						String[]   elements  = keycodeAndMods.split("-", -1);
 						int        keyCode   = Integer.parseInt(elements[0]);
@@ -964,9 +964,9 @@ public class Config {
 	 * @return tree model for the key bindings.
 	 */
 	public static MidicaTreeModel getKeyBindingTreeModel() {
-		MidicaTreeModel model = new MidicaTreeModel( Dict.get(Dict.KB_CATEGORIES) );
+		MidicaTreeModel model = new MidicaTreeModel(Dict.get(Dict.KB_CATEGORIES));
 		
-		Pattern chPattern = Pattern.compile( "(\\d{1})" );
+		Pattern chPattern = Pattern.compile("(\\d{1})");
 		
 		// category == window
 		int catNum = 0;
@@ -1121,7 +1121,7 @@ public class Config {
 		// create a value for the config file
 		ArrayList<String> values = new ArrayList<>();
 		for (KeyBinding b : bindings) {
-			values.add( b.toString() );
+			values.add(b.toString());
 		}
 		String configValue = String.join(",", values);
 		
@@ -1138,51 +1138,51 @@ public class Config {
 		
 		// language combobox
 		CBX_LANGUAGE_OPTIONS = new ArrayList<>();
-		for ( String id : CBX_LANGUAGES ) {
-			CBX_LANGUAGE_OPTIONS.add( new ComboboxStringOption(id, id) );
+		for (String id : CBX_LANGUAGES) {
+			CBX_LANGUAGE_OPTIONS.add(new ComboboxStringOption(id, id));
 		}
-		ConfigComboboxModel.initModel( CBX_LANGUAGE_OPTIONS, Config.LANGUAGE );
+		ConfigComboboxModel.initModel(CBX_LANGUAGE_OPTIONS, Config.LANGUAGE);
 		
 		// half tone symbol
 		CBX_HALFTONE_OPTIONS = new ArrayList<>();
-		for ( String id : CBX_HALFTONE_IDENTIFIERS ) {
-			CBX_HALFTONE_OPTIONS.add( new ComboboxStringOption(id, get(id)) );
+		for (String id : CBX_HALFTONE_IDENTIFIERS) {
+			CBX_HALFTONE_OPTIONS.add(new ComboboxStringOption(id, get(id)));
 		}
-		ConfigComboboxModel.initModel( CBX_HALFTONE_OPTIONS, Config.HALF_TONE );
+		ConfigComboboxModel.initModel(CBX_HALFTONE_OPTIONS, Config.HALF_TONE);
 		
 		// note system
 		CBX_NOTE_OPTIONS = new ArrayList<>();
-		for ( String id : CBX_NOTE_IDENTIFIERS ) {
-			CBX_NOTE_OPTIONS.add( new ComboboxStringOption(id, get(id)) );
+		for (String id : CBX_NOTE_IDENTIFIERS) {
+			CBX_NOTE_OPTIONS.add(new ComboboxStringOption(id, get(id)));
 		}
-		ConfigComboboxModel.initModel( CBX_NOTE_OPTIONS, Config.NOTE );
+		ConfigComboboxModel.initModel(CBX_NOTE_OPTIONS, Config.NOTE);
 		
 		// octave naming
 		CBX_OCTAVE_OPTIONS = new ArrayList<>();
-		for ( String id : CBX_OCTAVE_IDENTIFIERS ) {
-			CBX_OCTAVE_OPTIONS.add( new ComboboxStringOption(id, get(id)) );
+		for (String id : CBX_OCTAVE_IDENTIFIERS) {
+			CBX_OCTAVE_OPTIONS.add(new ComboboxStringOption(id, get(id)));
 		}
-		ConfigComboboxModel.initModel( CBX_OCTAVE_OPTIONS, Config.OCTAVE );
+		ConfigComboboxModel.initModel(CBX_OCTAVE_OPTIONS, Config.OCTAVE);
 		
 		// syntax
 		CBX_SYNTAX_OPTIONS = new ArrayList<>();
-		for ( String id : CBX_SYNTAX_IDENTIFIERS ) {
-			CBX_SYNTAX_OPTIONS.add( new ComboboxStringOption(id, get(id)) );
+		for (String id : CBX_SYNTAX_IDENTIFIERS) {
+			CBX_SYNTAX_OPTIONS.add(new ComboboxStringOption(id, get(id)));
 		}
-		ConfigComboboxModel.initModel( CBX_SYNTAX_OPTIONS, Config.SYNTAX );
+		ConfigComboboxModel.initModel(CBX_SYNTAX_OPTIONS, Config.SYNTAX);
 		
 		// percussion shortcuts
 		CBX_PERCUSSION_OPTIONS = new ArrayList<>();
-		for ( String id : CBX_PERCUSSION_IDENTIFIERS ) {
-			CBX_PERCUSSION_OPTIONS.add( new ComboboxStringOption(id, get(id)) );
+		for (String id : CBX_PERCUSSION_IDENTIFIERS) {
+			CBX_PERCUSSION_OPTIONS.add(new ComboboxStringOption(id, get(id)));
 		}
-		ConfigComboboxModel.initModel( CBX_PERCUSSION_OPTIONS, Config.PERCUSSION );
+		ConfigComboboxModel.initModel(CBX_PERCUSSION_OPTIONS, Config.PERCUSSION);
 		
 		// instrument naming
 		CBX_INSTRUMENT_OPTIONS = new ArrayList<>();
-		for ( String id : CBX_INSTRUMENT_IDENTIFIERS ) {
-			CBX_INSTRUMENT_OPTIONS.add( new ComboboxStringOption(id, get(id)) );
+		for (String id : CBX_INSTRUMENT_IDENTIFIERS) {
+			CBX_INSTRUMENT_OPTIONS.add(new ComboboxStringOption(id, get(id)));
 		}
-		ConfigComboboxModel.initModel( CBX_INSTRUMENT_OPTIONS, Config.INSTRUMENT );
+		ConfigComboboxModel.initModel(CBX_INSTRUMENT_OPTIONS, Config.INSTRUMENT);
 	}
 }

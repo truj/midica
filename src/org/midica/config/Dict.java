@@ -1767,14 +1767,14 @@ public class Dict {
 	private static void initLanguage() {
 		
 		// get language
-		String language = Config.get( Config.LANGUAGE );
+		String language = Config.get(Config.LANGUAGE);
 		
 		// init the default language
 		dictionary = new HashMap<String, String>();
 		initLanguageEnglish();
 		
 		// init another language if chosen
-		if ( Config.CBX_LANG_GERMAN.equals(language) )
+		if (Config.CBX_LANG_GERMAN.equals(language))
 			initLanguageGerman();
 	}
 	
@@ -3306,35 +3306,35 @@ public class Dict {
 	public static void initHalfTones() {
 		
 		// refresh combobox language
-		ConfigComboboxModel.refill( Config.HALF_TONE );
+		ConfigComboboxModel.refill(Config.HALF_TONE);
 		
 		// get configuration
-		String configuredHalfTone = Config.get( Config.HALF_TONE );
+		String configuredHalfTone = Config.get(Config.HALF_TONE);
 		
 		// init half tone
 		String  suffix = null;
 		boolean sharp  = true;
-		if ( Config.CBX_HALFTONE_ID_SHARP.equals(configuredHalfTone) ) {
+		if (Config.CBX_HALFTONE_ID_SHARP.equals(configuredHalfTone)) {
 			suffix = "#";
 			sharp  = true;
 		}
-		else if ( Config.CBX_HALFTONE_ID_FLAT.equals(configuredHalfTone) ) {
+		else if (Config.CBX_HALFTONE_ID_FLAT.equals(configuredHalfTone)) {
 			suffix = "b";
 			sharp  = false;
 		}
-		else if ( Config.CBX_HALFTONE_ID_DIESIS.equals(configuredHalfTone) ) {
+		else if (Config.CBX_HALFTONE_ID_DIESIS.equals(configuredHalfTone)) {
 			suffix = "-diesis";
 			sharp  = true;
 		}
-		else if ( Config.CBX_HALFTONE_ID_BEMOLLE.equals(configuredHalfTone) ) {
+		else if (Config.CBX_HALFTONE_ID_BEMOLLE.equals(configuredHalfTone)) {
 			suffix = "-bemolle";
 			sharp  = false;
 		}
-		else if ( Config.CBX_HALFTONE_ID_CIS.equals(configuredHalfTone) ) {
+		else if (Config.CBX_HALFTONE_ID_CIS.equals(configuredHalfTone)) {
 			suffix = "is";
 			sharp  = true;
 		}
-		else if ( Config.CBX_HALFTONE_ID_DES.equals(configuredHalfTone) ) {
+		else if (Config.CBX_HALFTONE_ID_DES.equals(configuredHalfTone)) {
 			suffix = "es";
 			sharp  = false;
 		}
@@ -3353,33 +3353,33 @@ public class Dict {
 			baseIncrementation =  1;
 		
 		// initialize half tones
-		for ( byte i : isHalfTone ) {
+		for (byte i : isHalfTone) {
 			// get base note
 			int baseIndex = i + baseIncrementation;
 			baseIndex %= 12;
-			String baseNote = notes[ baseIndex ];
+			String baseNote = notes[baseIndex];
 			
 			// construct current half tone
-			notes[ i ] = baseNote + suffix;
+			notes[i] = baseNote + suffix;
 			
 			// handle exceptions
-			if ( "Hb".equals(notes[i]) ) {
-				notes[ i ] = "B";
+			if ("Hb".equals(notes[i])) {
+				notes[i] = "B";
 			}
-			else if ( "hb".equals(notes[i]) ) {
-				notes[ i ] = "b";
+			else if ("hb".equals(notes[i])) {
+				notes[i] = "b";
 			}
-			else if ( "Ees".equals(notes[i]) ) {
-				notes[ i ] = "Es";
+			else if ("Ees".equals(notes[i])) {
+				notes[i] = "Es";
 			}
-			else if ( "ees".equals(notes[i]) ) {
-				notes[ i ] = "es";
+			else if ("ees".equals(notes[i])) {
+				notes[i] = "es";
 			}
-			else if ( "Aes".equals(notes[i]) ) {
-				notes[ i ] = "As";
+			else if ("Aes".equals(notes[i])) {
+				notes[i] = "As";
 			}
-			else if ( "aes".equals(notes[i]) ) {
-				notes[ i ] = "as";
+			else if ("aes".equals(notes[i])) {
+				notes[i] = "as";
 			}
 		}
 		
@@ -3399,40 +3399,40 @@ public class Dict {
 	public static void initNoteSystem() {
 		
 		// refresh combobox language
-		ConfigComboboxModel.refill( Config.NOTE );
+		ConfigComboboxModel.refill(Config.NOTE);
 		
 		// get note system and half tone
-		String configuredNoteSystem = Config.get( Config.NOTE );
+		String configuredNoteSystem = Config.get(Config.NOTE);
 		
 		// define what is a half tone (in german note systems this will be overridden)
-		isHalfTone = new byte[ 5 ];
-		isHalfTone[ 0 ] =  1; // C#, Db
-		isHalfTone[ 1 ] =  3; // D#, Eb
-		isHalfTone[ 2 ] =  6; // F#, Gb
-		isHalfTone[ 3 ] =  8; // G#, Ab
-		isHalfTone[ 4 ] = 10; // A#, Bb
+		isHalfTone = new byte[5];
+		isHalfTone[0] =  1; // C#, Db
+		isHalfTone[1] =  3; // D#, Eb
+		isHalfTone[2] =  6; // F#, Gb
+		isHalfTone[3] =  8; // G#, Ab
+		isHalfTone[4] = 10; // A#, Bb
 		
 		// initialize the configuration specific note system
-		if ( Config.CBX_NOTE_ID_INTERNATIONAL_LC.equals(configuredNoteSystem) ) {
-			initNotesInternational( false );
+		if (Config.CBX_NOTE_ID_INTERNATIONAL_LC.equals(configuredNoteSystem)) {
+			initNotesInternational(false);
 		}
-		else if ( Config.CBX_NOTE_ID_INTERNATIONAL_UC.equals(configuredNoteSystem) ) {
-			initNotesInternational( true );
+		else if (Config.CBX_NOTE_ID_INTERNATIONAL_UC.equals(configuredNoteSystem)) {
+			initNotesInternational(true);
 		}
-		else if ( Config.CBX_NOTE_ID_ITALIAN_LC.equals(configuredNoteSystem) ) {
-			initNotesItalian( false );
+		else if (Config.CBX_NOTE_ID_ITALIAN_LC.equals(configuredNoteSystem)) {
+			initNotesItalian(false);
 		}
-		else if ( Config.CBX_NOTE_ID_ITALIAN_UC.equals(configuredNoteSystem) ) {
-			initNotesItalian( true );
+		else if (Config.CBX_NOTE_ID_ITALIAN_UC.equals(configuredNoteSystem)) {
+			initNotesItalian(true);
 		}
-		else if ( Config.CBX_NOTE_ID_GERMAN_LC.equals(configuredNoteSystem) ) {
-			initNotesGerman( false );
+		else if (Config.CBX_NOTE_ID_GERMAN_LC.equals(configuredNoteSystem)) {
+			initNotesGerman(false);
 		}
-		else if ( Config.CBX_NOTE_ID_GERMAN_UC.equals(configuredNoteSystem) ) {
-			initNotesGerman( true );
+		else if (Config.CBX_NOTE_ID_GERMAN_UC.equals(configuredNoteSystem)) {
+			initNotesGerman(true);
 		}
 		else {
-			initNotesInternational( false );
+			initNotesInternational(false);
 		}
 		
 		// the note system has changed so the half tones have to be refreshed as well
@@ -3450,25 +3450,25 @@ public class Dict {
 	public static void initOctaves() {
 		
 		// refresh combobox language
-		ConfigComboboxModel.refill( Config.OCTAVE );
+		ConfigComboboxModel.refill(Config.OCTAVE);
 		
 		// get note system and half tone
-		String configuredOctave = Config.get( Config.OCTAVE );
+		String configuredOctave = Config.get(Config.OCTAVE);
 		
 		noteNameToInt = new HashMap<String, Integer>();
 		noteIntToName = new HashMap<Integer, String>();
 		
 		// initialize the octave according to the configuration
-		if ( Config.CBX_OCTAVE_PLUS_MINUS_N.equals(configuredOctave) ) {
+		if (Config.CBX_OCTAVE_PLUS_MINUS_N.equals(configuredOctave)) {
 			initOctavesPlusMinusN();
 		}
-		else if ( Config.CBX_OCTAVE_PLUS_MINUS.equals(configuredOctave) ) {
+		else if (Config.CBX_OCTAVE_PLUS_MINUS.equals(configuredOctave)) {
 			initOctavesPlusMinus();
 		}
-		else if ( Config.CBX_OCTAVE_INTERNATIONAL.equals(configuredOctave) ) {
+		else if (Config.CBX_OCTAVE_INTERNATIONAL.equals(configuredOctave)) {
 			initOctavesInternational();
 		}
-		else if ( Config.CBX_OCTAVE_GERMAN.equals(configuredOctave) ) {
+		else if (Config.CBX_OCTAVE_GERMAN.equals(configuredOctave)) {
 			initOctavesGerman();
 		}
 		else {
@@ -3476,8 +3476,8 @@ public class Dict {
 		}
 		
 		// init integers to names
-		for ( String key : noteNameToInt.keySet() ) {
-			noteIntToName.put( noteNameToInt.get(key), key );
+		for (String key : noteNameToInt.keySet()) {
+			noteIntToName.put(noteNameToInt.get(key), key);
 		}
 	}
 	
@@ -3491,10 +3491,10 @@ public class Dict {
 	public static void initSyntax() {
 		
 		// refresh combobox language
-		ConfigComboboxModel.refill( Config.SYNTAX );
+		ConfigComboboxModel.refill(Config.SYNTAX);
 		
 		// get syntax
-		String configuredSyntax = Config.get( Config.SYNTAX );
+		String configuredSyntax = Config.get(Config.SYNTAX);
 		
 		// init configured syntax
 		syntax = new HashMap<String, String>();
@@ -3609,13 +3609,13 @@ public class Dict {
 		setSyntax( SYNTAX_LENGTH_PLUS,        "+"            );
 		
 		// switch to lower/upper, if needed
-		if ( Config.CBX_SYNTAX_LOWER.equals(configuredSyntax) ) {
+		if (Config.CBX_SYNTAX_LOWER.equals(configuredSyntax)) {
 			for (String id : syntax.keySet()) {
 				String keyword = syntax.get(id).toLowerCase();
 				setSyntax(id, keyword);
 			}
 		}
-		else if ( Config.CBX_SYNTAX_UPPER.equals(configuredSyntax) ) {
+		else if (Config.CBX_SYNTAX_UPPER.equals(configuredSyntax)) {
 			for (String id : syntax.keySet()) {
 				String keyword = syntax.get(id).toUpperCase();
 				setSyntax(id, keyword);
@@ -3625,7 +3625,7 @@ public class Dict {
 		// init syntax for the syntax tab in the info view
 		syntaxList = new ArrayList<SyntaxElement>();
 		
-		addSyntaxCategory( get(SYNTAX_CAT_DEFINITION) );
+		addSyntaxCategory(get(SYNTAX_CAT_DEFINITION));
 		addSyntaxForInfoView( SYNTAX_DEFINE            );
 		addSyntaxForInfoView( SYNTAX_META              );
 		addSyntaxForInfoView( SYNTAX_FUNCTION          );
@@ -3642,7 +3642,7 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_BLOCK_OPEN        );
 		addSyntaxForInfoView( SYNTAX_BLOCK_CLOSE       );
 		
-		addSyntaxCategory( get(SYNTAX_CAT_EXECUTE) );
+		addSyntaxCategory(get(SYNTAX_CAT_EXECUTE));
 		addSyntaxForInfoView( SYNTAX_CALL            );
 		addSyntaxForInfoView( SYNTAX_PARAM_OPEN      );
 		addSyntaxForInfoView( SYNTAX_PARAM_CLOSE     );
@@ -3651,7 +3651,7 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_INCLUDE         );
 		addSyntaxForInfoView( SYNTAX_SOUNDFONT       );
 		
-		addSyntaxCategory( get(SYNTAX_CAT_GLOBAL) );
+		addSyntaxCategory(get(SYNTAX_CAT_GLOBAL));
 		addSyntaxForInfoView( SYNTAX_GLOBAL             );
 		addSyntaxForInfoView( SYNTAX_TEMPO              );
 		addSyntaxForInfoView( SYNTAX_TIME_SIG           );
@@ -3663,12 +3663,12 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_PARTIAL_SYNC_RANGE );
 		addSyntaxForInfoView( SYNTAX_PARTIAL_SYNC_SEP   );
 		
-		addSyntaxCategory( get(SYNTAX_CAT_OTHER) );
+		addSyntaxCategory(get(SYNTAX_CAT_OTHER));
 		addSyntaxForInfoView( SYNTAX_COMMENT           );
 		addSyntaxForInfoView( SYNTAX_REST              );
 		addSyntaxForInfoView( SYNTAX_P                 );
 		
-		addSyntaxCategory( get(SYNTAX_CAT_META) );
+		addSyntaxCategory(get(SYNTAX_CAT_META));
 		addSyntaxForInfoView( SYNTAX_META_COPYRIGHT    );
 		addSyntaxForInfoView( SYNTAX_META_TITLE        );
 		addSyntaxForInfoView( SYNTAX_META_COMPOSER     );
@@ -3682,7 +3682,7 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_META_SK_COPYRIGHT );
 		addSyntaxForInfoView( SYNTAX_META_SK_INFO      );
 		
-		addSyntaxCategory( get(SYNTAX_CAT_VAR_AND_CONST) );
+		addSyntaxCategory(get(SYNTAX_CAT_VAR_AND_CONST));
 		addSyntaxForInfoView( SYNTAX_CONST             );
 		addSyntaxForInfoView( SYNTAX_VAR               );
 		addSyntaxForInfoView( SYNTAX_VAR_SYMBOL        );
@@ -3692,7 +3692,7 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_PARAM_INDEX_OPEN  );
 		addSyntaxForInfoView( SYNTAX_PARAM_INDEX_CLOSE );
 		
-		addSyntaxCategory( get(SYNTAX_CAT_OPTION) );
+		addSyntaxCategory(get(SYNTAX_CAT_OPTION));
 		addSyntaxForInfoView( SYNTAX_OPT_SEPARATOR    );
 		addSyntaxForInfoView( SYNTAX_OPT_ASSIGNER     );
 		addSyntaxForInfoView( SYNTAX_VELOCITY         );
@@ -3720,7 +3720,7 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_ELSIF            );
 		addSyntaxForInfoView( SYNTAX_ELSE             );
 		
-		addSyntaxCategory( get(SYNTAX_CAT_CONDITON) );
+		addSyntaxCategory(get(SYNTAX_CAT_CONDITON));
 		addSyntaxForInfoView( SYNTAX_COND_EQ          );
 		addSyntaxForInfoView( SYNTAX_COND_NEQ         );
 		addSyntaxForInfoView( SYNTAX_COND_NDEF        );
@@ -3731,7 +3731,7 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_COND_IN          );
 		addSyntaxForInfoView( SYNTAX_COND_IN_SEP      );
 		
-		addSyntaxCategory( get(SYNTAX_CAT_NOTE_LENGTH) );
+		addSyntaxCategory(get(SYNTAX_CAT_NOTE_LENGTH));
 		addSyntaxForInfoView( SYNTAX_32            );
 		addSyntaxForInfoView( SYNTAX_16            );
 		addSyntaxForInfoView( SYNTAX_8             );
@@ -3762,14 +3762,14 @@ public class Dict {
 	public static void initPercussion() {
 		
 		// refresh combobox language
-		ConfigComboboxModel.refill( Config.PERCUSSION );
+		ConfigComboboxModel.refill(Config.PERCUSSION);
 		
 		// get language
-		String percSet = Config.get( Config.PERCUSSION );
+		String percSet = Config.get(Config.PERCUSSION);
 		
 		// init percussion translations
 		initPercussionEnglish();
-		if ( Config.CBX_PERC_DE_1.equals( percSet ) ) {
+		if (Config.CBX_PERC_DE_1.equals(percSet)) {
 			initPercussionGerman();
 		}
 		
@@ -3841,8 +3841,8 @@ public class Dict {
 		
 		// init translation integer --> long ID
 		percussionIntToLongId = new HashMap<Integer, String>();
-		for ( String key : percussionIdToInt.keySet() ) {
-			percussionIntToLongId.put( percussionIdToInt.get(key), key );
+		for (String key : percussionIdToInt.keySet()) {
+			percussionIntToLongId.put(percussionIdToInt.get(key), key);
 		}
 		
 		// short identifiers
@@ -3915,7 +3915,7 @@ public class Dict {
 			String longId = percussionIntToLongId.get(number);
 			if (key.equals(longId))
 				continue;
-			percussionIntToShortId.put( percussionIdToInt.get(key), key );
+			percussionIntToShortId.put(percussionIdToInt.get(key), key);
 		}
 	}
 	
@@ -3926,10 +3926,10 @@ public class Dict {
 	public static void initInstruments() {
 		
 		// refresh combobox language
-		ConfigComboboxModel.refill( Config.INSTRUMENT );
+		ConfigComboboxModel.refill(Config.INSTRUMENT);
 
 		// get language
-		String instrSet = Config.get( Config.INSTRUMENT );
+		String instrSet = Config.get(Config.INSTRUMENT);
 		
 		// init instrument translations
 		instrIntToName   = new HashMap<Integer, String>();
@@ -3938,7 +3938,7 @@ public class Dict {
 		drumkitIntToName = new HashMap<Integer, String>();
 		drumkitNameToInt = new HashMap<String, Integer>();
 		drumkitList      = new ArrayList<InstrumentElement>();
-		if ( Config.CBX_PERC_DE_1.equals( instrSet ) ) {
+		if (Config.CBX_PERC_DE_1.equals(instrSet)) {
 			initInstrumentsGerman1();
 		}
 		else {
@@ -3952,7 +3952,7 @@ public class Dict {
 	 * @param upperCase true if the resulting note names shall be capitalized
 	 *                  -- otherwise: false
 	 */
-	private static void initNotesInternational( boolean upperCase ) {
+	private static void initNotesInternational(boolean upperCase) {
 		// initialize full notes
 		if (upperCase) {
 			notes[  0 ] = "C";
@@ -3980,7 +3980,7 @@ public class Dict {
 	 * @param upperCase true if the resulting note names shall have an capitalized
 	 *                  first character -- otherwise: false
 	 */
-	private static void initNotesItalian( boolean upperCase ) {
+	private static void initNotesItalian(boolean upperCase) {
 		// initialize full notes
 		if (upperCase) {
 			notes[  0 ] = "Do";
@@ -4008,7 +4008,7 @@ public class Dict {
 	 * @param upperCase true if the resulting note names shall be capitalized
 	 *                  -- otherwise: false
 	 */
-	private static void initNotesGerman( boolean upperCase ) {
+	private static void initNotesGerman(boolean upperCase) {
 		// initialize full notes
 		if (upperCase) {
 			notes[  0 ] = "C";
@@ -4032,11 +4032,11 @@ public class Dict {
 		}
 		
 		// redefine what is a half tone (the german system is different)
-		isHalfTone = new byte[ 4 ];
-		isHalfTone[ 0 ] =  1; // C#, Db
-		isHalfTone[ 1 ] =  3; // D#, Eb
-		isHalfTone[ 2 ] =  6; // F#, Gb
-		isHalfTone[ 3 ] =  8; // G#, Ab
+		isHalfTone = new byte[4];
+		isHalfTone[0] =  1; // C#, Db
+		isHalfTone[1] =  3; // D#, Eb
+		isHalfTone[2] =  6; // F#, Gb
+		isHalfTone[3] =  8; // G#, Ab
 	}
 	
 	/**
@@ -4075,7 +4075,7 @@ public class Dict {
 		}
 		
 		// initialize lower notes
-		Collections.reverse( noteNames );
+		Collections.reverse(noteNames);
 		postfix = "";
 		OCTAVE:
 		for (int octave = 1; ; octave++) {
@@ -4132,7 +4132,7 @@ public class Dict {
 		Collections.reverse(noteNames);
 		postfix = new StringBuilder("");
 		OCTAVE:
-		for ( int octave = 1; ; octave++ ) {
+		for (int octave = 1; ; octave++) {
 			postfix.append("-");
 			int decrement = octave * 12;
 			NAME:
@@ -4201,14 +4201,14 @@ public class Dict {
 		StringBuilder postfix = new StringBuilder("");
 		OCTAVE:
 		for (int octave = 0; ; octave++) {
-			if ( octave > 0 )
+			if (octave > 0)
 				postfix.append("'");
 			int increment = octave * 12;
 			NAME:
 			for (NamedInteger name : noteNames) {
 				String newName  = name.name  + postfix;
 				int    newValue = name.value + increment;
-				if ( newValue > 127 )
+				if (newValue > 127)
 					break OCTAVE;
 				noteNameToInt.put(newName, newValue);
 			}
@@ -4216,11 +4216,11 @@ public class Dict {
 		
 		// define unmodified note names for lower notes (upper case)
 		for (NamedInteger note : noteNames) {
-			note.name = note.name.substring( 0, 1 ).toUpperCase()
-			          + note.name.substring( 1 )
+			note.name = note.name.substring(0, 1).toUpperCase()
+			          + note.name.substring(1)
 			          ;
 		}
-		Collections.reverse( noteNames );
+		Collections.reverse(noteNames);
 		postfix = new StringBuilder("");
 		
 		// initialize lower notes
@@ -4510,8 +4510,8 @@ public class Dict {
 	 * @param id        identifier defining the meaning of the keyword to specify
 	 * @param keyword   the keyword to be configured
 	 */
-	private static void setSyntax( String id, String keyword ) {
-		syntax.put( id, keyword );
+	private static void setSyntax(String id, String keyword) {
+		syntax.put(id, keyword);
 	}
 	
 	/**
@@ -4522,11 +4522,11 @@ public class Dict {
 	 * 
 	 * @param id identifier of the syntax element to add
 	 */
-	private static void addSyntaxForInfoView( String id ) {
-		String description = get( id );
-		String keyword     = getSyntax( id );
-		SyntaxElement elem = new SyntaxElement( id, description, keyword, false );
-		syntaxList.add( elem );
+	private static void addSyntaxForInfoView(String id) {
+		String description = get(id);
+		String keyword     = getSyntax(id);
+		SyntaxElement elem = new SyntaxElement(id, description, keyword, false);
+		syntaxList.add(elem);
 	}
 	
 	/**
@@ -4537,9 +4537,9 @@ public class Dict {
 	 * 
 	 * @param categoryName name of the syntax category
 	 */
-	private static void addSyntaxCategory( String categoryName ) {
-		SyntaxElement elem = new SyntaxElement( categoryName, "", "", true );
-		syntaxList.add( elem );
+	private static void addSyntaxCategory(String categoryName) {
+		SyntaxElement elem = new SyntaxElement(categoryName, "", "", true);
+		syntaxList.add(elem);
 	}
 	
 	/**
@@ -4548,7 +4548,7 @@ public class Dict {
 	 */
 	private static void initInstrumentsEnglish1() {
 		// piano
-		addInstrCategory( INSTR_CAT_PIANO );
+		addInstrCategory(INSTR_CAT_PIANO);
 		setInstrument( 0,   "ACOUSTIC_GRAND_PIANO"  );
 		setInstrument( 1,   "BRIGHT_ACOUSTIC_PIANO" );
 		setInstrument( 2,   "ELECTRIC_GRAND_PIANO"  );
@@ -4559,7 +4559,7 @@ public class Dict {
 		setInstrument( 7,   "CLAVINET"              );
 		
 		// chromatic percussion
-		addInstrCategory( INSTR_CAT_CHROM_PERC );
+		addInstrCategory(INSTR_CAT_CHROM_PERC);
 		setInstrument( 8,   "CELESTA"               );
 		setInstrument( 9,   "GLOCKENSPIEL"          );
 		setInstrument( 10,  "MUSIC_BOX"             );
@@ -4570,7 +4570,7 @@ public class Dict {
 		setInstrument( 15,  "DULCIMER"              );
 		
 		// organ
-		addInstrCategory( INSTR_CAT_ORGAN );
+		addInstrCategory(INSTR_CAT_ORGAN);
 		setInstrument( 16,  "DRAWBAR_ORGAN"         );
 		setInstrument( 17,  "PERCUSSIVE_ORGAN"      );
 		setInstrument( 18,  "ROCK_ORGAN"            );
@@ -4581,7 +4581,7 @@ public class Dict {
 		setInstrument( 23,  "TANGO_ACCORDION"       );
 		
 		// guitar
-		addInstrCategory( INSTR_CAT_GUITAR );
+		addInstrCategory(INSTR_CAT_GUITAR);
 		setInstrument( 24,  "NYLON_GUITAR"          );
 		setInstrument( 25,  "STEEL_GUITAR"          );
 		setInstrument( 26,  "E_GUITAR_JAZZ"         );
@@ -4592,7 +4592,7 @@ public class Dict {
 		setInstrument( 31,  "GUITAR_HARMONICS"      );
 		
 		// bass
-		addInstrCategory( INSTR_CAT_BASS );
+		addInstrCategory(INSTR_CAT_BASS);
 		setInstrument( 32,  "ACOUSTIC_BASS"         );
 		setInstrument( 33,  "E_BASS_FINGER"         );
 		setInstrument( 34,  "E_BASS_PICK"           );
@@ -4603,7 +4603,7 @@ public class Dict {
 		setInstrument( 39,  "SYNTH_BASS_2"          );
 		
 		// strings
-		addInstrCategory( INSTR_CAT_STRINGS );
+		addInstrCategory(INSTR_CAT_STRINGS);
 		setInstrument( 40,  "VIOLIN"                );
 		setInstrument( 41,  "VIOLA"                 );
 		setInstrument( 42,  "CELLO"                 );
@@ -4614,7 +4614,7 @@ public class Dict {
 		setInstrument( 47,  "TIMPANI"               );
 		
 		// ensemble
-		addInstrCategory( INSTR_CAT_ENSEMBLE );
+		addInstrCategory(INSTR_CAT_ENSEMBLE);
 		setInstrument( 48,  "STRING_ENSEMBLE_1"     );
 		setInstrument( 49,  "STRING_ENSEMBLE_2"     );
 		setInstrument( 50,  "SYNTH_STRINGS_1"       );
@@ -4625,7 +4625,7 @@ public class Dict {
 		setInstrument( 55,  "ORCHESTRA_HIT"         );
 		
 		// brass
-		addInstrCategory( INSTR_CAT_BRASS );
+		addInstrCategory(INSTR_CAT_BRASS);
 		setInstrument( 56,  "TRUMPET"               );
 		setInstrument( 57,  "TROMBONE"              );
 		setInstrument( 58,  "TUBA"                  );
@@ -4636,7 +4636,7 @@ public class Dict {
 		setInstrument( 63,  "SYNTH_BRASS_2"         );
 		
 		// reed
-		addInstrCategory( INSTR_CAT_REED );
+		addInstrCategory(INSTR_CAT_REED);
 		setInstrument( 64,  "SOPRANO_SAX"           );
 		setInstrument( 65,  "ALTO_SAX"              );
 		setInstrument( 66,  "TENOR_SAX"             );
@@ -4647,7 +4647,7 @@ public class Dict {
 		setInstrument( 71,  "CLARINET"              );
 		
 		// pipe
-		addInstrCategory( INSTR_CAT_PIPE );
+		addInstrCategory(INSTR_CAT_PIPE);
 		setInstrument( 72,  "PICCOLO"               );
 		setInstrument( 73,  "FLUTE"                 );
 		setInstrument( 74,  "RECORDER"              );
@@ -4658,7 +4658,7 @@ public class Dict {
 		setInstrument( 79,  "OCARINA"               );
 		
 		// synth lead
-		addInstrCategory( INSTR_CAT_SYNTH_LEAD );
+		addInstrCategory(INSTR_CAT_SYNTH_LEAD);
 		setInstrument( 80,  "LEAD_SQUARE"          );
 		setInstrument( 81,  "LEAD_SAWTOOTH"        );
 		setInstrument( 82,  "LEAD_CALLIOPE"        );
@@ -4669,7 +4669,7 @@ public class Dict {
 		setInstrument( 87,  "LEAD_BASS_LEAD"       );
 		
 		// synth pad
-		addInstrCategory( INSTR_CAT_SYNTH_PAD );
+		addInstrCategory(INSTR_CAT_SYNTH_PAD);
 		setInstrument( 88,  "PAD_NEW_AGE"           );
 		setInstrument( 89,  "PAD_WARM"              );
 		setInstrument( 90,  "PAD_POLYSYNTH"         );
@@ -4680,7 +4680,7 @@ public class Dict {
 		setInstrument( 95,  "PAD_SWEEP"             );
 		
 		// synth effects
-		addInstrCategory( INSTR_CAT_SYNTH_EFFECTS );
+		addInstrCategory(INSTR_CAT_SYNTH_EFFECTS);
 		setInstrument( 96,  "FX_RAIN"               );
 		setInstrument( 97,  "FX_SOUNDTRACK"         );
 		setInstrument( 98,  "FX_CRYSTAL"            );
@@ -4691,7 +4691,7 @@ public class Dict {
 		setInstrument( 103, "FX_SCI_FI"             );
 		
 		// ethnic
-		addInstrCategory( INSTR_CAT_ETHNIC );
+		addInstrCategory(INSTR_CAT_ETHNIC);
 		setInstrument( 104, "SITAR"                 );
 		setInstrument( 105, "BANJO"                 );
 		setInstrument( 106, "SHAMISEN"              );
@@ -4702,7 +4702,7 @@ public class Dict {
 		setInstrument( 111, "SHANAI"                );
 		
 		// percussive
-		addInstrCategory( INSTR_CAT_PERCUSSIVE );
+		addInstrCategory(INSTR_CAT_PERCUSSIVE);
 		setInstrument( 112, "TINKLE_BELL"           );
 		setInstrument( 113, "AGOGO"                 );
 		setInstrument( 114, "STEEL_DRUMS"           );
@@ -4713,7 +4713,7 @@ public class Dict {
 		setInstrument( 119, "REVERSE_CYMBAL"        );
 		
 		// sound effects
-		addInstrCategory( INSTR_CAT_SOUND_EFFECTS );
+		addInstrCategory(INSTR_CAT_SOUND_EFFECTS);
 		setInstrument( 120, "GUITAR_FRET_NOISE"     );
 		setInstrument( 121, "BREATH_NOISE"          );
 		setInstrument( 122, "SEASHORE"              );
@@ -4743,7 +4743,7 @@ public class Dict {
 	private static void initInstrumentsGerman1() {
 		// TODO: translate
 		// piano
-		addInstrCategory( INSTR_CAT_PIANO );
+		addInstrCategory(INSTR_CAT_PIANO);
 		setInstrument( 0,   "ACOUSTIC_GRAND_PIANO"  );
 		setInstrument( 1,   "BRIGHT_ACOUSTIC_PIANO" );
 		setInstrument( 2,   "ELECTRIC_GRAND_PIANO"  );
@@ -4754,7 +4754,7 @@ public class Dict {
 		setInstrument( 7,   "CLAVINET"              );
 		
 		// chromatic percussion
-		addInstrCategory( INSTR_CAT_CHROM_PERC );
+		addInstrCategory(INSTR_CAT_CHROM_PERC);
 		setInstrument( 8,   "CELESTA"               );
 		setInstrument( 9,   "GLOCKENSPIEL"          );
 		setInstrument( 10,  "MUSIC_BOX"             );
@@ -4765,7 +4765,7 @@ public class Dict {
 		setInstrument( 15,  "DULCIMER"              );
 		
 		// organ
-		addInstrCategory( INSTR_CAT_ORGAN );
+		addInstrCategory(INSTR_CAT_ORGAN);
 		setInstrument( 16,  "DRAWBAR_ORGAN"         );
 		setInstrument( 17,  "PERCUSSIVE_ORGAN"      );
 		setInstrument( 18,  "ROCK_ORGAN"            );
@@ -4776,7 +4776,7 @@ public class Dict {
 		setInstrument( 23,  "TANGO_ACCORDION"       );
 		
 		// guitar
-		addInstrCategory( INSTR_CAT_GUITAR );
+		addInstrCategory(INSTR_CAT_GUITAR);
 		setInstrument( 24,  "NYLON_GUITAR"          );
 		setInstrument( 25,  "STEEL_GUITAR"          );
 		setInstrument( 26,  "E_GUITAR_JAZZ"         );
@@ -4787,7 +4787,7 @@ public class Dict {
 		setInstrument( 31,  "GUITAR_HARMONICS"      );
 		
 		// bass
-		addInstrCategory( INSTR_CAT_BASS );
+		addInstrCategory(INSTR_CAT_BASS);
 		setInstrument( 32,  "ACOUSTIC_BASS"         );
 		setInstrument( 33,  "E_BASS_FINGER"         );
 		setInstrument( 34,  "E_BASS_PICK"           );
@@ -4798,7 +4798,7 @@ public class Dict {
 		setInstrument( 39,  "SYNTH_BASS_2"          );
 		
 		// strings
-		addInstrCategory( INSTR_CAT_STRINGS );
+		addInstrCategory(INSTR_CAT_STRINGS);
 		setInstrument( 40,  "VIOLIN"                );
 		setInstrument( 41,  "VIOLA"                 );
 		setInstrument( 42,  "CELLO"                 );
@@ -4809,7 +4809,7 @@ public class Dict {
 		setInstrument( 47,  "TIMPANI"               );
 		
 		// ensemble
-		addInstrCategory( INSTR_CAT_ENSEMBLE );
+		addInstrCategory(INSTR_CAT_ENSEMBLE);
 		setInstrument( 48,  "STRING_ENSEMBLE_1"     );
 		setInstrument( 49,  "STRING_ENSEMBLE_2"     );
 		setInstrument( 50,  "SYNTH_STRINGS_1"       );
@@ -4820,7 +4820,7 @@ public class Dict {
 		setInstrument( 55,  "ORCHESTRA_HIT"         );
 		
 		// brass
-		addInstrCategory( INSTR_CAT_BRASS );
+		addInstrCategory(INSTR_CAT_BRASS);
 		setInstrument( 56,  "TRUMPET"               );
 		setInstrument( 57,  "TROMBONE"              );
 		setInstrument( 58,  "TUBA"                  );
@@ -4831,7 +4831,7 @@ public class Dict {
 		setInstrument( 63,  "SYNTH_BRASS_2"         );
 		
 		// reed
-		addInstrCategory( INSTR_CAT_REED );
+		addInstrCategory(INSTR_CAT_REED);
 		setInstrument( 64,  "SOPRANO_SAX"           );
 		setInstrument( 65,  "ALTO_SAX"              );
 		setInstrument( 66,  "TENOR_SAX"             );
@@ -4842,7 +4842,7 @@ public class Dict {
 		setInstrument( 71,  "CLARINET"              );
 		
 		// pipe
-		addInstrCategory( INSTR_CAT_PIPE );
+		addInstrCategory(INSTR_CAT_PIPE);
 		setInstrument( 72,  "PICCOLO"               );
 		setInstrument( 73,  "FLUTE"                 );
 		setInstrument( 74,  "RECORDER"              );
@@ -4853,7 +4853,7 @@ public class Dict {
 		setInstrument( 79,  "OCARINA"               );
 		
 		// synth lead
-		addInstrCategory( INSTR_CAT_SYNTH_LEAD );
+		addInstrCategory(INSTR_CAT_SYNTH_LEAD);
 		setInstrument( 80,  "LEAD_SQUARE"          );
 		setInstrument( 81,  "LEAD_SAWTOOTH"        );
 		setInstrument( 82,  "LEAD_CALLIOPE"        );
@@ -4864,7 +4864,7 @@ public class Dict {
 		setInstrument( 87,  "LEAD_BASS_LEAD"       );
 		
 		// synth pad
-		addInstrCategory( INSTR_CAT_SYNTH_PAD );
+		addInstrCategory(INSTR_CAT_SYNTH_PAD);
 		setInstrument( 88,  "PAD_NEW_AGE"           );
 		setInstrument( 89,  "PAD_WARM"              );
 		setInstrument( 90,  "PAD_POLYSYNTH"         );
@@ -4875,7 +4875,7 @@ public class Dict {
 		setInstrument( 95,  "PAD_SWEEP"             );
 		
 		// synth effects
-		addInstrCategory( INSTR_CAT_SYNTH_EFFECTS );
+		addInstrCategory(INSTR_CAT_SYNTH_EFFECTS);
 		setInstrument( 96,  "FX_RAIN"               );
 		setInstrument( 97,  "FX_SOUNDTRACK"         );
 		setInstrument( 98,  "FX_CRYSTAL"            );
@@ -4886,7 +4886,7 @@ public class Dict {
 		setInstrument( 103, "FX_SCI_FI"             );
 		
 		// ethnic
-		addInstrCategory( INSTR_CAT_ETHNIC );
+		addInstrCategory(INSTR_CAT_ETHNIC);
 		setInstrument( 104, "SITAR"                 );
 		setInstrument( 105, "BANJO"                 );
 		setInstrument( 106, "SHAMISEN"              );
@@ -4897,7 +4897,7 @@ public class Dict {
 		setInstrument( 111, "SHANAI"                );
 		
 		// percussive
-		addInstrCategory( INSTR_CAT_PERCUSSIVE );
+		addInstrCategory(INSTR_CAT_PERCUSSIVE);
 		setInstrument( 112, "TINKLE_BELL"           );
 		setInstrument( 113, "AGOGO"                 );
 		setInstrument( 114, "STEEL_DRUMS"           );
@@ -4908,7 +4908,7 @@ public class Dict {
 		setInstrument( 119, "REVERSE_CYMBAL"        );
 		
 		// sound effects
-		addInstrCategory( INSTR_CAT_SOUND_EFFECTS );
+		addInstrCategory(INSTR_CAT_SOUND_EFFECTS);
 		setInstrument( 120, "GUITAR_FRET_NOISE"     );
 		setInstrument( 121, "BREATH_NOISE"          );
 		setInstrument( 122, "SEASHORE"              );
@@ -4970,10 +4970,10 @@ public class Dict {
 	 * 
 	 * @param categoryId  identifier of the category to be added
 	 */
-	private static void addInstrCategory( String categoryId ) {
-		String categoryName = get( categoryId );
-		InstrumentElement elem = new InstrumentElement( -1, categoryName, true );
-		instrumentList.add( elem );
+	private static void addInstrCategory(String categoryId) {
+		String categoryName = get(categoryId);
+		InstrumentElement elem = new InstrumentElement(-1, categoryName, true);
+		instrumentList.add(elem);
 	}
 	
 	/**
@@ -4996,8 +4996,8 @@ public class Dict {
 	 * @param key  identifier of the requested translation
 	 * @return     language translation corresponding to the given identifier
 	 */
-	public static String get( String key ) {
-		if ( dictionary.containsKey(key) )
+	public static String get(String key) {
+		if (dictionary.containsKey(key))
 			return dictionary.get(key);
 		else
 			return "[[" + key + "]]";
@@ -5009,9 +5009,9 @@ public class Dict {
 	 * @param name  note name to identify the requested note
 	 * @return      value of the requested note like it is defined in the MIDI specification
 	 */
-	public static int getNote( String name ) {
-		if ( noteNameToInt.containsKey(name) )
-			return noteNameToInt.get( name );
+	public static int getNote(String name) {
+		if (noteNameToInt.containsKey(name))
+			return noteNameToInt.get(name);
 		else
 			return UNKNOWN_CODE;
 	}
@@ -5022,11 +5022,11 @@ public class Dict {
 	 * @param i  value of the requested note like it is defined in the MIDI specification
 	 * @return   currently configured name for the requested note
 	 */
-	public static String getNote( int i ) {
-		if ( noteIntToName.containsKey(i) )
-			return noteIntToName.get( i );
+	public static String getNote(int i) {
+		if (noteIntToName.containsKey(i))
+			return noteIntToName.get(i);
 		else
-			return get( UNKNOWN_NOTE_NAME );
+			return get(UNKNOWN_NOTE_NAME);
 	}
 	
 	/**
@@ -5036,9 +5036,9 @@ public class Dict {
 	 * @param noteNum  The note number.
 	 * @return  The note's base name.
 	 */
-	public static String getBaseNoteName( int noteNum ) {
+	public static String getBaseNoteName(int noteNum) {
 		int noteIndex = noteNum % 12;
-		return notes[ noteIndex ];
+		return notes[noteIndex];
 	}
 	
 	/**
@@ -5047,9 +5047,9 @@ public class Dict {
 	 * @param name  currently configured name for the instrument
 	 * @return      value for the instrument as defined by the MIDI specification
 	 */
-	public static int getInstrument( String name ) {
-		if ( instrNameToInt.containsKey(name) )
-			return instrNameToInt.get( name );
+	public static int getInstrument(String name) {
+		if (instrNameToInt.containsKey(name))
+			return instrNameToInt.get(name);
 		else
 			return UNKNOWN_CODE;
 	}
@@ -5061,10 +5061,10 @@ public class Dict {
 	 * @return   currently configured name for the requested instrument
 	 */
 	public static String getInstrument(int i) {
-		if ( instrIntToName.containsKey(i) )
+		if (instrIntToName.containsKey(i))
 			return instrIntToName.get(i);
 		else
-			return get( UNKNOWN_INSTRUMENT );
+			return get(UNKNOWN_INSTRUMENT);
 	}
 	
 	/**
@@ -5074,7 +5074,7 @@ public class Dict {
 	 * @return      true, if the note name is configured -- otherwise: false
 	 */
 	public static boolean noteExists(String name) {
-		if ( noteNameToInt.containsKey(name) )
+		if (noteNameToInt.containsKey(name))
 			return true;
 		return false;
 	}
@@ -5086,7 +5086,7 @@ public class Dict {
 	 * @return    instrument value as defined by the MIDI specification
 	 */
 	public static int getPercussion(String id) {
-		if ( percussionIdToInt.containsKey(id) )
+		if (percussionIdToInt.containsKey(id))
 			return percussionIdToInt.get(id);
 		else
 			return UNKNOWN_CODE;
@@ -5100,7 +5100,7 @@ public class Dict {
 	 *           percussion instrument
 	 */
 	public static String getPercussionLongId(int i) {
-		if ( percussionIntToLongId.containsKey(i) )
+		if (percussionIntToLongId.containsKey(i))
 			return percussionIntToLongId.get(i);
 		else
 			return get(UNKNOWN_PERCUSSION_NAME);
@@ -5114,7 +5114,7 @@ public class Dict {
 	 *           percussion instrument
 	 */
 	public static String getPercussionShortId(int i) {
-		if ( percussionIntToShortId.containsKey(i) )
+		if (percussionIntToShortId.containsKey(i))
 			return percussionIntToShortId.get(i);
 		else
 			return get(UNKNOWN_PERCUSSION_NAME);
@@ -5144,7 +5144,7 @@ public class Dict {
 	 * @return      drumkit number as defined by the General Standard specification
 	 */
 	public static int getDrumkit(String name) {
-		if ( drumkitNameToInt.containsKey(name) )
+		if (drumkitNameToInt.containsKey(name))
 			return drumkitNameToInt.get(name);
 		else
 			return UNKNOWN_CODE;
@@ -5157,7 +5157,7 @@ public class Dict {
 	 * @return drumkit ID.
 	 */
 	public static String getDrumkit(int i) {
-		if ( drumkitIntToName.containsKey(i) )
+		if (drumkitIntToName.containsKey(i))
 			return drumkitIntToName.get(i);
 		else
 			return get(UNKNOWN_DRUMKIT_NAME);
@@ -5170,7 +5170,7 @@ public class Dict {
 	 * @return      true, if the percussion name is configured -- otherwise: false
 	 */
 	public static boolean percussionExists(String name) {
-		if ( percussionIdToInt.containsKey(name) )
+		if (percussionIdToInt.containsKey(name))
 			return true;
 		return false;
 	}
@@ -5182,7 +5182,7 @@ public class Dict {
 	 * @return    currently configured syntax keyword
 	 */
 	public static String getSyntax(String id) {
-		if ( syntax.containsKey(id) )
+		if (syntax.containsKey(id))
 			return syntax.get(id);
 		else
 			return UNKNOWN_SYNTAX;
@@ -5267,10 +5267,10 @@ public class Dict {
 	 * @return **true**, if flat is configured, otherwise false.
 	 */
 	public static boolean isFlatConfigured() {
-		String configuredHalfTone = Config.get( Config.HALF_TONE );
-		if ( Config.CBX_HALFTONE_ID_FLAT.equals(configuredHalfTone)    ) { return true; }
-		if ( Config.CBX_HALFTONE_ID_BEMOLLE.equals(configuredHalfTone) ) { return true; }
-		if ( Config.CBX_HALFTONE_ID_DES.equals(configuredHalfTone)     ) { return true; }
+		String configuredHalfTone = Config.get(Config.HALF_TONE);
+		if (Config.CBX_HALFTONE_ID_FLAT.equals(configuredHalfTone))    { return true; }
+		if (Config.CBX_HALFTONE_ID_BEMOLLE.equals(configuredHalfTone)) { return true; }
+		if (Config.CBX_HALFTONE_ID_DES.equals(configuredHalfTone))     { return true; }
 		return false;
 	}
 	
