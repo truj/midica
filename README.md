@@ -44,7 +44,7 @@ If you prefer to write your music in ALDA or ABC, you need to:
 
 - Install [ALDA](https://github.com/alda-lang/alda) or [abcMIDI](https://ifdo.ca/~seymour/runabc/top.html)
 - In Step 4: Download an [ALDA example](https://github.com/alda-lang/alda-core/tree/master/examples) or [ABC example](https://abcnotation.com/search) or create your own file with the extension `.alda` or `.abc`.
-- In Step 6: Switch to the ALDA or ABC tab (any maybe adjust the program path).
+- In Step 6: Switch to the ALDA or ABC tab (and maybe adjust the program path).
 
 # Features of the Midica Application itself
 
@@ -102,20 +102,63 @@ The third one shows the player in Karaoke mode.
 
 # Programming with Midica
 
-Midica has its own Music Programming Language: MidicaPL. But alternatively you can also code in [ALDA](https://github.com/alda-lang/alda/blob/master/doc/index.md) or [ABC](https://abcnotation.com/learn).
+Midica has its own Music Programming Language: MidicaPL. But alternatively you can also code in ALDA or ABC.
 
-You can find a MidicaPL tutorial here:
+For learning, each language has its own resources:
+
+- [MidicaPL tutorial](http://www.midica.org/tutorial.html)
+- [ALDA documentation](https://github.com/alda-lang/alda/blob/master/doc/index.md)
+- [ABC tutorials](https://abcnotation.com/learn)
+
+Here we focus on MidicaPL. For a quick reference, here are the links to the main
+chapters of the MidicaPL tutorial:
 
 - [Preparation](http://www.midica.org/tutorial.html)
-- [Chapter 1](http://www.midica.org/tutorial-1.html)
-- [Chapter 2](http://www.midica.org/tutorial-2.html)
-- [Chapter 3](http://www.midica.org/tutorial-3.html)
-- [Chapter 4](http://www.midica.org/tutorial-4.html)
-- [Chapter 5](http://www.midica.org/tutorial-5.html)
+- [Chapter 1: Basics](http://www.midica.org/tutorial-1.html)
+- [Chapter 2: Improving](http://www.midica.org/tutorial-2.html)
+- [Chapter 3: Functions](http://www.midica.org/tutorial-3.html)
+- [Chapter 4: Blocks](http://www.midica.org/tutorial-4.html)
+- [Chapter 5: Tweaking](http://www.midica.org/tutorial-5.html)
+- [Chapter 6: Patterns](http://www.midica.org/tutorial-6.html)
 
 Examples of complete songs can be found in the [examples directory](examples/).
+In this Readme we just show some short examples to get an impression of the language.
 
-In this Readme one short example shall be enough:
+## Example 1
+
+This example only uses simple channel commands and lyrics:
+
+	// use Piano in channel 0
+	INSTRUMENTS
+		0  ACOUSTIC_GRAND_PIANO  Piano
+	END
+	
+	0  c  /8.  v=95, l=Hap   // v = velocity, 95 = forte
+	0  c  /16        l=py_   // l = lyrics (syllable)
+	
+	0  d  /4   l=birth
+	0  c  /4   l=day_        // '_' = space
+	0  f  /4   l=to_
+	
+	0  e  /2   l=you\c\r     // \c = comma, \r = new line
+	0  c  /8.  l=hap
+	0  c  /16  l=py_
+	
+	0  d  /4   l=birth
+	0  c  /4   l=day_
+	0  g  /4   l=to_
+	
+	0  f  /2   l=you.\n      // \n = new paragraph
+	0  c  /8.  l=Hap
+	0  c  /16  l=py...
+
+This results in a MIDI sequence like this:
+
+<img src="img/example-birthday.svg" title="Example Score">
+
+## Example 2
+
+This example uses nestable blocks and global commands:
 
 	// initialize channel 0 and 1
 	INSTRUMENTS
@@ -152,6 +195,105 @@ In this Readme one short example shall be enough:
 This results in a MIDI sequence like this:
 
 <img src="img/example-score.svg" title="Example Score">
+
+## Example 3
+
+This example uses a guitar picking pattern with several chords. It produces the beginning of "Dust in the wind":
+
+	// use the guitar in channel 0
+	INSTRUMENTS
+		0  STEEL_GUITAR Guitar
+	END
+	
+	// define some chords
+	CHORD cmaj   c-  e- g- c
+	CHORD cmaj7  c-  e- g- b-
+	CHORD cadd9  c-  e- g- d
+	CHORD asus2  a-2 e- a- b-
+	CHORD asus4  a-2 e- a- d
+	CHORD amin   a-2 e- a- c
+	
+	// define the picking pattern (Travis picking)
+	PATTERN travis
+		0,3 /4      // the numbers inside the pattern
+		1   /8      // aren't channel numbers
+		2   /8      // but note indices
+		0   /8
+		3   /8
+		1   /8
+		2   /8
+	END
+	
+	// play the chords using this pattern
+	0  cmaj   travis
+	0  cmaj7  travis
+	0  cadd9  travis
+	0  cmaj   travis
+	0  asus2  travis
+	0  asus4  travis
+	0  amin   travis
+	0  asus2  travis
+
+This results in the following sequence:
+
+<img src="img/example-dust.svg" title="Example Score">
+
+## Example 4
+
+This example uses functions. It produces the first beats of "Another one bites the Dust":
+
+	INSTRUMENTS
+		5  E_BASS_FINGER  Bass
+	END
+	
+	// anacrusis
+	* time 1/8
+	5 a-2 /16  d=30%
+	5 g-2 /16
+	
+	// regular
+	* time 4/4
+	CALL drum-and-bass(firstBar)
+	CALL drum-and-bass()  q=2
+	
+	FUNCTION drum-and-bass
+		CALL bassline($[0])
+		CALL drums
+		CALL drums
+		CALL drums
+		CALL drums
+	END
+	
+	FUNCTION bassline
+		5 e-2 /4   q=3, d=30%
+		5 -   /8.
+		5 e-2 /16
+		5 e-2 /8   q=2
+		5 g-2 /8
+		5 e-2 /16
+		5 a-2 /16
+		{ if $[0]
+			5 -   /4+/8
+			5 a-2 /16
+			5 g-2 /16
+		}
+		{ else
+			5 -  /2
+		}
+	END
+	
+	// p = percussion channel (channel 9)
+	// hhc = hi-hat-closed, bd1 = base-drum-1, sd1 = snare-drum-1
+	FUNCTION drums
+		p hhc,bd1     /8 v=127
+		p hhc         /8 v=80
+		p hhc,bd1,sd1 /8 v=127
+		p hhc         /8 v=80
+	END
+
+The resulting sequence looks like this:
+
+<img src="img/example-another.svg" title="Example Score">
 
 # Command Line Interface
 
