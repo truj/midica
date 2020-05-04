@@ -697,6 +697,24 @@ public class UiView extends JFrame {
 	}
 	
 	/**
+	 * Returns the config comboboxes.
+	 * Used for unit-testing.
+	 * 
+	 * @return the config comboboxes.
+	 */
+	public JComboBox<?>[] getConfigComboboxes() {
+		return new JComboBox<?>[] {
+			cbxGuiLang,
+			cbxNoteSys,
+			cbxHalfTone,
+			cbxOctave,
+			cbxSyntax,
+			cbxPercussion,
+			cbxInstrument,
+		};
+	}
+	
+	/**
 	 * Adds key bindings to the window.
 	 */
 	private void addKeyBindings() {
