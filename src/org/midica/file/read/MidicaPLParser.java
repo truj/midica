@@ -164,6 +164,8 @@ public class MidicaPLParser extends SequenceParser {
 	public static String OPT_ASSIGNER       = null;
 	public static String OPT_SEPARATOR      = null;
 	public static String P                  = null;
+	public static String HALFTONE_FLAT      = null;
+	public static String HALFTONE_SHARP     = null;
 	public static String REST               = null;
 	public static String S                  = null;
 	public static String SHIFT              = null;
@@ -379,6 +381,8 @@ public class MidicaPLParser extends SequenceParser {
 		OPT_ASSIGNER       = Dict.getSyntax( Dict.SYNTAX_OPT_ASSIGNER       );
 		OPT_SEPARATOR      = Dict.getSyntax( Dict.SYNTAX_OPT_SEPARATOR      );
 		P                  = Dict.getSyntax( Dict.SYNTAX_P                  );
+		HALFTONE_FLAT      = Dict.getSyntax( Dict.SYNTAX_HALFTONE_FLAT      );
+		HALFTONE_SHARP     = Dict.getSyntax( Dict.SYNTAX_HALFTONE_SHARP     );
 		REST               = Dict.getSyntax( Dict.SYNTAX_REST               );
 		PROG_BANK_SEP      = Dict.getSyntax( Dict.SYNTAX_PROG_BANK_SEP      );
 		Q                  = Dict.getSyntax( Dict.SYNTAX_Q                  );
@@ -3228,6 +3232,8 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_OPT_ASSIGNER.equals(cmdId)       ) OPT_ASSIGNER       = cmdName;
 		else if ( Dict.SYNTAX_OPT_SEPARATOR.equals(cmdId)      ) OPT_SEPARATOR      = cmdName;
 		else if ( Dict.SYNTAX_P.equals(cmdId)                  ) P                  = cmdName;
+		else if ( Dict.SYNTAX_HALFTONE_FLAT.equals(cmdId)      ) HALFTONE_FLAT      = cmdName;
+		else if ( Dict.SYNTAX_HALFTONE_SHARP.equals(cmdId)     ) HALFTONE_SHARP     = cmdName;
 		else if ( Dict.SYNTAX_REST.equals(cmdId)               ) REST               = cmdName;
 		else if ( Dict.SYNTAX_PROG_BANK_SEP.equals(cmdId)      ) PROG_BANK_SEP      = cmdName;
 		else if ( Dict.SYNTAX_Q.equals(cmdId)                  ) Q                  = cmdName;

@@ -28,14 +28,16 @@ public class NoteTableModel extends MidicaTableModel {
 	public NoteTableModel() {
 		
 		// table header
-		columnNames = new String[ 2 ];
-		columnNames[ 0 ] = Dict.get( Dict.INFO_COL_NOTE_NUM  );
-		columnNames[ 1 ] = Dict.get( Dict.INFO_COL_NOTE_NAME );
+		columnNames = new String[ 3 ];
+		columnNames[ 0 ] = Dict.get(Dict.INFO_COL_NOTE_NUM);
+		columnNames[ 1 ] = Dict.get(Dict.INFO_COL_NOTE_NAME);
+		columnNames[ 2 ] = Dict.get(Dict.INFO_COL_NOTE_ALT);
 		
 		// column classes, used for sorting
-		columnClasses = new Class[ 2 ];
+		columnClasses = new Class[ 3 ];
 		columnClasses[ 0 ] = Integer.class;
 		columnClasses[ 1 ] = String.class;
+		columnClasses[ 2 ] = String.class;
 	}
 	
 	/**
@@ -56,15 +58,19 @@ public class NoteTableModel extends MidicaTableModel {
 	 * @return    Table cell text.
 	 */
 	@Override
-	public Object getValueAt( int rowIndex, int colIndex ) {
+	public Object getValueAt(int rowIndex, int colIndex) {
 		
 		// number
-		if ( 0 == colIndex )
+		if (0 == colIndex)
 			return rowIndex;
 		
 		// name
-		else if ( 1 == colIndex )
-			return Dict.getNote( rowIndex );
+		else if (1 == colIndex)
+			return Dict.getNote(rowIndex);
+		
+		// alternative names
+		else if (2 == colIndex)
+			return Dict.getNoteAlternatives(rowIndex);
 		
 		// default
 		return "";

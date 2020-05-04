@@ -105,7 +105,8 @@ public class InfoView extends JDialog {
 	
 	// widths and heights, used for dimensions
 	private static final int COL_WIDTH_NOTE_NUM          =  80;
-	private static final int COL_WIDTH_NOTE_NAME         = 240;
+	private static final int COL_WIDTH_NOTE_NAME         = 200;
+	private static final int COL_WIDTH_NOTE_ALT          = 440;
 	private static final int COL_WIDTH_PERC_NUM          =  80;
 	private static final int COL_WIDTH_PERC_ID_SHORT     =  80;
 	private static final int COL_WIDTH_PERC_ID_LONG      = 250;
@@ -241,7 +242,7 @@ public class InfoView extends JDialog {
 		setTitle(Dict.get(Dict.TITLE_INFO_VIEW));
 		
 		// initialize table dimensions
-		int noteWidth       = COL_WIDTH_NOTE_NUM + COL_WIDTH_NOTE_NAME;
+		int noteWidth       = COL_WIDTH_NOTE_NUM + COL_WIDTH_NOTE_NAME + COL_WIDTH_NOTE_ALT;
 		int percWidth       = COL_WIDTH_PERC_NUM + COL_WIDTH_PERC_ID_SHORT
 							+ COL_WIDTH_PERC_ID_LONG;
 		int syntaxWidth     = COL_WIDTH_SYNTAX_NAME + COL_WIDTH_SYNTAX_KEYWORD
@@ -439,6 +440,7 @@ public class InfoView extends JDialog {
 		// set column sizes and colors
 		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_NOTE_NUM  );
 		table.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_NOTE_NAME );
+		table.getColumnModel().getColumn( 2 ).setPreferredWidth( COL_WIDTH_NOTE_ALT  );
 		
 		return area;
 	}

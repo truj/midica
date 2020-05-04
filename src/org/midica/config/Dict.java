@@ -8,9 +8,14 @@
 package org.midica.config;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.midica.Midica;
 import org.midica.ui.info.InstrumentElement;
@@ -69,8 +74,11 @@ public class Dict {
 	private static ArrayList<String>            keyBindingCategories   = null;
 	
 	// needed to build up the note dictionaries (noteNameToInt and noteIntToName)
-	private static String[] notes      = new String[12];
-	private static byte[]   isHalfTone = null;
+	private static String[]                         notes          = new String[12];
+	private static byte[]                           halfTones      = null;
+	private static HashMap<String, Byte>            moreNotes      = null;
+	private static TreeMap<Byte, ArrayList<String>> moreBaseNotes  = null;
+	private static ArrayList<TreeSet<String>>       moreNotesByNum = null;
 	
 	// syntax
 	public static final String SYNTAX_DEFINE             = "DEFINE";
@@ -157,6 +165,8 @@ public class Dict {
 	public static final String SYNTAX_COND_GE            = "COND_GE";
 	public static final String SYNTAX_COND_IN            = "COND_IN";
 	public static final String SYNTAX_COND_IN_SEP        = "COND_IN_SEP";
+	public static final String SYNTAX_HALFTONE_FLAT      = "HALFTONE_FLAT";
+	public static final String SYNTAX_HALFTONE_SHARP     = "HALFTONE_SHARP";
 	public static final String SYNTAX_REST               = "REST";
 	public static final String SYNTAX_CHORD              = "CHORD";
 	public static final String SYNTAX_CHORD_ASSIGNER     = "CHORD_ASSIGNER";
@@ -950,6 +960,7 @@ public class Dict {
 	public static final String DESCRIPTION                 = "description";
 	public static final String INFO_COL_NOTE_NUM           = "info_col_note_num";
 	public static final String INFO_COL_NOTE_NAME          = "info_col_note_name";
+	public static final String INFO_COL_NOTE_ALT           = "info_col_note_alt";
 	public static final String INFO_COL_SYNTAX_NAME        = "info_col_syntax_name";
 	public static final String INFO_COL_SYNTAX_DESC        = "info_col_syntax_desc";
 	public static final String INFO_COL_SYNTAX_SHORTCUT    = "info_col_syntax_shortcut";
@@ -1743,10 +1754,11 @@ public class Dict {
 	 * the user changes a configuration using the GUI.
 	 */
 	public static void init() {
+		syntax = new HashMap<String, String>();
+		
 		initLanguage();
-		initNoteSystem(); // calls also initHalfTones() which calls initOctaves()
+		initNoteSystem(); // calls also initHalfTones() which calls initOctaves() which calls initSyntax()
 		initPercussion();
-		initSyntax();
 		initInstruments();
 		
 		// init key binding categories
@@ -2335,6 +2347,7 @@ public class Dict {
 		set( DESCRIPTION,                            "Description"                   );
 		set( INFO_COL_NOTE_NUM,                      "Number"                        );
 		set( INFO_COL_NOTE_NAME,                     "Name"                          );
+		set( INFO_COL_NOTE_ALT,                      "Alternative Names"             );
 		set( INFO_COL_SYNTAX_NAME,                   "ID"                            );
 		set( INFO_COL_SYNTAX_DESC,                   "Description"                   );
 		set( INFO_COL_SYNTAX_SHORTCUT,               "Keyword"                       );
@@ -2545,6 +2558,8 @@ public class Dict {
 		set( SYNTAX_COND_GE,            "Condition: greater or equal than..."              );
 		set( SYNTAX_COND_IN,            "Condition: in, e.g. $x in 0;1;5"                  );
 		set( SYNTAX_COND_IN_SEP,        "Separator for in-condition"                       );
+		set( SYNTAX_HALFTONE_FLAT,      "flat symbol (half tone)"                          );
+		set( SYNTAX_HALFTONE_SHARP,     "sharp symbol (half tone)"                         );
 		set( SYNTAX_REST,               "rest character"                                   );
 		set( SYNTAX_CHORD,              "chord definition"                                 );
 		set( SYNTAX_CHORD_ASSIGNER,     "assign symbol between chord name and notes"       );
@@ -3298,96 +3313,6 @@ public class Dict {
 	}
 	
 	/**
-	 * Adds the currently configured half tone and octave symbols
-	 * to the currently configured note symbols.
-	 * 
-	 * The octave symbols are added using the method {@link #initOctaves()}.
-	 */
-	public static void initHalfTones() {
-		
-		// refresh combobox language
-		ConfigComboboxModel.refill(Config.HALF_TONE);
-		
-		// get configuration
-		String configuredHalfTone = Config.get(Config.HALF_TONE);
-		
-		// init half tone
-		String  suffix = null;
-		boolean sharp  = true;
-		if (Config.CBX_HALFTONE_ID_SHARP.equals(configuredHalfTone)) {
-			suffix = "#";
-			sharp  = true;
-		}
-		else if (Config.CBX_HALFTONE_ID_FLAT.equals(configuredHalfTone)) {
-			suffix = "b";
-			sharp  = false;
-		}
-		else if (Config.CBX_HALFTONE_ID_DIESIS.equals(configuredHalfTone)) {
-			suffix = "-diesis";
-			sharp  = true;
-		}
-		else if (Config.CBX_HALFTONE_ID_BEMOLLE.equals(configuredHalfTone)) {
-			suffix = "-bemolle";
-			sharp  = false;
-		}
-		else if (Config.CBX_HALFTONE_ID_CIS.equals(configuredHalfTone)) {
-			suffix = "is";
-			sharp  = true;
-		}
-		else if (Config.CBX_HALFTONE_ID_DES.equals(configuredHalfTone)) {
-			suffix = "es";
-			sharp  = false;
-		}
-		else {
-			// default
-			suffix = "#";
-			sharp  = true;
-		}
-		
-		// find out what to add to the current index
-		// to get the index of the base note
-		byte baseIncrementation;
-		if (sharp)
-			baseIncrementation = -1;
-		else
-			baseIncrementation =  1;
-		
-		// initialize half tones
-		for (byte i : isHalfTone) {
-			// get base note
-			int baseIndex = i + baseIncrementation;
-			baseIndex %= 12;
-			String baseNote = notes[baseIndex];
-			
-			// construct current half tone
-			notes[i] = baseNote + suffix;
-			
-			// handle exceptions
-			if ("Hb".equals(notes[i])) {
-				notes[i] = "B";
-			}
-			else if ("hb".equals(notes[i])) {
-				notes[i] = "b";
-			}
-			else if ("Ees".equals(notes[i])) {
-				notes[i] = "Es";
-			}
-			else if ("ees".equals(notes[i])) {
-				notes[i] = "es";
-			}
-			else if ("Aes".equals(notes[i])) {
-				notes[i] = "As";
-			}
-			else if ("aes".equals(notes[i])) {
-				notes[i] = "as";
-			}
-		}
-		
-		// the half tones have changed so the octave naming has to be refreshed as well
-		initOctaves();
-	}
-	
-	/**
 	 * Initializes the internal data structures for translations between note values
 	 * and the configured note symbols.
 	 * This includes:
@@ -3405,12 +3330,12 @@ public class Dict {
 		String configuredNoteSystem = Config.get(Config.NOTE);
 		
 		// define what is a half tone (in german note systems this will be overridden)
-		isHalfTone = new byte[5];
-		isHalfTone[0] =  1; // C#, Db
-		isHalfTone[1] =  3; // D#, Eb
-		isHalfTone[2] =  6; // F#, Gb
-		isHalfTone[3] =  8; // G#, Ab
-		isHalfTone[4] = 10; // A#, Bb
+		halfTones = new byte[5];
+		halfTones[0] =  1; // C#, Db
+		halfTones[1] =  3; // D#, Eb
+		halfTones[2] =  6; // F#, Gb
+		halfTones[3] =  8; // G#, Ab
+		halfTones[4] = 10; // A#, Bb
 		
 		// initialize the configuration specific note system
 		if (Config.CBX_NOTE_ID_INTERNATIONAL_LC.equals(configuredNoteSystem)) {
@@ -3440,12 +3365,161 @@ public class Dict {
 	}
 	
 	/**
+	 * Adds the currently configured half tone and octave symbols
+	 * to the currently configured note symbols.
+	 * 
+	 * The octave symbols are added using the method {@link #initOctaves()}.
+	 */
+	public static void initHalfTones() {
+		
+		// refresh combobox language
+		ConfigComboboxModel.refill(Config.HALF_TONE);
+		
+		// get configuration
+		String configuredHalfTone = Config.get(Config.HALF_TONE);
+		
+		// init half tone symbols
+		String  suffixFlat  = null;
+		String  suffixSharp = null;
+		boolean isSharp     = true;
+		if (Config.CBX_HALFTONE_ID_SHARP.equals(configuredHalfTone) || Config.CBX_HALFTONE_ID_FLAT.equals(configuredHalfTone)) {
+			suffixSharp = "#";
+			suffixFlat  = "b";
+			isSharp     = Config.CBX_HALFTONE_ID_SHARP.equals(configuredHalfTone);
+		}
+		else if (Config.CBX_HALFTONE_ID_DIESIS.equals(configuredHalfTone) || Config.CBX_HALFTONE_ID_BEMOLLE.equals(configuredHalfTone)) {
+			suffixSharp = "-diesis";
+			suffixFlat  = "-bemolle";
+			isSharp       = Config.CBX_HALFTONE_ID_DIESIS.equals(configuredHalfTone);
+		}
+		else if (Config.CBX_HALFTONE_ID_CIS.equals(configuredHalfTone) || Config.CBX_HALFTONE_ID_DES.equals(configuredHalfTone)) {
+			suffixSharp = "is";
+			suffixFlat  = "es";
+			isSharp     = Config.CBX_HALFTONE_ID_CIS.equals(configuredHalfTone);
+		}
+		else {
+			// default
+			suffixSharp = "#";
+			suffixFlat  = "b";
+			isSharp     = true;
+		}
+		setSyntax( SYNTAX_HALFTONE_FLAT,  suffixFlat  );
+		setSyntax( SYNTAX_HALFTONE_SHARP, suffixSharp );
+		
+		// init default half tone symbol
+		String suffixDefault = isSharp ? suffixSharp : suffixFlat;
+		
+		// find out what to add to the current index
+		// to get the index of the base note
+		byte baseIncrementation;
+		if (isSharp)
+			baseIncrementation = -1;
+		else
+			baseIncrementation =  1;
+		
+		// initialize half tones
+		boolean isHalfTone[] = new boolean[12];
+		for (int i = 0; i < 12; i++) {
+			isHalfTone[i] = false;
+		}
+		for (byte i : halfTones) {
+			isHalfTone[i] = true;
+			
+			// get base note
+			int baseIndex = i + baseIncrementation;
+			baseIndex %= 12;
+			String baseNote = notes[baseIndex];
+			
+			// construct current half tone
+			notes[i] = baseNote + suffixDefault;
+			
+			// handle exceptions
+			notes[i] = replaceNoteNameExceptions(notes[i]);
+		}
+		
+		// create additional sharps and flats
+		// flat  / double-flat  / triple-flat
+		// sharp / double-sharp / triple-sharp
+		moreNotes     = new HashMap<>();
+		moreBaseNotes = new TreeMap<>();
+		boolean[] sharpOrFlat = {true, false};
+		for (boolean sharp : sharpOrFlat) {
+			byte increment = (byte) (sharp ? 1 : -1);
+			for (byte i = 0; i < 12; i++) {
+				
+				// don't allow mixes like c#b, cb#, etc.
+				if (isHalfTone[i] && sharp != isSharp)
+					continue;
+				
+				// don't repeat notes that we already have ???
+				if (! isHalfTone[i] && sharp == isSharp && isHalfTone[(i + increment) % 12])
+					continue;
+				
+				String baseName = notes[i];
+				byte   baseNum  = i;
+				for (byte step = 1; step < 4; step++) {
+					if (sharp)
+						baseName += suffixSharp;
+					else
+						baseName += suffixFlat;
+					baseName = replaceNoteNameExceptions(baseName);
+					baseNum += increment;
+					moreNotes.put(baseName, baseNum);
+					
+					ArrayList<String> alternatives = moreBaseNotes.get(baseNum);
+					if (null == alternatives) {
+						alternatives = new ArrayList<>();
+						moreBaseNotes.put(baseNum, alternatives);
+					}
+					alternatives.add(baseName);
+				}
+			}
+		}
+		
+		// the half tones have changed so the octave naming has to be refreshed as well
+		initOctaves();
+	}
+	
+	/**
+	 * Maps a calculated note name to the actual name.
+	 * Most of the time, the note name will stay the same. But there are some
+	 * exceptions in the german note naming system.
+	 * 
+	 * @param name  the calculated note name
+	 * @return the actual name
+	 */
+	private static String replaceNoteNameExceptions(String name) {
+		
+		if ("Hb".equals(name))
+			return "B";
+		if ("hb".equals(name))
+			return "b";
+		if ("Ees".equals(name))
+			return "Es";
+		if ("ees".equals(name))
+			return "es";
+		if ("Aes".equals(name))
+			return "As";
+		if ("aes".equals(name))
+			return "as";
+		if ("Hes".equals(name))
+			return "B";
+		if ("hes".equals(name))
+			return "b";
+		
+		return name;
+	}
+	
+	/**
 	 * Creates the translation structures between note values and their configured
 	 * symbols.
 	 * 
 	 * Reads the currently configured note names and half tone symbols which have
 	 * been created before. Creates full translation structures including the
 	 * configured octave symbols for each possible note value.
+	 * 
+	 * Then the syntax is (re)initialized using {@link #initSyntax()} because the syntax elements
+	 * for flats and sharps may have changed.
 	 */
 	public static void initOctaves() {
 		
@@ -3458,27 +3532,228 @@ public class Dict {
 		noteNameToInt = new HashMap<String, Integer>();
 		noteIntToName = new HashMap<Integer, String>();
 		
-		// initialize the octave according to the configuration
-		if (Config.CBX_OCTAVE_PLUS_MINUS_N.equals(configuredOctave)) {
-			initOctavesPlusMinusN();
+		boolean isGermanOctave = Config.CBX_OCTAVE_GERMAN.equals(Config.get(Config.OCTAVE));
+		
+		// middle octave
+		ArrayList<NamedInteger> noteNames = new ArrayList<NamedInteger>();
+		int octave = -1;
+		int num    = 59; // one lower than middle C
+		
+		// higher octaves
+		OCTAVE:
+		while (true) {
+			octave++;
+			for (String name : notes) {
+				num++;
+				if (num > 127)
+					break OCTAVE;
+				
+				if (isGermanOctave)
+					name = lcFirst(name);
+				
+				// base octave
+				noteNameToInt.put(name + getOctavePostfix(octave), num);
+			}
 		}
-		else if (Config.CBX_OCTAVE_PLUS_MINUS.equals(configuredOctave)) {
-			initOctavesPlusMinus();
-		}
-		else if (Config.CBX_OCTAVE_INTERNATIONAL.equals(configuredOctave)) {
-			initOctavesInternational();
-		}
-		else if (Config.CBX_OCTAVE_GERMAN.equals(configuredOctave)) {
-			initOctavesGerman();
-		}
-		else {
-			initOctavesPlusMinusN();
+		
+		// lower octaves
+		List<String> reverseNotes = Arrays.asList(notes.clone());
+		Collections.reverse(reverseNotes);
+		octave = 0;
+		num    = 60;
+		OCTAVE:
+		while (true) {
+			octave--;
+			for (String name : reverseNotes) {
+				num--;
+				if (num < 0)
+					break OCTAVE;
+				
+				if (isGermanOctave) {
+					if (octave < -1)
+						name = ucFirst(name);
+					else
+						name = lcFirst(name);
+				}
+				
+				// base octave
+				noteNameToInt.put(name + getOctavePostfix(octave), num);
+			}
 		}
 		
 		// init integers to names
 		for (String key : noteNameToInt.keySet()) {
 			noteIntToName.put(noteNameToInt.get(key), key);
 		}
+		
+		// add alternative note names to noteNameToInt
+		initOctavesAlternative();
+		
+		initSyntax();
+	}
+	
+	/**
+	 * Adds alternative note names to moreNotesByNum and noteNameToInt.
+	 */
+	private static void initOctavesAlternative() {
+		boolean isGermanOctave = Config.CBX_OCTAVE_GERMAN.equals(Config.get(Config.OCTAVE));
+		
+		// init structure
+		moreNotesByNum = new ArrayList<>();
+		for (int i = 0; i < 128; i++) {
+			moreNotesByNum.add(new TreeSet<>());
+		}
+		
+		for (Entry<Byte, ArrayList<String>> entry : moreBaseNotes.entrySet()) {
+			int               baseNum   = 60 + entry.getKey();
+			ArrayList<String> baseNames = entry.getValue();
+			
+			for (String baseName : baseNames) {
+				
+				if (isGermanOctave)
+					baseName = lcFirst(baseName);
+				
+				// ignore duplicates
+				String baseNoteName = baseName + getOctavePostfix(0);
+				if (noteNameToInt.get(baseNoteName) != null) {
+					continue;
+				}
+				
+				// base octave
+				moreNotesByNum.get(baseNum).add(baseNoteName);
+				noteNameToInt.put(baseNoteName, baseNum);
+				
+				// higher octaves
+				int num    = baseNum;
+				int octave = 0;
+				while (true) {
+					octave++;
+					num += 12;
+					if (num > 127)
+						break;
+					
+					String name = baseName + getOctavePostfix(octave);
+					moreNotesByNum.get(num).add(name);
+					noteNameToInt.put(name, num);
+				}
+				
+				// lower octaves
+				num    = baseNum;
+				octave = 0;
+				while (true) {
+					octave--;
+					num -= 12;
+					if (num < 0)
+						break;
+					
+					if (isGermanOctave && octave == -2)
+						baseName = ucFirst(baseName);
+					
+					String name = baseName + getOctavePostfix(octave);
+					moreNotesByNum.get(num).add(name);
+					noteNameToInt.put(name, num);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Calculates and returns the postfix of an octave.
+	 * 
+	 * @param octaveNumber  0 for the middle octave, positive for higher octaves, negative for lower octaves
+	 * @return the octave postfix
+	 */
+	private static String getOctavePostfix(int octaveNumber) {
+		String configuredOctave = Config.get(Config.OCTAVE);
+		
+		if (Config.CBX_OCTAVE_PLUS_MINUS_N.equals(configuredOctave)) {
+			if (-6 == octaveNumber) return "-6";
+			if (-5 == octaveNumber) return "-5";
+			if (-4 == octaveNumber) return "-4";
+			if (-3 == octaveNumber) return "-3";
+			if (-2 == octaveNumber) return "-2";
+			if (-1 == octaveNumber) return "-";
+			if ( 0 == octaveNumber) return "";
+			if ( 1 == octaveNumber) return "+";
+			if ( 2 == octaveNumber) return "+2";
+			if ( 3 == octaveNumber) return "+3";
+			if ( 4 == octaveNumber) return "+4";
+			if ( 5 == octaveNumber) return "+5";
+			if ( 6 == octaveNumber) return "+6";
+		}
+		if (Config.CBX_OCTAVE_PLUS_MINUS.equals(configuredOctave)) {
+			if (-6 == octaveNumber) return "------";
+			if (-5 == octaveNumber) return "-----";
+			if (-4 == octaveNumber) return "----";
+			if (-3 == octaveNumber) return "---";
+			if (-2 == octaveNumber) return "--";
+			if (-1 == octaveNumber) return "-";
+			if ( 0 == octaveNumber) return "";
+			if ( 1 == octaveNumber) return "+";
+			if ( 2 == octaveNumber) return "++";
+			if ( 3 == octaveNumber) return "+++";
+			if ( 4 == octaveNumber) return "++++";
+			if ( 5 == octaveNumber) return "+++++";
+			if ( 6 == octaveNumber) return "++++++";
+		}
+		if (Config.CBX_OCTAVE_INTERNATIONAL.equals(configuredOctave)) {
+			if (-6 == octaveNumber) return "-2";
+			if (-5 == octaveNumber) return "-1";
+			if (-4 == octaveNumber) return "0";
+			if (-3 == octaveNumber) return "1";
+			if (-2 == octaveNumber) return "2";
+			if (-1 == octaveNumber) return "3";
+			if ( 0 == octaveNumber) return "4";
+			if ( 1 == octaveNumber) return "5";
+			if ( 2 == octaveNumber) return "6";
+			if ( 3 == octaveNumber) return "7";
+			if ( 4 == octaveNumber) return "8";
+			if ( 5 == octaveNumber) return "9";
+			if ( 6 == octaveNumber) return "10";
+		}
+		if (Config.CBX_OCTAVE_GERMAN.equals(configuredOctave)) {
+			if (-6 == octaveNumber) return "''''";
+			if (-5 == octaveNumber) return "'''";
+			if (-4 == octaveNumber) return "''";
+			if (-3 == octaveNumber) return "'";
+			if (-2 == octaveNumber) return "";
+			if (-1 == octaveNumber) return "";
+			if ( 0 == octaveNumber) return "'";
+			if ( 1 == octaveNumber) return "''";
+			if ( 2 == octaveNumber) return "'''";
+			if ( 3 == octaveNumber) return "''''";
+			if ( 4 == octaveNumber) return "'''''";
+			if ( 5 == octaveNumber) return "''''''";
+			if ( 6 == octaveNumber) return "'''''''";
+		}
+		
+		return "invalid octave";
+	}
+	
+	/**
+	 * Transforms the first character of the given string to lower-case.
+	 * This is used for the german octave naming system.
+	 * 
+	 * @param str    the string to be transformed
+	 * @return the transformed string.
+	 */
+	private static String lcFirst(String str) {
+		char characters[] = str.toCharArray();
+		characters[0] = Character.toLowerCase(characters[0]);
+		return new String(characters);
+	}
+	
+	/**
+	 * Transforms the first character of the given string to upper-case.
+	 * This is used for the german octave naming system.
+	 * 
+	 * @param str    the string to be transformed
+	 * @return the transformed string.
+	 */
+	private static String ucFirst(String str) {
+		char characters[] = str.toCharArray();
+		characters[0] = Character.toUpperCase(characters[0]);
+		return new String(characters);
 	}
 	
 	/**
@@ -3495,9 +3770,6 @@ public class Dict {
 		
 		// get syntax
 		String configuredSyntax = Config.get(Config.SYNTAX);
-		
-		// init configured syntax
-		syntax = new HashMap<String, String>();
 		
 		// set up default syntax
 		setSyntax( SYNTAX_DEFINE,            "DEFINE"        );
@@ -3611,12 +3883,16 @@ public class Dict {
 		// switch to lower/upper, if needed
 		if (Config.CBX_SYNTAX_LOWER.equals(configuredSyntax)) {
 			for (String id : syntax.keySet()) {
+				if (id.startsWith("HALFTONE_"))
+					continue;
 				String keyword = syntax.get(id).toLowerCase();
 				setSyntax(id, keyword);
 			}
 		}
 		else if (Config.CBX_SYNTAX_UPPER.equals(configuredSyntax)) {
 			for (String id : syntax.keySet()) {
+				if (id.startsWith("HALFTONE_"))
+					continue;
 				String keyword = syntax.get(id).toUpperCase();
 				setSyntax(id, keyword);
 			}
@@ -3665,6 +3941,8 @@ public class Dict {
 		
 		addSyntaxCategory(get(SYNTAX_CAT_OTHER));
 		addSyntaxForInfoView( SYNTAX_COMMENT           );
+		addSyntaxForInfoView( SYNTAX_HALFTONE_FLAT     );
+		addSyntaxForInfoView( SYNTAX_HALFTONE_SHARP    );
 		addSyntaxForInfoView( SYNTAX_REST              );
 		addSyntaxForInfoView( SYNTAX_P                 );
 		
@@ -4032,212 +4310,11 @@ public class Dict {
 		}
 		
 		// redefine what is a half tone (the german system is different)
-		isHalfTone = new byte[4];
-		isHalfTone[0] =  1; // C#, Db
-		isHalfTone[1] =  3; // D#, Eb
-		isHalfTone[2] =  6; // F#, Gb
-		isHalfTone[3] =  8; // G#, Ab
-	}
-	
-	/**
-	 * Sets up note names using:
-	 * 
-	 * - `+`, `+2`, `+3`, ... for higher octaves
-	 * - `-`, `-2`, `-3`, ... for lower octaves
-	 */
-	private static void initOctavesPlusMinusN() {
-		
-		// define unmodified note names
-		ArrayList<NamedInteger> noteNames = new ArrayList<NamedInteger>();
-		byte i = 60; // middle C
-		for (String name : notes) {
-			NamedInteger note = new NamedInteger(name, i);
-			noteNames.add(note);
-			i++;
-		}
-		
-		// initialize unmodified and higher notes
-		String postfix = "";
-		OCTAVE:
-		for (int octave = 0; ; octave++) {
-			if (1 == octave)
-				postfix = "+";
-			if (octave > 1)
-				postfix = "+" + octave;
-			int increment = octave * 12;
-			for (NamedInteger name : noteNames) {
-				String newName  = name.name  + postfix;
-				int    newValue = name.value + increment;
-				if (newValue > 127)
-					break OCTAVE;
-				noteNameToInt.put(newName, newValue);
-			}
-		}
-		
-		// initialize lower notes
-		Collections.reverse(noteNames);
-		postfix = "";
-		OCTAVE:
-		for (int octave = 1; ; octave++) {
-			if (1 == octave)
-				postfix = "-";
-			if (octave > 1)
-				postfix = "-" + octave;
-			int decrement = octave * 12;
-			for (NamedInteger name : noteNames) {
-				String newName  = name.name  + postfix;
-				int    newValue = name.value - decrement;
-				if (newValue < 0)
-					break OCTAVE;
-				noteNameToInt.put(newName, newValue);
-			}
-		}
-	}
-	
-	/**
-	 * Sets up note names using:
-	 * 
-	 * - `+`, `++`, `+++`, ... for higher octaves
-	 * - `-`, `--`, `---`, ... for lower octaves
-	 */
-	private static void initOctavesPlusMinus() {
-		
-		// define unmodified note names
-		ArrayList<NamedInteger> noteNames = new ArrayList<NamedInteger>();
-		byte i = 60; // middle C
-		for (String name : notes) {
-			NamedInteger note = new NamedInteger(name, i);
-			noteNames.add(note);
-			i++;
-		}
-		
-		// initialize unmodified and higher notes
-		StringBuilder postfix = new StringBuilder("");
-		OCTAVE:
-		for (int octave = 0; ; octave++) {
-			if (octave > 0)
-				postfix.append("+");
-			int increment = octave * 12;
-			NAME:
-			for (NamedInteger name : noteNames) {
-				String newName  = name.name  + postfix;
-				int    newValue = name.value + increment;
-				if (newValue > 127)
-					break OCTAVE;
-				noteNameToInt.put(newName, newValue);
-			}
-		}
-		
-		// initialize lower notes
-		Collections.reverse(noteNames);
-		postfix = new StringBuilder("");
-		OCTAVE:
-		for (int octave = 1; ; octave++) {
-			postfix.append("-");
-			int decrement = octave * 12;
-			NAME:
-			for (NamedInteger name : noteNames) {
-				String newName  = name.name  + postfix;
-				int    newValue = name.value - decrement;
-				if (newValue < 0)
-					break OCTAVE;
-				noteNameToInt.put(newName, newValue);
-			}
-		}
-	}
-	
-	/**
-	 * Sets up note names using the international octave naming system:
-	 * 
-	 * - C-1, C0, C1, C2, C3, C4...
-	 */
-	private static void initOctavesInternational() {
-		// define unmodified note names
-		ArrayList<NamedInteger> noteNames = new ArrayList<NamedInteger>();
-		byte i = 0; // C-1
-		for (String name : notes) {
-			NamedInteger note = new NamedInteger(name, i);
-			noteNames.add(note);
-			i++;
-		}
-		
-		// initialize octaves
-		byte postfix = -1;
-		OCTAVE:
-		for (int octave = 0; ; octave++) {
-			int increment = octave * 12;
-			NAME:
-			for (NamedInteger name : noteNames) {
-				String newName  = name.name  + postfix;
-				int    newValue = name.value + increment;
-				if (newValue > 127)
-					break OCTAVE;
-				noteNameToInt.put(newName, newValue);
-			}
-			postfix++;
-		}
-	}
-	
-	/**
-	 * Sets up note names using the traditional german octave naming system:
-	 * 
-	 * - lower case c, c', c'', c'''... for higher octaves and
-	 * - upper case C, C', C'', C'''... for lower octaves
-	 */
-	private static void initOctavesGerman() {
-		
-		// define unmodified note names for higher notes (lower case)
-		ArrayList<NamedInteger> noteNames = new ArrayList<NamedInteger>();
-		byte i = 48; // capizalized C without modifiers
-		for (String name : notes) {
-			// use lower case for higher octaves
-			name = name.toLowerCase();
-			NamedInteger note = new NamedInteger(name, i);
-			noteNames.add(note);
-			i++;
-		}
-		
-		// initialize unmodified and higher notes
-		StringBuilder postfix = new StringBuilder("");
-		OCTAVE:
-		for (int octave = 0; ; octave++) {
-			if (octave > 0)
-				postfix.append("'");
-			int increment = octave * 12;
-			NAME:
-			for (NamedInteger name : noteNames) {
-				String newName  = name.name  + postfix;
-				int    newValue = name.value + increment;
-				if (newValue > 127)
-					break OCTAVE;
-				noteNameToInt.put(newName, newValue);
-			}
-		}
-		
-		// define unmodified note names for lower notes (upper case)
-		for (NamedInteger note : noteNames) {
-			note.name = note.name.substring(0, 1).toUpperCase()
-			          + note.name.substring(1)
-			          ;
-		}
-		Collections.reverse(noteNames);
-		postfix = new StringBuilder("");
-		
-		// initialize lower notes
-		OCTAVE:
-		for (int octave = 1; ; octave++) {
-			if (octave > 1)
-				postfix.append("'");
-			int decrement = octave * 12;
-			NAME:
-			for (NamedInteger name : noteNames) {
-				String newName  = name.name  + postfix;
-				int    newValue = name.value - decrement;
-				if (newValue < 0)
-					break OCTAVE;
-				noteNameToInt.put(newName, newValue);
-			}
-		}
+		halfTones = new byte[4];
+		halfTones[0] =  1; // C#, Db
+		halfTones[1] =  3; // D#, Eb
+		halfTones[2] =  6; // F#, Gb
+		halfTones[3] =  8; // G#, Ab
 	}
 	
 	/**
@@ -5027,6 +5104,16 @@ public class Dict {
 			return noteIntToName.get(i);
 		else
 			return get(UNKNOWN_NOTE_NAME);
+	}
+	
+	/**
+	 * Returns a String with alternative note names by note value.
+	 * 
+	 * @param i  value of the requested note like it is defined in the MIDI specification
+	 * @return   currently configured alternative names for the requested note
+	 */
+	public static String getNoteAlternatives(int i) {
+		return String.join(", ", moreNotesByNum.get(i));
 	}
 	
 	/**
