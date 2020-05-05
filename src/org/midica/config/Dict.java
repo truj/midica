@@ -165,8 +165,6 @@ public class Dict {
 	public static final String SYNTAX_COND_GE            = "COND_GE";
 	public static final String SYNTAX_COND_IN            = "COND_IN";
 	public static final String SYNTAX_COND_IN_SEP        = "COND_IN_SEP";
-	public static final String SYNTAX_HALFTONE_FLAT      = "HALFTONE_FLAT";
-	public static final String SYNTAX_HALFTONE_SHARP     = "HALFTONE_SHARP";
 	public static final String SYNTAX_REST               = "REST";
 	public static final String SYNTAX_CHORD              = "CHORD";
 	public static final String SYNTAX_CHORD_ASSIGNER     = "CHORD_ASSIGNER";
@@ -777,7 +775,6 @@ public class Dict {
 	public static final String EXPORT_FILE                 = "export_file";
 	public static final String CONF_ERROR_OK               = "conf_error_ok";
 	public static final String CONF_ERROR_ERROR            = "conf_error_error";
-	public static final String CONF_ERROR_HALFTONE_SYNTAX  = "conf_Error_halftone_syntax";
 	public static final String ERROR_NOT_YET_IMPLEMENTED   = "error_not_yet_implemented";
 	
 	// MidicaFileChooser
@@ -2140,7 +2137,6 @@ public class Dict {
 		set( CHOOSE_FILE_EXPORT,           "select file"                   );
 		set( EXPORT_FILE,                  "Export file"                   );
 		set( CONF_ERROR_OK,                "Configuration OK"              );
-		set( CONF_ERROR_HALFTONE_SYNTAX,   "Chosen half tone symbol incompatible with chosen syntax" );
 		set( ERROR_NOT_YET_IMPLEMENTED,    "This functionality is not yet implemented" );
 		
 		// FileSelector / MidicaFileChooser
@@ -2558,8 +2554,6 @@ public class Dict {
 		set( SYNTAX_COND_GE,            "Condition: greater or equal than..."              );
 		set( SYNTAX_COND_IN,            "Condition: in, e.g. $x in 0;1;5"                  );
 		set( SYNTAX_COND_IN_SEP,        "Separator for in-condition"                       );
-		set( SYNTAX_HALFTONE_FLAT,      "flat symbol (half tone)"                          );
-		set( SYNTAX_HALFTONE_SHARP,     "sharp symbol (half tone)"                         );
 		set( SYNTAX_REST,               "rest character"                                   );
 		set( SYNTAX_CHORD,              "chord definition"                                 );
 		set( SYNTAX_CHORD_ASSIGNER,     "assign symbol between chord name and notes"       );
@@ -3403,8 +3397,6 @@ public class Dict {
 			suffixFlat  = "b";
 			isSharp     = true;
 		}
-		setSyntax( SYNTAX_HALFTONE_FLAT,  suffixFlat  );
-		setSyntax( SYNTAX_HALFTONE_SHARP, suffixSharp );
 		
 		// init default half tone symbol
 		String suffixDefault = isSharp ? suffixSharp : suffixFlat;
@@ -3523,66 +3515,34 @@ public class Dict {
 		ConfigComboboxModel.refill(Config.OCTAVE);
 		
 		// get note system and half tone
-		String configuredOctave = Config.get(Config.OCTAVE);
-		
-		noteNameToInt = new HashMap<String, Integer>();
-		noteIntToName = new HashMap<Integer, String>();
+		String configuredOctave = Config.get(Config.OCTAVE); // TODO: delete?
 		
 		boolean isGermanOctave = Config.CBX_OCTAVE_GERMAN.equals(Config.get(Config.OCTAVE));
 		
-		// middle octave
-		ArrayList<NamedInteger> noteNames = new ArrayList<NamedInteger>();
-		int octave = -1;
-		int num    = 59; // one lower than middle C
-		
-		// higher octaves
+		// create number-to-name and name-to-number translations
+		noteIntToName = new HashMap<>();
+		noteNameToInt = new HashMap<>();
+		int octave  = -5;
+		int noteNum =  0;
 		OCTAVE:
 		while (true) {
-			octave++;
+			if (0 == noteNum % 12 && noteNum > 0)
+				octave++;
+			
+			// notes
 			for (String name : notes) {
-				num++;
-				if (num > 127)
+				if (noteNum > 127)
 					break OCTAVE;
-				
 				if (isGermanOctave)
-					name = lcFirst(name);
-				
-				// base octave
-				noteNameToInt.put(name + getOctavePostfix(octave), num);
+					name = octave < -1 ? ucFirst(name) : lcFirst(name);
+				String fullName = name + getOctavePostfix(octave);
+				noteNameToInt.put(fullName, noteNum);
+				noteIntToName.put(noteNum, fullName);
+				noteNum++;
 			}
 		}
 		
-		// lower octaves
-		List<String> reverseNotes = Arrays.asList(notes.clone());
-		Collections.reverse(reverseNotes);
-		octave = 0;
-		num    = 60;
-		OCTAVE:
-		while (true) {
-			octave--;
-			for (String name : reverseNotes) {
-				num--;
-				if (num < 0)
-					break OCTAVE;
-				
-				if (isGermanOctave) {
-					if (octave < -1)
-						name = ucFirst(name);
-					else
-						name = lcFirst(name);
-				}
-				
-				// base octave
-				noteNameToInt.put(name + getOctavePostfix(octave), num);
-			}
-		}
-		
-		// init integers to names
-		for (String key : noteNameToInt.keySet()) {
-			noteIntToName.put(noteNameToInt.get(key), key);
-		}
-		
-		// add alternative note names to noteNameToInt
+		// calculate alternative note names
 		initOctavesAlternative();
 		
 		initSyntax();
@@ -3879,16 +3839,12 @@ public class Dict {
 		// switch to lower/upper, if needed
 		if (Config.CBX_SYNTAX_LOWER.equals(configuredSyntax)) {
 			for (String id : syntax.keySet()) {
-				if (id.startsWith("HALFTONE_"))
-					continue;
 				String keyword = syntax.get(id).toLowerCase();
 				setSyntax(id, keyword);
 			}
 		}
 		else if (Config.CBX_SYNTAX_UPPER.equals(configuredSyntax)) {
 			for (String id : syntax.keySet()) {
-				if (id.startsWith("HALFTONE_"))
-					continue;
 				String keyword = syntax.get(id).toUpperCase();
 				setSyntax(id, keyword);
 			}
@@ -3936,11 +3892,9 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_PARTIAL_SYNC_SEP   );
 		
 		addSyntaxCategory(get(SYNTAX_CAT_OTHER));
-		addSyntaxForInfoView( SYNTAX_COMMENT           );
-		addSyntaxForInfoView( SYNTAX_HALFTONE_FLAT     );
-		addSyntaxForInfoView( SYNTAX_HALFTONE_SHARP    );
-		addSyntaxForInfoView( SYNTAX_REST              );
-		addSyntaxForInfoView( SYNTAX_P                 );
+		addSyntaxForInfoView( SYNTAX_COMMENT );
+		addSyntaxForInfoView( SYNTAX_REST    );
+		addSyntaxForInfoView( SYNTAX_P       );
 		
 		addSyntaxCategory(get(SYNTAX_CAT_META));
 		addSyntaxForInfoView( SYNTAX_META_COPYRIGHT    );
