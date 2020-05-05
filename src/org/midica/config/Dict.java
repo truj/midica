@@ -3451,10 +3451,6 @@ public class Dict {
 				if (isHalfTone[i] && sharp != isSharp)
 					continue;
 				
-				// don't repeat notes that we already have ???
-				if (! isHalfTone[i] && sharp == isSharp && isHalfTone[(i + increment) % 12])
-					continue;
-				
 				String baseName = notes[i];
 				byte   baseNum  = i;
 				for (byte step = 1; step < 4; step++) {
