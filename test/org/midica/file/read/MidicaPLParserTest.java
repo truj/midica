@@ -121,8 +121,60 @@ class MidicaPLParserTest extends MidicaPLParser {
 		parse(getWorkingFile("functions-and-blocks"));
 		assertEquals( 11040, instruments.get(0).getCurrentTicks() );
 		
+		parse(getWorkingFile("alternative-note-names"));
+		assertEquals( 12960, instruments.get(0).getCurrentTicks() );
+		ArrayList<SingleMessage> messages = getMessagesByStatus("90");
+		{
+			int i = 0;
+			// plain
+			assertEquals( "0/0/90/c / 64",        messages.get(i++).toString() ); // bbb,c##,dbb = a,d,c ==> c,d,a
+			assertEquals( "0/0/90/d / 64",        messages.get(i++).toString() );
+			assertEquals( "0/0/90/a / 64",        messages.get(i++).toString() );
+			assertEquals( "480/0/90/c / 64",      messages.get(i++).toString() ); // bbb,c##,dbb = a,d,c ==> c,d,a
+			assertEquals( "480/0/90/d / 64",      messages.get(i++).toString() );
+			assertEquals( "480/0/90/a / 64",      messages.get(i++).toString() );
+			assertEquals( "960/0/90/a+2 / 64",    messages.get(i++).toString() ); // bbb+2  = a+2
+			assertEquals( "1440/0/90/d-2 / 64",   messages.get(i++).toString() ); // c##-2  = d-2
+			assertEquals( "1920/0/90/c / 64",     messages.get(i++).toString() ); // dbb    = c
+			assertEquals( "2400/0/90/c-5 / 64",   messages.get(i++).toString() ); // a###-6 = c-5
+			assertEquals( "2880/0/90/g+5 / 64",   messages.get(i++).toString() ); // abb+5  = g+5
+			assertEquals( "3360/0/90/a#+4 / 64",  messages.get(i++).toString() ); // cbb+5  = a#+4
+			assertEquals( "3840/0/90/c#+4 / 64",  messages.get(i++).toString() ); // b##+3  = c#+4
+			// function + block
+			assertEquals( "4320/0/90/c / 64",     messages.get(i++).toString() ); // bbb,c##,dbb = a,d,c ==> c,d,a
+			assertEquals( "4320/0/90/d / 64",     messages.get(i++).toString() );
+			assertEquals( "4320/0/90/a / 64",     messages.get(i++).toString() );
+			assertEquals( "4800/0/90/c / 64",     messages.get(i++).toString() ); // bbb,c##,dbb = a,d,c ==> c,d,a
+			assertEquals( "4800/0/90/d / 64",     messages.get(i++).toString() );
+			assertEquals( "4800/0/90/a / 64",     messages.get(i++).toString() );
+			assertEquals( "5280/0/90/a+2 / 64",   messages.get(i++).toString() ); // bbb+2  = a+2
+			assertEquals( "5760/0/90/d-2 / 64",   messages.get(i++).toString() ); // c##-2  = d-2
+			assertEquals( "6240/0/90/c / 64",     messages.get(i++).toString() ); // dbb    = c
+			assertEquals( "6720/0/90/c-5 / 64",   messages.get(i++).toString() ); // a###-6 = c-5
+			assertEquals( "7200/0/90/g+5 / 64",   messages.get(i++).toString() ); // abb+5  = g+5
+			assertEquals( "7680/0/90/a#+4 / 64",  messages.get(i++).toString() ); // cbb+5  = a#+4
+			assertEquals( "8160/0/90/c#+4 / 64",  messages.get(i++).toString() ); // b##+3  = c#+4
+			// function
+			assertEquals( "8640/0/90/c / 64",     messages.get(i++).toString() ); // bbb,c##,dbb = a,d,c ==> c,d,a
+			assertEquals( "8640/0/90/d / 64",     messages.get(i++).toString() );
+			assertEquals( "8640/0/90/a / 64",     messages.get(i++).toString() );
+			assertEquals( "9120/0/90/c / 64",     messages.get(i++).toString() ); // bbb,c##,dbb = a,d,c ==> c,d,a
+			assertEquals( "9120/0/90/d / 64",     messages.get(i++).toString() );
+			assertEquals( "9120/0/90/a / 64",     messages.get(i++).toString() );
+			assertEquals( "9600/0/90/a+2 / 64",   messages.get(i++).toString() ); // bbb+2  = a+2
+			assertEquals( "10080/0/90/d-2 / 64",  messages.get(i++).toString() ); // c##-2  = d-2
+			assertEquals( "10560/0/90/c / 64",    messages.get(i++).toString() ); // dbb    = c
+			assertEquals( "11040/0/90/c-5 / 64",  messages.get(i++).toString() ); // a###-6 = c-5
+			assertEquals( "11520/0/90/g+5 / 64",  messages.get(i++).toString() ); // abb+5  = g+5
+			assertEquals( "12000/0/90/a#+4 / 64", messages.get(i++).toString() ); // cbb+5  = a#+4
+			assertEquals( "12480/0/90/c#+4 / 64", messages.get(i++).toString() ); // b##+3  = c#+4
+			// no more messages
+			assertTrue(i == messages.size());
+		}
+		
 		parse(getWorkingFile("chords"));
 		assertEquals( 13440, instruments.get(0).getCurrentTicks() );
+		assertEquals(  2400, instruments.get(1).getCurrentTicks() );
 		
 		parse(getWorkingFile("define"));
 		assertEquals( 3120, instruments.get(0).getCurrentTicks() );
@@ -264,7 +316,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "/2",   variables.get("$l")               );
 		assertEquals( "3",    variables.get("$q")               );
 		// channel 0:
-		ArrayList<SingleMessage> messages = getMessagesByChannel(0);
+		messages = getMessagesByChannel(0);
 		{
 			int i = 0;
 			assertEquals( "0/0/90/c / 30",     messages.get(++i).toString() );  // c piano

@@ -1,0 +1,39 @@
+INCLUDE inc/instruments.midica
+
+CHORD crd1 = bbb, c##, dbb  // a, d, c
+CHORD crd2 = a, d, c
+
+0   crd1     /4
+0   crd2     /4
+0   bbb+2    /4  // a+2
+0   c##-2    /4  // d-2
+0   dbb      /4  // c
+0   a###-6   /4  // c-5  (0)
+0   abb+5    /4  // g+5  (127)
+0   cbb+5    /4  // a#+4 (118)
+0   b##+3    /4  // c#+4 (109)
+
+FUNCTION test
+	{
+		0   crd1     /4
+		0   crd2     /4
+		0   bbb+2    /4  // a+2
+		0   c##-2    /4  // d-2
+		0   dbb      /4  // c
+		0   a###-6   /4  // c-5  (0)
+		0   abb+5    /4  // g+5  (127)
+		0   cbb+5    /4  // a#+4 (118)
+		0   b##+3    /4  // c#+4 (109)
+	}
+	0   crd1     /4
+	0   crd2     /4
+	0   bbb+2    /4  // a+2
+	0   c##-2    /4  // d-2
+	0   dbb      /4  // c
+	0   a###-6   /4  // c-5  (0)
+	0   abb+5    /4  // g+5  (127)
+	0   cbb+5    /4  // a#+4 (118)
+	0   b##+3    /4  // c#+4 (109)
+END
+CALL test
+
