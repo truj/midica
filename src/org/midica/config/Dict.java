@@ -8,10 +8,7 @@
 package org.midica.config;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
@@ -74,11 +71,11 @@ public class Dict {
 	private static ArrayList<String>            keyBindingCategories   = null;
 	
 	// needed to build up the note dictionaries (noteNameToInt and noteIntToName)
-	private static String[]                         notes          = new String[12];
-	private static byte[]                           halfTones      = null;
-	private static HashMap<String, Byte>            moreNotes      = null;
-	private static TreeMap<Byte, ArrayList<String>> moreBaseNotes  = null;
-	private static ArrayList<TreeSet<String>>       moreNotesByNum = null;
+	private static String[]                            notes          = new String[12];
+	private static byte[]                              halfTones      = null;
+	private static HashMap<String, Integer>            moreNotes      = null;
+	private static TreeMap<Integer, ArrayList<String>> moreBaseNotes  = null;
+	private static ArrayList<TreeSet<String>>          moreNotesByNum = null;
 	
 	// syntax
 	public static final String SYNTAX_DEFINE             = "DEFINE";
@@ -1754,9 +1751,10 @@ public class Dict {
 		syntax = new HashMap<String, String>();
 		
 		initLanguage();
-		initNoteSystem(); // calls also initHalfTones() which calls initOctaves() which calls initSyntax()
+		initNoteSystem(); // calls also initHalfTones() which calls initOctaves()
 		initPercussion();
 		initInstruments();
+		initSyntax();
 		
 		// init key binding categories
 		keyBindingCategories = new ArrayList<>();
@@ -3444,7 +3442,7 @@ public class Dict {
 					continue;
 				
 				String baseName = notes[i];
-				byte   baseNum  = i;
+				int    baseNum  = i;
 				for (byte step = 1; step < 4; step++) {
 					if (sharp)
 						baseName += suffixSharp;
@@ -3505,107 +3503,62 @@ public class Dict {
 	 * Reads the currently configured note names and half tone symbols which have
 	 * been created before. Creates full translation structures including the
 	 * configured octave symbols for each possible note value.
-	 * 
-	 * Then the syntax is (re)initialized using {@link #initSyntax()} because the syntax elements
-	 * for flats and sharps may have changed.
 	 */
 	public static void initOctaves() {
+		boolean isGermanOctave = Config.CBX_OCTAVE_GERMAN.equals(Config.get(Config.OCTAVE));
 		
 		// refresh combobox language
 		ConfigComboboxModel.refill(Config.OCTAVE);
 		
-		// get note system and half tone
-		String configuredOctave = Config.get(Config.OCTAVE); // TODO: delete?
-		
-		boolean isGermanOctave = Config.CBX_OCTAVE_GERMAN.equals(Config.get(Config.OCTAVE));
-		
 		// create number-to-name and name-to-number translations
 		noteIntToName = new HashMap<>();
 		noteNameToInt = new HashMap<>();
-		int octave  = -5;
-		int noteNum =  0;
+		int octave = -5;
+		int num    =  0;
 		OCTAVE:
 		while (true) {
-			if (0 == noteNum % 12 && noteNum > 0)
+			if (0 == num % 12 && num > 0)
 				octave++;
 			
 			// notes
 			for (String name : notes) {
-				if (noteNum > 127)
+				if (num > 127)
 					break OCTAVE;
 				if (isGermanOctave)
 					name = octave < -1 ? ucFirst(name) : lcFirst(name);
 				String fullName = name + getOctavePostfix(octave);
-				noteNameToInt.put(fullName, noteNum);
-				noteIntToName.put(noteNum, fullName);
-				noteNum++;
+				noteNameToInt.put(fullName, num);
+				noteIntToName.put(num, fullName);
+				num++;
 			}
 		}
 		
 		// calculate alternative note names
-		initOctavesAlternative();
-		
-		initSyntax();
-	}
-	
-	/**
-	 * Adds alternative note names to moreNotesByNum and noteNameToInt.
-	 */
-	private static void initOctavesAlternative() {
-		boolean isGermanOctave = Config.CBX_OCTAVE_GERMAN.equals(Config.get(Config.OCTAVE));
-		
-		// init structure
 		moreNotesByNum = new ArrayList<>();
 		for (int i = 0; i < 128; i++) {
 			moreNotesByNum.add(new TreeSet<>());
 		}
-		
-		for (Entry<Byte, ArrayList<String>> entry : moreBaseNotes.entrySet()) {
-			int               baseNum   = 60 + entry.getKey();
+		int middleC = 60;
+		for (Entry<Integer, ArrayList<String>> entry : moreBaseNotes.entrySet()) {
+			
+			int baseNum = entry.getKey();
 			ArrayList<String> baseNames = entry.getValue();
 			
-			for (String baseName : baseNames) {
-				
-				if (isGermanOctave)
-					baseName = lcFirst(baseName);
-				
-				// ignore duplicates
-				String baseNoteName = baseName + getOctavePostfix(0);
-				if (noteNameToInt.get(baseNoteName) != null) {
+			for (octave = -6; octave < 6; octave++) {
+				num = octave * 12 + middleC + baseNum;
+				if (num < 0 || num > 127)
 					continue;
-				}
 				
-				// base octave
-				moreNotesByNum.get(baseNum).add(baseNoteName);
-				noteNameToInt.put(baseNoteName, baseNum);
-				
-				// higher octaves
-				int num    = baseNum;
-				int octave = 0;
-				while (true) {
-					octave++;
-					num += 12;
-					if (num > 127)
-						break;
+				String octavePostfix = getOctavePostfix(octave);
+				for (String baseName : baseNames) {
+					String name = baseName + octavePostfix;
+					if (isGermanOctave)
+						name = octave < -1 ? ucFirst(name) : lcFirst(name);
 					
-					String name = baseName + getOctavePostfix(octave);
-					moreNotesByNum.get(num).add(name);
-					noteNameToInt.put(name, num);
-				}
-				
-				// lower octaves
-				num    = baseNum;
-				octave = 0;
-				while (true) {
-					octave--;
-					num -= 12;
-					if (num < 0)
-						break;
+					// ignore duplicates
+					if (noteNameToInt.get(name) != null)
+						continue;
 					
-					if (isGermanOctave && octave == -2)
-						baseName = ucFirst(baseName);
-					
-					String name = baseName + getOctavePostfix(octave);
 					moreNotesByNum.get(num).add(name);
 					noteNameToInt.put(name, num);
 				}
