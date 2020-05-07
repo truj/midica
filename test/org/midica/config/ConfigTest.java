@@ -78,46 +78,46 @@ public class ConfigTest {
 		
 		// change half tone system
 		cbxs[2].setSelectedIndex(1);
-		assertEquals(Config.CBX_HALFTONE_ID_FLAT, Config.get(Config.HALF_TONE));
-		cbxs[2].setSelectedIndex(2);
 		assertEquals(Config.CBX_HALFTONE_ID_DIESIS, Config.get(Config.HALF_TONE));
-		cbxs[2].setSelectedIndex(3);
-		assertEquals(Config.CBX_HALFTONE_ID_BEMOLLE, Config.get(Config.HALF_TONE));
-		cbxs[2].setSelectedIndex(4);
+		cbxs[2].setSelectedIndex(2);
 		assertEquals(Config.CBX_HALFTONE_ID_CIS, Config.get(Config.HALF_TONE));
-		cbxs[2].setSelectedIndex(5);
-		assertEquals(Config.CBX_HALFTONE_ID_DES, Config.get(Config.HALF_TONE));
 		cbxs[2].setSelectedIndex(0);
 		assertEquals(Config.CBX_HALFTONE_ID_SHARP, Config.get(Config.HALF_TONE));
 		
-		// change octave naming
+		// change sharp/flat
 		cbxs[3].setSelectedIndex(1);
-		assertEquals(Config.CBX_OCTAVE_PLUS_MINUS, Config.get(Config.OCTAVE));
-		cbxs[3].setSelectedIndex(2);
-		assertEquals(Config.CBX_OCTAVE_INTERNATIONAL, Config.get(Config.OCTAVE));
-		cbxs[3].setSelectedIndex(3);
-		assertEquals(Config.CBX_OCTAVE_GERMAN, Config.get(Config.OCTAVE));
+		assertEquals(Config.CBX_SHARPFLAT_FLAT, Config.get(Config.SHARP_FLAT));
 		cbxs[3].setSelectedIndex(0);
+		assertEquals(Config.CBX_SHARPFLAT_SHARP, Config.get(Config.SHARP_FLAT));
+		
+		// change octave naming
+		cbxs[4].setSelectedIndex(1);
+		assertEquals(Config.CBX_OCTAVE_PLUS_MINUS, Config.get(Config.OCTAVE));
+		cbxs[4].setSelectedIndex(2);
+		assertEquals(Config.CBX_OCTAVE_INTERNATIONAL, Config.get(Config.OCTAVE));
+		cbxs[4].setSelectedIndex(3);
+		assertEquals(Config.CBX_OCTAVE_GERMAN, Config.get(Config.OCTAVE));
+		cbxs[4].setSelectedIndex(0);
 		assertEquals(Config.CBX_OCTAVE_PLUS_MINUS_N, Config.get(Config.OCTAVE));
 		
 		// change syntax
-		cbxs[4].setSelectedIndex(1);
+		cbxs[5].setSelectedIndex(1);
 		assertEquals(Config.CBX_SYNTAX_LOWER, Config.get(Config.SYNTAX));
-		cbxs[4].setSelectedIndex(2);
+		cbxs[5].setSelectedIndex(2);
 		assertEquals(Config.CBX_SYNTAX_UPPER, Config.get(Config.SYNTAX));
-		cbxs[4].setSelectedIndex(0);
+		cbxs[5].setSelectedIndex(0);
 		assertEquals(Config.CBX_SYNTAX_MIXED, Config.get(Config.SYNTAX));
 		
 		// change percussion language
-		cbxs[5].setSelectedIndex(1);
+		cbxs[6].setSelectedIndex(1);
 		assertEquals(Config.CBX_PERC_DE_1, Config.get(Config.PERCUSSION));
-		cbxs[5].setSelectedIndex(0);
+		cbxs[6].setSelectedIndex(0);
 		assertEquals(Config.CBX_PERC_EN_1, Config.get(Config.PERCUSSION));
 		
 		// change percussion language
-		cbxs[6].setSelectedIndex(1);
+		cbxs[7].setSelectedIndex(1);
 		assertEquals(Config.CBX_INSTR_DE_1, Config.get(Config.INSTRUMENT));
-		cbxs[6].setSelectedIndex(0);
+		cbxs[7].setSelectedIndex(0);
 		assertEquals(Config.CBX_INSTR_EN_1, Config.get(Config.INSTRUMENT));
 	}
 }

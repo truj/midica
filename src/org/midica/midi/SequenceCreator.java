@@ -328,12 +328,13 @@ public class SequenceCreator {
 	/**
 	 * Sets the key signature using a meta message.
 	 * 
-	 * @param note     any note number from 0 to 127
-	 * @param isMajor  **true** for a major key signature, **false** for a minor one
-	 * @param tick     Tickstamp of the time signature event
+	 * @param note            any note number from 0 to 127
+	 * @param isMajor         **true** for a major key signature, **false** for a minor one
+	 * @param tick            Tickstamp of the time signature event
+	 * @param inDoubtUseFlat  **true** use flat symbols, if both is possible; **false**: use sharp
 	 * @throws InvalidMidiDataException if invalid MIDI data is used to create a MIDI message.
 	 */
-	public static void addMessageKeySignature(int note, boolean isMajor, long tick) throws InvalidMidiDataException {
+	public static void addMessageKeySignature(int note, boolean isMajor, long tick, boolean inDoubtUseFlat) throws InvalidMidiDataException {
 		int cmd = MidiListener.META_KEY_SIGNATURE;
 		
 		// calculate sharps or flats
@@ -370,7 +371,7 @@ public class SequenceCreator {
 		
 		// In some cases there are 2 possibilities. Then we must decide using the configured
 		// half tone symbol
-		if (Dict.isFlatConfigured()) {
+		if (inDoubtUseFlat) {
 			if (isMajor) {
 				     if ( 1 == note) { sharpsOrFlats = -5; } // Db maj: 5 flats
 				else if ( 6 == note) { sharpsOrFlats = -6; } // Gb maj: 6 flats

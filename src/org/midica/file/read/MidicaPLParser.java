@@ -241,6 +241,8 @@ public class MidicaPLParser extends SequenceParser {
 	private   static Pattern                            condPattern          = null;
 	private   static Pattern                            condInPattern        = null;
 	private   static Pattern                            crlfSkPattern        = null;
+	private   static Pattern                            sharpPattern         = null;
+	private   static Pattern                            flatPattern          = null;
 	private   static boolean                            isSoftKaraoke        = false;
 	private   static boolean                            isPatternSubChord    = false;
 	
@@ -631,6 +633,10 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// find forbidden \r or \n in a soft karaoke field or syllable
 		crlfSkPattern = Pattern.compile(Pattern.quote(LYRICS_CR) + "|" + Pattern.quote(LYRICS_LF));
+		
+		// find sharp(s) or flat(s) in a note name
+		sharpPattern = Pattern.compile("^.+" + Pattern.quote(Config.getConfiguredSharpOrFlat(true)) + ".*");
+		flatPattern  = Pattern.compile("^.+" + Pattern.quote(Config.getConfiguredSharpOrFlat(false)) + ".*");
 	}
 	
 	/**
@@ -3864,8 +3870,14 @@ public class MidicaPLParser extends SequenceParser {
 						throw new ParseException(Dict.get(Dict.ERROR_INVALID_TONALITY) + tonality);
 					}
 					// set the key signature message
-					if (! isFake)
-						SequenceCreator.addMessageKeySignature(note, isMajor, currentTicks);
+					if (! isFake) {
+						boolean inDoubtUseFlat = Config.isFlatConfigured();
+						if (sharpPattern.matcher(noteName).find())
+							inDoubtUseFlat = false;
+						else if (flatPattern.matcher(noteName).find())
+							inDoubtUseFlat = true;
+						SequenceCreator.addMessageKeySignature(note, isMajor, currentTicks, inDoubtUseFlat);
+					}
 				}
 				else {
 					throw new ParseException( Dict.get(Dict.ERROR_INVALID_KEY_SIG) + value);

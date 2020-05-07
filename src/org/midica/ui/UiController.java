@@ -840,6 +840,22 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			}
 		}
 		
+		// sharp/flat selected
+		else if (UiView.NAME_SELECT_SHARP_FLAT.equals(name)) {
+			
+			// store new configuration
+			type         = Config.SHARP_FLAT;
+			configuredId = Config.get(type);
+			Config.set(type, selectedId);
+			
+			// check if there has been a change we have to care about
+			if ( ! selectedId.equals(configuredId) ) {
+				
+				// update half tone
+				Dict.initHalfTones();
+			}
+		}
+		
 		// octave naming selected
 		else if (UiView.NAME_SELECT_OCTAVE.equals(name)) {
 			

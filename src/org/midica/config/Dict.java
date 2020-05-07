@@ -493,6 +493,7 @@ public class Dict {
 	public static final String KEY_MAIN_CBX_LANGUAGE        = "key_main_cbx_language";
 	public static final String KEY_MAIN_CBX_NOTE            = "key_main_cbx_note";
 	public static final String KEY_MAIN_CBX_HALFTONE        = "key_main_cbx_halftone";
+	public static final String KEY_MAIN_CBX_SHARPFLAT       = "key_main_cbx_sharpflat";
 	public static final String KEY_MAIN_CBX_OCTAVE          = "key_main_cbx_octave";
 	public static final String KEY_MAIN_CBX_SYNTAX          = "key_main_cbx_syntax";
 	public static final String KEY_MAIN_CBX_PERCUSSION      = "key_main_cbx_percussion";
@@ -736,6 +737,7 @@ public class Dict {
 	public static final String LANGUAGE                    = "language";
 	public static final String NOTE_SYSTEM                 = "note_system";
 	public static final String HALF_TONE_SYMBOL            = "half_tone_symbol";
+	public static final String SHARP_FLAT_DEFAULT          = "sharp_flat_default";
 	public static final String OCTAVE_NAMING               = "octave_naming";
 	public static final String SYNTAX                      = "syntax";
 	public static final String PERCUSSION                  = "percussion";
@@ -1791,12 +1793,12 @@ public class Dict {
 	private static void initLanguageEnglish() {
 		
 		// Config
-		set( Config.CBX_HALFTONE_ID_SHARP,           "#: c#, d#, f#..."                      );
-		set( Config.CBX_HALFTONE_ID_FLAT,            "b: db, eb, gb..."                      );
-		set( Config.CBX_HALFTONE_ID_DIESIS,          "-diesis: do-diesis, re-diesis..."      );
-		set( Config.CBX_HALFTONE_ID_BEMOLLE,         "-bemolle: re-bemolle, mi-bemolle..."   );
-		set( Config.CBX_HALFTONE_ID_CIS,             "-is: cis, dis, fis..."                 );
-		set( Config.CBX_HALFTONE_ID_DES,             "-es: des, es, ges..."                  );
+		set( Config.CBX_HALFTONE_ID_SHARP,           "# / b (c#, cb, d#, db, ...)"           );
+		set( Config.CBX_HALFTONE_ID_DIESIS,          "-diesis / -bemolle (do-diesis, ...)"   );
+		set( Config.CBX_HALFTONE_ID_CIS,             "-is / -es (cis, ces, dis, des,...)"    );
+		
+		set( Config.CBX_SHARPFLAT_SHARP,             "sharp (#, -is, -dieses)"               );
+		set( Config.CBX_SHARPFLAT_FLAT,              "flat (b, -es, -bemolle)"               );
 		
 		set( Config.CBX_NOTE_ID_INTERNATIONAL_LC,    "International: c, d, e, f, g, a, b"    );
 		set( Config.CBX_NOTE_ID_INTERNATIONAL_UC,    "International: C, D, E, F, G, A, B"    );
@@ -1857,6 +1859,7 @@ public class Dict {
 		set( KEY_MAIN_CBX_LANGUAGE,        "Open Language Selection"                                                     );
 		set( KEY_MAIN_CBX_NOTE,            "Open Note System Selection"                                                  );
 		set( KEY_MAIN_CBX_HALFTONE,        "Open Half Tone Symbol Selection"                                             );
+		set( KEY_MAIN_CBX_SHARPFLAT,       "Open Default Half Tone Selection"                                            );
 		set( KEY_MAIN_CBX_OCTAVE,          "Open Octave Naming Selection"                                                );
 		set( KEY_MAIN_CBX_SYNTAX,          "Open Syntax Selection"                                                       );
 		set( KEY_MAIN_CBX_PERCUSSION,      "Open Percussion ID Selection"                                                );
@@ -2093,7 +2096,8 @@ public class Dict {
 		set( CONFIGURATION,                "Configuration"                 );
 		set( LANGUAGE,                     "Language"                      );
 		set( NOTE_SYSTEM,                  "Note System"                   );
-		set( HALF_TONE_SYMBOL,             "Half Tone Symbol"              );
+		set( HALF_TONE_SYMBOL,             "Half Tone Symbols"             );
+		set( SHARP_FLAT_DEFAULT,           "Default Half Tone"             );
 		set( OCTAVE_NAMING,                "Octave Naming"                 );
 		set( SYNTAX,                       "Syntax"                        );
 		set( PERCUSSION,                   "Percussion IDs"                );
@@ -3232,12 +3236,12 @@ public class Dict {
 	private static void initLanguageGerman() {
 		
 		// Config
-		set( Config.CBX_HALFTONE_ID_SHARP,           "#: c#, d#, f#..."                      );
-		set( Config.CBX_HALFTONE_ID_FLAT,            "b: db, eb, gb..."                      );
-		set( Config.CBX_HALFTONE_ID_DIESIS,          "-diesis: do-diesis, re-diesis..."      );
-		set( Config.CBX_HALFTONE_ID_BEMOLLE,         "-bemolle: re-bemolle, mi-bemolle..."   );
-		set( Config.CBX_HALFTONE_ID_CIS,             "-is: cis, dis, fis..."                 );
-		set( Config.CBX_HALFTONE_ID_DES,             "-es: des, es, ges..."                  );
+		set( Config.CBX_HALFTONE_ID_SHARP,           "# / b (c#, cb, d#, db, ...)"           );
+		set( Config.CBX_HALFTONE_ID_DIESIS,          "-diesis / -bemolle (do-diesis, ...)"   );
+		set( Config.CBX_HALFTONE_ID_CIS,             "-is / -es (cis, ces, dis, des,...)"    );
+		
+		set( Config.CBX_SHARPFLAT_SHARP,             "Kreuz (#, -is, -diesis)"               );
+		set( Config.CBX_SHARPFLAT_FLAT,              "B (b, -es, -bemolle)"                  );
 		
 		set( Config.CBX_NOTE_ID_INTERNATIONAL_LC,    "International: c, d, e, f, g, a, b"    );
 		set( Config.CBX_NOTE_ID_INTERNATIONAL_UC,    "International: C, D, E, F, G, A, B"    );
@@ -3265,7 +3269,8 @@ public class Dict {
 		set( CONFIGURATION,                          "Konfiguration"                         );
 		set( LANGUAGE,                               "Sprache"                               );
 		set( NOTE_SYSTEM,                            "Notensystem"                           );
-		set( HALF_TONE_SYMBOL,                       "Halbton-Symbol"                        );
+		set( HALF_TONE_SYMBOL,                       "Versetzungszeichen"                    );
+		set( SHARP_FLAT_DEFAULT,                     "Default-Versetzungszeichen"            );
 		set( OCTAVE_NAMING,                          "Oktavenbezeichner"                     );
 		set( SYNTAX,                                 "Syntax"                                );
 		set( PERCUSSION,                             "Percussion-Bezeichner"                 );
@@ -3366,46 +3371,43 @@ public class Dict {
 		
 		// refresh combobox language
 		ConfigComboboxModel.refill(Config.HALF_TONE);
+		ConfigComboboxModel.refill(Config.SHARP_FLAT);
 		
 		// get configuration
-		String configuredHalfTone = Config.get(Config.HALF_TONE);
+		String  configuredHalfToneSymbols = Config.get(Config.HALF_TONE);
+		boolean isFlat                    = Config.isFlatConfigured();
 		
 		// init half tone symbols
 		String  suffixFlat  = null;
 		String  suffixSharp = null;
-		boolean isSharp     = true;
-		if (Config.CBX_HALFTONE_ID_SHARP.equals(configuredHalfTone) || Config.CBX_HALFTONE_ID_FLAT.equals(configuredHalfTone)) {
+		if (Config.CBX_HALFTONE_ID_SHARP.equals(configuredHalfToneSymbols)) {
 			suffixSharp = "#";
 			suffixFlat  = "b";
-			isSharp     = Config.CBX_HALFTONE_ID_SHARP.equals(configuredHalfTone);
 		}
-		else if (Config.CBX_HALFTONE_ID_DIESIS.equals(configuredHalfTone) || Config.CBX_HALFTONE_ID_BEMOLLE.equals(configuredHalfTone)) {
+		else if (Config.CBX_HALFTONE_ID_DIESIS.equals(configuredHalfToneSymbols)) {
 			suffixSharp = "-diesis";
 			suffixFlat  = "-bemolle";
-			isSharp       = Config.CBX_HALFTONE_ID_DIESIS.equals(configuredHalfTone);
 		}
-		else if (Config.CBX_HALFTONE_ID_CIS.equals(configuredHalfTone) || Config.CBX_HALFTONE_ID_DES.equals(configuredHalfTone)) {
+		else if (Config.CBX_HALFTONE_ID_CIS.equals(configuredHalfToneSymbols)) {
 			suffixSharp = "is";
 			suffixFlat  = "es";
-			isSharp     = Config.CBX_HALFTONE_ID_CIS.equals(configuredHalfTone);
 		}
 		else {
 			// default
 			suffixSharp = "#";
 			suffixFlat  = "b";
-			isSharp     = true;
 		}
 		
 		// init default half tone symbol
-		String suffixDefault = isSharp ? suffixSharp : suffixFlat;
+		String suffixDefault = isFlat ? suffixFlat : suffixSharp;
 		
 		// find out what to add to the current index
 		// to get the index of the base note
 		byte baseIncrementation;
-		if (isSharp)
-			baseIncrementation = -1;
-		else
+		if (isFlat)
 			baseIncrementation =  1;
+		else
+			baseIncrementation = -1;
 		
 		// initialize half tones
 		boolean isHalfTone[] = new boolean[12];
@@ -3438,7 +3440,7 @@ public class Dict {
 			for (byte i = 0; i < 12; i++) {
 				
 				// don't allow mixes like c#b, cb#, etc.
-				if (isHalfTone[i] && sharp != isSharp)
+				if (isHalfTone[i] && sharp == isFlat)
 					continue;
 				
 				String baseName = notes[i];
@@ -5248,20 +5250,6 @@ public class Dict {
 	 */
 	public static ArrayList<String> getKeyBindingCategories() {
 		return keyBindingCategories;
-	}
-	
-	/**
-	 * Checks if the configured half tone symbol is sharp or flat.
-	 * Only needed for some special cases when parsing the key signature.
-	 * 
-	 * @return **true**, if flat is configured, otherwise false.
-	 */
-	public static boolean isFlatConfigured() {
-		String configuredHalfTone = Config.get(Config.HALF_TONE);
-		if (Config.CBX_HALFTONE_ID_FLAT.equals(configuredHalfTone))    { return true; }
-		if (Config.CBX_HALFTONE_ID_BEMOLLE.equals(configuredHalfTone)) { return true; }
-		if (Config.CBX_HALFTONE_ID_DES.equals(configuredHalfTone))     { return true; }
-		return false;
 	}
 	
 	/**

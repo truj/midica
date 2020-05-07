@@ -46,6 +46,7 @@ public class UiView extends JFrame {
 	public static final String NAME_SELECT_LANGUAGE   = "name_select_language";
 	public static final String NAME_SELECT_SYSTEM     = "name_select_system";
 	public static final String NAME_SELECT_HALF_TONE  = "name_select_half_tone";
+	public static final String NAME_SELECT_SHARP_FLAT = "name_select_sharp_flat";
 	public static final String NAME_SELECT_OCTAVE     = "name_select_octave";
 	public static final String NAME_SELECT_SYNTAX     = "name_select_syntax";
 	public static final String NAME_SELECT_PERCUSSION = "name_select_percussion";
@@ -76,6 +77,7 @@ public class UiView extends JFrame {
 	private JComboBox<ComboboxStringOption> cbxGuiLang             = null;
 	private JComboBox<ComboboxStringOption> cbxNoteSys             = null;
 	private JComboBox<ComboboxStringOption> cbxHalfTone            = null;
+	private JComboBox<ComboboxStringOption> cbxSharpFlat           = null;
 	private JComboBox<ComboboxStringOption> cbxOctave              = null;
 	private JComboBox<ComboboxStringOption> cbxSyntax              = null;
 	private JComboBox<ComboboxStringOption> cbxPercussion          = null;
@@ -308,6 +310,22 @@ public class UiView extends JFrame {
 		cbxHalfTone.addActionListener(controller);
 		
 		area.add(cbxHalfTone, constraints);
+		
+		// sharp/flat label
+		constraints.gridx = 0;
+		constraints.gridy++;
+		JLabel lblSharpFlat = new JLabel(Dict.get(Dict.SHARP_FLAT_DEFAULT));
+		Laf.makeBold(lblSharpFlat);
+		area.add(lblSharpFlat, constraints);
+		
+		// sharp/flat selection
+		constraints.gridx++;
+		cbxSharpFlat = new JComboBox<ComboboxStringOption>();
+		cbxSharpFlat.setName(NAME_SELECT_SHARP_FLAT);
+		cbxSharpFlat.setModel(ConfigComboboxModel.getModel(Config.SHARP_FLAT));
+		cbxSharpFlat.addActionListener(controller);
+		
+		area.add(cbxSharpFlat, constraints);
 		
 		// octave naming label
 		constraints.gridx = 0;
@@ -707,6 +725,7 @@ public class UiView extends JFrame {
 			cbxGuiLang,
 			cbxNoteSys,
 			cbxHalfTone,
+			cbxSharpFlat,
 			cbxOctave,
 			cbxSyntax,
 			cbxPercussion,
@@ -733,6 +752,7 @@ public class UiView extends JFrame {
 		keyBindingManager.addBindingsForComboboxOpen( this.cbxGuiLang,    Dict.KEY_MAIN_CBX_LANGUAGE   );
 		keyBindingManager.addBindingsForComboboxOpen( this.cbxNoteSys,    Dict.KEY_MAIN_CBX_NOTE       );
 		keyBindingManager.addBindingsForComboboxOpen( this.cbxHalfTone,   Dict.KEY_MAIN_CBX_HALFTONE   );
+		keyBindingManager.addBindingsForComboboxOpen( this.cbxSharpFlat,  Dict.KEY_MAIN_CBX_SHARPFLAT  );
 		keyBindingManager.addBindingsForComboboxOpen( this.cbxOctave,     Dict.KEY_MAIN_CBX_OCTAVE     );
 		keyBindingManager.addBindingsForComboboxOpen( this.cbxSyntax,     Dict.KEY_MAIN_CBX_SYNTAX     );
 		keyBindingManager.addBindingsForComboboxOpen( this.cbxPercussion, Dict.KEY_MAIN_CBX_PERCUSSION );

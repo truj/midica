@@ -50,6 +50,7 @@ public class Config {
 	// keys for the config dropdown boxes
 	public static final String LANGUAGE   = "language";
 	public static final String HALF_TONE  = "half_tone";
+	public static final String SHARP_FLAT = "sharp_flat";
 	public static final String NOTE       = "note";
 	public static final String OCTAVE     = "octave";
 	public static final String SYNTAX     = "syntax";
@@ -131,21 +132,24 @@ public class Config {
 	private static ArrayList<ComboboxStringOption> CBX_OCTAVE_OPTIONS = null;
 	
 	// half tone combobox
-	public  static final String   CBX_HALFTONE_ID_SHARP   = "cbx_halftone_id_sharp";
-	public  static final String   CBX_HALFTONE_ID_FLAT    = "cbx_halftone_id_flat";
-	public  static final String   CBX_HALFTONE_ID_DIESIS  = "cbx_halftone_id_diesis";
-	public  static final String   CBX_HALFTONE_ID_BEMOLLE = "cbx_halftone_id_bemolle";
-	public  static final String   CBX_HALFTONE_ID_CIS     = "cbx_halftone_id_cis";
-	public  static final String   CBX_HALFTONE_ID_DES     = "cbx_halftone_id_des";
+	public  static final String   CBX_HALFTONE_ID_SHARP  = "cbx_halftone_id_sharp";
+	public  static final String   CBX_HALFTONE_ID_DIESIS = "cbx_halftone_id_diesis";
+	public  static final String   CBX_HALFTONE_ID_CIS    = "cbx_halftone_id_cis";
 	private static final String[] CBX_HALFTONE_IDENTIFIERS = {
 		CBX_HALFTONE_ID_SHARP,
-		CBX_HALFTONE_ID_FLAT,
 		CBX_HALFTONE_ID_DIESIS,
-		CBX_HALFTONE_ID_BEMOLLE,
 		CBX_HALFTONE_ID_CIS,
-		CBX_HALFTONE_ID_DES,
 	};
 	private static ArrayList<ComboboxStringOption> CBX_HALFTONE_OPTIONS = null;
+	
+	// sharp or flat
+	public  static final String   CBX_SHARPFLAT_SHARP = "cbx_sharp_flat_sharp";
+	public  static final String   CBX_SHARPFLAT_FLAT  = "cbx_sharp_flat_flat";
+	private static final String[] CBX_SHARPFLAT_IDENTIFIERS = {
+		CBX_SHARPFLAT_SHARP,
+		CBX_SHARPFLAT_FLAT,
+	};
+	private static ArrayList<ComboboxStringOption> CBX_SHARPFLAT_OPTIONS = null;
 	
 	// syntax combobox
 	public  static final String   CBX_SYNTAX_MIXED       = "cbx_syntax_mixed";
@@ -248,6 +252,7 @@ public class Config {
 		defaults = new HashMap<>();
 		defaults.put( LANGUAGE,    CBX_LANG_ENGLISH             );
 		defaults.put( HALF_TONE,   CBX_HALFTONE_ID_SHARP        );
+		defaults.put( SHARP_FLAT,  CBX_SHARPFLAT_SHARP          );
 		defaults.put( NOTE,        CBX_NOTE_ID_INTERNATIONAL_LC );
 		defaults.put( OCTAVE,      CBX_OCTAVE_PLUS_MINUS_N      );
 		defaults.put( SYNTAX,      CBX_SYNTAX_MIXED             );
@@ -349,6 +354,7 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_LANGUAGE,        KeyEvent.VK_L,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_NOTE,            KeyEvent.VK_N,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_HALFTONE,        KeyEvent.VK_H,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_SHARPFLAT,       KeyEvent.VK_D,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_OCTAVE,          KeyEvent.VK_O,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_SYNTAX,          KeyEvent.VK_S,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_PERCUSSION,      KeyEvent.VK_P,        InputEvent.ALT_DOWN_MASK   );
@@ -1150,6 +1156,13 @@ public class Config {
 		}
 		ConfigComboboxModel.initModel(CBX_HALFTONE_OPTIONS, Config.HALF_TONE);
 		
+		// half tone symbol
+		CBX_SHARPFLAT_OPTIONS = new ArrayList<>();
+		for (String id : CBX_SHARPFLAT_IDENTIFIERS) {
+			CBX_SHARPFLAT_OPTIONS.add(new ComboboxStringOption(id, get(id)));
+		}
+		ConfigComboboxModel.initModel(CBX_SHARPFLAT_OPTIONS, Config.SHARP_FLAT);
+		
 		// note system
 		CBX_NOTE_OPTIONS = new ArrayList<>();
 		for (String id : CBX_NOTE_IDENTIFIERS) {
@@ -1184,5 +1197,30 @@ public class Config {
 			CBX_INSTRUMENT_OPTIONS.add(new ComboboxStringOption(id, get(id)));
 		}
 		ConfigComboboxModel.initModel(CBX_INSTRUMENT_OPTIONS, Config.INSTRUMENT);
+	}
+	
+	/**
+	 * Returns the currently configured sharp or flat symbol.
+	 * 
+	 * @param sharp  **true** for the sharp symbol, **false** for the flat symbol
+	 * @return the requested symbol
+	 */
+	public static String getConfiguredSharpOrFlat(boolean sharp) {
+		String halfTone = get(Config.HALF_TONE);
+		if (CBX_HALFTONE_ID_DIESIS.equals(halfTone))
+			return sharp ? "-diesis" : "-bemolle";
+		if (CBX_HALFTONE_ID_CIS.equals(halfTone))
+			return sharp ? "is" : "es";
+		return sharp ? "#" : "b";
+	}
+	
+	/**
+	 * Checks if the configured half tone symbol is sharp or flat.
+	 * Only needed for some special cases when parsing the key signature.
+	 * 
+	 * @return **true**, if flat is configured, otherwise false.
+	 */
+	public static boolean isFlatConfigured() {
+		return Config.CBX_SHARPFLAT_FLAT.equals(Config.get(Config.SHARP_FLAT));
 	}
 }
