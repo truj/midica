@@ -1,0 +1,88 @@
+INCLUDE inc/instruments.midica
+
+0 - /4
+{
+	* key   c+2/maj     // 0 sharps/flats
+	0 - /4
+	* key   c#-2/maj    // 7 sharps
+	0 - /4
+	* key   db+2/maj                  // 5 flats
+	0 - /4
+	* key   d-2/maj     // 2 sharps
+	0 - /4
+	* key   d#+2/maj                  // 3 flats      d# ==> eb because more than 7 sharps aren't possible)
+	0 - /4
+	* key   eb-2/maj                  // 3 flats
+	0 - /4
+	* key   e+2/maj     // 4 sharps
+	0 - /4
+	* key   fb-2/maj                               // fb ==> e because more than 7 flats aren't possible
+	0 - /4
+	* key   e#/maj                                 // e# ==> f because more than 7 sharps aren't possible
+	0 - /4
+	* key   f/maj                     // 1 flat
+	0 - /4
+	* key   f#/maj      // 6 sharps
+	0 - /4
+	* key   gb/maj                    // 6 flats
+	0 - /4
+	* key   g/maj       // 1 sharp
+	0 - /4
+	* key   g#/maj                                 // g# ==> ab because more than 7 sharps aren't possible
+	0 - /4
+	* key   ab/maj                    // 4 flats
+	0 - /4
+	* key   a/maj       // 3 sharps
+	0 - /4
+	* key   a#/maj                                 // a# ==> bb because more than 7 sharps aren't possible
+	0 - /4
+	* key   bb/maj                    // 2 flats
+	0 - /4
+	* key   b/maj       // 5 sharps OR 7 flats, depending on the config
+	0 - /4
+	* key   cb/maj                    // 7 flats   // cb ==> b (not a half tone)
+	0 - /4
+}
+{
+	* key   c+2/min                   // 3 flats
+	0 - /4
+	* key   c#-2/min    // 4 sharps
+	0 - /4
+	* key   db+2/min                               // db ==> c# because more than 7 flats aren't possible
+	0 - /4
+	* key   d-2/min                   // 1 flat
+	0 - /4
+	* key   d#+2/min    // 6 sharps
+	0 - /4
+	* key   eb-2/min                  // 6 flats
+	0 - /4
+	* key   e+2/min     // 1 sharp
+	0 - /4
+	* key   fb-2/min                               // fb ==> e because more than 7 flats aren't possible
+	0 - /4
+	* key   e#/min                                 // e# ==> f because more than 7 sharps aren't possible
+	0 - /4
+	* key   f/min                     // 4 flats
+	0 - /4
+	* key   f#/min      // 3 sharps
+	0 - /4
+	* key   gb/min                                 // gb ==> f# because more than 7 flats aren't possible
+	0 - /4
+	* key   g/min                     // 2 flats
+	0 - /4
+	* key   g#/min      // 5 sharps
+	0 - /4
+	* key   ab/min                    // 7 flats
+	0 - /4
+	* key   a/min       // 0 sharps/flats
+	0 - /4
+	* key   a#/min      // 7 sharps
+	0 - /4
+	* key   bb/min                    // 5 flats
+	0 - /4
+	* key   b/min       // 2 sharps
+	0 - /4
+	* key   cb/min                                 // cb ==> b (not a half tone, and more than 7 flats aren't possible)
+	0 - /4
+}
+0 c /4

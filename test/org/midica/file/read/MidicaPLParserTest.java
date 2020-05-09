@@ -17,6 +17,7 @@ import java.util.Deque;
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.Sequence;
+import javax.swing.JComboBox;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,8 @@ import org.midica.ui.model.SingleMessage;
  */
 class MidicaPLParserTest extends MidicaPLParser {
 	
+	private static JComboBox<?>[] cbxs;
+	
 	public MidicaPLParserTest() {
 		super(true);
 	}
@@ -54,6 +57,8 @@ class MidicaPLParserTest extends MidicaPLParser {
 	@BeforeAll
 	static void setUpBeforeClass() throws InvocationTargetException, InterruptedException {
 		TestUtil.initMidica();
+		
+		cbxs = Midica.uiController.getView().getConfigComboboxes();
 	}
 	
 	/**
@@ -482,6 +487,68 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "2880/0/80/d+ / 0",  messages.get(i++).toString() ); // d+ OFF
 			assertEquals( "3840/0/80/e+ / 0",  messages.get(i++).toString() ); // e+ OFF
 		}
+		
+		// key-signature with "sharp" and "flat" configuration
+		boolean[] sharpOrFlat = new boolean[] {true, false};
+		for (boolean isSharp : sharpOrFlat) {
+			
+			// adjust config
+			if (isSharp)
+				cbxs[3].setSelectedIndex(0);
+			else
+				cbxs[3].setSelectedIndex(1);
+			
+			parse(getWorkingFile("key-signature"));
+			messages = getMessagesByStatusAndTickRangeAndSummary("FF", 1L, 999999L, true);
+			assertEquals(40, messages.size());
+			{
+				int i = 0;
+				assertEquals("c/maj, 0 ♯/♭", messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("c#/maj, 7 ♯",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("db/maj, 5 ♭",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("d/maj, 2 ♯",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("eb/maj, 3 ♭",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("eb/maj, 3 ♭",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("e/maj, 4 ♯",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("e/maj, 4 ♯",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("f/maj, 1 ♭",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("f/maj, 1 ♭",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("f#/maj, 6 ♯",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("gb/maj, 6 ♭",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("g/maj, 1 ♯",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("ab/maj, 4 ♭",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("ab/maj, 4 ♭",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("a/maj, 3 ♯",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("bb/maj, 2 ♭",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("bb/maj, 2 ♭",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				if (isSharp)
+					assertEquals("b/maj, 5 ♯", messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				else
+					assertEquals("b/maj, 7 ♭", messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("b/maj, 7 ♭",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("c/min, 3 ♭",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("c#/min, 4 ♯",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("c#/min, 4 ♯",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("d/min, 1 ♭",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("d#/min, 6 ♯",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("eb/min, 6 ♭",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("e/min, 1 ♯",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("e/min, 1 ♯",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("f/min, 4 ♭",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("f/min, 4 ♭",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("f#/min, 3 ♯",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("f#/min, 3 ♯",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("g/min, 2 ♭",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("g#/min, 5 ♯",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("ab/min, 7 ♭",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("a/min, 0 ♯/♭", messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("a#/min, 7 ♯",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("bb/min, 5 ♭",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("b/min, 2 ♯",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("b/min, 2 ♯",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+			}
+		}
+		cbxs[3].setSelectedIndex(0); // restore default config (sharp)
 		
 		parse(getWorkingFile("patterns"));
 		// channel 0:
@@ -1801,7 +1868,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 	 * Returns the message list, filtered by the given status byte.
 	 * 
 	 * @param statusByte  status byte (first byte of the message)
-	 * @return all messages with the given channel.
+	 * @return the filtered messages.
 	 */
 	private static ArrayList<SingleMessage> getMessagesByStatus(String statusByte) {
 		ArrayList<SingleMessage> allMessages = (ArrayList<SingleMessage>) SequenceAnalyzer.getSequenceInfo().get("messages");
@@ -1810,6 +1877,57 @@ class MidicaPLParserTest extends MidicaPLParser {
 			String status = (String) msg.getOption(IMessageType.OPT_STATUS_BYTE);
 			if (status.equals(statusByte))
 				messages.add(msg);
+		}
+		
+		return messages;
+	}
+	
+	/**
+	 * Returns the message list, filtered by the given status byte, and tick range, and summary status.
+	 * 
+	 * @param statusByte  status byte (first byte of the message);
+	 *                    **null** if the status doesn't matter
+	 * @param minTick     minimum tick to be included;
+	 *                    **null** if the minimum tick doesn't matter
+	 * @param maxTick     maximum tick to be included;
+	 *                    **null** if the maximum tick doesn't matter
+	 * @param summary     **true** for messages **with** summary;
+	 *                    **false** messages **without** summary;
+	 *                    **null** if the summary doesn't matter.
+	 * @return the filtered messages.
+	 */
+	private static ArrayList<SingleMessage> getMessagesByStatusAndTickRangeAndSummary(String statusByte, Long minTick, Long maxTick, Boolean summary) {
+		ArrayList<SingleMessage> allMessages = (ArrayList<SingleMessage>) SequenceAnalyzer.getSequenceInfo().get("messages");
+		ArrayList<SingleMessage> messages    = new ArrayList<>();
+		for (SingleMessage msg : allMessages) {
+			
+			// filter status
+			if (statusByte != null) {
+				String status = (String) msg.getOption(IMessageType.OPT_STATUS_BYTE);
+				if (! status.equals(statusByte))
+					continue;
+			}
+			
+			// filter min tick
+			if (minTick != null || maxTick != null) {
+				Long tick = (Long) msg.getOption(IMessageType.OPT_TICK);
+				if (minTick != null && tick < minTick)
+					continue;
+				if (maxTick != null && tick > maxTick)
+					continue;
+			}
+			
+			// filter summary
+			if (summary != null) {
+				String msgSummary = (String) msg.getOption(IMessageType.OPT_SUMMARY);
+				if (summary && null == msgSummary)
+					continue;
+				if (! summary && msgSummary != null)
+					continue;
+			}
+			
+			// not yet filtered - add the message
+			messages.add(msg);
 		}
 		
 		return messages;

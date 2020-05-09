@@ -288,7 +288,7 @@ public class MessageClassifier {
 						shortDesc = keyStr + Dict.getSyntax(Dict.SYNTAX_KEY_SEPARATOR) + tonalityStr + ", " + Math.abs(sharpsOrFlats) + " ";
 						
 						// display sharps / flats
-						String  sharpFlatStr;
+						String sharpFlatStr;
 						if (sharpsOrFlats > 0) {
 							sharpFlatStr = sharpsOrFlats + " " + Dict.get(Dict.MSG_DESC_F_KEY_SIG_SHARPS);
 							shortDesc += "♯";
@@ -384,7 +384,7 @@ public class MessageClassifier {
 		}
 		
 		// note name
-		String keyStr = Dict.getNote(note);
+		String keyStr = Dict.getNoteAsSharpOrFlat(note, sharpsOrFlats < 1);
 		if (-1 == note) {
 			keyStr = "";
 		}

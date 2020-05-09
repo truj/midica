@@ -10,6 +10,7 @@ package org.midica.config;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map.Entry;
+import java.util.regex.Pattern;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
@@ -73,6 +74,7 @@ public class Dict {
 	// needed to build up the note dictionaries (noteNameToInt and noteIntToName)
 	private static String[]                            notes          = new String[12];
 	private static byte[]                              halfTones      = null;
+	private static boolean[]                           isHalfTone     = null;
 	private static HashMap<String, Integer>            moreNotes      = null;
 	private static TreeMap<Integer, ArrayList<String>> moreBaseNotes  = null;
 	private static ArrayList<TreeSet<String>>          moreNotesByNum = null;
@@ -3410,7 +3412,7 @@ public class Dict {
 			baseIncrementation = -1;
 		
 		// initialize half tones
-		boolean isHalfTone[] = new boolean[12];
+		isHalfTone = new boolean[12];
 		for (int i = 0; i < 12; i++) {
 			isHalfTone[i] = false;
 		}
@@ -5009,6 +5011,40 @@ public class Dict {
 			return noteIntToName.get(i);
 		else
 			return get(UNKNOWN_NOTE_NAME);
+	}
+	
+	/**
+	 * Returns a note name by note value.
+	 * In case of a half tone, the returned note name depends on the parameter **useFlat**.
+	 * 
+	 * @param noteNum    value of the requested note like it is defined in the MIDI specification
+	 * @param useFlat    **true** to get the "flat" name for half tones, **false** for the "sharp" name
+	 * @return the requested note name, depending on useFlat and the configuration
+	 */
+	public static String getNoteAsSharpOrFlat(int noteNum, boolean useFlat) {
+		boolean halftone = isHalfTone[noteNum % 12];
+		
+		// full tone?
+		if (! halftone)
+			return getNote(noteNum);
+		
+		// half tone with the configured default symbol?
+		if (Config.isFlatConfigured() == useFlat)
+			return getNote(noteNum);
+		
+		// not the configured default symbol - check alternative note names
+		String symbol = Config.getConfiguredSharpOrFlat(! useFlat);
+		Pattern patternSingle = Pattern.compile("^.+" + Pattern.quote(symbol) + ".*");
+		Pattern patternMore   = Pattern.compile("^.+" + Pattern.quote(symbol) + "{2,}.*");
+		TreeSet<String> noteNames = moreNotesByNum.get(noteNum);
+		for (String name : noteNames) {
+			if (patternSingle.matcher(name).find() && ! patternMore.matcher(name).find()) {
+				return name;
+			}
+		}
+		
+		// no candidate found
+		return getNote(noteNum);
 	}
 	
 	/**

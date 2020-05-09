@@ -369,8 +369,7 @@ public class SequenceCreator {
 			else if (11 == note) { sharpsOrFlats =  2; } // B  min: 2 sharps
 		}
 		
-		// In some cases there are 2 possibilities. Then we must decide using the configured
-		// half tone symbol
+		// In some cases there are 2 possibilities. Then we must decide using the in-doubt variable
 		if (inDoubtUseFlat) {
 			if (isMajor) {
 				     if ( 1 == note) { sharpsOrFlats = -5; } // Db maj: 5 flats
