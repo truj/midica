@@ -105,14 +105,14 @@ public class InfoView extends JDialog {
 	
 	// widths and heights, used for dimensions
 	private static final int COL_WIDTH_NOTE_NUM          =  80;
-	private static final int COL_WIDTH_NOTE_NAME         = 200;
-	private static final int COL_WIDTH_NOTE_ALT          = 440;
+	private static final int COL_WIDTH_NOTE_NAME         = 120;
+	private static final int COL_WIDTH_NOTE_ALT          = 630;
 	private static final int COL_WIDTH_PERC_NUM          =  80;
 	private static final int COL_WIDTH_PERC_ID_SHORT     =  80;
 	private static final int COL_WIDTH_PERC_ID_LONG      = 250;
 	private static final int COL_WIDTH_SYNTAX_NAME       = 180;
-	private static final int COL_WIDTH_SYNTAX_DESC       = 230;
-	private static final int COL_WIDTH_SYNTAX_KEYWORD    = 130;
+	private static final int COL_WIDTH_SYNTAX_DESC       = 360;
+	private static final int COL_WIDTH_SYNTAX_KEYWORD    = 100;
 	private static final int COL_WIDTH_INSTR_NUM         =  80;
 	private static final int COL_WIDTH_INSTR_NAME        = 300;
 	private static final int COL_WIDTH_DRUMKIT_NUM       =  80;
