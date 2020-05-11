@@ -3860,23 +3860,21 @@ public class MidicaPLParser extends SequenceParser {
 					// check and process note and tonality
 					int     note = parseNote(noteName);
 					boolean isMajor;
-					if (tonality.equals(KEY_MAJ)) {
+					if (tonality.equals(KEY_MAJ))
 						isMajor = true;
-					}
-					else if (tonality.equals(KEY_MIN)) {
+					else if (tonality.equals(KEY_MIN))
 						isMajor = false;
-					}
-					else {
+					else
 						throw new ParseException(Dict.get(Dict.ERROR_INVALID_TONALITY) + tonality);
-					}
+					
 					// set the key signature message
 					if (! isFake) {
-						boolean inDoubtUseFlat = Config.isFlatConfigured();
+						boolean preferFlat = false;
 						if (sharpPattern.matcher(noteName).find())
-							inDoubtUseFlat = false;
+							preferFlat = false;
 						else if (flatPattern.matcher(noteName).find())
-							inDoubtUseFlat = true;
-						SequenceCreator.addMessageKeySignature(note, isMajor, currentTicks, inDoubtUseFlat);
+							preferFlat = true;
+						SequenceCreator.addMessageKeySignature(note, isMajor, currentTicks, preferFlat);
 					}
 				}
 				else {

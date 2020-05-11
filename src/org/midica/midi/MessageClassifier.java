@@ -384,7 +384,7 @@ public class MessageClassifier {
 		}
 		
 		// note name
-		String keyStr = Dict.getNoteAsSharpOrFlat(note, sharpsOrFlats < 1);
+		String keyStr = Dict.getNoteAsSharpOrFlat(note, sharpsOrFlats > 0);
 		if (-1 == note) {
 			keyStr = "";
 		}

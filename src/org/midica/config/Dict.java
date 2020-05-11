@@ -72,12 +72,13 @@ public class Dict {
 	private static ArrayList<String>            keyBindingCategories   = null;
 	
 	// needed to build up the note dictionaries (noteNameToInt and noteIntToName)
-	private static String[]                            notes          = new String[12];
-	private static byte[]                              halfTones      = null;
-	private static boolean[]                           isHalfTone     = null;
-	private static HashMap<String, Integer>            moreNotes      = null;
-	private static TreeMap<Integer, ArrayList<String>> moreBaseNotes  = null;
-	private static ArrayList<TreeSet<String>>          moreNotesByNum = null;
+	private static String[]                            notes            = new String[12];
+	private static byte[]                              halfTones        = null;
+	private static boolean[]                           isHalfTone       = null;
+	private static HashMap<String, Integer>            moreNotes        = null;
+	private static TreeMap<Integer, ArrayList<String>> moreBaseNotes    = null;
+	private static TreeMap<Integer, ArrayList<String>> moreBaseNotesPos = null;
+	private static ArrayList<TreeSet<String>>          moreNotesByNum   = null;
 	
 	// syntax
 	public static final String SYNTAX_DEFINE             = "DEFINE";
@@ -3466,6 +3467,22 @@ public class Dict {
 			}
 		}
 		
+		// needed for getNoteAsSharpOrFlat()
+		moreBaseNotesPos = new TreeMap<>();
+		for (Entry<Integer, ArrayList<String>> entry : moreBaseNotes.entrySet()) {
+			int num = entry.getKey();
+			ArrayList<String> names = entry.getValue();
+			num = num < 0 ? num + 12 : num % 12;
+			ArrayList<String> notes = moreBaseNotesPos.get(num);
+			if (null == notes) {
+				notes = new ArrayList<>();
+				moreBaseNotesPos.put(num, notes);
+			}
+			for (String name : names) {
+				notes.add(name);
+			}
+		}
+		
 		// the half tones have changed so the octave naming has to be refreshed as well
 		initOctaves();
 	}
@@ -5014,29 +5031,20 @@ public class Dict {
 	}
 	
 	/**
-	 * Returns a note name by note value.
-	 * In case of a half tone, the returned note name depends on the parameter **useFlat**.
+	 * Returns a note name by note value, preferring sharps or flats instead of normal notes.
 	 * 
-	 * @param noteNum    value of the requested note like it is defined in the MIDI specification
-	 * @param useFlat    **true** to get the "flat" name for half tones, **false** for the "sharp" name
-	 * @return the requested note name, depending on useFlat and the configuration
+	 * @param noteNum        value of the requested note like it is defined in the MIDI specification
+	 * @param preferSharp    **true** to prefer the "sharp" name, **false** for the "flat" name
+	 * @return the requested note name
 	 */
-	public static String getNoteAsSharpOrFlat(int noteNum, boolean useFlat) {
-		boolean halftone = isHalfTone[noteNum % 12];
-		
-		// full tone?
-		if (! halftone)
-			return getNote(noteNum);
-		
-		// half tone with the configured default symbol?
-		if (Config.isFlatConfigured() == useFlat)
-			return getNote(noteNum);
+	public static String getNoteAsSharpOrFlat(int noteNum, boolean preferSharp) {
+		noteNum %= 12;
 		
 		// not the configured default symbol - check alternative note names
-		String symbol = Config.getConfiguredSharpOrFlat(! useFlat);
+		String symbol = Config.getConfiguredSharpOrFlat(preferSharp);
 		Pattern patternSingle = Pattern.compile("^.+" + Pattern.quote(symbol) + ".*");
 		Pattern patternMore   = Pattern.compile("^.+" + Pattern.quote(symbol) + "{2,}.*");
-		TreeSet<String> noteNames = moreNotesByNum.get(noteNum);
+		ArrayList<String> noteNames = moreBaseNotesPos.get(noteNum);
 		for (String name : noteNames) {
 			if (patternSingle.matcher(name).find() && ! patternMore.matcher(name).find()) {
 				return name;
@@ -5044,7 +5052,7 @@ public class Dict {
 		}
 		
 		// no candidate found
-		return getNote(noteNum);
+		return notes[noteNum];
 	}
 	
 	/**

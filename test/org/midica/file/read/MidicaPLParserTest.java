@@ -521,11 +521,8 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals("a/maj, 3 ♯",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
 				assertEquals("bb/maj, 2 ♭",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
 				assertEquals("bb/maj, 2 ♭",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
-				if (isSharp)
-					assertEquals("b/maj, 5 ♯", messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
-				else
-					assertEquals("b/maj, 7 ♭", messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
-				assertEquals("b/maj, 7 ♭",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("b/maj, 5 ♯",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
+				assertEquals("cb/maj, 7 ♭",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
 				assertEquals("c/min, 3 ♭",   messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
 				assertEquals("c#/min, 4 ♯",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));
 				assertEquals("c#/min, 4 ♯",  messages.get(i++).getOption(IMessageType.OPT_SUMMARY));

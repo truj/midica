@@ -38,9 +38,9 @@ INCLUDE inc/instruments.midica
 	0 - /4
 	* key   bb/maj                    // 2 flats
 	0 - /4
-	* key   b/maj       // 5 sharps OR 7 flats, depending on the config
+	* key   b/maj       // 5 sharps
 	0 - /4
-	* key   cb/maj                    // 7 flats   // cb ==> b (not a half tone)
+	* key   cb/maj                    // 7 flats
 	0 - /4
 }
 {
@@ -82,7 +82,7 @@ INCLUDE inc/instruments.midica
 	0 - /4
 	* key   b/min       // 2 sharps
 	0 - /4
-	* key   cb/min                                 // cb ==> b (not a half tone, and more than 7 flats aren't possible)
+	* key   cb/min                                 // cb ==> b because more than 7 flats aren't possible
 	0 - /4
 }
 0 c /4
