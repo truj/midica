@@ -1,8 +1,10 @@
 INCLUDE inc/instruments.midica
 
+1 ch3    /4
+1 b,c#,d /4
+
 CHORD ch1=c,d,e
 CHORD ch2 f g 99
-CHORD ch3 b, c, d
 
 FUNCTION test
 	{ q=2
@@ -12,6 +14,13 @@ FUNCTION test
 		0 c,e,g /4
 	}
 	0 c /4
+	1 b,c#,d /8
+	1 ch3    /8
 END
 CALL test q=3
+
 0 c,e,g /4
+{
+	0 c,e,g /4
+}
+CHORD ch3 b, c#, d

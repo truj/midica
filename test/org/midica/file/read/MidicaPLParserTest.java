@@ -122,7 +122,8 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 11040, instruments.get(0).getCurrentTicks() );
 		
 		parse(getWorkingFile("chords"));
-		assertEquals( 13440, instruments.get(0).getCurrentTicks() );
+		assertEquals( 13920, instruments.get(0).getCurrentTicks() );
+		assertEquals(  2400, instruments.get(1).getCurrentTicks() );
 		
 		parse(getWorkingFile("define"));
 		assertEquals( 3120, instruments.get(0).getCurrentTicks() );

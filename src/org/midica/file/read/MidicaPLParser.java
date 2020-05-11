@@ -242,7 +242,6 @@ public class MidicaPLParser extends SequenceParser {
 	private   static Pattern                            condInPattern        = null;
 	private   static Pattern                            crlfSkPattern        = null;
 	private   static boolean                            isSoftKaraoke        = false;
-	private   static boolean                            isPatternSubChord    = false;
 	
 	private static boolean isDefineParsRun     = false; // parsing run for define commands
 	private static boolean isConstParsRun      = false; // parsing run for constant definitions
@@ -951,11 +950,6 @@ public class MidicaPLParser extends SequenceParser {
 				currentFunction.add(String.join(" ", tokens)); // add to function
 			else if (isBlock) {
 				nestableBlkStack.peek().add(tokens); // add to block
-				
-				// Ensure that a chord in a block in a pattern is not added more than once.
-				// Otherwise, the stacktrace line numbers would be wrong.
-				if (isPatternSubChord)
-					return;
 			}
 			
 			// apply or fake command
@@ -2595,9 +2589,7 @@ public class MidicaPLParser extends SequenceParser {
 				}
 				
 				// parse the resulting line
-				isPatternSubChord = lineNotes.size() > 1;
 				parseTokens(lineTokens.toArray(new String[0]));
-				isPatternSubChord = false;
 			}
 			
 			// reset channel state (velocity + duration)
@@ -3896,7 +3888,12 @@ public class MidicaPLParser extends SequenceParser {
 			throw new ParseException(Dict.get(Dict.ERROR_CH_CMD_NUM_OF_ARGS));
 		
 		int channel = toChannel(tokens[0]);
-		int note    = parseNote(tokens[1], channel);
+		
+		// don't throw exceptions for chords inside a block
+		if (isFake && tokens[1].contains(CHORD_SEPARATOR))
+			return;
+		
+		int note = parseNote(tokens[1], channel);
 		
 		// separate the duration from further arguments
 		String[] subTokens = tokens[2].split("\\s+", 2);
@@ -4721,7 +4718,6 @@ public class MidicaPLParser extends SequenceParser {
 			redefinitions        = new HashSet<>();
 			soundfontParsed      = false;
 			isSoftKaraoke        = false;
-			isPatternSubChord    = false;
 			constants            = new HashMap<>();
 			variables            = new HashMap<>();
 			varPattern           = null;
