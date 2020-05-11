@@ -18,6 +18,9 @@ FUNCTION test
 	1 ch3         /8
 END
 CALL test q=3
-0 c,e,g /4
 
+0 c,e,g /4
+{
+	0 c,e,g /4
+}
 CHORD ch3 bbb, c##, dbb
