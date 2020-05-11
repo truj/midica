@@ -5,10 +5,10 @@
 // So you have to add 225 to get the original measure number.
 // 
 // This file assumes standard program configuration:
-// - Note System:      International: c, d, e, ... (lower case)
-// - Half Tone Symbol: # (c#, d#, e#, ...)
-// - Octave Naming:    +n/-n
-// - Syntax:           Mixed Case Syntax
+// - Note System:       International: c, d, e, ... (lower case)
+// - Half Tone Symbols: # / b (c#, cb, d#, db, ...)
+// - Octave Naming:     +n/-n
+// - Syntax:            Mixed Case Syntax
 // 
 // Function naming conventions used in this example file:
 // - Functions related to a certain measure start with 'm', followed by the measure number.
@@ -1822,24 +1822,24 @@ CALL  m99_without_clarinet
 // m. 101
 *
 {
-	2  b,d#+  /4
-	2  a#,c#+ /4
-	3  -      /4
-	3  g      /4
-	4  d#     /4
-	4  d#-    /4
-	11 d#+    /16
-	11 b      /16
-	11 g#     /16  q=2
-	11 a#     /16
-	11 g      /16
-	11 d#     /16  q=2
-	12 d#     /8
-	12 -      /8
-	12 c#     /8
-	13 g#-,b- /8
-	13 -      /8
-	13 g-,a#- /8
+	2  b,d#+    /4
+	2  a#,c#+   /4
+	3  -        /4
+	3  g        /4
+	4  d#       /4
+	4  d#-      /4
+	11 d#+      /16
+	11 b        /16
+	11 g#       /16  q=2
+	11 a#       /16
+	11 f##      /16
+	11 d#       /16  q=2
+	12 d#       /8
+	12 -        /8
+	12 c#       /8
+	13 g#-,b-   /8
+	13 -        /8
+	13 f##-,a#- /8
 	{ q=2
 		14 d#-     /8
 		14 -       /8
@@ -1855,7 +1855,7 @@ CALL  m99_without_clarinet
 	3  g#      /8
 	4  g#-     /8
 	11 g#      /16
-	11 g       /16
+	11 f##     /16
 	11 g#      /16
 	11 g       /16
 	11 g#      /16
@@ -3048,7 +3048,7 @@ FUNCTION m192_to_193_without_violins
 	CALL  v_all_sf
 	0  a#+3       /2+/8
 	1  a#+2       /2+/8
-	2  g+,a#+     /2+/8
+	2  g+,bb+     /2+/8
 	3  a#,a#+     /2+/8
 	4  c-,c       /2+/8
 	5  g          /2+/8

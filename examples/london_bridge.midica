@@ -2,10 +2,10 @@
 // "London Bridge is Falling Down".
 // 
 // This file assumes standard program configuration:
-// - Note System:      International: c, d, e, ... (lower case)
-// - Half Tone Symbol: # (c#, d#, e#, ...)
-// - Octave Naming:    +n/-n
-// - Syntax:           Mixed Case Syntax
+// - Note System:       International: c, d, e, ... (lower case)
+// - Half Tone Symbols: # / b (c#, cb, d#, db, ...)
+// - Octave Naming:     +n/-n
+// - Syntax:            Mixed Case Syntax
 
 META
 	copyright  (c) Mozilla Public License, v. 2.0, author: Jan Trukenmüller
@@ -19,7 +19,7 @@ INSTRUMENTS
 	1  E_GUITAR_CLEAN  Guitar
 END
 
-// global defaults
+// global settings
 *  tempo  150
 *  time   4/4
 *  key    d/maj

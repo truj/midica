@@ -2,10 +2,10 @@
 // It comprises the measures 197 until the end (measure 326).
 // 
 // This file assumes standard program configuration:
-// - Note System:      International: c, d, e, ... (lower case)
-// - Half Tone Symbol: # (c#, d#, e#, ...)
-// - Octave Naming:    +n/-n
-// - Syntax:           Mixed Case Syntax
+// - Note System:       International: c, d, e, ... (lower case)
+// - Half Tone Symbols: # / b (c#, cb, eb, db, ...)
+// - Octave Naming:     +n/-n
+// - Syntax:            Mixed Case Syntax
 // 
 // Conventions used in this example file:
 //
@@ -63,7 +63,7 @@ FUNCTION c0m1_5
 	$c  g-  /16  q=11
 	$c  f   /16
 	$c  g-  /16  q=11
-	$c  d#  /16
+	$c  eb  /16
 	$c  g-  /16  q=11
 	$c  d   /16
 	$c  g-  /16  q=7
@@ -79,7 +79,7 @@ FUNCTION c0m6_9
 	$c  d   /16  q=11
 	$c  c+  /16
 	$c  d   /16  q=11
-	$c  a#  /16
+	$c  bb  /16
 	$c  d   /16  q=11
 	$c  a   /16
 	$c  d   /16  q=7
@@ -93,14 +93,14 @@ FUNCTION c0m10
 	$c  -    /16
 	$c  d+   /16
 	$c  c+   /16
-	$c  a#   /16
+	$c  bb   /16
 	$c  a    /16
 	$c  g    /16
 	$c  f#   /16
 	$c  e    /16
 	$c  d    /16
 	$c  c    /16
-	$c  a#-  /16
+	$c  bb-  /16
 	$c  a-   /16
 END
 CALL  c0m10
@@ -110,13 +110,13 @@ FUNCTION c0m16  // only definition yet
 	$c  g    /16
 	$c  d+2  /16
 	$c  c+2  /16
-	$c  a#+  /16
+	$c  bb+  /16
 	$c  g+   /16
 	$c  f#+  /16
 	$c  e+   /16
 	$c  d+   /16
 	$c  c+   /16
-	$c  a#   /16
+	$c  bb   /16
 	$c  a    /16
 	$c  g    /16
 END
@@ -131,29 +131,29 @@ FUNCTION c0m11_18
 	$c  g-   /16
 	$c  g+   /16
 	$c  f+   /16
-	$c  d#+  /16
+	$c  eb+  /16
 	$c  d+   /16
 	$c  c+   /16
-	$c  a#   /16
+	$c  bb   /16
 	$c  a    /16
 	$c  g    /16
 	$c  f    /16
-	$c  d#   /16
+	$c  eb   /16
 	$c  d    /16
 	
 	// m. 13-15
 	$c  c    /16  q=13
-	$c  a#+  /16
+	$c  bb+  /16
 	$c  g+   /16
 	$c  f+   /16
-	$c  d#+  /16
+	$c  eb+  /16
 	$c  d+   /16
 	$c  c+   /16
-	$c  a#   /16
+	$c  bb   /16
 	$c  a    /16
 	$c  g    /16
 	$c  f    /16
-	$c  d#   /16  q=13
+	$c  eb   /16  q=13
 	
 	// m. 16-18
 	CALL  c0m16  // m. 16
@@ -177,7 +177,7 @@ FUNCTION c0m22_23  // only definition yet
 	// m. 22
 	$c  -    /16
 	$c  a    /16
-	$c  a#   /16
+	$c  bb   /16
 	$c  c+   /16
 	$c  d+   /16
 	$c  e+   /16
@@ -188,14 +188,14 @@ FUNCTION c0m22_23  // only definition yet
 	
 	// m. 23
 	$c  -    /16
-	$c  a#   /16
+	$c  bb   /16
 	$c  c+   /16
 	$c  d+   /16
-	$c  d#+  /16
+	$c  eb+  /16
 	$c  f#+  /16
 	$c  g+   /16
 	$c  a+   /16
-	$c  a#+  /8
+	$c  bb+  /8
 	$c  -    /8
 END
 FUNCTION c0m24  // only definition yet
@@ -205,7 +205,7 @@ FUNCTION c0m24  // only definition yet
 	$c  f#+  /16
 	$c  g+   /16
 	$c  a+   /16
-	$c  a#+  /16
+	$c  bb+  /16
 	$c  c+2  /16
 	$c  d+2  /8
 	$c  -    /8
@@ -214,7 +214,7 @@ FUNCTION c0m21_28
 	// m. 21
 	$c  d    /16
 	$c  a    /16
-	$c  a#   /16
+	$c  bb   /16
 	$c  c+   /16
 	$c  d+   /16
 	$c  e+   /16
@@ -237,16 +237,16 @@ CALL  c0m21_28
 FUNCTION c0m29_37
 	// m. 29
 	{ q=3
-		$c  a#+  /16
+		$c  bb+  /16
 		$c  g+   /16
 		$c  d+   /16
-		$c  a#   /16
+		$c  bb   /16
 	}
 	
 	// m. 30
 	{ q=3
 		$c  d+   /16
-		$c  a#   /16
+		$c  bb   /16
 		$c  g    /16
 		$c  d    /16
 	}
@@ -255,7 +255,7 @@ FUNCTION c0m29_37
 	{ q=3
 		$c  g    /16
 		$c  d    /16
-		$c  a#-  /16
+		$c  bb-  /16
 		$c  g-   /16
 	}
 	
@@ -377,13 +377,13 @@ $c  d+2       /16
 CALL  c0m45part
 $c  c+2       /16
 CALL  c0m45part
-$c  a#+       /16
+$c  bb+       /16
 CALL  c0m45part
 
 // m. 46
 $c  a+    /16
 CALL  c0m45part
-$c  a#+   /16
+$c  bb+   /16
 CALL  c0m45part
 $c  c#+2   /16
 CALL  c0m45part
@@ -393,7 +393,7 @@ $c  d+2   /16
 CALL  c0m45part
 $c  c+2   /16
 CALL  c0m45part
-$c  a#+   /16
+$c  bb+   /16
 CALL  c0m45part
 
 // m. 48-50
@@ -402,17 +402,17 @@ $c  -        /16
 $c  a+2      /16  q=2
 $c  g+2      /16  q=2
 $c  f+2      /16  q=2
-$c  d#+2     /16  q=2
+$c  eb+2     /16  q=2
 $c  d+2      /16  q=2
 $c  c+2      /16  q=2
-$c  a#+      /16  q=2
+$c  bb+      /16  q=2
 $c  a+       /16  q=2
 $c  g+       /16  q=2
 $c  f+       /16  q=2
 $c  e+       /16  q=2
 $c  d+       /16  q=2
 $c  c+       /16  q=2
-$c  a#       /16  q=2
+$c  bb       /16  q=2
 $c  a        /16  q=2
 $c  g#       /16
 
@@ -428,7 +428,7 @@ $c  g#       /16
 
 // 1st voice, m. 52
 $c  g    /8
-$c  d#   /8
+$c  eb   /8
 $c  f    /8
 $c  d    /8
 $c  f    /8
@@ -452,15 +452,15 @@ FUNCTION c0m55second_63
 	$c  a+   /8
 	
 	// m. 56-57
-	$c  a#+  /8
+	$c  bb+  /8
 	$c  d    /8  q=2
 	$c  d+   /8
 	$c  g+   /8
-	$c  a#+  /8  q=2
+	$c  bb+  /8  q=2
 	$c  e    /8  q=2
 	$c  e+   /8
 	$c  g+   /8
-	$c  a#+  /8
+	$c  bb+  /8
 	
 	// m. 58-59
 	$c  a+   /8
@@ -476,12 +476,12 @@ FUNCTION c0m55second_63
 	// m. 60-62
 	$c  g+   /8
 	$c  d    /8  q=2
-	$c  a#   /8
-	$c  d#+  /8
+	$c  bb   /8
+	$c  eb+  /8
 	$c  d+   /8  q=2
 	$c  c    /8  q=2
 	$c  c+   /8
-	$c  d#+  /8
+	$c  eb+  /8
 	$c  g+   /8  q=2
 	$c  d    /8  q=2
 	$c  b    /8
@@ -500,28 +500,28 @@ CALL  c0m55second_63
 // m. 64-66
 FUNCTION c0m64_66
 	// m. 64
-	$c  d#+  /16
-	$c  d#   /16
+	$c  eb+  /16
+	$c  eb   /16
 	$c  f    /16
 	$c  g    /16
-	$c  g#   /16
+	$c  ab   /16
 	$c  b    /16
 	$c  c+   /16
 	$c  d+   /16
-	$c  d#+  /8
+	$c  eb+  /8
 	$c  -    /8
 	
 	// m. 65-66
 	{ q=2
 		$c  -    /16
-		$c  d#   /16
+		$c  eb   /16
 		$c  f    /16
 		$c  g    /16
-		$c  g#   /16
+		$c  ab   /16
 		$c  b    /16
 		$c  c+   /16
 		$c  d+   /16
-		$c  d#+  /8
+		$c  eb+  /8
 		$c  -    /8
 	}
 END
@@ -531,9 +531,9 @@ CALL  c0m64_66
 FUNCTION c0m67_69
 	// m. 67
 	{ q=3
-		$c  d#   /16
+		$c  eb   /16
 		$c  c+   /16
-		$c  a#   /16
+		$c  bb   /16
 		$c  c+   /16
 	}
 	
@@ -541,7 +541,7 @@ FUNCTION c0m67_69
 	{ q=3
 		$c  f    /16
 		$c  c+   /16
-		$c  a#   /16
+		$c  bb   /16
 		$c  c+   /16
 	}
 	
@@ -567,11 +567,11 @@ FUNCTION c0m70second_73
 	$c  c   /16  q=11
 		
 	// m. 71
-	$c  a#  /16
+	$c  bb  /16
 	$c  c   /16  q=11
 	
 	// m. 72
-	$c  g#  /16
+	$c  ab  /16
 	$c  c   /16  q=11
 	
 	// m. 73
@@ -585,7 +585,7 @@ CALL  c0m70second_73
 // m. 74
 $c  g+   /2.  m
 { q=6
-	$c  d#+  /16
+	$c  eb+  /16
 	$c  d+   /16
 }
 
@@ -599,7 +599,7 @@ $c  g+   /2.  m
 // m. 76
 $c  g+   /2.  m
 { q=6
-	$c  d#+  /16
+	$c  eb+  /16
 	$c  c+   /16
 }
 
@@ -607,40 +607,40 @@ $c  g+   /2.  m
 $c  f+   /2.  m
 { q=6
 	$c  d+  /16
-	$c  g#  /16
+	$c  bb  /16
 }
 
 // m. 78
 $c  g+   /2.  m
 { q=6
-	$c  d#+ /16
-	$c  g#  /16
+	$c  eb+ /16
+	$c  bb  /16
 }
 
 // m. 79
-$c  d#+   /16
+$c  eb+   /16
 $c  g+    /16  q=2
-$c  g#+   /16  q=2
-$c  a#+   /16  q=2
+$c  ab+   /16  q=2
+$c  bb+   /16  q=2
 $c  c+2   /16  q=2
 $c  d+2   /16  q=2
-$c  d#+2  /16
+$c  eb+2  /16
 
 // m. 79
 { q=3
-	$c  d#+2  /16
-	$c  a#+   /16
+	$c  eb+2  /16
+	$c  bb+   /16
 	$c  g+    /16
-	$c  d#+   /16
+	$c  eb+   /16
 }
 
 // m. 81
 $c  f+    /16
-$c  g#+   /16  q=2
-$c  a#+   /16  q=2
+$c  ab+   /16  q=2
+$c  bb+   /16  q=2
 $c  c+2   /16  q=2
 $c  d+2   /16  q=2
-$c  d#+2  /16  q=2
+$c  eb+2  /16  q=2
 $c  f+2   /16
 
 // m. 82
@@ -653,10 +653,10 @@ $c  f+2   /16
 
 // m. 83
 $c  g+    /16
-$c  a#+   /16  q=2
+$c  bb+   /16  q=2
 $c  c+2   /16  q=2
 $c  d+2   /16  q=2
-$c  d#+2  /16  q=2
+$c  eb+2  /16  q=2
 $c  f+2   /16  q=2
 $c  g+2   /16
 
@@ -676,7 +676,7 @@ $c  c    /16  q=11
 FUNCTION c0m86_96
 	// m. 86
 	{ q=3
-		$c  g#  /16
+		$c  ab  /16
 		$c  c   /16  q=3
 	}
 	
@@ -686,7 +686,7 @@ FUNCTION c0m86_96
 	// m. 88
 	{ q=3
 		$c  g   /16
-		$c  a#  /16  q=3
+		$c  bb  /16  q=3
 	}
 	
 	// m. 89
@@ -695,7 +695,7 @@ FUNCTION c0m86_96
 	// m. 90
 	{ q=3
 		$c  f    /16
-		$c  g#-  /16  q=3
+		$c  ab-  /16  q=3
 	}
 	
 	// m. 91
@@ -704,7 +704,7 @@ FUNCTION c0m86_96
 	
 	// m. 92
 	{ q=3
-		$c  d#+  /16
+		$c  eb+  /16
 		$c  g    /16  q=3
 	}
 	
@@ -723,7 +723,7 @@ FUNCTION c0m86_96
 	// m. 96
 	{ q=3
 		$c  c+  /16
-		$c  d#  /16  q=3
+		$c  eb  /16  q=3
 	}
 END
 CALL  c0m86_96
@@ -736,7 +736,7 @@ $c  a   /16
 $c  d   /16  q=3
 
 // m. 98
-$c  a#  /16
+$c  bb  /16
 $c  d   /16  q=3
 $c  c+  /16
 $c  d   /16  q=3
@@ -744,7 +744,7 @@ $c  d+  /16
 $c  d   /16  q=3
 
 // m. 99
-$c  d#+  /16
+$c  eb+  /16
 $c  d    /16  q=3
 $c  f#+  /16
 $c  d    /16  q=3
@@ -754,7 +754,7 @@ $c  d    /16  q=3
 // m. 100
 $c  a+   /16
 $c  d    /16  q=3
-$c  a#+  /16
+$c  bb+  /16
 $c  d    /16  q=3
 $c  c+2  /16
 $c  d    /16  q=3
@@ -767,14 +767,14 @@ FUNCTION c0m101second_107
 	// m. 101/2
 	$c  d+   /16
 	$c  c+   /16
-	$c  a#   /16
+	$c  bb   /16
 	$c  a    /16
 	$c  g    /16
 	$c  f    /16
 	$c  e    /16
 	$c  d    /16
 	$c  c    /16
-	$c  a#-  /16
+	$c  bb-  /16
 	$c  a-   /16
 	
 	// m. 102
@@ -784,14 +784,14 @@ FUNCTION c0m101second_107
 	$c  g-   /16
 	$c  g+   /16
 	$c  f+   /16
-	$c  d#+  /16
+	$c  eb+  /16
 	$c  d+   /16
 	$c  c+   /16
-	$c  a#   /16
+	$c  bb   /16
 	$c  a   /16
 	$c  g   /16
 	$c  f   /16
-	$c  d#  /16
+	$c  eb  /16
 	$c  d   /16
 	
 	// m. 104
@@ -799,29 +799,29 @@ FUNCTION c0m101second_107
 	
 	// m. 105-106
 	$c  c    /16
-	$c  a#+  /16
+	$c  bb+  /16
 	$c  g+   /16
 	$c  f+   /16
-	$c  d#+  /16
+	$c  eb+  /16
 	$c  d+   /16
 	$c  c+   /16
-	$c  a#   /16
+	$c  bb   /16
 	$c  a    /16
 	$c  g    /16
 	$c  f    /16
-	$c  d#   /16  q=13
+	$c  eb   /16  q=13
 	
 	// m. 107-108
 	$c  g    /16
 	$c  d+2  /16
 	$c  c+2  /16
-	$c  a#+  /16
+	$c  bb+  /16
 	$c  g+   /16
 	$c  f#+  /16
 	$c  e+   /16
 	$c  d+   /16
 	$c  c+   /16
-	$c  a#   /16
+	$c  bb   /16
 	$c  a    /16
 	$c  g    /16
 END
@@ -841,7 +841,7 @@ FUNCTION c0m109part
 END
 $c  d+   /16
 CALL  c0m109part
-$c  d#+  /16
+$c  eb+  /16
 CALL  c0m109part
 $c  f#+  /16
 CALL  c0m109part
@@ -852,7 +852,7 @@ FUNCTION c0m110
 	CALL  c0m109part
 	$c  f+   /16
 	CALL  c0m109part
-	$c  d#+  /16
+	$c  eb+  /16
 	CALL  c0m109part
 END
 CALL  c0m110
@@ -860,7 +860,7 @@ CALL  c0m110
 // m. 111
 $c  d+   /16
 CALL  c0m109part
-$c  d#+  /16
+$c  eb+  /16
 CALL  c0m109part
 $c  f#+  /16
 CALL  c0m109part
@@ -875,23 +875,23 @@ FUNCTION c0m113_114
 	$c  g-   /16
 	$c  g    /16
 	$c  a    /16
-	$c  a#   /16
+	$c  bb   /16
 	$c  c+   /16
 	$c  d+   /16
 	$c  e+   /16
 	$c  f#+  /16
 	$c  g+   /16
 	$c  a+   /16
-	$c  a#+  /16
+	$c  bb+  /16
 	$c  a+   /16
 	
 	// m. 114
 	$c  g+   /16
 	$c  f+   /16
-	$c  d#+  /16
+	$c  eb+  /16
 	$c  d+   /16
 	$c  c+   /16
-	$c  a#   /16
+	$c  bb   /16
 	$c  a    /16
 	$c  g    /16
 	$c  f#   /16
@@ -904,7 +904,7 @@ CALL  c0m113_114
 // m. 115
 FUNCTION c0m115
 	{ q=6
-		$c  a#-  /16  $f
+		$c  bb-  /16  $f
 		$c  g-   /16
 	}
 END
@@ -913,7 +913,7 @@ CALL  c0m115
 // m. 116-119
 { q=2
 	// 116 == 118
-	$c  d#   /16
+	$c  eb   /16
 	$c  d    /16
 	$c  f#   /16
 	$c  e    /16
@@ -921,15 +921,15 @@ CALL  c0m115
 	$c  f#   /16
 	$c  a    /16
 	$c  g    /16
-	$c  a#   /16
+	$c  bb   /16
 	$c  a    /16
 	$c  c+   /16
-	$c  a#   /16
+	$c  bb   /16
 	
 	// 117 == 119
 	$c  d+   /16
 	$c  c+   /16
-	$c  d#+  /16
+	$c  eb+  /16
 	$c  d+   /16
 	$c  f+   /16
 	$c  e+   /16
@@ -937,7 +937,7 @@ CALL  c0m115
 	$c  f#+  /16
 	$c  a+   /16
 	$c  g+   /16
-	$c  a#+  /16
+	$c  bb+  /16
 	$c  a+   /16
 }
 
@@ -946,7 +946,7 @@ FUNCTION c0m121  // only definition yet
 	{ q=3
 		$c  g    /16
 		$c  d    /16
-		$c  a#-  /16
+		$c  bb-  /16
 		$c  g-   /16
 	}
 END
@@ -981,17 +981,17 @@ FUNCTION c0m125_130
 	
 	// m. 127
 	$c  g   /16  q=4
-	$c  a#  /16  q=4
+	$c  bb  /16  q=4
 	$c  d+  /16  q=4
 	
 	// m. 128
 	$c  g+   /16  q=4
-	$c  a#+  /16  q=4
+	$c  bb+  /16  q=4
 	$c  g+   /16  q=4
 	
 	// m. 129
 	$c  d+  /16  q=4
-	$c  a#  /16  q=4
+	$c  bb  /16  q=4
 	$c  g   /16  q=4
 	
 	// m. 130
@@ -1116,7 +1116,7 @@ FUNCTION c2m21
 	$c  f#   /16
 	$c  g    /16
 	$c  a    /16
-	$c  a#   /16
+	$c  bb   /16
 	$c  c+   /16
 	$c  d+   /16
 	$c  e+   /16
@@ -1131,7 +1131,7 @@ FUNCTION c2m22
 	$c  f#   /16
 	$c  g    /16
 	$c  a    /16
-	$c  a#   /16
+	$c  bb   /16
 	$c  c+   /16
 	$c  d+   /16
 	$c  e+   /16
@@ -1145,10 +1145,10 @@ FUNCTION c2m23
 	$c  -    /16
 	$c  g    /16
 	$c  a    /16
-	$c  a#   /16
+	$c  bb   /16
 	$c  c+   /16
 	$c  d+   /16
-	$c  d#+  /16
+	$c  eb+  /16
 	$c  f#+  /16
 	$c  g+   /8
 	$c  -    /8
@@ -1163,24 +1163,24 @@ CALL  c2m22
 
 // m. 29
 { q=3
-	$c  a#   /16
+	$c  bb   /16
 	$c  d+   /16
 	$c  g+   /16
-	$c  a#+  /16
+	$c  bb+  /16
 }
 
 // m. 30
 { q=3
 	$c  d   /16
 	$c  g   /16
-	$c  a#  /16
+	$c  bb  /16
 	$c  d+  /16
 }
 
 // m. 31
 { q=3
 	$c  g-   /16
-	$c  a#-  /16
+	$c  bb-  /16
 	$c  d    /16
 	$c  g    /16
 }
@@ -1193,11 +1193,11 @@ CALL  c2m22
 
 // m. 33
 { q=4
-	$c  d#  /16
+	$c  eb  /16
 	$c  g   /16
 }
 { q=2
-	$c  d#  /16
+	$c  eb  /16
 	$c  c   /16
 }
 
@@ -1235,8 +1235,8 @@ $c  f+  /8
 
 // m. 56
 $c  g+   /8
-$c  a#-  /8  q=2
-$c  a#   /8
+$c  bb-  /8  q=2
+$c  bb   /8
 $c  d+   /8
 $c  g+   /8
 
@@ -1256,27 +1256,27 @@ $c  f+  /8
 
 // m. 59
 $c  f+   /8
-$c  a#-  /8  q=2
-$c  a#   /8
+$c  bb-  /8  q=2
+$c  bb   /8
 $c  d+   /8
 $c  f+   /8
 
 // m. 60
-$c  d#+  /8
-$c  a#-  /8  q=2
+$c  eb+  /8
+$c  bb-  /8  q=2
 $c  g    /8
-$c  a#+  /8
-$c  d#+  /8
+$c  bb+  /8
+$c  eb+  /8
 
 // m. 61
-$c  d#+  /8
-$c  g#-  /8  q=2
-$c  g#   /8
+$c  eb+  /8
+$c  ab-  /8  q=2
+$c  ab   /8
 $c  c    /8
-$c  d#+  /8
+$c  eb+  /8
 
 // m. 62
-$c  d#+  /8
+$c  eb+  /8
 $c  b-   /8  q=2
 $c  g    /8
 $c  b    /8
@@ -1293,7 +1293,7 @@ $c  d+  /8
 $c  c+  /16
 $c  c   /16
 $c  d   /16
-$c  d#  /16
+$c  eb  /16
 $c  f   /16
 $c  g   /16
 $c  a   /16
@@ -1306,7 +1306,7 @@ $c  -   /8
 	$c  -   /16
 	$c  c   /16
 	$c  d   /16
-	$c  d#  /16
+	$c  eb  /16
 	$c  f   /16
 	$c  g   /16
 	$c  a   /16
@@ -1340,20 +1340,20 @@ CALL  c0m121      // m. 124
 $c  a-  /16  q=24    // m. 125-126
 
 // m. 127
-$c  a#-  /16
+$c  bb-  /16
 $c  d    /16  q=3
 $c  g    /16  q=4
-$c  a#   /16  q=4
+$c  bb   /16  q=4
 
 // m. 128
 $c  d+   /16  q=4
 $c  g+   /16  q=4
-$c  a#+  /16  q=4
+$c  bb+  /16  q=4
 
 // m. 129
 $c  g+  /16  q=4
 $c  d+  /16  q=4
-$c  a#  /16  q=4
+$c  bb  /16  q=4
 
 // m. 130
 $c  g-   /2.
@@ -1372,7 +1372,7 @@ CALL  rest_full_measure
 // m. 11-20
 $c  g-  /16  q=24  // m. 11-12
 $c  c   /16  q=24  // m. 13-14
-$c  d#  /16  q=24  // m. 15-16
+$c  eb  /16  q=24  // m. 15-16
 $c  g   /16  q=36  // m. 17-19
 CALL  c2m20
 
@@ -1386,7 +1386,7 @@ END
 FUNCTION c3m23second  // only definition yet
 	$c  -   /4+/16
 	$c  d+  /16
-	$c  a#  /16
+	$c  bb  /16
 	$c  g   /16
 END
 $c  f#  /4            // m. 21/1
@@ -1418,7 +1418,7 @@ $c  d  /8  q=18
 // m. 33
 { q=6
 	$c  c   /16
-	$c  d#  /16
+	$c  eb  /16
 }
 
 // m. 34
@@ -1463,7 +1463,7 @@ $c  e  /16
 $c  d   /4
 $c  -   /8
 $c  d+  /8
-$c  a#  /16
+$c  bb  /16
 $c  a   /16
 $c  g   /16
 $c  f   /16
@@ -1475,7 +1475,7 @@ $c  g    /8
 $c  e    /16
 $c  d    /16
 $c  c    /16
-$c  a#-  /16
+$c  bb-  /16
 
 // m. 58
 $c  d   /4
@@ -1484,7 +1484,7 @@ $c  c+  /8
 $c  a   /16
 $c  g   /16
 $c  f   /16
-$c  d#  /16
+$c  eb  /16
 
 // m. 59
 $c  d    /4
@@ -1492,25 +1492,25 @@ $c  -    /8
 $c  d    /8
 $c  d    /16
 $c  c    /16
-$c  a#-  /16
+$c  bb-  /16
 $c  a-   /16
 
 // m. 60
-$c  a#-  /4
+$c  bb-  /4
 $c  -    /8
-$c  a#   /8
+$c  bb   /8
 $c  g    /16
 $c  f    /16
-$c  d#   /16
+$c  eb   /16
 $c  d    /16
 
 // m. 61
 $c  c    /4
 $c  -    /8
-$c  d#   /8
+$c  eb   /8
 $c  c    /16
-$c  a#-  /16
-$c  g#-  /16
+$c  bb-  /16
+$c  ab-  /16
 $c  g-   /16
 
 // m. 62
@@ -1537,20 +1537,20 @@ $c  f-  /16
 	$c  -   /4
 	$c  c+  /16
 	$c  g   /16
-	$c  d#  /16
+	$c  eb  /16
 	$c  c   /16
 }
 
 // m. 67-73
 $c  g-   /8   q=6   // m. 67
-$c  g#-  /8   q=4   // m. 68/1
-$c  g#   /8   q=2   // m. 68/2
+$c  ab-  /8   q=4   // m. 68/1
+$c  ab   /8   q=2   // m. 68/2
 $c  d    /8   q=6   // m. 69
-$c  d#   /16        // m. 70/1
+$c  eb   /16        // m. 70/1
 $c  c    /16  q=11  // m. 70/2
-$c  a#   /16        // m. 71/1
+$c  bb   /16        // m. 71/1
 $c  c    /16  q=11  // m. 71/2
-$c  g#   /16        // m. 72/1
+$c  ab   /16        // m. 72/1
 $c  c    /16  q=11  // m. 72/2
 $c  g    /16        // m. 73/1
 $c  c    /16  q=7   // m. 73/2
@@ -1569,7 +1569,7 @@ CALL  rest_full_measure  // m. 101
 // m. 102-108
 $c  g-  /16  q=24  // m. 102-103
 $c  c   /16  q=24  // m. 104-105
-$c  d#  /16  q=24  // m. 106-107
+$c  eb  /16  q=24  // m. 106-107
 $c  g   /16  q=12  // m. 108
 
 // m. 109-119
@@ -1588,7 +1588,7 @@ $c  d   /4
 $c  -   /16
 $c  d+  /16
 $c  c+  /16
-$c  a#  /16
+$c  bb  /16
 $c  a   /16
 $c  g   /16
 $c  f#  /16
@@ -1596,26 +1596,26 @@ $c  e   /16
 
 // m. 121-126
 $c  d    /16  q=12  // m. 121
-$c  d#   /16  q=12  // m. 122
+$c  eb   /16  q=12  // m. 122
 $c  d    /16  q=12  // m. 123
-$c  a#-  /16  q=4   // m. 124/1
+$c  bb-  /16  q=4   // m. 124/1
 $c  d    /16  q=8   // m. 124/2
-$c  d#   /16  q=12  // m. 125
+$c  eb   /16  q=12  // m. 125
 $c  d    /16  q=12  // m. 126
 
 // m. 127
 $c  d    /16
-$c  a#-  /16  q=3
+$c  bb-  /16  q=3
 $c  d    /16  q=4
 $c  g    /16  q=4
 
 // m. 128
-$c  a#  /16  q=4
+$c  bb  /16  q=4
 $c  d+  /16  q=4
 $c  d   /16  q=4
 
 // m. 129
-$c  a#-  /16  q=4
+$c  bb-  /16  q=4
 $c  g-   /16  q=4
 $c  d    /16  q=4
 
@@ -1637,7 +1637,7 @@ CALL  rest_full_measure
 FUNCTION  c4m11_19
 	$c  g-2  /8  q=12  // m. 11-12
 	$c  c-   /8  q=12  // m. 13-14
-	$c  d#-  /8  q=12  // m. 15-16
+	$c  eb-  /8  q=12  // m. 15-16
 	$c  g-   /8  q=18  // m. 17-19
 END
 CALL  c4m11_19
@@ -1658,7 +1658,7 @@ FUNCTION c4m21_31
 		// m. 23-24 == 27-28
 		{ q=12
 			$c  d-   /16
-			$c  a#-  /16
+			$c  bb-  /16
 		}
 	}
 	
@@ -1707,10 +1707,10 @@ FUNCTION c4m56  // only definition yet
 	$c  g-2   /16
 	$c  g-    /16
 	$c  f-    /16
-	$c  d#-   /16
+	$c  eb-   /16
 	$c  d-    /16
 	$c  c-    /16
-	$c  a#-2  /16
+	$c  bb-2  /16
 	$c  a-2   /16
 	$c  g-2   /8
 	$c  -     /8
@@ -1720,7 +1720,7 @@ FUNCTION c4m55_64
 	$c  d-   /16
 	$c  d    /16
 	$c  c    /16
-	$c  a#-  /16
+	$c  bb-  /16
 	$c  a-   /16
 	$c  g-   /16
 	$c  f-   /16
@@ -1734,7 +1734,7 @@ FUNCTION c4m55_64
 	// m. 57
 	$c  c-   /16
 	$c  c    /16
-	$c  a#-  /16
+	$c  bb-  /16
 	$c  a-   /16
 	$c  g-   /16
 	$c  f-   /16
@@ -1749,46 +1749,46 @@ FUNCTION c4m55_64
 	$c  e-   /16
 	$c  d-   /16
 	$c  c-   /16
-	$c  a#-  /16
+	$c  bb-  /16
 	$c  a-   /16
 	$c  g-2  /16
 	$c  f-2  /8
 	$c  -    /8
 	
 	// m. 59
-	$c  a#-2  /16
-	$c  a#-   /16
+	$c  bb-2  /16
+	$c  bb-   /16
 	$c  a-2   /16
 	$c  g-    /16
 	$c  f-    /16
-	$c  d#-   /16
+	$c  eb-   /16
 	$c  d-    /16
 	$c  c-    /16
-	$c  a#-2  /8
+	$c  bb-2  /8
 	$c  -     /8
 	
 	// m. 60
-	$c  d#-2  /16
-	$c  d#-   /16
+	$c  eb-2  /16
+	$c  eb-   /16
 	$c  d-    /16
 	$c  c-    /16
-	$c  a#-2  /16
+	$c  bb-2  /16
 	$c  a-2   /16
 	$c  g-2   /16
 	$c  f-2   /16
-	$c  d#-2  /8
+	$c  eb-2  /8
 	$c  -     /8
 	
 	// m. 61
-	$c  g#-2  /16
-	$c  g#-   /16
+	$c  ab-2  /16
+	$c  ab-   /16
 	$c  g-    /16
 	$c  f-    /16
-	$c  d#-   /16
+	$c  eb-   /16
 	$c  d-    /16
 	$c  c-    /16
-	$c  a#-2  /16
-	$c  g#-2  /8
+	$c  bb-2  /16
+	$c  ab-2  /8
 	$c  -     /8
 	
 	// m. 62
@@ -1797,7 +1797,7 @@ FUNCTION c4m55_64
 	$c  a-2  /16
 	$c  g-2  /16
 	$c  f-2  /16
-	$c  d#-  /16
+	$c  eb-  /16
 	$c  d-   /16
 	$c  c-   /16
 	$c  b-2  /8
@@ -1809,11 +1809,11 @@ FUNCTION c4m55_64
 	// m. 64
 	$c  c-   /16
 	$c  c    /16
-	$c  a#-  /16
-	$c  g#-  /16
+	$c  bb-  /16
+	$c  ab-  /16
 	$c  g-   /16
 	$c  f-   /16
-	$c  d#-  /16
+	$c  eb-  /16
 	$c  d-   /16
 	$c  c-   /8
 	$c  -    /8
@@ -1825,16 +1825,16 @@ FUNCTION c4m65_69
 	{ q=2             // m. 65-66
 		$c  -    /16
 		$c  c    /16
-		$c  a#-  /16
-		$c  g#-  /16
+		$c  bb-  /16
+		$c  ab-  /16
 		$c  g-   /16
 		$c  f-   /16
-		$c  d#-  /16
+		$c  eb-  /16
 		$c  d-   /16
 		$c  c-   /8
 		$c  -    /8
 	}
-	$c  d#-  /8  q=6  // m. 67
+	$c  eb-  /8  q=6  // m. 67
 	$c  f-   /8  q=6  // m. 68
 	$c  g-   /8  q=4  // m. 69/1
 	$c  g-2  /8  q=2  // m. 69/2
@@ -1859,16 +1859,16 @@ FUNCTION c4m74_84
 	$c  g-2   /4        // m. 75/1
 	$c  -     /2        // m. 75/2
 	CALL  c4m74      // m. 76
-	$c  a#-2  /4        // m. 77/1
+	$c  bb-2  /4        // m. 77/1
 	$c  -     /2        // m. 77/2
 	
 	// m. 78-79
-	$c  d#-2  /8
-	$c  d#-   /16
+	$c  eb-2  /8
+	$c  eb-   /16
 	$c  d-    /16
-	$c  d#-   /8
-	$c  d#-2  /8   q=2
-	$c  d#-   /8
+	$c  eb-   /8
+	$c  eb-2  /8   q=2
+	$c  eb-   /8
 	$c  g-2   /4        // m. 79/1
 	$c  -     /2        // m. 79/2
 	
@@ -1879,7 +1879,7 @@ FUNCTION c4m74_84
 	$c  g-    /8
 	$c  g-2   /8   q=2
 	$c  g-    /8
-	$c  g#-2  /4        // m. 81/1
+	$c  ab-2  /4        // m. 81/1
 	$c  -     /2        // m. 81/2
 	
 	// m. 82-83
@@ -1889,7 +1889,7 @@ FUNCTION c4m74_84
 	$c  a-    /8
 	$c  a-2   /8   q=2
 	$c  a-    /8
-	$c  a#-2  /4        // m. 83/1
+	$c  bb-2  /4        // m. 83/1
 	$c  -     /2        // m. 83/2
 	
 	// m. 84
@@ -1920,7 +1920,7 @@ CALL  c4m97_101
 FUNCTION  c4m102_108
 	$c  g-2  /8  q=12  // m. 102-103
 	$c  c-   /8  q=12  // m. 104-105
-	$c  d#-  /8  q=12  // m. 106-107
+	$c  eb-  /8  q=12  // m. 106-107
 	$c  g-   /8  q=6   // m. 108
 END
 CALL  c4m102_108
@@ -1933,9 +1933,9 @@ FUNCTION c4m120
 	$c  d-   /16
 	$c  d    /16
 	$c  c    /16
-	$c  a#-  /16
+	$c  bb-  /16
 	$c  a-   /16
-	$c  a#-  /16
+	$c  bb-  /16
 	$c  a-   /16
 	$c  g-   /16
 	$c  f#-  /16
@@ -1947,12 +1947,12 @@ CALL  c4m120
 
 // m. 121-126
 FUNCTION c4m121_126
-	$c  a#-2  /16  q=12  // m. 121
+	$c  bb-2  /16  q=12  // m. 121
 	$c  c-    /16  q=12  // m. 122
 	$c  d-    /16  q=12  // m. 123
-	$c  a#-2  /16  q=4   // m. 124/1
+	$c  bb-2  /16  q=4   // m. 124/1
 	$c  d-    /16  q=8   // m. 124/2
-	$c  d#-   /16  q=12  // m. 125
+	$c  eb-   /16  q=12  // m. 125
 	$c  d-    /16  q=12  // m. 126
 END
 CALL  c4m121_126
@@ -1978,7 +1978,7 @@ $c  g-2   /8     $f      // m. 1
 $c  -     /2+/8
 $c  f-2   /8             // m. 2
 $c  -     /2+/8
-$c  d#-2  /8             // m. 3
+$c  eb-2  /8             // m. 3
 $c  -     /2+/8
 $c  d-2   /8             // m. 4
 $c  -     /2+/8
@@ -1987,7 +1987,7 @@ $c  d-    /8             // m. 6
 $c  -     /2+/8
 $c  c-    /8             // m. 7
 $c  -     /2+/8
-$c  a#-2  /8             // m. 8
+$c  bb-2  /8             // m. 8
 $c  -     /2+/8
 $c  a-2   /8             // m. 9
 $c  -     /2+/8
@@ -2055,8 +2055,8 @@ FUNCTION  c5m70
 	$c  -     /2+/8
 END
 CALL  c5m70         // m. 70: c-2
-CALL  c5m70  s=+10  // m. 71: a#-2
-CALL  c5m70  s=+8   // m. 72: g#-2
+CALL  c5m70  s=+10  // m. 71: bb-2
+CALL  c5m70  s=+8   // m. 72: ab-2
 CALL  c5m70  s=+7   // m. 73: g-2
 
 // m. 74-84
@@ -2064,13 +2064,13 @@ CALL  rest_full_measure  q=11
 
 // m. 85-96
 CALL  c5m70         // m. 85: c-2
-CALL  c5m70  s=+8   // m. 86: g#-2
+CALL  c5m70  s=+8   // m. 86: ab-2
 CALL  c5m70  s=-1   // m. 87: b-3
 CALL  c5m70  s=+7   // m. 88: g-2
 CALL  c5m70  s=-3   // m. 89: a-3
 CALL  c5m70  s=+5   // m. 90: f-2
 CALL  c5m70  s=-5   // m. 91: g-3
-CALL  c5m70  s=+15  // m. 92: d#-
+CALL  c5m70  s=+15  // m. 92: eb-
 CALL  c5m70  s=+6   // m. 93: f#-2
 CALL  c5m70  s=+14  // m. 94: d-
 CALL  c5m70  s=+4   // m. 95: e-2
@@ -2086,7 +2086,7 @@ CALL  rest_full_measure  q=5  // m. 110-114
 
 // m. 115-116
 { q=3              // m. 115
-	$c  a#-3  /8
+	$c  bb-3  /8
 	$c  -     /8
 }
 $c  d-2  /4        // m. 116
@@ -2120,24 +2120,24 @@ CALL  rest_full_measure
 
 // m. 11-20
 $c  g-,d     /4  q=6  // m. 11-12
-$c  g-,d#    /4  q=6  // m. 13-14
+$c  g-,eb    /4  q=6  // m. 13-14
 $c  g-,c,g   /4  q=6  // m. 14-16
-$c  a#-,d    /4  q=3  // m. 17
-$c  a#-,d,g  /4  q=3  // m. 18
-$c  d,g,a#   /4  q=3  // m. 19
+$c  bb-,d    /4  q=3  // m. 17
+$c  bb-,d,g  /4  q=3  // m. 18
+$c  d,g,bb   /4  q=3  // m. 19
 CALL  c2m20
 
 // m. 21-28
 { q=2
 	$c  f#,a,d+  /4  q=6  // m. 21-22 == 25-26
-	$c  d,g,a#   /4  q=3  // m. 23 == 27
+	$c  d,g,bb   /4  q=3  // m. 23 == 27
 	$c  d,f#,a   /4  q=3  // m. 24 == 28
 }
 
 // m. 29-37
-$c  a#-,d,g  /2.  q=3  // m. 29-31
+$c  bb-,d,g  /2.  q=3  // m. 29-31
 $c  d,g,b    /2.       // m. 32
-$c  d#,g,c   /2.       // m. 33
+$c  eb,g,c   /2.       // m. 33
 $c  e,a,c#+  /2.       // m. 34
 $c  f,a,d+   /2.       // m. 35
 $c  e,a,d+   /2.       // m. 36
@@ -2167,7 +2167,7 @@ $c  f,a      /2+/8  m  // m. 55
 $c  -        /2
 $c  d+       /8
 $c  -        /8
-$c  d,g,a#   /2+/8     // m. 56
+$c  d,g,bb   /2+/8     // m. 56
 $c  -        /8
 $c  e,g,c    /2+/8     // m. 57
 $c  -        /8
@@ -2175,60 +2175,60 @@ $c  c,f,a    /2+/8     // m. 58
 $c  -        /8
 $c  d,f,a    /2+/8     // m. 59
 $c  -        /8
-$c  a#,d#,g  /2+/8     // m. 60
+$c  bb,eb,g  /2+/8     // m. 60
 $c  -        /8
-$c  d,f,g#   /2+/8     // m. 61
+$c  c,f,ab   /2+/8     // m. 61
 $c  -        /8
 $c  d,g,d+   /2+/8     // m. 62
 $c  -        /8
 $c  d,f,b    /2+/8     // m. 63
 $c  -        /8
 { q=3                  // m. 64-66
-	$c  d#,g,c+  /2+/8
+	$c  eb,g,c+  /2+/8
 	$c  -        /8
 }
 
 // m. 67-70/1
 $c  g,c+     /2.  // m. 67
-$c  d,g#,c+  /2.  // m. 68
+$c  d,ab,c+  /2.  // m. 68
 $c  d,g,c+   /2   // m. 69/1
 $c  d,g,b    /4   // m. 69/2
-$c  d#,g,c+  /16  // m. 70/1
+$c  eb,g,c+  /16  // m. 70/1
 
 // m. 70/2-73
 CALL  c0m70second_73
 
 // m. 74-96
-$c  g,c+,d#+    /4  q=3  // m. 74
+$c  g,c+,eb+    /4  q=3  // m. 74
 $c  g,b,d+      /4       // m. 75
 $c  -           /2
-$c  g,c+,d#+    /4  q=3  // m. 76
-$c  a#,d+,f+    /4       // m. 77
+$c  g,c+,eb+    /4  q=3  // m. 76
+$c  bb,d+,f+    /4       // m. 77
 $c  -           /2
-$c  a#,d#+,g+   /4       // m. 78
+$c  bb,eb+,g+   /4       // m. 78
 $c  -           /2
-$c  a#,d#+,a#+  /4       // m. 79
+$c  bb,eb+,bb+  /4       // m. 79
 $c  -           /2
-$c  d#,a#       /2.      // m. 80
-$c  c,d#,g#     /4       // m. 81
+$c  eb,bb       /2.      // m. 80
+$c  c,eb,ab     /4       // m. 81
 $c  -           /2
 $c  f,c+        /2.      // m. 82
-$c  d,a#        /4       // m. 83
+$c  d,bb        /4       // m. 83
 $c  -           /2
 $c  g,d+        /2.      // m. 84
-$c  d#,g,c+     /2.      // m. 85
-$c  d#,g#       /2.      // m. 86
-$c  d,f,g#      /2.      // m. 87
+$c  eb,g,c+     /2.      // m. 85
+$c  eb,ab       /2.      // m. 86
+$c  d,f,ab      /2.      // m. 87
 $c  d,g         /2.      // m. 88
-$c  c,d#,g      /2.      // m. 89
+$c  c,eb,g      /2.      // m. 89
 $c  c,f         /2.      // m. 90
 $c  b-,d,f      /2.      // m. 91
 $c  c           /4       // m. 92
 $c  g           /4
 $c  c+          /4
-$c  a,c+,d#+    /2.      // m. 93
+$c  a,c+,eb+    /2.      // m. 93
 $c  a,d+        /2.      // m. 94
-$c  g,a#,d+     /2.      // m. 95
+$c  g,bb,d+     /2.      // m. 95
 $c  g,c+        /2.      // m. 96
 
 // m. 97-101
@@ -2236,21 +2236,21 @@ CALL  rest_full_measure  q=5
 
 // m. 102-130
 $c  g-     /2.  q=2              // m. 102-103
-$c  g-,d#  /2.                   // m. 104
+$c  g-,eb  /2.                   // m. 104
 $c  c      /2.                   // m. 105
-$c  a#-,g  /2.                   // m. 106
+$c  bb-,g  /2.                   // m. 106
 $c  c,a    /2.                   // m. 107
-$c  d,a#   /2.                   // m. 108
+$c  d,bb   /2.                   // m. 108
 
 { q=2                            // m. 109-112
-	$c  a#-,d  /4                // m. 109 == 111
-	$c  c,d#   /4  $p
+	$c  bb-,d  /4                // m. 109 == 111
+	$c  c,eb   /4  $p
 	$c  d,f#   /4
-	$c  d#,g   /4                // m. 110 == 112
+	$c  eb,g   /4                // m. 110 == 112
 	$c  d,f    /4
-	$c  c,d#   /4
+	$c  c,eb   /4
 }
-$c  a#-,d    /4                  // m. 113
+$c  bb-,d    /4                  // m. 113
 $c  -        /2
 CALL  rest_full_measure       // m. 114
 $c  d,g,d+   /2.   $f            // m. 115
@@ -2258,15 +2258,15 @@ $c  d,f#,a   /4                  // m. 116
 $c  -        /2
 CALL  rest_full_measure  q=4  // m. 117-120
 $c  d,g      /2.                 // m. 121
-$c  d#,g,a   /2.                 // m. 122
+$c  eb,g,a   /2.                 // m. 122
 $c  d,f#,a   /2.                 // m. 123
-$c  d,g,a#   /4                  // m. 124
+$c  d,g,bb   /4                  // m. 124
 $c  d,g      /2
 $c  d,g,a    /2.                 // m. 125
 $c  d,f#,a   /2.                 // m. 126
-$c  d,g,a#   /2.                 // m. 127
-$c  d,a#,d+  /2.                 // m. 128
-$c  d,g,a#   /4                  // m. 129
+$c  d,g,bb   /2.                 // m. 127
+$c  d,bb,d+  /2.                 // m. 128
+$c  d,g,bb   /4                  // m. 129
 $c  g        /4
 $c  d        /4
 $c  g-       /2.                 // m. 130

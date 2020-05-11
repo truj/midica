@@ -2,10 +2,10 @@
 // "Old MacDonald had a farm".
 // 
 // This file assumes standard program configuration:
-// - Note System:      International: c, d, e, ... (lower case)
-// - Half Tone Symbol: # (c#, d#, e#, ...)
-// - Octave Naming:    +n/-n
-// - Syntax:           Mixed Case Syntax
+// - Note System:       International: c, d, e, ... (lower case)
+// - Half Tone Symbols: # / b (c#, cb, d#, db, ...)
+// - Octave Naming:     +n/-n
+// - Syntax:            Mixed Case Syntax
 
 META
 	copyright  (c) Mozilla Public License, v. 2.0, author: Jan Trukenmüller
@@ -18,6 +18,11 @@ INSTRUMENTS
 	0  LEAD_VOICE      Vocals
 	1  STEEL_GUITAR    Guitar
 END
+
+// global settings
+*  tempo  120
+*  time   4/4
+*  key    g/maj
 
 // initialize channel defaults
 0  -  /4  m, d=75%,  v=127

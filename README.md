@@ -80,7 +80,7 @@ If you prefer to write your music in ALDA or ABC, you need to:
 - **Configuration** of
     - GUI language (currently English or German)
     - Note System - (6 different systems), e.g. International (C,D,E,F,G,A,B), German (C,D,E,F,G,A,H), Italian (Do,Re,Mi,Fa,Sol,La,Si)
-    - Half Tone Symbols (6 different systems)
+    - Half Tone Symbols (3 different sets)
     - Octave Naming - 4 different systems
     - Syntax (3 different sets of key words for the programming language) - not _that_ important as the syntax can be redefined in MidicaPL anyway
     - Percussion IDs (English or German)
@@ -176,9 +176,9 @@ This example uses nestable blocks and global commands:
 	        0  d   /8  v=70    // channel 0: play D4 and switch to mezzo piano
 	        0  -   /8          // play a rest
 	        0  d   /8
-	        0  d#  /8
+	        0  eb  /8
 	        0  d   /8
-	        0  d#  /8
+	        0  eb  /8
 	        *                   // synchronize: bring all channels to the same time
 	    }
 	    1  d-  /4
@@ -187,9 +187,9 @@ This example uses nestable blocks and global commands:
 	    0  d   /8
 	    0  -   /8
 	    0  d   /8
-	    0  d#  /8
+	    0  eb  /8
 	    0  f   /8
-	    0  d#  /8
+	    0  eb  /8
 	}
 
 This results in a MIDI sequence like this:
