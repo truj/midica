@@ -787,6 +787,25 @@ class MidicaPLParserTest extends MidicaPLParser {
 	}
 	
 	/**
+	 * Tests if the files in the examples directory can be parsed.
+	 * 
+	 * Needed in case of bugs that are not found by normal unit tests.
+	 * 
+	 * @throws ParseException if something went wrong.
+	 */
+	@Test
+	void testExampleFiles() throws ParseException {
+		String dirStr = System.getProperty("user.dir") + File.separator + "examples";
+		File dir = new File(dirStr);
+		for (File file : dir.listFiles()) {
+			if (!file.isFile())
+				continue;
+			if (file.getName().endsWith(".midica") || file.getName().endsWith(".mpl"))
+				parse(file);
+		}
+	}
+	
+	/**
 	 * Tests for parsing full source files that are expected to throw a parsing exception.
 	 * 
 	 * The files are located in test/org/midica/testfiles/failing
