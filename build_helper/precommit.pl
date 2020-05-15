@@ -21,13 +21,21 @@
 # yourself.
 # 
 # This script performs the following tasks:
-# - Calculating a new minor version from the current time and writing it
-#   into the according variable in Midica.java.
-# - Compiling the source to a temporary directory and creating a jar
-#   file from it. Deleting old jar files.
-#   (Only if the env variable 'create_jar' is set.)
-# - Creating new Javadoc
-#   (Only if the env variables 'create_javadoc' and 'javadoc_path' are both set.)
+# - Detecting or calculating the following variables:
+#   - current branch name
+#   - current UNIX timestamp
+#   - current major version (from Midica.java).
+#   - current minor version (from Midica.java).
+# - Incrementing the minor version. (Only if we are in the master branch.)
+# - Calculating the new full version.
+# - Writing branch name, commit time and (updated) minor version into Midica.java.
+# - Only if 'create_jar' is set:
+#   - Compiling the source to a temporary directory and creating a jar
+#     file from it.
+#   - Updating midica.jar file.
+# - Creating new Javadoc (using the calculated full version)
+#   (Only in the master branch, and only if the env variables
+#   'create_javadoc' and 'javadoc_path' are both set.)
 ###############################################################################
 
 use strict;
@@ -81,35 +89,68 @@ if ($status) {
 	  . "$cmd\n";
 }
 
-# get major and minor version number
-my $major_version = -1;
+# get branch name
+my $branch = `git rev-parse --abbrev-ref HEAD`;
+chomp $branch;
+if (! $branch) {
+	die "Branch name not found.\n";
+}
+my $branch_suffix = 'master' eq $branch ? '' : '-' . $branch;
+
+# get OLD major and minor version number
+my $major_version = undef;
+my $minor_version = undef;
 open my $fh, '<', $java_file or die "Cannot read $java_file: $!\n";
 while (my $line = <$fh>) {
 	if ($line =~ /(\bint\s+VERSION_MAJOR\s*=)\s*(\d+)/) {
-		$major_version =  $2;
-		last;
+		$major_version = $2;
 	}
+	elsif ($line =~ /(\bint\s+VERSION_MINOR\s*=)\s*(\-?\d+)/) {
+		$minor_version = $2;
+	}
+	last if defined $major_version && defined $minor_version;
 }
 close $fh or die "Cannot close $java_file: $!\n";
-if ($major_version < 0) {
+if (! defined $major_version) {
 	die "Did not find major version in $java_file.\n";
 }
-my $minor_version = time();
-my $version       = $major_version . '.' . $minor_version;
+if (! defined $minor_version) {
+	die "Did not find minor version in $java_file.\n";
+}
 
-# Build up the command to replace VERSION_MINOR in Midica.java.
+# get NEW version and commit time
+if ('master' eq $branch) {
+	$minor_version++;
+}
+my $commit_time = time();
+my $version     = $major_version . '.' . $minor_version . $branch_suffix;
+
+# Build up the commands to replace VERSION_MINOR, BRANCH and COMMIT_TIME in Midica.java.
 # 1. perl and options and opening single quote (') for the regex
 # 2. the regex
 # 3. closing single quote for the regex and single-quoted file parameter
-$cmd = "perl -CSD -Mutf8 -p -i -e '"
-        . 's/(\bint\s+VERSION_MINOR\s*=)\s*(\d+)/\1 ' . $minor_version . '/'
+my $replace_cmd = "perl -CSD -Mutf8 -p -i -e '"
+        . 's/(\b{{TYPE}}\s+{{NAME}}\s*=)\s*{{OLD}}/\1 {{NEW}}/'
         . "' '$java_file'";
 
-# execute the replacement command
-$status = system $cmd;
-if ($status) {
-	die "Could not replace minor version in $java_file.\n"
-	  . "Command failed: $cmd\n";
+# execute the replacement commands for VERSION_MINOR, BRANCH and COMMIT_TIME
+my @replacements = (
+	[ 'int',    'VERSION_MINOR', '(\-?\d+)',  $minor_version      ],
+	[ 'String', 'BRANCH',        '"([^"]*)"', '"' . $branch . '"' ],
+	[ 'int',    'COMMIT_TIME',   '(\d+)',     $commit_time        ],
+);
+foreach my $repl_ref (@replacements) {
+	$cmd = $replace_cmd;
+	$cmd =~ s/\{\{TYPE\}\}/$repl_ref->[0]/;
+	$cmd =~ s/\{\{NAME\}\}/$repl_ref->[1]/;
+	$cmd =~ s/\{\{OLD\}\}/$repl_ref->[2]/;
+	$cmd =~ s/\{\{NEW\}\}/$repl_ref->[3]/;
+	
+	$status = system $cmd;
+	if ($status) {
+		die "Could not replace $repl_ref->[1] in $java_file.\n"
+		  . "Command failed: $cmd\n";
+	}
 }
 
 # add Midica.java to the staging area
@@ -147,18 +188,13 @@ if ($must_create_jar) {
 		die "Command failed: $cmd\n";
 	}
 	
-	# delete old jar files
-	my @old_jars = glob $project_path . '/midica-*.jar';
-	foreach my $file (@old_jars) {
-		$status = system "git rm -f '$file'"; # delete from git and file system
-		if ($status) {
-			# probably not in the repository - only remove from file system
-			unlink $file or die "Delete of '$file' failed: $!\n";
-		}
+	# delete old jar file
+	my $jar_path = $project_path . '/midica.jar';
+	if (-e $jar_path) {
+		unlink $jar_path or die "Delete of '$jar_path' failed: $!\n";
 	}
 	
 	# create new jar file
-	my $jar_path      = $project_path . '/midica-' . $version . '.jar';
 	my $manifest_path = $project_path . '/build_helper/manifest';
 	$cmd              = "jar -cvfm '$jar_path' '$manifest_path' -C '$tmp_path' org";
 	$status           = system $cmd;

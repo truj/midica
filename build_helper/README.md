@@ -8,8 +8,8 @@ to be used from GIT's precommit hook.
 
 What precommit.pl does:
 - Executing the unit tests (JUnit 5)
-- Injecting a new minor version number into the source code (Midica.java)
-- Deleting the old jar file and creating a new one (inside of the repository)
+- Injecting a new minor version number, commit time and branch name into the source code (Midica.java)
+- Updating the old jar file with a new version (inside of the repository)
 - Deleting the old Javadoc and creating a new version (outside of the repository)
 
 The first two of these tasks are always done. The other two are optional.

@@ -33,8 +33,8 @@ You write your songs in plain text files using the text editor of your choice. M
 
 # Get started
 1. Install Java Runtume Environment (JRE) version 1.7 or higher.
-2. Download the file `midica-VERSION.jar`.
-3. Start Midica using the command: `java -jar midica-VERSION.jar`
+2. Download the file [midica.jar](midica.jar?raw=true).
+3. Start Midica using the command: `java -jar midica.jar`
 4. Download one of the [example files](examples/) or create your own file and save it with the file extension `.midica`.
 5. In the Midica application, load this file by pressing the upper right button `select file`.
 6. Switch to the MidicaPL tab (it's the default tab) and choose this file.

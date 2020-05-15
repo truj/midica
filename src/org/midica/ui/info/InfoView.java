@@ -2639,7 +2639,7 @@ public class InfoView extends JDialog {
 		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		Date             timestamp = new Date(Midica.VERSION_MINOR * 1000L);
+		Date             timestamp = new Date(Midica.COMMIT_TIME * 1000L);
 		SimpleDateFormat formatter = new SimpleDateFormat(Dict.get(Dict.TIMESTAMP_FORMAT));
 		FlowLabel lblTimestampContent = new FlowLabel(formatter.format(timestamp), CPL_ABOUT, PWIDTH_ABOUT);
 		area.add(lblTimestampContent, constraints);
