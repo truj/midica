@@ -62,11 +62,11 @@ public class DecompileConfigView extends JDialog {
 	JCheckBox               cbxAddConfig;
 	JCheckBox               cbxAddScore;
 	JCheckBox               cbxAddStatistics;
+	JCheckBox               cbxAddStrategyStat;
 	JComboBox<NamedInteger> cbxLengthStrategy;
 	JComboBox<NamedInteger> cbxMaxTargetTicksOn;
-	JTextField              fldNextNoteOnTolerance;
 	JTextField              fldMinDurToKeep;
-	JTextField              fldDurationTickTolerance;
+	JTextField              fldLengthTickTolerance;
 	JTextField              fldDurationRatioTolerance;
 	JCheckBox               cbxPredefinedChords;
 	JTextField              fldChordNoteOnTolerance;
@@ -108,11 +108,11 @@ public class DecompileConfigView extends JDialog {
 		cbxAddConfig              = new JCheckBox(Dict.get(Dict.DC_ADD_CONFIG));
 		cbxAddScore               = new JCheckBox(Dict.get(Dict.DC_ADD_SCORE));
 		cbxAddStatistics          = new JCheckBox(Dict.get(Dict.DC_ADD_STATISTICS));
+		cbxAddStrategyStat        = new JCheckBox(Dict.get(Dict.DC_ADD_STRATEGY_STAT));
 		cbxLengthStrategy         = new JComboBox<>();
 		cbxMaxTargetTicksOn       = new JComboBox<>();
-		fldNextNoteOnTolerance    = new JTextField();
 		fldMinDurToKeep           = new JTextField();
-		fldDurationTickTolerance  = new JTextField();
+		fldLengthTickTolerance    = new JTextField();
 		fldDurationRatioTolerance = new JTextField();
 		cbxPredefinedChords       = new JCheckBox();
 		fldChordNoteOnTolerance   = new JTextField();
@@ -262,10 +262,15 @@ public class DecompileConfigView extends JDialog {
 		cbxAddScore.addActionListener(controller);
 		area.add(cbxAddScore, constrLeft);
 		
-		// statistics
+		// quality statistics
 		constrLeft.gridy++;
 		cbxAddStatistics.addActionListener(controller);
 		area.add(cbxAddStatistics, constrLeft);
+		
+		// note length stragegy statistics
+		constrLeft.gridy++;
+		cbxAddStrategyStat.addActionListener(controller);
+		area.add(cbxAddStrategyStat, constrLeft);
 		
 		return wrapTabContent(area);
 	}
@@ -324,24 +329,6 @@ public class DecompileConfigView extends JDialog {
 		area.add(cbxMaxTargetTicksOn, constrCenter);
 		constrCenter.gridwidth = 1;
 		
-		// next note-on tolerance
-		// label
-		constrLeft.gridy++;
-		JLabel lblNextOnTol = new JLabel( Dict.get(Dict.NEXT_NOTE_ON_TOLERANCE) );
-		Laf.makeBold(lblNextOnTol);
-		area.add(lblNextOnTol, constrLeft);
-		
-		// field
-		constrCenter.gridy++;
-		fldNextNoteOnTolerance.getDocument().addDocumentListener(controller);
-		fldNextNoteOnTolerance.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
-		area.add(fldNextNoteOnTolerance, constrCenter);
-		
-		// description
-		constrRight.gridy++;
-		JLabel descNextOnTol = new JLabel( Dict.get(Dict.NEXT_NOTE_ON_TOLERANCE_D) );
-		area.add(descNextOnTol, constrRight);
-		
 		// separator
 		constrLeft.gridy++;
 		constrCenter.gridy++;
@@ -367,23 +354,30 @@ public class DecompileConfigView extends JDialog {
 		JLabel descMinDuration = new JLabel( Dict.get(Dict.MIN_DURATION_TO_KEEP_D) );
 		area.add(descMinDuration, constrRight);
 		
-		// duration tick tolerance
+		// separator
+		constrLeft.gridy++;
+		constrCenter.gridy++;
+		constrRight.gridy++;
+		constrFull.gridy = constrRight.gridy;
+		area.add(Laf.createSeparator(), constrFull);
+		
+		// note length tick tolerance
 		// label
 		constrLeft.gridy++;
-		JLabel lblTickTol = new JLabel( Dict.get(Dict.DURATION_TICK_TOLERANCE) );
-		Laf.makeBold(lblTickTol);
-		area.add(lblTickTol, constrLeft);
+		JLabel lblLenTickTol = new JLabel( Dict.get(Dict.LENGTH_TICK_TOLERANCE) );
+		Laf.makeBold(lblLenTickTol);
+		area.add(lblLenTickTol, constrLeft);
 		
 		// field
 		constrCenter.gridy++;
-		fldDurationTickTolerance.getDocument().addDocumentListener(controller);
-		fldDurationTickTolerance.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
-		area.add(fldDurationTickTolerance, constrCenter);
+		fldLengthTickTolerance.getDocument().addDocumentListener(controller);
+		fldLengthTickTolerance.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
+		area.add(fldLengthTickTolerance, constrCenter);
 		
 		// description
 		constrRight.gridy++;
-		JLabel descTickTol = new JLabel( Dict.get(Dict.DURATION_TICK_TOLERANCE_D) );
-		area.add(descTickTol, constrRight);
+		JLabel descLenTickTol = new JLabel( Dict.get(Dict.LENGTH_TICK_TOLERANCE_D) );
+		area.add(descLenTickTol, constrRight);
 		
 		// duration ratio tolerance
 		// label
@@ -869,13 +863,13 @@ public class DecompileConfigView extends JDialog {
 		keyBindingManager.addBindingsForTabLevel3( cbxAddConfig,       Dict.KEY_DC_ADD_CONFIG        );
 		keyBindingManager.addBindingsForTabLevel3( cbxAddScore,        Dict.KEY_DC_ADD_SCORE         );
 		keyBindingManager.addBindingsForTabLevel3( cbxAddStatistics,   Dict.KEY_DC_ADD_STATISTICS    );
+		keyBindingManager.addBindingsForTabLevel3( cbxAddStrategyStat, Dict.KEY_DC_ADD_STRATEGY_STAT );
 		
 		// note length tab
 		keyBindingManager.addBindingsForTabLevel3( cbxLengthStrategy,         Dict.KEY_DC_NOTE_LENGTH_STRATEGY );
 		keyBindingManager.addBindingsForTabLevel3( cbxMaxTargetTicksOn,       Dict.KEY_DC_MAX_TARGET_TICKS_ON  );
-		keyBindingManager.addBindingsForTabLevel3( fldNextNoteOnTolerance,    Dict.KEY_DC_TOL_NEXT_ON          );
 		keyBindingManager.addBindingsForTabLevel3( fldMinDurToKeep,           Dict.KEY_DC_MIN_DUR_TO_KEEP      );
-		keyBindingManager.addBindingsForTabLevel3( fldDurationTickTolerance,  Dict.KEY_DC_TOL_DUR_TICK         );
+		keyBindingManager.addBindingsForTabLevel3( fldLengthTickTolerance,    Dict.KEY_DC_TOL_TICK_LEN         );
 		keyBindingManager.addBindingsForTabLevel3( fldDurationRatioTolerance, Dict.KEY_DC_TOL_DUR_RATIO        );
 		
 		// chords tab

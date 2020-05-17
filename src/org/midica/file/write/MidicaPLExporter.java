@@ -79,10 +79,13 @@ public class MidicaPLExporter extends Decompiler {
 		}
 		
 		// config
-		output.append( createConfig() );
+		output.append(createConfig());
 		
-		// statistics
-		output.append( createStatistics() );
+		// quality statistics
+		output.append(createQualityStats());
+		
+		// strategy statistics
+		output.append(createStrategyStats());
 		
 		return output.toString();
 	}

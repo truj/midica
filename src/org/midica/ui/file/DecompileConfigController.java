@@ -117,11 +117,11 @@ public class DecompileConfigController implements WindowListener, DocumentListen
 		initWidgetConfig( Config.DC_MUST_ADD_CONFIG,          view.cbxAddConfig,              Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_MUST_ADD_QUALITY_SCORE,   view.cbxAddScore,               Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_MUST_ADD_STATISTICS,      view.cbxAddStatistics,          Boolean.class, fromConfig );
+		initWidgetConfig( Config.DC_MUST_ADD_STRATEGY_STAT,   view.cbxAddStrategyStat,        Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_LENGTH_STRATEGY,          view.cbxLengthStrategy,         Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_MAX_TARGET_TICKS_ON,      view.cbxMaxTargetTicksOn,       Integer.class, fromConfig );
-		initWidgetConfig( Config.DC_NEXT_NOTE_ON_TOLERANCE,   view.fldNextNoteOnTolerance,    Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_MIN_DURATION_TO_KEEP,     view.fldMinDurToKeep,           Float.class,   fromConfig );
-		initWidgetConfig( Config.DC_DURATION_TICK_TOLERANCE,  view.fldDurationTickTolerance,  Integer.class, fromConfig );
+		initWidgetConfig( Config.DC_LENGTH_TICK_TOLERANCE,    view.fldLengthTickTolerance,    Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_DURATION_RATIO_TOLERANCE, view.fldDurationRatioTolerance, Float.class,   fromConfig );
 		initWidgetConfig( Config.DC_USE_PRE_DEFINED_CHORDS,   view.cbxPredefinedChords,       Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_CHORD_NOTE_ON_TOLERANCE,  view.fldChordNoteOnTolerance,   Integer.class, fromConfig );

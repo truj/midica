@@ -30,10 +30,10 @@ public class Midica {
 	 * After switching to a new major version, this has to be set to "-1" manually, so that
 	 * precommit.pl starts with "0" again.
 	 */
-	public static final int VERSION_MINOR = 0;
+	public static final int VERSION_MINOR = 1;
 	
 	/** UNIX timestamp of the last commit */
-	public static final int COMMIT_TIME = 1589554992;
+	public static final int COMMIT_TIME = 1589716979;
 	
 	/** Branch name. Automatically changed by precommit.pl */
 	public static final String BRANCH = "master";

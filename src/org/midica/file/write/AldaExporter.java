@@ -80,16 +80,16 @@ public class AldaExporter extends Decompiler {
 			
 			currentSliceNumber++;
 		}
+		output.append(NEW_LINE + NEW_LINE);
 		
 		// config
-		if (MUST_ADD_CONFIG) {
-			output.append(NEW_LINE + NEW_LINE + createConfig());
-		}
+		output.append(createConfig());
 		
-		// statistics
-		if (MUST_ADD_STATISTICS) {
-			output.append(createStatistics());
-		}
+		// quality statistics
+		output.append(createQualityStats());
+		
+		// strategy statistics
+		output.append(createStrategyStats());
 		
 		return output.toString();
 	}

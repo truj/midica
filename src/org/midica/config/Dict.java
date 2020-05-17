@@ -701,11 +701,11 @@ public class Dict {
 	public static final String KEY_DC_ADD_CONFIG            = "key_dc_config";
 	public static final String KEY_DC_ADD_SCORE             = "key_dc_add_score";
 	public static final String KEY_DC_ADD_STATISTICS        = "key_dc_add_statistics";
+	public static final String KEY_DC_ADD_STRATEGY_STAT     = "key_dc_add_strategy_stat";
 	public static final String KEY_DC_NOTE_LENGTH_STRATEGY  = "key_dc_note_length_strategy";
 	public static final String KEY_DC_MAX_TARGET_TICKS_ON   = "key_dc_max_target_ticks_on";
-	public static final String KEY_DC_TOL_NEXT_ON           = "key_dc_tol_next_on";
 	public static final String KEY_DC_MIN_DUR_TO_KEEP       = "key_dc_min_dur_to_keep";
-	public static final String KEY_DC_TOL_DUR_TICK          = "key_dc_tol_dur_tick";
+	public static final String KEY_DC_TOL_TICK_LEN          = "key_dc_tol_tick_len";
 	public static final String KEY_DC_TOL_DUR_RATIO         = "key_dc_tol_dur_ratio";
 	public static final String KEY_DC_CRD_PREDEFINED        = "key_dc_crd_predefined";
 	public static final String KEY_DC_CRD_NOTE_ON           = "key_dc_crd_note_on";
@@ -827,14 +827,13 @@ public class Dict {
 	public static final String DC_ADD_CONFIG                = "dc_add_config";
 	public static final String DC_ADD_SCORE                 = "dc_add_score";
 	public static final String DC_ADD_STATISTICS            = "dc_add_statistics";
+	public static final String DC_ADD_STRATEGY_STAT         = "dc_add_strategy_stat";
 	public static final String NOTE_LENGTH_STRATEGY         = "note_length_strategy";
 	public static final String MAX_TARGET_TICKS_NEXT_ON     = "max_target_ticks_next_on";
-	public static final String NEXT_NOTE_ON_TOLERANCE       = "next_note_on_tolerance";
-	public static final String NEXT_NOTE_ON_TOLERANCE_D     = "next_note_on_tolerance_d";
 	public static final String MIN_DURATION_TO_KEEP         = "min_duration_to_keep";
 	public static final String MIN_DURATION_TO_KEEP_D       = "min_duration_to_keep_d";
-	public static final String DURATION_TICK_TOLERANCE      = "duration_tick_tolerance";
-	public static final String DURATION_TICK_TOLERANCE_D    = "duration_tick_tolerance_d";
+	public static final String LENGTH_TICK_TOLERANCE        = "length_tick_tolerance";
+	public static final String LENGTH_TICK_TOLERANCE_D      = "length_tick_tolerance_d";
 	public static final String DURATION_RATIO_TOLERANCE     = "duration_ratio_tolerance";
 	public static final String DURATION_RATIO_TOLERANCE_D   = "duration_ratio_tolerance_d";
 	public static final String USE_PRE_DEFINED_CHORDS       = "use_pre_defined_chords";
@@ -2066,12 +2065,12 @@ public class Dict {
 		set( KEY_DC_ADD_TICK_COMMENTS,     "Toggle Checkbox: Add Tick Comments"                                          );
 		set( KEY_DC_ADD_CONFIG,            "Toggle Checkbox: Add Configuration"                                          );
 		set( KEY_DC_ADD_SCORE,             "Toggle Checkbox: Add Quality Score"                                          );
-		set( KEY_DC_ADD_STATISTICS,        "Toggle Checkbox: Add Statistics"                                             );
+		set( KEY_DC_ADD_STATISTICS,        "Toggle Checkbox: Add Quality Statistics"                                     );
+		set( KEY_DC_ADD_STRATEGY_STAT,     "Toggle Checkbox: Add Stragegy Statistics"                                    );
 		set( KEY_DC_NOTE_LENGTH_STRATEGY,  "Open Selection: Note Length Strategy"                                        );
 		set( KEY_DC_MAX_TARGET_TICKS_ON,   "Focus the text field for the Max target ticks"                               );
-		set( KEY_DC_TOL_NEXT_ON,           "Focus the text field for the Next Note-ON Tolerance"                         );
 		set( KEY_DC_MIN_DUR_TO_KEEP,       "Focus the text field for the Min Duration to keep"                           );
-		set( KEY_DC_TOL_DUR_TICK,          "Focus the text field for the Duration Tick Tolerance"                        );
+		set( KEY_DC_TOL_TICK_LEN,          "Focus the text field for the Note Length Tick Tolerance"                     );
 		set( KEY_DC_TOL_DUR_RATIO,         "Focus the text field for the Duration Ratio Tolerance"                       );
 		set( KEY_DC_CRD_PREDEFINED,        "Toggle Checkbox: Use Predefined Chords"                                      );
 		set( KEY_DC_CRD_NOTE_ON,           "Focus the text field for the chord Note-ON tick tolerance"                   );
@@ -2189,7 +2188,7 @@ public class Dict {
 		                                 + "<br><b>&mdash; Duration*:</b> Tries to avoid a duration change, if possible. The note length is adjusted as close as possible to the previous note's duration."
 		                                 + "<br><b>&mdash; Press length:</b> Uses the press length (Note-ON to Note-OFF) and chooses the lowest possible length with at least this number of ticks."
 		                                 + "<br>The priority combobox configures which strategy to prefer if more than one is possible."
-		                                 + "<br>The other fields can be used to fine-tune the <b>Next ON</b> and <b>Duration</b> strategy."
+		                                 + "<br>The other fields can be used to fine-tune the strategies."
 		                                 + "<br><b>*</b> In ALDA the duration is called 'quantization'" );
 		set( DC_TABINFO_CHORDS,            "<html>Settings to control chords."
 		                                 + "<br>Pre-defined chords are only used for MidicaPL, otherwise ignored."
@@ -2211,20 +2210,18 @@ public class Dict {
 		set( DC_ADD_CONFIG,                "Add Configuration"                                );
 		set( DC_ADD_SCORE,                 "Add Quality Score"                                );
 		set( DC_ADD_STATISTICS,            "Add Quality Statistics"                           );
+		set( DC_ADD_STRATEGY_STAT,         "Add Strategy Statistics"                          );
 		set( NOTE_LENGTH_STRATEGY,         "Priority of strategies"                           );
 		set( MAX_TARGET_TICKS_NEXT_ON,     "<html>Maximum note length for<br>the 'Next ON' strategy" );
-		set( NEXT_NOTE_ON_TOLERANCE,       "Next Note-ON Tolerance" );
-		set( NEXT_NOTE_ON_TOLERANCE_D,     "<html>If the length, calculated with the <b>Next ON</b> strategy, is so many ticks longer"
-		                                 + "<br>than a note length <b>L</b>, then <b>L</b> is still used instead of the next longer note length." );
 		set( MIN_DURATION_TO_KEEP,         "Minimum Duration to keep" );
 		set( MIN_DURATION_TO_KEEP_D,       "<html>Minimum Duration for using the duration strategy."
 		                                 + "<br>1.0 = 100%; &nbsp; 0.1 = 10%; &nbsp; 0.01 = 1%" );
-		set( DURATION_TICK_TOLERANCE,      "Duration Tick Tolerance" );
-		set( DURATION_TICK_TOLERANCE_D,    "<html>If the length, calculated with the <b>Duration</b> strategy, is so many ticks longer"
-		                                 + "<br>than a note length <b>L</b>, then <b>L</b> is still used instead of the next longer note length." );
+		set( LENGTH_TICK_TOLERANCE,        "Note Length Tick Tolerance" );
+		set( LENGTH_TICK_TOLERANCE_D,      "<html>If the calculated note length is so many ticks longer than a note length <b>L</b>,<br>"
+		                                 + "then <b>L</b> is still used instead of the next longer note length." );
 		set( DURATION_RATIO_TOLERANCE,     "Duration Ratio Tolerance" );
 		set( DURATION_RATIO_TOLERANCE_D,   "<html>The duration is not changed, if the difference between the old duration and the"
-		                                 + "<br>duration calculated with the <b>Duration</b> strategy is smaller than this value."
+		                                 + "<br>new (calculated) duration is smaller than this value."
 		                                 + "<br>0.1 = 10%; &nbsp; 0.01 = 1%; &nbsp; 0.001 = 0.1%" );
 		set( USE_PRE_DEFINED_CHORDS,       "Pre-defined Chords"                                                        );
 		set( USE_PRE_DEFINED_CHORDS_D,     "Use Pre-defined Chords (instead of inline chords)"                         );

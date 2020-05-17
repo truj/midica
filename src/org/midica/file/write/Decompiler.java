@@ -85,6 +85,11 @@ public abstract class Decompiler extends Exporter {
 	protected static final byte STAT_NOTE_SUMMANDS   = 35;
 	protected static final byte STAT_NOTE_MULTIPLE   = 36;
 	
+	// constants for the used note length strategy
+	private static final byte STAT_STRATEGY_NEXT_ON  = 41;
+	private static final byte STAT_STRATEGY_DURATION = 42;
+	private static final byte STAT_STRATEGY_PRESS    = 43;
+	
 	protected static final String NEW_LINE = System.getProperty("line.separator");
 	
 	// decompile constants
@@ -101,11 +106,11 @@ public abstract class Decompiler extends Exporter {
 	public static final boolean DEFAULT_MUST_ADD_CONFIG          = true;
 	public static final boolean DEFAULT_MUST_ADD_QUALITY_SCORE   = true;
 	public static final boolean DEFAULT_MUST_ADD_STATISTICS      = true;
+	public static final boolean DEFAULT_MUST_ADD_STRATEGY_STAT   = true;
 	public static final byte    DEFAULT_LENGTH_STRATEGY          = STRATEGY_NEXT_DURATION_PRESS;
 	public static final long    DEFAULT_MAX_TARGET_TICKS_ON      = 3840; // 2 full notes
-	public static final long    DEFAULT_NEXT_NOTE_ON_TOLERANCE   = 3;
 	public static final float   DEFAULT_MIN_DURATION_TO_KEEP     = 0.05f;
-	public static final long    DEFAULT_DURATION_TICK_TOLERANCE  = 2;
+	public static final long    DEFAULT_LENGTH_TICK_TOLERANCE    = 2;
 	public static final float   DEFAULT_DURATION_RATIO_TOLERANCE = 0.014f;
 	public static final boolean DEFAULT_USE_PRE_DEFINED_CHORDS   = true;
 	public static final long    DEFAULT_CHORD_NOTE_ON_TOLERANCE  = 0;
@@ -130,12 +135,12 @@ public abstract class Decompiler extends Exporter {
 	protected static boolean       MUST_ADD_CONFIG          = DEFAULT_MUST_ADD_CONFIG;
 	protected static boolean       MUST_ADD_QUALITY_SCORE   = DEFAULT_MUST_ADD_QUALITY_SCORE;
 	protected static boolean       MUST_ADD_STATISTICS      = DEFAULT_MUST_ADD_STATISTICS;
+	protected static boolean       MUST_ADD_STRATEGY_STAT   = DEFAULT_MUST_ADD_STRATEGY_STAT;
 	protected static byte          LENGTH_STRATEGY          = DEFAULT_LENGTH_STRATEGY;
 	protected static long          MAX_TARGET_TICKS_ON      = DEFAULT_MAX_TARGET_TICKS_ON;
 	protected static long          MAX_SOURCE_TICKS_ON      = 0L;
-	protected static long          NEXT_NOTE_ON_TOLERANCE   = DEFAULT_NEXT_NOTE_ON_TOLERANCE;
 	protected static float         MIN_DURATION_TO_KEEP     = DEFAULT_MIN_DURATION_TO_KEEP;
-	protected static long          DURATION_TICK_TOLERANCE  = DEFAULT_DURATION_TICK_TOLERANCE;
+	protected static long          LENGTH_TICK_TOLERANCE    = DEFAULT_LENGTH_TICK_TOLERANCE;
 	protected static float         DURATION_RATIO_TOLERANCE = DEFAULT_DURATION_RATIO_TOLERANCE;
 	protected static boolean       USE_PRE_DEFINED_CHORDS   = DEFAULT_USE_PRE_DEFINED_CHORDS;
 	protected static long          CHORD_NOTE_ON_TOLERANCE  = DEFAULT_CHORD_NOTE_ON_TOLERANCE;
@@ -184,8 +189,15 @@ public abstract class Decompiler extends Exporter {
 	protected TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>> noteOnOff         = null;
 	protected TreeMap<Long, String>                                lyricsSyllables   = null;
 	
-	/** stores statistics to estimate the decompilation quality */
-	protected TreeMap<Byte, TreeMap<Byte, Integer>> statistics = null;
+	/**
+	 * Stores statistics to estimate the decompilation quality and to count the used strategies.
+	 * Parts of this structure:
+	 * 
+	 * - channel number (or a higher number for the total statistic)
+	 * - type number (value of the STAT_... variable)
+	 * - appearance count
+	 */
+	private TreeMap<Byte, TreeMap<Byte, Integer>> statistics = null;
 	
 	/**
 	 * Stores each **slice** of the sequence.
@@ -336,11 +348,11 @@ public abstract class Decompiler extends Exporter {
 		MUST_ADD_CONFIG          = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_CONFIG)          );
 		MUST_ADD_QUALITY_SCORE   = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_QUALITY_SCORE)   );
 		MUST_ADD_STATISTICS      = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_STATISTICS)      );
+		MUST_ADD_STRATEGY_STAT   = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_STRATEGY_STAT)   );
 		LENGTH_STRATEGY          = Byte.parseByte(       sessionConfig.get(Config.DC_LENGTH_STRATEGY)          );
 		MAX_TARGET_TICKS_ON      = Long.parseLong(       sessionConfig.get(Config.DC_MAX_TARGET_TICKS_ON)      );
-		NEXT_NOTE_ON_TOLERANCE   = Long.parseLong(       sessionConfig.get(Config.DC_NEXT_NOTE_ON_TOLERANCE)   );
 		MIN_DURATION_TO_KEEP     = Float.parseFloat(     sessionConfig.get(Config.DC_MIN_DURATION_TO_KEEP)     );
-		DURATION_TICK_TOLERANCE  = Long.parseLong(       sessionConfig.get(Config.DC_DURATION_TICK_TOLERANCE)  );
+		LENGTH_TICK_TOLERANCE    = Long.parseLong(       sessionConfig.get(Config.DC_LENGTH_TICK_TOLERANCE)    );
 		DURATION_RATIO_TOLERANCE = Float.parseFloat(     sessionConfig.get(Config.DC_DURATION_RATIO_TOLERANCE) );
 		USE_PRE_DEFINED_CHORDS   = Boolean.parseBoolean( sessionConfig.get(Config.DC_USE_PRE_DEFINED_CHORDS)   );
 		CHORD_NOTE_ON_TOLERANCE  = Long.parseLong(       sessionConfig.get(Config.DC_CHORD_NOTE_ON_TOLERANCE)  );
@@ -359,7 +371,11 @@ public abstract class Decompiler extends Exporter {
 	}
 	
 	/**
-	 * Initializes data structures for the statistics to estimate the decompilation quality.
+	 * Initializes data structures for statistics.
+	 * This is used for the following statistics:
+	 * 
+	 * - quality statistics (to estimate the decompilation quality)
+	 * - strategy statistics (counts which strategy is used how often)
 	 */
 	private void initStatistics() {
 		statistics = new TreeMap<>();
@@ -373,6 +389,8 @@ public abstract class Decompiler extends Exporter {
 		// init sub statistics for all channels and total
 		for (Byte channelOrTotal : statistics.keySet()) {
 			TreeMap<Byte, Integer> channelStats = statistics.get(channelOrTotal);
+			
+			// quality statistics
 			channelStats.put( STAT_RESTS,           0 );
 			channelStats.put( STAT_REST_SKIPPED,    0 );
 			channelStats.put( STAT_REST_TRIPLETS,   0 );
@@ -383,6 +401,11 @@ public abstract class Decompiler extends Exporter {
 			channelStats.put( STAT_NOTE_TRIPLETS,   0 );
 			channelStats.put( STAT_NOTE_SUMMANDS,   0 );
 			channelStats.put( STAT_NOTE_MULTIPLE,   0 );
+			
+			// strategy statistics
+			channelStats.put( STAT_STRATEGY_NEXT_ON,  0 );
+			channelStats.put( STAT_STRATEGY_DURATION, 0 );
+			channelStats.put( STAT_STRATEGY_PRESS,    0 );
 		}
 	}
 	
@@ -1115,13 +1138,13 @@ public abstract class Decompiler extends Exporter {
 	 * - the **duration percentage** is the duration option of a MidicaPL channel command or
 	 *   the quantization attribute in ALDA
 	 * 
-	 * For the calculation, one one of the following values is used:
+	 * For the calculation, one of the following strategies is used:
 	 * 
 	 * - The length between note-ON and note-ON of the next note, if this is reasonable.
 	 * - The length according to the channel's current duration ratio.
 	 * - The lowest possible of the predefined values, that is higher than the note press length.
 	 * 
-	 * The priority of the actually chosen value to be used is controlled by the configuration.
+	 * The priority of the actually chosen strategy to be used is controlled by the configuration.
 	 * 
 	 * @param onTick   Note-ON tick of the note.
 	 * @param offTick  Note-OFF tick of the note.
@@ -1139,9 +1162,9 @@ public abstract class Decompiler extends Exporter {
 		// TODO: Handle the case of different durations in the same tick,
 		// TODO: because than instruments.get(channel).getDurationRatio() will already be outdated.
 		
-		// 1st strategy: calculate note length according to the current duration ratio
+		// DURATION strategy: calculate note length according to the current duration ratio
 		float oldDuration    = instrumentsByChannel.get(channel).getDurationRatio();
-		long  noteTicksByDur = (long) ((pressTicks / (double) oldDuration)) - DURATION_TICK_TOLERANCE;
+		long  noteTicksByDur = (long) ((pressTicks / (double) oldDuration)) - LENGTH_TICK_TOLERANCE;
 		noteTicksByDur       = getNoteLengthByPressTicks(noteTicksByDur);
 		float durationByDur  = calculateDuration(noteTicksByDur, pressTicks);
 		float durationDiff   = oldDuration > durationByDur ? oldDuration - durationByDur : durationByDur - oldDuration;
@@ -1151,14 +1174,14 @@ public abstract class Decompiler extends Exporter {
 			canUseByDur = false;
 		}
 		
-		// 2nd strategy: calculate note length according to the next note-ON
+		// next-ON strategy: calculate note length according to the next note-ON tick
 		long  noteTicksByOn = -1;
 		float durationByOn  = -1;
 		Long nextNoteOnTick = noteHistory.get(channel).ceilingKey(onTick + 1);
 		if (nextNoteOnTick != null) {
-			noteTicksByOn   = nextNoteOnTick - onTick - NEXT_NOTE_ON_TOLERANCE;
-			noteTicksByOn   = getNoteLengthByPressTicks(noteTicksByOn);
-			durationByOn    = calculateDuration(noteTicksByOn, pressTicks);
+			noteTicksByOn = nextNoteOnTick - onTick - LENGTH_TICK_TOLERANCE;
+			noteTicksByOn = getNoteLengthByPressTicks(noteTicksByOn);
+			durationByOn  = calculateDuration(noteTicksByOn, pressTicks);
 		}
 		boolean canUseNextOn = noteTicksByOn > 0 && durationByOn > 0;
 		if (noteTicksByOn > MAX_SOURCE_TICKS_ON) {
@@ -1185,15 +1208,26 @@ public abstract class Decompiler extends Exporter {
 		if (canUseNextOn) {
 			noteTicks     = noteTicksByOn;
 			durationRatio = durationByOn;
+			incrementStats(STAT_STRATEGY_NEXT_ON, channel);
 		}
 		else if (canUseByDur) {
 			noteTicks     = noteTicksByDur;
 			durationRatio = durationByDur;
+			incrementStats(STAT_STRATEGY_DURATION, channel);
 		}
 		else {
 			// fallback strategy: calculate note length only by press length
+			pressTicks   -= LENGTH_TICK_TOLERANCE;
+			pressTicks    = pressTicks < 1 ? 1 : pressTicks;
 			noteTicks     = getNoteLengthByPressTicks(pressTicks);
 			durationRatio = calculateDuration(noteTicks, pressTicks);
+			incrementStats(STAT_STRATEGY_PRESS, channel);
+		}
+		
+		// ignore small duration changes
+		durationDiff = oldDuration > durationRatio ? oldDuration - durationRatio : durationRatio - oldDuration;
+		if (durationDiff < DURATION_RATIO_TOLERANCE) {
+			durationRatio = oldDuration;
 		}
 		
 		// calculate duration ratio
@@ -1326,16 +1360,18 @@ public abstract class Decompiler extends Exporter {
 	}
 	
 	/**
-	 * Creates the statistics to be printed at the end of the produced file.
+	 * Creates the quality statistics to be printed at the end of the produced file.
 	 * 
-	 * @return statistics block
+	 * @return quality statistics block
 	 */
-	protected String createStatistics() {
+	protected String createQualityStats() {
+		if (! MUST_ADD_STATISTICS && ! MUST_ADD_QUALITY_SCORE)
+			return "";
+		
 		StringBuilder statLines = new StringBuilder("");
 		String comment = getCommentSymbol();
-		
-		if (MUST_ADD_STATISTICS)
-			statLines.append(comment + " " + "STATISTICS:" + NEW_LINE);
+		statLines.append(comment + " " + "QUALITY STATISTICS:" + NEW_LINE);
+		statLines.append(comment + NEW_LINE);
 		
 		// channels
 		for (byte channel = 0; channel < 16; channel++) {
@@ -1345,29 +1381,31 @@ public abstract class Decompiler extends Exporter {
 			if (0 == channelStats.get(STAT_NOTES) && 0 == channelStats.get(STAT_RESTS))
 				continue;
 			
-			if (MUST_ADD_STATISTICS)
-				statLines.append(comment + " Channel " + channel + ":" + NEW_LINE);
-			statLines.append( createStatisticPart(channelStats, false) );
+			statLines.append(comment + " Channel " + channel + ":" + NEW_LINE);
+			statLines.append( createQualityStatsPart(channelStats) );
 		}
 		
 		// total
-		if (MUST_ADD_STATISTICS)
-			statLines.append(comment + " TOTAL:" + NEW_LINE);
-		statLines.append( createStatisticPart(statistics.get(STAT_TOTAL), true) );
+		statLines.append(comment + " TOTAL:" + NEW_LINE);
+		statLines.append(createQualityStatsPart(statistics.get(STAT_TOTAL)));
+		statLines.append(NEW_LINE);
 		
 		return statLines.toString();
 	}
 	
 	/**
-	 * Creates the statistics for one part (either a channel or total).
+	 * Creates the quality statistics for one part (either a channel or total).
 	 * 
-	 * @param subStat  statistic structure for the part (channel or total)
-	 * @param isTotal  **true**, if this is for the total statistics, **false** for channel statistics
+	 * @param subStat    statistic structure for the part (channel or total)
 	 * @return the created statistics.
 	 */
-	private String createStatisticPart(TreeMap<Byte,Integer> subStat, boolean isTotal) {
+	private String createQualityStatsPart(TreeMap<Byte,Integer> subStat) {
 		StringBuilder stats = new StringBuilder("");
 		String comment = getCommentSymbol();
+		
+		// format strings
+		final String fmtName = "%-20s";
+		final String fmtVal  = "%1$10s";
 		
 		// markers for the quality score
 		int    markerCount = 0;
@@ -1386,7 +1424,7 @@ public abstract class Decompiler extends Exporter {
 				restsPercent *= 100;
 				String restsPercentStr = String.format("%.2f", restsPercent);
 				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + "Rests/Notes: " + rests + "/" + notes + " (" + restsPercentStr + "%)" + NEW_LINE);
+					stats.append(comment + "\t\t" + String.format(fmtName, "Rests/Notes:") + String.format(fmtVal, rests + "/" + notes) + " (" + restsPercentStr + "%)" + NEW_LINE);
 				markerCount++;
 				markerSum += (100.0D - restsPercent);
 			}
@@ -1398,7 +1436,7 @@ public abstract class Decompiler extends Exporter {
 				restsSkipped *= 100;
 				String restsSkippedStr = String.format("%.2f", restsSkipped);
 				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + "Skipped: " + subStat.get(STAT_REST_SKIPPED) + " (" + restsSkippedStr + "%)" + NEW_LINE);
+					stats.append(comment + "\t\t" + String.format(fmtName, "Skipped:") + String.format(fmtVal, subStat.get(STAT_REST_SKIPPED)) + " (" + restsSkippedStr + "%)" + NEW_LINE);
 				markerCount++;
 				markerSum += (100.0D - restsSkipped);
 				
@@ -1408,7 +1446,7 @@ public abstract class Decompiler extends Exporter {
 				summandsPercent *= 100;
 				String summandsPercentStr = String.format("%.2f", summandsPercent);
 				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + "Summands: " + summands + " (" + summandsPercentStr + "%)" + NEW_LINE);
+					stats.append(comment + "\t\t" + String.format(fmtName, "Summands:") + String.format(fmtVal, summands) + " (" + summandsPercentStr + "%)" + NEW_LINE);
 				markerCount++;
 				markerSum += 100.0D - (summandsPercent - 100.0D);
 				
@@ -1419,7 +1457,7 @@ public abstract class Decompiler extends Exporter {
 					tripletsPercent *= 100;
 					String tripletsStr = String.format("%.2f", tripletsPercent);
 					if (MUST_ADD_STATISTICS)
-						stats.append(comment + "\t\t" + "Triplets: " + triplets + " (" + tripletsStr + "%)" + NEW_LINE);
+						stats.append(comment + "\t\t" + String.format(fmtName, "Triplets:") + String.format(fmtVal, triplets) + " (" + tripletsStr + "%)" + NEW_LINE);
 					markerCount++;
 					markerSum += (100.0D - tripletsPercent);
 				}
@@ -1439,7 +1477,7 @@ public abstract class Decompiler extends Exporter {
 				summandsPercent *= 100;
 				String summandsPercentStr = String.format("%.2f", summandsPercent);
 				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + "Summands: " + summands + " (" + summandsPercentStr + "%)" + NEW_LINE);
+					stats.append(comment + "\t\t" + String.format(fmtName, "Summands:") + String.format(fmtVal, summands) + " (" + summandsPercentStr + "%)" + NEW_LINE);
 				markerCount++;
 				markerSum += 100.0D - (summandsPercent - 100.0D);
 				
@@ -1450,7 +1488,7 @@ public abstract class Decompiler extends Exporter {
 					tripletsPercent *= 100;
 					String tripletsStr = String.format("%.2f", tripletsPercent);
 					if (MUST_ADD_STATISTICS)
-						stats.append(comment + "\t\t" + "Triplets: " + triplets + " (" + tripletsStr + "%)" + NEW_LINE);
+						stats.append(comment + "\t\t" + String.format(fmtName, "Triplets:") + String.format(fmtVal, triplets) + " (" + tripletsStr + "%)" + NEW_LINE);
 					markerCount++;
 					markerSum += (100.0D - tripletsPercent);
 				}
@@ -1461,7 +1499,7 @@ public abstract class Decompiler extends Exporter {
 				velocitiesPercent *= 100;
 				String velocitiesPercentStr = String.format("%.2f", velocitiesPercent);
 				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + "Velocity changes: " + velocities + " (" + velocitiesPercentStr + "%)" + NEW_LINE);
+					stats.append(comment + "\t\t" + String.format(fmtName, "Velocity changes:") + String.format(fmtVal, velocities) + " (" + velocitiesPercentStr + "%)" + NEW_LINE);
 				markerCount++;
 				markerSum += (100.0D - velocitiesPercent);
 				
@@ -1471,7 +1509,7 @@ public abstract class Decompiler extends Exporter {
 				durationPercent *= 100;
 				String durationPercentStr = String.format("%.2f", durationPercent);
 				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + "Duration changes: " + durations + " (" + durationPercentStr + "%)" + NEW_LINE);
+					stats.append(comment + "\t\t" + String.format(fmtName, "Duration changes:") + String.format(fmtVal, durations) + " (" + durationPercentStr + "%)" + NEW_LINE);
 				markerCount++;
 				markerSum += (100.0D - durationPercent);
 				
@@ -1481,29 +1519,97 @@ public abstract class Decompiler extends Exporter {
 				multiplePercent *= 100;
 				String multiplePercentStr = String.format("%.2f", multiplePercent);
 				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + "Multiple option: " + multiple + " (" + multiplePercentStr + "%)" + NEW_LINE);
+					stats.append(comment + "\t\t" + String.format(fmtName, "Multiple option:") + String.format(fmtVal, multiple) + " (" + multiplePercentStr + "%)" + NEW_LINE);
 				markerCount++;
 				markerSum += (100.0D - multiplePercent);
 			}
 		}
 		
 		// quality score
-		if (isTotal) {
-			if (MUST_ADD_STATISTICS && MUST_ADD_QUALITY_SCORE)
-				stats.append(comment + NEW_LINE);
-			double totalScore = ((double) markerSum) / markerCount;
+		if (MUST_ADD_QUALITY_SCORE) {
+			double totalScore    = ((double) markerSum) / markerCount;
 			String totalScoreStr = String.format("%.2f", totalScore);
-			if (MUST_ADD_QUALITY_SCORE)
-				stats.append(comment + " QUALITY SCORE: " + totalScoreStr + NEW_LINE);
+			stats.append(comment + "\tQuality Score: " + totalScoreStr + NEW_LINE);
 		}
 		
 		// empty line
-		if (MUST_ADD_STATISTICS || MUST_ADD_QUALITY_SCORE) {
-			if (isTotal)
-				stats.append(NEW_LINE);
-			else if (MUST_ADD_STATISTICS)
-				stats.append(comment + NEW_LINE);
+		if (MUST_ADD_STATISTICS) {
+			stats.append(comment + NEW_LINE);
 		}
+		
+		return stats.toString();
+	}
+	
+	/**
+	 * Creates the strategy statistics to be printed at the end of the produced file.
+	 * 
+	 * @return strategy statistics block
+	 */
+	protected String createStrategyStats() {
+		if (! MUST_ADD_STRATEGY_STAT)
+			return "";
+		
+		StringBuilder statLines = new StringBuilder("");
+		String comment = getCommentSymbol();
+		
+		statLines.append(comment + " " + "STRATEGY STATISTICS:" + NEW_LINE);
+		statLines.append(comment + NEW_LINE);
+		
+		// channels
+		for (byte channel = 0; channel < 16; channel++) {
+			TreeMap<Byte, Integer> channelStats = statistics.get(channel);
+			
+			int sum = channelStats.get(STAT_STRATEGY_NEXT_ON)
+			        + channelStats.get(STAT_STRATEGY_DURATION)
+			        + channelStats.get(STAT_STRATEGY_PRESS);
+			
+			// nothing to do?
+			if (0 == sum)
+				continue;
+			
+			statLines.append(comment + " Channel " + channel + ":" + NEW_LINE);
+			statLines.append(createStrategyStatsPart(channelStats));
+		}
+		
+		statLines.append(comment + " TOTAL:" + NEW_LINE);
+		statLines.append(createStrategyStatsPart(statistics.get(STAT_TOTAL)));
+		statLines.append(NEW_LINE);
+		
+		return statLines.toString();
+	}
+	
+	/**
+	 * Creates the strategy statistics for one part (either a channel or total).
+	 * 
+	 * @param subStat    statistic structure for the part (channel or total)
+	 * @return the created statistics.
+	 */
+	private String createStrategyStatsPart(TreeMap<Byte,Integer> subStat) {
+		StringBuilder stats = new StringBuilder("");
+		String comment = getCommentSymbol();
+		
+		// get counts
+		int countNextOn   = subStat.get(STAT_STRATEGY_NEXT_ON);
+		int countDuration = subStat.get(STAT_STRATEGY_DURATION);
+		int countPress    = subStat.get(STAT_STRATEGY_PRESS);
+		int countAll      = countNextOn + countDuration + countPress;
+		
+		// format counts
+		String strCountNextOn   = String.format("%6d", countNextOn);
+		String strCountDuration = String.format("%6d", countDuration);
+		String strCountPress    = String.format("%6d", countPress);
+		String strCountAll      = String.format("%6d", countAll);
+		
+		// calculate percentages
+		String percentNextOn   = String.format("%.2f", ((double) 100) * ((double) countNextOn)   / ((double) (countAll)));
+		String percentDuration = String.format("%.2f", ((double) 100) * ((double) countDuration) / ((double) (countAll)));
+		String percentPress    = String.format("%.2f", ((double) 100) * ((double) countPress)    / ((double) (countAll)));
+		
+		// add the lines
+		stats.append(comment + "\t\t" + "Sum:      " + strCountAll + NEW_LINE);
+		stats.append(comment + "\t\t" + "Next ON:  " + strCountNextOn   + " (" + percentNextOn   + "%)" + NEW_LINE);
+		stats.append(comment + "\t\t" + "Duration: " + strCountDuration + " (" + percentDuration + "%)" + NEW_LINE);
+		stats.append(comment + "\t\t" + "Press:    " + strCountPress    + " (" + percentPress    + "%)" + NEW_LINE);
 		
 		return stats.toString();
 	}
@@ -1514,11 +1620,11 @@ public abstract class Decompiler extends Exporter {
 	 * @return configuration block
 	 */
 	protected String createConfig() {
+		if (! MUST_ADD_CONFIG)
+			return "";
+		
 		StringBuilder statLines = new StringBuilder("");
 		String comment = getCommentSymbol();
-		
-		if ( ! MUST_ADD_CONFIG )
-			return statLines.toString();
 		
 		// headline
 		statLines.append(comment + " " + "CONFIGURATION:" + NEW_LINE);
@@ -1532,7 +1638,7 @@ public abstract class Decompiler extends Exporter {
 			String value = sessionConfig.get(key);
 			statLines.append(comment + " " + key + "\t" + value + NEW_LINE);
 		}
-		statLines.append(NEW_LINE + NEW_LINE);
+		statLines.append(NEW_LINE);
 		
 		return statLines.toString();
 	}
