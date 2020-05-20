@@ -690,6 +690,9 @@ public class Dict {
 	public static final String KEY_FILE_SELECTOR_EXP_MID    = "key_file_selector_exp_mid";
 	public static final String KEY_FILE_SELECTOR_EXP_MPL    = "key_file_selector_exp_mpl";
 	public static final String KEY_FILE_SELECTOR_EXP_ALDA   = "key_file_selector_exp_alda";
+	public static final String KEY_FILE_SELECTOR_EXP_ABC    = "key_file_selector_exp_abc";
+	public static final String KEY_FILE_SELECTOR_EXP_LY     = "key_file_selector_exp_ly";
+	public static final String KEY_FILE_SELECTOR_EXP_MSCORE = "key_file_selector_exp_mscore";
 	public static final String KEY_DC_CONFIG_CLOSE          = "key_dc_config_close";
 	public static final String KEY_DC_TAB_DEBUG             = "key_dc_tab_debug";
 	public static final String KEY_DC_TAB_NOTE_LENGTH       = "key_dc_tab_note_length";
@@ -797,6 +800,8 @@ public class Dict {
 	public static final String FOREIGN_PROG_ALDA           = "foreign_prog_alda";
 	public static final String FOREIGN_PROG_ABCMIDI        = "foreign_prog_abcmidi";
 	public static final String FOREIGN_PROG_LY             = "foreign_prog_ly";
+	public static final String FOREIGN_PROG_MIDI2ABC       = "foreign_prog_midi2abc";
+	public static final String FOREIGN_PROG_MIDI2LY        = "foreign_prog_midi2ly";
 	public static final String FOREIGN_PROG_MSCORE         = "foreign_prog_mscore";
 	public static final String DIRECT_IMPORT               = "direct_import";
 	
@@ -1582,6 +1587,10 @@ public class Dict {
 	public static final String ERROR_WRONG_DIVISION_TYPE         = "error_wrong_division_type";
 	public static final String ERROR_DIFFERENT_RESOLUTION        = "error_different_resolution";
 	
+	// MusescoreExporter
+	public static final String ERROR_MSCORE_NO_OUTPUT_FILE       = "error_mscore_no_output_file";
+	public static final String ERROR_MSCORE_MOVE_FAILED          = "error_mscore_move_failed";
+	
 	// NestableBlock
 	public static final String ERROR_BLOCK_ARG_ALREADY_SET      = "error_block_arg_already_set";
 	
@@ -2055,6 +2064,9 @@ public class Dict {
 		set( KEY_FILE_SELECTOR_EXP_MID,    "In the EXPORT selector, select the MIDI Tab"                                 );
 		set( KEY_FILE_SELECTOR_EXP_MPL,    "In the EXPORT selector, select the MidicaPL Tab"                             );
 		set( KEY_FILE_SELECTOR_EXP_ALDA,   "In the EXPORT selector, select the ALDA Tab"                                 );
+		set( KEY_FILE_SELECTOR_EXP_ABC,    "In the EXPORT selector, select the ABC Tab"                                  );
+		set( KEY_FILE_SELECTOR_EXP_LY,     "In the EXPORT selector, select the LilyPond Tab"                             );
+		set( KEY_FILE_SELECTOR_EXP_MSCORE, "In the EXPORT selector, select the MuscScore Tab"                            );
 		set( KEY_DC_CONFIG_CLOSE,          "Close the Decompile Configuration Window"                                    );
 		set( KEY_DC_TAB_DEBUG,             "Select the Debug tab in the decompile config window"                         );
 		set( KEY_DC_TAB_NOTE_LENGTH,       "Select the Note Length tab in the decompile config window"                   );
@@ -2161,6 +2173,8 @@ public class Dict {
 		set( FOREIGN_PROG_ALDA,        "ALDA"                                                 );
 		set( FOREIGN_PROG_ABCMIDI,     "abcMIDI"                                              );
 		set( FOREIGN_PROG_LY,          "LilyPond"                                             );
+		set( FOREIGN_PROG_MIDI2ABC,    "midi2abc"                                             );
+		set( FOREIGN_PROG_MIDI2LY,     "midi2ly"                                              );
 		set( FOREIGN_PROG_MSCORE,      "MuseScore"                                            );
 		set( DIRECT_IMPORT,            "Directly import the exported file"                    );
 		
@@ -3077,6 +3091,10 @@ public class Dict {
 		set( ERROR_LILYPOND_NO_MIDI_FILE,         "<html>LilyPond didn't create any MIDI file.<br>Did you forget to include a \\midi block?" );
 		set( ERROR_WRONG_DIVISION_TYPE,           "Wrong division type. Only PPQ allowed."                            );
 		set( ERROR_DIFFERENT_RESOLUTION,          "Temporary MIDI files have different resolutions."                  );
+		
+		// MusescoreExporter
+		set( ERROR_MSCORE_NO_OUTPUT_FILE,         "<html>MuseScore didn't create any file."                           );
+		set( ERROR_MSCORE_MOVE_FAILED,            "Failed to move temporary file '%s' to '%s'"                        );
 		
 		// NestableBlock
 		set( ERROR_BLOCK_ARG_ALREADY_SET,         "Block argument has already been set before: "                      );
@@ -5308,6 +5326,12 @@ public class Dict {
 		if (Config.EXEC_PATH_IMP_LY.equals(id))
 			return "https://lilypond.org/";
 		if (Config.EXEC_PATH_IMP_MSCORE.equals(id))
+			return "https://musescore.org/";
+		if (Config.EXEC_PATH_EXP_ABC.equals(id))
+			return "https://ifdo.ca/~seymour/runabc/top.html";
+		if (Config.EXEC_PATH_EXP_LY.equals(id))
+			return "https://lilypond.org/";
+		if (Config.EXEC_PATH_EXP_MSCORE.equals(id))
 			return "https://musescore.org/";
 		else
 			return null;

@@ -91,7 +91,7 @@ public class MidicaFileChooser extends JFileChooser {
 	 *                             be shown. Otherwise **false**.
 	 * @param confKeyForeignExe    config key for the foreign executable command or path, if a
 	 *                             foreign program is needed. Otherwise: **null**.
-	 * @param parent               the parent window (only needed for the MidicaPL exporter)
+	 * @param parent               the parent window (only needed for exporters with a decompile config icon)
 	 */
 	public MidicaFileChooser(String type, byte purpose, String directory, boolean charsetSel,
 			String confKeyForeignExe, FileSelector parent) {
@@ -104,7 +104,10 @@ public class MidicaFileChooser extends JFileChooser {
 		this.confKeyForeignExe = confKeyForeignExe;
 		this.needDCIcon        = FileSelector.WRITE == purpose && ! FileSelector.FILE_TYPE_MIDI.equals(type);
 		this.needForeignExe    = confKeyForeignExe != null;
-		this.needDirectImport  = FileSelector.WRITE == purpose && ! FileSelector.FILE_TYPE_MIDI.equals(type);
+		this.needDirectImport  = FileSelector.WRITE == purpose && (
+		                              FileSelector.FILE_TYPE_MPL.equals(type)
+		                           || FileSelector.FILE_TYPE_ALDA.equals(type)
+		                         );
 		
 		if (Laf.isNimbus)
 			changeButtonColors();
@@ -309,10 +312,12 @@ public class MidicaFileChooser extends JFileChooser {
 		if (FileSelector.FILE_TYPE_ALDA.equals(type))
 			progName = Dict.get(Dict.FOREIGN_PROG_ALDA);
 		else if (FileSelector.FILE_TYPE_ABC.equals(type))
-			progName = Dict.get(Dict.FOREIGN_PROG_ABCMIDI);
+			progName = FileSelector.READ == purpose ? Dict.get(Dict.FOREIGN_PROG_ABCMIDI) : Dict.get(Dict.FOREIGN_PROG_MIDI2ABC);
 		else if (FileSelector.FILE_TYPE_LY.equals(type))
-			progName = Dict.get(Dict.FOREIGN_PROG_LY);
+			progName = FileSelector.READ == purpose ? Dict.get(Dict.FOREIGN_PROG_LY) : Dict.get(Dict.FOREIGN_PROG_MIDI2LY);
 		else if (FileSelector.FILE_TYPE_MSCORE_IMP.equals(type))
+			progName = Dict.get(Dict.FOREIGN_PROG_MSCORE);
+		else if (FileSelector.FILE_TYPE_MSCORE_EXP.equals(type))
 			progName = Dict.get(Dict.FOREIGN_PROG_MSCORE);
 		else
 			progName = "[[TRANSLATION MISSING, PLEASE REPORT THIS BUG]]";
@@ -661,13 +666,22 @@ public class MidicaFileChooser extends JFileChooser {
 			Config.set(Config.EXEC_PATH_IMP_ALDA, path);
 		}
 		else if (FileSelector.FILE_TYPE_ABC.equals(type)) {
-			Config.set(Config.EXEC_PATH_IMP_ABC, path);
+			if (FileSelector.WRITE == purpose)
+				Config.set(Config.EXEC_PATH_EXP_ABC, path);
+			else
+				Config.set(Config.EXEC_PATH_IMP_ABC, path);
 		}
 		else if (FileSelector.FILE_TYPE_LY.equals(type)) {
-			Config.set(Config.EXEC_PATH_IMP_LY, path);
+			if (FileSelector.WRITE == purpose)
+				Config.set(Config.EXEC_PATH_EXP_LY, path);
+			else
+				Config.set(Config.EXEC_PATH_IMP_LY, path);
 		}
 		else if (FileSelector.FILE_TYPE_MSCORE_IMP.equals(type)) {
 			Config.set(Config.EXEC_PATH_IMP_MSCORE, path);
+		}
+		else if (FileSelector.FILE_TYPE_MSCORE_EXP.equals(type)) {
+			Config.set(Config.EXEC_PATH_EXP_MSCORE, path);
 		}
 	}
 }

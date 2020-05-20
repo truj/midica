@@ -37,11 +37,11 @@ public class MidiExporter extends Exporter {
 	/** File type of the currently loaded MIDI sequence. */
 	private String sourceFileType = null;
 	
-	/** (default) charset used to read the currently loaded file (or it's text-based messages) */
-	private String sourceCharset = null;
+	/** (default) charset used to read the currently loaded file (or its text-based messages) */
+	protected String sourceCharset = null;
 	
 	/** Target charset for text-based messages. */
-	private String targetCharset = null;
+	protected String targetCharset = null;
 	
 	/** Source charset, specified in the sequence. */
 	private String fileCharset = null;
@@ -61,36 +61,39 @@ public class MidiExporter extends Exporter {
 	 * @return                   Empty data structure (warnings are not used for MIDI exports).
 	 * @throws  ExportException  If the file can not be exported correctly.
 	 */
-	public ExportResult export( File file ) throws ExportException {
+	public ExportResult export(File file) throws ExportException {
 		
-		exportResult = new ExportResult( true );
+		exportResult = new ExportResult(true);
 		
 		// charset-related initializations
-		targetCharset  = ((ComboboxStringOption) ConfigComboboxModel.getModel( Config.CHARSET_EXPORT_MID ).getSelectedItem() ).getIdentifier();
+		// TODO: replace "mid" by a constant
+		// TODO: also care about the source charsets of other imported formats
+		// TODO: also care about the target charsets of derived formats
+		targetCharset  = ((ComboboxStringOption) ConfigComboboxModel.getModel(Config.CHARSET_EXPORT_MID).getSelectedItem()).getIdentifier();
 		sourceFileType = SequenceCreator.getFileType();
-		if ( "mid".equals(sourceFileType) ) {
-			sourceCharset = Config.get( Config.CHARSET_MID );
+		if ("mid".equals(sourceFileType)) {
+			sourceCharset = Config.get(Config.CHARSET_MID);
 		}
 		else {
-			sourceCharset = Config.get( Config.CHARSET_MPL );
+			sourceCharset = Config.get(Config.CHARSET_MPL);
 		}
 		
 		try {
 			
 			// create file writer and store it in this.writer
-			if ( ! createFile(file) ) {
+			if (! createFile(file)) {
 				// user doesn't want to overwrite the file
-				return new ExportResult( false );
+				return new ExportResult(false);
 			}
 			
 			// export the MIDI file
 			Sequence seq = cloneSequence();
-			int[] supportedFileTypes = MidiSystem.getMidiFileTypes( seq );
-			MidiSystem.write( seq, supportedFileTypes[0], file );
+			int[] supportedFileTypes = MidiSystem.getMidiFileTypes(seq);
+			MidiSystem.write(seq, supportedFileTypes[0], file);
 			
 		}
-		catch ( IOException | InvalidMidiDataException e ) {
-			throw new ExportException( e.getMessage() );
+		catch (IOException | InvalidMidiDataException e) {
+			throw new ExportException(e.getMessage());
 		}
 		
 		return exportResult;
@@ -105,58 +108,58 @@ public class MidiExporter extends Exporter {
 	 * @return copied and modified MIDI Sequence.
 	 * @throws InvalidMidiDataException if the new MIDI (copied) sequence cannot be created.
 	 */
-	private Sequence cloneSequence() throws InvalidMidiDataException {
+	protected Sequence cloneSequence() throws InvalidMidiDataException {
 		
 		Sequence oldSeq = MidiDevices.getSequence();
-		Sequence newSeq = new Sequence( oldSeq.getDivisionType(), oldSeq.getResolution() );
+		Sequence newSeq = new Sequence(oldSeq.getDivisionType(), oldSeq.getResolution());
 		
 		int trackNum = 0;
 		TRACK:
-		for ( Track oldTrack : oldSeq.getTracks() ) {
+		for (Track oldTrack : oldSeq.getTracks()) {
 			
 			Track newTrack = newSeq.createTrack();
 			
 			// add a charset event
-			if ( 0 == trackNum ) {
+			if (0 == trackNum) {
 				String csChange = "{@" + targetCharset + "}";
-				byte[] data     = CharsetUtils.getBytesFromText( csChange, "US-ASCII" );
-				MetaMessage msg = new MetaMessage( MidiListener.META_LYRICS, data, data.length );
-				newTrack.add( new MidiEvent(msg, 0) );
+				byte[] data     = CharsetUtils.getBytesFromText(csChange, "US-ASCII");
+				MetaMessage msg = new MetaMessage(MidiListener.META_LYRICS, data, data.length);
+				newTrack.add(new MidiEvent(msg, 0));
 			}
 			
 			EVENT:
-			for ( int i=0; i < oldTrack.size(); i++ ) {
-				MidiEvent   event = oldTrack.get( i );
+			for (int i=0; i < oldTrack.size(); i++) {
+				MidiEvent   event = oldTrack.get(i);
 				MidiMessage msg   = event.getMessage();
 				
 				// manipulate some meta messages
-				if ( msg instanceof MetaMessage ) {
+				if (msg instanceof MetaMessage) {
 					int    type = ((MetaMessage) msg).getType();
 					byte[] data = ((MetaMessage) msg).getData();
 					
 					// ignore marker messages created by the SequenceCreator
-					if ( MidiListener.META_MARKER == type
+					if (MidiListener.META_MARKER == type
 					  && data.length > 0
-					  && data.length <= 16 ) {
+					  && data.length <= 16) {
 						continue EVENT;
 					}
 					
 					// convert charset of text-based messages
-					else if ( type >= 0x01 && type <= 0x0F ) {
-						String text = CharsetUtils.getTextFromBytes( data, sourceCharset, fileCharset );
-						event       = convertCharset( event, text, fileCharset, type, event.getTick(), trackNum );
+					else if (type >= 0x01 && type <= 0x0F) {
+						String text = CharsetUtils.getTextFromBytes(data, sourceCharset, fileCharset);
+						event       = convertCharset(event, text, fileCharset, type, event.getTick(), trackNum);
 						
 						// charset switch detected in the sequence?
-						if ( MidiListener.META_TEXT == type || MidiListener.META_LYRICS == type ) {
-							String newCharset = CharsetUtils.findCharsetSwitch( text );
-							if ( newCharset != null ) {
+						if (MidiListener.META_TEXT == type || MidiListener.META_LYRICS == type) {
+							String newCharset = CharsetUtils.findCharsetSwitch(text);
+							if (newCharset != null) {
 								
 								// remember the new charset
 								fileCharset = newCharset;
 								
 								// remove charset switch from the message
-								event = removeCharsetSwitch( event, text, type, event.getTick(), trackNum );
-								if ( null == event ) {
+								event = removeCharsetSwitch(event, text, type, event.getTick(), trackNum);
+								if (null == event) {
 									continue EVENT;
 								}
 							}
@@ -165,7 +168,7 @@ public class MidiExporter extends Exporter {
 				}
 				
 				// copy the event
-				newTrack.add( event );
+				newTrack.add(event);
 			}
 			trackNum++;
 		}
@@ -185,16 +188,16 @@ public class MidiExporter extends Exporter {
 	 * @return the new meta event with the converted text or the original
 	 *         event, if the text cannot be converted.
 	 */
-	private MidiEvent convertCharset( MidiEvent oldEvent, String text, String fileCharset, int type, long tick, int trackNum ) {
+	private MidiEvent convertCharset(MidiEvent oldEvent, String text, String fileCharset, int type, long tick, int trackNum) {
 		
 		// convert text
-		byte[] data = CharsetUtils.getBytesFromText( text, targetCharset );
+		byte[] data = CharsetUtils.getBytesFromText(text, targetCharset);
 		try {
-			MetaMessage newMsg = new MetaMessage( type, data, data.length );
-			return new MidiEvent( newMsg, tick );
+			MetaMessage newMsg = new MetaMessage(type, data, data.length);
+			return new MidiEvent(newMsg, tick);
 		}
-		catch ( InvalidMidiDataException e ) {
-			exportResult.addWarning( trackNum, tick, -1, -1, e.getMessage() );
+		catch (InvalidMidiDataException e) {
+			exportResult.addWarning(trackNum, tick, -1, -1, e.getMessage());
 			
 			return oldEvent;
 		}
@@ -211,31 +214,31 @@ public class MidiExporter extends Exporter {
 	 * @return the new event with the changed text or **null** if the text is
 	 *         empty after the changes.
 	 */
-	private MidiEvent removeCharsetSwitch( MidiEvent oldEvent, String text, int type, long tick, int trackNum ) {
+	private MidiEvent removeCharsetSwitch(MidiEvent oldEvent, String text, int type, long tick, int trackNum) {
 		
 		// replace text recursively (don't allow nested tags to evaluate to new tags)
 		// e.g. @{UT@{UTF-16}F-8} would otherwise evaluate to @{UTF-16}.
 		int length     = text.length();
 		int lastLength = -1;
-		while ( length != lastLength ) {
+		while (length != lastLength) {
 			lastLength = length;
-			text       = text.replaceAll( "\\{@[\\w\\-]+\\}", "" );
+			text       = text.replaceAll("\\{@[\\w\\-]+\\}", "");
 			length     = text.length();
 		}
 		
 		// text empty after the replacement? - than remove it completely.
-		if ( "".equals(text) ) {
+		if ("".equals(text)) {
 			return null;
 		}
 		
 		// replace the event with a new event using the new text
-		byte[] data = CharsetUtils.getBytesFromText( text, targetCharset );
+		byte[] data = CharsetUtils.getBytesFromText(text, targetCharset);
 		try {
-			MetaMessage newMsg = new MetaMessage( type, data, data.length );
-			return new MidiEvent( newMsg, tick );
+			MetaMessage newMsg = new MetaMessage(type, data, data.length);
+			return new MidiEvent(newMsg, tick);
 		}
-		catch ( InvalidMidiDataException e ) {
-			exportResult.addWarning( trackNum, tick, -1, -1, e.getMessage() );
+		catch (InvalidMidiDataException e) {
+			exportResult.addWarning(trackNum, tick, -1, -1, e.getMessage());
 			
 			return oldEvent;
 		}

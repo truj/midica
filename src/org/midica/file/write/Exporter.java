@@ -20,7 +20,9 @@ import org.midica.ui.file.ExportResult;
 /**
  * This class can be extended by exporter classes which write a music file based on a MIDI sequence.
  * 
- * Derived classes are {@link MidiExporter} and {@link MidicaPLExporter}.
+ * Directly derived classes are MidiExporter and MidicaPLExporter.
+ * 
+ * Indirectly derived classes are AbcExporter, LilypondExporter and MusescoreExporter.
  * 
  * @author Jan Trukenmüller
  */
@@ -40,7 +42,7 @@ public abstract class Exporter {
 		
 		try {
 			// file exists already?
-    		if ( ! file.createNewFile() ) {
+    		if (! file.createNewFile()) {
     			int mayOverwrite;
     			if (Cli.isCliMode) {
     				mayOverwrite = JOptionPane.YES_OPTION;
@@ -57,7 +59,7 @@ public abstract class Exporter {
     		}
     		
     		// writable
-    		if ( ! file.canWrite() )
+    		if (! file.canWrite())
     			throw new ExportException(Dict.get(Dict.ERROR_FILE_NOT_WRITABLE));
     		
     		return true;

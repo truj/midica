@@ -37,11 +37,14 @@ import org.midica.file.read.MusescoreImporter;
 import org.midica.file.read.ParseException;
 import org.midica.file.read.SequenceParser;
 import org.midica.file.read.SoundfontParser;
+import org.midica.file.write.AbcExporter;
 import org.midica.file.write.AldaExporter;
 import org.midica.file.write.ExportException;
 import org.midica.file.write.Exporter;
+import org.midica.file.write.LilypondExporter;
 import org.midica.file.write.MidiExporter;
 import org.midica.file.write.MidicaPLExporter;
+import org.midica.file.write.MusescoreExporter;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.file.ExportResult;
 import org.midica.ui.file.ExportResultView;
@@ -499,6 +502,17 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		else if (FileSelector.FILE_TYPE_MIDI.equals(type)) {
 			charsetKey = Config.CHARSET_EXPORT_MID;
 			exporter   = new MidiExporter();
+		}
+		else if (FileSelector.FILE_TYPE_ABC.equals(type)) {
+			// TODO: care about alternative charsets
+			exporter = new AbcExporter();
+		}
+		else if (FileSelector.FILE_TYPE_LY.equals(type)) {
+			// TODO: care about alternative charsets
+			exporter = new LilypondExporter();
+		}
+		else if (FileSelector.FILE_TYPE_MSCORE_EXP.equals(type)) {
+			exporter = new MusescoreExporter();
 		}
 		else {
 			return;

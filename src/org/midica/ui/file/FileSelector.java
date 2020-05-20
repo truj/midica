@@ -183,6 +183,36 @@ public class FileSelector extends JDialog {
 				this
 			));
 			tabs.put(FILE_TYPE_ALDA, Dict.TAB_ALDA);
+			
+			fileChoosers.add(new MidicaFileChooser(
+				FILE_TYPE_ABC,
+				filePurpose,
+				Config.get(Config.DIRECTORY_EXPORT_ABC),
+				false,
+				Config.EXEC_PATH_EXP_ABC,
+				this
+			));
+			tabs.put(FILE_TYPE_ABC, Dict.TAB_ABC);
+			
+			fileChoosers.add(new MidicaFileChooser(
+				FILE_TYPE_LY,
+				filePurpose,
+				Config.get(Config.DIRECTORY_EXPORT_LY),
+				false,
+				Config.EXEC_PATH_EXP_LY,
+				this
+			));
+			tabs.put(FILE_TYPE_LY, Dict.TAB_LY);
+			
+			fileChoosers.add(new MidicaFileChooser(
+				FILE_TYPE_MSCORE_EXP,
+				filePurpose,
+				Config.get(Config.DIRECTORY_EXPORT_MSCORE),
+				false,
+				Config.EXEC_PATH_EXP_MSCORE,
+				this
+			));
+			tabs.put(FILE_TYPE_MSCORE_EXP, Dict.TAB_MSCORE);
 		}
 		
 		// complete file choosers
@@ -361,6 +391,12 @@ public class FileSelector extends JDialog {
 					Config.set(Config.DIRECTORY_EXPORT_MPL, directory);
 				else if (FILE_TYPE_ALDA.equals(fileType))
 					Config.set(Config.DIRECTORY_EXPORT_ALDA, directory);
+				else if (FILE_TYPE_ABC.equals(fileType))
+					Config.set(Config.DIRECTORY_EXPORT_ABC, directory);
+				else if (FILE_TYPE_LY.equals(fileType))
+					Config.set(Config.DIRECTORY_EXPORT_LY, directory);
+				else if (FILE_TYPE_MSCORE_EXP.equals(fileType))
+					Config.set(Config.DIRECTORY_EXPORT_MSCORE, directory);
 			}
 		}
 		catch (IOException e) {
@@ -411,9 +447,12 @@ public class FileSelector extends JDialog {
 				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_MSCORE, 5 );
 			}
 			else {
-				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_MID,  0 );
-				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_MPL,  1 );
-				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_ALDA, 2 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_MID,    0 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_MPL,    1 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_ALDA,   2 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_ABC,    3 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_LY,     4 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_MSCORE, 5 );
 			}
 		}
 		
