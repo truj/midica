@@ -1403,30 +1403,26 @@ public abstract class Decompiler extends Exporter {
 		StringBuilder stats = new StringBuilder("");
 		String comment = getCommentSymbol();
 		
-		// format strings
-		final String fmtName = "%-20s";
-		final String fmtVal  = "%1$10s";
-		
 		// markers for the quality score
 		int    markerCount = 0;
 		double markerSum   = 0;
+		double subScore;
 		
 		// rests
 		{
 			int rests = subStat.get(STAT_RESTS);
 			if (MUST_ADD_STATISTICS)
-				stats.append(comment + "\t" + "Rests: " + rests + NEW_LINE);
+				stats.append(comment + "     " + "Rests: " + rests + NEW_LINE);
 			
 			// rests / notes
 			int notes = subStat.get(STAT_NOTES);
 			if (notes > 0) {
 				double restsPercent = ((double) rests) / ((double) (notes));
 				restsPercent *= 100;
-				String restsPercentStr = String.format("%.2f", restsPercent);
-				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + String.format(fmtName, "Rests/Notes:") + String.format(fmtVal, rests + "/" + notes) + " (" + restsPercentStr + "%)" + NEW_LINE);
+				subScore = 100.0D - restsPercent;
+				addQualityDetailsLine(stats, "Rests/Notes:", rests + "/" + notes, restsPercent, subScore);
 				markerCount++;
-				markerSum += (100.0D - restsPercent);
+				markerSum += subScore;
 			}
 			
 			if (rests > 0) {
@@ -1434,32 +1430,29 @@ public abstract class Decompiler extends Exporter {
 				// rests skipped
 				double restsSkipped = ((double) subStat.get(STAT_REST_SKIPPED)) / ((double) rests);
 				restsSkipped *= 100;
-				String restsSkippedStr = String.format("%.2f", restsSkipped);
-				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + String.format(fmtName, "Skipped:") + String.format(fmtVal, subStat.get(STAT_REST_SKIPPED)) + " (" + restsSkippedStr + "%)" + NEW_LINE);
+				subScore = 100.0D - restsSkipped;
+				addQualityDetailsLine(stats, "Skipped:", subStat.get(STAT_REST_SKIPPED) + "", restsSkipped, subScore);
 				markerCount++;
-				markerSum += (100.0D - restsSkipped);
+				markerSum += subScore;
 				
 				// rest summands
 				int    summands        = subStat.get(STAT_REST_SUMMANDS);
 				double summandsPercent = ((double) summands) / ((double) rests);
 				summandsPercent *= 100;
-				String summandsPercentStr = String.format("%.2f", summandsPercent);
-				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + String.format(fmtName, "Summands:") + String.format(fmtVal, summands) + " (" + summandsPercentStr + "%)" + NEW_LINE);
+				subScore = 200.0D - summandsPercent;
+				addQualityDetailsLine(stats, "Summands:", summands + "", summandsPercent, subScore);
 				markerCount++;
-				markerSum += 100.0D - (summandsPercent - 100.0D);
+				markerSum += subScore;
 				
 				// rest triplets
 				if (summands > 0) {
 					int triplets = subStat.get(STAT_REST_TRIPLETS);
 					double tripletsPercent = ((double) triplets) / ((double) summands);
 					tripletsPercent *= 100;
-					String tripletsStr = String.format("%.2f", tripletsPercent);
-					if (MUST_ADD_STATISTICS)
-						stats.append(comment + "\t\t" + String.format(fmtName, "Triplets:") + String.format(fmtVal, triplets) + " (" + tripletsStr + "%)" + NEW_LINE);
+					subScore = 100.0D - tripletsPercent;
+					addQualityDetailsLine(stats, "Triplets:", triplets + "", tripletsPercent, subScore);
 					markerCount++;
-					markerSum += (100.0D - tripletsPercent);
+					markerSum += subScore;
 				}
 			}
 		}
@@ -1468,60 +1461,55 @@ public abstract class Decompiler extends Exporter {
 		{
 			int notes = subStat.get(STAT_NOTES);
 			if (MUST_ADD_STATISTICS)
-				stats.append(comment + "\t" + "Notes: " + notes + NEW_LINE);
+				stats.append(comment + "     " + "Notes: " + notes + NEW_LINE);
 			if (notes > 0) {
 				
 				// note summands
 				int    summands    = subStat.get(STAT_NOTE_SUMMANDS);
 				double summandsPercent = ((double) summands) / ((double) notes);
 				summandsPercent *= 100;
-				String summandsPercentStr = String.format("%.2f", summandsPercent);
-				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + String.format(fmtName, "Summands:") + String.format(fmtVal, summands) + " (" + summandsPercentStr + "%)" + NEW_LINE);
+				subScore = 200.0D - summandsPercent;
+				addQualityDetailsLine(stats, "Summands:", summands + "", summandsPercent, subScore);
 				markerCount++;
-				markerSum += 100.0D - (summandsPercent - 100.0D);
+				markerSum += subScore;
 				
 				// note triplets
 				if (summands > 0) {
 					int triplets = subStat.get(STAT_NOTE_TRIPLETS);
 					double tripletsPercent = ((double) triplets) / ((double) summands);
 					tripletsPercent *= 100;
-					String tripletsStr = String.format("%.2f", tripletsPercent);
-					if (MUST_ADD_STATISTICS)
-						stats.append(comment + "\t\t" + String.format(fmtName, "Triplets:") + String.format(fmtVal, triplets) + " (" + tripletsStr + "%)" + NEW_LINE);
+					subScore = 100.0D - tripletsPercent;
+					addQualityDetailsLine(stats, "Triplets:", triplets + "", tripletsPercent, subScore);
 					markerCount++;
-					markerSum += (100.0D - tripletsPercent);
+					markerSum += subScore;
 				}
 				
 				// velocity changes
 				int    velocities    = subStat.get(STAT_NOTE_VELOCITIES);
 				double velocitiesPercent = ((double) velocities) / ((double) notes);
 				velocitiesPercent *= 100;
-				String velocitiesPercentStr = String.format("%.2f", velocitiesPercent);
-				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + String.format(fmtName, "Velocity changes:") + String.format(fmtVal, velocities) + " (" + velocitiesPercentStr + "%)" + NEW_LINE);
+				subScore = 100.0D - velocitiesPercent;
+				addQualityDetailsLine(stats, "Velocity changes:", velocities + "", velocitiesPercent, subScore);
 				markerCount++;
-				markerSum += (100.0D - velocitiesPercent);
+				markerSum += subScore;
 				
 				// duration changes
 				int    durations   = subStat.get(STAT_NOTE_DURATIONS);
 				double durationPercent = ((double) durations) / ((double) notes);
 				durationPercent *= 100;
-				String durationPercentStr = String.format("%.2f", durationPercent);
-				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + String.format(fmtName, "Duration changes:") + String.format(fmtVal, durations) + " (" + durationPercentStr + "%)" + NEW_LINE);
+				subScore = 100.0D - durationPercent;
+				addQualityDetailsLine(stats, "Duration changes:", durations + "", durationPercent, subScore);
 				markerCount++;
-				markerSum += (100.0D - durationPercent);
+				markerSum += subScore;
 				
 				// multiple option
 				int    multiple        = subStat.get(STAT_NOTE_MULTIPLE);
 				double multiplePercent = ((double) multiple) / ((double) notes);
 				multiplePercent *= 100;
-				String multiplePercentStr = String.format("%.2f", multiplePercent);
-				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + String.format(fmtName, "Multiple option:") + String.format(fmtVal, multiple) + " (" + multiplePercentStr + "%)" + NEW_LINE);
+				subScore = 100.0D - multiplePercent;
+				addQualityDetailsLine(stats, "Multiple option:", multiple + "", multiplePercent, subScore);
 				markerCount++;
-				markerSum += (100.0D - multiplePercent);
+				markerSum += subScore;
 			}
 		}
 		
@@ -1529,7 +1517,7 @@ public abstract class Decompiler extends Exporter {
 		if (MUST_ADD_QUALITY_SCORE) {
 			double totalScore    = ((double) markerSum) / markerCount;
 			String totalScoreStr = String.format("%.2f", totalScore);
-			stats.append(comment + "\tQuality Score: " + totalScoreStr + NEW_LINE);
+			stats.append(comment + "     Quality Score: " + totalScoreStr + NEW_LINE);
 		}
 		
 		// empty line
@@ -1538,6 +1526,43 @@ public abstract class Decompiler extends Exporter {
 		}
 		
 		return stats.toString();
+	}
+	
+	/**
+	 * Adds a line to the quality statistics, if configured.
+	 * 
+	 * @param stats         the statistic line
+	 * @param name
+	 * @param count
+	 * @param percentage
+	 * @param subScore      the sub score to be added
+	 */
+	private void addQualityDetailsLine(StringBuilder stats, String name, String count, double percentage, double subScore) {
+		if (! MUST_ADD_STATISTICS)
+			return;
+		
+		String comment = getCommentSymbol();
+		stats.append(
+			comment + "         " + String.format("%-20s", name)
+			+ String.format("%1$10s", count) + " "
+			+ String.format(
+				"%-9s",
+				"(" + String.format("%.2f", percentage) + "%)"
+			)
+		);
+		
+		if (MUST_ADD_QUALITY_SCORE) {
+			stats.append(" Sub Score: "
+				+ String.format(
+					"%1$10s",
+					String.format("%.2f", subScore)
+				)
+				+ NEW_LINE
+			);
+			return;
+		}
+		
+		stats.append(NEW_LINE);
 	}
 	
 	/**
@@ -1606,10 +1631,10 @@ public abstract class Decompiler extends Exporter {
 		String percentPress    = String.format("%.2f", ((double) 100) * ((double) countPress)    / ((double) (countAll)));
 		
 		// add the lines
-		stats.append(comment + "\t\t" + "Sum:      " + strCountAll + NEW_LINE);
-		stats.append(comment + "\t\t" + "Next ON:  " + strCountNextOn   + " (" + percentNextOn   + "%)" + NEW_LINE);
-		stats.append(comment + "\t\t" + "Duration: " + strCountDuration + " (" + percentDuration + "%)" + NEW_LINE);
-		stats.append(comment + "\t\t" + "Press:    " + strCountPress    + " (" + percentPress    + "%)" + NEW_LINE);
+		stats.append(comment + "     " + "Sum:      " + strCountAll + NEW_LINE);
+		stats.append(comment + "     " + "Next ON:  " + strCountNextOn   + " (" + percentNextOn   + "%)" + NEW_LINE);
+		stats.append(comment + "     " + "Duration: " + strCountDuration + " (" + percentDuration + "%)" + NEW_LINE);
+		stats.append(comment + "     " + "Press:    " + strCountPress    + " (" + percentPress    + "%)" + NEW_LINE);
 		
 		return stats.toString();
 	}
@@ -1636,7 +1661,10 @@ public abstract class Decompiler extends Exporter {
 		Collections.sort(configKeys);
 		for (String key : configKeys) {
 			String value = sessionConfig.get(key);
-			statLines.append(comment + " " + key + "\t" + value + NEW_LINE);
+			statLines.append(
+				comment + " "
+				+ String.format("%-30s", key) + " " + value + NEW_LINE
+			);
 		}
 		statLines.append(NEW_LINE);
 		
