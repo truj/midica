@@ -33,7 +33,6 @@ import javax.sound.midi.Track;
 import org.midica.config.Dict;
 import org.midica.file.CharsetUtils;
 import org.midica.file.read.ParseException;
-import org.midica.file.write.MidicaPLExporter;
 import org.midica.ui.model.SingleMessage;
 import org.midica.ui.model.MessageTreeNode;
 import org.midica.ui.model.MidicaTreeModel;
@@ -179,7 +178,7 @@ public class SequenceAnalyzer {
 			}
 			else {
 				e.printStackTrace();
-				throw new ParseException( e.getMessage() );
+				throw new ParseException(e.getMessage());
 			}
 		}
 		
@@ -204,39 +203,65 @@ public class SequenceAnalyzer {
 	}
 	
 	/**
-	 * Returns internal data structures from the parsed sequence.
-	 * This is needed for the {@link MidicaPLExporter}.
+	 * Returns the instrument history.
 	 * 
-	 * The following structures are returned:
+	 * Structure:
 	 * 
-	 * - **instrument_history**: TreeMap<Byte, TreeMap<Long, Byte[]>>
-	 *     - channel
-	 *     - tick
-	 *     - 0=bankMSB, 1=bankLSB, 3=program
-	 * - **comment_history**: TreeMap<Byte, TreeMap<Long, String>>
-	 *     - channel
-	 *     - tick
-	 *     - comment
-	 * - **note_history**: TreeMap<Byte, TreeMap<Long, TreeMap<Byte, Byte>>>
-	 *     - channel
-	 *     - tick
-	 *     - note
-	 *     - velocity
-	 * - **note_on_off**: TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>>
-	 *     - channel
-	 *     - note
-	 *     - tick
-	 *     - on/off
-	 * @return internal data structures as described above.
+	 * - channel
+	 * - tick
+	 * - 0=bankMSB, 1=bankLSB, 3=program
+	 * 
+	 * @return the instrument history, or **null** if no MIDI sequence has been loaded.
 	 */
-	public static HashMap<String, Object> getHistories() {
-		HashMap<String, Object> histories = new HashMap<>();
-		histories.put( "instrument_history", instrumentHistory  );
-		histories.put( "comment_history",    commentHistory     );
-		histories.put( "note_history",       noteHistory        );
-		histories.put( "note_on_off",        noteOnOffByChannel );
-		
-		return histories;
+	public static TreeMap<Byte, TreeMap<Long, Byte[]>> getInstrumentHistory() {
+		return instrumentHistory;
+	}
+	
+	/**
+	 * Returns the channel comment history.
+	 * 
+	 * Structure:
+	 * 
+	 * - channel
+	 * - tick
+	 * - comment
+	 * 
+	 * @return the channel comment history, or **null** if no MIDI sequence has been loaded.
+	 */
+	public static TreeMap<Byte, TreeMap<Long, String>> getCommentHistory() {
+		return commentHistory;
+	}
+	
+	/**
+	 * Returns the note history.
+	 * 
+	 * Structure:
+	 * 
+	 * - channel
+	 * - tick
+	 * - note
+	 * - velocity
+	 * 
+	 * @return the note history, or **null** if no MIDI sequence has been loaded.
+	 */
+	public static TreeMap<Byte, TreeMap<Long, TreeMap<Byte, Byte>>> getNoteHistory() {
+		return noteHistory;
+	}
+	
+	/**
+	 * Returns the note-ON/note-OFF history.
+	 * 
+	 * Structure:
+	 * 
+	 * - channel
+	 * - note
+	 * - tick
+	 * - on/off
+	 * 
+	 * @return the on/off history, or **null** if no MIDI sequence has been loaded.
+	 */
+	public static TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>> getOnOffHistory() {
+		return noteOnOffByChannel;
 	}
 	
 	/**
@@ -250,37 +275,37 @@ public class SequenceAnalyzer {
 		// initialize data structures for the sequence info
 		sequenceInfo   = new HashMap<>();
 		int resolution = sequence.getResolution();
-		sequenceInfo.put( "resolution",    resolution               );
-		sequenceInfo.put( "meta_info",     new HashMap<>()          );
-		sequenceInfo.put( "used_channels", new TreeSet<>()          );
-		sequenceInfo.put( "tempo_mpq",     new TreeMap<>()          );
-		sequenceInfo.put( "tempo_bpm",     new TreeMap<>()          );
-		sequenceInfo.put( "ticks",         sequence.getTickLength() );
-		banksAndInstrTotal      = new MidicaTreeModel( Dict.get(Dict.TOTAL)        );
-		banksAndInstrPerChannel = new MidicaTreeModel( Dict.get(Dict.PER_CHANNEL)  );
-		msgTreeModel            = new MidicaTreeModel( Dict.get(Dict.TAB_MESSAGES), MessageTreeNode.class );
+		sequenceInfo.put( "resolution",    resolution       );
+		sequenceInfo.put( "meta_info",     new HashMap<>()  );
+		sequenceInfo.put( "used_channels", new TreeSet<>()  );
+		sequenceInfo.put( "tempo_mpq",     new TreeMap<>()  );
+		sequenceInfo.put( "tempo_bpm",     new TreeMap<>()  );
+		sequenceInfo.put( "ticks", sequence.getTickLength() );
+		banksAndInstrTotal      = new MidicaTreeModel(Dict.get(Dict.TOTAL));
+		banksAndInstrPerChannel = new MidicaTreeModel(Dict.get(Dict.PER_CHANNEL));
+		msgTreeModel            = new MidicaTreeModel(Dict.get(Dict.TAB_MESSAGES), MessageTreeNode.class);
 		messages                = new ArrayList<>();
 		sequenceInfo.put( "banks_total",         banksAndInstrTotal      );
 		sequenceInfo.put( "banks_per_channel",   banksAndInstrPerChannel );
 		sequenceInfo.put( "msg_tree_model",      msgTreeModel            );
 		sequenceInfo.put( "messages",            messages                );
 		long   microseconds = sequence.getMicrosecondLength();
-		String time         = MidiDevices.microsecondsToTimeString( microseconds );
-		sequenceInfo.put( "time_length", time );
+		String time         = MidiDevices.microsecondsToTimeString(microseconds);
+		sequenceInfo.put("time_length", time);
 		channelParamConfig = new TreeMap<>();
 		for (byte channel = 0; channel < 16; channel++) {
 			// default (N)RPN config: MSB=LSB=127 (no parameter set), -1: neither RPN nor NRPN is active
-			Byte[] conf = { 127, 127, 127, 127, -1 };
+			Byte[] conf = {127, 127, 127, 127, -1};
 			channelParamConfig.put(channel, conf);
 		}
 		channelParamHistory = new TreeMap<>();
 		for (byte channel = 0; channel < 16; channel++) {
 			TreeMap<Long, Byte[]> paramHistory = new TreeMap<>();
-			channelParamHistory.put( channel, paramHistory );
+			channelParamHistory.put(channel, paramHistory);
 			
 			// default config (same as the default in channelParamConfig)
-			Byte[] conf0 = { 127, 127, 127, 127, -1 }; // MSB=LSB=127 (no parameter set), -1: neither RPN nor NRPN is active
-			paramHistory.put( 0L, conf0 );
+			Byte[] conf0 = {127, 127, 127, 127, -1}; // MSB=LSB=127 (no parameter set), -1: neither RPN nor NRPN is active
+			paramHistory.put(0L, conf0);
 		}
 		controllerHistory = new TreeMap<>();
 		for (byte channel = 0; channel < 16; channel++) {
@@ -300,22 +325,22 @@ public class SequenceAnalyzer {
 		// init data structures for the note history
 		noteHistory = new TreeMap<>();
 		for (byte channel = 0; channel < 16; channel++) {
-			noteHistory.put( channel, new TreeMap<>() );
+			noteHistory.put(channel, new TreeMap<>());
 		}
 		
 		instrumentHistory = new TreeMap<>();
 		for (byte channel = 0; channel < 16; channel++) {
 			TreeMap<Long, Byte[]> channelHistory = new TreeMap<>();
-			instrumentHistory.put( channel, channelHistory );
+			instrumentHistory.put(channel, channelHistory);
 			
 			// default config
-			Byte[] conf0 = { 0, 0, 0 }; // default values: bankMSB=0, bankLSB=0, program=0
-			channelHistory.put( DEFAULT_CHANNEL_CONFIG_TICK, conf0 ); // this must be configured before the sequence starts
+			Byte[] conf0 = {0, 0, 0}; // default values: bankMSB=0, bankLSB=0, program=0
+			channelHistory.put(DEFAULT_CHANNEL_CONFIG_TICK, conf0); // this must be configured before the sequence starts
 		}
 		commentHistory = new TreeMap<>();
 		for (byte channel = 0; channel < 16; channel++) {
 			TreeMap<Long, String> channelCommentHistory = new TreeMap<>();
-			commentHistory.put( channel, channelCommentHistory );
+			commentHistory.put(channel, channelCommentHistory);
 		}
 	}
 	
@@ -382,7 +407,7 @@ public class SequenceAnalyzer {
 			}
 			trackNum++;
 		}
-		sequenceInfo.put( "num_tracks", trackNum );
+		sequenceInfo.put("num_tracks", trackNum);
 		
 		// decide which track number and META type to use for the lyrics
 		KaraokeAnalyzer.chooseLyricsTypeAndTrack();
@@ -443,12 +468,12 @@ public class SequenceAnalyzer {
 		if (ShortMessage.PROGRAM_CHANGE == cmd) {
 			
 			// get current config
-			Entry<Long, Byte> bankMsbEntry = controllerHistory.get(channel).get( (byte) 0x00 ).floorEntry(tick);
-			Entry<Long, Byte> bankLsbEntry = controllerHistory.get(channel).get( (byte) 0x20 ).floorEntry(tick);
+			Entry<Long, Byte> bankMsbEntry = controllerHistory.get(channel).get((byte) 0x00).floorEntry(tick);
+			Entry<Long, Byte> bankLsbEntry = controllerHistory.get(channel).get((byte) 0x20).floorEntry(tick);
 			byte bankMsb       = bankMsbEntry.getValue();
 			byte bankLsb       = bankLsbEntry.getValue();
 			byte programNumber = (byte) msg.getData1();
-			Byte[] currentConf = { bankMsb, bankLsb, programNumber };
+			Byte[] currentConf = {bankMsb, bankLsb, programNumber};
 			
 			// add to history
 			instrumentHistory.get(channel).put(tick, currentConf);
@@ -495,19 +520,19 @@ public class SequenceAnalyzer {
 				byte currentLsb;
 				if (controller >= 0x64) {
 					rpnNrpnReset = 1;  // RPN
-					currentMsb = channelParamConfig.get(channel)[ 0 ];
-					currentLsb = channelParamConfig.get(channel)[ 1 ];
+					currentMsb = channelParamConfig.get(channel)[0];
+					currentLsb = channelParamConfig.get(channel)[1];
 				}
 				else {
 					rpnNrpnReset = 0;  // NRPN
-					currentMsb = channelParamConfig.get(channel)[ 2 ];
-					currentLsb = channelParamConfig.get(channel)[ 3 ];
+					currentMsb = channelParamConfig.get(channel)[2];
+					currentLsb = channelParamConfig.get(channel)[3];
 				}
 				if (((byte) 0x7F) == currentMsb && ((byte) 0x7F) == currentLsb) {
 					// reset
 					rpnNrpnReset = -1;
 				}
-				channelParamConfig.get(channel)[ 4 ] = rpnNrpnReset;
+				channelParamConfig.get(channel)[4] = rpnNrpnReset;
 				
 				// add history entry
 				Byte[] confAtTick = channelParamConfig.get(channel).clone();
@@ -515,16 +540,16 @@ public class SequenceAnalyzer {
 			}
 			
 			// Data Entry/Increment/Decrement
-			else if ( 0x06 == controller       // data entry MSB
-			       || 0x26 == controller       // data entry LSB
-			       || 0x60 == controller       // data button increment
-			       || 0x61 == controller ) {   // data button decrement
+			else if (0x06 == controller    // data entry MSB
+			      || 0x26 == controller    // data entry LSB
+			      || 0x60 == controller    // data button increment
+			      || 0x61 == controller) { // data button decrement
 				
 				// find out what parameter has to be changed
 				Byte[] paramMsbLsb = getChannelParamMsbLsbType(channel, tick);
-				byte msb  = paramMsbLsb[ 0 ];
-				byte lsb  = paramMsbLsb[ 1 ];
-				byte type = paramMsbLsb[ 2 ];
+				byte msb  = paramMsbLsb[0];
+				byte lsb  = paramMsbLsb[1];
+				byte type = paramMsbLsb[2];
 				
 				// change RPN
 				if (1 == type) {
@@ -638,7 +663,7 @@ public class SequenceAnalyzer {
 		else if (MidiListener.META_COPYRIGHT == type) {
 			String                  copyright = CharsetUtils.getTextFromBytes(content, chosenCharset, KaraokeAnalyzer.getFileCharset());
 			HashMap<String, String> metaInfo  = (HashMap<String, String>) sequenceInfo.get("meta_info");
-			metaInfo.put( "copyright", copyright );
+			metaInfo.put("copyright", copyright);
 		}
 		
 		// fetch tree and detailed message information
@@ -698,17 +723,17 @@ public class SequenceAnalyzer {
 	private static void addNoteOn(long tick, byte channel, byte note, byte velocity) throws ReflectiveOperationException {
 		
 		// note on/off tracking
-		TreeMap<Byte, TreeMap<Long, Boolean>> noteTickOnOff = noteOnOffByChannel.get( channel );
+		TreeMap<Byte, TreeMap<Long, Boolean>> noteTickOnOff = noteOnOffByChannel.get(channel);
 		if (null == noteTickOnOff) {
 			noteTickOnOff = new TreeMap<>();
-			noteOnOffByChannel.put( channel, noteTickOnOff );
+			noteOnOffByChannel.put(channel, noteTickOnOff);
 		}
-		TreeMap<Long, Boolean> pressedAtTick = noteTickOnOff.get( note );
+		TreeMap<Long, Boolean> pressedAtTick = noteTickOnOff.get(note);
 		if (null == pressedAtTick) {
 			pressedAtTick = new TreeMap<>();
-			noteTickOnOff.put( note, pressedAtTick );
+			noteTickOnOff.put(note, pressedAtTick);
 		}
-		boolean wasPressedBefore = pressedAtTick.containsKey( tick );
+		boolean wasPressedBefore = pressedAtTick.containsKey(tick);
 		if (wasPressedBefore)
 			// Key press and/or release conflict.
 			// There was a(nother) ON or OFF event for the same key in the
@@ -716,59 +741,59 @@ public class SequenceAnalyzer {
 			// synthesizer implementation what happens.
 			// Here we just assume that these events will be processed in
 			// the same order as we found them.
-			wasPressedBefore = pressedAtTick.get( tick );
+			wasPressedBefore = pressedAtTick.get(tick);
 		if (wasPressedBefore)
 			return;
-		pressedAtTick.put( tick, true );
+		pressedAtTick.put(tick, true);
 		
 		// get last channel activity
 		int lastChannelActivity = 0;
-		TreeMap<Long, Integer> activityAtTick = activityByChannel.get( channel );
+		TreeMap<Long, Integer> activityAtTick = activityByChannel.get(channel);
 		if (null == activityAtTick) {
 			activityAtTick = new TreeMap<>();
-			activityByChannel.put( channel, activityAtTick );
+			activityByChannel.put(channel, activityAtTick);
 		}
 		else {
-			Entry<Long, Integer> lastActivity = activityAtTick.floorEntry( tick );
+			Entry<Long, Integer> lastActivity = activityAtTick.floorEntry(tick);
 			if (lastActivity != null) {
 				lastChannelActivity = lastActivity.getValue();
 			}
 		}
-		activityAtTick.put( tick, lastChannelActivity + 1 );
+		activityAtTick.put(tick, lastChannelActivity + 1);
 		
 		// note history by channel
-		TreeMap<Long, TreeMap<Byte, Byte>> noteHistoryForChannel = noteHistory.get( channel );
-		TreeMap<Byte, Byte> noteHistoryAtTick = noteHistoryForChannel.get( tick );
+		TreeMap<Long, TreeMap<Byte, Byte>> noteHistoryForChannel = noteHistory.get(channel);
+		TreeMap<Byte, Byte> noteHistoryAtTick = noteHistoryForChannel.get(tick);
 		if (null == noteHistoryAtTick) {
 			noteHistoryAtTick = new TreeMap<>();
-			noteHistoryForChannel.put( tick, noteHistoryAtTick );
+			noteHistoryForChannel.put(tick, noteHistoryAtTick);
 		}
-		noteHistoryAtTick.put( note, velocity );
+		noteHistoryAtTick.put(note, velocity);
 		
 		// prepare marker event
-		markerTicks.add( tick );
+		markerTicks.add(tick);
 		
 		
 		// bank/instrument/note info for the tree
 		String channelTxt = Dict.get(Dict.CHANNEL) + " " + channel;
-		String channelID  = String.format( "%02X", channel );
+		String channelID  = String.format("%02X", channel);
 		Entry<Long, Byte[]> instrEntry = instrumentHistory.get(channel).floorEntry(tick);
 		Byte[] config     = instrEntry.getValue();
 		int    bankNum    = (config[0] << 7) | config[1]; // bankMSB * 2^7 + bankLSB
 		String bankSyntax = config[0] + ""; // MSB as a string
 		if (config[1] > 0) {  // MSB/LSB
-			bankSyntax    = bankSyntax + Dict.getSyntax( Dict.SYNTAX_PROG_BANK_SEP ) + config[ 1 ];
+			bankSyntax    = bankSyntax + Dict.getSyntax(Dict.SYNTAX_PROG_BANK_SEP) + config[1];
 		}
-		String bankTxt    = Dict.get(Dict.BANK)             + " "  + bankNum     + ", "
-		                  + Dict.get(Dict.TOOLTIP_BANK_MSB) + ": " + config[ 0 ] + ", "
-				          + Dict.get(Dict.TOOLTIP_BANK_LSB) + ": " + config[ 1 ];
-		String bankID     = String.format( "%02X%02X", config[0], config[1] );
-		String programStr = config[ 2 ] + "";
-		String programID  = String.format( "%02X", config[2] );
-		String instrTxt   = 9 == channel ? Dict.getDrumkit( config[2] ) : Dict.getInstrument( config[2] );
+		String bankTxt    = Dict.get(Dict.BANK)             + " "  + bankNum   + ", "
+		                  + Dict.get(Dict.TOOLTIP_BANK_MSB) + ": " + config[0] + ", "
+				          + Dict.get(Dict.TOOLTIP_BANK_LSB) + ": " + config[1];
+		String bankID     = String.format("%02X%02X", config[0], config[1]);
+		String programStr = config[2] + "";
+		String programID  = String.format("%02X", config[2]);
+		String instrTxt   = 9 == channel ? Dict.getDrumkit(config[2]) : Dict.getInstrument(config[2]);
 		String noteStr    = note + "";
-		String noteTxt    = 9 == channel ? Dict.getPercussionLongId( note ) : Dict.getNote( note );
-		String noteID     = String.format( "%02X", note );
+		String noteTxt    = 9 == channel ? Dict.getPercussionLongId(note) : Dict.getNote(note);
+		String noteID     = String.format("%02X", note);
 		if (9 == channel) {
 			noteID = "Z" + noteID; // give percussion notes have a different (higher) ID
 		}
@@ -807,18 +832,18 @@ public class SequenceAnalyzer {
 	private static void addNoteOff(long tick, byte channel, byte note) {
 		
 		// check if the released key has been pressed before
-		TreeMap<Byte, TreeMap<Long, Boolean>> noteTickOnOff = noteOnOffByChannel.get( channel );
+		TreeMap<Byte, TreeMap<Long, Boolean>> noteTickOnOff = noteOnOffByChannel.get(channel);
 		if (null == noteTickOnOff) {
 			noteTickOnOff = new TreeMap<>();
-			noteOnOffByChannel.put( channel, noteTickOnOff );
+			noteOnOffByChannel.put(channel, noteTickOnOff);
 		}
-		TreeMap<Long, Boolean> pressedAtTick = noteTickOnOff.get( note );
+		TreeMap<Long, Boolean> pressedAtTick = noteTickOnOff.get(note);
 		if (null == pressedAtTick) {
 			pressedAtTick = new TreeMap<>();
-			noteTickOnOff.put( note, pressedAtTick );
+			noteTickOnOff.put(note, pressedAtTick);
 		}
 		boolean wasPressedBefore = false;
-		Entry<Long, Boolean> wasPressed = pressedAtTick.floorEntry( tick );
+		Entry<Long, Boolean> wasPressed = pressedAtTick.floorEntry(tick);
 		if (null != wasPressed) {
 			wasPressedBefore = wasPressed.getValue();
 		}
@@ -827,15 +852,15 @@ public class SequenceAnalyzer {
 		}
 		
 		// mark as released
-		pressedAtTick.put( tick, false );
+		pressedAtTick.put(tick, false);
 		
 		// channel activity
-		TreeMap<Long, Integer> activityAtTick = activityByChannel.get( channel );
+		TreeMap<Long, Integer> activityAtTick = activityByChannel.get(channel);
 		if (null == activityAtTick) {
 			activityAtTick = new TreeMap<>();
-			activityByChannel.put( channel, activityAtTick );
+			activityByChannel.put(channel, activityAtTick);
 		}
-		Entry<Long, Integer> lastActivity = activityAtTick.floorEntry( tick );
+		Entry<Long, Integer> lastActivity = activityAtTick.floorEntry(tick);
 		if (null == lastActivity) {
 			// A key was released before it has been pressed for the very first time.
 			return;
@@ -847,10 +872,10 @@ public class SequenceAnalyzer {
 			// should never happen
 			return;
 		}
-		activityAtTick.put( tick, lastActivityCount - 1 );
+		activityAtTick.put(tick, lastActivityCount - 1);
 		
 		// prepare marker event
-		markerTicks.add( tick );
+		markerTicks.add(tick);
 	}
 	
 	/**
@@ -879,8 +904,8 @@ public class SequenceAnalyzer {
 		for (long tick : tempoBpm.keySet()) {
 			
 			// average
-			int  newBpm   = tempoBpm.get( tick );
-			int  newMpq   = tempoMpq.get( tick );
+			int  newBpm   = tempoBpm.get(tick);
+			int  newMpq   = tempoMpq.get(tick);
 			long tickDiff = tick - lastTick;
 			bpmProduct   += tickDiff * lastBpm;
 			mpqProduct   += tickDiff * lastMpq;
@@ -908,30 +933,26 @@ public class SequenceAnalyzer {
 				maxMpq = newMpq;
 			}
 		}
-		long tickLength = (Long) sequenceInfo.get( "ticks" );
+		long tickLength = (Long) sequenceInfo.get("ticks");
 		long tickDiff = tickLength - lastTick;
 		bpmProduct   += tickDiff * lastBpm;
 		mpqProduct   += tickDiff * lastMpq;
-		if (0 == minBpm ) {
+		if (0 == minBpm)
 			minBpm = lastBpm;
-		}
-		if (0 == maxBpm ) {
+		if (0 == maxBpm)
 			maxBpm = lastBpm;
-		}
-		if (0 == minMpq ) {
+		if (0 == minMpq)
 			minMpq = lastMpq;
-		}
-		if (0 == maxMpq ) {
+		if (0 == maxMpq)
 			maxMpq = lastMpq;
-		}
 		double avgBpm = (double) bpmProduct / tickLength;
 		double avgMpq = (double) mpqProduct / tickLength;
 		sequenceInfo.put( "tempo_bpm_avg", String.format("%.2f", avgBpm) );
-		sequenceInfo.put( "tempo_bpm_min", Integer.toString(minBpm) );
-		sequenceInfo.put( "tempo_bpm_max", Integer.toString(maxBpm) );
+		sequenceInfo.put( "tempo_bpm_min", Integer.toString(minBpm)      );
+		sequenceInfo.put( "tempo_bpm_max", Integer.toString(maxBpm)      );
 		sequenceInfo.put( "tempo_mpq_avg", String.format("%.1f", avgMpq) );
-		sequenceInfo.put( "tempo_mpq_min", Integer.toString(minMpq) );
-		sequenceInfo.put( "tempo_mpq_max", Integer.toString(maxMpq) );
+		sequenceInfo.put( "tempo_mpq_min", Integer.toString(minMpq)      );
+		sequenceInfo.put( "tempo_mpq_max", Integer.toString(maxMpq)      );
 		
 		// reset default channel config for unused channels (to avoid confusion in the player UI)
 		for (byte channel = 0; channel < 16; channel++) {
@@ -941,7 +962,7 @@ public class SequenceAnalyzer {
 			if (channelNoteHistory.isEmpty()) {
 				TreeMap<Long, Byte[]> channelInstrumentHistory = instrumentHistory.get(channel);
 				
-				Byte[] conf0 = { -1, -1, -1 };
+				Byte[] conf0 = {-1, -1, -1};
 				channelInstrumentHistory.put(-1L, conf0);
 			}
 		}
@@ -994,14 +1015,14 @@ public class SequenceAnalyzer {
 					activityChanged = true;
 					
 					// is at least one of the channel events a NOTE-ON?
-					TreeMap<Byte, TreeMap<Long, Boolean>>    noteTickOnOff    = noteOnOffByChannel.get( channel );
+					TreeMap<Byte, TreeMap<Long, Boolean>>    noteTickOnOff    = noteOnOffByChannel.get(channel);
 					Set<Entry<Byte, TreeMap<Long, Boolean>>> noteTickOnOffSet = noteTickOnOff.entrySet();
 					for (Entry<Byte, TreeMap<Long, Boolean>> noteTickOnOffEntry : noteTickOnOffSet) {
 						TreeMap<Long, Boolean> tickOnOff = noteTickOnOffEntry.getValue();
 						if (null == tickOnOff) {
 							continue;
 						}
-						Boolean onOff = tickOnOff.get( tick );
+						Boolean onOff = tickOnOff.get(tick);
 						if (null == onOff) {
 							continue;
 						}
@@ -1024,21 +1045,21 @@ public class SequenceAnalyzer {
 				
 				// add the channel to the marker
 				if (lyricsChanged || activityChanged || historyChanged || instrumentChanged) {
-					channelsAtTick.add( channel );
+					channelsAtTick.add(channel);
 					mustAddMarker = true;
 				}
 			}
 			
 			// add the marker
 			if (mustAddMarker) {
-				markers.put( tick, channelsAtTick );
+				markers.put(tick, channelsAtTick);
 			}
 		}
 		try {
-			SequenceCreator.addMarkers( markers );
+			SequenceCreator.addMarkers(markers);
 		}
 		catch (InvalidMidiDataException e) {
-			throw new ParseException( Dict.get(Dict.ERROR_ANALYZE_POSTPROCESS) + e.getMessage() );
+			throw new ParseException(Dict.get(Dict.ERROR_ANALYZE_POSTPROCESS) + e.getMessage());
 		}
 		
 		// postprocess the lyrics for karaoke
@@ -1055,14 +1076,14 @@ public class SequenceAnalyzer {
 	public static boolean getChannelActivity(byte channel, long tick) {
 		
 		// get ticks of this channel
-		TreeMap<Long, Integer> ticksInChannel = activityByChannel.get( channel );
+		TreeMap<Long, Integer> ticksInChannel = activityByChannel.get(channel);
 		if (null == ticksInChannel) {
 			// channel not used at all
 			return false;
 		}
 		
 		// get the last activity
-		Entry<Long, Integer> activityState = ticksInChannel.floorEntry( tick );
+		Entry<Long, Integer> activityState = ticksInChannel.floorEntry(tick);
 		if (null == activityState) {
 			// nothing happened in the channel so far
 			return false;
@@ -1098,7 +1119,7 @@ public class SequenceAnalyzer {
 		if (null == noteHistory) {
 			return result;
 		}
-		TreeMap<Long, TreeMap<Byte, Byte>> channelHistory = noteHistory.get( channel );
+		TreeMap<Long, TreeMap<Byte, Byte>> channelHistory = noteHistory.get(channel);
 		
 		// get past notes
 		long lastTick = tick;
@@ -1107,7 +1128,7 @@ public class SequenceAnalyzer {
 		while (i < NOTE_HISTORY_BUFFER_SIZE_PAST) {
 			
 			// get all notes from the last tick
-			Entry<Long, TreeMap<Byte, Byte>> notesAtTickEntry = channelHistory.floorEntry( lastTick );
+			Entry<Long, TreeMap<Byte, Byte>> notesAtTickEntry = channelHistory.floorEntry(lastTick);
 			if (null == notesAtTickEntry) {
 				break PAST;
 			}
@@ -1126,7 +1147,7 @@ public class SequenceAnalyzer {
 					lastTick,        // tick
 					0L,              // 0 = past; 1 = future
 				};
-				result.add( row );
+				result.add(row);
 				
 				i++;
 				if (i >= NOTE_HISTORY_BUFFER_SIZE_PAST) {
@@ -1139,7 +1160,7 @@ public class SequenceAnalyzer {
 		}
 		
 		// reverse the order of the past notes
-		Collections.reverse( result );
+		Collections.reverse(result);
 		
 		// get future notes
 		long nextTick = tick + 1;
@@ -1148,7 +1169,7 @@ public class SequenceAnalyzer {
 		while (i < NOTE_HISTORY_BUFFER_SIZE_FUTURE) {
 			
 			// get all notes from the next tick
-			Entry<Long, TreeMap<Byte, Byte>> notesAtTickEntry = channelHistory.ceilingEntry( nextTick );
+			Entry<Long, TreeMap<Byte, Byte>> notesAtTickEntry = channelHistory.ceilingEntry(nextTick);
 			if (null == notesAtTickEntry) {
 				break FUTURE;
 			}
@@ -1167,7 +1188,7 @@ public class SequenceAnalyzer {
 					nextTick,        // tick
 					1L,              // 0 = past; 1 = future
 				};
-				result.add( row );
+				result.add(row);
 				
 				i++;
 				if (i >= NOTE_HISTORY_BUFFER_SIZE_FUTURE) {
@@ -1208,7 +1229,7 @@ public class SequenceAnalyzer {
 	 * @return         channel comment
 	 */
 	public static String getChannelComment(byte channel, long tick) {
-		Entry<Long, String> entry = commentHistory.get( channel ).floorEntry( tick );
+		Entry<Long, String> entry = commentHistory.get(channel).floorEntry(tick);
 		
 		if (null == entry) {
 			return "";
@@ -1240,23 +1261,23 @@ public class SequenceAnalyzer {
 		Byte[] confAtTick = entry.getValue();
 		
 		// get current type (0=RPN, 1=NRPN or -1=none)
-		byte type = confAtTick[ 4 ];
+		byte type = confAtTick[4];
 		byte msb  = 127; // none
 		byte lsb  = 127; // none
 		// get MSB and LSB
 		if (1 == type) {
 			// RPN
-			msb = confAtTick[ 0 ];
-			lsb = confAtTick[ 1 ];
+			msb = confAtTick[0];
+			lsb = confAtTick[1];
 		}
 		else if (0 == type) {
 			// NRPN
-			msb = confAtTick[ 2 ];
-			lsb = confAtTick[ 3 ];
+			msb = confAtTick[2];
+			lsb = confAtTick[3];
 		}
 		
 		// return the result
-		Byte[] result = { msb, lsb, type };
+		Byte[] result = {msb, lsb, type};
 		return result;
 	}
 	
@@ -1284,7 +1305,7 @@ public class SequenceAnalyzer {
 	 */
 	public static void retrieveSoftwareVersion(String text) {
 		
-		HashMap<String, String> metaInfo = (HashMap<String, String>) sequenceInfo.get( "meta_info" );
+		HashMap<String, String> metaInfo = (HashMap<String, String>) sequenceInfo.get("meta_info");
 		metaInfo.put("software", text);
 		
 		// minor version?
@@ -1293,7 +1314,7 @@ public class SequenceAnalyzer {
 		if (matcherMV.matches()) {
 			int  minor     = Integer.parseInt(matcherMV.group(1));
 			Date timestamp = new Date(minor * 1000L);
-			SimpleDateFormat formatter    = new SimpleDateFormat( Dict.get(Dict.TIMESTAMP_FORMAT) );
+			SimpleDateFormat formatter    = new SimpleDateFormat(Dict.get(Dict.TIMESTAMP_FORMAT));
 			String           softwareDate = formatter.format(timestamp);
 			metaInfo.put("software_date", softwareDate);
 		}

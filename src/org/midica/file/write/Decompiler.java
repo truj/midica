@@ -277,11 +277,10 @@ public abstract class Decompiler extends Exporter {
 			BufferedWriter writer = new BufferedWriter(osw);
 			
 			// get pre-parsed data structures
-			HashMap<String, Object> histories = SequenceAnalyzer.getHistories();
-			instrumentHistory = (TreeMap<Byte, TreeMap<Long, Byte[]>>)                 histories.get( "instrument_history" );
-			commentHistory    = (TreeMap<Byte, TreeMap<Long, String>>)                 histories.get( "comment_history" );
-			noteHistory       = (TreeMap<Byte, TreeMap<Long, TreeMap<Byte, Byte>>>)    histories.get( "note_history" );
-			noteOnOff         = (TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>>) histories.get( "note_on_off" );
+			instrumentHistory = SequenceAnalyzer.getInstrumentHistory();
+			commentHistory    = SequenceAnalyzer.getCommentHistory();
+			noteHistory       = SequenceAnalyzer.getNoteHistory();
+			noteOnOff         = SequenceAnalyzer.getOnOffHistory();
 			lyricsSyllables   = KaraokeAnalyzer.getLyricsFlat();
 			
 			// init data structures
