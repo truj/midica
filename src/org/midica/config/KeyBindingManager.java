@@ -41,9 +41,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.midica.ui.ErrorMsgView;
-import org.midica.ui.tablefilter.FilterIcon;
-import org.midica.ui.tablefilter.FilterIconWithLabel;
 import org.midica.ui.widget.DecompileConfigIcon;
+import org.midica.ui.widget.IOpenIcon;
 import org.midica.ui.widget.MidicaButton;
 import org.midica.ui.widget.MidicaTable;
 import org.midica.ui.widget.MidicaTree;
@@ -331,7 +330,7 @@ public class KeyBindingManager {
 	 * Adds a key binding for a list of icon labels to be pressed when possible.
 	 * All buttons use the same key binding ID but at most one of them is visible.
 	 * 
-	 * This is used for decompilation config icons in the decompilation file chooser.
+	 * This is used for decompile config icons in the export file chooser.
 	 * Each target format has its own tab with its own icon.
 	 * The icon is only visible if the according tab is chosen.
 	 * 
@@ -345,8 +344,10 @@ public class KeyBindingManager {
 		
 		// tooltips
 		for (JComponent c : icons) {
-			if (c instanceof DecompileConfigIcon)
+			if (c instanceof IOpenIcon) {
+				((IOpenIcon) c).rememberKeyBindingId(id, Dict.TT_KEY_DC_CONFIG_OPEN);
 				addTooltip(c, id, Dict.TT_KEY_DC_CONFIG_OPEN);
+			}
 		}
 		
 		// fill action map
@@ -361,8 +362,8 @@ public class KeyBindingManager {
 					return;
 				
 				for (JComponent c : icons) {
-					if (c instanceof DecompileConfigIcon) {
-						DecompileConfigIcon icon = (DecompileConfigIcon) c;
+					if (c instanceof IOpenIcon) {
+						IOpenIcon icon = (IOpenIcon) c;
 						if (icon.isShowing()) {
 							icon.open();
 							return;
@@ -483,9 +484,11 @@ public class KeyBindingManager {
 	 * 
 	 * The given icon can be an element of one of the following classes:
 	 * 
-	 * - {@link FilterIconWithLabel} - opens a table string filter
-	 * - {@link FilterIcon} - opens a table string filter
-	 * - {@link DecompileConfigIcon} - opens the decompile configuration window
+	 * - FilterIconWithLabel - opens a table string filter
+	 * - FilterIcon - opens a table string filter
+	 * - DecompileConfigIcon - opens the decompile configuration window
+	 * 
+	 * Currently only used for FilterIconWithLabel, from the soundcheck window.
 	 * 
 	 * @param icon  the icon belonging
 	 * @param id    the key binding ID
@@ -496,17 +499,10 @@ public class KeyBindingManager {
 		addInputs(id);
 		
 		// tooltips
-		if (icon instanceof FilterIconWithLabel) {
-			((FilterIconWithLabel) icon).rememberKeyBindingId(id, Dict.TT_KEY_FILTER_OPEN);
-			addTooltip(icon, id, Dict.TT_KEY_FILTER_OPEN);
-		}
-		else if (icon instanceof FilterIcon) {
-			((FilterIcon) icon).rememberKeyBindingId(id, Dict.TT_KEY_FILTER_OPEN);
-			addTooltip(icon, id, Dict.TT_KEY_FILTER_OPEN);
-		}
-		else if (icon instanceof DecompileConfigIcon) {
-			((DecompileConfigIcon) icon).rememberKeyBindingId(id, Dict.TT_KEY_DC_CONFIG_OPEN);
-			addTooltip(icon, id, Dict.TT_KEY_DC_CONFIG_OPEN);
+		String ttKey = icon instanceof DecompileConfigIcon ? Dict.TT_KEY_DC_CONFIG_OPEN : Dict.TT_KEY_FILTER_OPEN;
+		if (icon instanceof IOpenIcon) {
+			((IOpenIcon) icon).rememberKeyBindingId(id, ttKey);
+			addTooltip(icon, id, ttKey);
 		}
 		
 		// fill action map
@@ -520,12 +516,8 @@ public class KeyBindingManager {
 					return;
 				
 				// get the focus
-				if (icon instanceof FilterIconWithLabel)
-					((FilterIconWithLabel) icon).open();
-				else if (icon instanceof FilterIcon)
-					((FilterIcon) icon).open();
-				else if (icon instanceof DecompileConfigIcon)
-					((DecompileConfigIcon) icon).open();
+				if (icon instanceof IOpenIcon)
+					((IOpenIcon) icon).open();
 			}
 		});
 	}
@@ -651,7 +643,7 @@ public class KeyBindingManager {
 	 * The same key binding can also be used for selecting a level-1 or level-2 tab.
 	 * In this case, the level-3 element has always priority if it's currently visible.
 	 * 
-	 * This is used for the Info View.
+	 * This is used for the Info View and other tab-based windows.
 	 * 
 	 * @param c   the component to be controlled by the key binding
 	 * @param id  the key binding ID
@@ -661,13 +653,10 @@ public class KeyBindingManager {
 		lvl3Components.put(id, c);
 		
 		// add tooltip
-		if (c instanceof FilterIconWithLabel) {
-			((FilterIconWithLabel) c).rememberKeyBindingId(id, Dict.TT_KEY_FILTER_OPEN);
-			addTooltip(c, id, Dict.TT_KEY_FILTER_OPEN);
-		}
-		else if (c instanceof FilterIcon) {
-			((FilterIcon) c).rememberKeyBindingId(id, Dict.TT_KEY_FILTER_OPEN);
-			addTooltip(c, id, Dict.TT_KEY_FILTER_OPEN);
+		if (c instanceof IOpenIcon) {
+			String ttKey = c instanceof DecompileConfigIcon ? Dict.TT_KEY_DC_CONFIG_OPEN : Dict.TT_KEY_FILTER_OPEN;
+			((IOpenIcon) c).rememberKeyBindingId(id, ttKey);
+			addTooltip(c, id, ttKey);
 		}
 		else if (c instanceof MidicaButton)
 			addTooltip(c, id, Dict.TT_KEY_BUTTON_PRESS);
@@ -1209,10 +1198,8 @@ public class KeyBindingManager {
 								if (comp != null && comp.isShowing()) {
 									
 									// add element-specific key binding
-									if (comp instanceof FilterIconWithLabel)
-										((FilterIconWithLabel) comp).open();
-									else if (comp instanceof FilterIcon)
-										((FilterIcon) comp).open();
+									if (comp instanceof IOpenIcon)
+										((IOpenIcon) comp).open();
 									else if (comp instanceof MidicaButton)
 										((MidicaButton) comp).doClick();
 									else if (comp instanceof MidicaTree)
@@ -1246,7 +1233,6 @@ public class KeyBindingManager {
 											return;
 										}
 									}
-									
 									
 									return;
 								}

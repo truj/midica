@@ -15,6 +15,7 @@ import javax.swing.JPanel;
 import javax.swing.event.RowSorterListener;
 
 import org.midica.config.Laf;
+import org.midica.ui.widget.IOpenIcon;
 import org.midica.ui.widget.MidicaTable;
 
 /**
@@ -22,7 +23,7 @@ import org.midica.ui.widget.MidicaTable;
  * 
  * @author Jan Trukenmüller
  */
-public class FilterIconWithLabel extends JPanel {
+public class FilterIconWithLabel extends JPanel implements IOpenIcon {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -126,6 +127,7 @@ public class FilterIconWithLabel extends JPanel {
 	 * @param keyBindingId  the key binding id
 	 * @param ttType        the key binding type id
 	 */
+	@Override
 	public void rememberKeyBindingId(String keyBindingId, String ttType) {
 		filterIcon.rememberKeyBindingId(keyBindingId, ttType);
 	}
@@ -149,6 +151,7 @@ public class FilterIconWithLabel extends JPanel {
 	/**
 	 * Opens the associated string filter layer.
 	 */
+	@Override
 	public void open() {
 		filterIcon.open();
 	}

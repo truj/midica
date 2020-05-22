@@ -27,7 +27,7 @@ import org.midica.ui.file.DecompileConfigView;
  * 
  * @author Jan Trukenmüller
  */
-public class DecompileConfigIcon extends JLabel {
+public class DecompileConfigIcon extends JLabel implements IOpenIcon {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -115,14 +115,7 @@ public class DecompileConfigIcon extends JLabel {
 		}
 	}
 	
-	/**
-	 * Stores key binding related IDs.
-	 * These IDs are needed to be able to restore the key binding specific part of
-	 * the tool tip after the basic tool tip has been changed due to decompile config changes.
-	 * 
-	 * @param keyBindingId  the key binding id
-	 * @param ttType        the key binding type id
-	 */
+	@Override
 	public void rememberKeyBindingId(String keyBindingId, String ttType) {
 		this.keyBindingId     = keyBindingId;
 		this.keyBindingTypeId = ttType;
@@ -132,6 +125,7 @@ public class DecompileConfigIcon extends JLabel {
 	 * Opens the decompile config window.
 	 * Called when activated by key binding.
 	 */
+	@Override
 	public void open() {
 		decompileConfigView = new DecompileConfigView(this, winOwner);
 		decompileConfigView.open();
