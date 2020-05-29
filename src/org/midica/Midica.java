@@ -33,7 +33,7 @@ public class Midica {
 	public static final int VERSION_MINOR = 1;
 	
 	/** UNIX timestamp of the last commit */
-	public static final int COMMIT_TIME = 1590168054;
+	public static final int COMMIT_TIME = 1590729348;
 	
 	/** Branch name. Automatically changed by precommit.pl */
 	public static final String BRANCH = "decompile-optimization";

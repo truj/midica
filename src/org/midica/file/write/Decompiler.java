@@ -1117,7 +1117,7 @@ public abstract class Decompiler extends Exporter {
 		while (true) {
 			Long restTicks = structure.floorKey(ticksLeft);
 			
-			// continuing makes no sence?
+			// continuing makes no sense?
 			if (null == restTicks || 0 == ticksLeft || restTicks <= 0)
 				break;
 			
@@ -1254,9 +1254,9 @@ public abstract class Decompiler extends Exporter {
 		
 		// sum up
 		while (true) {
-			Long length = noteLength.ceilingKey(ticks); // next highest length
+			Long length = noteLength.ceilingKey(ticksLeft); // next highest length
 			if (null == length)
-				length = noteLength.floorKey(ticks); // highest possible element
+				length = noteLength.lastKey(); // highest possible element
 			
 			totalLength += length;
 			ticksLeft   -= length;
