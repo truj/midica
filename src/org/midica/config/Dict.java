@@ -485,6 +485,7 @@ public class Dict {
 	public static final String KEYCAT_MSG                   = "key_msg";
 	public static final String KEYCAT_FILE_SELECT           = "key_file_select";
 	public static final String KEYCAT_DC_CONF               = "key_dc_conf";
+	public static final String KEYCAT_EXPORT_RESULT         = "key_export_result";
 	public static final String KEYCAT_STRING_FILTER         = "key_string_filter";
 	
 	// key binding IDs
@@ -728,6 +729,14 @@ public class Dict {
 	public static final String KEY_DC_RESTORE_SAVED         = "key_dc_restore_saved";
 	public static final String KEY_DC_RESTORE_DEFAULT       = "key_dc_restore_default";
 	public static final String KEY_DC_SAVE                  = "key_dc_save";
+	public static final String KEY_EXPORT_RESULT_CLOSE      = "key_export_result_close";
+	public static final String KEY_EXPORT_RESULT_SHORT      = "key_export_result_short";
+	public static final String KEY_EXPORT_RESULT_META       = "key_export_result_meta";
+	public static final String KEY_EXPORT_RESULT_SYSEX      = "key_export_result_sysex";
+	public static final String KEY_EXPORT_RESULT_SKIPPED_RESTS = "key_export_result_skipped_rests";
+	public static final String KEY_EXPORT_RESULT_OFF_NOT_FOUND = "key_export_result_off_not_found";
+	public static final String KEY_EXPORT_RESULT_OTHER      = "key_export_result_other";
+	public static final String KEY_EXPORT_RESULT_FILTER     = "key_export_result_filter";
 	
 	// UiView
 	public static final String TITLE_MAIN_WINDOW           = "title_main";
@@ -1627,8 +1636,14 @@ public class Dict {
 	public static final String WARNING_COL_TRACK                = "warning_col_track";
 	public static final String WARNING_COL_TICK                 = "warning_col_tick";
 	public static final String WARNING_COL_CHANNEL              = "warning_col_channel";
-	public static final String WARNING_COL_NOTE                 = "warning_col_note";
 	public static final String WARNING_COL_MESSAGE              = "warning_col_message";
+	public static final String WARNING_COL_DETAILS              = "warning_col_details";
+	public static final String SHOW_IGN_SHORT_MSG               = "show_ign_short_msg";
+	public static final String SHOW_IGN_META_MSG                = "show_ign_meta_msg";
+	public static final String SHOW_IGN_SYSEX_MSG               = "show_ign_sysex_msg";
+	public static final String SHOW_SKIPPED_RESTS               = "show_skipped_rests";
+	public static final String SHOW_OFF_NOT_FOUND               = "show_off_not_found";
+	public static final String SHOW_OTHER_WARNINGS              = "show_other_warnings";
 	
 	// ExportException
 	public static final String ERROR_TICK                       = "error_tick";
@@ -1638,6 +1653,11 @@ public class Dict {
 	// MidicaPLExporter
 	public static final String WARNING_SAME_NOTE_IN_SAME_TICK   = "warning_same_note_in_same_tick";
 	public static final String WARNING_IGNORED_SHORT_MESSAGE    = "warning_ignored_short_message";
+	public static final String WARNING_IGNORED_META_MESSAGE     = "warning_ignored_meta_message";
+	public static final String WARNING_IGNORED_SYSEX_MESSAGE    = "warning_ignored_sysex_message";
+	public static final String WARNING_REST_SKIPPED             = "warning_rest_skipped";
+	public static final String WARNING_REST_SKIPPED_TICKS       = "warning_rest_skipped_ticks";
+	public static final String WARNING_OFF_NOT_FOUND            = "warning_off_not_found";
 	
 	// MidiDevices
 	public static final String DEFAULT_CHANNEL_COMMENT          = "default_channel_comment";
@@ -1769,6 +1789,7 @@ public class Dict {
 		keyBindingCategories.add(KEYCAT_MSG);
 		keyBindingCategories.add(KEYCAT_FILE_SELECT);
 		keyBindingCategories.add(KEYCAT_DC_CONF);
+		keyBindingCategories.add(KEYCAT_EXPORT_RESULT);
 		keyBindingCategories.add(KEYCAT_STRING_FILTER);
 	}
 	
@@ -1850,6 +1871,7 @@ public class Dict {
 		set( KEYCAT_MSG,                   "Message Window"                                                              );
 		set( KEYCAT_FILE_SELECT,           "File Selector"                                                               );
 		set( KEYCAT_DC_CONF,               "Decompile Config Window"                                                     );
+		set( KEYCAT_EXPORT_RESULT,         "Export Result Window"                                                        );
 		set( KEYCAT_STRING_FILTER,         "Table Filter"                                                                );
 		
 		// key binding IDs
@@ -2093,6 +2115,14 @@ public class Dict {
 		set( KEY_DC_RESTORE_SAVED,         "Press the button to restore saved decompile config"                          );
 		set( KEY_DC_RESTORE_DEFAULT,       "Press the button to restore default decompile config"                        );
 		set( KEY_DC_SAVE,                  "Press the button to save the decompile config"                               );
+		set( KEY_EXPORT_RESULT_CLOSE,      "Close the Export Result Window"                                              );
+		set( KEY_EXPORT_RESULT_SHORT,      "Toggle Checkbox: Show Ignored Short Message"                                 );
+		set( KEY_EXPORT_RESULT_META,       "Toggle Checkbox: Show Ignored Meta Message"                                  );
+		set( KEY_EXPORT_RESULT_SYSEX,      "Toggle Checkbox: Show Ignored SysEx Message"                                 );
+		set( KEY_EXPORT_RESULT_SKIPPED_RESTS, "Toggle Checkbox: Show Skipped Rests"                                      );
+		set( KEY_EXPORT_RESULT_OFF_NOT_FOUND, "Toggle Checkbox: Show Note-OFF not found"                                 );
+		set( KEY_EXPORT_RESULT_OTHER,      "Toggle Checkbox: Show other warnings"                                        );
+		set( KEY_EXPORT_RESULT_FILTER,     "Open the Table Filter"                                                       );
 		
 		// UiView
 		set( CONFIGURATION,                "Configuration"                 );
@@ -3123,8 +3153,14 @@ public class Dict {
 		set( WARNING_COL_TRACK,                   "Track"                                                             );
 		set( WARNING_COL_TICK,                    "Tick"                                                              );
 		set( WARNING_COL_CHANNEL,                 "Channel"                                                           );
-		set( WARNING_COL_NOTE,                    "Note"                                                              );
 		set( WARNING_COL_MESSAGE,                 "Warning"                                                           );
+		set( WARNING_COL_DETAILS,                 "Details"                                                           );
+		set( SHOW_IGN_SHORT_MSG,                  "Show Ignored Short Messages"                                       );
+		set( SHOW_IGN_META_MSG,                   "Show Ignored Meta Messages"                                        );
+		set( SHOW_IGN_SYSEX_MSG,                  "Show Ignored SysEx Messages"                                       );
+		set( SHOW_SKIPPED_RESTS,                  "Show Skipped Rests"                                                );
+		set( SHOW_OFF_NOT_FOUND,                  "Show Note-OFF not found"                                           );
+		set( SHOW_OTHER_WARNINGS,                 "Show other warnings"                                               );
 		
 		// ExportException
 		set( ERROR_TICK,                          "Tick"                                                              );
@@ -3134,7 +3170,12 @@ public class Dict {
 		// MidicaPLExporter
 		set( WARNING_SAME_NOTE_IN_SAME_TICK,      "The same note has been addressed more than once"
 		                                        + " at the same time and channel (current/old velocity: %s/%s)"       );
-		set( WARNING_IGNORED_SHORT_MESSAGE,       "Ignored ShortMessage - command: %s, data1: %s, data2: %s"          );
+		set( WARNING_IGNORED_SHORT_MESSAGE,       "Ignored Short Message"                                             );
+		set( WARNING_IGNORED_META_MESSAGE,        "Ignored Meta Message"                                              );
+		set( WARNING_IGNORED_SYSEX_MESSAGE,       "Ignored SysEx Message"                                             );
+		set( WARNING_REST_SKIPPED,                "Rest skipped (too small)"                                          );
+		set( WARNING_REST_SKIPPED_TICKS,          "ticks"                                                             );
+		set( WARNING_OFF_NOT_FOUND,               "Note-Off not found"                                                );
 		
 		// MidiDevices
 		set( PERCUSSION_CHANNEL,                  "Percussion Channel"         );
@@ -3146,9 +3187,8 @@ public class Dict {
 		set( ERROR_SOUNDFONT_LOADING_FAILED,      "Soundfont failed to load"   );
 		
 		// SequenceNotSetException
-		set( ERROR_SEQUENCE_NOT_SET,              "<html>A Sequence is not yet set<br>"
-		                                        + "You have to open either a MIDI file (.mid)<br>"
-		                                        + "or a score file (.midica) from the import area<br>"
+		set( ERROR_SEQUENCE_NOT_SET,              "<html>A MIDI Sequence is not yet loaded.<br>"
+		                                        + "You have to import a file (no matter which format)<br>"
 		                                        + "before you can use the player or export a file." );
 		
 		// ErrorMessage

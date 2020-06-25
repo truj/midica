@@ -79,6 +79,9 @@ public class SequenceAnalyzer {
 	/**                    tick */
 	private static TreeSet<Long> markerTicks = null;
 	
+	/** translates a MIDI message to the derived SingleMessage */
+	private static HashMap<MidiMessage, SingleMessage> midiMsgToSingleMsg = null;
+	
 	/**
 	 * History of the instrument configuration for each channel.
 	 * 
@@ -187,6 +190,33 @@ public class SequenceAnalyzer {
 	}
 	
 	/**
+	 * Returns a list of all MIDI messages.
+	 * 
+	 * @return MIDI messages
+	 */
+	public static ArrayList<SingleMessage> getMessages() {
+		return messages;
+	}
+	
+	/**
+	 * Searches for the single message in the message list that has been derived by the given MIDI message.
+	 * Returns the message from the list, if found.
+	 * 
+	 * Used by the decompiler to create warnings due to ignored messages.
+	 * 
+	 * @param msg    MIDI message
+	 * @return the retrieved message, or **null** if no message could be retrieved.
+	 */
+	public static SingleMessage getSingleMsgByMidiMsg(MidiMessage msg) {
+		
+		SingleMessage singleMsg = midiMsgToSingleMsg.get(msg);
+		if (singleMsg != null)
+			return singleMsg;
+		
+		return null;
+	}
+	
+	/**
 	 * Returns the information that have been collected while
 	 * analyzing the MIDI sequence.
 	 * 
@@ -285,10 +315,9 @@ public class SequenceAnalyzer {
 		banksAndInstrPerChannel = new MidicaTreeModel(Dict.get(Dict.PER_CHANNEL));
 		msgTreeModel            = new MidicaTreeModel(Dict.get(Dict.TAB_MESSAGES), MessageTreeNode.class);
 		messages                = new ArrayList<>();
-		sequenceInfo.put( "banks_total",         banksAndInstrTotal      );
-		sequenceInfo.put( "banks_per_channel",   banksAndInstrPerChannel );
-		sequenceInfo.put( "msg_tree_model",      msgTreeModel            );
-		sequenceInfo.put( "messages",            messages                );
+		sequenceInfo.put( "banks_total",      banksAndInstrTotal      );
+		sequenceInfo.put( "banks_per_channel",banksAndInstrPerChannel );
+		sequenceInfo.put( "msg_tree_model",   msgTreeModel            );
 		long   microseconds = sequence.getMicrosecondLength();
 		String time         = MidiDevices.microsecondsToTimeString(microseconds);
 		sequenceInfo.put("time_length", time);
@@ -321,6 +350,7 @@ public class SequenceAnalyzer {
 		noteOnOffByChannel = new TreeMap<>();
 		markerTicks        = new TreeSet<>();
 		markers            = new TreeMap<>();
+		midiMsgToSingleMsg = new HashMap<>();
 		
 		// init data structures for the note history
 		noteHistory = new TreeMap<>();
@@ -388,18 +418,20 @@ public class SequenceAnalyzer {
 					processMetaMessage((MetaMessage) msg, tick, trackNum, msgNum);
 				}
 				else if (msg instanceof ShortMessage) {
-					MessageClassifier.processShortMessage(
+					SingleMessage singleMsg = MessageClassifier.processShortMessage(
 						(ShortMessage) msg, tick, trackNum, msgNum,
 						messages,     // add details and leaf node to messages
 						msgTreeModel  // add leaf node
 					);
+					midiMsgToSingleMsg.put(msg, singleMsg);
 				}
 				else if (msg instanceof SysexMessage) {
-					MessageClassifier.processSysexMessage(
+					SingleMessage singleMsg = MessageClassifier.processSysexMessage(
 						(SysexMessage) msg, tick, trackNum, msgNum,
 						messages,     // add details and leaf node to messages
 						msgTreeModel  // add leaf node
 					);
+					midiMsgToSingleMsg.put(msg, singleMsg);
 				}
 				else {
 				}
@@ -667,13 +699,14 @@ public class SequenceAnalyzer {
 		}
 		
 		// fetch tree and detailed message information
-		MessageClassifier.processMetaMessage(
+		SingleMessage singleMsg = MessageClassifier.processMetaMessage(
 			(MetaMessage) msg, tick, trackNum, msgNum,
 			messages,                        // add details and leaf node to messages
 			msgTreeModel,                    // add leaf node
 			chosenCharset,                   // charset from the file chooser
 			KaraokeAnalyzer.getFileCharset() // charset from last charset switch in a meta message
 		);
+		midiMsgToSingleMsg.put(msg, singleMsg);
 	}
 	
 	/**

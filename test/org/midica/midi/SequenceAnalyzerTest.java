@@ -745,7 +745,7 @@ public class SequenceAnalyzerTest {
 		MidicaTreeModel model = (MidicaTreeModel) SequenceAnalyzer.getSequenceInfo().get("msg_tree_model");
 		model.postprocess();
 		
-		return (ArrayList<SingleMessage>) SequenceAnalyzer.getSequenceInfo().get("messages");
+		return (ArrayList<SingleMessage>) SequenceAnalyzer.getMessages();
 	}
 	
 	/**

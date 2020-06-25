@@ -12,18 +12,20 @@ import java.util.HashMap;
 
 import org.midica.config.Dict;
 import org.midica.ui.file.ExportResult;
+import org.midica.ui.tablesorter.OptionalNumber;
 
 /**
  * This class represents the data model of export result tables.
  * 
- * When exporting a MIDI stream to a MidicaPL file, this table shows all warnings.
+ * When decompiling a MIDI sequence, this table shows all warnings.
  * 
  * Each warning (row) consists of the following fields (columns):
  * 
+ * - track number (or '?', if unknown)
  * - tickstamp where the warning occurred
- * - channel
- * - note number
+ * - channel (or '-', if unknown)
  * - warning text
+ * - details
  * 
  * @author Jan Trukenmüller
  */
@@ -39,27 +41,26 @@ public class ExportResultTableModel extends MidicaTableModel {
 	 * 
 	 * @param result
 	 */
-	public ExportResultTableModel( ExportResult result ) {
+	public ExportResultTableModel(ExportResult result) {
 		
 		this.warnings = result.getWarnings();
 		
 		// table header
-		columnNames = new String[ 5 ];
-		columnNames[ 0 ] = Dict.get( Dict.WARNING_COL_TRACK   );
-		columnNames[ 1 ] = Dict.get( Dict.WARNING_COL_TICK    );
-		columnNames[ 2 ] = Dict.get( Dict.WARNING_COL_CHANNEL );
-		columnNames[ 3 ] = Dict.get( Dict.WARNING_COL_NOTE    );
-		columnNames[ 4 ] = Dict.get( Dict.WARNING_COL_MESSAGE );
+		columnNames = new String[5];
+		columnNames[0] = Dict.get(Dict.WARNING_COL_TRACK);
+		columnNames[1] = Dict.get(Dict.WARNING_COL_TICK);
+		columnNames[2] = Dict.get(Dict.WARNING_COL_CHANNEL);
+		columnNames[3] = Dict.get(Dict.WARNING_COL_MESSAGE);
+		columnNames[4] = Dict.get(Dict.WARNING_COL_DETAILS);
 		
 		// column classes, used for sorting
-		columnClasses = new Class[ 5 ];
-		columnClasses[ 0 ] = Integer.class;
-		columnClasses[ 1 ] = Long.class;
-		columnClasses[ 2 ] = Byte.class;
-		columnClasses[ 3 ] = String.class;
-		columnClasses[ 4 ] = String.class;
+		columnClasses = new Class[5];
+		columnClasses[0] = OptionalNumber.class;
+		columnClasses[1] = Long.class;
+		columnClasses[2] = OptionalNumber.class;
+		columnClasses[3] = String.class;
+		columnClasses[4] = String.class;
 	}
-	
 	
 	/**
 	 * Returns the number of rows in the table - same as the number of warnings.
@@ -69,7 +70,7 @@ public class ExportResultTableModel extends MidicaTableModel {
 	@Override
 	public int getRowCount() {
 		
-		if ( null == warnings )
+		if (null == warnings)
 			return 0;
 		
 		return warnings.size();
@@ -87,7 +88,12 @@ public class ExportResultTableModel extends MidicaTableModel {
 		
 		// track
 		if (0 == colIndex) {
-			return warnings.get(rowIndex).get("track");
+			Object trackObj = warnings.get(rowIndex).get("track");
+			if (null == trackObj) {
+				trackObj = "?";
+			}
+			trackObj = new OptionalNumber(trackObj);
+			return trackObj;
 		}
 		
 		// tick
@@ -97,31 +103,23 @@ public class ExportResultTableModel extends MidicaTableModel {
 		
 		// channel
 		else if (2 == colIndex) {
-			Integer channel = (Integer) warnings.get(rowIndex).get("channel");
-			if (-1 == channel) {
-				return "-";
+			Object channelObj = warnings.get(rowIndex).get("channel");
+			if (null == channelObj) {
+				channelObj = "-";
 			}
-			return channel;
-		}
-		
-		// note
-		else if (3 == colIndex) {
-			Integer noteNum = (Integer) warnings.get(rowIndex).get("note");
-			if (-1 == noteNum) {
-				return "-";
-			}
-			Integer channel = (Integer) warnings.get(rowIndex).get("channel");
-			String noteName;
-			if (9 == channel)
-				noteName = Dict.getPercussionLongId(noteNum);
-			else
-				noteName = Dict.getNote(noteNum);
-			return noteNum + ": " + noteName;
+			channelObj = new OptionalNumber(channelObj);
+			return channelObj;
 		}
 		
 		// message
-		else if (4 == colIndex) {
+		else if (3 == colIndex) {
 			return warnings.get(rowIndex).get("msg");
+		}
+		
+		// details
+		else if (4 == colIndex) {
+			String details = (String) warnings.get(rowIndex).get("details");
+			return null == details ? "" : details;
 		}
 		
 		// default

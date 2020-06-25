@@ -1869,7 +1869,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 	 * @return all messages with the given channel.
 	 */
 	private static ArrayList<SingleMessage> getMessagesByChannel(int channel) {
-		ArrayList<SingleMessage> allMessages = (ArrayList<SingleMessage>) SequenceAnalyzer.getSequenceInfo().get("messages");
+		ArrayList<SingleMessage> allMessages = (ArrayList<SingleMessage>) SequenceAnalyzer.getMessages();
 		ArrayList<SingleMessage> messages    = new ArrayList<>();
 		for (SingleMessage msg : allMessages) {
 			Integer ch = (Integer) msg.getOption(IMessageType.OPT_CHANNEL);
@@ -1887,7 +1887,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 	 * @return the filtered messages.
 	 */
 	private static ArrayList<SingleMessage> getMessagesByStatus(String statusByte) {
-		ArrayList<SingleMessage> allMessages = (ArrayList<SingleMessage>) SequenceAnalyzer.getSequenceInfo().get("messages");
+		ArrayList<SingleMessage> allMessages = (ArrayList<SingleMessage>) SequenceAnalyzer.getMessages();
 		ArrayList<SingleMessage> messages    = new ArrayList<>();
 		for (SingleMessage msg : allMessages) {
 			String status = (String) msg.getOption(IMessageType.OPT_STATUS_BYTE);
@@ -1913,7 +1913,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 	 * @return the filtered messages.
 	 */
 	private static ArrayList<SingleMessage> getMessagesByStatusAndTickRangeAndSummary(String statusByte, Long minTick, Long maxTick, Boolean summary) {
-		ArrayList<SingleMessage> allMessages = (ArrayList<SingleMessage>) SequenceAnalyzer.getSequenceInfo().get("messages");
+		ArrayList<SingleMessage> allMessages = (ArrayList<SingleMessage>) SequenceAnalyzer.getMessages();
 		ArrayList<SingleMessage> messages    = new ArrayList<>();
 		for (SingleMessage msg : allMessages) {
 			
@@ -1956,7 +1956,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 	 * @return the filtered messages.
 	 */
 	private static ArrayList<SingleMessage> getNoteOnOffMessagesByChannel(int channel) {
-		ArrayList<SingleMessage> allMessages = (ArrayList<SingleMessage>) SequenceAnalyzer.getSequenceInfo().get("messages");
+		ArrayList<SingleMessage> allMessages = (ArrayList<SingleMessage>) SequenceAnalyzer.getMessages();
 		ArrayList<SingleMessage> messages    = new ArrayList<>();
 		
 		// filter

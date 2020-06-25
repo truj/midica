@@ -57,10 +57,10 @@ public class MessageClassifier {
 	 * @return long and short description as described above.
 	 */
 	public static final String[] getDescription(IMessageType message) {
-		String  statusByte    = (String)  message.getOption( IMessageType.OPT_STATUS_BYTE );
-		Integer channel       = (Integer) message.getOption( IMessageType.OPT_CHANNEL );
-		long    tick          = (Long)    message.getOption( IMessageType.OPT_TICK );
-		byte[]  msg           = (byte[])  message.getOption( IMessageType.OPT_MESSAGE );
+		String  statusByte    = (String)  message.getOption(IMessageType.OPT_STATUS_BYTE);
+		Integer channel       = (Integer) message.getOption(IMessageType.OPT_CHANNEL);
+		long    tick          = (Long)    message.getOption(IMessageType.OPT_TICK);
+		byte[]  msg           = (byte[])  message.getOption(IMessageType.OPT_MESSAGE);
 		char    statusNibble1 = statusByte.charAt(0);
 		
 		// default = name of the leaf node
@@ -68,7 +68,7 @@ public class MessageClassifier {
 		if (message instanceof MessageTreeNode)
 			leaf = (MessageTreeNode) message;
 		else
-			leaf = (MessageTreeNode) message.getOption( IMessageType.OPT_LEAF_NODE );
+			leaf = (MessageTreeNode) message.getOption(IMessageType.OPT_LEAF_NODE);
 		String        leafName    = leaf.getName();
 		StringBuilder description = new StringBuilder(leafName);
 		String        shortDesc   = "";
@@ -132,55 +132,55 @@ public class MessageClassifier {
 				// NRPN LSB (0x62)
 				if (0x62 == controller) {
 					if (0x7F == value)
-						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_NRPN_7F) );
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_NRPN_7F));
 					else
-						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.UNKNOWN) );
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.UNKNOWN));
 				}
 				
 				// NRPN MSB (0x63)
 				if (0x63 == controller) {
 					if (0x7F == value)
-						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_NRPN_7F) );
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_NRPN_7F));
 					else
-						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.UNKNOWN) );
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.UNKNOWN));
 				}
 				
 				// RPN LSB (0x64)
 				if (0x64 == controller) {
 					if (0x00 == value)
-						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_00) );
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_00));
 					else if (0x01 == value)
-						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_01) );
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_01));
 					else if (0x02 == value)
-						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_02) );
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_02));
 					else if (0x03 == value)
-						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_03) );
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_03));
 					else if (0x04 == value)
-						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_04) );
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_04));
 					else if (0x05 == value)
-						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_05) );
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_05));
 					else if (0x06 == value)
-						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_06) );
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_06));
 					else if (0x07 == value)
-						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_07) );
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_07));
 					else if (0x08 == value)
-						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_08) );
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_LSB_08));
 					else if (0x7F == value)
-						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_NRPN_7F) );
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_NRPN_7F));
 					else
-						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.UNKNOWN) );
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.UNKNOWN));
 				}
 				
 				// RPN MSB (0x65)
 				if (0x65 == controller) {
 					if (0x00 == value)
-						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_MSB_00) );
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_MSB_00));
 					else if (0x3D == value)
-						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_MSB_3D) );
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_MSB_3D));
 					else if (0x7F == value)
-						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_NRPN_7F) );
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.MSG_DESC_B_RPN_NRPN_7F));
 					else
-						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.UNKNOWN) );
+						description.append("\n" + Dict.get(Dict.MSG_DESC_B_POS_MEANINGS) + Dict.get(Dict.UNKNOWN));
 				}
 				
 				// local control
@@ -258,10 +258,10 @@ public class MessageClassifier {
 					
 					// tempo change
 					if (0x51 == type) {
-						int mpq = (Integer) message.getOption( IMessageType.OPT_TEMPO_MPQ );
-						int bpm = (Integer) message.getOption( IMessageType.OPT_TEMPO_BPM );
-						description.append( "\n" + mpq + " " + Dict.get(Dict.MSG_DESC_F_TEMPO_MPQ) );
-						description.append( "\n" + bpm + " " + Dict.get(Dict.MSG_DESC_F_TEMPO_BPM) );
+						int mpq = (Integer) message.getOption(IMessageType.OPT_TEMPO_MPQ);
+						int bpm = (Integer) message.getOption(IMessageType.OPT_TEMPO_BPM);
+						description.append("\n" + mpq + " " + Dict.get(Dict.MSG_DESC_F_TEMPO_MPQ));
+						description.append("\n" + bpm + " " + Dict.get(Dict.MSG_DESC_F_TEMPO_BPM));
 						shortDesc = bpm + " " + Dict.get(Dict.MSG_DESC_F_BPM);
 					}
 					
@@ -270,7 +270,7 @@ public class MessageClassifier {
 						int numerator   = msg[3];
 						int exp         = msg[4];
 						int denominator = (int) Math.pow(2, exp);
-						description.append( "\n" + numerator + Dict.getSyntax(Dict.SYNTAX_TIME_SIG_SLASH) + denominator );
+						description.append("\n" + numerator + Dict.getSyntax(Dict.SYNTAX_TIME_SIG_SLASH) + denominator);
 						shortDesc = numerator + Dict.getSyntax(Dict.SYNTAX_TIME_SIG_SLASH) + denominator;
 					}
 					
@@ -304,14 +304,14 @@ public class MessageClassifier {
 						
 						// put it all together
 						if ("".equals(keyStr) || "".equals(tonalityStr))
-							description.append( "\n" + Dict.get(Dict.MSG_DESC_F_UNKNOWN_TONALITY) );
+							description.append("\n" + Dict.get(Dict.MSG_DESC_F_UNKNOWN_TONALITY));
 						else
 							description.append("\n" + keyStr + tonalityStr);
 						description.append("\n" + sharpFlatStr);
 					}
 					
 					// any text-based meta message?
-					String text = (String) message.getOption( IMessageType.OPT_TEXT );
+					String text = (String) message.getOption(IMessageType.OPT_TEXT);
 					if (text != null)
 						shortDesc = text;
 				}
@@ -413,9 +413,9 @@ public class MessageClassifier {
 	/**
 	 * Retrieves general information from short messages.
 	 * 
-	 * Creates a path and adds it to the given tree model.
-	 * Creates message details and adds them to the given messages list.
-	 * Adds the leaf node of the created path to the created message.
+	 * - Creates a path and adds it to the given tree model.
+	 * - Adds the created {@link SingleMessage} to the given messages list.
+	 * - Adds the leaf node of the created path to the created message.
 	 * 
 	 * @param msg           Short message
 	 * @param tick          Tickstamp
@@ -423,9 +423,10 @@ public class MessageClassifier {
 	 * @param msgNum        Number of the message inside the track.
 	 * @param messages      List of messages where the processed message will be added.
 	 * @param msgTreeModel  Tree model where the created leaf note will be added.
+	 * @return the created message object
 	 * @throws ReflectiveOperationException if the message cannot be added to the tree model.
 	 */
-	public static final void processShortMessage(ShortMessage msg, long tick, int trackNum, int msgNum,
+	public static final SingleMessage processShortMessage(ShortMessage msg, long tick, int trackNum, int msgNum,
 		ArrayList<SingleMessage> messages, MidicaTreeModel msgTreeModel) throws ReflectiveOperationException {
 		
 		// prepare data structures
@@ -449,55 +450,55 @@ public class MessageClassifier {
 			
 			// system realtime: 1111_1XXX
 			isSystemMsg      = true;
-			String[] msgLvl1 = { MSG_LVL_1_SORT_SYS_RT, Dict.get(Dict.MSG1_SYSTEM_REALTIME), null };
-			path.add( msgLvl1 );
+			String[] msgLvl1 = {MSG_LVL_1_SORT_SYS_RT, Dict.get(Dict.MSG1_SYSTEM_REALTIME), null};
+			path.add(msgLvl1);
 		}
 		else if (((byte) 0b1111_0000) == (statusByte & statusBitmask)) {
 			
 			// system common: 1111_0XXX
 			isSystemMsg      = true;
-			String[] msgLvl1 = { MSG_LVL_1_SORT_SYS_COM, Dict.get(Dict.MSG1_SYSTEM_COMMON), null };
-			path.add( msgLvl1 );
+			String[] msgLvl1 = {MSG_LVL_1_SORT_SYS_COM, Dict.get(Dict.MSG1_SYSTEM_COMMON), null};
+			path.add(msgLvl1);
 		}
 		else if (0xB0 == cmd && data1 >= 0x78 && data1 <= 0x7F) {
 			
 			// channel mode
 			isChModeMsg      = true;
-			String[] msgLvl1 = { MSG_LVL_1_SORT_CH_MODE, Dict.get(Dict.MSG1_CH_MODE), null };
-			path.add( msgLvl1 );
+			String[] msgLvl1 = {MSG_LVL_1_SORT_CH_MODE, Dict.get(Dict.MSG1_CH_MODE), null};
+			path.add(msgLvl1);
 		}
 		else {
 			// channel voice
-			String[] msgLvl1 = { MSG_LVL_1_SORT_CH_VOICE, Dict.get(Dict.MSG1_CH_VOICE), null };
-			path.add( msgLvl1 );
+			String[] msgLvl1 = {MSG_LVL_1_SORT_CH_VOICE, Dict.get(Dict.MSG1_CH_VOICE), null};
+			path.add(msgLvl1);
 		}
 		
 		// level 2 nodes for system common & system realtime
 		if (isSystemMsg) {
-			String   statusID   = String.format( "%02X", statusByte );
+			String   statusID   = String.format("%02X", statusByte);
 			String   statusStr  = (statusByte & 0xFF) + "";
-			String   statusText = getLvl2SystemMsgTxtByStatusByte( statusInt );
-			String[] msgLvl2    = { statusID, statusText, statusStr };
-			path.add( msgLvl2 );
+			String   statusText = getLvl2SystemMsgTxtByStatusByte(statusInt);
+			String[] msgLvl2    = {statusID, statusText, statusStr};
+			path.add(msgLvl2);
 		}
 		
 		// level 2 for channel mode messages
 		else if (isChModeMsg) {
-			String   commandID   = String.format( "%02X", data1 );
+			String   commandID   = String.format("%02X", data1);
 			String   commandStr  = data1 + "";
 			String   commandText = getLvl2ModeMsgTxtByData1(data1);
-			String[] msgLvl2     = { commandID, commandText, commandStr };
-			path.add( msgLvl2 );
-			details.put( IMessageType.OPT_CONTROLLER, (byte) data1 );
+			String[] msgLvl2     = {commandID, commandText, commandStr};
+			path.add(msgLvl2);
+			details.put(IMessageType.OPT_CONTROLLER, (byte) data1);
 		}
 		
 		// level 2 and 3 nodes for channel voice messages
 		else {
-			String   commandID   = String.format( "%02X", cmd );
+			String   commandID   = String.format("%02X", cmd);
 			String   commandStr  = cmd + "";
-			String   commandText = getLvl2VoiceMsgTxtByCommand( cmd );
-			String[] msgLvl2     = { commandID, commandText, commandStr };
-			path.add( msgLvl2 );
+			String   commandText = getLvl2VoiceMsgTxtByCommand(cmd);
+			String[] msgLvl2     = {commandID, commandText, commandStr};
+			path.add(msgLvl2);
 			
 			// level 3 and 4 nodes (controllers)
 			if (0xB0 == cmd) { // control change
@@ -505,7 +506,7 @@ public class MessageClassifier {
 				// There must be at least one data byte after the status byte.
 				// Otherwise: unknown controller.
 				if (msgLength > 1) {
-					details.put( IMessageType.OPT_CONTROLLER, (byte) data1 );
+					details.put(IMessageType.OPT_CONTROLLER, (byte) data1);
 				}
 				else {
 					// invalid data --> ctrlTxt: unknown
@@ -521,38 +522,38 @@ public class MessageClassifier {
 					// RPN or NRPN
 					isRpnOrNrpn        = true;
 					ctrlBitmask        = (byte) 0b1111_1110; // last bit: MSB or LSB
-					String paramNumStr = String.format( "%02X", data2 );
+					String paramNumStr = String.format("%02X", data2);
 					if (data1 >= 0x64) {
-						distinctDetails.put( IMessageType.OPT_RPN, paramNumStr );
+						distinctDetails.put(IMessageType.OPT_RPN, paramNumStr);
 					}
 					else {
-						distinctDetails.put( IMessageType.OPT_NRPN, paramNumStr );
+						distinctDetails.put(IMessageType.OPT_NRPN, paramNumStr);
 					}
 				}
-				else if ( 0x06 == data1       // data entry MSB
-				       || 0x26 == data1       // data entry LSB
-				       || 0x60 == data1       // data button increment
-				       || 0x61 == data1 ) {   // data button decrement
+				else if (0x06 == data1       // data entry MSB
+				      || 0x26 == data1       // data entry LSB
+				      || 0x60 == data1       // data button increment
+				      || 0x61 == data1) {   // data button decrement
 					isDataChange = true;
 				}
-				byte     ctrlPart = (byte) ( data1Byte & ctrlBitmask ); // same like the MSB
-				String   ctrlID   = String.format( "%02X", ctrlPart );
+				byte     ctrlPart = (byte) (data1Byte & ctrlBitmask); // same like the MSB
+				String   ctrlID   = String.format("%02X", ctrlPart);
 				String[] ctrlTxt  = getLvl34ControllerMsgTxtByData1(data1);
 				String   ctrlNum  = null;
 				if (null == ctrlTxt[1]) {
 					// no MSB/LSB or unknown
-					ctrlID  = String.format( "%02X", data1 );
+					ctrlID  = String.format("%02X", data1);
 					ctrlNum = data1 + "";
 				}
-				String[] msgLvl3 = { ctrlID, ctrlTxt[0], ctrlNum };
-				path.add( msgLvl3 );
+				String[] msgLvl3 = {ctrlID, ctrlTxt[0], ctrlNum};
+				path.add(msgLvl3);
 				
 				// level 4 (MSB or LSB)
 				if (ctrlTxt[1] != null) {
 					String   data1ID   = String.format("%02X", data1);
 					String   msbLsbStr = data1 + "";
-					String[] msgLvl4   = { data1ID, ctrlTxt[1], msbLsbStr };
-					path.add( msgLvl4 );
+					String[] msgLvl4   = {data1ID, ctrlTxt[1], msbLsbStr};
+					path.add(msgLvl4);
 				}
 				
 				// level 5 for (N)RPN (only MSB or LSB number)
@@ -562,47 +563,47 @@ public class MessageClassifier {
 						"0x" + String.format("%02X", data2), // text
 						data2 + ""                           // number
 					};
-					path.add( msgLvl5 );
+					path.add(msgLvl5);
 				}
 				
 				// level 4 and 5 data entry/increment/decrement for RPN or NRPN
 				if (isDataChange) {
 					
 					// get MSB, LSB and type (RPN/NRPN)
-					Byte[] paramMsbLsb = SequenceAnalyzer.getChannelParamMsbLsbType( (byte) channel, tick );
-					byte msb  = paramMsbLsb[ 0 ];
-					byte lsb  = paramMsbLsb[ 1 ];
-					byte type = paramMsbLsb[ 2 ];
+					Byte[] paramMsbLsb = SequenceAnalyzer.getChannelParamMsbLsbType((byte) channel, tick);
+					byte msb  = paramMsbLsb[0];
+					byte lsb  = paramMsbLsb[1];
+					byte type = paramMsbLsb[2];
 					
 					// Put a new level 4 node (param name) between controller
 					// name and MSB/LSB. So the old level 4 becomes level 5.
-					String[] paramFields = getLvl4RpnNrpnDataTxt( msb, lsb, type );
-					String   paramID     = String.format( "%02X%02X", msb, lsb );
-					String   paramTxt    = paramFields[ 0 ];
-					String   paramStr    = paramFields[ 1 ];
-					String[] msgLvl4     = { paramID, paramTxt, paramStr };
-					path.add( 3, msgLvl4 ); // index 3 == level 4
+					String[] paramFields = getLvl4RpnNrpnDataTxt(msb, lsb, type);
+					String   paramID     = String.format("%02X%02X", msb, lsb);
+					String   paramTxt    = paramFields[0];
+					String   paramStr    = paramFields[1];
+					String[] msgLvl4     = {paramID, paramTxt, paramStr};
+					path.add(3, msgLvl4); // index 3 == level 4
 				}
 			}
 		}
 		
 		// get general details
 		if (isSystemMsg) {
-			details.put( IMessageType.OPT_STATUS_BYTE, String.format("%02X", statusByte) );
+			details.put(IMessageType.OPT_STATUS_BYTE, String.format("%02X", statusByte));
 		}
 		else {
 			// status byte contains command and channel
-			byte cmdByte     = (byte) ( cmd & 0b1111_0000 );
-			String cmdHex    = String.format( "%01X", cmdByte );
-			cmdHex           = cmdHex.substring( 0, 1 );
+			byte cmdByte     = (byte) (cmd & 0b1111_0000);
+			String cmdHex    = String.format("%01X", cmdByte);
+			cmdHex           = cmdHex.substring(0, 1);
 			String statusStr = cmdHex + "0-" + cmdHex + "F";
-			details.put( IMessageType.OPT_STATUS_BYTE, statusStr );
-			distinctDetails.put( IMessageType.OPT_CHANNEL, channel );
+			details.put(IMessageType.OPT_STATUS_BYTE, statusStr);
+			distinctDetails.put(IMessageType.OPT_CHANNEL, channel);
 		}
 		details.put( IMessageType.OPT_LENGTH,  msgLength );
 		details.put( IMessageType.OPT_TICK,    tick      );
 		details.put( IMessageType.OPT_MSG_NUM, msgNum    );
-		distinctDetails.put( IMessageType.OPT_TRACK, trackNum );
+		distinctDetails.put(IMessageType.OPT_TRACK, trackNum);
 		
 		// add message to the data structures
 		MessageTreeNode leaf          = (MessageTreeNode) msgTreeModel.add(path, null);
@@ -616,22 +617,24 @@ public class MessageClassifier {
 		}
 		for (Entry<Integer, Object> detailEntry : distinctDetails.entrySet()) {
 			leaf.setDistinctOption(  detailEntry.getKey(), (Comparable<?>) detailEntry.getValue() );
-			singleMessage.setOption( detailEntry.getKey(), detailEntry.getValue() );
+			singleMessage.setOption( detailEntry.getKey(), detailEntry.getValue()                 );
 		}
 		singleMessage.setOption( IMessageType.OPT_STATUS_BYTE, String.format("%02X", statusByte) );
-		singleMessage.setOption( IMessageType.OPT_LEAF_NODE, leaf );
-		singleMessage.setOption( IMessageType.OPT_MESSAGE, message );
+		singleMessage.setOption( IMessageType.OPT_LEAF_NODE,   leaf                              );
+		singleMessage.setOption( IMessageType.OPT_MESSAGE,     message                           );
 		String[] desc = getDescription(singleMessage);
 		if (desc[1].length() > 0)
-			singleMessage.setOption( IMessageType.OPT_SUMMARY, desc[1] );
+			singleMessage.setOption(IMessageType.OPT_SUMMARY, desc[1]);
+		
+		return singleMessage;
 	}
 	
 	/**
 	 * Retrieves general information from meta messages.
 	 * 
-	 * Creates a path and adds it to the given tree model.
-	 * Creates message details and adds them to the given messages list.
-	 * Adds the leaf node of the created path to the created message.
+	 * - Creates a path and adds it to the given tree model.
+	 * - Adds the created {@link SingleMessage} to the given messages list.
+	 * - Adds the leaf node of the created path to the created message.
 	 * 
 	 * @param msg              Meta message
 	 * @param tick             Tickstamp
@@ -641,9 +644,10 @@ public class MessageClassifier {
 	 * @param msgTreeModel     Tree model where the created leaf note will be added.
 	 * @param chosenCharset    Charset that has been chosen with the file chooser.
 	 * @param midiFileCharset  The last charset from a charset switch inside of a lyrics message.
+	 * @return the created message object
 	 * @throws ReflectiveOperationException if the message cannot be added to the tree model.
 	 */
-	public static final void processMetaMessage(MetaMessage msg, long tick, int trackNum, int msgNum,
+	public static final SingleMessage processMetaMessage(MetaMessage msg, long tick, int trackNum, int msgNum,
 		ArrayList<SingleMessage> messages, MidicaTreeModel msgTreeModel,
 		String chosenCharset, String midiFileCharset) throws ReflectiveOperationException {
 		
@@ -666,15 +670,15 @@ public class MessageClassifier {
 		}
 		
 		// level 1 node
-		String[] msgLvl1 = { MSG_LVL_1_SORT_META, Dict.get(Dict.MSG1_META), null };
-		path.add( msgLvl1 );
+		String[] msgLvl1 = {MSG_LVL_1_SORT_META, Dict.get(Dict.MSG1_META), null};
+		path.add(msgLvl1);
 		
 		// level 2 node
-		String   typeID  = String.format( "%02X", type );
-		String   typeTxt = getLvl2MetaText( type );
+		String   typeID  = String.format("%02X", type);
+		String   typeTxt = getLvl2MetaText(type);
 		String   typeStr = type + "";
-		String[] msgLvl2 = { typeID, typeTxt, typeStr };
-		path.add( msgLvl2 );
+		String[] msgLvl2 = {typeID, typeTxt, typeStr};
+		path.add(msgLvl2);
 		
 		// level 3 node - vendor for sequencer specific messages
 		if (MidiListener.META_SEQUENCER_SPECIFIC == type) {
@@ -684,7 +688,7 @@ public class MessageClassifier {
 			
 			// vendor byte: 1st 1 or 3 bytes after: [status byte, type byte, length byte]
 			if (msgLength >= 4) {
-				int vendorByte = (byte) content[ 0 ];
+				int vendorByte = (byte) content[0];
 				
 				// 3-byte vendor ID
 				if (0x00 == vendorByte) {
@@ -698,13 +702,13 @@ public class MessageClassifier {
 				// 1-byte vendor ID
 				else {
 					vendorID  = String.format( "1-0000%02X", vendorByte );
-					vendorHex = String.format( "%02X", vendorByte );
+					vendorHex = String.format( "%02X",       vendorByte );
 					vendorStr = vendorHex;
 				}
 			}
-			String   vendorTxt = getVendorName( vendorStr );
-			String[] msgLvl4   = { vendorID, vendorTxt, "0x" + vendorStr };
-			path.add( msgLvl4 );
+			String   vendorTxt = getVendorName(vendorStr);
+			String[] msgLvl4   = {vendorID, vendorTxt, "0x" + vendorStr};
+			path.add(msgLvl4);
 			details.put( IMessageType.OPT_VENDOR_ID,   vendorHex );
 			details.put( IMessageType.OPT_VENDOR_NAME, vendorTxt );
 		}
@@ -717,12 +721,12 @@ public class MessageClassifier {
 		boolean msgContainsText = type >= 0x01 && type <= 0x0F;
 		if (msgContainsText) { // get texts from text-based messages
 			if (null == text) {
-				text = CharsetUtils.getTextFromBytes( content, chosenCharset, midiFileCharset );
+				text = CharsetUtils.getTextFromBytes(content, chosenCharset, midiFileCharset);
 			}
-			distinctDetails.put( IMessageType.OPT_TEXT, text );
+			distinctDetails.put(IMessageType.OPT_TEXT, text);
 		}
-		details.put( IMessageType.OPT_MSG_NUM, msgNum );
-		distinctDetails.put( IMessageType.OPT_TRACK, trackNum );
+		details.put(IMessageType.OPT_MSG_NUM, msgNum);
+		distinctDetails.put(IMessageType.OPT_TRACK, trackNum);
 		
 		// add message to the data structures
 		MessageTreeNode leaf          = (MessageTreeNode) msgTreeModel.add(path, null);
@@ -736,21 +740,23 @@ public class MessageClassifier {
 		}
 		for (Entry<Integer, Object> detailEntry : distinctDetails.entrySet()) {
 			leaf.setDistinctOption(  detailEntry.getKey(), (Comparable<?>) detailEntry.getValue() );
-			singleMessage.setOption( detailEntry.getKey(), detailEntry.getValue() );
+			singleMessage.setOption( detailEntry.getKey(), detailEntry.getValue()                 );
 		}
-		singleMessage.setOption( IMessageType.OPT_LEAF_NODE, leaf );
-		singleMessage.setOption( IMessageType.OPT_MESSAGE, message );
+		singleMessage.setOption( IMessageType.OPT_LEAF_NODE, leaf    );
+		singleMessage.setOption( IMessageType.OPT_MESSAGE,   message );
 		String[] desc = getDescription(singleMessage);
 		if (desc[1].length() > 0)
-			singleMessage.setOption( IMessageType.OPT_SUMMARY, desc[1] );
+			singleMessage.setOption(IMessageType.OPT_SUMMARY, desc[1]);
+		
+		return singleMessage;
 	}
 	
 	/**
 	 * Retrieves general information from SysEx messages.
 	 * 
-	 * Creates a path and adds it to the given tree model.
-	 * Creates message details and adds them to the given messages list.
-	 * Adds the leaf node of the created path to the created message.
+	 * - Creates a path and adds it to the given tree model.
+	 * - Adds the created {@link SingleMessage} to the given messages list.
+	 * - Adds the leaf node of the created path to the created message.
 	 * 
 	 * @param msg           SysEx message
 	 * @param tick          Tickstamp
@@ -758,9 +764,10 @@ public class MessageClassifier {
 	 * @param msgNum        Number of the message inside the track.
 	 * @param messages      List of messages where the processed message will be added.
 	 * @param msgTreeModel  Tree model where the created leaf note will be added.
+	 * @return the created message object
 	 * @throws ReflectiveOperationException if the message cannot be added to the tree model.
 	 */
-	public static final void processSysexMessage(SysexMessage msg, long tick, int trackNum, int msgNum,
+	public static final SingleMessage processSysexMessage(SysexMessage msg, long tick, int trackNum, int msgNum,
 		ArrayList<SingleMessage> messages, MidicaTreeModel msgTreeModel) throws ReflectiveOperationException {
 		
 		// prepare data structures
@@ -772,15 +779,15 @@ public class MessageClassifier {
 		byte[] content   = msg.getData();
 		
 		// level 1 node - All SysEx messages are system common messages
-		String[] msgLvl1 = { MSG_LVL_1_SORT_SYS_COM, Dict.get(Dict.MSG1_SYSTEM_COMMON), null };
-		path.add( msgLvl1 );
+		String[] msgLvl1 = {MSG_LVL_1_SORT_SYS_COM, Dict.get(Dict.MSG1_SYSTEM_COMMON), null};
+		path.add(msgLvl1);
 		
 		// level 2 node
-		String   statusID  = String.format( "%02X", 0xF0 ); // 0xF0: status byte for SysEx
-		String   statusTxt = Dict.get( Dict.MSG2_SC_SYSEX );
+		String   statusID  = String.format("%02X", 0xF0); // 0xF0: status byte for SysEx
+		String   statusTxt = Dict.get(Dict.MSG2_SC_SYSEX);
 		String   statusStr = 0xF0 + "";
-		String[] msgLvl2 = { statusID, statusTxt, statusStr };
-		path.add( msgLvl2 );
+		String[] msgLvl2 = {statusID, statusTxt, statusStr};
+		path.add(msgLvl2);
 		
 		// level 3 node
 		int     vendorByte    = INVALID_BYTE;
@@ -794,10 +801,10 @@ public class MessageClassifier {
 			if (0x7E == vendorByte) {
 				isUniversal        = true;
 				String   vendorID  = "7E";
-				String   vendorTxt = Dict.get( Dict.MSG3_SX_NON_RT_UNIVERSAL );
+				String   vendorTxt = Dict.get(Dict.MSG3_SX_NON_RT_UNIVERSAL);
 				String   vendorStr = vendorByte + "";
-				String[] msgLvl3   = { vendorID, vendorTxt, vendorStr };
-				path.add( msgLvl3 );
+				String[] msgLvl3   = {vendorID, vendorTxt, vendorStr};
+				path.add(msgLvl3);
 				details.put( IMessageType.OPT_VENDOR_ID,   vendorID  );
 				details.put( IMessageType.OPT_VENDOR_NAME, vendorTxt );
 			}
@@ -807,10 +814,10 @@ public class MessageClassifier {
 				isUniversal        = true;
 				isRealTime         = true;
 				String   vendorID  = "7F";
-				String   vendorTxt = Dict.get( Dict.MSG3_SX_RT_UNIVERSAL );
+				String   vendorTxt = Dict.get(Dict.MSG3_SX_RT_UNIVERSAL);
 				String   vendorStr = vendorByte + "";
-				String[] msgLvl3   = { vendorID, vendorTxt, vendorStr };
-				path.add( msgLvl3 );
+				String[] msgLvl3   = {vendorID, vendorTxt, vendorStr};
+				path.add(msgLvl3);
 				details.put( IMessageType.OPT_VENDOR_ID,   vendorID  );
 				details.put( IMessageType.OPT_VENDOR_NAME, vendorTxt );
 			}
@@ -819,10 +826,10 @@ public class MessageClassifier {
 			else if (0x7D == vendorByte) {
 				isEducational      = true;
 				String   vendorID  = "FE";  // sort educational after universal
-				String   vendorTxt = Dict.get( Dict.MSG3_SX_EDUCATIONAL );
+				String   vendorTxt = Dict.get(Dict.MSG3_SX_EDUCATIONAL);
 				String   vendorStr = vendorByte + "";
-				String[] msgLvl3   = { vendorID, vendorTxt, vendorStr };
-				path.add( msgLvl3 );
+				String[] msgLvl3   = {vendorID, vendorTxt, vendorStr};
+				path.add(msgLvl3);
 				details.put( IMessageType.OPT_VENDOR_ID,   "7D"      );
 				details.put( IMessageType.OPT_VENDOR_NAME, vendorTxt );
 			}
@@ -830,9 +837,9 @@ public class MessageClassifier {
 			// vendor specific
 			else {
 				String   vendorID  = "FF"; // sort vendor-specific after educational
-				String   vendorTxt = Dict.get( Dict.MSG3_SX_VENDOR );
-				String[] msgLvl3   = { vendorID, vendorTxt, null };
-				path.add( msgLvl3 );
+				String   vendorTxt = Dict.get(Dict.MSG3_SX_VENDOR);
+				String[] msgLvl3   = {vendorID, vendorTxt, null};
+				path.add(msgLvl3);
 			}
 		}
 		
@@ -854,7 +861,7 @@ public class MessageClassifier {
 			// single-byte vendor ID
 			else {
 				vendorID  = String.format( "1-0000%02X", vendorByte );
-				vendorHex = String.format( "%02X", vendorByte );
+				vendorHex = String.format( "%02X",       vendorByte );
 				vendorStr = vendorHex;
 			}
 			
@@ -864,9 +871,9 @@ public class MessageClassifier {
 				vendorHex = "-";
 				vendorStr = "-";
 			}
-			String   vendorTxt = getVendorName( vendorStr );
-			String[] msgLvl4   = { vendorID, vendorTxt, "0x" + vendorStr };
-			path.add( msgLvl4 );
+			String   vendorTxt = getVendorName(vendorStr);
+			String[] msgLvl4   = {vendorID, vendorTxt, "0x" + vendorStr};
+			path.add(msgLvl4);
 			details.put( IMessageType.OPT_VENDOR_ID,   vendorHex );
 			details.put( IMessageType.OPT_VENDOR_NAME, vendorTxt );
 		}
@@ -890,11 +897,11 @@ public class MessageClassifier {
 			}
 			
 			// level 4 node
-			String   mainTypeID  = String.format( "%02X", subId1 );
+			String   mainTypeID  = String.format("%02X", subId1);
 			String   mainTypeStr = INVALID_BYTE == subId1 ? "-" : subId1 + "";
 			String[] texts       = getLvl456UniversalSysexTxt(isRealTime, subId1, subId2);
 			String[] msgLvl4     = {mainTypeID, texts[0], mainTypeStr};
-			path.add( msgLvl4 );
+			path.add(msgLvl4);
 			
 			// level 5 node
 			if (3 == texts.length) {
@@ -925,14 +932,14 @@ public class MessageClassifier {
 			}
 			
 			// add channel to details
-			String sysExChannelID = "0x" + String.format( "%02X", sysExChannel );
+			String sysExChannelID = "0x" + String.format("%02X", sysExChannel);
 			if (0x7F == sysExChannel) {
-				sysExChannelID += " (" + Dict.get( Dict.BROADCAST_MSG ) + ")";
+				sysExChannelID += " (" + Dict.get(Dict.BROADCAST_MSG) + ")";
 			}
 			else if (INVALID_BYTE == sysExChannel) {
 				sysExChannelID = "-";
 			}
-			distinctDetails.put( IMessageType.OPT_SYSEX_CHANNEL, sysExChannelID );
+			distinctDetails.put(IMessageType.OPT_SYSEX_CHANNEL, sysExChannelID);
 			
 			// add Sub-IDs to details
 			String sub1Str = INVALID_BYTE == subId1 ? "-" : String.format("0x%02X", subId1);
@@ -971,10 +978,12 @@ public class MessageClassifier {
 		}
 		for (Entry<Integer, Object> detailEntry : distinctDetails.entrySet()) {
 			leaf.setDistinctOption(  detailEntry.getKey(), (Comparable<?>) detailEntry.getValue() );
-			singleMessage.setOption( detailEntry.getKey(), detailEntry.getValue() );
+			singleMessage.setOption( detailEntry.getKey(), detailEntry.getValue()                 );
 		}
 		singleMessage.setOption( IMessageType.OPT_LEAF_NODE, leaf    );
 		singleMessage.setOption( IMessageType.OPT_MESSAGE,   message );
+		
+		return singleMessage;
 	}
 	
 	/**
@@ -988,33 +997,33 @@ public class MessageClassifier {
 		
 		// system common
 		if (0xF1 == status)
-			return Dict.get( Dict.MSG2_SC_MIDI_TIME_CODE );
+			return Dict.get(Dict.MSG2_SC_MIDI_TIME_CODE);
 		else if (0xF2 == status)
-			return Dict.get( Dict.MSG2_SC_SONG_POS_POINTER );
+			return Dict.get(Dict.MSG2_SC_SONG_POS_POINTER);
 		else if (0xF3 == status)
-			return Dict.get( Dict.MSG2_SC_SONG_SELECT );
+			return Dict.get(Dict.MSG2_SC_SONG_SELECT);
 		else if (0xF6 == status)
-			return Dict.get( Dict.MSG2_SC_TUNE_REQUEST );
+			return Dict.get(Dict.MSG2_SC_TUNE_REQUEST);
 		else if (0xF7 == status)
-			return Dict.get( Dict.MSG2_SC_END_OF_SYSEX );
+			return Dict.get(Dict.MSG2_SC_END_OF_SYSEX);
 		
 		// system realtime
 		else if (0xF8 == status)
-			return Dict.get( Dict.MSG2_SR_TIMING_CLOCK );
+			return Dict.get(Dict.MSG2_SR_TIMING_CLOCK);
 		else if (0xFA == status)
-			return Dict.get( Dict.MSG2_SR_START );
+			return Dict.get(Dict.MSG2_SR_START);
 		else if (0xFB == status)
-			return Dict.get( Dict.MSG2_SR_CONTINUE );
+			return Dict.get(Dict.MSG2_SR_CONTINUE);
 		else if (0xFC == status)
-			return Dict.get( Dict.MSG2_SR_STOP );
+			return Dict.get(Dict.MSG2_SR_STOP);
 		else if (0xFE == status)
-			return Dict.get( Dict.MSG2_SR_ACTIVE_SENSING );
+			return Dict.get(Dict.MSG2_SR_ACTIVE_SENSING);
 		else if (0xFF == status)
-			return Dict.get( Dict.MSG2_SR_SYSTEM_RESET );
+			return Dict.get(Dict.MSG2_SR_SYSTEM_RESET);
 		
 		// fallback
 		else
-			return Dict.get( Dict.UNKNOWN );
+			return Dict.get(Dict.UNKNOWN);
 	}
 	
 	/**
@@ -1026,40 +1035,40 @@ public class MessageClassifier {
 	private static final String getLvl2MetaText(int type) {
 		
 		if (0x00 == type)
-			return Dict.get( Dict.MSG2_M_SEQUENCE_NUMBER );
+			return Dict.get(Dict.MSG2_M_SEQUENCE_NUMBER);
 		if (0x01 == type)
-			return Dict.get( Dict.MSG2_M_TEXT );
+			return Dict.get(Dict.MSG2_M_TEXT);
 		if (0x02 == type)
-			return Dict.get( Dict.MSG2_M_COPYRIGHT );
+			return Dict.get(Dict.MSG2_M_COPYRIGHT);
 		if (0x03 == type)
-			return Dict.get( Dict.MSG2_M_TRACK_NAME );
+			return Dict.get(Dict.MSG2_M_TRACK_NAME);
 		if (0x04 == type)
-			return Dict.get( Dict.MSG2_M_INSTRUMENT_NAME );
+			return Dict.get(Dict.MSG2_M_INSTRUMENT_NAME);
 		if (0x05 == type)
-			return Dict.get( Dict.MSG2_M_LYRICS );
+			return Dict.get(Dict.MSG2_M_LYRICS);
 		if (0x06 == type)
-			return Dict.get( Dict.MSG2_M_MARKER );
+			return Dict.get(Dict.MSG2_M_MARKER);
 		if (0x07 == type)
-			return Dict.get( Dict.MSG2_M_CUE_POINT );
+			return Dict.get(Dict.MSG2_M_CUE_POINT);
 		if (0x20 == type)
-			return Dict.get( Dict.MSG2_M_CHANNEL_PREFIX );
+			return Dict.get(Dict.MSG2_M_CHANNEL_PREFIX);
 		if (0x21 == type)
-			return Dict.get( Dict.MSG2_M_MIDI_PORT );
+			return Dict.get(Dict.MSG2_M_MIDI_PORT);
 		if (0x2F == type)
-			return Dict.get( Dict.MSG2_M_END_OF_SEQUENCE );
+			return Dict.get(Dict.MSG2_M_END_OF_SEQUENCE);
 		if (0x51 == type)
-			return Dict.get( Dict.MSG2_M_SET_TEMPO );
+			return Dict.get(Dict.MSG2_M_SET_TEMPO);
 		if (0x54 == type)
-			return Dict.get( Dict.MSG2_M_SMPTE_OFFSET );
+			return Dict.get(Dict.MSG2_M_SMPTE_OFFSET);
 		if (0x58 == type)
-			return Dict.get( Dict.MSG2_M_TIME_SIGNATURE );
+			return Dict.get(Dict.MSG2_M_TIME_SIGNATURE);
 		if (0x59 == type)
-			return Dict.get( Dict.MSG2_M_KEY_SIGNATURE );
+			return Dict.get(Dict.MSG2_M_KEY_SIGNATURE);
 		if (0x7F == type)
-			return Dict.get( Dict.MSG2_M_SEQUENCER_SPEC );
+			return Dict.get(Dict.MSG2_M_SEQUENCER_SPEC);
 		
 		// fallback
-		return Dict.get( Dict.UNKNOWN );
+		return Dict.get(Dict.UNKNOWN);
 	}
 	
 	/**
@@ -1074,23 +1083,23 @@ public class MessageClassifier {
 	private static final String getLvl2VoiceMsgTxtByCommand(int cmd) {
 		
 		if (0x80 == cmd)
-			return Dict.get( Dict.MSG2_CV_NOTE_OFF );
+			return Dict.get(Dict.MSG2_CV_NOTE_OFF);
 		else if (0x90 == cmd)
-			return Dict.get( Dict.MSG2_CV_NOTE_ON );
+			return Dict.get(Dict.MSG2_CV_NOTE_ON);
 		else if (0xA0 == cmd)
-			return Dict.get( Dict.MSG2_CV_POLY_PRESSURE );
+			return Dict.get(Dict.MSG2_CV_POLY_PRESSURE);
 		else if (0xB0 == cmd)
-			return Dict.get( Dict.MSG2_CV_CONTROL_CHANGE );
+			return Dict.get(Dict.MSG2_CV_CONTROL_CHANGE);
 		else if (0xC0 == cmd)
-			return Dict.get( Dict.MSG2_CV_PROGRAM_CHANGE );
+			return Dict.get(Dict.MSG2_CV_PROGRAM_CHANGE);
 		else if (0xD0 == cmd)
-			return Dict.get( Dict.MSG2_CV_CHANNEL_PRESSURE );
+			return Dict.get(Dict.MSG2_CV_CHANNEL_PRESSURE);
 		else if (0xE0 == cmd)
-			return Dict.get( Dict.MSG2_CV_PITCH_BEND );
+			return Dict.get(Dict.MSG2_CV_PITCH_BEND);
 		
 		// fallback
 		else
-			return Dict.get( Dict.UNKNOWN );
+			return Dict.get(Dict.UNKNOWN);
 	}
 	
 	/**
@@ -1103,24 +1112,24 @@ public class MessageClassifier {
 	 */
 	private static final String getLvl2ModeMsgTxtByData1(int val) {
 		if (0x78 == val)
-			return Dict.get( Dict.MSG2_CM_ALL_SOUND_OFF );
+			return Dict.get(Dict.MSG2_CM_ALL_SOUND_OFF);
 		else if (0x79 == val)
-			return Dict.get( Dict.MSG2_CM_ALL_CTRLS_OFF );
+			return Dict.get(Dict.MSG2_CM_ALL_CTRLS_OFF);
 		else if (0x7A == val)
-			return Dict.get( Dict.MSG2_CM_LOCAL_CTRL );
+			return Dict.get(Dict.MSG2_CM_LOCAL_CTRL);
 		else if (0x7B == val)
-			return Dict.get( Dict.MSG2_CM_ALL_NOTES_OFF );
+			return Dict.get(Dict.MSG2_CM_ALL_NOTES_OFF);
 		else if (0x7C == val)
-			return Dict.get( Dict.MSG2_CM_OMNI_MODE_OFF );
+			return Dict.get(Dict.MSG2_CM_OMNI_MODE_OFF);
 		else if (0x7D == val)
-			return Dict.get( Dict.MSG2_CM_OMNI_MODE_ON );
+			return Dict.get(Dict.MSG2_CM_OMNI_MODE_ON);
 		else if (0x7E == val)
-			return Dict.get( Dict.MSG2_CM_MONO_NOTES_OFF );
+			return Dict.get(Dict.MSG2_CM_MONO_NOTES_OFF);
 		else if (0x7F == val)
-			return Dict.get( Dict.MSG2_CM_POLY_NOTES_OFF );
+			return Dict.get(Dict.MSG2_CM_POLY_NOTES_OFF);
 		else
 			// fallback
-			return Dict.get( Dict.UNKNOWN );
+			return Dict.get(Dict.UNKNOWN);
 	}
 	
 	/**
@@ -1139,250 +1148,250 @@ public class MessageClassifier {
 	 * @return level 3 and 4 texts
 	 */
 	private static final String[] getLvl34ControllerMsgTxtByData1(int val) {
-		String[] result = { null, null };
+		String[] result = {null, null};
 		
 		// controller + MSB
 		if (0x00 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_BANK_SELECT );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_BANK_SELECT_MSB );
+			result[0] = Dict.get(Dict.MSG3_C_BANK_SELECT);
+			result[1] = Dict.get(Dict.MSG4_C_BANK_SELECT_MSB);
 		}
 		else if (0x01 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_MODULATION_WHEEL );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_MODULATION_WHEEL_MSB );
+			result[0] = Dict.get(Dict.MSG3_C_MODULATION_WHEEL);
+			result[1] = Dict.get(Dict.MSG4_C_MODULATION_WHEEL_MSB);
 		}
 		else if (0x02 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_BREATH_CTRL );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_BREATH_CTRL_MSB );
+			result[0] = Dict.get(Dict.MSG3_C_BREATH_CTRL);
+			result[1] = Dict.get(Dict.MSG4_C_BREATH_CTRL_MSB);
 		}
 		else if (0x04 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_FOOT_CTRL );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_FOOT_CTRL_MSB );
+			result[0] = Dict.get(Dict.MSG3_C_FOOT_CTRL);
+			result[1] = Dict.get(Dict.MSG4_C_FOOT_CTRL_MSB);
 		}
 		else if (0x05 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_PORTAMENTO_TIME );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_PORTAMENTO_TIME_MSB );
+			result[0] = Dict.get(Dict.MSG3_C_PORTAMENTO_TIME);
+			result[1] = Dict.get(Dict.MSG4_C_PORTAMENTO_TIME_MSB);
 		}
 		else if (0x06 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_DATA_ENTRY );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_DATA_ENTRY_MSB );
+			result[0] = Dict.get(Dict.MSG3_C_DATA_ENTRY);
+			result[1] = Dict.get(Dict.MSG4_C_DATA_ENTRY_MSB);
 		}
 		else if (0x07 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_CHANNEL_VOL );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_CHANNEL_VOL_MSB );
+			result[0] = Dict.get(Dict.MSG3_C_CHANNEL_VOL);
+			result[1] = Dict.get(Dict.MSG4_C_CHANNEL_VOL_MSB);
 		}
 		else if (0x08 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_BALANCE );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_BALANCE_MSB );
+			result[0] = Dict.get(Dict.MSG3_C_BALANCE);
+			result[1] = Dict.get(Dict.MSG4_C_BALANCE_MSB);
 		}
 		else if (0x0A == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_PAN );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_PAN_MSB );
+			result[0] = Dict.get(Dict.MSG3_C_PAN);
+			result[1] = Dict.get(Dict.MSG4_C_PAN_MSB);
 		}
 		else if (0x0B == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_EXPRESSION );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_EXPRESSION_MSB );
+			result[0] = Dict.get(Dict.MSG3_C_EXPRESSION);
+			result[1] = Dict.get(Dict.MSG4_C_EXPRESSION_MSB);
 		}
 		else if (0x0C == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_EFFECT_CTRL_1 );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_EFFECT_CTRL_1_MSB );
+			result[0] = Dict.get(Dict.MSG3_C_EFFECT_CTRL_1);
+			result[1] = Dict.get(Dict.MSG4_C_EFFECT_CTRL_1_MSB);
 		}
 		else if (0x0D == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_EFFECT_CTRL_2 );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_EFFECT_CTRL_2_MSB );
+			result[0] = Dict.get(Dict.MSG3_C_EFFECT_CTRL_2);
+			result[1] = Dict.get(Dict.MSG4_C_EFFECT_CTRL_2_MSB);
 		}
 		else if (0x10 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_1 );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_GEN_PURP_CTRL_1_MSB );
+			result[0] = Dict.get(Dict.MSG3_C_GEN_PURP_CTRL_1);
+			result[1] = Dict.get(Dict.MSG4_C_GEN_PURP_CTRL_1_MSB);
 		}
 		else if (0x11 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_2 );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_GEN_PURP_CTRL_2_MSB );
+			result[0] = Dict.get(Dict.MSG3_C_GEN_PURP_CTRL_2);
+			result[1] = Dict.get(Dict.MSG4_C_GEN_PURP_CTRL_2_MSB);
 		}
 		else if (0x12 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_3 );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_GEN_PURP_CTRL_3_MSB );
+			result[0] = Dict.get(Dict.MSG3_C_GEN_PURP_CTRL_3);
+			result[1] = Dict.get(Dict.MSG4_C_GEN_PURP_CTRL_3_MSB);
 		}
 		else if (0x13 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_4 );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_GEN_PURP_CTRL_4_MSB );
+			result[0] = Dict.get(Dict.MSG3_C_GEN_PURP_CTRL_4);
+			result[1] = Dict.get(Dict.MSG4_C_GEN_PURP_CTRL_4_MSB);
 		}
 		
 		// controller + LSB
 		else if (0x20 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_BANK_SELECT );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_BANK_SELECT_LSB );
+			result[0] = Dict.get(Dict.MSG3_C_BANK_SELECT);
+			result[1] = Dict.get(Dict.MSG4_C_BANK_SELECT_LSB);
 		}
 		else if (0x21 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_MODULATION_WHEEL );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_MODULATION_WHEEL_LSB );
+			result[0] = Dict.get(Dict.MSG3_C_MODULATION_WHEEL);
+			result[1] = Dict.get(Dict.MSG4_C_MODULATION_WHEEL_LSB);
 		}
 		else if (0x22 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_BREATH_CTRL );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_BREATH_CTRL_LSB );
+			result[0] = Dict.get(Dict.MSG3_C_BREATH_CTRL);
+			result[1] = Dict.get(Dict.MSG4_C_BREATH_CTRL_LSB);
 		}
 		else if (0x24 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_FOOT_CTRL );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_FOOT_CTRL_LSB );
+			result[0] = Dict.get(Dict.MSG3_C_FOOT_CTRL);
+			result[1] = Dict.get(Dict.MSG4_C_FOOT_CTRL_LSB);
 		}
 		else if (0x25 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_PORTAMENTO_TIME );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_PORTAMENTO_TIME_LSB );
+			result[0] = Dict.get(Dict.MSG3_C_PORTAMENTO_TIME);
+			result[1] = Dict.get(Dict.MSG4_C_PORTAMENTO_TIME_LSB);
 		}
 		else if (0x26 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_DATA_ENTRY );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_DATA_ENTRY_LSB );
+			result[0] = Dict.get(Dict.MSG3_C_DATA_ENTRY);
+			result[1] = Dict.get(Dict.MSG4_C_DATA_ENTRY_LSB);
 		}
 		else if (0x27 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_CHANNEL_VOL );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_CHANNEL_VOL_LSB );
+			result[0] = Dict.get(Dict.MSG3_C_CHANNEL_VOL);
+			result[1] = Dict.get(Dict.MSG4_C_CHANNEL_VOL_LSB);
 		}
 		else if (0x28 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_BALANCE );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_BALANCE_LSB );
+			result[0] = Dict.get(Dict.MSG3_C_BALANCE);
+			result[1] = Dict.get(Dict.MSG4_C_BALANCE_LSB);
 		}
 		else if (0x2A == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_PAN );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_PAN_LSB );
+			result[0] = Dict.get(Dict.MSG3_C_PAN);
+			result[1] = Dict.get(Dict.MSG4_C_PAN_LSB);
 		}
 		else if (0x2B == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_EXPRESSION );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_EXPRESSION_LSB );
+			result[0] = Dict.get(Dict.MSG3_C_EXPRESSION);
+			result[1] = Dict.get(Dict.MSG4_C_EXPRESSION_LSB);
 		}
 		else if (0x2C == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_EFFECT_CTRL_1 );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_EFFECT_CTRL_1_LSB );
+			result[0] = Dict.get(Dict.MSG3_C_EFFECT_CTRL_1);
+			result[1] = Dict.get(Dict.MSG4_C_EFFECT_CTRL_1_LSB);
 		}
 		else if (0x2D == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_EFFECT_CTRL_2 );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_EFFECT_CTRL_2_LSB );
+			result[0] = Dict.get(Dict.MSG3_C_EFFECT_CTRL_2);
+			result[1] = Dict.get(Dict.MSG4_C_EFFECT_CTRL_2_LSB);
 		}
 		else if (0x30 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_1 );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_GEN_PURP_CTRL_1_LSB );
+			result[0] = Dict.get(Dict.MSG3_C_GEN_PURP_CTRL_1);
+			result[1] = Dict.get(Dict.MSG4_C_GEN_PURP_CTRL_1_LSB);
 		}
 		else if (0x31 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_2 );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_GEN_PURP_CTRL_2_LSB );
+			result[0] = Dict.get(Dict.MSG3_C_GEN_PURP_CTRL_2);
+			result[1] = Dict.get(Dict.MSG4_C_GEN_PURP_CTRL_2_LSB);
 		}
 		else if (0x32 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_3 );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_GEN_PURP_CTRL_3_LSB );
+			result[0] = Dict.get(Dict.MSG3_C_GEN_PURP_CTRL_3);
+			result[1] = Dict.get(Dict.MSG4_C_GEN_PURP_CTRL_3_LSB);
 		}
 		else if (0x33 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_4 );
-			result[ 1 ] = Dict.get( Dict.MSG4_C_GEN_PURP_CTRL_4_LSB );
+			result[0] = Dict.get(Dict.MSG3_C_GEN_PURP_CTRL_4);
+			result[1] = Dict.get(Dict.MSG4_C_GEN_PURP_CTRL_4_LSB);
 		}
 		
 		// controllers without MSB / LSB
 		else if (0x40 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_HOLD_PEDAL_1 );
+			result[0] = Dict.get(Dict.MSG3_C_HOLD_PEDAL_1);
 		}
 		else if (0x41 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_PORTAMENTO_PEDAL );
+			result[0] = Dict.get(Dict.MSG3_C_PORTAMENTO_PEDAL);
 		}
 		else if (0x42 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_SOSTENUTO_PEDAL );
+			result[0] = Dict.get(Dict.MSG3_C_SOSTENUTO_PEDAL);
 		}
 		else if (0x43 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_SOFT_PEDAL );
+			result[0] = Dict.get(Dict.MSG3_C_SOFT_PEDAL);
 		}
 		else if (0x44 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_LEGATO_PEDAL );
+			result[0] = Dict.get(Dict.MSG3_C_LEGATO_PEDAL);
 		}
 		else if (0x45 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_HOLD_PEDAL_2 );
+			result[0] = Dict.get(Dict.MSG3_C_HOLD_PEDAL_2);
 		}
 		else if (0x46 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_1 );
+			result[0] = Dict.get(Dict.MSG3_C_SOUND_CTRL_1);
 		}
 		else if (0x47 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_2 );
+			result[0] = Dict.get(Dict.MSG3_C_SOUND_CTRL_2);
 		}
 		else if (0x48 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_3 );
+			result[0] = Dict.get(Dict.MSG3_C_SOUND_CTRL_3);
 		}
 		else if (0x49 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_4 );
+			result[0] = Dict.get(Dict.MSG3_C_SOUND_CTRL_4);
 		}
 		else if (0x4A == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_5 );
+			result[0] = Dict.get(Dict.MSG3_C_SOUND_CTRL_5);
 		}
 		else if (0x4B == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_6 );
+			result[0] = Dict.get(Dict.MSG3_C_SOUND_CTRL_6);
 		}
 		else if (0x4C == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_7 );
+			result[0] = Dict.get(Dict.MSG3_C_SOUND_CTRL_7);
 		}
 		else if (0x4D == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_8 );
+			result[0] = Dict.get(Dict.MSG3_C_SOUND_CTRL_8);
 		}
 		else if (0x4E == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_9 );
+			result[0] = Dict.get(Dict.MSG3_C_SOUND_CTRL_9);
 		}
 		else if (0x4F == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_SOUND_CTRL_10 );
+			result[0] = Dict.get(Dict.MSG3_C_SOUND_CTRL_10);
 		}
 		else if (0x50 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_5 );
+			result[0] = Dict.get(Dict.MSG3_C_GEN_PURP_CTRL_5);
 		}
 		else if (0x51 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_6 );
+			result[0] = Dict.get(Dict.MSG3_C_GEN_PURP_CTRL_6);
 		}
 		else if (0x52 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_7 );
+			result[0] = Dict.get(Dict.MSG3_C_GEN_PURP_CTRL_7);
 		}
 		else if (0x53 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_GEN_PURP_CTRL_8 );
+			result[0] = Dict.get(Dict.MSG3_C_GEN_PURP_CTRL_8);
 		}
 		else if (0x54 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_PORTAMENTO_CTRL );
+			result[0] = Dict.get(Dict.MSG3_C_PORTAMENTO_CTRL);
 		}
 		else if (0x58 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_HI_RES_VELO_PRFX );
+			result[0] = Dict.get(Dict.MSG3_C_HI_RES_VELO_PRFX);
 		}
 		else if (0x5B == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_EFFECT_1_DEPTH );
+			result[0] = Dict.get(Dict.MSG3_C_EFFECT_1_DEPTH);
 		}
 		else if (0x5C == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_EFFECT_2_DEPTH );
+			result[0] = Dict.get(Dict.MSG3_C_EFFECT_2_DEPTH);
 		}
 		else if (0x5D == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_EFFECT_3_DEPTH );
+			result[0] = Dict.get(Dict.MSG3_C_EFFECT_3_DEPTH);
 		}
 		else if (0x5E == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_EFFECT_4_DEPTH );
+			result[0] = Dict.get(Dict.MSG3_C_EFFECT_4_DEPTH);
 		}
 		else if (0x5F == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_EFFECT_5_DEPTH );
+			result[0] = Dict.get(Dict.MSG3_C_EFFECT_5_DEPTH);
 		}
 		else if (0x60 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_DATA_BUTTON_INCR );
+			result[0] = Dict.get(Dict.MSG3_C_DATA_BUTTON_INCR);
 		}
 		else if (0x61 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_DATA_BUTTON_DECR );
+			result[0] = Dict.get(Dict.MSG3_C_DATA_BUTTON_DECR);
 		}
 		
 		// RPN / NRPN (with MSB/LSB)
 		else if (0x62 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_NRPN );
-			result[ 1 ] = Dict.get( Dict.MSG5_C_NRPN_LSB );
+			result[0] = Dict.get(Dict.MSG3_C_NRPN);
+			result[1] = Dict.get(Dict.MSG5_C_NRPN_LSB);
 		}
 		else if (0x63 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_NRPN );
-			result[ 1 ] = Dict.get( Dict.MSG5_C_NRPN_MSB );
+			result[0] = Dict.get(Dict.MSG3_C_NRPN);
+			result[1] = Dict.get(Dict.MSG5_C_NRPN_MSB);
 		}
 		else if (0x64 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_RPN );
-			result[ 1 ] = Dict.get( Dict.MSG5_C_RPN_LSB );
+			result[0] = Dict.get(Dict.MSG3_C_RPN);
+			result[1] = Dict.get(Dict.MSG5_C_RPN_LSB);
 		}
 		else if (0x65 == val) {
-			result[ 0 ] = Dict.get( Dict.MSG3_C_RPN );
-			result[ 1 ] = Dict.get( Dict.MSG5_C_RPN_MSB );
+			result[0] = Dict.get(Dict.MSG3_C_RPN);
+			result[1] = Dict.get(Dict.MSG5_C_RPN_MSB);
 		}
 		
 		// fallback
 		else {
-			result[ 0 ] = Dict.get( Dict.UNKNOWN );
+			result[0] = Dict.get(Dict.UNKNOWN);
 		}
 		
 		return result;
@@ -1407,56 +1416,56 @@ public class MessageClassifier {
 	private static final String[] getLvl4RpnNrpnDataTxt(byte msb, byte lsb, byte type) {
 		
 		// set general values
-		String paramTxt = Dict.get( Dict.UNKNOWN );
-		String paramStr = String.format( msb + "," + lsb );
+		String paramTxt = Dict.get(Dict.UNKNOWN);
+		String paramStr = String.format(msb + "," + lsb);
 		
 		// none
 		if (-1 == type || 0x7F == msb && 0x7F == lsb) {
-			paramTxt = Dict.get( Dict.UNSET );
+			paramTxt = Dict.get(Dict.UNSET);
 		}
 		
 		// RPN
 		if (1 == type) {
 			if (0x00 == msb) {
 				if (0x00 == lsb)
-					paramTxt = Dict.get( Dict.MSG4_RPN_PITCH_BEND_SENS );
+					paramTxt = Dict.get(Dict.MSG4_RPN_PITCH_BEND_SENS);
 				else if (0x01 == lsb)
-					paramTxt = Dict.get( Dict.MSG4_RPN_MASTER_FINE_TUN );
+					paramTxt = Dict.get(Dict.MSG4_RPN_MASTER_FINE_TUN);
 				else if (0x02 == lsb)
-					paramTxt = Dict.get( Dict.MSG4_RPN_MASTER_COARSE_TUN );
+					paramTxt = Dict.get(Dict.MSG4_RPN_MASTER_COARSE_TUN);
 				else if (0x03 == lsb)
-					paramTxt = Dict.get( Dict.MSG4_RPN_TUN_PROG_CHANGE );
+					paramTxt = Dict.get(Dict.MSG4_RPN_TUN_PROG_CHANGE);
 				else if (0x04 == lsb)
-					paramTxt = Dict.get( Dict.MSG4_RPN_TUN_BANK_SELECT );
+					paramTxt = Dict.get(Dict.MSG4_RPN_TUN_BANK_SELECT);
 				else if (0x05 == lsb)
-					paramTxt = Dict.get( Dict.MSG4_RPN_MOD_DEPTH_RANGE );
+					paramTxt = Dict.get(Dict.MSG4_RPN_MOD_DEPTH_RANGE);
 				else if (0x06 == lsb)
-					paramTxt = Dict.get( Dict.MSG4_RPN_MPE_CONFIG );
+					paramTxt = Dict.get(Dict.MSG4_RPN_MPE_CONFIG);
 			}
 			else if (0x3D == msb) {
 				if (0x00 == lsb)
-					paramTxt = Dict.get( Dict.MSG4_RPN_AZIMUTH_ANGLE );
+					paramTxt = Dict.get(Dict.MSG4_RPN_AZIMUTH_ANGLE);
 				else if (0x01 == lsb)
-					paramTxt = Dict.get( Dict.MSG4_RPN_ELEVATION_ANGLE );
+					paramTxt = Dict.get(Dict.MSG4_RPN_ELEVATION_ANGLE);
 				else if (0x02 == lsb)
-					paramTxt = Dict.get( Dict.MSG4_RPN_GAIN );
+					paramTxt = Dict.get(Dict.MSG4_RPN_GAIN);
 				else if (0x03 == lsb)
-					paramTxt = Dict.get( Dict.MSG4_RPN_DISTANCE_RATIO );
+					paramTxt = Dict.get(Dict.MSG4_RPN_DISTANCE_RATIO);
 				else if (0x04 == lsb)
-					paramTxt = Dict.get( Dict.MSG4_RPN_MAXIMUM_DISTANCE );
+					paramTxt = Dict.get(Dict.MSG4_RPN_MAXIMUM_DISTANCE);
 				else if (0x05 == lsb)
-					paramTxt = Dict.get( Dict.MSG4_RPN_GAIN_AT_MAX_DIST );
+					paramTxt = Dict.get(Dict.MSG4_RPN_GAIN_AT_MAX_DIST);
 				else if (0x06 == lsb)
-					paramTxt = Dict.get( Dict.MSG4_RPN_REF_DISTANCE_RATIO );
+					paramTxt = Dict.get(Dict.MSG4_RPN_REF_DISTANCE_RATIO);
 				else if (0x07 == lsb)
-					paramTxt = Dict.get( Dict.MSG4_RPN_PAN_SPREAD_ANGLE );
+					paramTxt = Dict.get(Dict.MSG4_RPN_PAN_SPREAD_ANGLE);
 				else if (0x08 == lsb)
-					paramTxt = Dict.get( Dict.MSG4_RPN_ROLL_ANGLE );
+					paramTxt = Dict.get(Dict.MSG4_RPN_ROLL_ANGLE);
 			}
 		}
 		
 		// put everything together
-		String[] result = { paramTxt, paramStr };
+		String[] result = {paramTxt, paramStr};
 		return result;
 	}
 	
@@ -1494,271 +1503,271 @@ public class MessageClassifier {
 		// init fallback
 		boolean hasLvl5 = false;
 		boolean hasLvl6 = false;
-		String  l4Txt   = Dict.get( Dict.UNKNOWN );
+		String  l4Txt   = Dict.get(Dict.UNKNOWN);
 		String  l5Txt   = l4Txt;
 		String  l6Txt   = l4Txt;
 		
 		// invalid sub ID 1 (message too short)
 		if (INVALID_BYTE == sub1) {
-			l4Txt = Dict.get( Dict.INVALID_MSG );
+			l4Txt = Dict.get(Dict.INVALID_MSG);
 		}
 		
 		// real time
 		if (isRealTime) {
 			if (0x01 == sub1) {
 				hasLvl5 = true;
-				l4Txt   = Dict.get( Dict.MSG4_SX_RU_MIDI_TIME_CODE );
-				if      (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR1_FULL_MSG  );
-				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR1_USER_BITS );
+				l4Txt   = Dict.get(Dict.MSG4_SX_RU_MIDI_TIME_CODE);
+				if      (0x01 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR1_FULL_MSG);
+				else if (0x02 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR1_USER_BITS);
 			}
 			else if (0x02 == sub1) {
 				hasLvl5 = true;
-				l4Txt   = Dict.get( Dict.MSG4_SX_RU_MIDI_SHOW_CTRL );
-				if      (0x00 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR2_MSC_EXT );
-				else if (sub2 <= 0x7F) l5Txt = Dict.get( Dict.MSG5_SXR2_MSC_CMD );
+				l4Txt   = Dict.get(Dict.MSG4_SX_RU_MIDI_SHOW_CTRL);
+				if      (0x00 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR2_MSC_EXT);
+				else if (sub2 <= 0x7F) l5Txt = Dict.get(Dict.MSG5_SXR2_MSC_CMD);
 			}
 			else if (0x03 == sub1) {
 				hasLvl5 = true;
-				l4Txt   = Dict.get( Dict.MSG4_SX_RU_NOTATION_INFO );
-				if      (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR3_BAR_NUMBER       );
-				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR3_TIME_SIG_IMMED   );
-				else if (0x42 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR3_TIME_SIG_DELAYED );
+				l4Txt   = Dict.get(Dict.MSG4_SX_RU_NOTATION_INFO);
+				if      (0x01 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR3_BAR_NUMBER);
+				else if (0x02 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR3_TIME_SIG_IMMED);
+				else if (0x42 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR3_TIME_SIG_DELAYED);
 			}
 			else if (0x04 == sub1) {
 				hasLvl5 = true;
-				l4Txt   = Dict.get( Dict.MSG4_SX_RU_DEVICE_CTRL );
-				if      (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR4_MASTER_VOLUME     );
-				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR4_MASTER_BALANCE    );
-				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR4_MASTER_FINE_TUN   );
-				else if (0x04 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR4_MASTER_COARSE_TUN );
-				else if (0x05 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR4_GLOBAL_PARAM_CTRL );
+				l4Txt   = Dict.get(Dict.MSG4_SX_RU_DEVICE_CTRL);
+				if      (0x01 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR4_MASTER_VOLUME);
+				else if (0x02 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR4_MASTER_BALANCE);
+				else if (0x03 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR4_MASTER_FINE_TUN);
+				else if (0x04 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR4_MASTER_COARSE_TUN);
+				else if (0x05 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR4_GLOBAL_PARAM_CTRL);
 			}
 			else if (0x05 == sub1) {
 				hasLvl5 = true;
-				l4Txt   = Dict.get( Dict.MSG4_SX_RU_RT_MTC_CUEING );
-				if      (0x00 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_SPECIAL           );
-				else if (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_PUNCH_IN_PTS      );
-				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_PUNCH_OUT_PTS     );
-				else if (0x05 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_EVT_START_PT      );
-				else if (0x06 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_EVT_STOP_PT       );
-				else if (0x07 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_EVT_START_PTS_ADD );
-				else if (0x08 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_EVT_STOP_PTS_ADD  );
-				else if (0x0B == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_CUE_PTS           );
-				else if (0x0C == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_CUE_PTS_ADD       );
-				else if (0x0E == sub2) l5Txt = Dict.get( Dict.MSG5_SXR5_EVT_NAME_IN_ADD   );
+				l4Txt   = Dict.get(Dict.MSG4_SX_RU_RT_MTC_CUEING);
+				if      (0x00 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR5_SPECIAL);
+				else if (0x01 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR5_PUNCH_IN_PTS);
+				else if (0x02 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR5_PUNCH_OUT_PTS);
+				else if (0x05 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR5_EVT_START_PT);
+				else if (0x06 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR5_EVT_STOP_PT);
+				else if (0x07 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR5_EVT_START_PTS_ADD);
+				else if (0x08 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR5_EVT_STOP_PTS_ADD);
+				else if (0x0B == sub2) l5Txt = Dict.get(Dict.MSG5_SXR5_CUE_PTS);
+				else if (0x0C == sub2) l5Txt = Dict.get(Dict.MSG5_SXR5_CUE_PTS_ADD);
+				else if (0x0E == sub2) l5Txt = Dict.get(Dict.MSG5_SXR5_EVT_NAME_IN_ADD);
 			}
 			else if (0x06 == sub1) {
 				hasLvl5 = true;
-				l4Txt   = Dict.get( Dict.MSG4_SX_RU_MACH_CTRL_CMD );
-				if      (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_STOP          );
-				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_PLAY          );
-				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_DEF_PLAY      );
-				else if (0x04 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_FAST_FW       );
-				else if (0x05 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_REWIND        );
-				else if (0x06 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_REC_STROBE    );
-				else if (0x07 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_REC_EXIT      );
-				else if (0x08 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_REC_PAUSE     );
-				else if (0x09 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_PAUSE         );
-				else if (0x0A == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_EJECT         );
-				else if (0x0B == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_CHASE         );
-				else if (0x0C == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_CMD_ERR_RESET );
-				else if (0x0D == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_MMC_RESET     );
-				else if (0x40 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_WRITE         );
-				else if (0x44 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_GOTO          );
-				else if (0x47 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR6_SHUTTLE       );
+				l4Txt   = Dict.get(Dict.MSG4_SX_RU_MACH_CTRL_CMD);
+				if      (0x01 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR6_STOP);
+				else if (0x02 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR6_PLAY);
+				else if (0x03 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR6_DEF_PLAY);
+				else if (0x04 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR6_FAST_FW);
+				else if (0x05 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR6_REWIND);
+				else if (0x06 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR6_REC_STROBE);
+				else if (0x07 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR6_REC_EXIT);
+				else if (0x08 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR6_REC_PAUSE);
+				else if (0x09 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR6_PAUSE);
+				else if (0x0A == sub2) l5Txt = Dict.get(Dict.MSG5_SXR6_EJECT);
+				else if (0x0B == sub2) l5Txt = Dict.get(Dict.MSG5_SXR6_CHASE);
+				else if (0x0C == sub2) l5Txt = Dict.get(Dict.MSG5_SXR6_CMD_ERR_RESET);
+				else if (0x0D == sub2) l5Txt = Dict.get(Dict.MSG5_SXR6_MMC_RESET);
+				else if (0x40 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR6_WRITE);
+				else if (0x44 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR6_GOTO);
+				else if (0x47 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR6_SHUTTLE);
 			}
 			else if (0x07 == sub1) {
 				hasLvl5 = true;
-				l4Txt   = Dict.get( Dict.MSG4_SX_RU_MACH_CTRL_RES );
-				l5Txt   = Dict.get( Dict.MSG5_SXR7_MMC_RES        );
+				l4Txt   = Dict.get(Dict.MSG4_SX_RU_MACH_CTRL_RES);
+				l5Txt   = Dict.get(Dict.MSG5_SXR7_MMC_RES);
 			}
 			else if (0x08 == sub1) {
 				hasLvl5 = true;
-				l4Txt   = Dict.get( Dict.MSG4_SX_RU_TUNING_STANDARD );
-				if      (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR8_SG_TUN_CH         );
-				else if (0x07 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR8_SG_TUN_CH_BNK_SEL );
-				else if (0x08 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR8_SO_TUN_1          );
-				else if (0x09 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR8_SO_TUN_2          );
+				l4Txt   = Dict.get(Dict.MSG4_SX_RU_TUNING_STANDARD);
+				if      (0x02 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR8_SG_TUN_CH);
+				else if (0x07 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR8_SG_TUN_CH_BNK_SEL);
+				else if (0x08 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR8_SO_TUN_1);
+				else if (0x09 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR8_SO_TUN_2);
 			}
 			else if (0x09 == sub1) {
 				hasLvl5 = true;
-				l4Txt   = Dict.get( Dict.MSG4_SX_RU_CTRL_DEST_SET );
-				if      (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR9_CHANNEL_PRESSURE  );
-				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR9_POLY_KEY_PRESSURE );
-				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXR9_CTRL              );
+				l4Txt   = Dict.get(Dict.MSG4_SX_RU_CTRL_DEST_SET);
+				if      (0x01 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR9_CHANNEL_PRESSURE);
+				else if (0x02 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR9_POLY_KEY_PRESSURE);
+				else if (0x03 == sub2) l5Txt = Dict.get(Dict.MSG5_SXR9_CTRL);
 			}
 			else if (0x0A == sub1 && 0x01 == sub2) {
-				l4Txt = Dict.get( Dict.MSG4_SX_RU_KEY_B_INSTR_CTRL );
+				l4Txt = Dict.get(Dict.MSG4_SX_RU_KEY_B_INSTR_CTRL);
 			}
 			else if (0x0B == sub1 && 0x01 == sub2) {
-				l4Txt = Dict.get( Dict.MSG4_SX_RU_SCAL_POLY_MIP );
+				l4Txt = Dict.get(Dict.MSG4_SX_RU_SCAL_POLY_MIP);
 			}
 			else if (0x0C == sub1 && 0x00 == sub2) {
-				l4Txt = Dict.get( Dict.MSG4_SX_RU_MOB_PHONE_CTRL );
+				l4Txt = Dict.get(Dict.MSG4_SX_RU_MOB_PHONE_CTRL);
 			}
 		}
 		
 		// non real time
 		else {
 			if (0x01 == sub1) {
-				l4Txt = Dict.get( Dict.MSG4_SX_NU_SMPL_DUMP_HDR );
+				l4Txt = Dict.get(Dict.MSG4_SX_NU_SMPL_DUMP_HDR);
 			}
 			else if (0x02 == sub1) {
-				l4Txt = Dict.get( Dict.MSG4_SX_NU_SMPL_DATA_PKT );
+				l4Txt = Dict.get(Dict.MSG4_SX_NU_SMPL_DATA_PKT);
 			}
 			else if (0x03 == sub1) {
-				l4Txt = Dict.get( Dict.MSG4_SX_NU_SMPL_DUMP_REQ );
+				l4Txt = Dict.get(Dict.MSG4_SX_NU_SMPL_DUMP_REQ);
 			}
 			else if (0x04 == sub1) {
 				hasLvl5 = true;
-				l4Txt   = Dict.get( Dict.MSG4_SX_NU_MIDI_TIME_CODE );
-				if      (0x00 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_SPECIAL           );
-				else if (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_PUNCH_IN_PTS      );
-				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_PUNCH_OUT_PTS     );
-				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_DEL_PUNCH_IN_PTS  );
-				else if (0x04 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_DEL_PUNCH_OUT_PTS );
-				else if (0x05 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_EVT_START_PT      );
-				else if (0x06 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_EVT_STOP_PT       );
-				else if (0x07 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_EVT_START_PTS_ADD );
-				else if (0x08 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_EVT_STOP_PTS_ADD  );
-				else if (0x09 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_DEL_EVT_START_PT  );
-				else if (0x0A == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_DEL_EVT_STOP_PT   );
-				else if (0x0B == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_CUE_PTS           );
-				else if (0x0C == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_CUE_PTS_ADD       );
-				else if (0x0D == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_DEL_CUE_PT        );
-				else if (0x0E == sub2) l5Txt = Dict.get( Dict.MSG5_SXN4_EVT_NAME_IN_ADD   );
+				l4Txt   = Dict.get(Dict.MSG4_SX_NU_MIDI_TIME_CODE);
+				if      (0x00 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN4_SPECIAL);
+				else if (0x01 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN4_PUNCH_IN_PTS);
+				else if (0x02 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN4_PUNCH_OUT_PTS);
+				else if (0x03 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN4_DEL_PUNCH_IN_PTS);
+				else if (0x04 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN4_DEL_PUNCH_OUT_PTS);
+				else if (0x05 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN4_EVT_START_PT);
+				else if (0x06 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN4_EVT_STOP_PT);
+				else if (0x07 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN4_EVT_START_PTS_ADD);
+				else if (0x08 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN4_EVT_STOP_PTS_ADD);
+				else if (0x09 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN4_DEL_EVT_START_PT);
+				else if (0x0A == sub2) l5Txt = Dict.get(Dict.MSG5_SXN4_DEL_EVT_STOP_PT);
+				else if (0x0B == sub2) l5Txt = Dict.get(Dict.MSG5_SXN4_CUE_PTS);
+				else if (0x0C == sub2) l5Txt = Dict.get(Dict.MSG5_SXN4_CUE_PTS_ADD);
+				else if (0x0D == sub2) l5Txt = Dict.get(Dict.MSG5_SXN4_DEL_CUE_PT);
+				else if (0x0E == sub2) l5Txt = Dict.get(Dict.MSG5_SXN4_EVT_NAME_IN_ADD);
 			}
 			else if (0x05 == sub1) {
 				hasLvl5 = true;
-				l4Txt   = Dict.get( Dict.MSG4_SX_NU_SAMPLE_DUMP_EXT );
-				if      (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN5_LOOP_PTS_TRANSM  );
-				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN5_LOOP_PTS_REQ     );
-				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN5_SMPL_NAME_TRANSM );
-				else if (0x04 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN5_SMPL_NAME_REQ    );
-				else if (0x05 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN5_EXT_DUMP_HDR     );
-				else if (0x06 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN5_EXT_LOOP_PTS_TR  );
-				else if (0x07 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN5_EXT_LOOP_PTS_REQ );
+				l4Txt   = Dict.get(Dict.MSG4_SX_NU_SAMPLE_DUMP_EXT);
+				if      (0x01 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN5_LOOP_PTS_TRANSM);
+				else if (0x02 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN5_LOOP_PTS_REQ);
+				else if (0x03 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN5_SMPL_NAME_TRANSM);
+				else if (0x04 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN5_SMPL_NAME_REQ);
+				else if (0x05 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN5_EXT_DUMP_HDR);
+				else if (0x06 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN5_EXT_LOOP_PTS_TR);
+				else if (0x07 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN5_EXT_LOOP_PTS_REQ);
 			}
 			else if (0x06 == sub1) {
 				hasLvl5 = true;
-				l4Txt   = Dict.get( Dict.MSG4_SX_NU_GENERAL_INFO );
-				if      (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN6_IDENTITY_REQ  );
-				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN6_IDENTITY_REPL );
+				l4Txt   = Dict.get(Dict.MSG4_SX_NU_GENERAL_INFO);
+				if      (0x01 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN6_IDENTITY_REQ);
+				else if (0x02 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN6_IDENTITY_REPL);
 			}
 			else if (0x07 == sub1) {
 				hasLvl5 = true;
-				l4Txt   = Dict.get( Dict.MSG4_SX_NU_FILE_DUMP );
-				if      (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN7_HEADER      );
-				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN7_DATA_PACKET );
-				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN7_REQUEST     );
+				l4Txt   = Dict.get(Dict.MSG4_SX_NU_FILE_DUMP);
+				if      (0x01 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN7_HEADER);
+				else if (0x02 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN7_DATA_PACKET);
+				else if (0x03 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN7_REQUEST);
 			}
 			else if (0x08 == sub1) {
 				hasLvl5 = true;
-				l4Txt   = Dict.get( Dict.MSG4_SX_NU_TUNING_STANDARD );
-				if      (0x00 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN8_BLK_DUMP_REQ      );
-				else if (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN8_BLK_DUMP_REPL     );
-				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN8_TUNING_DUMP_REQ   );
-				else if (0x04 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN8_KEY_B_TUNING_DMP  );
-				else if (0x05 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN8_SO_TUN_DMP_1      );
-				else if (0x06 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN8_SO_TUN_DMP_2      );
-				else if (0x07 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN8_SG_TUN_CH_BNK_SEL );
-				else if (0x08 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN8_SO_TUN_1          );
-				else if (0x09 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN8_SO_TUN_2          );
+				l4Txt   = Dict.get(Dict.MSG4_SX_NU_TUNING_STANDARD);
+				if      (0x00 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN8_BLK_DUMP_REQ);
+				else if (0x01 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN8_BLK_DUMP_REPL);
+				else if (0x03 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN8_TUNING_DUMP_REQ);
+				else if (0x04 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN8_KEY_B_TUNING_DMP);
+				else if (0x05 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN8_SO_TUN_DMP_1);
+				else if (0x06 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN8_SO_TUN_DMP_2);
+				else if (0x07 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN8_SG_TUN_CH_BNK_SEL);
+				else if (0x08 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN8_SO_TUN_1);
+				else if (0x09 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN8_SO_TUN_2);
 			}
 			else if (0x09 == sub1) {
 				hasLvl5 = true;
-				l4Txt   = Dict.get( Dict.MSG4_SX_NU_GENERA_MIDI );
-				if      (0x00 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN9_GM_DISABLE );
-				else if (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN9_GM_1_ON    );
-				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN9_GM_OFF     );
-				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXN9_GM_2_ON    );
+				l4Txt   = Dict.get(Dict.MSG4_SX_NU_GENERA_MIDI);
+				if      (0x00 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN9_GM_DISABLE);
+				else if (0x01 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN9_GM_1_ON);
+				else if (0x02 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN9_GM_OFF);
+				else if (0x03 == sub2) l5Txt = Dict.get(Dict.MSG5_SXN9_GM_2_ON);
 			}
 			else if (0x0A == sub1) {
 				hasLvl5 = true;
-				l4Txt   = Dict.get( Dict.MSG4_SX_NU_DOWNLOADABLE_SND );
-				if      (0x00 == sub2) l5Txt = Dict.get( Dict.MSG5_SXNA_DLS_ON     );
-				else if (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXNA_DLS_OFF    );
-				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXNA_DLS_VA_OFF );
-				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXNA_DLS_VA_ON  );
+				l4Txt   = Dict.get(Dict.MSG4_SX_NU_DOWNLOADABLE_SND);
+				if      (0x00 == sub2) l5Txt = Dict.get(Dict.MSG5_SXNA_DLS_ON);
+				else if (0x01 == sub2) l5Txt = Dict.get(Dict.MSG5_SXNA_DLS_OFF);
+				else if (0x02 == sub2) l5Txt = Dict.get(Dict.MSG5_SXNA_DLS_VA_OFF);
+				else if (0x03 == sub2) l5Txt = Dict.get(Dict.MSG5_SXNA_DLS_VA_ON);
 			}
 			else if (0x0B == sub1) {
 				hasLvl5 = true;
-				l4Txt   = Dict.get( Dict.MSG4_SX_NU_FILE_REF_MSG );
-				if      (0x01 == sub2) l5Txt = Dict.get( Dict.MSG5_SXNB_OPEN_FILE      );
-				else if (0x02 == sub2) l5Txt = Dict.get( Dict.MSG5_SXNB_SEL_RESEL_CONT );
-				else if (0x03 == sub2) l5Txt = Dict.get( Dict.MSG5_SXNB_OPEN_SEL_CONT  );
-				else if (0x04 == sub2) l5Txt = Dict.get( Dict.MSG5_SXNB_CLOSE_FILE     );
+				l4Txt   = Dict.get(Dict.MSG4_SX_NU_FILE_REF_MSG);
+				if      (0x01 == sub2) l5Txt = Dict.get(Dict.MSG5_SXNB_OPEN_FILE);
+				else if (0x02 == sub2) l5Txt = Dict.get(Dict.MSG5_SXNB_SEL_RESEL_CONT);
+				else if (0x03 == sub2) l5Txt = Dict.get(Dict.MSG5_SXNB_OPEN_SEL_CONT);
+				else if (0x04 == sub2) l5Txt = Dict.get(Dict.MSG5_SXNB_CLOSE_FILE);
 			}
 			else if (0x0C == sub1) {
 				hasLvl5 = true;
-				l4Txt   = Dict.get( Dict.MSG4_SX_NU_MIDI_VISUAL_CTRL );
-				l5Txt   = Dict.get( Dict.MSG5_SXNC_MVC_CMD           );
+				l4Txt   = Dict.get(Dict.MSG4_SX_NU_MIDI_VISUAL_CTRL);
+				l5Txt   = Dict.get(Dict.MSG5_SXNC_MVC_CMD);
 			}
 			else if (0x0D == sub1) { // MIDI-CI Message
 				hasLvl5 = true;
-				l4Txt   = Dict.get( Dict.MSG4_SX_NU_MIDI_CI );
-				if      (sub2 < 0x10) l5Txt = Dict.get( Dict.MSG5_SXND_CI_RESERVED );
+				l4Txt   = Dict.get(Dict.MSG4_SX_NU_MIDI_CI);
+				if      (sub2 < 0x10) l5Txt = Dict.get(Dict.MSG5_SXND_CI_RESERVED);
 				else if (sub2 < 0x20) {
-					l5Txt   = Dict.get( Dict.MSG5_SXND_CI_PROTO_NEGO );
+					l5Txt   = Dict.get(Dict.MSG5_SXND_CI_PROTO_NEGO);
 					hasLvl6 = true;
-					if      (0x10 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND10_INIT_PROTO_NEGO   );
-					else if (0x11 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND11_INIT_PROTO_REPL   );
-					else if (0x12 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND12_SET_NEW_PROTO     );
-					else if (0x13 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND13_TEST_NEW_PROT_ITR );
-					else if (0x14 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND14_TEST_NEW_PROT_RTI );
-					else if (0x15 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND15_CONF_NEW_PROT_EST );
+					if      (0x10 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND10_INIT_PROTO_NEGO);
+					else if (0x11 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND11_INIT_PROTO_REPL);
+					else if (0x12 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND12_SET_NEW_PROTO);
+					else if (0x13 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND13_TEST_NEW_PROT_ITR);
+					else if (0x14 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND14_TEST_NEW_PROT_RTI);
+					else if (0x15 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND15_CONF_NEW_PROT_EST);
 				}
 				else if (sub2 < 0x30) {
-					l5Txt   = Dict.get( Dict.MSG5_SXND_CI_PROF_CONF );
+					l5Txt   = Dict.get(Dict.MSG5_SXND_CI_PROF_CONF);
 					hasLvl6 = true;
-					if      (0x20 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND20_PROF_INQ         );
-					else if (0x21 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND21_PROF_INQ_REPL    );
-					else if (0x22 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND22_SET_PROF_ON      );
-					else if (0x23 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND23_SET_PROF_OFF     );
-					else if (0x24 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND24_PROF_ENABL_RPRT  );
-					else if (0x25 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND25_PROF_DISABL_RPRT );
-					else if (0x2F == sub2) l6Txt = Dict.get( Dict.MSG6_SXND2F_PROF_SPEC_DATA   );
+					if      (0x20 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND20_PROF_INQ);
+					else if (0x21 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND21_PROF_INQ_REPL);
+					else if (0x22 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND22_SET_PROF_ON);
+					else if (0x23 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND23_SET_PROF_OFF);
+					else if (0x24 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND24_PROF_ENABL_RPRT);
+					else if (0x25 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND25_PROF_DISABL_RPRT);
+					else if (0x2F == sub2) l6Txt = Dict.get(Dict.MSG6_SXND2F_PROF_SPEC_DATA);
 				}
 				else if (sub2 < 0x40) {
-					l5Txt   = Dict.get( Dict.MSG5_SXND_CI_PROP_EXCH );
+					l5Txt   = Dict.get(Dict.MSG5_SXND_CI_PROP_EXCH);
 					hasLvl6 = true;
-					if      (0x30 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND30_PROP_EXCH_CAP_INQ  );
-					else if (0x31 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND31_PROP_EXCH_CAP_REPL );
-					else if (0x32 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND32_HAS_PROP_DATA_INQ  );
-					else if (0x33 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND33_HAS_PROP_DATA_REPL );
-					else if (0x34 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND34_GET_PROP_DATA_INQ  );
-					else if (0x35 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND35_GET_PROP_DATA_REPL );
-					else if (0x36 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND36_SET_PROP_DATA_INQ  );
-					else if (0x37 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND37_SET_PROP_DATA_REPL );
-					else if (0x38 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND38_SUBSCRIPTION       );
-					else if (0x39 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND39_SUBSCRIPTION_REPL  );
-					else if (0x3F == sub2) l6Txt = Dict.get( Dict.MSG6_SXND3F_NOTIFY             );
+					if      (0x30 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND30_PROP_EXCH_CAP_INQ);
+					else if (0x31 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND31_PROP_EXCH_CAP_REPL);
+					else if (0x32 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND32_HAS_PROP_DATA_INQ);
+					else if (0x33 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND33_HAS_PROP_DATA_REPL);
+					else if (0x34 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND34_GET_PROP_DATA_INQ);
+					else if (0x35 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND35_GET_PROP_DATA_REPL);
+					else if (0x36 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND36_SET_PROP_DATA_INQ);
+					else if (0x37 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND37_SET_PROP_DATA_REPL);
+					else if (0x38 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND38_SUBSCRIPTION);
+					else if (0x39 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND39_SUBSCRIPTION_REPL);
+					else if (0x3F == sub2) l6Txt = Dict.get(Dict.MSG6_SXND3F_NOTIFY);
 					
 				}
-				else if (sub2 < 0x70) l5Txt = Dict.get( Dict.MSG5_SXND_CI_RESERVED );
+				else if (sub2 < 0x70) l5Txt = Dict.get(Dict.MSG5_SXND_CI_RESERVED);
 				else if (sub2 < 0x80) {
-					l5Txt = Dict.get( Dict.MSG5_SXND_CI_MGMT_MSG );
+					l5Txt = Dict.get(Dict.MSG5_SXND_CI_MGMT_MSG);
 					hasLvl6 = true;
-					if      (0x70 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND70_DISCOVERY      );
-					else if (0x71 == sub2) l6Txt = Dict.get( Dict.MSG6_SXND71_DISCOVERY_RESP );
-					else if (0x7E == sub2) l6Txt = Dict.get( Dict.MSG6_SXND7E_INVAL_MUID     );
-					else if (0x7F == sub2) l6Txt = Dict.get( Dict.MSG6_SXND7F_NAK            );
+					if      (0x70 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND70_DISCOVERY);
+					else if (0x71 == sub2) l6Txt = Dict.get(Dict.MSG6_SXND71_DISCOVERY_RESP);
+					else if (0x7E == sub2) l6Txt = Dict.get(Dict.MSG6_SXND7E_INVAL_MUID);
+					else if (0x7F == sub2) l6Txt = Dict.get(Dict.MSG6_SXND7F_NAK);
 				}
 			}
 			else if (0x7B == sub1) {
-				l4Txt = Dict.get( Dict.MSG4_SX_NU_END_OF_FILE );
+				l4Txt = Dict.get(Dict.MSG4_SX_NU_END_OF_FILE);
 			}
 			else if (0x7C == sub1) {
-				l4Txt = Dict.get( Dict.MSG4_SX_NU_WAIT );
+				l4Txt = Dict.get(Dict.MSG4_SX_NU_WAIT);
 			}
 			else if (0x7D == sub1) {
-				l4Txt = Dict.get( Dict.MSG4_SX_NU_CANCEL );
+				l4Txt = Dict.get(Dict.MSG4_SX_NU_CANCEL);
 			}
 			else if (0x7E == sub1) {
-				l4Txt = Dict.get( Dict.MSG4_SX_NU_NAK );
+				l4Txt = Dict.get(Dict.MSG4_SX_NU_NAK);
 			}
 			else if (0x7F == sub1) {
-				l4Txt = Dict.get( Dict.MSG4_SX_NU_ACK );
+				l4Txt = Dict.get(Dict.MSG4_SX_NU_ACK);
 			}
 		}
 		
@@ -1771,15 +1780,15 @@ public class MessageClassifier {
 			String[] result = {l4Txt, l5Txt, String.format("%02X", sub2)};
 			if (INVALID_BYTE == sub2) {
 				// invalid sub ID 2 (message too short)
-				result[ 1 ] = Dict.get( Dict.INVALID_MSG );
-				result[ 2 ] = "-";
+				result[1] = Dict.get(Dict.INVALID_MSG);
+				result[2] = "-";
 			}
 			return result;
 		}
 		
 		// only node 4 - pack and return the result
 		else {
-			String[] result = { l4Txt };
+			String[] result = {l4Txt};
 			return result;
 		}
 	}
@@ -1800,7 +1809,7 @@ public class MessageClassifier {
 		
 		// invalid (vendor number not found, message too short)
 		if ("-".equals(vendorNum)) {
-			return Dict.get( Dict.INVALID_MSG );
+			return Dict.get(Dict.INVALID_MSG);
 		}
 		
 		// north american group
@@ -2330,6 +2339,6 @@ public class MessageClassifier {
 		if ( "004005".equals(vendorNum) ) return "Pioneer DJ";
 		
 		// fallback
-		return Dict.get( Dict.UNKNOWN );
+		return Dict.get(Dict.UNKNOWN);
 	}
 }

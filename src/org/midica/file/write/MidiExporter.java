@@ -194,7 +194,7 @@ public class MidiExporter extends Exporter {
 			return new MidiEvent( newMsg, tick );
 		}
 		catch ( InvalidMidiDataException e ) {
-			exportResult.addWarning( trackNum, tick, -1, -1, e.getMessage() );
+			exportResult.addWarning( trackNum, tick, null, e.getMessage() );
 			
 			return oldEvent;
 		}
@@ -235,7 +235,7 @@ public class MidiExporter extends Exporter {
 			return new MidiEvent( newMsg, tick );
 		}
 		catch ( InvalidMidiDataException e ) {
-			exportResult.addWarning( trackNum, tick, -1, -1, e.getMessage() );
+			exportResult.addWarning( trackNum, tick, null, e.getMessage() );
 			
 			return oldEvent;
 		}

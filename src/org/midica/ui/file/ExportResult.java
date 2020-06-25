@@ -11,9 +11,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.TreeMap;
 
+import org.midica.config.Dict;
+import org.midica.config.Laf;
+import org.midica.ui.model.IMessageType;
+import org.midica.ui.model.SingleMessage;
+
 /**
  * This class is used to collect export warnings for a later display.
- * A MIDI stream can not always be transformed into a MidicaPL source file properly.
+ * A MIDI sequence can not always be transformed into source code properly.
  * Warnings regarding such problems are collected and sorted here in order to be displayed later.
  * 
  * @author Jan Trukenmüller
@@ -21,8 +26,9 @@ import java.util.TreeMap;
 public class ExportResult {
 	
 	private TreeMap<Long, ArrayList<HashMap<String, Object>>> warningMap;
-	private int     numberOfWarnings;
-	private boolean success = true;
+	private int                     numberOfWarnings;
+	private boolean                 success     = true;
+	private HashMap<String, Object> lastWarning = null;
 	
 	/**
 	 * Creator of an empty warning object.
@@ -30,7 +36,7 @@ public class ExportResult {
 	 * 
 	 * @param success  false, if the export failed. Otherwise: true.
 	 */
-	public ExportResult( boolean success ) {
+	public ExportResult(boolean success) {
 		this.success     = success;
 		warningMap       = new TreeMap<Long, ArrayList<HashMap<String, Object>>>();
 		numberOfWarnings = 0;
@@ -39,24 +45,23 @@ public class ExportResult {
 	/**
 	 * Adds a new warning message.
 	 * 
-	 * @param track    Track number of the event that caused the warning.
+	 * @param track    Track number of the event that caused the warning, or **null** if unknown.
 	 * @param tick     Tickstamp of the event that caused the warning.
-	 * @param channel  Channel where the warning occured -- or -1 if it wasn't a channel based event.
-	 * @param note     Note number of the event -- or -1 if no note was involved.
+	 * @param channel  Channel where the warning occured -- or **null** if it wasn't a channel based event.
 	 * @param msg      Warning message
 	 */
-	public void addWarning( int track, long tick, int channel, int note, String msg ) {
+	public void addWarning(Integer track, long tick, Byte channel, String msg) {
 		
 		numberOfWarnings++;
 		
 		// create new warning list for the given tick, if this is the first warning at that tick
 		ArrayList<HashMap<String, Object>> warningsAtTick;
-		if ( warningMap.containsKey(tick) ) {
-			warningsAtTick = warningMap.get( tick );
+		if (warningMap.containsKey(tick)) {
+			warningsAtTick = warningMap.get(tick);
 		}
 		else {
 			warningsAtTick = new ArrayList<HashMap<String, Object>>();
-			warningMap.put( tick, warningsAtTick );
+			warningMap.put(tick, warningsAtTick);
 		}
 		
 		// create new warning
@@ -64,13 +69,45 @@ public class ExportResult {
 		warning.put( "track",   track   );
 		warning.put( "tick",    tick    );
 		warning.put( "channel", channel );
-		warning.put( "note",    note    );
 		warning.put( "msg",     msg     );
 		
 		// add the new warning
-		warningsAtTick.add( warning );
+		warningsAtTick.add(warning);
+		
+		// remember the last warning, in case it's based on a MIDI message
+		lastWarning = warning;
 		
 		return;
+	}
+	
+	/**
+	 * Adds MIDI message details to the last warning.
+	 * 
+	 * @param msg  the message details
+	 */
+	public void setDetailsOfLastWarning(SingleMessage msg) {
+		if (null == msg || null == lastWarning) {
+			return;
+		}
+		
+		String summary = (String) msg.getOption(IMessageType.OPT_SUMMARY);
+		String details = "<html><b>" + Dict.get(Dict.INFO_COL_MSG_TYPE) + ":</b> " + msg.getType();
+		if (summary != null) {
+			details += "<span style=\"color: #" + Laf.COLOR_MSG_ARROW_HTML + "; font-weight: bold; \"> / </span>"
+			        +  "<b>" + Dict.get(Dict.INFO_COL_MSG_SUMMARY) + ":</b> " + summary;
+		}
+		setDetailsOfLastWarning(details);
+	}
+	
+	/**
+	 * Adds a custom details string to the last warning.
+	 * 
+	 * @param details  the custom details to be added.
+	 */
+	public void setDetailsOfLastWarning(String details) {
+		if (lastWarning != null) {
+			lastWarning.put("details", details);
+		}
 	}
 	
 	/**
@@ -85,9 +122,9 @@ public class ExportResult {
 		
 		// transform the warnings into a flat data structure
 		ArrayList<HashMap<String, Object>> warnings = new ArrayList<HashMap<String,Object>>();
-		for ( long tick : warningMap.keySet() ) {
-			for ( int i = 0; i < warningMap.get(tick).size(); i++ ) {
-				warnings.add( warningMap.get(tick).get(i) );
+		for (long tick : warningMap.keySet()) {
+			for (int i = 0; i < warningMap.get(tick).size(); i++) {
+				warnings.add(warningMap.get(tick).get(i));
 			}
 		}
 		

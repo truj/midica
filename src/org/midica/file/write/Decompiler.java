@@ -24,6 +24,8 @@ import java.util.Map.Entry;
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiEvent;
 import javax.sound.midi.MidiMessage;
+import javax.sound.midi.ShortMessage;
+import javax.sound.midi.SysexMessage;
 import javax.sound.midi.Track;
 
 import org.midica.config.Cli;
@@ -42,6 +44,7 @@ import org.midica.ui.file.DecompileConfigController;
 import org.midica.ui.file.ExportResult;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
+import org.midica.ui.model.MidicaTreeModel;
 
 /**
  * This is the base class of all decompiling exporters, translating MIDI into something else.
@@ -255,8 +258,17 @@ public abstract class Decompiler extends Exporter {
 		// initialize format specific structures, if necessary
 		init();
 		
-		exportResult         = new ExportResult(true);
+		// prepare export result (including the warning table)
+		// The message tree must be postprocessed to make sure that the details column
+		// of message-based warnings is filled properly.
+		// Otherwise it only works if the InfoView has been opened before the decompilation.
+		exportResult = new ExportResult(true);
+		MidicaTreeModel model = (MidicaTreeModel) SequenceAnalyzer.getSequenceInfo().get("msg_tree_model");
+		model.postprocess();
+		
+		// charset
 		String targetCharset = ((ComboboxStringOption) ConfigComboboxModel.getModel(Config.CHARSET_EXPORT_MPL).getSelectedItem()).getIdentifier();
+		// TODO: ALDA charset
 		
 		try {
 			
@@ -312,9 +324,11 @@ public abstract class Decompiler extends Exporter {
 			// detect global commands and split the sequence into slices accordingly
 			splitSequence();
 			
-			// calculate what tick length corresponds to what note length
+			// calculate which tick length corresponds to which note length
 			noteLength = initLengths(false);
 			restLength = initLengths(true);
+			postprocessLengths(noteLength);
+			postprocessLengths(restLength);
 			
 			// fill slices
 			addInstrumentsToSlices();
@@ -553,6 +567,60 @@ public abstract class Decompiler extends Exporter {
 	}
 	
 	/**
+	 * Removes lengths that are too small to make sense according to the source resolution.
+	 * 
+	 * The following lengths are removed:
+	 * 
+	 * - lengths with zero ticks
+	 * - lengths with less than half ticks of the next longer length
+	 * 
+	 * The last step is necessary to avoid length sums like /4+256+256.
+	 * Can happen due to rounding errors of very small lengths.
+	 * 
+	 * @param lengths  note or rest lengths
+	 */
+	private void postprocessLengths(TreeMap<Long, String> lengths) {
+		
+		// remove zero-tick lengths
+		while (lengths.floorKey(0L) != null) {
+			lengths.remove(lengths.floorKey(0L));
+		}
+		
+		// Remove the smallest length, if the second smallest length is more than double of its size.
+		
+		// Step 1: collect the lengths to be removed
+		ArrayList<Long> toRemove = new ArrayList<>();
+		Long lastLength = null;
+		for (long length : lengths.keySet()) {
+			
+			// first loop run?
+			if (null == lastLength) {
+				lastLength = length;
+				continue;
+			}
+			
+			// must remove?
+			boolean mustRemove = false;
+			if (2 * lastLength < length)
+				mustRemove = true;
+			
+			// remove
+			if (mustRemove)
+				toRemove.add(lastLength);
+			
+			// stop, if possible
+			lastLength = length;
+			if (! mustRemove)
+				break;
+		}
+		
+		// Step 2: remove the lengths
+		for (long length : toRemove) {
+			lengths.remove(length);
+		}
+	}
+	
+	/**
 	 * Splits the sequence into slices between global commands.
 	 * Adds the global commands to the according slices.
 	 * 
@@ -591,33 +659,25 @@ public abstract class Decompiler extends Exporter {
 				long        tick  = event.getTick();
 				MidiMessage msg   = event.getMessage();
 				
-				// channel name?
-				if (msg instanceof MetaMessage) {
-					// TODO: implement or delete
-				}
-				
-				// TODO: implement or delete
 				// short message
-//				if (msg instanceof ShortMessage) {
-//					ShortMessage shortMsg = (ShortMessage) msg;
-//					int cmd      = shortMsg.getCommand();
-//					int channel  = shortMsg.getChannel();
-//					int note     = shortMsg.getData1();
-//					int velocity = shortMsg.getData2();
-//					
-//					// ignore events that are handled otherwise
-//					if ( ShortMessage.PROGRAM_CHANGE == cmd
-//					  || ShortMessage.NOTE_ON        == cmd
-//					  || ShortMessage.NOTE_OFF       == cmd ) {
-//						// ignore
-//					}
-//					
-//					// something else?
-//					else {
-//						String warning = String.format( Dict.get(Dict.WARNING_IGNORED_SHORT_MESSAGE), cmd, note, velocity );
-//						exportResult.addWarning(trackNum, tick, channel, -1, warning);
-//					}
-//				}
+				if (msg instanceof ShortMessage) {
+					ShortMessage shortMsg = (ShortMessage) msg;
+					int  cmd     = shortMsg.getCommand();
+					byte channel = (byte) shortMsg.getChannel();
+					
+					// ignore events that are handled otherwise
+					if (ShortMessage.PROGRAM_CHANGE == cmd
+					  || ShortMessage.NOTE_ON       == cmd
+					  || ShortMessage.NOTE_OFF      == cmd) {
+						// ignore
+					}
+					
+					// something else? - add warning
+					else {
+						exportResult.addWarning(trackNum, tick, channel, Dict.get(Dict.WARNING_IGNORED_SHORT_MESSAGE));
+						exportResult.setDetailsOfLastWarning(SequenceAnalyzer.getSingleMsgByMidiMsg(msg));
+					}
+				}
 				
 				// meta message
 				if (msg instanceof MetaMessage) {
@@ -650,6 +710,25 @@ public abstract class Decompiler extends Exporter {
 						if (ALDA == format) // not supported?
 							continue;
 					}
+					else if (MidiListener.META_INSTRUMENT_NAME == type) {
+						// channel name?
+						// TODO: implement or delete
+					}
+					else {
+						// something else
+						
+						// marker, created by Midica? - ignore
+						// end of track?              - ignore
+						boolean showWarning = true;
+						if (MidiListener.META_MARKER == type || MidiListener.META_END_OF_SEQUENCE == type) {
+							showWarning = null != SequenceAnalyzer.getSingleMsgByMidiMsg(msg);
+						}
+						
+						if (showWarning) {
+							exportResult.addWarning(trackNum, tick, null, Dict.get(Dict.WARNING_IGNORED_META_MESSAGE));
+							exportResult.setDetailsOfLastWarning(SequenceAnalyzer.getSingleMsgByMidiMsg(msg));
+						}
+					}
 					
 					// global command found?
 					if (cmdId != null) {
@@ -660,6 +739,12 @@ public abstract class Decompiler extends Exporter {
 						}
 						commands.add(new String[]{cmdId, value});
 					}
+				}
+				
+				// add warnings for ignored sysex messages
+				if (msg instanceof SysexMessage) {
+					exportResult.addWarning(trackNum, tick, null, Dict.get(Dict.WARNING_IGNORED_SYSEX_MESSAGE));
+					exportResult.setDetailsOfLastWarning(SequenceAnalyzer.getSingleMsgByMidiMsg(msg));
 				}
 			}
 			trackNum++;
@@ -773,7 +858,7 @@ public abstract class Decompiler extends Exporter {
 					skipUntil = futureTick;
 				}
 				
-				// TODO: adjust OFF TICK and velocity
+				// adjust OFF TICK and velocity
 				TreeMap<String, Long[]> chordIds = new TreeMap<>();
 				NOTE:
 				for (Entry<Byte, Byte> tickEntry: tickStructClone.entrySet()) {
@@ -856,9 +941,11 @@ public abstract class Decompiler extends Exporter {
 						Long offTick  = sliceOnOff.get(channel).get(note).ceilingKey(tick + 1);
 						
 						// TODO: handle the case that there is no offTick at all
-						// can happen if the MIDI is corrupt or uses all-notes-off / all-sounds-off instead of note-off
+						// can happen if the MIDI is corrupt or uses all-notes-off / all-sounds-off
+						// instead of note-off or note-on with velocity=0
 						if (null == offTick) {
-							System.err.println("note-off not found for channel " + channel + ", note: " + note + ", tick: " + tick);
+							exportResult.addWarning(null, tick, channel, Dict.get(Dict.WARNING_OFF_NOT_FOUND));
+							exportResult.setDetailsOfLastWarning(Dict.get(Dict.ERROR_NOTE) + ": " + note);
 						}
 						
 						// create structure for this note
@@ -1356,6 +1443,18 @@ public abstract class Decompiler extends Exporter {
 		
 		statistics.get(channel).put(type, channelValue + 1);
 		statistics.get(STAT_TOTAL).put(type, totalValue + 1);
+	}
+	
+	/**
+	 * Creates a warning caused by a skipped rest.
+	 * 
+	 * @param tick     the tick where the rest should have occurred.
+	 * @param ticks    length of the skipped rest in ticks
+	 * @param channel  MIDI channel
+	 */
+	protected void addWarningRestSkipped(Long tick, Long ticks, Byte channel) {
+		exportResult.addWarning(null, tick, channel, Dict.get(Dict.WARNING_REST_SKIPPED));
+		exportResult.setDetailsOfLastWarning(ticks + " " + Dict.get(Dict.WARNING_REST_SKIPPED_TICKS));
 	}
 	
 	/**

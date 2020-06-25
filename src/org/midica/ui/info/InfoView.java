@@ -2082,9 +2082,7 @@ public class InfoView extends JDialog {
 		constraints.anchor     = GridBagConstraints.NORTHWEST;
 		
 		// get messages
-		HashMap<String, Object>  sequenceInfo = SequenceAnalyzer.getSequenceInfo();
-		Object                   msgObj       = sequenceInfo.get("messages");
-		ArrayList<SingleMessage> messages     = (ArrayList<SingleMessage>) msgObj;
+		ArrayList<SingleMessage> messages = SequenceAnalyzer.getMessages();
 		
 		// filter
 		long minTick = 0;

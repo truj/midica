@@ -14,6 +14,7 @@ import java.util.List;
 
 import javax.swing.tree.TreeNode;
 
+import org.midica.config.Laf;
 import org.midica.midi.SequenceAnalyzer;
 
 /**
@@ -199,7 +200,7 @@ public class SingleMessage implements IMessageType, Comparable<SingleMessage> {
 			
 			// another node
 			else {
-				text.append(" <span style=\"color: #dd0000; font-size: 105%; font-weight: bold; \"> &larr; </span> " + name);
+				text.append(" <span style=\"color: #" + Laf.COLOR_MSG_ARROW_HTML + "; font-size: 105%; font-weight: bold; \"> &larr; </span> " + name);
 			}
 		}
 		
@@ -259,7 +260,7 @@ public class SingleMessage implements IMessageType, Comparable<SingleMessage> {
 		// probably a META message
 		else if (getOption(IMessageType.OPT_META_TYPE) != null) {
 			return "M:" + (Long) getOption(IMessageType.OPT_TICK)
-				+ "/" + (String) getOption(IMessageType.OPT_META_TYPE)
+				+ "/" + (Integer) getOption(IMessageType.OPT_META_TYPE)
 				+ "/" + (String) getOption(IMessageType.OPT_SUMMARY)
 				;
 		}

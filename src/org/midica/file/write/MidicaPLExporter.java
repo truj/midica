@@ -814,10 +814,7 @@ public class MidicaPLExporter extends Decompiler {
 			incrementStats(STAT_RESTS, channel);
 		}
 		else {
-			// TODO: Dict
-			// TODO: add warning
-			System.err.println("rest too small to be handled: " + ticks + " ticks");
-			line.append("// rest too small to be handled: " + ticks + " ticks");
+			addWarningRestSkipped(beginTick, ticks, channel);
 			incrementStats(STAT_REST_SKIPPED, channel);
 		}
 		
@@ -892,14 +889,6 @@ public class MidicaPLExporter extends Decompiler {
 		
 		// use very small lengths only for rests
 		if (rest) {
-			// 1/512
-			long length512 = calculateTicks(1, 128);
-			lengthToSymbol.put(length512, 512 + "");
-			
-			// 1/256
-			long length256 = calculateTicks(1, 64);
-			lengthToSymbol.put(length256, 256 + "");
-			
 			// 1/128
 			long length128 = calculateTicks(1, 32);
 			lengthToSymbol.put(length128, 128 + "");
@@ -952,40 +941,31 @@ public class MidicaPLExporter extends Decompiler {
 		// full
 		long length1t = calculateTicks( 4 * 2, 3 );
 		long length1  = calculateTicks( 4,     1 );
-		long length1d = calculateTicks( 4 * 3, 2 );
 		if (useTriplets) lengthToSymbol.put( length1t, d1 + triplet );
 		                 lengthToSymbol.put( length1,  d1           );
-		if (useDots)     lengthToSymbol.put( length1d, d1 + dot     );
 		
-		// 2 full notes
-		long length_m2  = calculateTicks( 8,     1 );
-		long length_m2d = calculateTicks( 8 * 3, 2 );
-		             lengthToSymbol.put( length_m2,  m2        );
-		if (useDots) lengthToSymbol.put( length_m2d, m2  + dot );
-		
-		// 4 full notes
-		long length_m4  = calculateTicks( 16,     1 );
-		long length_m4d = calculateTicks( 16 * 3, 2 );
-		             lengthToSymbol.put( length_m4,  m4        );
-		if (useDots) lengthToSymbol.put( length_m4d, m4  + dot );
-		
-		// 8 full notes
-		long length_m8  = calculateTicks( 32,     1 );
-		long length_m8d = calculateTicks( 32 * 3, 2 );
-		             lengthToSymbol.put( length_m8,  m8        );
-		if (useDots) lengthToSymbol.put( length_m8d, m8  + dot );
-		
-		// 16 full notes
-		long length_m16  = calculateTicks( 64,     1 );
-		long length_m16d = calculateTicks( 64 * 3, 2 );
-		             lengthToSymbol.put( length_m16,  m16        );
-		if (useDots) lengthToSymbol.put( length_m16d, m16  + dot );
-		
-		// 32 full notes
-		long length_m32  = calculateTicks( 128,     1 );
-		long length_m32d = calculateTicks( 128 * 3, 2 );
-		             lengthToSymbol.put( length_m32,  m32        );
-		if (useDots) lengthToSymbol.put( length_m32d, m32  + dot );
+		// allow longer lengths only for rests
+		if (rest) {
+			// 2 full notes
+			long length_m2 = calculateTicks(8, 1);
+			lengthToSymbol.put(length_m2,  m2);
+			
+			// 4 full notes
+			long length_m4 = calculateTicks(16, 1);
+			lengthToSymbol.put(length_m4, m4);
+			
+			// 8 full notes
+			long length_m8 = calculateTicks(32, 1);
+			lengthToSymbol.put(length_m8, m8);
+			
+			// 16 full notes
+			long length_m16 = calculateTicks(64, 1);
+			lengthToSymbol.put(length_m16, m16);
+			
+			// 32 full notes
+			long length_m32 = calculateTicks(128, 1);
+			lengthToSymbol.put(length_m32, m32);
+		}
 		
 		return lengthToSymbol;
 	}

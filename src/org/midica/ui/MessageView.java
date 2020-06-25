@@ -21,7 +21,7 @@ import org.midica.ui.widget.MidicaButton;
 /**
  * This class provides a modal window belonging to a parent window.
  * 
- * It provides key bindings that can be used to close the window.
+ * It provides a close button and key bindings that can be used to close the window.
  * 
  * Sub classes are:
  * 
@@ -37,7 +37,7 @@ public abstract class MessageView extends JDialog {
 	public static final String CMD_CLOSE = "close_message";
 	
 	protected ActionListener    controller        = null;
-	private   MidicaButton      closeButton       = null;
+	protected MidicaButton      closeButton       = null;
 	private   KeyBindingManager keyBindingManager = null;
 	
 	/**
@@ -67,7 +67,7 @@ public abstract class MessageView extends JDialog {
 	 * Closes the window.
 	 */
 	public void close() {
-		setVisible( false );
+		setVisible(false);
 		dispose();
 	}
 	
@@ -80,7 +80,7 @@ public abstract class MessageView extends JDialog {
 		keyBindingManager = new KeyBindingManager(this, this.getRootPane());
 		
 		// add key bindings to normal buttons
-		keyBindingManager.addBindingsForButton( this.closeButton, Dict.KEY_MSG_CLOSE );
+		keyBindingManager.addBindingsForButton(this.closeButton, Dict.KEY_MSG_CLOSE);
 		
 		// set input and action maps
 		keyBindingManager.postprocess();
@@ -92,9 +92,9 @@ public abstract class MessageView extends JDialog {
 	 * @return the created close button.
 	 */
 	protected MidicaButton createCloseButton() {
-		closeButton = new MidicaButton( Dict.get(Dict.CLOSE) );
-		closeButton.setActionCommand( MessageView.CMD_CLOSE );
-		closeButton.addActionListener( controller );
+		closeButton = new MidicaButton(Dict.get(Dict.CLOSE));
+		closeButton.setActionCommand(MessageView.CMD_CLOSE);
+		closeButton.addActionListener(controller);
 		closeButton.requestFocusInWindow();
 		
 		return closeButton;
