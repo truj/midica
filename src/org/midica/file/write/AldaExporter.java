@@ -244,7 +244,11 @@ public class AldaExporter extends Decompiler {
 		
 		if (MUST_ADD_TICK_COMMENTS) {
 			result.append(NEW_LINE);
-			result.append("# SLICE " + currentSliceNumber + " (tick: " + slice.getBeginTick() + ")");
+			result.append(
+				  "# SLICE " + currentSliceNumber + " ("
+				+ createTickDescription(slice.getBeginTick(), false)
+				+ ")"
+			);
 		}
 		result.append(NEW_LINE + NEW_LINE);
 		
@@ -533,9 +537,7 @@ public class AldaExporter extends Decompiler {
 			incrementStats(STAT_RESTS, channel);
 		}
 		else {
-			// TODO: Dict
-			// TODO: add warning
-			System.err.println("rest too small to be handled: " + ticks + " ticks");
+			addWarningRestSkipped(beginTick, ticks, channel);
 			incrementStats(STAT_REST_SKIPPED, channel);
 		}
 		
@@ -589,14 +591,6 @@ public class AldaExporter extends Decompiler {
 		
 		// use very small lengths only for rests
 		if (rest) {
-			// 1/512
-			long length512 = calculateTicks(1, 128);
-			lengthToSymbol.put(length512, 512 + "");
-			
-			// 1/256
-			long length256 = calculateTicks(1, 64);
-			lengthToSymbol.put(length256, 256 + "");
-			
 			// 1/128
 			long length128 = calculateTicks(1, 32);
 			lengthToSymbol.put(length128, 128 + "");
@@ -652,10 +646,8 @@ public class AldaExporter extends Decompiler {
 		if (useDots)     lengthToSymbol.put( length2d, base + "."       );
 		
 		// full
-		long length1  = calculateTicks( 4,     1 );
-		long length1d = calculateTicks( 4 * 3, 2 );
-		             lengthToSymbol.put( length1,  "1"  );
-		if (useDots) lengthToSymbol.put( length1d, "1." );
+		long length1  = calculateTicks(4, 1);
+		lengthToSymbol.put(length1, "1");
 		
 		return lengthToSymbol;
 	}

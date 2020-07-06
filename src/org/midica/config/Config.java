@@ -772,6 +772,14 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_DC_RESTORE_SAVED,         KeyEvent.VK_R,        InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_DC_RESTORE_DEFAULT,       KeyEvent.VK_D,        InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_DC_SAVE,                  KeyEvent.VK_S,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_CLOSE,      KeyEvent.VK_ESCAPE,   0                          );
+		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_SHORT,      KeyEvent.VK_S,        0                          );
+		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_META,       KeyEvent.VK_M,        0                          );
+		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_SYSEX,      KeyEvent.VK_X,        0                          );
+		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_SKIPPED_RESTS, KeyEvent.VK_R,     0                          );
+		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_OFF_NOT_FOUND, KeyEvent.VK_N,     0                          );
+		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_OTHER,      KeyEvent.VK_O,        0                          );
+		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_FILTER,     KeyEvent.VK_F,        0                          );
 		
 		// init key bindings with defaults
 		keyBindings = new TreeMap<>();

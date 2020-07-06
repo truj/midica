@@ -137,16 +137,18 @@ public class Laf {
 	public  static final Color COLOR_TREE_NODE_INACTIVE      = new Color( 180, 180, 180 );
 	
 	// message table and tree colors
-	public  static final Color COLOR_MSG_TABLE_HEADER_BG     = COLOR_TABLE_HEADER_BG;
-	public  static final Color COLOR_MSG_TABLE_HEADER_TXT    = COLOR_TABLE_HEADER_TXT;
-	public  static final Color COLOR_MSG_TABLE               = COLOR_SECONDARY_LIGHT;
-	public  static final Color COLOR_MSG_TABLE_SELECTED      = COLOR_SECONDARY; // new Color( 255, 243, 220 );
-	public  static final Color COLOR_MSG_TABLE_SELECTED_TXT  = COLOR_BLACK;
-	public  static final Color COLOR_MSG_TREE                = COLOR_PRIMARY_LIGHT;
-	private static final Color COLOR_MSG_TREE_SELECTED_BG    = COLOR_PRIMARY;
-	private static final Color COLOR_MSG_TREE_SELECTED_TXT   = COLOR_BLACK;
-	public  static final Color COLOR_MSG_DEFAULT             = UIManager.getColor( "Panel.background" );
-	public  static final Color COLOR_MSG_TABLE_GRID          = COLOR_SECONDARY;
+	public  static final Color  COLOR_MSG_TABLE_HEADER_BG     = COLOR_TABLE_HEADER_BG;
+	public  static final Color  COLOR_MSG_TABLE_HEADER_TXT    = COLOR_TABLE_HEADER_TXT;
+	public  static final Color  COLOR_MSG_TABLE               = COLOR_SECONDARY_LIGHT;
+	public  static final Color  COLOR_MSG_TABLE_SELECTED      = COLOR_SECONDARY; // new Color( 255, 243, 220 );
+	public  static final Color  COLOR_MSG_TABLE_SELECTED_TXT  = COLOR_BLACK;
+	public  static final Color  COLOR_MSG_TREE                = COLOR_PRIMARY_LIGHT;
+	private static final Color  COLOR_MSG_TREE_SELECTED_BG    = COLOR_PRIMARY;
+	private static final Color  COLOR_MSG_TREE_SELECTED_TXT   = COLOR_BLACK;
+	public  static final Color  COLOR_MSG_DEFAULT             = UIManager.getColor( "Panel.background" );
+	public  static final Color  COLOR_MSG_TABLE_GRID          = COLOR_SECONDARY;
+	private static final Color  COLOR_MSG_ARROW               = new Color( 221, 0, 0 );
+	public  static final String COLOR_MSG_ARROW_HTML          = Integer.toHexString(COLOR_MSG_ARROW.getRGB()).substring(2); // arrows in the message and warnings tables
 	
 	// colors for key binding configuration
 	public  static final Color COLOR_KEYBINDING_DEFAULT      = UIManager.getColor( "Panel.background" );

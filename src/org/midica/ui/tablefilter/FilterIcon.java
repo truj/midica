@@ -19,6 +19,7 @@ import javax.swing.event.RowSorterListener;
 import org.midica.config.Dict;
 import org.midica.config.KeyBindingManager;
 import org.midica.config.Laf;
+import org.midica.ui.widget.IOpenIcon;
 import org.midica.ui.widget.MidicaTable;
 
 /**
@@ -27,7 +28,7 @@ import org.midica.ui.widget.MidicaTable;
  * 
  * @author Jan Trukenmüller
  */
-public class FilterIcon extends JLabel {
+public class FilterIcon extends JLabel implements IOpenIcon {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -123,14 +124,7 @@ public class FilterIcon extends JLabel {
 		}
 	}
 	
-	/**
-	 * Stores key binding related IDs.
-	 * These IDs are needed to be able to restore the key binding specific part of
-	 * the tool tip after the basic tool tip has been changed due to filter changes.
-	 * 
-	 * @param keyBindingId  the key binding id
-	 * @param ttType        the key binding type id
-	 */
+	@Override
 	public void rememberKeyBindingId(String keyBindingId, String ttType) {
 		this.keyBindingId     = keyBindingId;
 		this.keyBindingTypeId = ttType;
@@ -157,6 +151,7 @@ public class FilterIcon extends JLabel {
 	/**
 	 * Opens the associated string filter layer.
 	 */
+	@Override
 	public void open() {
 		layer.open();
 	}

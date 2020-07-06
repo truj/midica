@@ -43,6 +43,10 @@ public class OptionalNumber implements Comparable<OptionalNumber> {
 			this.value   = (Long) value;
 			this.display = String.valueOf(value);
 		}
+		else if (value instanceof Byte) {
+			this.value   = (long) (byte) value;
+			this.display = String.valueOf(value);
+		}
 		else {
 			this.value   = -1L;
 			this.display = "";

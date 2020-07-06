@@ -24,6 +24,8 @@ import java.util.Map.Entry;
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiEvent;
 import javax.sound.midi.MidiMessage;
+import javax.sound.midi.ShortMessage;
+import javax.sound.midi.SysexMessage;
 import javax.sound.midi.Track;
 
 import org.midica.config.Cli;
@@ -42,6 +44,7 @@ import org.midica.ui.file.DecompileConfigController;
 import org.midica.ui.file.ExportResult;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
+import org.midica.ui.model.MidicaTreeModel;
 
 /**
  * This is the base class of all decompiling exporters, translating MIDI into something else.
@@ -255,8 +258,17 @@ public abstract class Decompiler extends Exporter {
 		// initialize format specific structures, if necessary
 		init();
 		
-		exportResult         = new ExportResult(true);
+		// prepare export result (including the warning table)
+		// The message tree must be postprocessed to make sure that the details column
+		// of message-based warnings is filled properly.
+		// Otherwise it only works if the InfoView has been opened before the decompilation.
+		exportResult = new ExportResult(true);
+		MidicaTreeModel model = (MidicaTreeModel) SequenceAnalyzer.getSequenceInfo().get("msg_tree_model");
+		model.postprocess();
+		
+		// charset
 		String targetCharset = ((ComboboxStringOption) ConfigComboboxModel.getModel(Config.CHARSET_EXPORT_MPL).getSelectedItem()).getIdentifier();
+		// TODO: ALDA charset
 		
 		try {
 			
@@ -277,11 +289,10 @@ public abstract class Decompiler extends Exporter {
 			BufferedWriter writer = new BufferedWriter(osw);
 			
 			// get pre-parsed data structures
-			HashMap<String, Object> histories = SequenceAnalyzer.getHistories();
-			instrumentHistory = (TreeMap<Byte, TreeMap<Long, Byte[]>>)                 histories.get( "instrument_history" );
-			commentHistory    = (TreeMap<Byte, TreeMap<Long, String>>)                 histories.get( "comment_history" );
-			noteHistory       = (TreeMap<Byte, TreeMap<Long, TreeMap<Byte, Byte>>>)    histories.get( "note_history" );
-			noteOnOff         = (TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>>) histories.get( "note_on_off" );
+			instrumentHistory = SequenceAnalyzer.getInstrumentHistory();
+			commentHistory    = SequenceAnalyzer.getCommentHistory();
+			noteHistory       = SequenceAnalyzer.getNoteHistory();
+			noteOnOff         = SequenceAnalyzer.getOnOffHistory();
 			lyricsSyllables   = KaraokeAnalyzer.getLyricsFlat();
 			
 			// init data structures
@@ -313,9 +324,11 @@ public abstract class Decompiler extends Exporter {
 			// detect global commands and split the sequence into slices accordingly
 			splitSequence();
 			
-			// calculate what tick length corresponds to what note length
+			// calculate which tick length corresponds to which note length
 			noteLength = initLengths(false);
 			restLength = initLengths(true);
+			postprocessLengths(noteLength);
+			postprocessLengths(restLength);
 			
 			// fill slices
 			addInstrumentsToSlices();
@@ -412,10 +425,87 @@ public abstract class Decompiler extends Exporter {
 	/**
 	 * Initializes and resets the instruments structures so that
 	 * their configurations can be tracked.
+	 * 
+	 * Also removes instrument switches that are never used by any note-ONs.
 	 */
 	private void initInstruments() {
 		instrumentsByName    = new TreeMap<>();
 		instrumentsByChannel = new ArrayList<>();
+		
+		// make a deep copy (clone) of the instrument history
+		TreeMap<Byte, TreeMap<Long, Byte[]>> originalInstrumentHistory = instrumentHistory;
+		instrumentHistory = new TreeMap<>();
+		for (Entry<Byte, TreeMap<Long, Byte[]>> channelEntry : originalInstrumentHistory.entrySet()) {
+			byte channel = channelEntry.getKey();
+			TreeMap<Long, Byte[]> originalInstrChanges = channelEntry.getValue();
+			
+			TreeMap<Long, Byte[]> instrChanges = new TreeMap<Long, Byte[]>();
+			instrumentHistory.put(channel, instrChanges);
+			
+			for (Entry<Long, Byte[]> originalInstrChange : originalInstrChanges.entrySet()) {
+				long tick    = originalInstrChange.getKey();
+				Byte[] value = originalInstrChange.getValue();
+				instrChanges.put(tick, value);
+			}
+		}
+		
+		// remove unnecessary instrument changes from the instrument history
+		for (Entry<Byte, TreeMap<Long, Byte[]>> channelEntry : originalInstrumentHistory.entrySet()) {
+			byte channel = channelEntry.getKey();
+			TreeMap<Long, Byte[]> instrChanges = channelEntry.getValue();
+			for (Entry<Long, Byte[]> instrChangeEntry : instrChanges.entrySet()) {
+				long tick = instrChangeEntry.getKey();
+				
+				// get next change (if any)
+				long nextChangeTick;
+				Entry<Long, Byte[]> nextEntry = instrChanges.ceilingEntry(tick + 1);
+				if (null == nextEntry)
+					nextChangeTick = Long.MAX_VALUE;
+				else
+					nextChangeTick = nextEntry.getKey();
+				
+				// get next note-ON tick after the instrument change
+				long noteTick;
+				Entry<Long, TreeMap<Byte, Byte>> nextNoteEntry = noteHistory.get(channel).ceilingEntry(tick);
+				if (null == nextNoteEntry)
+					// no note at all - unnecessary
+					noteTick = -1;
+				else
+					noteTick = nextNoteEntry.getKey();
+				
+				// is the instrument change necessary?
+				// (Is the next note between this instrument change and the next one?)
+				if (noteTick > 0 && tick <= noteTick && noteTick < nextChangeTick) {
+					continue;
+				}
+				
+				// no, the instrument change is unnecessary - remove it
+				instrumentHistory.get(channel).remove(tick);
+			}
+			instrChanges.size();
+		}
+		
+		// move the first instrument change of each channel to tick zero, if it contains
+		// only positive ticks so far.
+		// This ensures that all used instruments are initialized as soon as possible.
+		// (In MidicaPL: in the first INSTRUMENTS block)
+		for (Entry<Byte, TreeMap<Long, Byte[]>> channelEntry : instrumentHistory.entrySet()) {
+			TreeMap<Long, Byte[]> instrChanges = channelEntry.getValue();
+			
+			// get earliest instrument change
+			Entry<Long, Byte[]> firstChange = instrChanges.firstEntry();
+			if (null == firstChange)
+				continue;
+			long   tick       = firstChange.getKey();
+			Byte[] firstInstr = firstChange.getValue();
+			
+			// move to tick 0, if necessary
+			if (tick > 0) {
+				instrChanges.put(0L, firstInstr);
+				instrChanges.remove(tick);
+			}
+		}
+		
 		// CHANNEL:
 		for (byte channel = 0; channel < 16; channel++) {
 			// regard only the lowest tick >= 0
@@ -554,6 +644,60 @@ public abstract class Decompiler extends Exporter {
 	}
 	
 	/**
+	 * Removes lengths that are too small to make sense according to the source resolution.
+	 * 
+	 * The following lengths are removed:
+	 * 
+	 * - lengths with zero ticks
+	 * - lengths with less than half ticks of the next longer length
+	 * 
+	 * The last step is necessary to avoid length sums like /4+256+256.
+	 * Can happen due to rounding errors of very small lengths.
+	 * 
+	 * @param lengths  note or rest lengths
+	 */
+	private void postprocessLengths(TreeMap<Long, String> lengths) {
+		
+		// remove zero-tick lengths
+		while (lengths.floorKey(0L) != null) {
+			lengths.remove(lengths.floorKey(0L));
+		}
+		
+		// Remove the smallest length, if the second smallest length is more than double of its size.
+		
+		// Step 1: collect the lengths to be removed
+		ArrayList<Long> toRemove = new ArrayList<>();
+		Long lastLength = null;
+		for (long length : lengths.keySet()) {
+			
+			// first loop run?
+			if (null == lastLength) {
+				lastLength = length;
+				continue;
+			}
+			
+			// must remove?
+			boolean mustRemove = false;
+			if (2 * lastLength < length)
+				mustRemove = true;
+			
+			// remove
+			if (mustRemove)
+				toRemove.add(lastLength);
+			
+			// stop, if possible
+			lastLength = length;
+			if (! mustRemove)
+				break;
+		}
+		
+		// Step 2: remove the lengths
+		for (long length : toRemove) {
+			lengths.remove(length);
+		}
+	}
+	
+	/**
 	 * Splits the sequence into slices between global commands.
 	 * Adds the global commands to the according slices.
 	 * 
@@ -592,33 +736,25 @@ public abstract class Decompiler extends Exporter {
 				long        tick  = event.getTick();
 				MidiMessage msg   = event.getMessage();
 				
-				// channel name?
-				if (msg instanceof MetaMessage) {
-					// TODO: implement or delete
-				}
-				
-				// TODO: implement or delete
 				// short message
-//				if (msg instanceof ShortMessage) {
-//					ShortMessage shortMsg = (ShortMessage) msg;
-//					int cmd      = shortMsg.getCommand();
-//					int channel  = shortMsg.getChannel();
-//					int note     = shortMsg.getData1();
-//					int velocity = shortMsg.getData2();
-//					
-//					// ignore events that are handled otherwise
-//					if ( ShortMessage.PROGRAM_CHANGE == cmd
-//					  || ShortMessage.NOTE_ON        == cmd
-//					  || ShortMessage.NOTE_OFF       == cmd ) {
-//						// ignore
-//					}
-//					
-//					// something else?
-//					else {
-//						String warning = String.format( Dict.get(Dict.WARNING_IGNORED_SHORT_MESSAGE), cmd, note, velocity );
-//						exportResult.addWarning(trackNum, tick, channel, -1, warning);
-//					}
-//				}
+				if (msg instanceof ShortMessage) {
+					ShortMessage shortMsg = (ShortMessage) msg;
+					int  cmd     = shortMsg.getCommand();
+					byte channel = (byte) shortMsg.getChannel();
+					
+					// ignore events that are handled otherwise
+					if (ShortMessage.PROGRAM_CHANGE == cmd
+					  || ShortMessage.NOTE_ON       == cmd
+					  || ShortMessage.NOTE_OFF      == cmd) {
+						// ignore
+					}
+					
+					// something else? - add warning
+					else {
+						exportResult.addWarning(trackNum, tick, channel, Dict.get(Dict.WARNING_IGNORED_SHORT_MESSAGE));
+						exportResult.setDetailsOfLastWarning(SequenceAnalyzer.getSingleMsgByMidiMsg(msg));
+					}
+				}
 				
 				// meta message
 				if (msg instanceof MetaMessage) {
@@ -651,6 +787,25 @@ public abstract class Decompiler extends Exporter {
 						if (ALDA == format) // not supported?
 							continue;
 					}
+					else if (MidiListener.META_INSTRUMENT_NAME == type) {
+						// channel name?
+						// TODO: implement or delete
+					}
+					else {
+						// something else
+						
+						// marker, created by Midica? - ignore
+						// end of track?              - ignore
+						boolean showWarning = true;
+						if (MidiListener.META_MARKER == type || MidiListener.META_END_OF_SEQUENCE == type) {
+							showWarning = null != SequenceAnalyzer.getSingleMsgByMidiMsg(msg);
+						}
+						
+						if (showWarning) {
+							exportResult.addWarning(trackNum, tick, null, Dict.get(Dict.WARNING_IGNORED_META_MESSAGE));
+							exportResult.setDetailsOfLastWarning(SequenceAnalyzer.getSingleMsgByMidiMsg(msg));
+						}
+					}
 					
 					// global command found?
 					if (cmdId != null) {
@@ -661,6 +816,12 @@ public abstract class Decompiler extends Exporter {
 						}
 						commands.add(new String[]{cmdId, value});
 					}
+				}
+				
+				// add warnings for ignored sysex messages
+				if (msg instanceof SysexMessage) {
+					exportResult.addWarning(trackNum, tick, null, Dict.get(Dict.WARNING_IGNORED_SYSEX_MESSAGE));
+					exportResult.setDetailsOfLastWarning(SequenceAnalyzer.getSingleMsgByMidiMsg(msg));
 				}
 			}
 			trackNum++;
@@ -774,7 +935,7 @@ public abstract class Decompiler extends Exporter {
 					skipUntil = futureTick;
 				}
 				
-				// TODO: adjust OFF TICK and velocity
+				// adjust OFF TICK and velocity
 				TreeMap<String, Long[]> chordIds = new TreeMap<>();
 				NOTE:
 				for (Entry<Byte, Byte> tickEntry: tickStructClone.entrySet()) {
@@ -857,9 +1018,11 @@ public abstract class Decompiler extends Exporter {
 						Long offTick  = sliceOnOff.get(channel).get(note).ceilingKey(tick + 1);
 						
 						// TODO: handle the case that there is no offTick at all
-						// can happen if the MIDI is corrupt or uses all-notes-off / all-sounds-off instead of note-off
+						// can happen if the MIDI is corrupt or uses all-notes-off / all-sounds-off
+						// instead of note-off or note-on with velocity=0
 						if (null == offTick) {
-							System.err.println("note-off not found for channel " + channel + ", note: " + note + ", tick: " + tick);
+							exportResult.addWarning(null, tick, channel, Dict.get(Dict.WARNING_OFF_NOT_FOUND));
+							exportResult.setDetailsOfLastWarning(Dict.get(Dict.ERROR_NOTE) + ": " + note);
 						}
 						
 						// create structure for this note
@@ -1118,7 +1281,7 @@ public abstract class Decompiler extends Exporter {
 		while (true) {
 			Long restTicks = structure.floorKey(ticksLeft);
 			
-			// continuing makes no sence?
+			// continuing makes no sense?
 			if (null == restTicks || 0 == ticksLeft || restTicks <= 0)
 				break;
 			
@@ -1255,9 +1418,9 @@ public abstract class Decompiler extends Exporter {
 		
 		// sum up
 		while (true) {
-			Long length = noteLength.ceilingKey(ticks); // next highest length
+			Long length = noteLength.ceilingKey(ticksLeft); // next highest length
 			if (null == length)
-				length = noteLength.floorKey(ticks); // highest possible element
+				length = noteLength.lastKey(); // highest possible element
 			
 			totalLength += length;
 			ticksLeft   -= length;
@@ -1360,6 +1523,18 @@ public abstract class Decompiler extends Exporter {
 	}
 	
 	/**
+	 * Creates a warning caused by a skipped rest.
+	 * 
+	 * @param tick     the tick where the rest should have occurred.
+	 * @param ticks    length of the skipped rest in ticks
+	 * @param channel  MIDI channel
+	 */
+	protected void addWarningRestSkipped(Long tick, Long ticks, Byte channel) {
+		exportResult.addWarning(null, tick, channel, Dict.get(Dict.WARNING_REST_SKIPPED));
+		exportResult.setDetailsOfLastWarning(ticks + " " + Dict.get(Dict.WARNING_REST_SKIPPED_TICKS));
+	}
+	
+	/**
 	 * Creates the quality statistics to be printed at the end of the produced file.
 	 * 
 	 * @return quality statistics block
@@ -1403,30 +1578,26 @@ public abstract class Decompiler extends Exporter {
 		StringBuilder stats = new StringBuilder("");
 		String comment = getCommentSymbol();
 		
-		// format strings
-		final String fmtName = "%-20s";
-		final String fmtVal  = "%1$10s";
-		
 		// markers for the quality score
 		int    markerCount = 0;
 		double markerSum   = 0;
+		double subScore;
 		
 		// rests
 		{
 			int rests = subStat.get(STAT_RESTS);
 			if (MUST_ADD_STATISTICS)
-				stats.append(comment + "\t" + "Rests: " + rests + NEW_LINE);
+				stats.append(comment + "     " + "Rests: " + rests + NEW_LINE);
 			
 			// rests / notes
 			int notes = subStat.get(STAT_NOTES);
 			if (notes > 0) {
 				double restsPercent = ((double) rests) / ((double) (notes));
 				restsPercent *= 100;
-				String restsPercentStr = String.format("%.2f", restsPercent);
-				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + String.format(fmtName, "Rests/Notes:") + String.format(fmtVal, rests + "/" + notes) + " (" + restsPercentStr + "%)" + NEW_LINE);
+				subScore = 100.0D - restsPercent;
+				addQualityDetailsLine(stats, "Rests/Notes:", rests + "/" + notes, restsPercent, subScore);
 				markerCount++;
-				markerSum += (100.0D - restsPercent);
+				markerSum += subScore;
 			}
 			
 			if (rests > 0) {
@@ -1434,32 +1605,29 @@ public abstract class Decompiler extends Exporter {
 				// rests skipped
 				double restsSkipped = ((double) subStat.get(STAT_REST_SKIPPED)) / ((double) rests);
 				restsSkipped *= 100;
-				String restsSkippedStr = String.format("%.2f", restsSkipped);
-				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + String.format(fmtName, "Skipped:") + String.format(fmtVal, subStat.get(STAT_REST_SKIPPED)) + " (" + restsSkippedStr + "%)" + NEW_LINE);
+				subScore = 100.0D - restsSkipped;
+				addQualityDetailsLine(stats, "Skipped:", subStat.get(STAT_REST_SKIPPED) + "", restsSkipped, subScore);
 				markerCount++;
-				markerSum += (100.0D - restsSkipped);
+				markerSum += subScore;
 				
 				// rest summands
 				int    summands        = subStat.get(STAT_REST_SUMMANDS);
 				double summandsPercent = ((double) summands) / ((double) rests);
 				summandsPercent *= 100;
-				String summandsPercentStr = String.format("%.2f", summandsPercent);
-				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + String.format(fmtName, "Summands:") + String.format(fmtVal, summands) + " (" + summandsPercentStr + "%)" + NEW_LINE);
+				subScore = 200.0D - summandsPercent;
+				addQualityDetailsLine(stats, "Summands:", summands + "", summandsPercent, subScore);
 				markerCount++;
-				markerSum += 100.0D - (summandsPercent - 100.0D);
+				markerSum += subScore;
 				
 				// rest triplets
 				if (summands > 0) {
 					int triplets = subStat.get(STAT_REST_TRIPLETS);
 					double tripletsPercent = ((double) triplets) / ((double) summands);
 					tripletsPercent *= 100;
-					String tripletsStr = String.format("%.2f", tripletsPercent);
-					if (MUST_ADD_STATISTICS)
-						stats.append(comment + "\t\t" + String.format(fmtName, "Triplets:") + String.format(fmtVal, triplets) + " (" + tripletsStr + "%)" + NEW_LINE);
+					subScore = 100.0D - tripletsPercent;
+					addQualityDetailsLine(stats, "Triplets:", triplets + "", tripletsPercent, subScore);
 					markerCount++;
-					markerSum += (100.0D - tripletsPercent);
+					markerSum += subScore;
 				}
 			}
 		}
@@ -1468,60 +1636,57 @@ public abstract class Decompiler extends Exporter {
 		{
 			int notes = subStat.get(STAT_NOTES);
 			if (MUST_ADD_STATISTICS)
-				stats.append(comment + "\t" + "Notes: " + notes + NEW_LINE);
+				stats.append(comment + "     " + "Notes: " + notes + NEW_LINE);
 			if (notes > 0) {
 				
 				// note summands
 				int    summands    = subStat.get(STAT_NOTE_SUMMANDS);
 				double summandsPercent = ((double) summands) / ((double) notes);
 				summandsPercent *= 100;
-				String summandsPercentStr = String.format("%.2f", summandsPercent);
-				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + String.format(fmtName, "Summands:") + String.format(fmtVal, summands) + " (" + summandsPercentStr + "%)" + NEW_LINE);
+				subScore = 200.0D - summandsPercent;
+				addQualityDetailsLine(stats, "Summands:", summands + "", summandsPercent, subScore);
 				markerCount++;
-				markerSum += 100.0D - (summandsPercent - 100.0D);
+				markerSum += subScore;
 				
 				// note triplets
 				if (summands > 0) {
 					int triplets = subStat.get(STAT_NOTE_TRIPLETS);
 					double tripletsPercent = ((double) triplets) / ((double) summands);
 					tripletsPercent *= 100;
-					String tripletsStr = String.format("%.2f", tripletsPercent);
-					if (MUST_ADD_STATISTICS)
-						stats.append(comment + "\t\t" + String.format(fmtName, "Triplets:") + String.format(fmtVal, triplets) + " (" + tripletsStr + "%)" + NEW_LINE);
+					subScore = 100.0D - tripletsPercent;
+					addQualityDetailsLine(stats, "Triplets:", triplets + "", tripletsPercent, subScore);
 					markerCount++;
-					markerSum += (100.0D - tripletsPercent);
+					markerSum += subScore;
 				}
 				
 				// velocity changes
 				int    velocities    = subStat.get(STAT_NOTE_VELOCITIES);
 				double velocitiesPercent = ((double) velocities) / ((double) notes);
 				velocitiesPercent *= 100;
-				String velocitiesPercentStr = String.format("%.2f", velocitiesPercent);
-				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + String.format(fmtName, "Velocity changes:") + String.format(fmtVal, velocities) + " (" + velocitiesPercentStr + "%)" + NEW_LINE);
+				subScore = 100.0D - velocitiesPercent;
+				addQualityDetailsLine(stats, "Velocity changes:", velocities + "", velocitiesPercent, subScore);
 				markerCount++;
-				markerSum += (100.0D - velocitiesPercent);
+				markerSum += subScore;
 				
 				// duration changes
 				int    durations   = subStat.get(STAT_NOTE_DURATIONS);
 				double durationPercent = ((double) durations) / ((double) notes);
 				durationPercent *= 100;
-				String durationPercentStr = String.format("%.2f", durationPercent);
-				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + String.format(fmtName, "Duration changes:") + String.format(fmtVal, durations) + " (" + durationPercentStr + "%)" + NEW_LINE);
+				subScore = 100.0D - durationPercent;
+				addQualityDetailsLine(stats, "Duration changes:", durations + "", durationPercent, subScore);
 				markerCount++;
-				markerSum += (100.0D - durationPercent);
+				markerSum += subScore;
 				
 				// multiple option
-				int    multiple        = subStat.get(STAT_NOTE_MULTIPLE);
-				double multiplePercent = ((double) multiple) / ((double) notes);
-				multiplePercent *= 100;
-				String multiplePercentStr = String.format("%.2f", multiplePercent);
-				if (MUST_ADD_STATISTICS)
-					stats.append(comment + "\t\t" + String.format(fmtName, "Multiple option:") + String.format(fmtVal, multiple) + " (" + multiplePercentStr + "%)" + NEW_LINE);
-				markerCount++;
-				markerSum += (100.0D - multiplePercent);
+				if (MIDICA == format) {
+					int    multiple        = subStat.get(STAT_NOTE_MULTIPLE);
+					double multiplePercent = ((double) multiple) / ((double) notes);
+					multiplePercent *= 100;
+					subScore = 100.0D - multiplePercent;
+					addQualityDetailsLine(stats, "Multiple option:", multiple + "", multiplePercent, subScore);
+					markerCount++;
+					markerSum += subScore;
+				}
 			}
 		}
 		
@@ -1529,7 +1694,7 @@ public abstract class Decompiler extends Exporter {
 		if (MUST_ADD_QUALITY_SCORE) {
 			double totalScore    = ((double) markerSum) / markerCount;
 			String totalScoreStr = String.format("%.2f", totalScore);
-			stats.append(comment + "\tQuality Score: " + totalScoreStr + NEW_LINE);
+			stats.append(comment + "     Quality Score: " + totalScoreStr + NEW_LINE);
 		}
 		
 		// empty line
@@ -1538,6 +1703,43 @@ public abstract class Decompiler extends Exporter {
 		}
 		
 		return stats.toString();
+	}
+	
+	/**
+	 * Adds a line to the quality statistics, if configured.
+	 * 
+	 * @param stats         the statistic line
+	 * @param name          which kind of sub score (e.g. Summands, Triplets, ...)
+	 * @param count         number of occurrences
+	 * @param percentage    percentage of occurrences
+	 * @param subScore      sub score to be added
+	 */
+	private void addQualityDetailsLine(StringBuilder stats, String name, String count, double percentage, double subScore) {
+		if (! MUST_ADD_STATISTICS)
+			return;
+		
+		String comment = getCommentSymbol();
+		stats.append(
+			comment + "         " + String.format("%-20s", name)
+			+ String.format("%1$10s", count) + " "
+			+ String.format(
+				"%-9s",
+				"(" + String.format("%.2f", percentage) + "%)"
+			)
+		);
+		
+		if (MUST_ADD_QUALITY_SCORE) {
+			stats.append(" Sub Score: "
+				+ String.format(
+					"%1$10s",
+					String.format("%.2f", subScore)
+				)
+				+ NEW_LINE
+			);
+			return;
+		}
+		
+		stats.append(NEW_LINE);
 	}
 	
 	/**
@@ -1606,10 +1808,10 @@ public abstract class Decompiler extends Exporter {
 		String percentPress    = String.format("%.2f", ((double) 100) * ((double) countPress)    / ((double) (countAll)));
 		
 		// add the lines
-		stats.append(comment + "\t\t" + "Sum:      " + strCountAll + NEW_LINE);
-		stats.append(comment + "\t\t" + "Next ON:  " + strCountNextOn   + " (" + percentNextOn   + "%)" + NEW_LINE);
-		stats.append(comment + "\t\t" + "Duration: " + strCountDuration + " (" + percentDuration + "%)" + NEW_LINE);
-		stats.append(comment + "\t\t" + "Press:    " + strCountPress    + " (" + percentPress    + "%)" + NEW_LINE);
+		stats.append(comment + "     " + "Sum:      " + strCountAll + NEW_LINE);
+		stats.append(comment + "     " + "Next ON:  " + strCountNextOn   + " (" + percentNextOn   + "%)" + NEW_LINE);
+		stats.append(comment + "     " + "Duration: " + strCountDuration + " (" + percentDuration + "%)" + NEW_LINE);
+		stats.append(comment + "     " + "Press:    " + strCountPress    + " (" + percentPress    + "%)" + NEW_LINE);
 		
 		return stats.toString();
 	}
@@ -1636,11 +1838,34 @@ public abstract class Decompiler extends Exporter {
 		Collections.sort(configKeys);
 		for (String key : configKeys) {
 			String value = sessionConfig.get(key);
-			statLines.append(comment + " " + key + "\t" + value + NEW_LINE);
+			statLines.append(
+				comment + " "
+				+ String.format("%-30s", key) + " " + value + NEW_LINE
+			);
 		}
 		statLines.append(NEW_LINE);
 		
 		return statLines.toString();
+	}
+	
+	/**
+	 * Creates a tick description that can be used in tick comments.
+	 * The description contains the given tick in source and target resolution.
+	 * 
+	 * @param tick                 MIDI tickstamp (in source resolution).
+	 * @param withCommentSymbol    prefixes a comment symbol, if **true**
+	 * @return the comment string.
+	 */
+	protected String createTickDescription(long tick, boolean withCommentSymbol) {
+		
+		// convert source tick to target tick
+		long   targetTick  = (tick * targetResolution * 10 + 5) / (sourceResolution * 10);
+		String description = Dict.get(Dict.EXPORTER_TICK) + " " + tick + " ==> " + targetTick;
+		
+		if (withCommentSymbol)
+			return getCommentSymbol() + " " + description;
+		else
+			return description;
 	}
 	
 	/**
