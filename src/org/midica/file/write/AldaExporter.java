@@ -244,7 +244,11 @@ public class AldaExporter extends Decompiler {
 		
 		if (MUST_ADD_TICK_COMMENTS) {
 			result.append(NEW_LINE);
-			result.append("# SLICE " + currentSliceNumber + " (tick: " + slice.getBeginTick() + ")");
+			result.append(
+				  "# SLICE " + currentSliceNumber + " ("
+				+ createTickDescription(slice.getBeginTick(), false)
+				+ ")"
+			);
 		}
 		result.append(NEW_LINE + NEW_LINE);
 		

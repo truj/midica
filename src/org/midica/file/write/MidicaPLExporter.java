@@ -213,7 +213,7 @@ public class MidicaPLExporter extends Decompiler {
 		}
 		
 		// add one empty line between channels
-		if ( ! timeline.isEmpty() ) {
+		if (! timeline.isEmpty()) {
 			lines.append(NEW_LINE);
 		}
 		
@@ -261,8 +261,8 @@ public class MidicaPLExporter extends Decompiler {
 			
 			// LINE of this field
 			for (String singleLine : multiLines) {
-				if ( ! "".equals(singleLine) )
-					lines.add("\t" + mplIds[i] + "\t" + singleLine + NEW_LINE);
+				if (! "".equals(singleLine))
+					lines.add("\t" + String.format("%-12s", mplIds[i]) + " " + singleLine + NEW_LINE);
 			}
 		}
 		
@@ -319,7 +319,7 @@ public class MidicaPLExporter extends Decompiler {
 				continue;
 			
 			// append the line
-			block.append("\t\t" + mplIds[i] + "\t" + value + NEW_LINE);
+			block.append("\t\t" + String.format("%-12s", mplIds[i]) + " " + value + NEW_LINE);
 		}
 		
 		// process info fields
@@ -328,8 +328,11 @@ public class MidicaPLExporter extends Decompiler {
 			for (String info : infos) {
 				
 				// append info line
-				if ( ! "".equals(info) )
-					block.append("\t\t" + MidicaPLParser.META_SK_INFO + "\t" + info + NEW_LINE);
+				if (! "".equals(info))
+					block.append(
+						  "\t\t" + String.format("%-12s", MidicaPLParser.META_SK_INFO) + " "
+						+ info + NEW_LINE
+					);
 			}
 		}
 		
@@ -378,7 +381,7 @@ public class MidicaPLExporter extends Decompiler {
 		Set<Long> changeTicks = instrumentHistory.get(channel).keySet();
 		if (changeTicks.contains(tick)) {
 			String instrLine = createInstrLine(tick, channel);
-			if ( ! "".equals(instrLine) ) {
+			if (! "".equals(instrLine)) {
 				lines.append(instrLine);
 			}
 		}
@@ -419,7 +422,7 @@ public class MidicaPLExporter extends Decompiler {
 		Byte[]  instrConfig;
 		boolean isAutoChannel = false;
 		
-		String cmd = "";
+		String cmd = "\t";
 		if (0 == tick) {
 			// initialization - either a program change at tick 0 or the default at a negative tick
 			Entry<Long, Byte[]> initialInstr   = chInstrHist.floorEntry(tick);
@@ -466,20 +469,23 @@ public class MidicaPLExporter extends Decompiler {
 			commentStr = commentHistory.get(channel).get(instrNameTick);
 		}
 		
-		// tick comment (only for instrument changes
-		String lineEnd = NEW_LINE;
-		if (tick > 0) {
-			lineEnd = createTickComment(tick, true) + NEW_LINE;
+		// put everything together
+		
+		// instruments block
+		if (0 == tick) {
+			return (
+				  cmd
+				+ String.format("%-4s", channelStr)
+				+ " "
+				+ String.format("%-22s", programStr)
+				+ " "
+				+ commentStr
+				+ NEW_LINE
+			);
 		}
 		
-		// put everything together
-		return (
-			  cmd
-			+ "\t"   + channelStr
-			+ "\t"   + programStr
-			+ "\t\t" + commentStr
-			+ lineEnd
-		);
+		// single instrument change
+		return appendTickComment(cmd + "  " + channelStr + "  " + programStr, tick) + NEW_LINE;
 	}
 	
 	/**
@@ -519,7 +525,7 @@ public class MidicaPLExporter extends Decompiler {
 			// chords
 			for (String notesStr : noteChords) {
 				String chordName = chords.get(notesStr);
-				chordBlock.append(MidicaPLParser.CHORD + "\t" + chordName + MidicaPLParser.CHORD_ASSIGNER);
+				chordBlock.append(MidicaPLParser.CHORD + " " + String.format("%-12s", chordName)  + " ");
 				
 				// notes
 				String[]          noteNumbers = notesStr.split("\\,");
@@ -553,7 +559,8 @@ public class MidicaPLExporter extends Decompiler {
 		}
 		
 		// tick comment
-		result.append( createTickComment(slice.getBeginTick(), false) );
+		if (MUST_ADD_TICK_COMMENTS)
+			result.append( createTickDescription(slice.getBeginTick(), true) + NEW_LINE );
 		
 		// create global commands
 		TreeMap<String, String> globalCmds = slice.getGlobalCommands();
@@ -574,7 +581,11 @@ public class MidicaPLExporter extends Decompiler {
 					globalCmd = MidicaPLParser.KEY_SIG;
 				
 				// append command
-				result.append(MidicaPLParser.GLOBAL + "\t" + globalCmd + "\t" + value + NEW_LINE);
+				result.append(
+					  MidicaPLParser.GLOBAL + " "
+					+ String.format("%-7s", globalCmd) + " "
+					+ value + NEW_LINE
+				);
 			}
 			result.append(NEW_LINE);
 		}
@@ -719,7 +730,11 @@ public class MidicaPLExporter extends Decompiler {
 		Instrument instr = instrumentsByChannel.get(channel);
 		
 		// main part of the command
-		line.append(channel + "\t" + noteName + "\t" + noteOrCrd.get(NP_LENGTH));
+		line.append(
+			  String.format("%-2s", channel)  + " "
+			+ String.format("%-5s", noteName) + " "
+			+ String.format("%1$5s", noteOrCrd.get(NP_LENGTH))
+		);
 		
 		// get options that must be appended
 		ArrayList<String> options = new ArrayList<>();
@@ -731,7 +746,7 @@ public class MidicaPLExporter extends Decompiler {
 			}
 			
 			// duration and velocity
-			if ( ! noteName.equals(MidicaPLParser.REST) ) {
+			if (! noteName.equals(MidicaPLParser.REST)) {
 				
 				// duration
 				float duration           = Float.parseFloat( noteOrCrd.get(NP_DURATION) ) / 100;
@@ -771,14 +786,11 @@ public class MidicaPLExporter extends Decompiler {
 		// append options
 		if (options.size() > 0) {
 			String optionsStr = String.join(MidicaPLParser.OPT_SEPARATOR + " ", options);
-			line.append("\t" + optionsStr);
+			line.append(" " + optionsStr);
 		}
 		
 		// finish the line
-		line.append( createTickComment(tick, true) );
-		line.append(NEW_LINE);
-		
-		return line.toString();
+		return appendTickComment(line.toString(), tick) + NEW_LINE;
 	}
 	
 	/**
@@ -810,7 +822,12 @@ public class MidicaPLExporter extends Decompiler {
 		// add line
 		if (lengthSummands.size() > 0) {
 			String length = String.join(MidicaPLParser.LENGTH_PLUS, lengthSummands);
-			line.append(channel + "\t" + MidicaPLParser.REST + "\t" + length);
+			line.append(
+				  String.format("%-2s", channel) + " "
+				+ String.format("%-5s", MidicaPLParser.REST) + " "
+				+ String.format("%1$5s", length)
+			);
+			
 			incrementStats(STAT_RESTS, channel);
 		}
 		else {
@@ -821,16 +838,14 @@ public class MidicaPLExporter extends Decompiler {
 		// add lyrics option, if needed
 		if (syllable != null) {
 			syllable = escapeSyllable(syllable);
-			line.append("\t" + MidicaPLParser.L + MidicaPLParser.OPT_ASSIGNER + syllable);
+			line.append(" " + MidicaPLParser.L + MidicaPLParser.OPT_ASSIGNER + syllable);
 		}
 		
 		// finish the line
-		if (beginTick >= 0) {
-			line.append( createTickComment(beginTick, true) );
-		}
-		line.append(NEW_LINE);
-		
-		return line.toString();
+		if (beginTick < 0)
+			return line.toString() + NEW_LINE;
+		else
+			return appendTickComment(line.toString(), beginTick) + NEW_LINE;
 	}
 	
 	/**
@@ -971,33 +986,17 @@ public class MidicaPLExporter extends Decompiler {
 	}
 	
 	/**
-	 * Creates a comment giving the current tick - if configured accordingly.
+	 * Appends a tick comment to the given line, if tick comments are configured.
+	 * Otherwise the given line is returned unchanged.
 	 * 
-	 * Adds a line break, if **must_append** is **true**.
-	 * 
-	 * @param tick        MIDI tickstamp.
-	 * @param mustAppend  **true** for a comment to be appended to a line; **false** for a full-line comment.
-	 * @return the comment string.
+	 * @param line    the line to be completed by a comment
+	 * @param tick    MIDI tick
+	 * @return the changed or unchanged line
 	 */
-	private String createTickComment(long tick, boolean mustAppend) {
-		
-		// convert source tick to target tick
-		long targetTick = (tick * targetResolution * 10 + 5) / (sourceResolution * 10);
-		
-		String comment = "";
+	private String appendTickComment(String line, long tick) {
 		if (MUST_ADD_TICK_COMMENTS) {
-			if (mustAppend)
-				comment = "\t\t\t\t";
-			
-			comment += MidicaPLParser.COMMENT + " "
-				+ Dict.get(Dict.EXPORTER_TICK)  + " "
-				+ tick
-				+ " ==> "
-				+ targetTick;
+			line = String.format("%-35s", line) + " " + createTickDescription(tick, true);
 		}
-		
-		if (mustAppend)
-			return comment;
-		return comment + NEW_LINE;
+		return line;
 	}
 }

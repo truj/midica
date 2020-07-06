@@ -425,10 +425,87 @@ public abstract class Decompiler extends Exporter {
 	/**
 	 * Initializes and resets the instruments structures so that
 	 * their configurations can be tracked.
+	 * 
+	 * Also removes instrument switches that are never used by any note-ONs.
 	 */
 	private void initInstruments() {
 		instrumentsByName    = new TreeMap<>();
 		instrumentsByChannel = new ArrayList<>();
+		
+		// make a deep copy (clone) of the instrument history
+		TreeMap<Byte, TreeMap<Long, Byte[]>> originalInstrumentHistory = instrumentHistory;
+		instrumentHistory = new TreeMap<>();
+		for (Entry<Byte, TreeMap<Long, Byte[]>> channelEntry : originalInstrumentHistory.entrySet()) {
+			byte channel = channelEntry.getKey();
+			TreeMap<Long, Byte[]> originalInstrChanges = channelEntry.getValue();
+			
+			TreeMap<Long, Byte[]> instrChanges = new TreeMap<Long, Byte[]>();
+			instrumentHistory.put(channel, instrChanges);
+			
+			for (Entry<Long, Byte[]> originalInstrChange : originalInstrChanges.entrySet()) {
+				long tick    = originalInstrChange.getKey();
+				Byte[] value = originalInstrChange.getValue();
+				instrChanges.put(tick, value);
+			}
+		}
+		
+		// remove unnecessary instrument changes from the instrument history
+		for (Entry<Byte, TreeMap<Long, Byte[]>> channelEntry : originalInstrumentHistory.entrySet()) {
+			byte channel = channelEntry.getKey();
+			TreeMap<Long, Byte[]> instrChanges = channelEntry.getValue();
+			for (Entry<Long, Byte[]> instrChangeEntry : instrChanges.entrySet()) {
+				long tick = instrChangeEntry.getKey();
+				
+				// get next change (if any)
+				long nextChangeTick;
+				Entry<Long, Byte[]> nextEntry = instrChanges.ceilingEntry(tick + 1);
+				if (null == nextEntry)
+					nextChangeTick = Long.MAX_VALUE;
+				else
+					nextChangeTick = nextEntry.getKey();
+				
+				// get next note-ON tick after the instrument change
+				long noteTick;
+				Entry<Long, TreeMap<Byte, Byte>> nextNoteEntry = noteHistory.get(channel).ceilingEntry(tick);
+				if (null == nextNoteEntry)
+					// no note at all - unnecessary
+					noteTick = -1;
+				else
+					noteTick = nextNoteEntry.getKey();
+				
+				// is the instrument change necessary?
+				// (Is the next note between this instrument change and the next one?)
+				if (noteTick > 0 && tick <= noteTick && noteTick < nextChangeTick) {
+					continue;
+				}
+				
+				// no, the instrument change is unnecessary - remove it
+				instrumentHistory.get(channel).remove(tick);
+			}
+			instrChanges.size();
+		}
+		
+		// move the first instrument change of each channel to tick zero, if it contains
+		// only positive ticks so far.
+		// This ensures that all used instruments are initialized as soon as possible.
+		// (In MidicaPL: in the first INSTRUMENTS block)
+		for (Entry<Byte, TreeMap<Long, Byte[]>> channelEntry : instrumentHistory.entrySet()) {
+			TreeMap<Long, Byte[]> instrChanges = channelEntry.getValue();
+			
+			// get earliest instrument change
+			Entry<Long, Byte[]> firstChange = instrChanges.firstEntry();
+			if (null == firstChange)
+				continue;
+			long   tick       = firstChange.getKey();
+			Byte[] firstInstr = firstChange.getValue();
+			
+			// move to tick 0, if necessary
+			if (tick > 0) {
+				instrChanges.put(0L, firstInstr);
+				instrChanges.remove(tick);
+			}
+		}
+		
 		// CHANNEL:
 		for (byte channel = 0; channel < 16; channel++) {
 			// regard only the lowest tick >= 0
@@ -1601,13 +1678,15 @@ public abstract class Decompiler extends Exporter {
 				markerSum += subScore;
 				
 				// multiple option
-				int    multiple        = subStat.get(STAT_NOTE_MULTIPLE);
-				double multiplePercent = ((double) multiple) / ((double) notes);
-				multiplePercent *= 100;
-				subScore = 100.0D - multiplePercent;
-				addQualityDetailsLine(stats, "Multiple option:", multiple + "", multiplePercent, subScore);
-				markerCount++;
-				markerSum += subScore;
+				if (MIDICA == format) {
+					int    multiple        = subStat.get(STAT_NOTE_MULTIPLE);
+					double multiplePercent = ((double) multiple) / ((double) notes);
+					multiplePercent *= 100;
+					subScore = 100.0D - multiplePercent;
+					addQualityDetailsLine(stats, "Multiple option:", multiple + "", multiplePercent, subScore);
+					markerCount++;
+					markerSum += subScore;
+				}
 			}
 		}
 		
@@ -1630,10 +1709,10 @@ public abstract class Decompiler extends Exporter {
 	 * Adds a line to the quality statistics, if configured.
 	 * 
 	 * @param stats         the statistic line
-	 * @param name
-	 * @param count
-	 * @param percentage
-	 * @param subScore      the sub score to be added
+	 * @param name          which kind of sub score (e.g. Summands, Triplets, ...)
+	 * @param count         number of occurrences
+	 * @param percentage    percentage of occurrences
+	 * @param subScore      sub score to be added
 	 */
 	private void addQualityDetailsLine(StringBuilder stats, String name, String count, double percentage, double subScore) {
 		if (! MUST_ADD_STATISTICS)
@@ -1767,6 +1846,26 @@ public abstract class Decompiler extends Exporter {
 		statLines.append(NEW_LINE);
 		
 		return statLines.toString();
+	}
+	
+	/**
+	 * Creates a tick description that can be used in tick comments.
+	 * The description contains the given tick in source and target resolution.
+	 * 
+	 * @param tick                 MIDI tickstamp (in source resolution).
+	 * @param withCommentSymbol    prefixes a comment symbol, if **true**
+	 * @return the comment string.
+	 */
+	protected String createTickDescription(long tick, boolean withCommentSymbol) {
+		
+		// convert source tick to target tick
+		long   targetTick  = (tick * targetResolution * 10 + 5) / (sourceResolution * 10);
+		String description = Dict.get(Dict.EXPORTER_TICK) + " " + tick + " ==> " + targetTick;
+		
+		if (withCommentSymbol)
+			return getCommentSymbol() + " " + description;
+		else
+			return description;
 	}
 	
 	/**
