@@ -710,7 +710,7 @@ public class KeyBindingManager {
 	 * 
 	 * A key must be ignored, if:
 	 * 
-	 * - a text field is currently focused; and
+	 * - a text field or text area is currently focused; and
 	 * - the pressed key is printable; and
 	 * - there are no modifiers or only SHIFT; and
 	 * - the key is NOT the SPACE bar
@@ -723,9 +723,9 @@ public class KeyBindingManager {
 	 */
 	private boolean mustIgnore(ActionEvent e) {
 		
-		// no text field is focused? - don't ignore
+		// no text field/area is focused? - don't ignore
 		Component focusOwner = window.getFocusOwner();
-		if ( ! (focusOwner instanceof JTextField) )
+		if (! (focusOwner instanceof JTextField || focusOwner instanceof JTextArea))
 			return false;
 		
 		// special key pressed (e.g. F5)? - don't ignore

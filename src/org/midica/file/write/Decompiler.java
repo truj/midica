@@ -111,14 +111,16 @@ public abstract class Decompiler extends Exporter {
 	public static final boolean DEFAULT_MUST_ADD_STATISTICS      = true;
 	public static final boolean DEFAULT_MUST_ADD_STRATEGY_STAT   = true;
 	public static final byte    DEFAULT_LENGTH_STRATEGY          = STRATEGY_NEXT_DURATION_PRESS;
-	public static final long    DEFAULT_MAX_TARGET_TICKS_ON      = 3840; // 2 full notes
-	public static final float   DEFAULT_MIN_DURATION_TO_KEEP     = 0.05f;
-	public static final long    DEFAULT_LENGTH_TICK_TOLERANCE    = 2;
-	public static final float   DEFAULT_DURATION_RATIO_TOLERANCE = 0.014f;
+	public static final long    DEFAULT_MIN_TARGET_TICKS_ON      = 60;    // /32 (32th note)
+	public static final long    DEFAULT_MAX_TARGET_TICKS_ON      = 3840;  // *2 (2 full notes)
+	public static final float   DEFAULT_MIN_DURATION_TO_KEEP     = 0.2f;  // 20%
+	public static final float   DEFAULT_MAX_DURATION_TO_KEEP     = 1.1f;  // 110%
+	public static final long    DEFAULT_LENGTH_TICK_TOLERANCE    = 5;
+	public static final float   DEFAULT_DURATION_RATIO_TOLERANCE = 0.15f;
 	public static final boolean DEFAULT_USE_PRE_DEFINED_CHORDS   = true;
-	public static final long    DEFAULT_CHORD_NOTE_ON_TOLERANCE  = 0;
-	public static final long    DEFAULT_CHORD_NOTE_OFF_TOLERANCE = 0;
-	public static final long    DEFAULT_CHORD_VELOCITY_TOLERANCE = 0;
+	public static final long    DEFAULT_CHORD_NOTE_ON_TOLERANCE  = 3;
+	public static final long    DEFAULT_CHORD_NOTE_OFF_TOLERANCE = 20;
+	public static final long    DEFAULT_CHORD_VELOCITY_TOLERANCE = 5;
 	public static final boolean DEFAULT_USE_DOTTED_NOTES         = true;
 	public static final boolean DEFAULT_USE_DOTTED_RESTS         = true;
 	public static final boolean DEFAULT_USE_TRIPLETTED_NOTES     = true;
@@ -141,8 +143,11 @@ public abstract class Decompiler extends Exporter {
 	protected static boolean       MUST_ADD_STRATEGY_STAT   = DEFAULT_MUST_ADD_STRATEGY_STAT;
 	protected static byte          LENGTH_STRATEGY          = DEFAULT_LENGTH_STRATEGY;
 	protected static long          MAX_TARGET_TICKS_ON      = DEFAULT_MAX_TARGET_TICKS_ON;
+	protected static long          MIN_TARGET_TICKS_ON      = DEFAULT_MIN_TARGET_TICKS_ON;
+	protected static long          MIN_SOURCE_TICKS_ON      = 0L;
 	protected static long          MAX_SOURCE_TICKS_ON      = 0L;
 	protected static float         MIN_DURATION_TO_KEEP     = DEFAULT_MIN_DURATION_TO_KEEP;
+	protected static float         MAX_DURATION_TO_KEEP     = DEFAULT_MAX_DURATION_TO_KEEP;
 	protected static long          LENGTH_TICK_TOLERANCE    = DEFAULT_LENGTH_TICK_TOLERANCE;
 	protected static float         DURATION_RATIO_TOLERANCE = DEFAULT_DURATION_RATIO_TOLERANCE;
 	protected static boolean       USE_PRE_DEFINED_CHORDS   = DEFAULT_USE_PRE_DEFINED_CHORDS;
@@ -363,8 +368,10 @@ public abstract class Decompiler extends Exporter {
 		MUST_ADD_STATISTICS      = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_STATISTICS)      );
 		MUST_ADD_STRATEGY_STAT   = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_STRATEGY_STAT)   );
 		LENGTH_STRATEGY          = Byte.parseByte(       sessionConfig.get(Config.DC_LENGTH_STRATEGY)          );
+		MIN_TARGET_TICKS_ON      = Long.parseLong(       sessionConfig.get(Config.DC_MIN_TARGET_TICKS_ON)      );
 		MAX_TARGET_TICKS_ON      = Long.parseLong(       sessionConfig.get(Config.DC_MAX_TARGET_TICKS_ON)      );
 		MIN_DURATION_TO_KEEP     = Float.parseFloat(     sessionConfig.get(Config.DC_MIN_DURATION_TO_KEEP)     );
+		MAX_DURATION_TO_KEEP     = Float.parseFloat(     sessionConfig.get(Config.DC_MAX_DURATION_TO_KEEP)     );
 		LENGTH_TICK_TOLERANCE    = Long.parseLong(       sessionConfig.get(Config.DC_LENGTH_TICK_TOLERANCE)    );
 		DURATION_RATIO_TOLERANCE = Float.parseFloat(     sessionConfig.get(Config.DC_DURATION_RATIO_TOLERANCE) );
 		USE_PRE_DEFINED_CHORDS   = Boolean.parseBoolean( sessionConfig.get(Config.DC_USE_PRE_DEFINED_CHORDS)   );
@@ -380,6 +387,7 @@ public abstract class Decompiler extends Exporter {
 		EXTRA_GLOBALS            = DecompileConfigController.getExtraGlobalTicks();
 		
 		// apply indirect configuration
+		MIN_SOURCE_TICKS_ON = (MIN_TARGET_TICKS_ON * sourceResolution * 10 + 5) / (targetResolution * 10);
 		MAX_SOURCE_TICKS_ON = (MAX_TARGET_TICKS_ON * sourceResolution * 10 + 5) / (targetResolution * 10);
 	}
 	
@@ -425,8 +433,6 @@ public abstract class Decompiler extends Exporter {
 	/**
 	 * Initializes and resets the instruments structures so that
 	 * their configurations can be tracked.
-	 * 
-	 * Also removes instrument switches that are never used by any note-ONs.
 	 */
 	private void initInstruments() {
 		instrumentsByName    = new TreeMap<>();
@@ -1333,7 +1339,7 @@ public abstract class Decompiler extends Exporter {
 		float durationDiff   = oldDuration > durationByDur ? oldDuration - durationByDur : durationByDur - oldDuration;
 		boolean canUseByDur  = durationDiff < DURATION_RATIO_TOLERANCE;
 		durationByDur        = oldDuration;
-		if (durationByDur < MIN_DURATION_TO_KEEP) {
+		if (durationByDur < MIN_DURATION_TO_KEEP || durationByDur > MAX_DURATION_TO_KEEP) {
 			canUseByDur = false;
 		}
 		
@@ -1347,7 +1353,7 @@ public abstract class Decompiler extends Exporter {
 			durationByOn  = calculateDuration(noteTicksByOn, pressTicks);
 		}
 		boolean canUseNextOn = noteTicksByOn > 0 && durationByOn > 0;
-		if (noteTicksByOn > MAX_SOURCE_TICKS_ON) {
+		if (noteTicksByOn < MIN_SOURCE_TICKS_ON || noteTicksByOn > MAX_SOURCE_TICKS_ON) {
 			canUseNextOn = false;
 		}
 		
@@ -1602,13 +1608,10 @@ public abstract class Decompiler extends Exporter {
 			
 			if (rests > 0) {
 				
-				// rests skipped
+				// rests skipped - only for information, no sub score
 				double restsSkipped = ((double) subStat.get(STAT_REST_SKIPPED)) / ((double) rests);
 				restsSkipped *= 100;
-				subScore = 100.0D - restsSkipped;
-				addQualityDetailsLine(stats, "Skipped:", subStat.get(STAT_REST_SKIPPED) + "", restsSkipped, subScore);
-				markerCount++;
-				markerSum += subScore;
+				addQualityDetailsLine(stats, "Skipped:", subStat.get(STAT_REST_SKIPPED) + "", restsSkipped, null);
 				
 				// rest summands
 				int    summands        = subStat.get(STAT_REST_SUMMANDS);
@@ -1712,9 +1715,9 @@ public abstract class Decompiler extends Exporter {
 	 * @param name          which kind of sub score (e.g. Summands, Triplets, ...)
 	 * @param count         number of occurrences
 	 * @param percentage    percentage of occurrences
-	 * @param subScore      sub score to be added
+	 * @param subScore      sub score to be added (or **null**, if no sub score is used)
 	 */
-	private void addQualityDetailsLine(StringBuilder stats, String name, String count, double percentage, double subScore) {
+	private void addQualityDetailsLine(StringBuilder stats, String name, String count, double percentage, Double subScore) {
 		if (! MUST_ADD_STATISTICS)
 			return;
 		
@@ -1728,7 +1731,7 @@ public abstract class Decompiler extends Exporter {
 			)
 		);
 		
-		if (MUST_ADD_QUALITY_SCORE) {
+		if (MUST_ADD_QUALITY_SCORE && subScore != null) {
 			stats.append(" Sub Score: "
 				+ String.format(
 					"%1$10s",
@@ -1873,7 +1876,7 @@ public abstract class Decompiler extends Exporter {
 	 * 
 	 * @return comment symbol.
 	 */
-	private String getCommentSymbol() {
+	protected String getCommentSymbol() {
 		if (ALDA == format)
 			return "#";
 		return MidicaPLParser.COMMENT;

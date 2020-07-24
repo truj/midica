@@ -64,8 +64,10 @@ public class DecompileConfigView extends JDialog {
 	JCheckBox               cbxAddStatistics;
 	JCheckBox               cbxAddStrategyStat;
 	JComboBox<NamedInteger> cbxLengthStrategy;
+	JComboBox<NamedInteger> cbxMinTargetTicksOn;
 	JComboBox<NamedInteger> cbxMaxTargetTicksOn;
 	JTextField              fldMinDurToKeep;
+	JTextField              fldMaxDurToKeep;
 	JTextField              fldLengthTickTolerance;
 	JTextField              fldDurationRatioTolerance;
 	JCheckBox               cbxPredefinedChords;
@@ -110,8 +112,10 @@ public class DecompileConfigView extends JDialog {
 		cbxAddStatistics          = new JCheckBox(Dict.get(Dict.DC_ADD_STATISTICS));
 		cbxAddStrategyStat        = new JCheckBox(Dict.get(Dict.DC_ADD_STRATEGY_STAT));
 		cbxLengthStrategy         = new JComboBox<>();
+		cbxMinTargetTicksOn       = new JComboBox<>();
 		cbxMaxTargetTicksOn       = new JComboBox<>();
 		fldMinDurToKeep           = new JTextField();
+		fldMaxDurToKeep           = new JTextField();
 		fldLengthTickTolerance    = new JTextField();
 		fldDurationRatioTolerance = new JTextField();
 		cbxPredefinedChords       = new JCheckBox();
@@ -136,6 +140,7 @@ public class DecompileConfigView extends JDialog {
 		btnRestore                = new MidicaButton(Dict.get(Dict.DC_RESTORE));
 		btnSave                   = new MidicaButton(Dict.get(Dict.DC_SAVE));
 		cbxLengthStrategy.setModel(DecompileConfigController.getComboboxModel(Config.DC_LENGTH_STRATEGY));
+		cbxMinTargetTicksOn.setModel(DecompileConfigController.getComboboxModel(Config.DC_MIN_TARGET_TICKS_ON));
 		cbxMaxTargetTicksOn.setModel(DecompileConfigController.getComboboxModel(Config.DC_MAX_TARGET_TICKS_ON));
 		cbxOrphanedSyllables.setModel(DecompileConfigController.getComboboxModel(Config.DC_ORPHANED_SYLLABLES));
 		
@@ -314,6 +319,21 @@ public class DecompileConfigView extends JDialog {
 		constrFull.gridy = constrRight.gridy;
 		area.add(Laf.createSeparator(), constrFull);
 		
+		// min note length (min target ticks) for next note on
+		// label
+		constrLeft.gridy++;
+		JLabel lblMinTargetOn = new JLabel( Dict.get(Dict.MIN_TARGET_TICKS_NEXT_ON) );
+		Laf.makeBold(lblMinTargetOn);
+		area.add(lblMinTargetOn, constrLeft);
+		
+		// combobox
+		constrCenter.gridy++;
+		constrCenter.gridwidth = 2;
+		constrRight.gridy++;
+		cbxMinTargetTicksOn.addActionListener(controller);
+		area.add(cbxMinTargetTicksOn, constrCenter);
+		constrCenter.gridwidth = 1;
+		
 		// max note length (max target ticks) for next note on
 		// label
 		constrLeft.gridy++;
@@ -327,7 +347,6 @@ public class DecompileConfigView extends JDialog {
 		constrRight.gridy++;
 		cbxMaxTargetTicksOn.addActionListener(controller);
 		area.add(cbxMaxTargetTicksOn, constrCenter);
-		constrCenter.gridwidth = 1;
 		
 		// separator
 		constrLeft.gridy++;
@@ -336,7 +355,7 @@ public class DecompileConfigView extends JDialog {
 		constrFull.gridy = constrRight.gridy;
 		area.add(Laf.createSeparator(), constrFull);
 		
-		// duration ratio tolerance
+		// min duration to keep
 		// label
 		constrLeft.gridy++;
 		JLabel lblMinDuration = new JLabel( Dict.get(Dict.MIN_DURATION_TO_KEEP) );
@@ -345,6 +364,7 @@ public class DecompileConfigView extends JDialog {
 		
 		// field
 		constrCenter.gridy++;
+		constrCenter.gridwidth = 1;
 		fldMinDurToKeep.getDocument().addDocumentListener(controller);
 		fldMinDurToKeep.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
 		area.add(fldMinDurToKeep, constrCenter);
@@ -353,6 +373,24 @@ public class DecompileConfigView extends JDialog {
 		constrRight.gridy++;
 		JLabel descMinDuration = new JLabel( Dict.get(Dict.MIN_DURATION_TO_KEEP_D) );
 		area.add(descMinDuration, constrRight);
+		
+		// max duration to keep
+		// label
+		constrLeft.gridy++;
+		JLabel lblMaxDuration = new JLabel( Dict.get(Dict.MAX_DURATION_TO_KEEP) );
+		Laf.makeBold(lblMaxDuration);
+		area.add(lblMaxDuration, constrLeft);
+		
+		// field
+		constrCenter.gridy++;
+		fldMaxDurToKeep.getDocument().addDocumentListener(controller);
+		fldMaxDurToKeep.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
+		area.add(fldMaxDurToKeep, constrCenter);
+		
+		// description
+		constrRight.gridy++;
+		JLabel descMaxDuration = new JLabel( Dict.get(Dict.MAX_DURATION_TO_KEEP_D) );
+		area.add(descMaxDuration, constrRight);
 		
 		// separator
 		constrLeft.gridy++;
@@ -848,60 +886,62 @@ public class DecompileConfigView extends JDialog {
 		KeyBindingManager keyBindingManager = new KeyBindingManager(this, this.getRootPane());
 		
 		// close bindings
-		keyBindingManager.addBindingsForClose( Dict.KEY_DC_CONFIG_CLOSE );
+		keyBindingManager.addBindingsForClose( Dict.KEY_DC_CONF_CLOSE );
 		
 		// tab bindings
-		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_TAB_DEBUG,        0 );
-		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_TAB_NOTE_LENGTH,  1 );
-		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_TAB_CHORDS,       2 );
-		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_TAB_NOTE_REST,    3 );
-		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_TAB_KARAOKE,      4 );
-		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_TAB_SLICES,       5 );
+		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_CONF_TAB_DEBUG,       0 );
+		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_CONF_TAB_NOTE_LENGTH, 1 );
+		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_CONF_TAB_CHORDS,      2 );
+		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_CONF_TAB_NOTE_REST,   3 );
+		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_CONF_TAB_KARAOKE,     4 );
+		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_CONF_TAB_SLICES,      5 );
 		
 		// debug tab
-		keyBindingManager.addBindingsForTabLevel3( cbxAddTickComments, Dict.KEY_DC_ADD_TICK_COMMENTS );
-		keyBindingManager.addBindingsForTabLevel3( cbxAddConfig,       Dict.KEY_DC_ADD_CONFIG        );
-		keyBindingManager.addBindingsForTabLevel3( cbxAddScore,        Dict.KEY_DC_ADD_SCORE         );
-		keyBindingManager.addBindingsForTabLevel3( cbxAddStatistics,   Dict.KEY_DC_ADD_STATISTICS    );
-		keyBindingManager.addBindingsForTabLevel3( cbxAddStrategyStat, Dict.KEY_DC_ADD_STRATEGY_STAT );
+		keyBindingManager.addBindingsForTabLevel3( cbxAddTickComments, Dict.KEY_DC_CONF_ADD_TICK_COMMENTS );
+		keyBindingManager.addBindingsForTabLevel3( cbxAddConfig,       Dict.KEY_DC_CONF_ADD_CONFIG        );
+		keyBindingManager.addBindingsForTabLevel3( cbxAddScore,        Dict.KEY_DC_CONF_ADD_SCORE         );
+		keyBindingManager.addBindingsForTabLevel3( cbxAddStatistics,   Dict.KEY_DC_CONF_ADD_STATISTICS    );
+		keyBindingManager.addBindingsForTabLevel3( cbxAddStrategyStat, Dict.KEY_DC_CONF_ADD_STRATEGY_STAT );
 		
 		// note length tab
-		keyBindingManager.addBindingsForTabLevel3( cbxLengthStrategy,         Dict.KEY_DC_NOTE_LENGTH_STRATEGY );
-		keyBindingManager.addBindingsForTabLevel3( cbxMaxTargetTicksOn,       Dict.KEY_DC_MAX_TARGET_TICKS_ON  );
-		keyBindingManager.addBindingsForTabLevel3( fldMinDurToKeep,           Dict.KEY_DC_MIN_DUR_TO_KEEP      );
-		keyBindingManager.addBindingsForTabLevel3( fldLengthTickTolerance,    Dict.KEY_DC_TOL_TICK_LEN         );
-		keyBindingManager.addBindingsForTabLevel3( fldDurationRatioTolerance, Dict.KEY_DC_TOL_DUR_RATIO        );
+		keyBindingManager.addBindingsForTabLevel3( cbxLengthStrategy,         Dict.KEY_DC_CONF_NOTE_LENGTH_STRATEGY );
+		keyBindingManager.addBindingsForTabLevel3( cbxMinTargetTicksOn,       Dict.KEY_DC_CONF_MIN_TARGET_TICKS_ON  );
+		keyBindingManager.addBindingsForTabLevel3( cbxMaxTargetTicksOn,       Dict.KEY_DC_CONF_MAX_TARGET_TICKS_ON  );
+		keyBindingManager.addBindingsForTabLevel3( fldMinDurToKeep,           Dict.KEY_DC_CONF_MIN_DUR_TO_KEEP      );
+		keyBindingManager.addBindingsForTabLevel3( fldMaxDurToKeep,           Dict.KEY_DC_CONF_MAX_DUR_TO_KEEP      );
+		keyBindingManager.addBindingsForTabLevel3( fldLengthTickTolerance,    Dict.KEY_DC_CONF_TOL_TICK_LEN         );
+		keyBindingManager.addBindingsForTabLevel3( fldDurationRatioTolerance, Dict.KEY_DC_CONF_TOL_DUR_RATIO        );
 		
 		// chords tab
-		keyBindingManager.addBindingsForTabLevel3( cbxPredefinedChords,       Dict.KEY_DC_CRD_PREDEFINED );
-		keyBindingManager.addBindingsForTabLevel3( fldChordNoteOnTolerance,   Dict.KEY_DC_CRD_NOTE_ON    );
-		keyBindingManager.addBindingsForTabLevel3( fldChordNoteOffTolerance,  Dict.KEY_DC_CRD_NOTE_OFF   );
-		keyBindingManager.addBindingsForTabLevel3( fldChordVelocityTolerance, Dict.KEY_DC_CRD_VELOCITY   );
+		keyBindingManager.addBindingsForTabLevel3( cbxPredefinedChords,       Dict.KEY_DC_CONF_CRD_PREDEFINED );
+		keyBindingManager.addBindingsForTabLevel3( fldChordNoteOnTolerance,   Dict.KEY_DC_CONF_CRD_NOTE_ON    );
+		keyBindingManager.addBindingsForTabLevel3( fldChordNoteOffTolerance,  Dict.KEY_DC_CONF_CRD_NOTE_OFF   );
+		keyBindingManager.addBindingsForTabLevel3( fldChordVelocityTolerance, Dict.KEY_DC_CONF_CRD_VELOCITY   );
 		
 		// notes/rests tab
-		keyBindingManager.addBindingsForTabLevel3( cbxUseDottedNote,     Dict.KEY_DC_USE_DOT_NOTES  );
-		keyBindingManager.addBindingsForTabLevel3( cbxUseDottedRest,     Dict.KEY_DC_USE_DOT_RESTS  );
-		keyBindingManager.addBindingsForTabLevel3( cbxUseTriplettedNote, Dict.KEY_DC_USE_TRIP_NOTES );
-		keyBindingManager.addBindingsForTabLevel3( cbxUseTriplettedRest, Dict.KEY_DC_USE_TRIP_RESTS );
+		keyBindingManager.addBindingsForTabLevel3( cbxUseDottedNote,     Dict.KEY_DC_CONF_USE_DOT_NOTES  );
+		keyBindingManager.addBindingsForTabLevel3( cbxUseDottedRest,     Dict.KEY_DC_CONF_USE_DOT_RESTS  );
+		keyBindingManager.addBindingsForTabLevel3( cbxUseTriplettedNote, Dict.KEY_DC_CONF_USE_TRIP_NOTES );
+		keyBindingManager.addBindingsForTabLevel3( cbxUseTriplettedRest, Dict.KEY_DC_CONF_USE_TRIP_RESTS );
 		
 		// karaoke tab
-		keyBindingManager.addBindingsForTabLevel3( cbxOrphanedSyllables, Dict.KEY_DC_KAR_ORPHANED );
-		keyBindingManager.addBindingsForTabLevel3( cbxKarOneChannel,     Dict.KEY_DC_KAR_ONE_CH   );
+		keyBindingManager.addBindingsForTabLevel3( cbxOrphanedSyllables, Dict.KEY_DC_CONF_KAR_ORPHANED );
+		keyBindingManager.addBindingsForTabLevel3( cbxKarOneChannel,     Dict.KEY_DC_CONF_KAR_ONE_CH   );
 		
 		// slices
-		keyBindingManager.addBindingsForTabLevel3( fldAddGlobalAtTick,     Dict.KEY_DC_FLD_GLOB_SINGLE );
-		keyBindingManager.addBindingsForTabLevel3( btnAddGlobalAtTick,     Dict.KEY_DC_BTN_GLOB_SINGLE );
-		keyBindingManager.addBindingsForTabLevel3( fldAddGlobalsEachTick,  Dict.KEY_DC_FLD_GLOB_EACH   );
-		keyBindingManager.addBindingsForTabLevel3( fldAddGlobalsStartTick, Dict.KEY_DC_FLD_GLOB_FROM   );
-		keyBindingManager.addBindingsForTabLevel3( fldAddGlobalsStopTick,  Dict.KEY_DC_FLD_GLOB_TO     );
-		keyBindingManager.addBindingsForTabLevel3( btnAddGlobalTicks,      Dict.KEY_DC_BTN_GLOB_RANGE  );
-		keyBindingManager.addBindingsForTabLevel3( areaGlobalsStr,         Dict.KEY_DC_AREA_GLOB_ALL   );
-		keyBindingManager.addBindingsForTabLevel3( btnAllTicks,            Dict.KEY_DC_BTN_GLOB_ALL    );
+		keyBindingManager.addBindingsForTabLevel3( fldAddGlobalAtTick,     Dict.KEY_DC_CONF_FLD_GLOB_SINGLE );
+		keyBindingManager.addBindingsForTabLevel3( btnAddGlobalAtTick,     Dict.KEY_DC_CONF_BTN_GLOB_SINGLE );
+		keyBindingManager.addBindingsForTabLevel3( fldAddGlobalsEachTick,  Dict.KEY_DC_CONF_FLD_GLOB_EACH   );
+		keyBindingManager.addBindingsForTabLevel3( fldAddGlobalsStartTick, Dict.KEY_DC_CONF_FLD_GLOB_FROM   );
+		keyBindingManager.addBindingsForTabLevel3( fldAddGlobalsStopTick,  Dict.KEY_DC_CONF_FLD_GLOB_TO     );
+		keyBindingManager.addBindingsForTabLevel3( btnAddGlobalTicks,      Dict.KEY_DC_CONF_BTN_GLOB_RANGE  );
+		keyBindingManager.addBindingsForTabLevel3( areaGlobalsStr,         Dict.KEY_DC_CONF_AREA_GLOB_ALL   );
+		keyBindingManager.addBindingsForTabLevel3( btnAllTicks,            Dict.KEY_DC_CONF_BTN_GLOB_ALL    );
 		
 		// restore/save buttons
-		keyBindingManager.addBindingsForButton( btnSave,            Dict.KEY_DC_SAVE            );
-		keyBindingManager.addBindingsForButton( btnRestore,         Dict.KEY_DC_RESTORE_SAVED   );
-		keyBindingManager.addBindingsForButton( btnRestoreDefaults, Dict.KEY_DC_RESTORE_DEFAULT );
+		keyBindingManager.addBindingsForButton( btnSave,            Dict.KEY_DC_CONF_SAVE            );
+		keyBindingManager.addBindingsForButton( btnRestore,         Dict.KEY_DC_CONF_RESTORE_SAVED   );
+		keyBindingManager.addBindingsForButton( btnRestoreDefaults, Dict.KEY_DC_CONF_RESTORE_DEFAULT );
 		
 		// set input and action maps
 		keyBindingManager.postprocess();

@@ -833,6 +833,10 @@ public class MidicaPLExporter extends Decompiler {
 		else {
 			addWarningRestSkipped(beginTick, ticks, channel);
 			incrementStats(STAT_REST_SKIPPED, channel);
+			if (MUST_ADD_TICK_COMMENTS)
+				line.append(getCommentSymbol() + " " + Dict.get(Dict.WARNING_REST_SKIPPED));
+			else
+				return ""; // no line needed
 		}
 		
 		// add lyrics option, if needed
