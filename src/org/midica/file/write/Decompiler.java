@@ -62,8 +62,9 @@ public abstract class Decompiler extends Exporter {
 	protected static final byte ALDA   = 2;
 	
 	// event types
-	protected static final byte ET_INSTR = 1; // instrument change
-	protected static final byte ET_NOTES = 2; // notes or chords (or an inline rest with syllable)
+	protected static final byte ET_INSTR      = 1; // instrument change
+	protected static final byte ET_NOTES      = 2; // notes or chords (or an inline rest with a syllable)
+	protected static final byte ET_INLINE_BLK = 3; // start ticks of inline blocks
 	
 	// note properties
 	protected static final byte NP_VELOCITY = 1; // velocity option
