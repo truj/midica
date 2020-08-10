@@ -68,9 +68,10 @@ public class MidicaPLExporter extends Decompiler {
 			// channel commands and instrument changes
 			for (byte channel = 0; channel < 16; channel++) {
 				
-				// block with rests that are only used for syllables that don't have a note
-				if (slice.hasSyllableRests() && channel == lyricsChannels.get(0)) {
-					output.append( createSyllableRestsBlock(slice) );
+				// Add nestable block at the slice begin, if needed.
+				// This may contain orphaned syllables and/or (in the future) control changes.
+				if (slice.hasSliceBeginBlock(channel)) {
+					output.append( createSliceBeginBlock(slice, channel) );
 				}
 				
 				// normal commands
@@ -91,22 +92,28 @@ public class MidicaPLExporter extends Decompiler {
 	}
 	
 	/**
-	 * Creates a nestable block containing all rests with syllables that
-	 * have no corresponting Note-ON event.
+	 * Creates a nestable block with the 'multiple' option at the beginning of a slice.
 	 * 
-	 * @param slice  the sequence slice
+	 * This block doesn't contain any notes.
+	 * It may contain only:
+	 * 
+	 * - rests
+	 * - rests with (orphaned) syllables
+	 * - (in the future) control changes
+	 * 
+	 * @param slice      the sequence slice
+	 * @param channel    MIDI channel
 	 * @return the created block.
 	 */
-	private String createSyllableRestsBlock(Slice slice) {
+	private String createSliceBeginBlock(Slice slice, byte channel) {
 		StringBuilder lines = new StringBuilder();
-		TreeMap<Long, String> timeline = slice.getSyllableRestTimeline();
+		TreeMap<Long, String> timeline = slice.getSliceBeginBlockTimeline(channel);
 		
 		// open the block
 		lines.append(MidicaPLParser.BLOCK_OPEN + " " + MidicaPLParser.M);
 		lines.append(NEW_LINE);
 		
 		// get channel and tickstamp
-		byte channel      = lyricsChannels.get(0);
 		long currentTicks = instrumentsByChannel.get(channel).getCurrentTicks();
 		
 		// TICK:
@@ -128,10 +135,10 @@ public class MidicaPLExporter extends Decompiler {
 				nextTick = currentTicks + sourceResolution; // use a quarter note
 			}
 			
-			long restLength = nextTick - currentTicks;
+			long restTicks = nextTick - currentTicks;
 			
 			// add the rest with the syllable
-			lines.append( "\t" + createRest(channel, restLength, currentTicks, syllable) );
+			lines.append( "\t" + createRest(channel, restTicks, currentTicks, syllable) );
 			currentTicks = nextTick;
 		}
 		
@@ -171,6 +178,11 @@ public class MidicaPLExporter extends Decompiler {
 			// instrument change
 			if (events.containsKey(ET_INSTR)) {
 				lines.append( createInstrumentChange(channel, tick) );
+			}
+			
+			// inline block
+			if (events.containsKey(ET_INLINE_BLK)) {
+				lines.append( createInlineBlock(channel, tick, slice) );
 			}
 			
 			// notes/chords
@@ -594,6 +606,71 @@ public class MidicaPLExporter extends Decompiler {
 	}
 	
 	/**
+	 * Creates an inline block with a multiple option.
+	 * 
+	 * Adds a rest before the block, if necessary.
+	 * 
+	 * @param channel  MIDI channel
+	 * @param tick     MIDI tick
+	 * @param slice    the sequence slice
+	 * @return the created block.
+	 */
+	private String createInlineBlock(byte channel, long tick, Slice slice) {
+		StringBuilder lines = new StringBuilder("");
+		
+		// add rest, if necessary
+		Instrument instr  = instrumentsByChannel.get(channel);
+		long currentTicks = instr.getCurrentTicks();
+		long missingTicks = tick - currentTicks;
+		if (missingTicks > 0) {
+			lines.append( createRest(channel, missingTicks, currentTicks, null) );
+			instr.setCurrentTicks(tick);
+			currentTicks = tick;
+		}
+		
+		// open the block
+		String lineOpen = MidicaPLParser.BLOCK_OPEN + " " + MidicaPLParser.M;
+		lines.append(appendTickComment(lineOpen, tick));
+		lines.append(NEW_LINE);
+		
+		// add the inline block
+		TreeMap<Long, String> content = slice.getInlineBlockTimeline(channel, tick);
+		for (Entry<Long, String> entry : content.entrySet()) {
+			long   eventTick = entry.getKey();
+			String syllable  = entry.getValue();
+			
+			// add rest before event
+			missingTicks = eventTick - currentTicks;
+			if (missingTicks > 0) {
+				lines.append("\t" + createRest(channel, missingTicks, currentTicks, null));
+				currentTicks = eventTick;
+			}
+			
+			// calculate event rest length
+			Long nextEventTick = content.ceilingKey(eventTick + 1);
+			if (null == nextEventTick) {
+				nextEventTick = eventTick + 1;
+			}
+			long restTicks = nextEventTick - eventTick;
+			
+			// make sure that the rest is not skipped if it's too short
+			if (restTicks < restLength.firstKey()) {
+				restTicks = restLength.firstKey();
+			}
+			
+			// add rest with syllable
+			lines.append("\t" + createRest(channel, restTicks, currentTicks, syllable));
+			currentTicks += restTicks;
+		}
+		
+		// close the block
+		lines.append(MidicaPLParser.BLOCK_CLOSE);
+		lines.append(NEW_LINE);
+		
+		return lines.toString();
+	}
+	
+	/**
 	 * Creates lines for all notes or chords that are played in a certain
 	 * channel and begin at a certain tick.
 	 * 
@@ -833,6 +910,10 @@ public class MidicaPLExporter extends Decompiler {
 		else {
 			addWarningRestSkipped(beginTick, ticks, channel);
 			incrementStats(STAT_REST_SKIPPED, channel);
+			if (MUST_ADD_TICK_COMMENTS)
+				line.append(getCommentSymbol() + " " + Dict.get(Dict.WARNING_REST_SKIPPED));
+			else
+				return ""; // no line needed
 		}
 		
 		// add lyrics option, if needed

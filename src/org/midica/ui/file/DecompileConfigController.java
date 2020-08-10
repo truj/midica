@@ -119,8 +119,10 @@ public class DecompileConfigController implements WindowListener, DocumentListen
 		initWidgetConfig( Config.DC_MUST_ADD_STATISTICS,      view.cbxAddStatistics,          Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_MUST_ADD_STRATEGY_STAT,   view.cbxAddStrategyStat,        Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_LENGTH_STRATEGY,          view.cbxLengthStrategy,         Integer.class, fromConfig );
+		initWidgetConfig( Config.DC_MIN_TARGET_TICKS_ON,      view.cbxMinTargetTicksOn,       Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_MAX_TARGET_TICKS_ON,      view.cbxMaxTargetTicksOn,       Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_MIN_DURATION_TO_KEEP,     view.fldMinDurToKeep,           Float.class,   fromConfig );
+		initWidgetConfig( Config.DC_MAX_DURATION_TO_KEEP,     view.fldMaxDurToKeep,           Float.class,   fromConfig );
 		initWidgetConfig( Config.DC_LENGTH_TICK_TOLERANCE,    view.fldLengthTickTolerance,    Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_DURATION_RATIO_TOLERANCE, view.fldDurationRatioTolerance, Float.class,   fromConfig );
 		initWidgetConfig( Config.DC_USE_PRE_DEFINED_CHORDS,   view.cbxPredefinedChords,       Boolean.class, fromConfig );
@@ -679,7 +681,7 @@ public class DecompileConfigController implements WindowListener, DocumentListen
 			
 			return model;
 		}
-		else if (Config.DC_MAX_TARGET_TICKS_ON.equals(id)) {
+		else if (Config.DC_MAX_TARGET_TICKS_ON.equals(id) || Config.DC_MIN_TARGET_TICKS_ON.equals(id)) {
 			String noteLengths[] = {
 				Dict.SYNTAX_32, Dict.SYNTAX_16, Dict.SYNTAX_8,  Dict.SYNTAX_4,   Dict.SYNTAX_2, Dict.SYNTAX_1,
 				Dict.SYNTAX_M2, Dict.SYNTAX_M4, Dict.SYNTAX_M8, Dict.SYNTAX_M16, Dict.SYNTAX_M32,

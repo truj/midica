@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
-import org.midica.file.read.MidicaPLParser;
-
 /**
  * This class is used by the MidicaPlExporter to store a sequence slice.
  * 
@@ -55,12 +53,27 @@ public class Slice {
 	private ArrayList<TreeMap<Long, TreeMap<Byte, TreeMap<String, TreeMap<Byte, String>>>>> timelines = null;
 	
 	/**
-	 * Timeline for rests that are only there for syllables.
+	 * Timelines for blocks at a slice's beginnning with events other than notes/chords.
 	 * 
+	 * Used for orphaned syllables (and in the future control changes).
+	 * 
+	 * - channel
 	 * - tick
 	 * - value: syllable
 	 */
-	private TreeMap<Long, String> syllableRestTimeline = null;
+	private ArrayList<TreeMap<Long, String>> sliceBeginBlockTimelines = null;
+	
+	/**
+	 * Timeline for inline blocks for events other than notes/chords.
+	 * 
+	 * Used for orphaned syllables (and in the future control changes).
+	 * 
+	 * - channel
+	 * - block start tick
+	 * - event tick (must be >= block start tick)
+	 * - value: syllable
+	 */
+	private ArrayList<TreeMap<Long, TreeMap<Long, String>>> inlineBlockTimelines = null;
 	
 	/**
 	 * Returns the slice belonging to the given tick.
@@ -91,12 +104,14 @@ public class Slice {
 		this.beginTick = beginTick;
 		
 		// initialize timelines
-		timelines = new ArrayList<>();
+		timelines                = new ArrayList<>();
+		inlineBlockTimelines     = new ArrayList<>();
+		sliceBeginBlockTimelines = new ArrayList<>();
 		for (int i = 0; i < 16; i++) {
-			TreeMap<Long, TreeMap<Byte,TreeMap<String, TreeMap<Byte, String>>>> timeline = new TreeMap<>();
-			timelines.add(timeline);
+			timelines.add(new TreeMap<>());
+			inlineBlockTimelines.add(new TreeMap<>());
+			sliceBeginBlockTimelines.add(new TreeMap<>());
 		}
-		syllableRestTimeline = new TreeMap<>();
 	}
 	
 	/**
@@ -127,12 +142,15 @@ public class Slice {
 	}
 	
 	/**
-	 * Determins if the slice contains rests with syllables.
+	 * Determins if the slice contains a slice begin block for the given channel.
 	 * 
-	 * @return **true**, if the slice contains rests with syllables, otherwise: **false**.
+	 * That means, there are orphaned syllables or control changes, related to the channel.
+	 * 
+	 * @param channel    MIDI channel
+	 * @return **true**, if there is a slice begin block for the given channel, otherwise: **false**.
 	 */
-	public boolean hasSyllableRests() {
-		return ! syllableRestTimeline.isEmpty();
+	public boolean hasSliceBeginBlock(byte channel) {
+		return ! sliceBeginBlockTimelines.get(channel).isEmpty();
 	}
 	
 	/**
@@ -176,14 +194,16 @@ public class Slice {
 	}
 	
 	/**
-	 * Adds a lyrics syllable as an option to a rest command.
+	 * Adds an orphaned syllable to a special timeline.
+	 * 
+	 * This will later be used as an option to a rest command inside a nestable block.
+	 * 
 	 * This is needed if there is no note/chord being played at the tick when the syllable appears.
 	 * 
 	 * According to the **orphaned** parameter one of the following strategies is used to add the rest:
 	 * 
-	 * - The rest is added to a special timeline and later added inside a nestable block
-	 *   that contains only rests.
-	 * - The rest is added to the timeline of notes/chords and is later added inline.
+	 * - The rest is added to a timeline for a nestable block beginning at the slice's beginning.
+	 * - The rest is added to a timeline for a nestable inline block (starting parallel to the previous Note-ON event).
 	 * 
 	 * @param tick        MIDI tick
 	 * @param syllable    Lyrics syllable for Karaoke
@@ -193,32 +213,29 @@ public class Slice {
 	 */
 	public void addSyllableRest(long tick, String syllable, byte channel, byte orphaned, long resolution) {
 		
-		// add the rest inside a nestable block
+		// add the rest inside a nestable block at the slice's start
 		if (Decompiler.BLOCK == orphaned) {
-			syllableRestTimeline.put(tick, syllable);
+			sliceBeginBlockTimelines.get(channel).put(tick, syllable);
 		}
 		else {
-			// Add the rest inline.
-			// We know that there is no Note-ON in this tick. But there may
-			// still be an instrument change.
-			TreeMap<Byte, TreeMap<String, TreeMap<Byte, String>>> events = timelines.get(channel).get(tick);
-			if (null == events) {
-				events = new TreeMap<>();
-				timelines.get(channel).put(tick, events);
+			// Add the rest as an inline block
+			
+			// get the tick where the block must start
+			long blockStartTick = timelines.get(channel).floorKey(tick);
+			
+			// Get the events from the block's start tick
+			TreeMap<Byte, TreeMap<String, TreeMap<Byte, String>>> events = timelines.get(channel).get(blockStartTick);
+			
+			// create inline block, if not yet done, and add it to the notes timeline
+			TreeMap<Long, String> inlineBlock = inlineBlockTimelines.get(channel).get(blockStartTick);
+			if (null == inlineBlock) {
+				inlineBlock = new TreeMap<Long, String>();
+				inlineBlockTimelines.get(channel).put(blockStartTick, inlineBlock);
+				events.put(Decompiler.ET_INLINE_BLK, null); // add the information that there IS an inline block
 			}
 			
-			// add the rest
-			TreeMap<String, TreeMap<Byte, String>> notes = new TreeMap<>();
-			events.put(Decompiler.ET_NOTES, notes);
-			TreeMap<Byte, String> rest = new TreeMap<>();
-			notes.put(MidicaPLParser.REST, rest);
-			
-			// add properties to the rest
-			rest.put(Decompiler.NP_LYRICS, syllable);
-			Long nextNoteOnTick = noteHistory.get(channel).ceilingKey(tick + 1);
-			if (null == nextNoteOnTick)
-				nextNoteOnTick = tick + resolution;
-			rest.put(Decompiler.NP_OFF_TICK, nextNoteOnTick + "");
+			// add syllable to the inline block
+			inlineBlock.put(tick, syllable);
 		}
 	}
 	
@@ -233,12 +250,26 @@ public class Slice {
 	}
 	
 	/**
-	 * Returns the special timeline only for rests with syllables.
+	 * Returns the timeline for the slice begin block for the given channel.
 	 * 
-	 * @return the timeline for rests with syllables.
+	 * This timeline may contain orphaned syllables or control changes, related to the channel.
+	 * 
+	 * @param channel    MIDI channel
+	 * @return the timeline for the slice's begin block.
 	 */
-	public TreeMap<Long, String> getSyllableRestTimeline() {
-		return syllableRestTimeline;
+	public TreeMap<Long, String> getSliceBeginBlockTimeline(byte channel) {
+		return sliceBeginBlockTimelines.get(channel);
+	}
+	
+	/**
+	 * Returns the timeline for the requested inline block.
+	 * 
+	 * @param channel  MIDI channel
+	 * @param tick     begin tick of the inline block
+	 * @return the timeline for the requested inline block.
+	 */
+	public TreeMap<Long, String> getInlineBlockTimeline(byte channel, long tick) {
+		return inlineBlockTimelines.get(channel).get(tick);
 	}
 	
 	/**
