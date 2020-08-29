@@ -78,8 +78,11 @@ public class DecompileConfigView extends JDialog {
 	JCheckBox               cbxUseDottedRest;
 	JCheckBox               cbxUseTriplettedNote;
 	JCheckBox               cbxUseTriplettedRest;
+	JCheckBox               cbxUseKaraoke;
+	JCheckBox               cbxAllSyllablesOrphaned;
 	JComboBox<NamedInteger> cbxOrphanedSyllables;
 	JCheckBox               cbxKarOneChannel;
+	JComboBox<NamedInteger> cbxCtrlChangeMode;
 	JTextField              fldAddGlobalAtTick;
 	MidicaButton            btnAddGlobalAtTick;
 	JTextField              fldAddGlobalsEachTick;
@@ -126,8 +129,11 @@ public class DecompileConfigView extends JDialog {
 		cbxUseDottedRest          = new JCheckBox(Dict.get(Dict.USE_DOTTED_RESTS));
 		cbxUseTriplettedNote      = new JCheckBox(Dict.get(Dict.USE_TRIPLETTED_NOTES));
 		cbxUseTriplettedRest      = new JCheckBox(Dict.get(Dict.USE_TRIPLETTED_RESTS));
+		cbxUseKaraoke             = new JCheckBox();
+		cbxAllSyllablesOrphaned   = new JCheckBox();
 		cbxOrphanedSyllables      = new JComboBox<>();
 		cbxKarOneChannel          = new JCheckBox();
+		cbxCtrlChangeMode         = new JComboBox<>();
 		fldAddGlobalAtTick        = new JTextField();
 		btnAddGlobalAtTick        = new MidicaButton(Dict.get(Dict.BTN_ADD_TICK));
 		fldAddGlobalsEachTick     = new JTextField();
@@ -143,6 +149,7 @@ public class DecompileConfigView extends JDialog {
 		cbxMinTargetTicksOn.setModel(DecompileConfigController.getComboboxModel(Config.DC_MIN_TARGET_TICKS_ON));
 		cbxMaxTargetTicksOn.setModel(DecompileConfigController.getComboboxModel(Config.DC_MAX_TARGET_TICKS_ON));
 		cbxOrphanedSyllables.setModel(DecompileConfigController.getComboboxModel(Config.DC_ORPHANED_SYLLABLES));
+		cbxCtrlChangeMode.setModel(DecompileConfigController.getComboboxModel(Config.DC_CTRL_CHANGE_MODE));
 		
 		// setup controller
 		controller = new DecompileConfigController(this, icon);
@@ -185,8 +192,9 @@ public class DecompileConfigView extends JDialog {
 		tabs.add( Dict.get(Dict.DC_TAB_DEBUG),       createDebugArea(Dict.DC_TAB_DEBUG)            );
 		tabs.add( Dict.get(Dict.DC_TAB_NOTE_LENGTH), createNoteLengthArea(Dict.DC_TAB_NOTE_LENGTH) );
 		tabs.add( Dict.get(Dict.DC_TAB_CHORDS),      createChordArea(Dict.DC_TAB_CHORDS)           );
-		tabs.add( Dict.get(Dict.DC_TAB_NOTE_REST),   createNoteRestArea(Dict.DC_TAB_NOTE_REST)        );
+		tabs.add( Dict.get(Dict.DC_TAB_NOTE_REST),   createNoteRestArea(Dict.DC_TAB_NOTE_REST)     );
 		tabs.add( Dict.get(Dict.DC_TAB_KARAOKE),     createKaraokeArea(Dict.DC_TAB_KARAOKE)        );
+		tabs.add( Dict.get(Dict.DC_TAB_CTRL_CHANGE), createCtrlChangeArea(Dict.DC_TAB_CTRL_CHANGE) );
 		tabs.add( Dict.get(Dict.DC_TAB_SLICE),       createSliceArea(Dict.DC_TAB_SLICE)            );
 		content.add(tabs, constraints);
 		
@@ -592,18 +600,52 @@ public class DecompileConfigView extends JDialog {
 		// tab info box
 		area.add(createTabInfo(tabKey, Dict.DC_TABINFO_KARAOKE), constrFull);
 		
-		// orphaned syllables
+		// use karaoke
+		JLabel lblUseKaraoke = new JLabel( Dict.get(Dict.USE_KARAOKE) );
+		Laf.makeBold(lblUseKaraoke);
+		area.add(lblUseKaraoke, constrLeft);
+		
+		// checkbox
+		cbxUseKaraoke.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
+		cbxUseKaraoke.addActionListener(controller);
+		area.add(cbxUseKaraoke, constrCenter);
+		
+		// description
+		JLabel descUseKar = new JLabel( Dict.get(Dict.USE_KARAOKE_D) );
+		area.add(descUseKar, constrRight);
+		
+		// regard all syllables as orphaned
+		constrLeft.gridy++;
+		JLabel lblAllSylOrp = new JLabel( Dict.get(Dict.ALL_SYLLABLES_ORPHANED) );
+		Laf.makeBold(lblAllSylOrp);
+		area.add(lblAllSylOrp, constrLeft);
+		
+		// checkbox
+		constrCenter.gridy++;
+		cbxAllSyllablesOrphaned.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
+		cbxAllSyllablesOrphaned.addActionListener(controller);
+		area.add(cbxAllSyllablesOrphaned, constrCenter);
+		
+		// description
+		constrRight.gridy++;
+		JLabel descAllSylOrp = new JLabel( Dict.get(Dict.ALL_SYLLABLES_ORPHANED_D) );
+		area.add(descAllSylOrp, constrRight);
+		
+		// orphaned syllables (how to treat them)
 		// label
+		constrLeft.gridy++;
 		JLabel lblOrpSyl = new JLabel( Dict.get(Dict.ORPHANED_SYLLABLES) );
 		Laf.makeBold(lblOrpSyl);
 		area.add(lblOrpSyl, constrLeft);
 		
 		// combobox
+		constrCenter.gridy++;
 		cbxOrphanedSyllables.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
 		cbxOrphanedSyllables.addActionListener(controller);
 		area.add(cbxOrphanedSyllables, constrCenter);
 		
 		// description
+		constrRight.gridy++;
 		JLabel descOrpSyl = new JLabel( Dict.get(Dict.ORPHANED_SYLLABLES_D) );
 		area.add(descOrpSyl, constrRight);
 		
@@ -625,6 +667,44 @@ public class DecompileConfigView extends JDialog {
 		JLabel descNextOnTol = new JLabel( Dict.get(Dict.KAR_ONE_CHANNEL_D) );
 		area.add(descNextOnTol, constrRight);
 		
+		return wrapTabContent(area);
+	}
+	
+	/**
+	 * Creates the area for control change settings.
+	 * 
+	 * @param tabKey  language key for the tab name
+	 * @return the created area
+	 */
+	private Container createCtrlChangeArea(String tabKey) {
+		
+		// layout
+		JPanel area = new JPanel();
+		area.setLayout(new GridBagLayout());
+		GridBagConstraints[] constaints = createConstraintsForArea();
+		GridBagConstraints constrFull   = constaints[0];
+		GridBagConstraints constrLeft   = constaints[1];
+		GridBagConstraints constrCenter = constaints[2];
+		GridBagConstraints constrRight  = constaints[3];
+		
+		// tab info box
+		area.add(createTabInfo(tabKey, Dict.DC_TABINFO_CTRL_CHANGE), constrFull);
+		
+		// orphaned syllables
+		// label
+		JLabel lblOrpSyl = new JLabel( Dict.get(Dict.CTRL_CHANGE_MODE) );
+		Laf.makeBold(lblOrpSyl);
+		area.add(lblOrpSyl, constrLeft);
+		
+		// combobox
+		cbxCtrlChangeMode.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
+		cbxCtrlChangeMode.addActionListener(controller);
+		area.add(cbxCtrlChangeMode, constrCenter);
+		
+		// description
+		JLabel descOrpSyl = new JLabel( Dict.get(Dict.CTRL_CHANGE_MODE_D) );
+		area.add(descOrpSyl, constrRight);
+
 		return wrapTabContent(area);
 	}
 	
@@ -894,7 +974,8 @@ public class DecompileConfigView extends JDialog {
 		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_CONF_TAB_CHORDS,      2 );
 		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_CONF_TAB_NOTE_REST,   3 );
 		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_CONF_TAB_KARAOKE,     4 );
-		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_CONF_TAB_SLICES,      5 );
+		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_CONF_TAB_CTRL_CHANGE, 5 );
+		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_CONF_TAB_SLICES,      6 );
 		
 		// debug tab
 		keyBindingManager.addBindingsForTabLevel3( cbxAddTickComments, Dict.KEY_DC_CONF_ADD_TICK_COMMENTS );
@@ -925,8 +1006,13 @@ public class DecompileConfigView extends JDialog {
 		keyBindingManager.addBindingsForTabLevel3( cbxUseTriplettedRest, Dict.KEY_DC_CONF_USE_TRIP_RESTS );
 		
 		// karaoke tab
-		keyBindingManager.addBindingsForTabLevel3( cbxOrphanedSyllables, Dict.KEY_DC_CONF_KAR_ORPHANED );
-		keyBindingManager.addBindingsForTabLevel3( cbxKarOneChannel,     Dict.KEY_DC_CONF_KAR_ONE_CH   );
+		keyBindingManager.addBindingsForTabLevel3( cbxUseKaraoke,           Dict.KEY_DC_CONF_USE_KARAOKE  );
+		keyBindingManager.addBindingsForTabLevel3( cbxAllSyllablesOrphaned, Dict.KEY_DC_CONF_ALL_SYL_ORP  );
+		keyBindingManager.addBindingsForTabLevel3( cbxOrphanedSyllables,    Dict.KEY_DC_CONF_KAR_ORPHANED );
+		keyBindingManager.addBindingsForTabLevel3( cbxKarOneChannel,        Dict.KEY_DC_CONF_KAR_ONE_CH   );
+		
+		// control change tab
+		keyBindingManager.addBindingsForTabLevel3( cbxCtrlChangeMode, Dict.KEY_DC_CONF_CTRL_CHANGE_MODE );
 		
 		// slices
 		keyBindingManager.addBindingsForTabLevel3( fldAddGlobalAtTick,     Dict.KEY_DC_CONF_FLD_GLOB_SINGLE );

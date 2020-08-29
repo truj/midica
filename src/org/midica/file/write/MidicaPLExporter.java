@@ -92,64 +92,6 @@ public class MidicaPLExporter extends Decompiler {
 	}
 	
 	/**
-	 * Creates a nestable block with the 'multiple' option at the beginning of a slice.
-	 * 
-	 * This block doesn't contain any notes.
-	 * It may contain only:
-	 * 
-	 * - rests
-	 * - rests with (orphaned) syllables
-	 * - (in the future) control changes
-	 * 
-	 * @param slice      the sequence slice
-	 * @param channel    MIDI channel
-	 * @return the created block.
-	 */
-	private String createSliceBeginBlock(Slice slice, byte channel) {
-		StringBuilder lines = new StringBuilder();
-		TreeMap<Long, String> timeline = slice.getSliceBeginBlockTimeline(channel);
-		
-		// open the block
-		lines.append(MidicaPLParser.BLOCK_OPEN + " " + MidicaPLParser.M);
-		lines.append(NEW_LINE);
-		
-		// get channel and tickstamp
-		long currentTicks = instrumentsByChannel.get(channel).getCurrentTicks();
-		
-		// TICK:
-		for (Entry<Long, String> entry : timeline.entrySet()) {
-			long   restTick = entry.getKey();
-			String syllable = entry.getValue();
-			
-			// need a normal rest before the syllable?
-			if (restTick < currentTicks) {
-				long missingTicks = restTick - currentTicks;
-				lines.append( "\t" + createRest(channel, missingTicks, currentTicks, null) );
-				currentTicks = restTick;
-			}
-			
-			// get tick distance until the next syllable
-			Long nextTick = timeline.ceilingKey(currentTicks + 1);
-			if (null == nextTick) {
-				// last syllable in this slice
-				nextTick = currentTicks + sourceResolution; // use a quarter note
-			}
-			
-			long restTicks = nextTick - currentTicks;
-			
-			// add the rest with the syllable
-			lines.append( "\t" + createRest(channel, restTicks, currentTicks, syllable) );
-			currentTicks = nextTick;
-		}
-		
-		// close the block
-		lines.append(MidicaPLParser.BLOCK_CLOSE);
-		lines.append(NEW_LINE);
-		
-		return lines.toString();
-	}
-	
-	/**
 	 * Creates channel commands and instrument changes from a slice's timeline.
 	 * 
 	 * Steps:
@@ -606,6 +548,64 @@ public class MidicaPLExporter extends Decompiler {
 	}
 	
 	/**
+	 * Creates a nestable block with the 'multiple' option at the beginning of a slice.
+	 * 
+	 * This block doesn't contain any notes.
+	 * It may contain only:
+	 * 
+	 * - rests
+	 * - rests with (orphaned) syllables
+	 * - (in the future) control changes
+	 * 
+	 * @param slice      the sequence slice
+	 * @param channel    MIDI channel
+	 * @return the created block.
+	 */
+	private String createSliceBeginBlock(Slice slice, byte channel) {
+		StringBuilder lines = new StringBuilder();
+		TreeMap<Long, String> timeline = slice.getSliceBeginBlockTimeline(channel);
+		
+		// open the block
+		lines.append(MidicaPLParser.BLOCK_OPEN + " " + MidicaPLParser.M);
+		lines.append(NEW_LINE);
+		
+		// get channel and tickstamp
+		long currentTicks = instrumentsByChannel.get(channel).getCurrentTicks();
+		
+		// TICK:
+		for (Entry<Long, String> entry : timeline.entrySet()) {
+			long   restTick = entry.getKey();
+			String syllable = entry.getValue();
+			
+			// need a normal rest before the syllable?
+			if (restTick > currentTicks) {
+				long missingTicks = restTick - currentTicks;
+				lines.append( "\t" + createRest(channel, missingTicks, currentTicks, null) );
+				currentTicks = restTick;
+			}
+			
+			// get tick distance until the next syllable
+			Long nextTick = timeline.ceilingKey(currentTicks + 1);
+			if (null == nextTick) {
+				// last syllable in this slice
+				nextTick = currentTicks + sourceResolution; // use a quarter note
+			}
+			
+			long restTicks = nextTick - currentTicks;
+			
+			// add the rest with the syllable
+			lines.append( "\t" + createRest(channel, restTicks, currentTicks, syllable) );
+			currentTicks = nextTick;
+		}
+		
+		// close the block
+		lines.append(MidicaPLParser.BLOCK_CLOSE);
+		lines.append(NEW_LINE);
+		
+		return lines.toString();
+	}
+	
+	/**
 	 * Creates an inline block with a multiple option.
 	 * 
 	 * Adds a rest before the block, if necessary.
@@ -793,7 +793,6 @@ public class MidicaPLExporter extends Decompiler {
 	
 	/**
 	 * Prints a single channel command for a note or chord.
-	 * (Or a rest with a syllable, if orphaned syllables are configured as INLINE.)
 	 * 
 	 * @param channel    MIDI channel
 	 * @param noteName   note or chord name
@@ -822,34 +821,30 @@ public class MidicaPLExporter extends Decompiler {
 				incrementStats(STAT_NOTE_MULTIPLE, channel);
 			}
 			
-			// duration and velocity
-			if (! noteName.equals(MidicaPLParser.REST)) {
-				
-				// duration
-				float duration           = Float.parseFloat( noteOrCrd.get(NP_DURATION) ) / 100;
-				float oldDuration        = instr.getDurationRatio();
-				int   durationPercent    = (int) ((duration    * 1000 + 0.5f) / 10);
-				int   oldDurationPercent = (int) ((oldDuration * 1000 + 0.5f) / 10);
-				if (durationPercent != oldDurationPercent) {
-					// don't allow 0%
-					String durationPercentStr = durationPercent + "";
-					if (durationPercent < 1) {
-						durationPercentStr = "0.5";
-						duration = 0.005f;
-					}
-					options.add(MidicaPLParser.D + MidicaPLParser.OPT_ASSIGNER + durationPercentStr + MidicaPLParser.DURATION_PERCENT);
-					instr.setDurationRatio(duration);
-					incrementStats(STAT_NOTE_DURATIONS, channel);
+			// duration
+			float duration           = Float.parseFloat( noteOrCrd.get(NP_DURATION) ) / 100;
+			float oldDuration        = instr.getDurationRatio();
+			int   durationPercent    = (int) ((duration    * 1000 + 0.5f) / 10);
+			int   oldDurationPercent = (int) ((oldDuration * 1000 + 0.5f) / 10);
+			if (durationPercent != oldDurationPercent) {
+				// don't allow 0%
+				String durationPercentStr = durationPercent + "";
+				if (durationPercent < 1) {
+					durationPercentStr = "0.5";
+					duration = 0.005f;
 				}
-				
-				// velocity
-				int velocity    = Integer.parseInt( noteOrCrd.get(NP_VELOCITY) );
-				int oldVelocity = instr.getVelocity();
-				if (velocity != oldVelocity) {
-					options.add(MidicaPLParser.V + MidicaPLParser.OPT_ASSIGNER + velocity);
-					instr.setVelocity(velocity);
-					incrementStats(STAT_NOTE_VELOCITIES, channel);
-				}
+				options.add(MidicaPLParser.D + MidicaPLParser.OPT_ASSIGNER + durationPercentStr + MidicaPLParser.DURATION_PERCENT);
+				instr.setDurationRatio(duration);
+				incrementStats(STAT_NOTE_DURATIONS, channel);
+			}
+			
+			// velocity
+			int velocity    = Integer.parseInt( noteOrCrd.get(NP_VELOCITY) );
+			int oldVelocity = instr.getVelocity();
+			if (velocity != oldVelocity) {
+				options.add(MidicaPLParser.V + MidicaPLParser.OPT_ASSIGNER + velocity);
+				instr.setVelocity(velocity);
+				incrementStats(STAT_NOTE_VELOCITIES, channel);
 			}
 			
 			// add syllable, if needed

@@ -201,8 +201,11 @@ public class Config {
 	public static final String DC_USE_DOTTED_RESTS         = "dc_use_dotted_rests";
 	public static final String DC_USE_TRIPLETTED_NOTES     = "dc_use_tripletted_notes";
 	public static final String DC_USE_TRIPLETTED_RESTS     = "dc_use_tripletted_rests";
+	public static final String DC_USE_KARAOKE              = "dc_use_karaoke";
+	public static final String DC_ALL_SYLLABLES_ORPHANED   = "dc_all_syllables_orphaned";
 	public static final String DC_ORPHANED_SYLLABLES       = "dc_orphaned_syllables";
 	public static final String DC_KARAOKE_ONE_CHANNEL      = "dc_karaoke_one_channel";
+	public static final String DC_CTRL_CHANGE_MODE         = "dc_ctrl_change_mode";
 	public static final String DC_EXTRA_GLOBALS_STR        = "dc_extra_globals_str";
 	
 	// private constants
@@ -336,8 +339,11 @@ public class Config {
 		dcDefaults.put( DC_USE_DOTTED_RESTS,         "" + Decompiler.DEFAULT_USE_DOTTED_RESTS         );
 		dcDefaults.put( DC_USE_TRIPLETTED_NOTES,     "" + Decompiler.DEFAULT_USE_TRIPLETTED_NOTES     );
 		dcDefaults.put( DC_USE_TRIPLETTED_RESTS,     "" + Decompiler.DEFAULT_USE_TRIPLETTED_RESTS     );
+		dcDefaults.put( DC_USE_KARAOKE,              "" + Decompiler.DEFAULT_USE_KARAOKE              );
+		dcDefaults.put( DC_ALL_SYLLABLES_ORPHANED,   "" + Decompiler.DEFAULT_ALL_SYLLABLES_ORPHANED   );
 		dcDefaults.put( DC_ORPHANED_SYLLABLES,       "" + Decompiler.DEFAULT_ORPHANED_SYLLABLES       );
 		dcDefaults.put( DC_KARAOKE_ONE_CHANNEL,      "" + Decompiler.DEFAULT_KARAOKE_ONE_CHANNEL      );
+		dcDefaults.put( DC_CTRL_CHANGE_MODE,         "" + Decompiler.DEFAULT_CTRL_CHANGE_MODE         );
 		dcDefaults.put( DC_EXTRA_GLOBALS_STR,             Decompiler.DEFAULT_EXTRA_GLOBALS_STR        );
 		
 		return dcDefaults;
@@ -719,10 +725,14 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_KARAOKE,          KeyEvent.VK_NUMPAD5,  0                          );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_KARAOKE,          KeyEvent.VK_5,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_KARAOKE,          KeyEvent.VK_NUMPAD5,  InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_SLICES,           KeyEvent.VK_6,        0                          );
-		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_SLICES,           KeyEvent.VK_NUMPAD6,  0                          );
-		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_SLICES,           KeyEvent.VK_6,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_SLICES,           KeyEvent.VK_NUMPAD6,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_CTRL_CHANGE,      KeyEvent.VK_6,        0                          );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_CTRL_CHANGE,      KeyEvent.VK_NUMPAD6,  0                          );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_CTRL_CHANGE,      KeyEvent.VK_6,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_CTRL_CHANGE,      KeyEvent.VK_NUMPAD6,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_SLICES,           KeyEvent.VK_7,        0                          );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_SLICES,           KeyEvent.VK_NUMPAD7,  0                          );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_SLICES,           KeyEvent.VK_7,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_SLICES,           KeyEvent.VK_NUMPAD7,  InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_ADD_TICK_COMMENTS,    KeyEvent.VK_T,        0                          );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_ADD_CONFIG,           KeyEvent.VK_C,        0                          );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_ADD_SCORE,            KeyEvent.VK_Q,        0                          );
@@ -743,8 +753,11 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_USE_DOT_RESTS,        KeyEvent.VK_D,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_USE_TRIP_NOTES,       KeyEvent.VK_T,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_USE_TRIP_RESTS,       KeyEvent.VK_T,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_USE_KARAOKE,          KeyEvent.VK_U,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_ALL_SYL_ORP,          KeyEvent.VK_A,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_KAR_ORPHANED,         KeyEvent.VK_O,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_KAR_ONE_CH,           KeyEvent.VK_A,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_CTRL_CHANGE_MODE,     KeyEvent.VK_M,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_FLD_GLOB_SINGLE,      KeyEvent.VK_O,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_BTN_GLOB_SINGLE,      KeyEvent.VK_O,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_FLD_GLOB_EACH,        KeyEvent.VK_D,        InputEvent.CTRL_DOWN_MASK  );

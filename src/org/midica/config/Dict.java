@@ -697,6 +697,7 @@ public class Dict {
 	public static final String KEY_DC_CONF_TAB_CHORDS           = "key_dc_conf_tab_chords";
 	public static final String KEY_DC_CONF_TAB_NOTE_REST        = "key_dc_conf_tab_note_rest";
 	public static final String KEY_DC_CONF_TAB_KARAOKE          = "key_dc_conf_tab_karaoke";
+	public static final String KEY_DC_CONF_TAB_CTRL_CHANGE      = "key_dc_conf_tab_ctrl_change";
 	public static final String KEY_DC_CONF_TAB_SLICES           = "key_dc_conf_tab_slices";
 	public static final String KEY_DC_CONF_ADD_TICK_COMMENTS    = "key_dc_conf_add_tick_comments";
 	public static final String KEY_DC_CONF_ADD_CONFIG           = "key_dc_conf_config";
@@ -718,8 +719,11 @@ public class Dict {
 	public static final String KEY_DC_CONF_USE_DOT_RESTS        = "key_dc_conf_use_dot_rests";
 	public static final String KEY_DC_CONF_USE_TRIP_NOTES       = "key_dc_conf_use_trip_notes";
 	public static final String KEY_DC_CONF_USE_TRIP_RESTS       = "key_dc_conf_use_trip_rests";
+	public static final String KEY_DC_CONF_ALL_SYL_ORP          = "key_dc_conf_all_syl_orp";
+	public static final String KEY_DC_CONF_USE_KARAOKE          = "key_dc_conf_use_karaoke";
 	public static final String KEY_DC_CONF_KAR_ORPHANED         = "key_dc_conf_kar_orphaned";
 	public static final String KEY_DC_CONF_KAR_ONE_CH           = "key_dc_conf_kar_one_ch";
+	public static final String KEY_DC_CONF_CTRL_CHANGE_MODE     = "key_dc_conf_ctrl_change_mode";
 	public static final String KEY_DC_CONF_FLD_GLOB_SINGLE      = "key_dc_conf_fld_glob_single";
 	public static final String KEY_DC_CONF_BTN_GLOB_SINGLE      = "key_dc_conf_btn_glob_single";
 	public static final String KEY_DC_CONF_FLD_GLOB_EACH        = "key_dc_conf_fld_glob_each";
@@ -827,12 +831,14 @@ public class Dict {
 	public static final String DC_TAB_CHORDS                = "dc_tab_chords";
 	public static final String DC_TAB_NOTE_REST             = "dc_tab_note_rest";
 	public static final String DC_TAB_KARAOKE               = "dc_tab_karaoke";
+	public static final String DC_TAB_CTRL_CHANGE           = "dc_tab_ctrl_change";
 	public static final String DC_TAB_SLICE                 = "dc_tab_slice";
 	public static final String DC_TABINFO_DEBUG             = "dc_tabinfo_debug";
 	public static final String DC_TABINFO_NOTE_LENGTH       = "dc_tabinfo_note_length";
 	public static final String DC_TABINFO_CHORDS            = "dc_tabinfo_chords";
 	public static final String DC_TABINFO_NOTE_REST         = "dc_tabinfo_note_rest";
 	public static final String DC_TABINFO_KARAOKE           = "dc_tabinfo_karaoke";
+	public static final String DC_TABINFO_CTRL_CHANGE       = "dc_tabinfo_ctrl_change";
 	public static final String DC_TABINFO_SLICE             = "dc_tabinfo_slice";
 	public static final String DC_ADD_TICK_COMMENT          = "dc_add_tick_comment";
 	public static final String DC_ADD_CONFIG                = "dc_add_config";
@@ -862,10 +868,16 @@ public class Dict {
 	public static final String USE_DOTTED_RESTS             = "use_dotted_rests";
 	public static final String USE_TRIPLETTED_NOTES         = "use_tripletted_notes";
 	public static final String USE_TRIPLETTED_RESTS         = "use_tripletted_rests";
+	public static final String USE_KARAOKE                  = "use_karaoke";
+	public static final String USE_KARAOKE_D                = "use_karaoke_d";
+	public static final String ALL_SYLLABLES_ORPHANED       = "all_syllables_orphaned";
+	public static final String ALL_SYLLABLES_ORPHANED_D     = "all_syllables_orphaned_d";
 	public static final String ORPHANED_SYLLABLES           = "orphaned_syllables";
 	public static final String ORPHANED_SYLLABLES_D         = "orphaned_syllables_d";
-	public static final String DC_INLINE                    = "dc_inline";
-	public static final String DC_BLOCK                     = "dc_block";
+	public static final String CTRL_CHANGE_MODE             = "ctrl_change_mode";
+	public static final String CTRL_CHANGE_MODE_D           = "ctrl_change_mode_d";
+	public static final String DC_INLINE_BLOCK              = "dc_inline_block";
+	public static final String DC_SLICE_BEGIN_BLOCK         = "dc_slice_begin_block";
 	public static final String DC_STRAT_NEXT_DURATION_PRESS = "dc_strat_next_duration_press";
 	public static final String DC_STRAT_DURATION_NEXT_PRESS = "dc_strat_duration_next_press";
 	public static final String DC_STRAT_NEXT_PRESS          = "dc_strat_next_press";
@@ -2088,6 +2100,7 @@ public class Dict {
 		set( KEY_DC_CONF_TAB_CHORDS,           "Select the Chords tab in the decompile config window"                        );
 		set( KEY_DC_CONF_TAB_NOTE_REST,        "Select the Notes/Rests tab in the decompile config window"                   );
 		set( KEY_DC_CONF_TAB_KARAOKE,          "Select the Karaoke tab in the decompile config window"                       );
+		set( KEY_DC_CONF_TAB_CTRL_CHANGE,      "Select the Control Change tab in the decompile config window"                );
 		set( KEY_DC_CONF_TAB_SLICES,           "Select the Extra Slices tab in the decompile config window"                  );
 		set( KEY_DC_CONF_ADD_TICK_COMMENTS,    "Toggle Checkbox: Add Tick Comments"                                          );
 		set( KEY_DC_CONF_ADD_CONFIG,           "Toggle Checkbox: Add Configuration"                                          );
@@ -2109,8 +2122,11 @@ public class Dict {
 		set( KEY_DC_CONF_USE_DOT_RESTS,        "Toggle Checkbox: Use dotted rests"                                           );
 		set( KEY_DC_CONF_USE_TRIP_NOTES,       "Toggle Checkbox: Use tripletted notes"                                       );
 		set( KEY_DC_CONF_USE_TRIP_RESTS,       "Toggle Checkbox: Use tripletted rests"                                       );
+		set( KEY_DC_CONF_USE_KARAOKE,          "Toggle Checkbox: Use Karaoke"                                                );
+		set( KEY_DC_CONF_ALL_SYL_ORP,          "Toggle Checkbox: Regard all syllables as orphaned"                           );
 		set( KEY_DC_CONF_KAR_ORPHANED,         "Open Orphaned Syllables Selection"                                           );
 		set( KEY_DC_CONF_KAR_ONE_CH,           "Toggle Checkbox: All Lyrics in One Channel"                                  );
+		set( KEY_DC_CONF_CTRL_CHANGE_MODE,     "Open Control Change Mode Selection"                                          );
 		set( KEY_DC_CONF_FLD_GLOB_SINGLE,      "Focus text field: Add one split at tick..."                                  );
 		set( KEY_DC_CONF_BTN_GLOB_SINGLE,      "Press Button: Add Single Tick"                                               );
 		set( KEY_DC_CONF_FLD_GLOB_EACH,        "Focus text field: Add many splits (distance)"                                );
@@ -2217,6 +2233,7 @@ public class Dict {
 		set( DC_TAB_CHORDS,                "Chords"                                           );
 		set( DC_TAB_NOTE_REST,             "Notes / Rests"                                    );
 		set( DC_TAB_KARAOKE,               "Karaoke Settings"                                 );
+		set( DC_TAB_CTRL_CHANGE,           "Control Change"                                   );
 		set( DC_TAB_SLICE,                 "Extra Slices"                                     );
 		set( DC_TABINFO_DEBUG,             "<html>Settings to control additional debugging information that's added as code comments in the target file."
 		                                 + "<br>The resulting MIDI sequence is not affected by these settings." );
@@ -2232,13 +2249,18 @@ public class Dict {
 		                                 + "<br>The other settings control how different the properties of two notes can be to be still regarded as a part of the same chord." );
 		set( DC_TABINFO_NOTE_REST,         "<html>Settings to control which note or rest lengths to use" );
 		set( DC_TABINFO_KARAOKE,           "<html>Karaoke-related settings. Only used by the MidicaPL decompiler. Otherwise ignored."
-		                                 + "<br><br>Orphaned Syllables are always implemented as an option of a rest."
-		                                 + "<br>This rest can either be between the other notes (inline)"
-		                                 + "<br>or in a block at the slice's beginning, consisting only of rests."
-		                                 + "<br><b>Inline</b> is more accurate and keeps the lyrics more or less in the right tick. But it causes more 'multiple' parameters and rests."
-		                                 + "<br><b>Block</b> produces cleaner code regarding the notes. But the placement of the lyrics in the timeline is less precise."
-		                                 + "<br><br>Using only one channel for all the lyrics makes the code more readable."
-		                                 + "<br>But it could result in more orphaned syllables and so more rests and/or 'multiple' options are needed." );
+		                                 + "<br><br>A syllable is <b>normal</b>, if there's a Note-ON beginning in the same tick. Otherwise it is <b>orphaned</b>."
+		                                 + "<br>Normal syllables are implemented as an option to a note or chord."
+		                                 + "<br>Orphaned Syllables are implemented as an option of a rest inside of a nestable block."
+		                                 + "<br>This block can either be an <b>Inline Block</b> starting together with the previous Note-ON,"
+		                                 + "<br>or a <b>Slice Begin Block</b>, starting at the beginning of a slice."
+		                                 + "<br><b>Inline Blocks</b> are more accurate and keep the lyrics closer to the right tick."
+		                                 + "<br>They are smaller and occur more often."
+		                                 + "<br><b>Slice Begin Blocks</b> produce cleaner code regarding the notes. But the placement of the lyrics in the timeline is less precise."
+		                                 + "<br>They are larger and occur less often."
+		                                 + "<br><br>Using only one channel for all the lyrics keeps the lyrics closer together, making the karaoke-related code more readable."
+		                                 + "<br>But it could result in more orphaned syllables requiring more nestable blocks and rests." );
+		set( DC_TABINFO_CTRL_CHANGE,       "<html>Settings related to Control Change Events. Not yet implemented. Feature for the future." );
 		set( DC_TABINFO_SLICE,             "<html>Settings to add extra slices."
 		                                 + "<br>By default the sequence is split into slices in each tick that contains certain META messages."
 		                                 + "<br>Here you can add extra splitting for certain ticks." );
@@ -2277,10 +2299,16 @@ public class Dict {
 		set( USE_DOTTED_RESTS,             "Use dotted rests"                                                          );
 		set( USE_TRIPLETTED_NOTES,         "Use tripletted notes"                                                      );
 		set( USE_TRIPLETTED_RESTS,         "Use tripletted rests"                                                      );
+		set( USE_KARAOKE,                  "Use Karaoke"                                                               );
+		set( USE_KARAOKE_D,                "Includes lyrics, if checked. Otherwise, ignores all other Karaoke Settings." );
+		set( ALL_SYLLABLES_ORPHANED,       "Regard all syllables as orphaned"                                          );
+		set( ALL_SYLLABLES_ORPHANED_D,     "If checked, no syllable is assigned to any note."                          );
 		set( ORPHANED_SYLLABLES,           "Orphaned Syllables"                                                        );
 		set( ORPHANED_SYLLABLES_D,         "How to treat syllables that appear in a tick without any Note-ON"          );
-		set( DC_INLINE,                    "Inline"                                                                    );
-		set( DC_BLOCK,                     "Block"                                                                     );
+		set( CTRL_CHANGE_MODE,             "Control Change Mode"                                                       );
+		set( CTRL_CHANGE_MODE_D,           "Where to put control changes"                                              );
+		set( DC_INLINE_BLOCK,              "Inline Block"                                                              );
+		set( DC_SLICE_BEGIN_BLOCK,         "Slice Begin Block"                                                         );
 		set( DC_STRAT_NEXT_DURATION_PRESS, "<html><b>1.</b> Next ON, &nbsp;&nbsp;<b>2.</b> Duration,&nbsp;&nbsp;<b>3.</b> Press length" );
 		set( DC_STRAT_DURATION_NEXT_PRESS, "<html><b>1.</b> Duration,&nbsp;&nbsp;<b>2.</b> Next ON, &nbsp;&nbsp;<b>3.</b> Press length" );
 		set( DC_STRAT_NEXT_PRESS,          "<html><b>1.</b> Next ON, &nbsp;&nbsp;<b>2.</b> Press length"               );
