@@ -491,7 +491,7 @@ public abstract class Decompiler extends Exporter {
 				
 				// is the instrument change necessary?
 				// (Is the next note between this instrument change and the next one?)
-				if (noteTick > 0 && tick <= noteTick && noteTick < nextChangeTick) {
+				if (noteTick >= 0 && tick <= noteTick && noteTick < nextChangeTick) {
 					continue;
 				}
 				
@@ -898,7 +898,6 @@ public abstract class Decompiler extends Exporter {
 			return;
 		
 		// deep-clone the on/off structure
-//		TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>> noteOnOffClone = (TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>>) noteOnOff.clone(); // TODO: remove or restore
 		TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>> noteOnOffClone = new TreeMap<>();
 		for (Entry<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>> channelEntry : noteOnOff.entrySet()) {
 			byte channel = channelEntry.getKey();
@@ -920,9 +919,6 @@ public abstract class Decompiler extends Exporter {
 		
 		// note history: deep clone with grouping
 		TreeMap<Byte, TreeMap<Long, TreeMap<Byte, Byte>>> noteHistoryClone = new TreeMap<>();
-		
-		// TODO: delete
-		System.out.println();
 		
 		// CHANNEL:
 		for (byte channel : noteHistory.keySet()) {
@@ -999,6 +995,7 @@ public abstract class Decompiler extends Exporter {
 							if (diffOff != 0) {
 								channelOnOffClone.get(note).remove(offTick);
 								// TODO: check if we put the OFF to a former ON
+								// TODO: check if we mess up the ON/OFF order
 								channelOnOffClone.get(note).put(crdOffTick, false);
 							}
 							if (diffVelocity != 0) {
@@ -1023,13 +1020,6 @@ public abstract class Decompiler extends Exporter {
 		// replace the local copy with the adjusted clone
 		noteHistory = noteHistoryClone;
 		noteOnOff   = noteOnOffClone;
-		
-		// TODO: delete
-		System.out.println();
-		// TODO: noteOnOffClone, CHANNEL 0, note 68:
-		// TODO: 56580=true, 57539=false, 57540=true, 58500=false
-		// TODO: 56580=true, 57540=false, 58500=false
-		// TODO: WHY ???
 	}
 	
 	/**
@@ -1064,7 +1054,8 @@ public abstract class Decompiler extends Exporter {
 						byte velocity = noteSet.getValue();
 						Long offTick  = sliceOnOff.get(channel).get(note).ceilingKey(tick + 1);
 						
-						// TODO: handle the case that there is no offTick at all
+						// TODO: test this
+						// handle the case that there is no offTick at all
 						// can happen if the MIDI is corrupt or uses all-notes-off / all-sounds-off
 						// instead of note-off or note-on with velocity=0
 						if (null == offTick) {
@@ -1907,7 +1898,7 @@ public abstract class Decompiler extends Exporter {
 		
 		// convert source tick to target tick
 		long   targetTick  = (tick * targetResolution * 10 + 5) / (sourceResolution * 10);
-		String description = Dict.get(Dict.EXPORTER_TICK) + " " + tick + " ==> " + targetTick;
+		String description = Dict.get(Dict.EXPORTER_TICK) + " " + tick + " ==> ~" + targetTick;
 		
 		if (withCommentSymbol)
 			return getCommentSymbol() + " " + description;
