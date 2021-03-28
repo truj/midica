@@ -775,6 +775,7 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_SYSEX,          KeyEvent.VK_X,        0                          );
 		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_SKIPPED_RESTS,  KeyEvent.VK_R,        0                          );
 		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_OFF_NOT_FOUND,  KeyEvent.VK_N,        0                          );
+		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_CRD_GRP_FAILED, KeyEvent.VK_C,        0                          );
 		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_OTHER,          KeyEvent.VK_O,        0                          );
 		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_FILTER,         KeyEvent.VK_F,        0                          );
 		

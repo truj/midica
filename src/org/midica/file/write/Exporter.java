@@ -20,7 +20,7 @@ import org.midica.ui.file.ExportResult;
 /**
  * This class can be extended by exporter classes which write a music file based on a MIDI sequence.
  * 
- * Derived classes are {@link MidiExporter} and {@link MidicaPLExporter}.
+ * Derived classes are {@link MidiExporter} and {@link Decompiler}.
  * 
  * @author Jan Trukenmüller
  */

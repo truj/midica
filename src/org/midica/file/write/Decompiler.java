@@ -993,10 +993,7 @@ public abstract class Decompiler extends Exporter {
 						long   diffVelocity = Math.abs(crdVelocity - velocity);
 						if (diffOff <= CHORD_NOTE_OFF_TOLERANCE && diffVelocity <= CHORD_VELOCITY_TOLERANCE) {
 							if (diffOff != 0) {
-								channelOnOffClone.get(note).remove(offTick);
-								// TODO: check if we put the OFF to a former ON
-								// TODO: check if we mess up the ON/OFF order
-								channelOnOffClone.get(note).put(crdOffTick, false);
+								adjustOffTick(channelOnOffClone, channel, note, offTick, crdOffTick);
 							}
 							if (diffVelocity != 0) {
 								tickEntry.setValue(crdVelocity);
@@ -1020,6 +1017,60 @@ public abstract class Decompiler extends Exporter {
 		// replace the local copy with the adjusted clone
 		noteHistory = noteHistoryClone;
 		noteOnOff   = noteOnOffClone;
+	}
+	
+	/**
+	 * Adjusts the Note-OFF tick of a note so that it can join a chord.
+	 * 
+	 * Checks if there is another ON/OFF between source and target OFF tick.
+	 * 
+	 * In this case: Doesn't adjust the OFF tick and creates a warning instead.
+	 * 
+	 * @param channelOnOff  noteOnOff structure for the channel in question (note, offTick, onOff)
+	 * @param channel       MIDI channel
+	 * @param note          note number
+	 * @param offTick       current Note-OFF tick
+	 * @param crdOffTick    target Note-OFF tick (Note-OFF tick of the chord)
+	 */
+	private void adjustOffTick(TreeMap<Byte, TreeMap<Long, Boolean>> channelOnOff, byte channel, byte note, long offTick, long crdOffTick) {
+		
+		// check if there are ON/OFF events for the same note and channel
+		// between original and target tick (including the target tick itself)
+		Long conflictTick = null;
+		long buffer       = offTick < crdOffTick ? 1 : -1;
+		long tick         = offTick + buffer;
+		while (tick != crdOffTick + buffer) {
+			
+			// remove and remember the note event, if available
+			Boolean onOff = channelOnOff.get(note).get(tick);
+			if (onOff != null) {
+				conflictTick = tick;
+				break;
+			}
+			
+			// move on
+			if (offTick < crdOffTick)
+				tick++;
+			else
+				tick--;
+		}
+		
+		// conflict found?
+		if (conflictTick != null) {
+			String details = String.format(
+				Dict.get(Dict.WARNING_OFF_MOVING_CONFLICT),
+				Dict.getNoteOrPercussionName(note, 9 == channel),
+				offTick, crdOffTick
+			);
+			exportResult.addWarning(null, conflictTick, channel, Dict.get(Dict.WARNING_CHORD_GROUPING_FAILED));
+			exportResult.setDetailsOfLastWarning(details);
+			
+			return;
+		}
+		
+		// move the OFF tick
+		channelOnOff.get(note).remove(offTick);
+		channelOnOff.get(note).put(crdOffTick, false);
 	}
 	
 	/**
@@ -1070,13 +1121,7 @@ public abstract class Decompiler extends Exporter {
 						noteStruct.put( NP_NOTE_NUM, note     + "" );
 						
 						// add to the tick notes
-						String noteName = Dict.getNote((int) note);
-						if (9 == channel) {
-							noteName = Dict.getPercussionShortId((int) note);
-							if ( noteName.equals(Dict.get(Dict.UNKNOWN_PERCUSSION_NAME)) ) {
-								noteName = note + ""; // name unknown - use number instead
-							}
-						}
+						String noteName = Dict.getNoteOrPercussionName(note, 9 == channel);
 						notesStruct.put(noteName, noteStruct);
 					}
 					
@@ -1156,13 +1201,7 @@ public abstract class Decompiler extends Exporter {
 				ArrayList<String> inlineChord = new ArrayList<>();
 				while (it.hasNext()) {
 					byte   note     = it.next();
-					String noteName = Dict.getNote(note);
-					if (isPercussion) {
-						noteName = Dict.getPercussionShortId(note);
-						if ( noteName.equals(Dict.get(Dict.UNKNOWN_PERCUSSION_NAME)) ) {
-							noteName = note + "";
-						}
-					}
+					String noteName = Dict.getNoteOrPercussionName(note, isPercussion);
 					if (isPercussion || useInlineChords) {
 						inlineChord.add(noteName);
 					}

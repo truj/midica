@@ -367,7 +367,7 @@ public class Slice {
 					// later slice - only add one last entry, if the last note is still pressed
 					
 					// was there any note pressed in this slice at all?
-					Entry<Long, Boolean> lastOnOff = sliceNoteOnOff.lastEntry(); // TODO: why is this false at 57540? - should be true
+					Entry<Long, Boolean> lastOnOff = sliceNoteOnOff.lastEntry();
 					if (lastOnOff != null) {
 						
 						// is the last pressed note still pressed?
@@ -419,5 +419,14 @@ public class Slice {
 		
 		// add event
 		events.put(key, notesOrChords);
+	}
+	
+	/**
+	 * Contains begin and end tick of the slice.
+	 * 
+	 * Only used for debugging purposes.
+	 */
+	public String toString() {
+		return "Slice, begin: " + beginTick + ", end: " + endTick;
 	}
 }

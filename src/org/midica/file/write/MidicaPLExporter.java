@@ -26,6 +26,11 @@ import org.midica.midi.SequenceAnalyzer;
  */
 public class MidicaPLExporter extends Decompiler {
 	
+	// string formats for channel commands
+	private String FORMAT_CH_CMD_CHANNEL = "%-2s";   // channel:          2 left-aligned characters, filled with spaces
+	private String FORMAT_CH_CMD_CRD     = "%-10s";  // chord/note/rest: 10 left-aligned characters, filled with spaces
+	private String FORMAT_CH_CMD_LENGTH  = "%1$10s"; // length:          10 right-aligned characters, filled with spaces
+	
 	/**
 	 * Creates a new MidicaPL exporter.
 	 */
@@ -807,9 +812,9 @@ public class MidicaPLExporter extends Decompiler {
 		
 		// main part of the command
 		line.append(
-			  String.format("%-2s", channel)  + " "
-			+ String.format("%-5s", noteName) + " "
-			+ String.format("%1$5s", noteOrCrd.get(NP_LENGTH))
+			  String.format(FORMAT_CH_CMD_CHANNEL, channel)  + " "
+			+ String.format(FORMAT_CH_CMD_CRD,     noteName) + " "
+			+ String.format(FORMAT_CH_CMD_LENGTH,  noteOrCrd.get(NP_LENGTH))
 		);
 		
 		// get options that must be appended
@@ -895,9 +900,9 @@ public class MidicaPLExporter extends Decompiler {
 		if (lengthSummands.size() > 0) {
 			String length = String.join(MidicaPLParser.LENGTH_PLUS, lengthSummands);
 			line.append(
-				  String.format("%-2s", channel) + " "
-				+ String.format("%-5s", MidicaPLParser.REST) + " "
-				+ String.format("%1$5s", length)
+				  String.format(FORMAT_CH_CMD_CHANNEL, channel) + " "
+				+ String.format(FORMAT_CH_CMD_CRD, MidicaPLParser.REST) + " "
+				+ String.format(FORMAT_CH_CMD_LENGTH, length)
 			);
 			
 			incrementStats(STAT_RESTS, channel);
@@ -1071,7 +1076,7 @@ public class MidicaPLExporter extends Decompiler {
 	 */
 	private String appendTickComment(String line, long tick) {
 		if (MUST_ADD_TICK_COMMENTS) {
-			line = String.format("%-35s", line) + " " + createTickDescription(tick, true);
+			line = String.format("%-45s", line) + " " + createTickDescription(tick, true);
 		}
 		return line;
 	}

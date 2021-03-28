@@ -741,6 +741,7 @@ public class Dict {
 	public static final String KEY_EXPORT_RESULT_SYSEX          = "key_export_result_sysex";
 	public static final String KEY_EXPORT_RESULT_SKIPPED_RESTS  = "key_export_result_skipped_rests";
 	public static final String KEY_EXPORT_RESULT_OFF_NOT_FOUND  = "key_export_result_off_not_found";
+	public static final String KEY_EXPORT_RESULT_CRD_GRP_FAILED = "key_export_result_crd_grp_failed";
 	public static final String KEY_EXPORT_RESULT_OTHER          = "key_export_result_other";
 	public static final String KEY_EXPORT_RESULT_FILTER         = "key_export_result_filter";
 	
@@ -1660,6 +1661,7 @@ public class Dict {
 	public static final String SHOW_IGN_SYSEX_MSG               = "show_ign_sysex_msg";
 	public static final String SHOW_SKIPPED_RESTS               = "show_skipped_rests";
 	public static final String SHOW_OFF_NOT_FOUND               = "show_off_not_found";
+	public static final String SHOW_CRD_GRP_FAILED              = "show_crd_grp_failed";
 	public static final String SHOW_OTHER_WARNINGS              = "show_other_warnings";
 	
 	// ExportException
@@ -1668,13 +1670,14 @@ public class Dict {
 	public static final String ERROR_NOTE                       = "error_note";
 	
 	// MidicaPLExporter
-	public static final String WARNING_SAME_NOTE_IN_SAME_TICK   = "warning_same_note_in_same_tick";
 	public static final String WARNING_IGNORED_SHORT_MESSAGE    = "warning_ignored_short_message";
 	public static final String WARNING_IGNORED_META_MESSAGE     = "warning_ignored_meta_message";
 	public static final String WARNING_IGNORED_SYSEX_MESSAGE    = "warning_ignored_sysex_message";
 	public static final String WARNING_REST_SKIPPED             = "warning_rest_skipped";
 	public static final String WARNING_REST_SKIPPED_TICKS       = "warning_rest_skipped_ticks";
 	public static final String WARNING_OFF_NOT_FOUND            = "warning_off_not_found";
+	public static final String WARNING_CHORD_GROUPING_FAILED    = "warning_chord_grouping_conflict";
+	public static final String WARNING_OFF_MOVING_CONFLICT      = "warning_off_moving_conflict";
 	
 	// MidiDevices
 	public static final String DEFAULT_CHANNEL_COMMENT          = "default_channel_comment";
@@ -2144,6 +2147,7 @@ public class Dict {
 		set( KEY_EXPORT_RESULT_SYSEX,          "Toggle Checkbox: Show Ignored SysEx Message"                                 );
 		set( KEY_EXPORT_RESULT_SKIPPED_RESTS,  "Toggle Checkbox: Show Skipped Rests"                                         );
 		set( KEY_EXPORT_RESULT_OFF_NOT_FOUND,  "Toggle Checkbox: Show Note-OFF not found"                                    );
+		set( KEY_EXPORT_RESULT_CRD_GRP_FAILED, "Toggle Checkbox: Show Chord grouping failed"                                 );
 		set( KEY_EXPORT_RESULT_OTHER,          "Toggle Checkbox: Show other warnings"                                        );
 		set( KEY_EXPORT_RESULT_FILTER,         "Open the Table Filter"                                                       );
 		
@@ -3200,6 +3204,7 @@ public class Dict {
 		set( SHOW_IGN_SYSEX_MSG,                  "Show Ignored SysEx Messages"                                       );
 		set( SHOW_SKIPPED_RESTS,                  "Show Skipped Rests"                                                );
 		set( SHOW_OFF_NOT_FOUND,                  "Show Note-OFF not found"                                           );
+		set( SHOW_CRD_GRP_FAILED,                 "Show Chord grouping failed"                                        );
 		set( SHOW_OTHER_WARNINGS,                 "Show other warnings"                                               );
 		
 		// ExportException
@@ -3208,14 +3213,14 @@ public class Dict {
 		set( ERROR_NOTE,                          "Note"                                                              );
 		
 		// MidicaPLExporter
-		set( WARNING_SAME_NOTE_IN_SAME_TICK,      "The same note has been addressed more than once"
-		                                        + " at the same time and channel (current/old velocity: %s/%s)"       );
 		set( WARNING_IGNORED_SHORT_MESSAGE,       "Ignored Short Message"                                             );
 		set( WARNING_IGNORED_META_MESSAGE,        "Ignored Meta Message"                                              );
 		set( WARNING_IGNORED_SYSEX_MESSAGE,       "Ignored SysEx Message"                                             );
 		set( WARNING_REST_SKIPPED,                "Rest skipped (too small)"                                          );
 		set( WARNING_REST_SKIPPED_TICKS,          "ticks"                                                             );
 		set( WARNING_OFF_NOT_FOUND,               "Note-Off not found"                                                );
+		set( WARNING_CHORD_GROUPING_FAILED,       "Chord grouping failed"                                             );
+		set( WARNING_OFF_MOVING_CONFLICT,         "<html>Cannot move Note-OFF for <b>%s</b> from tick %d to %d. Conflict detected." );
 		
 		// MidiDevices
 		set( PERCUSSION_CHANNEL,                  "Percussion Channel"         );
@@ -5105,6 +5110,26 @@ public class Dict {
 			return noteIntToName.get(i);
 		else
 			return get(UNKNOWN_NOTE_NAME);
+	}
+	
+	/**
+	 * Returns a note or percussion name by number.
+	 * 
+	 * If the percussion name is requested and not found, the number is returned as a string instead.
+	 * 
+	 * @param number        number
+	 * @param isPercussion  **true** for a percussion name, **false** for a note name
+	 * @return the name
+	 */
+	public static String getNoteOrPercussionName(int number, boolean isPercussion) {
+		String name = Dict.getNote(number);
+		if (isPercussion) {
+			name = Dict.getPercussionShortId(number);
+			if (name.equals(Dict.get(Dict.UNKNOWN_PERCUSSION_NAME))) {
+				name = number + ""; // name unknown - use number instead
+			}
+		}
+		return name;
 	}
 	
 	/**
