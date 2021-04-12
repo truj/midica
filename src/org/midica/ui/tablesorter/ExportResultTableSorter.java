@@ -25,12 +25,13 @@ import org.midica.ui.model.ExportResultTableModel;
  */
 public class ExportResultTableSorter<M> extends MidicaSorter<M> {
 	
-	private boolean showShortMsg    = true;
-	private boolean showMetaMsg     = true;
-	private boolean showSysexMsg    = true;
-	private boolean showRestSkipped = true;
-	private boolean showOffNotFound = true;
-	private boolean showOther       = true;
+	private boolean showShortMsg     = true;
+	private boolean showMetaMsg      = true;
+	private boolean showSysexMsg     = true;
+	private boolean showRestSkipped  = true;
+	private boolean showOffNotFound  = true;
+	private boolean showCrdGrpFailed = true;
+	private boolean showOther        = true;
 	
 	/**
 	 * Sets a new set of warning filters.
@@ -43,15 +44,19 @@ public class ExportResultTableSorter<M> extends MidicaSorter<M> {
 	 * @param sysexMsg      **true** to show Ignored SysEx Message warnings, otherwise **false**
 	 * @param restSkipped   **true** to show Skipped Rest warnings, otherwise **false**
 	 * @param offNotFound   **true** to show Note-OFF Not Found warnings, otherwise **false**
+	 * @param crdGrpFailed  **true** to show Chord Grouping Failed warnings, otherwise **false**
 	 * @param other         **true** to show other warnings, otherwise **false**
 	 */
-	public void setWarningFilters(boolean shortMsg, boolean metaMsg, boolean sysexMsg, boolean restSkipped, boolean offNotFound, boolean other) {
-		showShortMsg    = shortMsg;
-		showMetaMsg     = metaMsg;
-		showSysexMsg    = sysexMsg;
-		showRestSkipped = restSkipped;
-		showOffNotFound = offNotFound;
-		showOther       = other;
+	public void setWarningFilters(
+			boolean shortMsg, boolean metaMsg, boolean sysexMsg, boolean restSkipped,
+			boolean offNotFound, boolean crdGrpFailed, boolean other) {
+		showShortMsg     = shortMsg;
+		showMetaMsg      = metaMsg;
+		showSysexMsg     = sysexMsg;
+		showRestSkipped  = restSkipped;
+		showOffNotFound  = offNotFound;
+		showCrdGrpFailed = crdGrpFailed;
+		showOther        = other;
 	}
 	
 	/**
@@ -83,11 +88,14 @@ public class ExportResultTableSorter<M> extends MidicaSorter<M> {
 					return true;
 				if (showOffNotFound && warning.equals(Dict.get(Dict.WARNING_OFF_NOT_FOUND)))
 					return true;
+				if (showCrdGrpFailed && warning.equals(Dict.get(Dict.WARNING_CHORD_GROUPING_FAILED)))
+					return true;
 				if (showOther && ! warning.equals(Dict.get(Dict.WARNING_IGNORED_SHORT_MESSAGE))
 					&& ! warning.equals(Dict.get(Dict.WARNING_IGNORED_META_MESSAGE))
 					&& ! warning.equals(Dict.get(Dict.WARNING_IGNORED_SYSEX_MESSAGE))
 					&& ! warning.equals(Dict.get(Dict.WARNING_REST_SKIPPED))
-					&& ! warning.equals(Dict.get(Dict.WARNING_OFF_NOT_FOUND)))
+					&& ! warning.equals(Dict.get(Dict.WARNING_OFF_NOT_FOUND))
+					&& ! warning.equals(Dict.get(Dict.WARNING_CHORD_GROUPING_FAILED)))
 					return true;
 				return false;
 			}

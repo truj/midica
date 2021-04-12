@@ -20,9 +20,7 @@ import org.midica.ui.file.ExportResult;
 /**
  * This class can be extended by exporter classes which write a music file based on a MIDI sequence.
  * 
- * Directly derived classes are MidiExporter and MidicaPLExporter.
- * 
- * Indirectly derived classes are AbcExporter, LilypondExporter and MusescoreExporter.
+ * Directly derived classes are {@link org.midica.file.write.MidiExporter} and {@link org.midica.file.write.Decompiler}.
  * 
  * @author Jan Trukenmüller
  */

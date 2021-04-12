@@ -55,13 +55,14 @@ public class ExportResultView extends MessageView implements ActionListener, Row
 	private MidicaTable table    = null;
 	
 	// filter widgets
-	private JCheckBox  cbxShortMsg    = null;
-	private JCheckBox  cbxMetaMsg     = null;
-	private JCheckBox  cbxSysexMsg    = null;
-	private JCheckBox  cbxRestSkipped = null;
-	private JCheckBox  cbxOffNotFound = null;
-	private JCheckBox  cbxOther       = null;
-	private FilterIcon filterIcon     = null;
+	private JCheckBox  cbxShortMsg     = null;
+	private JCheckBox  cbxMetaMsg      = null;
+	private JCheckBox  cbxSysexMsg     = null;
+	private JCheckBox  cbxRestSkipped  = null;
+	private JCheckBox  cbxOffNotFound  = null;
+	private JCheckBox  cbxCrdGrpFailed = null;
+	private JCheckBox  cbxOther        = null;
+	private FilterIcon filterIcon      = null;
 	
 	/**
 	 * Creates a new export result window.
@@ -227,6 +228,21 @@ public class ExportResultView extends MessageView implements ActionListener, Row
 		cbxOffNotFound.addActionListener(this);
 		area.add(cbxOffNotFound, constraints);
 		
+		// chord grouping failed
+		constraints.gridy++;
+		cbxCrdGrpFailed = new JCheckBox(Dict.get(Dict.SHOW_CRD_GRP_FAILED));
+		cbxCrdGrpFailed.setSelected(true);
+		cbxCrdGrpFailed.addActionListener(this);
+		area.add(cbxCrdGrpFailed, constraints);
+		
+		// next column
+		constraints.gridx++;
+		constraints.gridy -= 2;
+		JLabel spacer2 = new JLabel(" ");
+		area.add(spacer2, constraints);
+		constraints.gridx++;
+		constraints.gridy--;
+		
 		// other
 		constraints.gridy++;
 		cbxOther = new JCheckBox(Dict.get(Dict.SHOW_OTHER_WARNINGS));
@@ -236,9 +252,10 @@ public class ExportResultView extends MessageView implements ActionListener, Row
 		
 		// next column
 		constraints.gridx++;
-		JLabel spacer2 = new JLabel(" ");
-		area.add(spacer2, constraints);
+		JLabel spacer3 = new JLabel(" ");
+		area.add(spacer3, constraints);
 		constraints.gridx++;
+		constraints.gridy += 2;
 		
 		// table string filter
 		filterIcon = new FilterIcon(this);
@@ -274,6 +291,7 @@ public class ExportResultView extends MessageView implements ActionListener, Row
 			cbxSysexMsg.isSelected(),
 			cbxRestSkipped.isSelected(),
 			cbxOffNotFound.isSelected(),
+			cbxCrdGrpFailed.isSelected(),
 			cbxOther.isSelected()
 		);
 		rowSorter.filter();
@@ -289,12 +307,13 @@ public class ExportResultView extends MessageView implements ActionListener, Row
 		KeyBindingManager keyBindingManager = new KeyBindingManager(this, this.getRootPane());
 		
 		// add key bindings comboboxes
-		keyBindingManager.addBindingsForCheckbox(cbxShortMsg,    Dict.KEY_EXPORT_RESULT_SHORT);
-		keyBindingManager.addBindingsForCheckbox(cbxMetaMsg,     Dict.KEY_EXPORT_RESULT_META);
-		keyBindingManager.addBindingsForCheckbox(cbxSysexMsg,    Dict.KEY_EXPORT_RESULT_SYSEX);
-		keyBindingManager.addBindingsForCheckbox(cbxRestSkipped, Dict.KEY_EXPORT_RESULT_SKIPPED_RESTS);
-		keyBindingManager.addBindingsForCheckbox(cbxOffNotFound, Dict.KEY_EXPORT_RESULT_OFF_NOT_FOUND);
-		keyBindingManager.addBindingsForCheckbox(cbxOther,       Dict.KEY_EXPORT_RESULT_OTHER);
+		keyBindingManager.addBindingsForCheckbox(cbxShortMsg,     Dict.KEY_EXPORT_RESULT_SHORT);
+		keyBindingManager.addBindingsForCheckbox(cbxMetaMsg,      Dict.KEY_EXPORT_RESULT_META);
+		keyBindingManager.addBindingsForCheckbox(cbxSysexMsg,     Dict.KEY_EXPORT_RESULT_SYSEX);
+		keyBindingManager.addBindingsForCheckbox(cbxRestSkipped,  Dict.KEY_EXPORT_RESULT_SKIPPED_RESTS);
+		keyBindingManager.addBindingsForCheckbox(cbxOffNotFound,  Dict.KEY_EXPORT_RESULT_OFF_NOT_FOUND);
+		keyBindingManager.addBindingsForCheckbox(cbxCrdGrpFailed, Dict.KEY_EXPORT_RESULT_CRD_GRP_FAILED);
+		keyBindingManager.addBindingsForCheckbox(cbxOther,        Dict.KEY_EXPORT_RESULT_OTHER);
 		
 		// add key bindings to filters
 		keyBindingManager.addBindingsForIconLabel(filterIcon, Dict.KEY_EXPORT_RESULT_FILTER);

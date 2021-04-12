@@ -208,13 +208,13 @@ public class Slice {
 	 * @param tick        MIDI tick
 	 * @param syllable    Lyrics syllable for Karaoke
 	 * @param channel     MIDI channel
-	 * @param orphaned    either {@link Decompiler#INLINE} or {@link Decompiler#BLOCK}
+	 * @param orphaned    either {@link Decompiler#INLINE_BLOCK} or {@link Decompiler#SLICE_BEGIN_BLOCK}
 	 * @param resolution  source resolution of the sequence
 	 */
 	public void addSyllableRest(long tick, String syllable, byte channel, byte orphaned, long resolution) {
 		
 		// add the rest inside a nestable block at the slice's start
-		if (Decompiler.BLOCK == orphaned) {
+		if (Decompiler.SLICE_BEGIN_BLOCK == orphaned) {
 			sliceBeginBlockTimelines.get(channel).put(tick, syllable);
 		}
 		else {
@@ -293,7 +293,7 @@ public class Slice {
 			byte channel = channelSet.getKey();
 			
 			TreeMap<Long, TreeMap<Byte, Byte>> allChannelNotes  = channelSet.getValue();
-			TreeMap<Long, TreeMap<Byte, Byte>> slideNoteHistory = new TreeMap<>();
+			TreeMap<Long, TreeMap<Byte, Byte>> sliceNoteHistory = new TreeMap<>();
 			
 			TICK:
 			for (Entry<Long, TreeMap<Byte, Byte>> chHistorySet : allChannelNotes.entrySet()) {
@@ -301,7 +301,7 @@ public class Slice {
 				
 				// decide if the notes belong to the slice
 				if (tick >= endTick) {
-					this.noteHistory.put(channel, slideNoteHistory);
+					this.noteHistory.put(channel, sliceNoteHistory);
 					continue CHANNEL;
 				}
 				if (tick < beginTick) {
@@ -309,11 +309,11 @@ public class Slice {
 				}
 				
 				// add notes
-				slideNoteHistory.put(tick, chHistorySet.getValue());
+				sliceNoteHistory.put(tick, chHistorySet.getValue());
 			}
 			
 			// add structure
-			this.noteHistory.put(channel, slideNoteHistory);
+			this.noteHistory.put(channel, sliceNoteHistory);
 		}
 		
 		return this.noteHistory;
@@ -325,7 +325,7 @@ public class Slice {
 	 * 
 	 * An entry is copied, if:
 	 * 
-	 * - it's within the slice's scope (>= beginTick or < endTick); **or**:
+	 * - it's within the slice's scope (>= beginTick and < endTick); **or**:
 	 * - it's a **Note-OFF** in a later slice **but** the note has been pressed in the slice's scope and has not yet been released.
 	 * 
 	 * @param noteOnOff    structure containing channel, tick, note and on/off
@@ -340,14 +340,14 @@ public class Slice {
 			byte channel = channelSet.getKey();
 			
 			TreeMap<Byte, TreeMap<Long, Boolean>> allChannelOnOff   = channelSet.getValue();
-			TreeMap<Byte, TreeMap<Long, Boolean>> slideChannelOnOff = new TreeMap<>();
+			TreeMap<Byte, TreeMap<Long, Boolean>> sliceChannelOnOff = new TreeMap<>();
 			
 			NOTE:
 			for (Entry<Byte, TreeMap<Long, Boolean>> chOnOffSet : allChannelOnOff.entrySet()) {
 				byte note = chOnOffSet.getKey();
 				
 				TreeMap<Long, Boolean> channelNoteOnOff = chOnOffSet.getValue();
-				TreeMap<Long, Boolean> slideNoteOnOff   = new TreeMap<>();
+				TreeMap<Long, Boolean> sliceNoteOnOff   = new TreeMap<>();
 				
 				TICK:
 				for (Entry<Long, Boolean> chNoteEntry : channelNoteOnOff.entrySet()) {
@@ -360,36 +360,36 @@ public class Slice {
 					
 					// slice scope matches? - add on/off
 					if (tick < endTick) {
-						slideNoteOnOff.put(tick, isOn);
+						sliceNoteOnOff.put(tick, isOn);
 						continue TICK;
 					}
 					
 					// later slice - only add one last entry, if the last note is still pressed
 					
 					// was there any note pressed in this slice at all?
-					Entry<Long, Boolean> lastOnOff = slideNoteOnOff.lastEntry();
+					Entry<Long, Boolean> lastOnOff = sliceNoteOnOff.lastEntry();
 					if (lastOnOff != null) {
 						
 						// is the last pressed note still pressed?
 						boolean isStillPressed = lastOnOff.getValue();
 						if (isStillPressed) {
-							slideNoteOnOff.put(tick, isOn);
+							sliceNoteOnOff.put(tick, isOn);
 						}
 					}
 					
 					// TODO: test
 					
 					// the rest of the Note-ONs are out of the slice's scope
-					slideChannelOnOff.put(note, slideNoteOnOff);
+					sliceChannelOnOff.put(note, sliceNoteOnOff);
 					continue NOTE;
 				}
 				
 				// add note structure
-				slideChannelOnOff.put(note, slideNoteOnOff);
+				sliceChannelOnOff.put(note, sliceNoteOnOff);
 			}
 			
 			// add channel structure
-			this.noteOnOff.put(channel, slideChannelOnOff);
+			this.noteOnOff.put(channel, sliceChannelOnOff);
 		}
 		
 		return this.noteOnOff;
@@ -419,5 +419,14 @@ public class Slice {
 		
 		// add event
 		events.put(key, notesOrChords);
+	}
+	
+	/**
+	 * Contains begin and end tick of the slice.
+	 * 
+	 * Only used for debugging purposes.
+	 */
+	public String toString() {
+		return "Slice, begin: " + beginTick + ", end: " + endTick;
 	}
 }

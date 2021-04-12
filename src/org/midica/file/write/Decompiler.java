@@ -97,8 +97,8 @@ public abstract class Decompiler extends Exporter {
 	protected static final String NEW_LINE = System.getProperty("line.separator");
 	
 	// decompile constants
-	public static final byte INLINE                       = 1;
-	public static final byte BLOCK                        = 2;
+	public static final byte INLINE_BLOCK                 = 1;
+	public static final byte SLICE_BEGIN_BLOCK            = 2;
 	public static final byte STRATEGY_NEXT_DURATION_PRESS = 1;
 	public static final byte STRATEGY_DURATION_NEXT_PRESS = 2;
 	public static final byte STRATEGY_NEXT_PRESS          = 3;
@@ -126,8 +126,11 @@ public abstract class Decompiler extends Exporter {
 	public static final boolean DEFAULT_USE_DOTTED_RESTS         = true;
 	public static final boolean DEFAULT_USE_TRIPLETTED_NOTES     = true;
 	public static final boolean DEFAULT_USE_TRIPLETTED_RESTS     = true;
-	public static final byte    DEFAULT_ORPHANED_SYLLABLES       = INLINE;
+	public static final boolean DEFAULT_USE_KARAOKE              = true;
+	public static final boolean DEFAULT_ALL_SYLLABLES_ORPHANED   = false;
+	public static final byte    DEFAULT_ORPHANED_SYLLABLES       = INLINE_BLOCK;
 	public static final boolean DEFAULT_KARAOKE_ONE_CHANNEL      = false;
+	public static final byte    DEFAULT_CTRL_CHANGE_MODE         = INLINE_BLOCK;
 	public static final String  DEFAULT_EXTRA_GLOBALS_STR        = "";
 	
 	/* *****************
@@ -159,8 +162,11 @@ public abstract class Decompiler extends Exporter {
 	protected static boolean       USE_DOTTED_RESTS         = DEFAULT_USE_DOTTED_RESTS;
 	protected static boolean       USE_TRIPLETTED_NOTES     = DEFAULT_USE_TRIPLETTED_NOTES;
 	protected static boolean       USE_TRIPLETTED_RESTS     = DEFAULT_USE_TRIPLETTED_RESTS;
+	protected static boolean       USE_KARAOKE              = DEFAULT_USE_KARAOKE;
+	protected static boolean       ALL_SYLLABLES_ORPHANED   = DEFAULT_ALL_SYLLABLES_ORPHANED;
 	protected static byte          ORPHANED_SYLLABLES       = DEFAULT_ORPHANED_SYLLABLES;
 	protected static boolean       KARAOKE_ONE_CHANNEL      = DEFAULT_KARAOKE_ONE_CHANNEL;
+	protected static byte          CTRL_CHANGE_MODE         = DEFAULT_CTRL_CHANGE_MODE;
 	protected static TreeSet<Long> EXTRA_GLOBALS            = null;
 	
 	protected static int          sourceResolution = 0;
@@ -383,8 +389,11 @@ public abstract class Decompiler extends Exporter {
 		USE_DOTTED_RESTS         = Boolean.parseBoolean( sessionConfig.get(Config.DC_USE_DOTTED_RESTS)         );
 		USE_TRIPLETTED_NOTES     = Boolean.parseBoolean( sessionConfig.get(Config.DC_USE_TRIPLETTED_NOTES)     );
 		USE_TRIPLETTED_RESTS     = Boolean.parseBoolean( sessionConfig.get(Config.DC_USE_TRIPLETTED_RESTS)     );
+		USE_KARAOKE              = Boolean.parseBoolean( sessionConfig.get(Config.DC_USE_KARAOKE)              );
+		ALL_SYLLABLES_ORPHANED   = Boolean.parseBoolean( sessionConfig.get(Config.DC_ALL_SYLLABLES_ORPHANED)   );
 		ORPHANED_SYLLABLES       = Byte.parseByte(       sessionConfig.get(Config.DC_ORPHANED_SYLLABLES)       );
 		KARAOKE_ONE_CHANNEL      = Boolean.parseBoolean( sessionConfig.get(Config.DC_KARAOKE_ONE_CHANNEL)      );
+		CTRL_CHANGE_MODE         = Byte.parseByte(       sessionConfig.get(Config.DC_CTRL_CHANGE_MODE)         );
 		EXTRA_GLOBALS            = DecompileConfigController.getExtraGlobalTicks();
 		
 		// apply indirect configuration
@@ -482,7 +491,7 @@ public abstract class Decompiler extends Exporter {
 				
 				// is the instrument change necessary?
 				// (Is the next note between this instrument change and the next one?)
-				if (noteTick > 0 && tick <= noteTick && noteTick < nextChangeTick) {
+				if (noteTick >= 0 && tick <= noteTick && noteTick < nextChangeTick) {
 					continue;
 				}
 				
@@ -888,9 +897,28 @@ public abstract class Decompiler extends Exporter {
 			&& 0 == CHORD_VELOCITY_TOLERANCE)
 			return;
 		
-		// clone the local copy of the structures to be modified
-		TreeMap<Byte, TreeMap<Long, TreeMap<Byte, Byte>>>    noteHistoryClone = new TreeMap<>();
-		TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>> noteOnOffClone   = (TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>>) noteOnOff.clone();
+		// deep-clone the on/off structure
+		TreeMap<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>> noteOnOffClone = new TreeMap<>();
+		for (Entry<Byte, TreeMap<Byte, TreeMap<Long, Boolean>>> channelEntry : noteOnOff.entrySet()) {
+			byte channel = channelEntry.getKey();
+			TreeMap<Byte, TreeMap<Long, Boolean>> notes      = channelEntry.getValue();
+			TreeMap<Byte, TreeMap<Long, Boolean>> notesClone = new TreeMap<>();
+			noteOnOffClone.put(channel, notesClone);
+			for (Entry<Byte, TreeMap<Long, Boolean>> noteEntry : notes.entrySet()) {
+				byte note = noteEntry.getKey();
+				TreeMap<Long, Boolean> onOff      = noteEntry.getValue();
+				TreeMap<Long, Boolean> onOffClone = new TreeMap<>();
+				notesClone.put(note, onOffClone);
+				for (Entry<Long, Boolean> tickEntry : onOff.entrySet()) {
+					long    tick    = tickEntry.getKey();
+					boolean onOrOff = tickEntry.getValue();
+					onOffClone.put(tick, onOrOff);
+				}
+			}
+		}
+		
+		// note history: deep clone with grouping
+		TreeMap<Byte, TreeMap<Long, TreeMap<Byte, Byte>>> noteHistoryClone = new TreeMap<>();
 		
 		// CHANNEL:
 		for (byte channel : noteHistory.keySet()) {
@@ -965,8 +993,7 @@ public abstract class Decompiler extends Exporter {
 						long   diffVelocity = Math.abs(crdVelocity - velocity);
 						if (diffOff <= CHORD_NOTE_OFF_TOLERANCE && diffVelocity <= CHORD_VELOCITY_TOLERANCE) {
 							if (diffOff != 0) {
-								channelOnOffClone.get(note).remove(offTick);
-								channelOnOffClone.get(note).put(crdOffTick, false);
+								adjustOffTick(channelOnOffClone, channel, note, offTick, crdOffTick);
 							}
 							if (diffVelocity != 0) {
 								tickEntry.setValue(crdVelocity);
@@ -990,6 +1017,60 @@ public abstract class Decompiler extends Exporter {
 		// replace the local copy with the adjusted clone
 		noteHistory = noteHistoryClone;
 		noteOnOff   = noteOnOffClone;
+	}
+	
+	/**
+	 * Adjusts the Note-OFF tick of a note so that it can join a chord.
+	 * 
+	 * Checks if there is another ON/OFF between source and target OFF tick.
+	 * 
+	 * In this case: Doesn't adjust the OFF tick and creates a warning instead.
+	 * 
+	 * @param channelOnOff  noteOnOff structure for the channel in question (note, offTick, onOff)
+	 * @param channel       MIDI channel
+	 * @param note          note number
+	 * @param offTick       current Note-OFF tick
+	 * @param crdOffTick    target Note-OFF tick (Note-OFF tick of the chord)
+	 */
+	private void adjustOffTick(TreeMap<Byte, TreeMap<Long, Boolean>> channelOnOff, byte channel, byte note, long offTick, long crdOffTick) {
+		
+		// check if there are ON/OFF events for the same note and channel
+		// between original and target tick (including the target tick itself)
+		Long conflictTick = null;
+		long buffer       = offTick < crdOffTick ? 1 : -1;
+		long tick         = offTick + buffer;
+		while (tick != crdOffTick + buffer) {
+			
+			// remove and remember the note event, if available
+			Boolean onOff = channelOnOff.get(note).get(tick);
+			if (onOff != null) {
+				conflictTick = tick;
+				break;
+			}
+			
+			// move on
+			if (offTick < crdOffTick)
+				tick++;
+			else
+				tick--;
+		}
+		
+		// conflict found?
+		if (conflictTick != null) {
+			String details = String.format(
+				Dict.get(Dict.WARNING_OFF_MOVING_CONFLICT),
+				Dict.getNoteOrPercussionName(note, 9 == channel),
+				offTick, crdOffTick
+			);
+			exportResult.addWarning(null, conflictTick, channel, Dict.get(Dict.WARNING_CHORD_GROUPING_FAILED));
+			exportResult.setDetailsOfLastWarning(details);
+			
+			return;
+		}
+		
+		// move the OFF tick
+		channelOnOff.get(note).remove(offTick);
+		channelOnOff.get(note).put(crdOffTick, false);
 	}
 	
 	/**
@@ -1024,7 +1105,8 @@ public abstract class Decompiler extends Exporter {
 						byte velocity = noteSet.getValue();
 						Long offTick  = sliceOnOff.get(channel).get(note).ceilingKey(tick + 1);
 						
-						// TODO: handle the case that there is no offTick at all
+						// TODO: test this
+						// handle the case that there is no offTick at all
 						// can happen if the MIDI is corrupt or uses all-notes-off / all-sounds-off
 						// instead of note-off or note-on with velocity=0
 						if (null == offTick) {
@@ -1039,13 +1121,7 @@ public abstract class Decompiler extends Exporter {
 						noteStruct.put( NP_NOTE_NUM, note     + "" );
 						
 						// add to the tick notes
-						String noteName = Dict.getNote((int) note);
-						if (9 == channel) {
-							noteName = Dict.getPercussionShortId((int) note);
-							if ( noteName.equals(Dict.get(Dict.UNKNOWN_PERCUSSION_NAME)) ) {
-								noteName = note + ""; // name unknown - use number instead
-							}
-						}
+						String noteName = Dict.getNoteOrPercussionName(note, 9 == channel);
 						notesStruct.put(noteName, noteStruct);
 					}
 					
@@ -1125,13 +1201,7 @@ public abstract class Decompiler extends Exporter {
 				ArrayList<String> inlineChord = new ArrayList<>();
 				while (it.hasNext()) {
 					byte   note     = it.next();
-					String noteName = Dict.getNote(note);
-					if (isPercussion) {
-						noteName = Dict.getPercussionShortId(note);
-						if ( noteName.equals(Dict.get(Dict.UNKNOWN_PERCUSSION_NAME)) ) {
-							noteName = note + "";
-						}
-					}
+					String noteName = Dict.getNoteOrPercussionName(note, isPercussion);
 					if (isPercussion || useInlineChords) {
 						inlineChord.add(noteName);
 					}
@@ -1210,13 +1280,16 @@ public abstract class Decompiler extends Exporter {
 	/**
 	 * Adds syllables to the slices' timelines.
 	 * 
-	 * If there are any notes or chords played in the same tick as the syllable, the syllable is added to
-	 * one of them (according to the channel's priority).
+	 * If there are any notes or chords played in the same tick as the syllable,
+	 * the syllable is added to one of them (according to the channel's priority).
 	 * 
-	 * If there are no notes or chords played in the syllable's tick, the syllable is added to the timeline
-	 * as an option to a rest.
+	 * If there are no notes or chords played in the syllable's tick,
+	 * the syllable is added to a special timeline as an option to a rest inside a nestable block.
 	 */
 	private void addLyricsToSlices() {
+		
+		if (! USE_KARAOKE || ALDA == format)
+			return;
 		
 		TICK:
 		for (long tick : lyricsSyllables.keySet()) {
@@ -1225,6 +1298,10 @@ public abstract class Decompiler extends Exporter {
 			
 			CHANNEL:
 			for (byte channel : lyricsChannels) {
+				
+				if (ALL_SYLLABLES_ORPHANED)
+					break CHANNEL;
+				
 				TreeMap<Byte, TreeMap<String, TreeMap<Byte, String>>> events = slice.getTimeline(channel).get(tick);
 				
 				// no event for this channel/tick
@@ -1245,13 +1322,9 @@ public abstract class Decompiler extends Exporter {
 			}
 			
 			// If we reach this point, there is no matching note/chord.
-			// Add the syllable to the slice using a rest.
+			// Add the syllable to a special timeline (inline block or slice begin block)
 			byte channel = lyricsChannels.get(0);
-			byte orphanedSyllables = ORPHANED_SYLLABLES;
-			if (ALDA == format) {
-				orphanedSyllables = BLOCK;
-			}
-			slice.addSyllableRest(tick, syllable, channel, orphanedSyllables, sourceResolution);
+			slice.addSyllableRest(tick, syllable, channel, ORPHANED_SYLLABLES, sourceResolution);
 		}
 	}
 	
@@ -1864,7 +1937,7 @@ public abstract class Decompiler extends Exporter {
 		
 		// convert source tick to target tick
 		long   targetTick  = (tick * targetResolution * 10 + 5) / (sourceResolution * 10);
-		String description = Dict.get(Dict.EXPORTER_TICK) + " " + tick + " ==> " + targetTick;
+		String description = Dict.get(Dict.EXPORTER_TICK) + " " + tick + " ==> ~" + targetTick;
 		
 		if (withCommentSymbol)
 			return getCommentSymbol() + " " + description;

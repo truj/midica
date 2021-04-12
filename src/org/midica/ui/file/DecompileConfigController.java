@@ -133,8 +133,11 @@ public class DecompileConfigController implements WindowListener, DocumentListen
 		initWidgetConfig( Config.DC_USE_DOTTED_RESTS,         view.cbxUseDottedRest,          Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_USE_TRIPLETTED_NOTES,     view.cbxUseTriplettedNote,      Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_USE_TRIPLETTED_RESTS,     view.cbxUseTriplettedRest,      Boolean.class, fromConfig );
+		initWidgetConfig( Config.DC_USE_KARAOKE,              view.cbxUseKaraoke,             Boolean.class, fromConfig );
+		initWidgetConfig( Config.DC_ALL_SYLLABLES_ORPHANED,   view.cbxAllSyllablesOrphaned,   Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_ORPHANED_SYLLABLES,       view.cbxOrphanedSyllables,      Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_KARAOKE_ONE_CHANNEL,      view.cbxKarOneChannel,          Boolean.class, fromConfig );
+		initWidgetConfig( Config.DC_CTRL_CHANGE_MODE,         view.cbxCtrlChangeMode,         Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_EXTRA_GLOBALS_STR,        view.areaGlobalsStr,            String.class,  fromConfig );
 		
 		// update gui
@@ -675,9 +678,9 @@ public class DecompileConfigController implements WindowListener, DocumentListen
 			
 			return model;
 		}
-		else if (Config.DC_ORPHANED_SYLLABLES.equals(id)) {
-			model.addElement(new NamedInteger(Dict.get(Dict.DC_INLINE), MidicaPLExporter.INLINE, true));
-			model.addElement(new NamedInteger(Dict.get(Dict.DC_BLOCK),  MidicaPLExporter.BLOCK,  true));
+		else if (Config.DC_ORPHANED_SYLLABLES.equals(id) || Config.DC_CTRL_CHANGE_MODE.equals(id)) {
+			model.addElement(new NamedInteger(Dict.get(Dict.DC_INLINE_BLOCK),      MidicaPLExporter.INLINE_BLOCK,      true));
+			model.addElement(new NamedInteger(Dict.get(Dict.DC_SLICE_BEGIN_BLOCK), MidicaPLExporter.SLICE_BEGIN_BLOCK, true));
 			
 			return model;
 		}
