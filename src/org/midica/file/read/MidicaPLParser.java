@@ -243,6 +243,10 @@ public class MidicaPLParser extends SequenceParser {
 	private   static Pattern                            crlfSkPattern        = null;
 	private   static Pattern                            sharpPattern         = null;
 	private   static Pattern                            flatPattern          = null;
+	private   static Pattern                            optAssignPattern     = null;
+	private   static Pattern                            chordAssignPattern   = null;
+	private   static Pattern                            varAssignPattern     = null;
+	private   static Pattern                            chordSepPattern      = null;
 	private   static boolean                            isSoftKaraoke        = false;
 	
 	private static boolean isDefineParsRun     = false; // parsing run for define commands
@@ -636,6 +640,18 @@ public class MidicaPLParser extends SequenceParser {
 		// find sharp(s) or flat(s) in a note name
 		sharpPattern = Pattern.compile("^.+" + Pattern.quote(Config.getConfiguredSharpOrFlat(true)) + ".*");
 		flatPattern  = Pattern.compile("^.+" + Pattern.quote(Config.getConfiguredSharpOrFlat(false)) + ".*");
+		
+		// splitting option name from option value: '=' and/or whitespace(s)
+		optAssignPattern = Pattern.compile("\\s*" + Pattern.quote(OPT_ASSIGNER) + "\\s*|\\s+");
+		
+		// splitting chord name from chord: '=' and/or whitespace(s)
+		chordAssignPattern = Pattern.compile("\\s*" + Pattern.quote(CHORD_ASSIGNER) + "\\s*|\\s+");
+		
+		// splitting variable name from assignment: '=' and/or whitespace(s)
+		varAssignPattern = Pattern.compile("\\s*" + Pattern.quote(VAR_ASSIGNER) + "\\s*|\\s+");
+		
+		// splitting notes of the chord: ',' and/or whitespace(s)
+		chordSepPattern = Pattern.compile("\\s*" + Pattern.quote(CHORD_SEPARATOR) + "\\s*|\\s+");
 	}
 	
 	/**
@@ -653,19 +669,17 @@ public class MidicaPLParser extends SequenceParser {
 			line = replaceConstants(line);
 		}
 		
-		// replace variables?
-		boolean mustReplaceVars = isDefaultParsRun             // only in the default run
-		                       && MODE_DEFAULT == currentMode  // not inside of functions
-		                       && 0 == nestableBlkDepth;       // not inside of a block
-		if (mustReplaceVars) {
-			String[] tokens = line.split("\\s+", 2);
-			
-			// inside of VAR definitions the replacement is done later
-			if (! VAR.equals(tokens[0])) {
-				line = replaceVariables(line);
-			}
-		}
 		currentLineContent = line;
+		
+		// replace variables in stack traces
+		// (the real replacement will be later)
+		if (isDefaultParsRun                  // only in the default run
+			&& MODE_DEFAULT == currentMode    // not inside of functions
+			&& 0 == nestableBlkDepth          // not inside of a block
+			&& line.startsWith(VAR_SYMBOL)) { // not for VAR definitions
+			
+			currentLineContent = replaceVariables(currentLineContent);
+		}
 		
 		String[] tokens = line.split("\\s+", 3);
 		
@@ -846,6 +860,16 @@ public class MidicaPLParser extends SequenceParser {
 	 * @throws ParseException  If the tokens cannot be parsed.
 	 */
 	private void parseTokens(String[] tokens) throws ParseException {
+		
+		// replace variables for channel commands
+		if (isDefaultParsRun && MODE_DEFAULT == currentMode && tokens.length > 2) {
+			
+			// channel command?
+			if (tokens[0].matches("^\\d{1,2}$") || tokens[0].contains(VAR_SYMBOL)) {
+				tokens[0] = replaceVariables(tokens[0]);  // replace channel
+				tokens[1] = replaceVariables(tokens[1]);  // replace note/chord
+			}
+		}
 		
 		// reset if/elsif/else conditions in blocks
 		if (isDefaultParsRun
@@ -1945,6 +1969,11 @@ public class MidicaPLParser extends SequenceParser {
 			throw new ParseException(Dict.get(Dict.ERROR_BLOCK_UNMATCHED_CLOSE));
 		}
 		
+		// nothing more needed for functions
+		if (isFuncParsRun) {
+			return;
+		}
+		
 		// construct options string from tokens
 		StringBuilder optionsStrBuf = new StringBuilder("");
 		String        optionsStr    = "";
@@ -1965,8 +1994,10 @@ public class MidicaPLParser extends SequenceParser {
 		String  tuplet         = null;
 		boolean mustCheckChain = isDefaultParsRun && nestableBlkDepth == 0;
 		if (optionsStr.length() > 0) {
+			
 			ArrayList<CommandOption> options = parseOptions(optionsStr, isFake);
 			for (CommandOption opt : options) {
+				
 				String optName = opt.getName();
 				if (OPT_QUANTITY.equals(optName))
 					quantity = opt.getQuantity();
@@ -2151,7 +2182,7 @@ public class MidicaPLParser extends SequenceParser {
 			throw new ParseException(Dict.get(Dict.ERROR_CHORD_NUM_OF_ARGS));
 		
 		// get and process chord name
-		String[] chordParts = chordDef.split("[" + Pattern.quote(CHORD_ASSIGNER) + "\\s]+", 2); // chord name and chords can be separated by CHORD_ASSIGNER (e,g, "=") and/or whitespace(s)
+		String[] chordParts = chordAssignPattern.split(chordDef, 2); // element 0: name; element 1: value
 		if (chordParts.length < 2) {
 			throw new ParseException(Dict.get(Dict.ERROR_CHORD_NUM_OF_ARGS));
 		}
@@ -2169,9 +2200,13 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// get and process chord elements
 		TreeSet<Integer> chord = new TreeSet<>();
-		String[] notes = chordValue.split("[" + CHORD_SEPARATOR + "\\s]+"); // notes of the chord can be separated by CHORD_SEPARATOR (e,g, "=") and/or whitespace(s)
+		String[] notes = chordSepPattern.split(chordValue, -1);
 		
 		for (String note : notes) {
+			
+			if ("".equals(note))
+				throw new ParseException(Dict.get(Dict.ERROR_CHORD_REDUNDANT_SEP));
+			
 			int noteVal = parseNote(note);
 			if (chord.contains(noteVal)) {
 				throw new ParseException(Dict.get(Dict.ERROR_CHORD_CONTAINS_ALREADY) + note);
@@ -2214,8 +2249,10 @@ public class MidicaPLParser extends SequenceParser {
 		boolean multiple = false;
 		String  condIf   = null;
 		if (optionString != null && ! "".equals(optionString)) {
+			
 			ArrayList<CommandOption> options = parseOptions(optionString, isFake);
 			for (CommandOption opt : options) {
+				
 				String optName = opt.getName();
 				if (OPT_QUANTITY.equals(optName))
 					quantity = opt.getQuantity();
@@ -2383,11 +2420,11 @@ public class MidicaPLParser extends SequenceParser {
 		int     outerShift    = 0;
 		String  outerSyllable = null;
 		if (outerOptStr != null) {
-			ArrayList<CommandOption> callOptions = parseOptions(outerOptStr, false);
 			
+			ArrayList<CommandOption> callOptions = parseOptions(outerOptStr, false);
 			for (CommandOption opt : callOptions) {
-				String optName = opt.getName();
 				
+				String optName = opt.getName();
 				if (OPT_VELOCITY.equals(optName)) {
 					int velocity = opt.getVelocity();
 					if (! isFake)
@@ -2483,7 +2520,13 @@ public class MidicaPLParser extends SequenceParser {
 				
 				// replace variables
 				currentLineContent = patternLine;
-				patternLine        = replaceVariables(patternLine);
+				String[] rawPatLineTokens = whitespace.split(patternLine);
+				if (BLOCK_OPEN.equals(rawPatLineTokens[0]) || BLOCK_CLOSE.equals(rawPatLineTokens[0])) {
+					// variables will be replaced later
+				}
+				else {
+					patternLine = replaceVariables(patternLine);
+				}
 				currentLineContent = patternLine;
 				
 				// special line inside the pattern?
@@ -2516,11 +2559,11 @@ public class MidicaPLParser extends SequenceParser {
 				Float   innerDuration = null;
 				String  innerTremolo  = null;
 				if (patternTokens.length > 2) {
-					ArrayList<CommandOption> patternOptions = parseOptions(patternTokens[2], false);
 					
+					ArrayList<CommandOption> patternOptions = parseOptions(patternTokens[2], false);
 					for (CommandOption opt : patternOptions) {
-						String optName = opt.getName();
 						
+						String optName = opt.getName();
 						if (OPT_VELOCITY.equals(optName)) {
 							innerVelocity = opt.getVelocity();
 						}
@@ -2638,6 +2681,10 @@ public class MidicaPLParser extends SequenceParser {
 		HashMap<String, String> paramsNamed   = new HashMap<>();
 		
 		if (paramStr != null && ! "".equals(paramStr)) {
+			
+			if (isDefaultParsRun)
+				paramStr = replaceVariables(paramStr);
+			
 			paramStr = clean(paramStr);
 			String[] params = paramStr.split("\\s*" + Pattern.quote(PARAM_SEPARATOR) + "\\s*", -1);
 			for (String rawParam : params) {
@@ -2736,11 +2783,11 @@ public class MidicaPLParser extends SequenceParser {
 				
 				// check options
 				if (tokens.length > 2) {
-					ArrayList<CommandOption> patternOptions = parseOptions(tokens[2], true);
 					
+					ArrayList<CommandOption> patternOptions = parseOptions(tokens[2], true);
 					for (CommandOption opt : patternOptions) {
-						String optName = opt.getName();
 						
+						String optName = opt.getName();
 						if (OPT_VELOCITY.equals(optName) || OPT_DURATION.equals(optName) || OPT_MULTIPLE.equals(optName)
 						 || OPT_QUANTITY.equals(optName) || OPT_TREMOLO.equals(optName)) {
 							// ok
@@ -2760,7 +2807,7 @@ public class MidicaPLParser extends SequenceParser {
 	}
 	
 	/**
-	 * Ensured that (nested or real) pattern call tokens contain the pattern call
+	 * Ensures that (nested or real) pattern call tokens contain the pattern call
 	 * and the options token in the right position.
 	 * 
 	 * For real pattern calls:
@@ -2779,8 +2826,9 @@ public class MidicaPLParser extends SequenceParser {
 	 * @param tokens         tokens to be checked or changed
 	 * @param indexOffset    pattern call index (**2** for real calls, **1** for nested calls)
 	 * @return the corrected tokens, if changed, or the original tokens, if no change was necessary.
+	 * @throws ParseException on syntax errors.
 	 */
-	private String[] reorganizePatternCallTokens(String[] tokens, int indexOffset) {
+	private String[] reorganizePatternCallTokens(String[] tokens, int indexOffset) throws ParseException {
 		
 		int iPat = indexOffset;      // index containing the pattern call
 		int iOpt = indexOffset + 1;  // index containing the options
@@ -2797,8 +2845,15 @@ public class MidicaPLParser extends SequenceParser {
 			String paramString = patCallMatcher.group(3);
 			String options     = patCallMatcher.group(4);
 			
-			// unknown pattern name (probably a duration) - don't change anything
+			// unknown pattern name? (maybe a length)
 			if (! definedPatternNames.contains(patternName)) {
+				
+				// parameters? - not existing pattern name
+				if (paramString != null)
+					throw new ParseException(Dict.get(Dict.ERROR_PATTERN_UNDEFINED) + patternName);
+				
+				// probably a note length
+				// don't change anything
 				return tokens;
 			}
 			
@@ -3136,7 +3191,7 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// split definition string by OPT_ASSIGNER (e,g, "=") and/or whitespace(s)
-		String[] defParts = def.split("[" + Pattern.quote(OPT_ASSIGNER) + "\\s]+", 2);
+		String[] defParts = def.split("\\s*" + Pattern.quote(OPT_ASSIGNER) + "\\s*|\\s+", 2);
 		if (defParts.length < 2)
 			throw new ParseException(Dict.get(Dict.ERROR_DEFINE_NUM_OF_ARGS));
 		String cmdId      = clean(defParts[0]);
@@ -3277,7 +3332,7 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// CONST with name but without value?
-		String[] assignParts = tokens[1].split("[" + Pattern.quote(VAR_ASSIGNER) + "\\s]+", 2); // const name and value can be separated by "=" and/or whitespace(s)
+		String[] assignParts = tokens[1].split("\\s*" + Pattern.quote(VAR_ASSIGNER) + "\\s*|\\s+", 2); // const name and value can be separated by "=" and/or whitespace(s)
 		if (assignParts.length < 2) {
 			throw new ParseException(Dict.get(Dict.ERROR_CONST_NUM_OF_ARGS));
 		}
@@ -3318,7 +3373,7 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// VAR with name but without value?
-		String[] assignParts = tokens[1].split("[" + Pattern.quote(VAR_ASSIGNER) + "\\s]+", 2); // var name and value can be separated by "=" and/or whitespace(s)
+		String[] assignParts = varAssignPattern.split(tokens[1], 2); // element 0: name; element 1: value
 		if (assignParts.length < 2) {
 			throw new ParseException(Dict.get(Dict.ERROR_VAR_NUM_OF_ARGS));
 		}
@@ -3910,6 +3965,10 @@ public class MidicaPLParser extends SequenceParser {
 		if (0 == subTokens.length)
 			throw new ParseException(Dict.get(Dict.ERROR_CH_CMD_NUM_OF_ARGS));
 		
+		// replace variables in duration
+		if (isDefaultParsRun && ! isFake)
+			subTokens[0] = replaceVariables(subTokens[0]);
+		
 		// process duration
 		String durationStr = subTokens[0];
 		int duration;
@@ -3943,11 +4002,11 @@ public class MidicaPLParser extends SequenceParser {
 		int     shift    = 0;
 		String  syllable = null;
 		if (2 == subTokens.length) {
-			ArrayList<CommandOption> options = parseOptions(subTokens[1], isFake);
 			
+			ArrayList<CommandOption> options = parseOptions(subTokens[1], isFake);
 			for (CommandOption opt : options) {
-				String optName = opt.getName();
 				
+				String optName = opt.getName();
 				if (OPT_VELOCITY.equals(optName)) {
 					int velocity = opt.getVelocity();
 					if (! isFake)
@@ -4071,142 +4130,197 @@ public class MidicaPLParser extends SequenceParser {
 	/**
 	 * Parses the options part of a command.
 	 * 
-	 * @param optString    The options string of the channel command to be parsed.
-	 * @param isFake       **true**, if this is called inside a function definition, pattern definition or block.
-	 * @return             All options and their values that have been found in the
-	 *                     provided options string.
-	 * @throws ParseException    If the command cannot be parsed.
+	 * The options may still contain unreplaced variables or parameters.
+	 * These are replaced or left as-is. This depends on the current parsing run,
+	 * the given **isFake** parameter, and other criteria.
+	 * 
+	 * @param optString  The raw options string of the command to be parsed.
+	 * @param isFake     **true**, if this is called inside a function definition, pattern definition or block.
+	 * @return           All options and their values that have been found in the
+	 *                   provided options string.
+	 * @throws ParseException if the options cannot be parsed.
 	 */
 	private ArrayList<CommandOption> parseOptions(String optString, boolean isFake) throws ParseException {
-		ArrayList<CommandOption> options = new ArrayList<>();
 		
+		// split (raw) option string (variables are not yet replaced)
+		ArrayList<String[]> rawOptTokens = new ArrayList<>();
 		String[] optTokens = optString.split(OPT_SEPARATOR, -1);
 		for (String opt : optTokens) {
 			opt = clean(opt);
-			String[] optParts = opt.split("[" + Pattern.quote(OPT_ASSIGNER) + "\\s]+", 2); // name and value can be separated by OPT_ASSIGNER (e,g, "=") and/or whitespace(s)
-			if (optParts.length > 2)
-				throw new ParseException(Dict.get(Dict.ERROR_CANT_PARSE_OPTIONS) + opt);
 			
-			// value is a variable? - don't check if this is fake
-			if (isFake && optParts.length > 1 && varPattern.matcher(optParts[1]).find())
-				return options;
+			// separate name and value of one option
+			String[] optParts = optAssignPattern.split(opt, 2);
 			
-			// construct name and value
-			String        optName  = optParts[0];
-			CommandOption optValue = new CommandOption();
+			rawOptTokens.add(optParts);
+		}
+		
+		// parse the options
+		ArrayList<CommandOption> options = new ArrayList<>();
+		for (String[] rawOptParts : rawOptTokens) {
 			
-			if (isCondCheckParsRun && ! IF.equals(optName) && ! ELSIF.equals(optName) && ! ELSE.equals(optName))
-				continue;
-			
-			if (V.equals(optName) || VELOCITY.equals(optName)) {
-				if (optParts.length < 2 || "".equals(optParts[1])) {
-					throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
-				}
-				optName = OPT_VELOCITY;
-				int val = toInt(optParts[1]);
-				if (val > 127)
-					throw new ParseException(Dict.get(Dict.ERROR_VEL_NOT_MORE_THAN_127));
-				if (val < 1)
-					throw new ParseException(Dict.get(Dict.ERROR_VEL_NOT_LESS_THAN_1));
-				optValue.set(optName, val);
-			}
-			else if (D.equals(optName) || DURATION.equals(optName)) {
-				if (optParts.length < 2 || "".equals(optParts[1])) {
-					throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
-				}
-				optName = OPT_DURATION;
-				String[] valueParts = optParts[1].split(Pattern.quote(DURATION_PERCENT), -1);
-				float    val        = toFloat(valueParts[0]);
-				if (valueParts.length > 1)
-					val /= 100; // percentage --> numeric
-				if (val <= 0.0)
-					throw new ParseException(Dict.get(Dict.ERROR_DURATION_MORE_THAN_0));
-				optValue.set(optName, val);
-			}
-			else if (Q.equals(optName) || QUANTITY.equals(optName)) {
-				if (optParts.length < 2 || "".equals(optParts[1])) {
-					throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
-				}
-				optName = OPT_QUANTITY;
-				optValue.set(optName, toInt(optParts[1], true));
-			}
-			else if (M.equals(optName) || MULTIPLE.equals(optName)) {
-				optName = OPT_MULTIPLE;
-				optValue.set(optName, true);
-				if (optParts.length > 1)
-					throw new ParseException(Dict.get(Dict.ERROR_OPTION_VAL_NOT_ALLOWED) + optName);
-			}
-			else if (L.equals(optName) || LYRICS.equals(optName)) {
-				if (optParts.length < 2 || "".equals(optParts[1])) {
-					throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
-				}
-				optName = OPT_LYRICS;
-				optValue.set(optName, optParts[1]);
-			}
-			else if (T.equals(optName) || TUPLET.equals(optName)) {
-				optName = OPT_TUPLET;
-				if (1 == optParts.length) {
-					optValue.set(optName, TRIPLET);
+			CommandOption opt;
+			if (isDefaultParsRun) {
+				if (OPT_IF.equals(rawOptParts[0]) || OPT_ELSIF.equals(rawOptParts[0])) {
+					opt = parseOption(rawOptParts, isFake);
+					if (null == opt)
+						continue;
+					
+					String condition = opt.getCondition();
+					condition = replaceVariables(condition);
+					opt.set(opt.getName(), condition);
 				}
 				else {
-					Pattern pattern = Pattern.compile("^(\\d+)" + Pattern.quote(TUPLET_FOR) + "(\\d+)$");
-					Matcher matcher = pattern.matcher(optParts[1]);
-					if (matcher.matches()) {
-						String num1 = matcher.group(1);
-						String num2 = matcher.group(2);
-						if ("0".equals(num1) || "0".equals(num2))
-							throw new ParseException(Dict.get(Dict.ERROR_TUPLET_INVALID) + optParts[1]);
-						optValue.set(optName, optParts[1]);
+					if (rawOptParts.length > 1) {
+						rawOptParts[1] = replaceVariables(rawOptParts[1]);
 					}
-					else {
-						throw new ParseException(Dict.get(Dict.ERROR_TUPLET_INVALID) + optParts[1]);
-					}
+					opt = parseOption(rawOptParts, isFake);
 				}
-			}
-			else if (TR.equals(optName) || TREMOLO.equals(optName)) {
-				if (optParts.length < 2 || "".equals(optParts[1])) {
-					throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
-				}
-				optName = OPT_TREMOLO;
-				optValue.setValueString(optParts[1]);
-				optValue.set(optName, parseDuration(optParts[1]));
-			}
-			else if (S.equals(optName) || SHIFT.equals(optName)) {
-				if (optParts.length < 2 || "".equals(optParts[1])) {
-					throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
-				}
-				optName = OPT_SHIFT;
-				optValue.set(optName, toInt(optParts[1], false));
-			}
-			else if (IF.equals(optName)) {
-				if (isCondCheckParsRun && (optParts.length < 2 || "".equals(optParts[1]))) {
-					throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
-				}
-				String val = optParts.length >= 2 ? optParts[1] : "";
-				optName = OPT_IF;
-				optValue.set(optName, val);
-			}
-			else if (ELSIF.equals(optName)) {
-				if (isCondCheckParsRun && (optParts.length < 2 || "".equals(optParts[1]))) {
-					throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
-				}
-				String val = optParts.length >= 2 ? optParts[1] : "";
-				optName = OPT_ELSIF;
-				optValue.set(optName, val);
-			}
-			else if (ELSE.equals(optName)) {
-				optName = OPT_ELSE;
-				optValue.set(optName, true);
-				if (optParts.length > 1)
-					throw new ParseException(Dict.get(Dict.ERROR_OPTION_VAL_NOT_ALLOWED) + optName);
 			}
 			else {
-				throw new ParseException(Dict.get(Dict.ERROR_UNKNOWN_OPTION) + optName);
+				opt = parseOption(rawOptParts, isFake);
 			}
-			options.add(optValue);
+			
+			if (opt != null)
+				options.add(opt);
 		}
 		
 		return options;
+	}
+	
+	/**
+	 * Parses one single command option.
+	 * 
+	 * The given optParts may have one or two elements.
+	 * 
+	 * The first element is the option name. The second element is the option's value.
+	 * 
+	 * @param optParts  first element: **name**; second element: **value** (optional)
+	 * @param isFake    **true**, if this is called inside a function definition, pattern definition or block.
+	 * @return a parsed option, or **null** if it's too early to parse the option.
+	 * @throws ParseException if the options cannot be parsed.
+	 */
+	CommandOption parseOption(String[] optParts, boolean isFake) throws ParseException {
+		if (optParts.length > 2)
+			throw new ParseException(Dict.get(Dict.ERROR_CANT_PARSE_OPTIONS) + String.join(" ", optParts));
+		
+		// value is a variable? - don't check if this is fake
+		if (isFake && optParts.length > 1 && varPattern.matcher(optParts[1]).find())
+			return null;
+		
+		// construct name and value
+		String        optName = optParts[0];
+		CommandOption cmdOpt  = new CommandOption();
+		
+		if (isCondCheckParsRun && ! IF.equals(optName) && ! ELSIF.equals(optName) && ! ELSE.equals(optName))
+			return null;
+		
+		if (V.equals(optName) || VELOCITY.equals(optName)) {
+			if (optParts.length < 2 || "".equals(optParts[1])) {
+				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
+			}
+			optName = OPT_VELOCITY;
+			int val = toInt(optParts[1]);
+			if (val > 127)
+				throw new ParseException(Dict.get(Dict.ERROR_VEL_NOT_MORE_THAN_127));
+			if (val < 1)
+				throw new ParseException(Dict.get(Dict.ERROR_VEL_NOT_LESS_THAN_1));
+			cmdOpt.set(optName, val);
+		}
+		else if (D.equals(optName) || DURATION.equals(optName)) {
+			if (optParts.length < 2 || "".equals(optParts[1])) {
+				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
+			}
+			optName = OPT_DURATION;
+			String[] valueParts = optParts[1].split(Pattern.quote(DURATION_PERCENT), -1);
+			float    val        = toFloat(valueParts[0]);
+			if (valueParts.length > 1)
+				val /= 100; // percentage --> numeric
+			if (val <= 0.0)
+				throw new ParseException(Dict.get(Dict.ERROR_DURATION_MORE_THAN_0));
+			cmdOpt.set(optName, val);
+		}
+		else if (Q.equals(optName) || QUANTITY.equals(optName)) {
+			if (optParts.length < 2 || "".equals(optParts[1])) {
+				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
+			}
+			optName = OPT_QUANTITY;
+			cmdOpt.set(optName, toInt(optParts[1], true));
+		}
+		else if (M.equals(optName) || MULTIPLE.equals(optName)) {
+			optName = OPT_MULTIPLE;
+			cmdOpt.set(optName, true);
+			if (optParts.length > 1)
+				throw new ParseException(Dict.get(Dict.ERROR_OPTION_VAL_NOT_ALLOWED) + optName);
+		}
+		else if (L.equals(optName) || LYRICS.equals(optName)) {
+			if (optParts.length < 2 || "".equals(optParts[1])) {
+				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
+			}
+			optName = OPT_LYRICS;
+			cmdOpt.set(optName, optParts[1]);
+		}
+		else if (T.equals(optName) || TUPLET.equals(optName)) {
+			optName = OPT_TUPLET;
+			if (1 == optParts.length) {
+				cmdOpt.set(optName, TRIPLET);
+			}
+			else {
+				Pattern pattern = Pattern.compile("^(\\d+)" + Pattern.quote(TUPLET_FOR) + "(\\d+)$");
+				Matcher matcher = pattern.matcher(optParts[1]);
+				if (matcher.matches()) {
+					String num1 = matcher.group(1);
+					String num2 = matcher.group(2);
+					if ("0".equals(num1) || "0".equals(num2))
+						throw new ParseException(Dict.get(Dict.ERROR_TUPLET_INVALID) + optParts[1]);
+					cmdOpt.set(optName, optParts[1]);
+				}
+				else {
+					throw new ParseException(Dict.get(Dict.ERROR_TUPLET_INVALID) + optParts[1]);
+				}
+			}
+		}
+		else if (TR.equals(optName) || TREMOLO.equals(optName)) {
+			if (optParts.length < 2 || "".equals(optParts[1])) {
+				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
+			}
+			optName = OPT_TREMOLO;
+			cmdOpt.setValueString(optParts[1]);
+			cmdOpt.set(optName, parseDuration(optParts[1]));
+		}
+		else if (S.equals(optName) || SHIFT.equals(optName)) {
+			if (optParts.length < 2 || "".equals(optParts[1])) {
+				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
+			}
+			optName = OPT_SHIFT;
+			cmdOpt.set(optName, toInt(optParts[1], false));
+		}
+		else if (IF.equals(optName)) {
+			if (isCondCheckParsRun && (optParts.length < 2 || "".equals(optParts[1]))) {
+				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
+			}
+			String val = optParts.length >= 2 ? optParts[1] : "";
+			optName = OPT_IF;
+			cmdOpt.set(optName, val);
+		}
+		else if (ELSIF.equals(optName)) {
+			if (isCondCheckParsRun && (optParts.length < 2 || "".equals(optParts[1]))) {
+				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
+			}
+			String val = optParts.length >= 2 ? optParts[1] : "";
+			optName = OPT_ELSIF;
+			cmdOpt.set(optName, val);
+		}
+		else if (ELSE.equals(optName)) {
+			optName = OPT_ELSE;
+			cmdOpt.set(optName, true);
+			if (optParts.length > 1)
+				throw new ParseException(Dict.get(Dict.ERROR_OPTION_VAL_NOT_ALLOWED) + optName);
+		}
+		else {
+			throw new ParseException(Dict.get(Dict.ERROR_UNKNOWN_OPTION) + optName);
+		}
+		
+		return cmdOpt;
 	}
 	
 	/**
@@ -4370,8 +4484,8 @@ public class MidicaPLParser extends SequenceParser {
 			return subTokens[0] + " " + MULTIPLE;
 		}
 		
-		// cut away trailing whitespaces and option separators (e.g. ',')
-		String cleanedOptString = optStr.replaceFirst("[" + Pattern.quote(OPT_SEPARATOR) + "\\s]+$", "");
+		// cut away trailing whitespaces
+		String cleanedOptString = optStr.replaceFirst("\\s+$", "");
 		
 		// append the option MULTIPLE
 		subTokens[1] = cleanedOptString + OPT_SEPARATOR + MULTIPLE;

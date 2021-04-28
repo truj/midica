@@ -1,10 +1,10 @@
 INCLUDE inc/instruments.midica
 
 CONST $cent= cent
-VAR $fa = 1                         // 1
-VAR $fb = 2                         // 2
-VAR $fc = 3                         // 0
-VAR $fd = $fb$fc                    // 23
+VAR $fa  = 1                        // 1
+ VAR $fb = 2                        // 2
+VAR $fc  = 3                        // 0
+VAR $fd  = $fb$fc                   // 23
 VAR $forte = $fa$fd                 // 123
 VAR $piano= 30                      // 30
 VAR $mezzoforte =80                 // 80

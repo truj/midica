@@ -1494,6 +1494,7 @@ public class Dict {
 	public static final String ERROR_CHORD_CONTAINS_ALREADY      = "error_chord_contains_already";
 	public static final String ERROR_CHORD_DEF_NOT_ALLOWED_HERE  = "error_chord_def_not_allowed_here";
 	public static final String ERROR_CHORD_NUM_OF_ARGS           = "error_chord_num_of_args";
+	public static final String ERROR_CHORD_REDUNDANT_SEP         = "error_chord_redundant_sep";
 	public static final String ERROR_CONST_NUM_OF_ARGS           = "error_const_num_of_args";
 	public static final String ERROR_CONST_ALREADY_DEFINED       = "error_const_already_defined";
 	public static final String ERROR_CONST_NAME_EQ_VALUE         = "error_const_name_eq_value";
@@ -1529,6 +1530,7 @@ public class Dict {
 	public static final String ERROR_PATTERN_INDEX_INVALID       = "error_pattern_index_invalid";
 	public static final String ERROR_PATTERN_INDEX_TOO_HIGH      = "error_pattern_index_too_high";
 	public static final String ERROR_PATTERN_RECURSION_DEPTH     = "error_pattern_recursion_depth";
+	public static final String ERROR_PATTERN_UNDEFINED           = "error_pattern_undefined";
 	public static final String ERROR_META_NUM_OF_ARGS            = "error_meta_num_of_arts";
 	public static final String ERROR_META_UNKNOWN_CMD            = "error_meta_unknown_cmd";
 	public static final String ERROR_SOFT_KARAOKE_UNKNOWN_CMD    = "error_soft_karaoke_unknown_cmd";
@@ -3034,6 +3036,7 @@ public class Dict {
 		set( ERROR_CHORD_CONTAINS_ALREADY,        "Note cannot be defined more than once in the same chord: "         );
 		set( ERROR_CHORD_DEF_NOT_ALLOWED_HERE,    "a chord definition is not allowed inside a block<br>maybe you forgot to close the block." );
 		set( ERROR_CHORD_NUM_OF_ARGS,             "wrong number of arguments in CHORD command"                        );
+		set( ERROR_CHORD_REDUNDANT_SEP,           "redundant separator in chord definition"                           );
 		set( ERROR_CONST_NUM_OF_ARGS,             "wrong number of arguments in CONSTANT definition"                  );
 		set( ERROR_CONST_ALREADY_DEFINED,         "constant already defined: "                                        );
 		set( ERROR_CONST_NAME_EQ_VALUE,           "constant name must be different from it's value: "                 );
@@ -3069,6 +3072,7 @@ public class Dict {
 		set( ERROR_PATTERN_INDEX_INVALID,         "pattern index not a number: "                                      );
 		set( ERROR_PATTERN_INDEX_TOO_HIGH,        "pattern index too high: "                                          );
 		set( ERROR_PATTERN_RECURSION_DEPTH,       "Recursion depth in pattern too big."                               );
+		set( ERROR_PATTERN_UNDEFINED,             "Pattern not defined: "                                             );
 		set( ERROR_META_NUM_OF_ARGS,              "no arguments allowed in meta command"                              );
 		set( ERROR_META_UNKNOWN_CMD,              "unknown meta command: "                                            );
 		set( ERROR_SOFT_KARAOKE_UNKNOWN_CMD,      "unknown soft karaoke command: "                                    );

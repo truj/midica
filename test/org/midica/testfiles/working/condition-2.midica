@@ -1,0 +1,22 @@
+INSTRUMENTS
+	0    PERCUSSIVE_ORGAN       PERCUSSIVE_ORGAN
+END
+
+CALL x()
+CALL x(IF)
+CALL x(UNKNOWN)
+
+FUNCTION x
+	CALL y( 1:IF\c   )  if $[0] == IF
+	CALL y( 2:ELSE\c )  if $[0] != IF
+	CALL y( 3:IF\c   )  if=$[0]==IF
+	CALL y( 4:ELSE\c )  if=$[0]!=IF
+	0  -  /4  l=\r
+END
+
+FUNCTION y
+	0  f  /4  l=$[0]
+END
+
+
+* tempo   95

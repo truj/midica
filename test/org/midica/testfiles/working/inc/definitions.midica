@@ -1,5 +1,5 @@
-DEFINE DEFINE def
-def INCLUDE incl_f
+DEFINE DEFINE=def
+def INCLUDE = incl_f
 def INSTRUMENTS instruments[
 def END ]
 def FUNCTION procedure[

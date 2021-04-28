@@ -1,0 +1,7 @@
+INSTRUMENTS
+	0    PERCUSSIVE_ORGAN       PERCUSSIVE_ORGAN
+END
+
+VAR $x==100
+
+0  c  /4  v=$x

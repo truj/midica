@@ -1,0 +1,7 @@
+INCLUDE inc/instruments.midica
+
+0  c,d,e  pat_a( y )
+
+PATTERN pat_a
+	0  /42
+END

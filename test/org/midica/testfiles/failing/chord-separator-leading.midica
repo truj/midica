@@ -1,0 +1,7 @@
+INSTRUMENTS
+	0    PERCUSSIVE_ORGAN       PERCUSSIVE_ORGAN
+END
+
+CHORD crd = ,c,d,e
+
+0  crd  /4  v=101

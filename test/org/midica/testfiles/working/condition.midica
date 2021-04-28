@@ -1,0 +1,131 @@
+INCLUDE inc/instruments.midica
+
+CHORD crd  a+3 f+4
+
+// call function with base-level if/else blocks
+CALL try_1(/32)
+CALL try_1(/32, ELSE)
+CALL try_1(/32, IF)
+
+// call function with nested if/else blocks
+CALL try_2(/32)
+CALL try_2(/32, ELSE)
+CALL try_2(/32, IF)
+
+// call pattern with base-level if/else blocks
+1  crd  pat_try_1(/16)
+1  crd  pat_try_1(/16, ELSE)
+1  crd  pat_try_1(/16, IF)
+
+// call pattern with nested if/else blocks
+1  crd  pat_try_2(/16)
+1  crd  pat_try_2(/16, ELSE)
+1  crd  pat_try_2(/16, IF)
+
+// same as above but with "if=$[1]==IF" instead of "if $[1] == IF"
+CALL try_3(/32)
+CALL try_3(/32, ELSE)
+CALL try_3(/32, IF)
+
+CALL try_4(/32)
+CALL try_4(/32, ELSE)
+CALL try_4(/32, IF)
+
+1  crd  pat_try_3(/16)
+1  crd  pat_try_3(/16, ELSE)
+1  crd  pat_try_3(/16, IF)
+
+1  crd  pat_try_4(/16)
+1  crd  pat_try_4(/16, ELSE)
+1  crd  pat_try_4(/16, IF)
+
+
+FUNCTION try_1
+	{ if $[1] == IF
+		1  a+2  $[0]  l=IF_
+	}
+	{ else
+		1  f+2  $[0]  l=ELSE_
+	}
+END
+
+FUNCTION try_2
+	{
+		{ if $[1] == IF
+			1  a+3  $[0]  l=IF_
+		}
+		{ else
+			1  f+3  $[0]  l=ELSE_
+		}
+	}
+END
+
+PATTERN pat_try_1
+	
+	{ if $[1] == IF
+		0  $[0]  m
+	} m
+	
+	{ else
+		1  $[0]  m
+	} m
+	- $[0]
+END
+
+PATTERN pat_try_2
+	{
+		{ if $[1] == IF
+			0  $[0]  m
+		} m
+		
+		{ else
+			1  $[0]  m
+		} m
+		- $[0]
+	}
+END
+
+FUNCTION try_3
+	{ if=$[1]==IF
+		1  a+2  $[0]  l=IF_
+	}
+	{ else
+		1  f+2  $[0]  l=ELSE_
+	}
+END
+
+FUNCTION try_4
+	{
+		{ if=$[1]==IF
+			1  a+3  $[0]  l=IF_
+		}
+		{ else
+			1  f+3  $[0]  l=ELSE_
+		}
+	}
+END
+
+PATTERN pat_try_3
+	
+	{ if=$[1]==IF
+		0  $[0]  m
+	} m
+	
+	{ else
+		1  $[0]  m
+	} m
+	- $[0]
+END
+
+PATTERN pat_try_4
+	{
+		{ if=$[1]==IF
+			0  $[0]  m
+		} m
+		
+		{ else
+			1  $[0]  m
+		} m
+		- $[0]
+	}
+END
