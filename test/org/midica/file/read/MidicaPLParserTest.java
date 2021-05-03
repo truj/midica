@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Deque;
 
 import javax.sound.midi.MetaMessage;
+import javax.sound.midi.MidiEvent;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.Sequence;
 import javax.swing.JComboBox;
@@ -833,6 +834,39 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		parse(getWorkingFile("condition-2"));
 		assertEquals( "2:ELSE,4:ELSE,\n1:IF,3:IF,\n2:ELSE,4:ELSE,\n", getLyrics() );
+		
+		parse(getWorkingFile("zerolength"));
+		messages = getMessagesByStatus("90");
+		{
+			int i = 0;
+			
+			assertEquals( "0/0/90/c / 10",     messages.get(i++).toString() ); // 0  c  /1
+			assertEquals( "1920/0/90/c+ / 20", messages.get(i++).toString() ); // CALL func
+			
+			// 0  d,e,f  pat
+			assertEquals( "3840/0/90/d / 20",  messages.get(i++).toString() );
+			assertEquals( "4320/0/90/e / 30",  messages.get(i++).toString() );
+			assertEquals( "4800/0/90/f / 40",  messages.get(i++).toString() );
+			
+			// 0  d,e,f  pat  v=110
+			assertEquals( "5280/0/90/d / 110", messages.get(i++).toString() );
+			assertEquals( "5760/0/90/e / 30",  messages.get(i++).toString() );
+			assertEquals( "6240/0/90/f / 40",  messages.get(i++).toString() );
+			
+			// 0  c  /1
+			assertEquals( "6720/0/90/c / 110", messages.get(i++).toString() );
+			
+			// 0  -  -  l=xyz
+			MidiEvent   event = SequenceCreator.getSequence().getTracks()[1].get(0);
+			MidiMessage msg   = event.getMessage();
+			MetaMessage mMsg  = (MetaMessage) msg;
+			byte[]      data  = mMsg.getData();
+			assertEquals( 8640, event.getTick() );
+			assertEquals( "xyz", CharsetUtils.getTextFromBytes(data, "UTF-8", null) );
+			
+			// first note-OFF (off-tick: 80% from 1920 = 1536)
+			assertEquals( "1536/0/80/c / 0", getMessagesByStatus("80").get(0).toString() );
+		}
 	}
 	
 	/**
@@ -1907,7 +1941,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("stacktrace-function")) );
 		assertEquals( 13, e.getLineNumber() );
 		assertEquals( "0 f,e -", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOTE_LENGTH_INVALID) + "-") );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_NOT_ALLOWED)) );
 		stackTrace = e.getStackTraceElements();
 		assertEquals( 11, stackTrace.size() );
 		assertEquals( "stacktrace-function.midica/47",    stackTrace.pop().toString() ); // channel cmd with invalid note length
@@ -1925,7 +1959,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("stacktrace-pattern")) );
 		assertEquals( 13, e.getLineNumber() );
 		assertEquals( "0,1,2 -", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOTE_LENGTH_INVALID) + "-") );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_NOT_ALLOWED)) );
 		stackTrace = e.getStackTraceElements();
 		assertEquals( 11, stackTrace.size() );
 		assertEquals( "stacktrace-pattern.midica/47",    stackTrace.pop().toString() ); // channel cmd with invalid note length
@@ -1939,6 +1973,56 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "stacktrace-pattern.midica/30",    stackTrace.pop().toString() ); // block execution
 		assertEquals( "stacktrace-pattern.midica/16",    stackTrace.pop().toString() ); // CALL pat1(...) from func()
 		assertEquals( "stacktrace-pattern.midica/13",    stackTrace.pop().toString() ); // CALL func(...)
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-for-note")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "0 c -", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_NOT_ALLOWED)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-for-note-2")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "0 -", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_NOT_ALLOWED)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-for-chord")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "0 c,d -", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_NOT_ALLOWED)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-in-summand")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "0 - /4+-+/8", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_IN_SUM)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-with-m")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "0 - - m", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_INVALID_OPTION) + OPT_MULTIPLE) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-with-m-2")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "- - m", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_INVALID_OPTION) + OPT_MULTIPLE) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-with-m-3")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "- - m", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_INVALID_OPTION) + OPT_MULTIPLE) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-with-q")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "0 - - q=5", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_INVALID_OPTION) + OPT_QUANTITY) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-with-s")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "0 - - s=5", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_INVALID_OPTION) + OPT_SHIFT) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-with-tr")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "0 - - tr=5", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_INVALID_OPTION) + OPT_TREMOLO) );
 	}
 	
 	/**

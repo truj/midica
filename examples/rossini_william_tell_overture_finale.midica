@@ -526,7 +526,7 @@ END
 CALL  m32_2
 
 // m. 33
-8 - /4  m, $f   // set trombone to forte instead of fortissimo - but only this time (not in measure 73)
+8 -  -  $f   // set trombone to forte instead of fortissimo - but only this time (not in measure 73)
 *
 FUNCTION m33
 	0  b+2    /4+/16      $legato
@@ -2299,7 +2299,7 @@ CALL  m58
 
 // m. 159-160
 *
-10 - /4  m, $p   // set timpani to piano instead of pianissimo
+10 -  -  $p   // set timpani to piano instead of pianissimo
 CALL  m19
 CALL  m59_contrabass
 *
@@ -4179,154 +4179,154 @@ END
 
 // functions for setting all channels to staccato or legato
 FUNCTION d_all_staccato
-	0  - /4  m, $staccato
-	1  - /4  m, $staccato
-	2  - /4  m, $staccato
-	3  - /4  m, $staccato
-	4  - /4  m, $staccato
-	5  - /4  m, $staccato
-	6  - /4  m, $staccato
-	7  - /4  m, $staccato
-	8  - /4  m, $staccato
-	p  - /4  m, $staccato
-	10 - /4  m, $staccato
-	11 - /4  m, $staccato
-	12 - /4  m, $staccato
-	13 - /4  m, $staccato
-	14 - /4  m, $staccato
-	15 - /4  m, $staccato
+	0  -  -  $staccato
+	1  -  -  $staccato
+	2  -  -  $staccato
+	3  -  -  $staccato
+	4  -  -  $staccato
+	5  -  -  $staccato
+	6  -  -  $staccato
+	7  -  -  $staccato
+	8  -  -  $staccato
+	p  -  -  $staccato
+	10 -  -  $staccato
+	11 -  -  $staccato
+	12 -  -  $staccato
+	13 -  -  $staccato
+	14 -  -  $staccato
+	15 -  -  $staccato
 END
 
 FUNCTION d_all_legato
-	0  - /4  m, $legato
-	1  - /4  m, $legato
-	2  - /4  m, $legato
-	3  - /4  m, $legato
-	4  - /4  m, $legato
-	5  - /4  m, $legato
-	6  - /4  m, $legato
-	7  - /4  m, $legato
-	8  - /4  m, $legato
-	p  - /4  m, $legato
-	10 - /4  m, $legato
-	11 - /4  m, $legato
-	12 - /4  m, $legato
-	13 - /4  m, $legato
-	14 - /4  m, $legato
-	15 - /4  m, $legato
+	0  -  -  $legato
+	1  -  -  $legato
+	2  -  -  $legato
+	3  -  -  $legato
+	4  -  -  $legato
+	5  -  -  $legato
+	6  -  -  $legato
+	7  -  -  $legato
+	8  -  -  $legato
+	p  -  -  $legato
+	10 -  -  $legato
+	11 -  -  $legato
+	12 -  -  $legato
+	13 -  -  $legato
+	14 -  -  $legato
+	15 -  -  $legato
 END
 
 // functions for setting velocities in all channels
 FUNCTION v_all_tutta_forza
-	0  - /4  m, $tutta_forza
-	1  - /4  m, $tutta_forza
-	2  - /4  m, $tutta_forza
-	3  - /4  m, $tutta_forza
-	4  - /4  m, $tutta_forza
-	5  - /4  m, $tutta_forza
-	6  - /4  m, $tutta_forza
-	7  - /4  m, $tutta_forza
-	8  - /4  m, $tutta_forza
-	p  - /4  m, $tutta_forza
-	10 - /4  m, $tutta_forza
-	11 - /4  m, $tutta_forza
-	12 - /4  m, $tutta_forza
-	13 - /4  m, $tutta_forza
-	14 - /4  m, $tutta_forza
-	15 - /4  m, $tutta_forza
+	0  -  -  $tutta_forza
+	1  -  -  $tutta_forza
+	2  -  -  $tutta_forza
+	3  -  -  $tutta_forza
+	4  -  -  $tutta_forza
+	5  -  -  $tutta_forza
+	6  -  -  $tutta_forza
+	7  -  -  $tutta_forza
+	8  -  -  $tutta_forza
+	p  -  -  $tutta_forza
+	10 -  -  $tutta_forza
+	11 -  -  $tutta_forza
+	12 -  -  $tutta_forza
+	13 -  -  $tutta_forza
+	14 -  -  $tutta_forza
+	15 -  -  $tutta_forza
 END
 
 FUNCTION v_all_sf
-	0  - /4  m, $sf
-	1  - /4  m, $sf
-	2  - /4  m, $sf
-	3  - /4  m, $sf
-	4  - /4  m, $sf
-	5  - /4  m, $sf
-	6  - /4  m, $sf
-	7  - /4  m, $sf
-	8  - /4  m, $sf
-	p  - /4  m, $sf
-	10 - /4  m, $sf
-	11 - /4  m, $sf
-	12 - /4  m, $sf
-	13 - /4  m, $sf
-	14 - /4  m, $sf
-	15 - /4  m, $sf
+	0  -  -  $sf
+	1  -  -  $sf
+	2  -  -  $sf
+	3  -  -  $sf
+	4  -  -  $sf
+	5  -  -  $sf
+	6  -  -  $sf
+	7  -  -  $sf
+	8  -  -  $sf
+	p  -  -  $sf
+	10 -  -  $sf
+	11 -  -  $sf
+	12 -  -  $sf
+	13 -  -  $sf
+	14 -  -  $sf
+	15 -  -  $sf
 END
 
 FUNCTION v_all_ff
-	0  - /4  m, $ff
-	1  - /4  m, $ff
-	2  - /4  m, $ff
-	3  - /4  m, $ff
-	4  - /4  m, $ff
-	5  - /4  m, $ff
-	6  - /4  m, $ff
-	7  - /4  m, $ff
-	8  - /4  m, $ff
-	p  - /4  m, $ff
-	10 - /4  m, $ff
-	11 - /4  m, $ff
-	12 - /4  m, $ff
-	13 - /4  m, $ff
-	14 - /4  m, $ff
-	15 - /4  m, $ff
+	0  -  -  $ff
+	1  -  -  $ff
+	2  -  -  $ff
+	3  -  -  $ff
+	4  -  -  $ff
+	5  -  -  $ff
+	6  -  -  $ff
+	7  -  -  $ff
+	8  -  -  $ff
+	p  -  -  $ff
+	10 -  -  $ff
+	11 -  -  $ff
+	12 -  -  $ff
+	13 -  -  $ff
+	14 -  -  $ff
+	15 -  -  $ff
 END
 
 FUNCTION v_all_f
-	0  - /4  m, $f
-	1  - /4  m, $f
-	2  - /4  m, $f
-	3  - /4  m, $f
-	4  - /4  m, $f
-	5  - /4  m, $f
-	6  - /4  m, $f
-	7  - /4  m, $f
-	8  - /4  m, $f
-	p  - /4  m, $f
-	10 - /4  m, $f
-	11 - /4  m, $f
-	12 - /4  m, $f
-	13 - /4  m, $f
-	14 - /4  m, $f
-	15 - /4  m, $f
+	0  -  -  $f
+	1  -  -  $f
+	2  -  -  $f
+	3  -  -  $f
+	4  -  -  $f
+	5  -  -  $f
+	6  -  -  $f
+	7  -  -  $f
+	8  -  -  $f
+	p  -  -  $f
+	10 -  -  $f
+	11 -  -  $f
+	12 -  -  $f
+	13 -  -  $f
+	14 -  -  $f
+	15 -  -  $f
 END
 
 FUNCTION v_all_p
-	0  - /4  m, $p
-	1  - /4  m, $p
-	2  - /4  m, $p
-	3  - /4  m, $p
-	4  - /4  m, $p
-	5  - /4  m, $p
-	6  - /4  m, $p
-	7  - /4  m, $p
-	8  - /4  m, $p
-	p  - /4  m, $p
-	10 - /4  m, $p
-	11 - /4  m, $p
-	12 - /4  m, $p
-	13 - /4  m, $p
-	14 - /4  m, $p
-	15 - /4  m, $p
+	0  -  -  $p
+	1  -  -  $p
+	2  -  -  $p
+	3  -  -  $p
+	4  -  -  $p
+	5  -  -  $p
+	6  -  -  $p
+	7  -  -  $p
+	8  -  -  $p
+	p  -  -  $p
+	10 -  -  $p
+	11 -  -  $p
+	12 -  -  $p
+	13 -  -  $p
+	14 -  -  $p
+	15 -  -  $p
 END
 
 FUNCTION v_all_pp
-	0  - /4  m, $pp
-	1  - /4  m, $pp
-	2  - /4  m, $pp
-	3  - /4  m, $pp
-	4  - /4  m, $pp
-	5  - /4  m, $pp
-	6  - /4  m, $pp
-	7  - /4  m, $pp
-	8  - /4  m, $pp
-	p  - /4  m, $pp
-	10 - /4  m, $pp
-	11 - /4  m, $pp
-	12 - /4  m, $pp
-	13 - /4  m, $pp
-	14 - /4  m, $pp
-	15 - /4  m, $pp
+	0  -  -  $pp
+	1  -  -  $pp
+	2  -  -  $pp
+	3  -  -  $pp
+	4  -  -  $pp
+	5  -  -  $pp
+	6  -  -  $pp
+	7  -  -  $pp
+	8  -  -  $pp
+	p  -  -  $pp
+	10 -  -  $pp
+	11 -  -  $pp
+	12 -  -  $pp
+	13 -  -  $pp
+	14 -  -  $pp
+	15 -  -  $pp
 END

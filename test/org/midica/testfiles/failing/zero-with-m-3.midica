@@ -1,0 +1,19 @@
+INCLUDE inc/instruments.midica
+
+CALL f
+
+FUNCTION f
+	{
+		{
+			0  c,d  pat
+		}
+	}
+END
+
+PATTERN pat
+	{
+		{
+			- - m
+		}
+	}
+END

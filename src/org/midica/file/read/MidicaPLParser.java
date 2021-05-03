@@ -130,6 +130,7 @@ public class MidicaPLParser extends SequenceParser {
 	public static String META_SK_AUTHOR     = null;
 	public static String META_SK_COPYRIGHT  = null;
 	public static String META_SK_INFO       = null;
+	public static String LENGTH_ZERO        = null;
 	public static String LENGTH_32          = null;
 	public static String LENGTH_16          = null;
 	public static String LENGTH_8           = null;
@@ -350,6 +351,7 @@ public class MidicaPLParser extends SequenceParser {
 		META_SK_AUTHOR     = Dict.getSyntax( Dict.SYNTAX_META_SK_AUTHOR     );
 		META_SK_COPYRIGHT  = Dict.getSyntax( Dict.SYNTAX_META_SK_COPYRIGHT  );
 		META_SK_INFO       = Dict.getSyntax( Dict.SYNTAX_META_SK_INFO       );
+		LENGTH_ZERO        = Dict.getSyntax( Dict.SYNTAX_ZEROLENGTH         );
 		LENGTH_32          = Dict.getSyntax( Dict.SYNTAX_32                 );
 		LENGTH_16          = Dict.getSyntax( Dict.SYNTAX_16                 );
 		LENGTH_8           = Dict.getSyntax( Dict.SYNTAX_8                  );
@@ -1570,6 +1572,11 @@ public class MidicaPLParser extends SequenceParser {
 	 * @throws ParseException  If the duration string cannot be parsed.
 	 */
 	protected int parseDuration(String s) throws ParseException {
+		
+		if (LENGTH_ZERO.equals(s)) {
+			return 0;
+		}
+		
 		String[] summands = s.split(Pattern.quote(LENGTH_PLUS), -1);
 		int      duration = 0;
 		for (String summand : summands) {
@@ -1636,6 +1643,8 @@ public class MidicaPLParser extends SequenceParser {
 				factor *= 16;
 			else if (LENGTH_M32.equals(prefix))
 				factor *= 32;
+			else if (LENGTH_ZERO.equals(prefix))
+				throw new ParseException(Dict.get(Dict.ERROR_ZEROLENGTH_IN_SUM));
 			else
 				throw new ParseException(Dict.get(Dict.ERROR_NOTE_LENGTH_INVALID) + s);
 			
@@ -3247,6 +3256,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_META_SK_AUTHOR.equals(cmdId)     ) META_SK_AUTHOR     = cmdName;
 		else if ( Dict.SYNTAX_META_SK_COPYRIGHT.equals(cmdId)  ) META_SK_COPYRIGHT  = cmdName;
 		else if ( Dict.SYNTAX_META_SK_INFO.equals(cmdId)       ) META_SK_INFO       = cmdName;
+		else if ( Dict.SYNTAX_ZEROLENGTH.equals(cmdId)         ) LENGTH_ZERO        = cmdName;
 		else if ( Dict.SYNTAX_32.equals(cmdId)                 ) LENGTH_32          = cmdName;
 		else if ( Dict.SYNTAX_16.equals(cmdId)                 ) LENGTH_16          = cmdName;
 		else if ( Dict.SYNTAX_8.equals(cmdId)                  ) LENGTH_8           = cmdName;
@@ -3990,6 +4000,11 @@ public class MidicaPLParser extends SequenceParser {
 			duration = parseDuration(durationStr);
 		}
 		
+		// illegal zero-length duration?
+		if (0 == duration && LENGTH_ZERO.equals(durationStr) && note != REST_VALUE) {
+			throw new ParseException(Dict.get(Dict.ERROR_ZEROLENGTH_NOT_ALLOWED));
+		}
+		
 		// allow drum-only sequences without an INSTRUMENTS block
 		if (! instrumentsParsed) {
 			postprocessInstruments();
@@ -4037,6 +4052,14 @@ public class MidicaPLParser extends SequenceParser {
 				}
 				else
 					throw new ParseException(Dict.get(Dict.ERROR_CHANNEL_INVALID_OPT) + optName);
+				
+				// invalid command for zero-length command?
+				if (0 == duration && LENGTH_ZERO.equals(durationStr)) {
+					if (OPT_MULTIPLE.equals(optName) || OPT_QUANTITY.equals(optName)
+						|| OPT_TREMOLO.equals(optName) || OPT_SHIFT.equals(optName)) {
+						throw new ParseException(Dict.get(Dict.ERROR_ZEROLENGTH_INVALID_OPTION) + optName);
+					}
+				}
 			}
 		}
 		

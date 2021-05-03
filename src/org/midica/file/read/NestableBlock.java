@@ -258,11 +258,15 @@ public class NestableBlock {
 				// separate duration from options
 				String[] durationAndOptions = whitespaces.split(tokens[2], 2);
 				
-				// pattern instead of duration? - ignore tuplets
-				if (MidicaPLParser.patterns.containsKey(durationAndOptions[0])) {
-					// ignore
+				if (MidicaPLParser.LENGTH_ZERO.equals(durationAndOptions[0])) {
+					// zero-length - ignore tuplets
+					return tokens;
+				}
+				else if (MidicaPLParser.patterns.containsKey(durationAndOptions[0])) {
+					// pattern - ignore tuplets
 				}
 				else {
+					// normal channel command - apply tuplet
 					String[] atoms = plus.split(durationAndOptions[0], -1);
 					for (int j=0; j < atoms.length; j++) {
 						atoms[j] += tuplet;

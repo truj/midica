@@ -1,0 +1,41 @@
+INCLUDE inc/instruments.midica
+
+0  -  -  v = 10 , d 0.8
+0  c  /1
+
+CALL func
+
+0  d,e,f  pat
+0  d,e,f  pat  v=110
+0  c  /1
+0  -  -  l=xyz
+
+{ t, s=12
+	{ t=3:2, s=12
+		0 - - v=50
+	}
+}
+
+
+
+FUNCTION func
+	{
+		{
+			0  -  -  v=20
+		}
+		0  c+ /1
+	}
+END
+
+PATTERN pat
+	0 /4
+	{
+		- -  v=30
+		1 /4
+		{
+			- -  v=40
+			2 /4
+		}
+	}
+END
+

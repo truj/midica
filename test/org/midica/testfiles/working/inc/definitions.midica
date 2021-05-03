@@ -10,3 +10,4 @@ def CALL inc
 def GLOBAL glob
 DEFINE PARTIAL_SYNC_RANGE ..
 def SOUNDFONT load_sf
+def LENGTH_ZERO _
