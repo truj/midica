@@ -306,17 +306,21 @@ public class ExportResultView extends MessageView implements ActionListener, Row
 		// reset everything
 		KeyBindingManager keyBindingManager = new KeyBindingManager(this, this.getRootPane());
 		
-		// add key bindings comboboxes
-		keyBindingManager.addBindingsForCheckbox(cbxShortMsg,     Dict.KEY_EXPORT_RESULT_SHORT);
-		keyBindingManager.addBindingsForCheckbox(cbxMetaMsg,      Dict.KEY_EXPORT_RESULT_META);
-		keyBindingManager.addBindingsForCheckbox(cbxSysexMsg,     Dict.KEY_EXPORT_RESULT_SYSEX);
-		keyBindingManager.addBindingsForCheckbox(cbxRestSkipped,  Dict.KEY_EXPORT_RESULT_SKIPPED_RESTS);
-		keyBindingManager.addBindingsForCheckbox(cbxOffNotFound,  Dict.KEY_EXPORT_RESULT_OFF_NOT_FOUND);
-		keyBindingManager.addBindingsForCheckbox(cbxCrdGrpFailed, Dict.KEY_EXPORT_RESULT_CRD_GRP_FAILED);
-		keyBindingManager.addBindingsForCheckbox(cbxOther,        Dict.KEY_EXPORT_RESULT_OTHER);
-		
-		// add key bindings to filters
-		keyBindingManager.addBindingsForIconLabel(filterIcon, Dict.KEY_EXPORT_RESULT_FILTER);
+		// filter widgets have been created? (only if there are warnings)
+		if (cbxShortMsg != null) {
+			
+			// add key bindings comboboxes
+			keyBindingManager.addBindingsForCheckbox(cbxShortMsg,     Dict.KEY_EXPORT_RESULT_SHORT);
+			keyBindingManager.addBindingsForCheckbox(cbxMetaMsg,      Dict.KEY_EXPORT_RESULT_META);
+			keyBindingManager.addBindingsForCheckbox(cbxSysexMsg,     Dict.KEY_EXPORT_RESULT_SYSEX);
+			keyBindingManager.addBindingsForCheckbox(cbxRestSkipped,  Dict.KEY_EXPORT_RESULT_SKIPPED_RESTS);
+			keyBindingManager.addBindingsForCheckbox(cbxOffNotFound,  Dict.KEY_EXPORT_RESULT_OFF_NOT_FOUND);
+			keyBindingManager.addBindingsForCheckbox(cbxCrdGrpFailed, Dict.KEY_EXPORT_RESULT_CRD_GRP_FAILED);
+			keyBindingManager.addBindingsForCheckbox(cbxOther,        Dict.KEY_EXPORT_RESULT_OTHER);
+			
+			// add key bindings to filters
+			keyBindingManager.addBindingsForIconLabel(filterIcon, Dict.KEY_EXPORT_RESULT_FILTER);
+		}
 		
 		// add key bindings to buttons
 		keyBindingManager.addBindingsForButton(this.closeButton, Dict.KEY_EXPORT_RESULT_CLOSE);

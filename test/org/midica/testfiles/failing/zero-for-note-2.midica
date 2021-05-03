@@ -1,0 +1,11 @@
+INCLUDE inc/instruments.midica
+
+0  c,d  pat
+
+PATTERN pat
+	{
+		{
+			0 -
+		}
+	}
+END

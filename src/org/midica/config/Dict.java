@@ -171,6 +171,7 @@ public class Dict {
 	public static final String SYNTAX_CHORD_SEPARATOR    = "CHORD_SEPARATOR";
 	public static final String SYNTAX_INCLUDE            = "INCLUDE";
 	public static final String SYNTAX_SOUNDFONT          = "SOUNDFONT";
+	public static final String SYNTAX_ZEROLENGTH         = "LENGTH_ZERO";
 	public static final String SYNTAX_32                 = "LENGTH_32";
 	public static final String SYNTAX_16                 = "LENGTH_16";
 	public static final String SYNTAX_8                  = "LENGTH_8";
@@ -1499,6 +1500,7 @@ public class Dict {
 	public static final String ERROR_CHORD_CONTAINS_ALREADY      = "error_chord_contains_already";
 	public static final String ERROR_CHORD_DEF_NOT_ALLOWED_HERE  = "error_chord_def_not_allowed_here";
 	public static final String ERROR_CHORD_NUM_OF_ARGS           = "error_chord_num_of_args";
+	public static final String ERROR_CHORD_REDUNDANT_SEP         = "error_chord_redundant_sep";
 	public static final String ERROR_CONST_NUM_OF_ARGS           = "error_const_num_of_args";
 	public static final String ERROR_CONST_ALREADY_DEFINED       = "error_const_already_defined";
 	public static final String ERROR_CONST_NAME_EQ_VALUE         = "error_const_name_eq_value";
@@ -1534,6 +1536,7 @@ public class Dict {
 	public static final String ERROR_PATTERN_INDEX_INVALID       = "error_pattern_index_invalid";
 	public static final String ERROR_PATTERN_INDEX_TOO_HIGH      = "error_pattern_index_too_high";
 	public static final String ERROR_PATTERN_RECURSION_DEPTH     = "error_pattern_recursion_depth";
+	public static final String ERROR_PATTERN_UNDEFINED           = "error_pattern_undefined";
 	public static final String ERROR_META_NUM_OF_ARGS            = "error_meta_num_of_arts";
 	public static final String ERROR_META_UNKNOWN_CMD            = "error_meta_unknown_cmd";
 	public static final String ERROR_SOFT_KARAOKE_UNKNOWN_CMD    = "error_soft_karaoke_unknown_cmd";
@@ -1566,6 +1569,9 @@ public class Dict {
 	public static final String ERROR_NOTE_TOO_BIG                = "error_note_too_big";
 	public static final String ERROR_NOTE_TOO_SMALL              = "error_note_too_small";
 	public static final String ERROR_NOTE_LENGTH_INVALID         = "error_note_length_invalid";
+	public static final String ERROR_ZEROLENGTH_NOT_ALLOWED      = "error_zerolength_not_allowed";
+	public static final String ERROR_ZEROLENGTH_IN_SUM           = "error_zerolength_in_sum";
+	public static final String ERROR_ZEROLENGTH_INVALID_OPTION   = "error_zerolength_invalid_option";
 	public static final String ERROR_EMPTY_LENGTH_SUMMAND        = "error_empty_length_summand";
 	public static final String ERROR_UNKNOWN_FUNCTION_CMD        = "error_unknown_function_cmd";
 	public static final String ERROR_INSTR_NUM_OF_ARGS           = "error_num_of_args";
@@ -2651,6 +2657,7 @@ public class Dict {
 		set( SYNTAX_INCLUDE,            "including another file"                           );
 		set( SYNTAX_SOUNDFONT,          "including a soundfont file"                       );
 		
+		set( SYNTAX_ZEROLENGTH,       "Zero-Length"                                      );
 		set( SYNTAX_32,               "32nd"                                             );
 		set( SYNTAX_16,               "16th"                                             );
 		set( SYNTAX_8,                "8th"                                              );
@@ -3048,6 +3055,7 @@ public class Dict {
 		set( ERROR_CHORD_CONTAINS_ALREADY,        "Note cannot be defined more than once in the same chord: "         );
 		set( ERROR_CHORD_DEF_NOT_ALLOWED_HERE,    "a chord definition is not allowed inside a block<br>maybe you forgot to close the block." );
 		set( ERROR_CHORD_NUM_OF_ARGS,             "wrong number of arguments in CHORD command"                        );
+		set( ERROR_CHORD_REDUNDANT_SEP,           "redundant separator in chord definition"                           );
 		set( ERROR_CONST_NUM_OF_ARGS,             "wrong number of arguments in CONSTANT definition"                  );
 		set( ERROR_CONST_ALREADY_DEFINED,         "constant already defined: "                                        );
 		set( ERROR_CONST_NAME_EQ_VALUE,           "constant name must be different from it's value: "                 );
@@ -3083,6 +3091,7 @@ public class Dict {
 		set( ERROR_PATTERN_INDEX_INVALID,         "pattern index not a number: "                                      );
 		set( ERROR_PATTERN_INDEX_TOO_HIGH,        "pattern index too high: "                                          );
 		set( ERROR_PATTERN_RECURSION_DEPTH,       "Recursion depth in pattern too big."                               );
+		set( ERROR_PATTERN_UNDEFINED,             "Pattern not defined: "                                             );
 		set( ERROR_META_NUM_OF_ARGS,              "no arguments allowed in meta command"                              );
 		set( ERROR_META_UNKNOWN_CMD,              "unknown meta command: "                                            );
 		set( ERROR_SOFT_KARAOKE_UNKNOWN_CMD,      "unknown soft karaoke command: "                                    );
@@ -3118,6 +3127,9 @@ public class Dict {
 		set( ERROR_NOTE_TOO_BIG,                  "note number too big: "                                             );
 		set( ERROR_NOTE_TOO_SMALL,                "note number too small: "                                           );
 		set( ERROR_NOTE_LENGTH_INVALID,           "invalid note length expression or undefined pattern: "             );
+		set( ERROR_ZEROLENGTH_NOT_ALLOWED,        "zero-length not allowed for notes or chords"                       );
+		set( ERROR_ZEROLENGTH_IN_SUM,             "zero-length not allowed in length sum"                             );
+		set( ERROR_ZEROLENGTH_INVALID_OPTION,     "channel option invalid for zero-length commands: "                 );
 		set( ERROR_EMPTY_LENGTH_SUMMAND,          "empty summand in length string: "                                  );
 		set( ERROR_UNKNOWN_FUNCTION_CMD,          "unknown function command: "                                        ); // TODO: check
 		set( ERROR_INSTR_NUM_OF_ARGS,             "wrong number of arguments in instrument command"                   );
@@ -3892,6 +3904,7 @@ public class Dict {
 		setSyntax( SYNTAX_CHORD_SEPARATOR,    ","            );
 		setSyntax( SYNTAX_INCLUDE,            "INCLUDE"      );
 		setSyntax( SYNTAX_SOUNDFONT,          "SOUNDFONT"    );
+		setSyntax( SYNTAX_ZEROLENGTH,         "-"            );
 		setSyntax( SYNTAX_32,                 "/32"          );
 		setSyntax( SYNTAX_16,                 "/16"          );
 		setSyntax( SYNTAX_8,                  "/8"           );
@@ -4034,6 +4047,7 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_COND_IN_SEP      );
 		
 		addSyntaxCategory(get(SYNTAX_CAT_NOTE_LENGTH));
+		addSyntaxForInfoView( SYNTAX_ZEROLENGTH    );
 		addSyntaxForInfoView( SYNTAX_32            );
 		addSyntaxForInfoView( SYNTAX_16            );
 		addSyntaxForInfoView( SYNTAX_8             );

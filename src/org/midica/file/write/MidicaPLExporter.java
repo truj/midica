@@ -593,7 +593,7 @@ public class MidicaPLExporter extends Decompiler {
 			Long nextTick = timeline.ceilingKey(currentTicks + 1);
 			if (null == nextTick) {
 				// last syllable in this slice
-				nextTick = currentTicks + sourceResolution; // use a quarter note
+				nextTick = currentTicks; // use a zero-length rest
 			}
 			
 			long restTicks = nextTick - currentTicks;
@@ -652,14 +652,17 @@ public class MidicaPLExporter extends Decompiler {
 			}
 			
 			// calculate event rest length
+			boolean isLast = false;
 			Long nextEventTick = content.ceilingKey(eventTick + 1);
 			if (null == nextEventTick) {
-				nextEventTick = eventTick + 1;
+				// last syllable in this inline block
+				isLast        = true;
+				nextEventTick = eventTick; // use a zero-length rest
 			}
 			long restTicks = nextEventTick - eventTick;
 			
-			// make sure that the rest is not skipped if it's too short
-			if (restTicks < restLength.firstKey()) {
+			// make sure to use zero-length rests only for the last rest of the block
+			if (! isLast && restTicks < restLength.firstKey()) {
 				restTicks = restLength.firstKey();
 			}
 			
@@ -894,6 +897,11 @@ public class MidicaPLExporter extends Decompiler {
 			if (summandStr.endsWith(MidicaPLParser.TRIPLET)) {
 				incrementStats(STAT_REST_TRIPLETS, channel);
 			}
+		}
+		
+		// zero-length?
+		if (0 == ticks && 0 == lengthSummands.size()) {
+			lengthSummands.add(MidicaPLParser.LENGTH_ZERO);
 		}
 		
 		// add line

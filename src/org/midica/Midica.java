@@ -23,23 +23,26 @@ import org.midica.ui.UiController;
 public class Midica {
 	
 	/** Major version number. This has to be incremented manually. */
-	public static final int VERSION_MAJOR = 1;
+	private static final int VERSION_MAJOR = 1;
+	
+	/** Middle version number. This has to be incremented manually. */
+	private static final int VERSION_MIDDLE = 3;
 	
 	/**
 	 * Minor version number. This is intended to be incremented automatically by precommit.pl.
 	 * After switching to a new major version, this has to be set to "-1" manually, so that
 	 * precommit.pl starts with "0" again.
 	 */
-	public static final int VERSION_MINOR = 3;
+	private static final int VERSION_MINOR = 2;
 	
 	/** UNIX timestamp of the last commit */
-	public static final int COMMIT_TIME = 1618245800;
+	public static final int COMMIT_TIME = 1620068516;
 	
 	/** Branch name. Automatically changed by precommit.pl */
 	public static final String BRANCH = "export-formats";
 	
 	/** Full version string. */
-	public static final String VERSION = VERSION_MAJOR + "." + VERSION_MINOR + ("master".equals(BRANCH) ? "" : "-" + BRANCH);
+	public static final String VERSION = VERSION_MAJOR + "." + VERSION_MIDDLE + "." + VERSION_MINOR + ("master".equals(BRANCH) ? "" : "-" + BRANCH);
 	
 	/** Author name */
 	public static final String AUTHOR = "Jan Trukenmüller";

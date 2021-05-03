@@ -106,7 +106,7 @@ public class Laf {
 	public  static final Color COLOR_BORDER          = new Color(  23, 121, 186 );
 	private static final Color COLOR_BORDER_LIGHT    = new Color( 148, 204, 242 );
 	private static final Color COLOR_ALERT           = new Color( 255,   0,   0 );
-	public  static final Color COLOR_PANEL           = new Color( 238, 238, 238 );
+	public  static final Color COLOR_PANEL           = new Color( 243, 240, 233 );
 	private static final Color COLOR_WHITE           = new Color( 255, 255, 255 );
 	private static final Color COLOR_BLACK           = new Color(   0,   0,   0 );
 	private static final Color COLOR_INACTIVE        = new Color( 228, 228, 228 );

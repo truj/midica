@@ -25,8 +25,8 @@ END
 *  key    d/maj
 
 // initialize channel defaults
-0  -  /4  m, d=75%,  v=100
-1  -  /4  m, d=100%, v=70
+0  -  -  d=75%,  v=100
+1  -  -  d=100%, v=70
 
 // execute the verses with different animals and sounds
 CALL verse(Lon, don_, Bridge_, is_, fal, ling_, down)

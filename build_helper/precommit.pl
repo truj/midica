@@ -98,21 +98,28 @@ if (! $branch) {
 my $branch_suffix = 'master' eq $branch ? '' : '-' . $branch;
 
 # get OLD major and minor version number
-my $major_version = undef;
-my $minor_version = undef;
+my $major_version  = undef;
+my $middle_version = undef;
+my $minor_version  = undef;
 open my $fh, '<', $java_file or die "Cannot read $java_file: $!\n";
 while (my $line = <$fh>) {
 	if ($line =~ /(\bint\s+VERSION_MAJOR\s*=)\s*(\d+)/) {
 		$major_version = $2;
 	}
+	elsif ($line =~ /(\bint\s+VERSION_MIDDLE\s*=)\s*(\d+)/) {
+		$middle_version = $2;
+	}
 	elsif ($line =~ /(\bint\s+VERSION_MINOR\s*=)\s*(\-?\d+)/) {
 		$minor_version = $2;
 	}
-	last if defined $major_version && defined $minor_version;
+	last if defined $major_version && defined $middle_version && defined $minor_version;
 }
 close $fh or die "Cannot close $java_file: $!\n";
 if (! defined $major_version) {
 	die "Did not find major version in $java_file.\n";
+}
+if (! defined $middle_version) {
+	die "Did not find middle version in $java_file.\n";
 }
 if (! defined $minor_version) {
 	die "Did not find minor version in $java_file.\n";
@@ -123,7 +130,7 @@ if ('master' eq $branch) {
 	$minor_version++;
 }
 my $commit_time = time();
-my $version     = $major_version . '.' . $minor_version . $branch_suffix;
+my $version     = $major_version . '.' . $middle_version . '.' . $minor_version . $branch_suffix;
 
 # Build up the commands to replace VERSION_MINOR, BRANCH and COMMIT_TIME in Midica.java.
 # 1. perl and options and opening single quote (') for the regex

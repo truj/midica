@@ -1,0 +1,9 @@
+INSTRUMENTS
+	0    PERCUSSIVE_ORGAN       PERCUSSIVE_ORGAN
+END
+
+CALL f(vel==102)
+
+FUNCTION f
+	0  c  /4  v=${vel}
+END

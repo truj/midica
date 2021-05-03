@@ -1,5 +1,5 @@
-DEFINE DEFINE def
-def INCLUDE incl_f
+DEFINE DEFINE=def
+def INCLUDE = incl_f
 def INSTRUMENTS instruments[
 def END ]
 def FUNCTION procedure[
@@ -10,3 +10,4 @@ def CALL inc
 def GLOBAL glob
 DEFINE PARTIAL_SYNC_RANGE ..
 def SOUNDFONT load_sf
+def LENGTH_ZERO _

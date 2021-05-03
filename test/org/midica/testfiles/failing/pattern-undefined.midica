@@ -1,0 +1,7 @@
+INCLUDE inc/instruments.midica
+
+0  c,d,e  pat_a( y )
+
+PATTERN pat_a
+	0  not_existing_pattern( x, y, z )  v = 120 , d = 80%
+END

@@ -25,8 +25,8 @@ END
 *  key    g/maj
 
 // initialize channel defaults
-0  -  /4  m, d=75%,  v=127
-1  -  /4  m, d=100%, v=40
+0  -  -  d=75%,  v=127
+1  -  -  d=100%, v=40
 
 // execute the verses with different animals and sounds
 CALL verse(1, cow, moo)
