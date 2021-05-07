@@ -11,6 +11,8 @@
 [CLI](#command-line-interface)
 |
 [Contribute](#contributing)
+|
+[License](#license)
 
 Midica is an interpreter for a Music Programming Language.
 It translates source code to MIDI.
@@ -345,3 +347,17 @@ ARGUMENTS:
 # Contributing
 
 If you want to contribute, please check the [Readme file for Developers](build_helper/README.md).
+
+# License
+
+The main part of Midica is published under the [MPL 2.0](LICENSE) (Mozilla Public License Version 2.0).
+
+The following third-party software is also included:
+
+- Gervill Synthesizer by Karl Helgason, published under [GPL 2](LICENSE-gervill) (General Public License 2.0)  
+  This code is located under [src/com/sun/media/sound](src/com/sun/media/sound)
+- [MidiToAudioRenderer](src/com/sun/karlhelgason/MidiToAudioRenderer.java) (Copyright notice can be found in the file header)  
+  originally written by Karl Helgason as "Midi2WavRender.java"    
+  This file is located under [src/com/sun/karlhelgason](src/com/sun/karlhelgason)
+- [ReferenceCountingDevice](src/com/sun/media/sound/ReferenceCountingDevice.java) by  Matthias Pfisterer, published under [GPL 2](LICENSE-gervill) (General Public License 2.0)  
+  This file is located under [src/com/sun/media/sound](src/com/sun/media/sound)

@@ -692,6 +692,7 @@ public class Dict {
 	public static final String KEY_FILE_SELECTOR_EXP_MID        = "key_file_selector_exp_mid";
 	public static final String KEY_FILE_SELECTOR_EXP_MPL        = "key_file_selector_exp_mpl";
 	public static final String KEY_FILE_SELECTOR_EXP_ALDA       = "key_file_selector_exp_alda";
+	public static final String KEY_FILE_SELECTOR_EXP_WAV        = "key_file_selector_exp_wav";
 	public static final String KEY_FILE_SELECTOR_EXP_ABC        = "key_file_selector_exp_abc";
 	public static final String KEY_FILE_SELECTOR_EXP_LY         = "key_file_selector_exp_ly";
 	public static final String KEY_FILE_SELECTOR_EXP_MSCORE     = "key_file_selector_exp_mscore";
@@ -803,6 +804,7 @@ public class Dict {
 	public static final String TAB_MIDI                    = "tab_midi";
 	public static final String TAB_MIDICAPL                = "tab_midicapl";
 	public static final String TAB_ALDA                    = "tab_alda";
+	public static final String TAB_WAV                     = "tab_wav";
 	public static final String TAB_ABC                     = "tab_abc";
 	public static final String TAB_LY                      = "tab_ly";
 	public static final String TAB_MSCORE                  = "tab_mscore";
@@ -2112,6 +2114,7 @@ public class Dict {
 		set( KEY_FILE_SELECTOR_EXP_MID,        "In the EXPORT selector, select the MIDI Tab"                                 );
 		set( KEY_FILE_SELECTOR_EXP_MPL,        "In the EXPORT selector, select the MidicaPL Tab"                             );
 		set( KEY_FILE_SELECTOR_EXP_ALDA,       "In the EXPORT selector, select the ALDA Tab"                                 );
+		set( KEY_FILE_SELECTOR_EXP_WAV,        "In the EXPORT selector, select the WAV Tab"                                  );
 		set( KEY_FILE_SELECTOR_EXP_ABC,        "In the EXPORT selector, select the ABC Tab"                                  );
 		set( KEY_FILE_SELECTOR_EXP_LY,         "In the EXPORT selector, select the LilyPond Tab"                             );
 		set( KEY_FILE_SELECTOR_EXP_MSCORE,     "In the EXPORT selector, select the MuscScore Tab"                            );
@@ -2222,6 +2225,7 @@ public class Dict {
 		set( TAB_MIDI,                 "MIDI"                                                 );
 		set( TAB_MIDICAPL,             "MidicaPL"                                             );
 		set( TAB_ALDA,                 "ALDA"                                                 );
+		set( TAB_WAV,                  "WAV"                                                  );
 		set( TAB_ABC,                  "ABC"                                                  );
 		set( TAB_LY,                   "LilyPond"                                             );
 		set( TAB_MSCORE,               "MuseScore"                                            );

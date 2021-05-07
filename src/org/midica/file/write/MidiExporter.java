@@ -80,11 +80,9 @@ public class MidiExporter extends Exporter {
 		
 		try {
 			
-			// create file writer and store it in this.writer
-			if (! createFile(file)) {
-				// user doesn't want to overwrite the file
+			// user doesn't want to overwrite the file?
+			if (! createFile(file))
 				return new ExportResult(false);
-			}
 			
 			// export the MIDI file
 			Sequence seq = cloneSequence();

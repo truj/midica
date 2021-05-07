@@ -102,7 +102,9 @@ public class MidicaFileChooser extends JFileChooser {
 		this.parentWindow      = parent;
 		this.needCharsetSel    = charsetSel;
 		this.confKeyForeignExe = confKeyForeignExe;
-		this.needDCIcon        = FileSelector.WRITE == purpose && ! FileSelector.FILE_TYPE_MIDI.equals(type);
+		this.needDCIcon        = FileSelector.WRITE == purpose
+		                    && ! FileSelector.FILE_TYPE_MIDI.equals(type)
+		                    && ! FileSelector.FILE_TYPE_WAV.equals(type);
 		this.needForeignExe    = confKeyForeignExe != null;
 		this.needDirectImport  = FileSelector.WRITE == purpose && (
 		                              FileSelector.FILE_TYPE_MPL.equals(type)

@@ -203,7 +203,9 @@ if ($must_create_jar) {
 	
 	# create new jar file
 	my $manifest_path = $project_path . '/build_helper/manifest';
-	$cmd              = "jar -cvfm '$jar_path' '$manifest_path' -C '$tmp_path' org";
+	$cmd              = "jar -cvfm '$jar_path' '$manifest_path' "
+	                  . " -C '$tmp_path' org"
+	                  . " -C '$tmp_path' com";
 	$status           = system $cmd;
 	if ($status) {
 		die "Command failed: $cmd\n";
@@ -243,7 +245,7 @@ if ($must_create_javadoc && $javadoc_path) {
 	        . " -doclet $doclet_name"
 	        . " -d '$javadoc_path'"
 	        . " -sourcepath '$source_path'"
-	        . " -subpackages org.midica"
+	        . " -subpackages org.midica com.sun.karlhelgason"
 	        . " -overview '$overview_path'"
 	        . " -private"
 	        . " -encoding utf-8"

@@ -50,9 +50,8 @@ public class MusescoreExporter extends MidiExporter {
 	public ExportResult export(File file) throws ExportException {
 		
 		// user doesn't want to overwrite the file?
-		if (! createFile(file)) {
+		if (! createFile(file))
 			return new ExportResult(false);
-		}
 		
 		// charset // TODO: optimize
 		String sourceFileType = SequenceCreator.getFileType();

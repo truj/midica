@@ -290,8 +290,9 @@ public abstract class Decompiler extends Exporter {
 				osw = new OutputStreamWriter(System.out, targetCharset);
 			}
 			else {
-				// create file writer and store it in this.writer
-				if ( ! createFile(file) )
+				
+				// user doesn't want to overwrite the file?
+				if (! createFile(file))
 					return new ExportResult(false);
 				
 				// open file for writing
