@@ -51,6 +51,7 @@ public class WaitView extends JDialog {
 		setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		
 		// show the window in the center of the parent window
+		pack();
 		setLocationRelativeTo(owner);
 	}
 	

@@ -161,6 +161,7 @@ public class ExportResultView extends MessageView implements ActionListener, Row
 		
 		addKeyBindings();
 		pack();
+		setLocationRelativeTo(getOwner());
 		setVisible(true);
 	}
 	

@@ -1655,6 +1655,7 @@ public class Dict {
 	public static final String WAIT_PARSE_FOREIGN               = "wait_parse_foreign";
 	public static final String WAIT_REPARSE                     = "wait_reparse";
 	public static final String WAIT_SETUP_DEVICES               = "wait_setup_devices";
+	public static final String WAIT_EXPORT                      = "wait_export";
 	
 	// Exporter
 	public static final String ERROR_EXPORT                     = "error_export";
@@ -3215,6 +3216,7 @@ public class Dict {
 		set( WAIT_PARSE_FOREIGN,                  "Importing the file using %s"                                       );
 		set( WAIT_REPARSE,                        "Reloading the File"                                                );
 		set( WAIT_SETUP_DEVICES,                  "Setting up MIDI devices and loading Soundfont"                     );
+		set( WAIT_EXPORT,                         "Exporting the file..."                                             );
 		
 		// Exporter
 		set( ERROR_EXPORT,                        "Export Error in the file "                                         );

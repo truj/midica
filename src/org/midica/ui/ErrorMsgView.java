@@ -90,6 +90,7 @@ public class ErrorMsgView extends MessageView {
 		super.addKeyBindings();
 		
 		pack();
+		setLocationRelativeTo(getOwner());
 		setVisible(true);
 	}
 	

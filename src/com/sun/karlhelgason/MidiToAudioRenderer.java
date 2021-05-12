@@ -37,16 +37,17 @@ import javax.sound.midi.Sequence;
 import javax.sound.midi.Soundbank;
 import javax.sound.midi.Track;
 import javax.sound.sampled.AudioFileFormat;
+import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 
-import com.sun.media.sound.SoftSynthesizer;
+import com.sun.gervill.SoftSynthesizer;
 
 /**
  * This class can be used to export an audio file from a MIDI sequence
  * using a user-defined soundfont.
  * 
- * Originally this class has been created by Karl Helgason as "Midi2AudioRender.java".
+ * Originally this class has been created by Karl Helgason as "Midi2WavRender.java".
  * 
  * @author Karl Helgason, Jan Trukenmüller
  */
@@ -55,13 +56,14 @@ public class MidiToAudioRenderer {
 	/*
 	 * Render sequence using selected or default soundbank into wave audio file.
 	 */
-	public static void render(Soundbank soundbank, Sequence sequence, File audioFile) throws Exception {
+	public static void render(Soundbank soundbank, Sequence sequence, File audioFile,
+			AudioFormat format, AudioFileFormat.Type fileType) throws Exception {
 		
 		// Create Synthesizer.
 		SoftSynthesizer synth = new SoftSynthesizer();
 		
 		// Open AudioStream from AudioSynthesizer.
-		AudioInputStream stream = synth.openStream(null, null);
+		AudioInputStream stream = synth.openStream(format, null);
 
 		// Load user-selected Soundbank into AudioSynthesizer.
 		if (soundbank != null) {
@@ -78,17 +80,17 @@ public class MidiToAudioRenderer {
 		long len = (long) (stream.getFormat().getFrameRate() * (total + 4));
 		stream = new AudioInputStream(stream, stream.getFormat(), len);
 		
-		// Write WAVE file to disk.
-		AudioSystem.write(stream, AudioFileFormat.Type.WAVE, audioFile);
+		// Write audio file to disk.
+		AudioSystem.write(stream, fileType, audioFile);
 		
 		// We are finished, close synthesizer.
 		synth.close();
 	}
 
 	/*
-	 * Send entiry MIDI Sequence into Receiver using timestamps.
+	 * Send MIDI Sequence to Receiver using timestamps.
 	 */
-	public static double send(Sequence seq, Receiver recv) {
+	private static double send(Sequence seq, Receiver recv) {
 		float divtype = seq.getDivisionType();
 		assert (seq.getDivisionType() == Sequence.PPQ);
 		Track[] tracks = seq.getTracks();

@@ -55,6 +55,7 @@ import org.midica.ui.info.InfoView;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
 import org.midica.ui.player.PlayerView;
+import org.midica.worker.ExportWorker;
 import org.midica.worker.ParsingWorker;
 import org.midica.worker.WaitView;
 
@@ -521,9 +522,30 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		else {
 			return;
 		}
+		
+		// close file selector
 		exportSelector.setVisible(false);
+		
+		// start file export in the background and show the wait window
+		WaitView     waitView = new WaitView(view);
+		ExportWorker worker   = new ExportWorker(waitView, exporter, file);
+		worker.execute();
+		waitView.init(Dict.get(Dict.WAIT_EXPORT));
+		
+		// wait until the file is exported and than evaluate the export result
 		try {
-			ExportResult result = exporter.export(file);
+			try {
+				ExportException exportException = (ExportException) worker.get();
+				if (exportException != null) {
+					throw exportException;
+				}
+			}
+			catch (InterruptedException | ExecutionException workerException) {
+				workerException.printStackTrace();
+				throw new ExportException(workerException.getMessage());
+			}
+			
+			ExportResult result = worker.getResult();
 			if (result.isSuccessful() && ! Cli.isCliMode) {
 				showExportResult(result);
 				

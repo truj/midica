@@ -32,6 +32,8 @@ import org.midica.file.read.SoundfontParser;
 import org.midica.ui.info.InstrumentElement;
 import org.midica.ui.player.PlayerController;
 
+import com.sun.gervill.SoftSynthesizer;
+
 /**
  * This class encapsulates the Java MIDI functionality.
  * It is not meant to instantiate any objects and contains only static methods.
@@ -213,7 +215,7 @@ public final class MidiDevices {
 	private static Receiver setupSynthesizer() throws MidiUnavailableException {
 		
 		// get synthesizer
-		synthesizer = MidiSystem.getSynthesizer();
+		synthesizer = new SoftSynthesizer();
 		
 		// hardware or software?
 		boolean isSoftware = ( null == synthesizer.getDefaultSoundbank() ) ? false : true;

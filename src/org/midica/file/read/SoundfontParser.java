@@ -29,6 +29,8 @@ import javax.sound.sampled.AudioInputStream;
 import org.midica.config.Dict;
 import org.midica.midi.MidiDevices;
 
+import com.sun.gervill.SF2Soundbank;
+
 /**
  * This class is used in order to load a user-defined soundfont file.
  * 
@@ -66,7 +68,7 @@ public class SoundfontParser implements IParser {
 		
 		try {
 			// load the soundfont
-			soundfont = MidiSystem.getSoundbank(file);
+			soundfont = new SF2Soundbank(file);
 			MidiDevices.setSoundfont(soundfont);
 			
 			// read it and build up data structures
@@ -76,9 +78,6 @@ public class SoundfontParser implements IParser {
 			
 			// parsing successful - save the file info
 			soundfontFile = file;
-		}
-		catch (InvalidMidiDataException e) {
-			throw new ParseException(e.getMessage());
 		}
 		catch (IOException e) {
 			throw new ParseException(e.getMessage());
