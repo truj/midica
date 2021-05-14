@@ -356,8 +356,8 @@ The following third-party software is also included:
 
 - Gervill Synthesizer by Karl Helgason, published under [GPL 2](LICENSE-gervill) (General Public License 2.0)  
   This code is located under [src/com/sun/gervill](src/com/sun/gervill)
-- [MidiToAudioRenderer](src/com/sun/karlhelgason/MidiToAudioRenderer.java) (Copyright notice can be found in the file header)  
+- [MidiToAudioRenderer](src/com/sun/kh/MidiToAudioRenderer.java) (Copyright notice can be found in the file header)  
   originally written by Karl Helgason as "Midi2WavRender.java"    
-  This file is located under [src/com/sun/karlhelgason](src/com/sun/karlhelgason)
+  This file is located under [src/com/sun/kh](src/com/sun/kh)
 - [ReferenceCountingDevice](src/com/sun/gervill/ReferenceCountingDevice.java) by  Matthias Pfisterer, published under [GPL 2](LICENSE-gervill) (General Public License 2.0)  
   This file is located under [src/com/sun/gervill](src/com/sun/gervill)

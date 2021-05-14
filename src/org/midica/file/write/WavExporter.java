@@ -18,8 +18,8 @@ import org.midica.file.read.SoundfontParser;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.file.ExportResult;
 
-import com.sun.karlhelgason.MidiToAudioRenderer;
 import com.sun.gervill.SF2Soundbank;
+import com.sun.kh.MidiToAudioRenderer;
 
 /**
  * This class is used to export the currently loaded MIDI sequence as a MIDI file.
