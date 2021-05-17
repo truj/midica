@@ -39,10 +39,10 @@ import org.midica.ui.model.ConfigComboboxModel;
 
 /**
  * This class provides a file chooser that allows to choose a file together with
- * a charset.
+ * a charset, a config icon etc.
  * 
  * It can add a charset combobox and a description to the inherited
- * {@link JFileChooser}.
+ * {@link JFileChooser}, an {@link ConfigIcon} and so on.
  * 
  * Moreover this class also adjusts the look and feel of buttons for nimbus.
  * 
@@ -66,14 +66,14 @@ public class MidicaFileChooser extends JFileChooser {
 	private boolean needCharsetSel    = false;
 	private boolean needForeignExe    = false;
 	private String  confKeyForeignExe = null;
-	private boolean needDCIcon        = false;
+	private boolean needConfigIcon    = false;
 	private boolean needDirectImport  = false;
 	
 	// charset selection combobox
 	private JComboBox<ComboboxStringOption> cbxCharset = null;
 	
-	// decompile config icon
-	private DecompileConfigIcon decompileConfigIcon = null;
+	// config icon for file-based configuration windows
+	private ConfigIcon configIcon = null;
 	
 	// direct import checkbox
 	private JCheckBox cbxDirectImport = null;
@@ -91,7 +91,7 @@ public class MidicaFileChooser extends JFileChooser {
 	 *                             be shown. Otherwise **false**.
 	 * @param confKeyForeignExe    config key for the foreign executable command or path, if a
 	 *                             foreign program is needed. Otherwise: **null**.
-	 * @param parent               the parent window (only needed for exporters with a decompile config icon)
+	 * @param parent               the parent window (only needed for exporters with a config icon)
 	 */
 	public MidicaFileChooser(String type, byte purpose, String directory, boolean charsetSel,
 			String confKeyForeignExe, FileSelector parent) {
@@ -102,9 +102,8 @@ public class MidicaFileChooser extends JFileChooser {
 		this.parentWindow      = parent;
 		this.needCharsetSel    = charsetSel;
 		this.confKeyForeignExe = confKeyForeignExe;
-		this.needDCIcon        = FileSelector.WRITE == purpose
-		                    && ! FileSelector.FILE_TYPE_MIDI.equals(type)
-		                    && ! FileSelector.FILE_TYPE_WAV.equals(type);
+		this.needConfigIcon    = FileSelector.WRITE == purpose
+		                    && ! FileSelector.FILE_TYPE_MIDI.equals(type);
 		this.needForeignExe    = confKeyForeignExe != null;
 		this.needDirectImport  = FileSelector.WRITE == purpose && (
 		                              FileSelector.FILE_TYPE_MPL.equals(type)
@@ -114,8 +113,8 @@ public class MidicaFileChooser extends JFileChooser {
 		if (Laf.isNimbus)
 			changeButtonColors();
 		
-		// insert the charset combobox and/or the decompile config icon
-		if (needCharsetSel || needDCIcon || needForeignExe || needDirectImport) {
+		// insert the charset combobox and/or the config icon
+		if (needCharsetSel || needConfigIcon || needForeignExe || needDirectImport) {
 			insertExtraWidgets();
 		}
 	}
@@ -139,12 +138,12 @@ public class MidicaFileChooser extends JFileChooser {
 	}
 	
 	/**
-	 * Returns the decompile config icon, if available, or otherwise **null**.
+	 * Returns the config icon, if available, or otherwise **null**.
 	 * 
 	 * @return the icon or **null**
 	 */
-	public DecompileConfigIcon getDecompileConfigIcon() {
-		return decompileConfigIcon;
+	public ConfigIcon getConfigIcon() {
+		return configIcon;
 	}
 	
 	/**
@@ -422,13 +421,13 @@ public class MidicaFileChooser extends JFileChooser {
 	}
 	
 	/**
-	 * Creates the decompilation area.
+	 * Creates the config area.
 	 * It consists of a spacer on the left side and the icon on the right side.
 	 * 
 	 * @param leftElement    file name label (used to copy the dimension)
 	 * @return the created area
 	 */
-	private Container createDecompileArea(Component leftElement) {
+	private Container createConfigArea(Component leftElement) {
 		
 		// copy the dimensions of the "file name" label
 		Dimension leftDimCorrected = leftElement.getPreferredSize();
@@ -436,19 +435,19 @@ public class MidicaFileChooser extends JFileChooser {
 		JLabel spacer = new JLabel("");
 		spacer.setPreferredSize(leftDimCorrected);
 		
-		// create the decompilation area
-		JPanel decompileArea = new JPanel();
-		decompileArea.setLayout(new BoxLayout(decompileArea, BoxLayout.X_AXIS));
+		// create the config area
+		JPanel configArea = new JPanel();
+		configArea.setLayout(new BoxLayout(configArea, BoxLayout.X_AXIS));
 		
-		// create the decompile config icon
-		decompileConfigIcon = new DecompileConfigIcon(parentWindow);
+		// create the config icon
+		configIcon = new ConfigIcon(parentWindow, ConfigIcon.TYPE_DECOMPILE);
 		
 		// add elements (spacer, icon, spacer)
-		decompileArea.add(spacer);
-		decompileArea.add(decompileConfigIcon);
-		decompileArea.add(Box.createHorizontalGlue());
+		configArea.add(spacer);
+		configArea.add(configIcon);
+		configArea.add(Box.createHorizontalGlue());
 		
-		return decompileArea;
+		return configArea;
 	}
 	
 	/**
@@ -469,7 +468,7 @@ public class MidicaFileChooser extends JFileChooser {
 		JPanel directImportArea = new JPanel();
 		directImportArea.setLayout(new BoxLayout(directImportArea, BoxLayout.X_AXIS));
 		
-		// create the decompile config icon
+		// create the checkbox
 		cbxDirectImport = new JCheckBox(Dict.get(Dict.DIRECT_IMPORT));
 		
 		// add elements (spacer, checkbox, spacer)
@@ -487,7 +486,7 @@ public class MidicaFileChooser extends JFileChooser {
 	 * The extra widgets are:
 	 * 
 	 * - charset-related widgets
-	 * - decompile configuration icon
+	 * - config icon
 	 * - widgets related to a foreign program (command or full path)
 	 * - foreign program URL, if available
 	 * 
@@ -564,10 +563,10 @@ public class MidicaFileChooser extends JFileChooser {
 				fileAttrArea.add( foreignUrlArea ); // program url and label
 			}
 		}
-		if (needDCIcon) {
-			Container decompileArea = createDecompileArea(leftElemOrig);
-			fileAttrArea.add( fillerF       ); // cloned filler
-			fileAttrArea.add( decompileArea ); // decompile config icon
+		if (needConfigIcon) {
+			Container configArea = createConfigArea(leftElemOrig);
+			fileAttrArea.add( fillerF    ); // cloned filler
+			fileAttrArea.add( configArea ); // config icon
 		}
 		if (needDirectImport) {
 			Container directImportArea = createDirectImportArea(leftElemOrig);

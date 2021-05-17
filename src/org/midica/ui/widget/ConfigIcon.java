@@ -19,26 +19,34 @@ import org.midica.config.Cli;
 import org.midica.config.Dict;
 import org.midica.config.KeyBindingManager;
 import org.midica.config.Laf;
-import org.midica.ui.file.DecompileConfigView;
+import org.midica.ui.file.config.DecompileConfigView;
+import org.midica.ui.file.config.FileConfigView;
 
 /**
- * This class provides an icon for opening the decompilation config window.
- * When clicked, it opens the window where decompilation options can be adjusted.
+ * This class provides an icon for opening a file-based config window.
+ * (E.g. for decompilation options, audio options, etc.)
+ * When clicked, it opens the window where the options can be adjusted.
  * 
  * @author Jan Trukenmüller
  */
-public class DecompileConfigIcon extends JLabel implements IOpenIcon {
+public class ConfigIcon extends JLabel implements IOpenIcon {
+	
+	public static final int TYPE_DECOMPILE = 1;
+	public static final int TYPE_AUDIO     = 2;
 	
 	private static final long serialVersionUID = 1L;
-	
-	private boolean isConfigOk = true;
 	
 	private static final String pathIconWrong = "org/midica/resources/config-icon-wrong.png";
 	private static final String pathIconOk    = "org/midica/resources/config-icon-ok.png";
 	
+	private int            type;
+	private FileConfigView configView;
+	
 	private JDialog   winOwner  = null;
 	private ImageIcon iconWrong = null;
 	private ImageIcon iconOk    = null;
+	
+	private boolean isConfigOk = true;
 	
 	private static final Border borderWrong = new LineBorder(Laf.COLOR_CONFIG_ICON_BORDER_WRONG, 1);
 	private static final Border borderOk    = new LineBorder(Laf.COLOR_CONFIG_ICON_BORDER_OK,    1);
@@ -46,15 +54,15 @@ public class DecompileConfigIcon extends JLabel implements IOpenIcon {
 	private String keyBindingId     = null;
 	private String keyBindingTypeId = null;
 	
-	private DecompileConfigView decompileConfigView;
-	
 	/**
-	 * Creates the decompile config icon.
+	 * Creates the config icon.
 	 * 
 	 * @param owner  The window that contains the icon.
+	 * @param type   The window type.
 	 */
-	public DecompileConfigIcon(JDialog owner) {
-		winOwner = owner;
+	public ConfigIcon(JDialog owner, int type) {
+		winOwner  = owner;
+		this.type = type;
 		if (!Cli.isCliMode) {
 			iconWrong = new ImageIcon( ClassLoader.getSystemResource(pathIconWrong) );
 			iconOk    = new ImageIcon( ClassLoader.getSystemResource(pathIconOk)    );
@@ -96,15 +104,15 @@ public class DecompileConfigIcon extends JLabel implements IOpenIcon {
 		setBackground(null);
 		
 		// icon and tooltip
-		String tooltip = "<html><b>" + Dict.get(Dict.DC_ICON_TOOLTIP) + "</b><br>\n";
+		String tooltip = "<html><b>" + Dict.get(Dict.CONFIG_ICON_TOOLTIP) + "</b><br>\n";
 		if (ok) {
 			setIcon(iconOk);
-			tooltip += Dict.get(Dict.DC_ICON_TOOLTIP_OK);
+			tooltip += Dict.get(Dict.CONFIG_ICON_TOOLTIP_OK);
 			setBorder(borderOk);
 		}
 		else {
 			setIcon(iconWrong);
-			tooltip += Dict.get(Dict.DC_ICON_TOOLTIP_WRONG);
+			tooltip += Dict.get(Dict.CONFIG_ICON_TOOLTIP_WRONG);
 			setBorder(borderWrong);
 		}
 		setToolTipText(tooltip);
@@ -122,12 +130,20 @@ public class DecompileConfigIcon extends JLabel implements IOpenIcon {
 	}
 	
 	/**
-	 * Opens the decompile config window.
+	 * Opens the config window.
 	 * Called when activated by key binding.
 	 */
 	@Override
 	public void open() {
-		decompileConfigView = new DecompileConfigView(this, winOwner);
-		decompileConfigView.open();
+		if (ConfigIcon.TYPE_DECOMPILE == type) {
+			configView = new DecompileConfigView(winOwner, this);
+		}
+		else if (ConfigIcon.TYPE_AUDIO == type) {
+			// TODO: implement
+		}
+		else
+			assert(false);
+		
+		configView.open();
 	}
 }

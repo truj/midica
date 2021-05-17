@@ -41,7 +41,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.midica.ui.ErrorMsgView;
-import org.midica.ui.widget.DecompileConfigIcon;
 import org.midica.ui.widget.IOpenIcon;
 import org.midica.ui.widget.MidicaButton;
 import org.midica.ui.widget.MidicaTable;
@@ -345,8 +344,8 @@ public class KeyBindingManager {
 		// tooltips
 		for (JComponent c : icons) {
 			if (c instanceof IOpenIcon) {
-				((IOpenIcon) c).rememberKeyBindingId(id, Dict.TT_KEY_DC_CONFIG_OPEN);
-				addTooltip(c, id, Dict.TT_KEY_DC_CONFIG_OPEN);
+				((IOpenIcon) c).rememberKeyBindingId(id, Dict.TT_KEY_OPEN_ICON);
+				addTooltip(c, id, Dict.TT_KEY_OPEN_ICON);
 			}
 		}
 		
@@ -499,7 +498,7 @@ public class KeyBindingManager {
 		addInputs(id);
 		
 		// tooltips
-		String ttKey = icon instanceof DecompileConfigIcon ? Dict.TT_KEY_DC_CONFIG_OPEN : Dict.TT_KEY_FILTER_OPEN;
+		String ttKey = Dict.TT_KEY_OPEN_ICON;
 		if (icon instanceof IOpenIcon) {
 			((IOpenIcon) icon).rememberKeyBindingId(id, ttKey);
 			addTooltip(icon, id, ttKey);
@@ -654,7 +653,7 @@ public class KeyBindingManager {
 		
 		// add tooltip
 		if (c instanceof IOpenIcon) {
-			String ttKey = c instanceof DecompileConfigIcon ? Dict.TT_KEY_DC_CONFIG_OPEN : Dict.TT_KEY_FILTER_OPEN;
+			String ttKey = Dict.TT_KEY_OPEN_ICON;
 			((IOpenIcon) c).rememberKeyBindingId(id, ttKey);
 			addTooltip(c, id, ttKey);
 		}

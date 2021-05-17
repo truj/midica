@@ -679,7 +679,7 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECT_CLOSE,            KeyEvent.VK_ESCAPE,   0                          );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECT_CHARSET_CBX,      KeyEvent.VK_C,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECT_FOREIGN_EXE,      KeyEvent.VK_P,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_FILE_SELECT_DC_OPEN,          KeyEvent.VK_D,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECT_CONFIG_OPEN,      KeyEvent.VK_O,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_IMP_MPL,        KeyEvent.VK_1,        0                          );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_IMP_MPL,        KeyEvent.VK_NUMPAD1,  0                          );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_IMP_MPL,        KeyEvent.VK_1,        InputEvent.CTRL_DOWN_MASK  );
@@ -732,7 +732,10 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_MSCORE,     KeyEvent.VK_NUMPAD7,  0                          );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_MSCORE,     KeyEvent.VK_7,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_MSCORE,     KeyEvent.VK_NUMPAD7,  InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_DC_CONF_CLOSE,                KeyEvent.VK_ESCAPE,   0                          );
+		addDefaultKeyBinding( Dict.KEY_FILE_CONF_CLOSE,              KeyEvent.VK_ESCAPE,   0                          );
+		addDefaultKeyBinding( Dict.KEY_FILE_CONF_SAVE,               KeyEvent.VK_S,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_CONF_RESTORE_SAVED,      KeyEvent.VK_R,        InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK );
+		addDefaultKeyBinding( Dict.KEY_FILE_CONF_RESTORE_DEFAULT,    KeyEvent.VK_D,        InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_DEBUG,            KeyEvent.VK_1,        0                          );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_DEBUG,            KeyEvent.VK_NUMPAD1,  0                          );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_DEBUG,            KeyEvent.VK_1,        InputEvent.CTRL_DOWN_MASK  );
@@ -794,9 +797,6 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_BTN_GLOB_RANGE,       KeyEvent.VK_R,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_AREA_GLOB_ALL,        KeyEvent.VK_E,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_BTN_GLOB_ALL,         KeyEvent.VK_U,        InputEvent.ALT_DOWN_MASK   );
-		addDefaultKeyBinding( Dict.KEY_DC_CONF_RESTORE_SAVED,        KeyEvent.VK_R,        InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK );
-		addDefaultKeyBinding( Dict.KEY_DC_CONF_RESTORE_DEFAULT,      KeyEvent.VK_D,        InputEvent.CTRL_DOWN_MASK | InputEvent.ALT_DOWN_MASK );
-		addDefaultKeyBinding( Dict.KEY_DC_CONF_SAVE,                 KeyEvent.VK_S,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_CLOSE,          KeyEvent.VK_ESCAPE,   0                          );
 		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_SHORT,          KeyEvent.VK_S,        0                          );
 		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_META,           KeyEvent.VK_M,        0                          );

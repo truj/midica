@@ -434,7 +434,7 @@ public class FileSelector extends JDialog {
 		for (MidicaFileChooser chooser : fileChoosers) {
 			JComboBox<?> cbx  = chooser.getCharsetSelectionCbx();
 			JComponent   fld  = chooser.getForeignExecField();
-			JComponent   icon = chooser.getDecompileConfigIcon();
+			JComponent   icon = chooser.getConfigIcon();
 			if (cbx != null)
 				cbxs.add(cbx);
 			if (fld != null)
@@ -447,7 +447,7 @@ public class FileSelector extends JDialog {
 		if (fields.size() > 0)
 			keyBindingManager.addBindingsForFocusOfVisibleElement(fields, Dict.KEY_FILE_SELECT_FOREIGN_EXE);
 		if (icons.size() > 0)
-			keyBindingManager.addBindingsForIconLabelOfVisibleTab(icons, Dict.KEY_FILE_SELECT_DC_OPEN);
+			keyBindingManager.addBindingsForIconLabelOfVisibleTab(icons, Dict.KEY_FILE_SELECT_CONFIG_OPEN);
 		
 		// add key binding to choose a tab
 		if (content != null) {

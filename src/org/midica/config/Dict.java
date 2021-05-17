@@ -474,9 +474,8 @@ public class Dict {
 	public static final String TT_KEY_CBX_OPEN              = "tt_key_cbx_open";
 	public static final String TT_KEY_CBX_CHANNEL_SELECT    = "tt_key_cbx_channel_select";
 	public static final String TT_KEY_CBX_SELECT_CHANNEL_N  = "tt_key_cbx_select_channel_n";
-	public static final String TT_KEY_FILTER_OPEN           = "tt_key_filter_open";
 	public static final String TT_KEY_TAB_SELECT            = "tt_key_tab_select";
-	public static final String TT_KEY_DC_CONFIG_OPEN        = "tt_key_dc_config_open";
+	public static final String TT_KEY_OPEN_ICON             = "tt_key_open_icon";
 	
 	// key binding categories (windows)
 	public static final String KEYCAT_MAIN                  = "key_main";
@@ -485,6 +484,7 @@ public class Dict {
 	public static final String KEYCAT_INFO                  = "key_info";
 	public static final String KEYCAT_MSG                   = "key_msg";
 	public static final String KEYCAT_FILE_SELECT           = "key_file_select";
+	public static final String KEYCAT_FILE_CONF             = "key_file_conf";
 	public static final String KEYCAT_DC_CONF               = "key_dc_conf";
 	public static final String KEYCAT_EXPORT_RESULT         = "key_export_result";
 	public static final String KEYCAT_STRING_FILTER         = "key_string_filter";
@@ -682,7 +682,7 @@ public class Dict {
 	public static final String KEY_FILE_SELECT_CLOSE            = "key_file_select_close";
 	public static final String KEY_FILE_SELECT_CHARSET_CBX      = "key_file_select_charset_cbx";
 	public static final String KEY_FILE_SELECT_FOREIGN_EXE      = "key_file_select_foreign_exe";
-	public static final String KEY_FILE_SELECT_DC_OPEN          = "key_file_select_dc_config_open";
+	public static final String KEY_FILE_SELECT_CONFIG_OPEN      = "key_file_select_config_open";
 	public static final String KEY_FILE_SELECTOR_IMP_MPL        = "key_file_selector_imp_mpl";
 	public static final String KEY_FILE_SELECTOR_IMP_MID        = "key_file_selector_imp_mid";
 	public static final String KEY_FILE_SELECTOR_IMP_ALDA       = "key_file_selector_imp_alda";
@@ -696,7 +696,10 @@ public class Dict {
 	public static final String KEY_FILE_SELECTOR_EXP_ABC        = "key_file_selector_exp_abc";
 	public static final String KEY_FILE_SELECTOR_EXP_LY         = "key_file_selector_exp_ly";
 	public static final String KEY_FILE_SELECTOR_EXP_MSCORE     = "key_file_selector_exp_mscore";
-	public static final String KEY_DC_CONF_CLOSE                = "key_dc_conf_close";
+	public static final String KEY_FILE_CONF_CLOSE              = "key_file_conf_close";
+	public static final String KEY_FILE_CONF_SAVE               = "key_file_conf_save";
+	public static final String KEY_FILE_CONF_RESTORE_SAVED      = "key_file_conf_restore_saved";
+	public static final String KEY_FILE_CONF_RESTORE_DEFAULT    = "key_file_conf_restore_default";
 	public static final String KEY_DC_CONF_TAB_DEBUG            = "key_dc_conf_tab_debug";
 	public static final String KEY_DC_CONF_TAB_NOTE_LENGTH      = "key_dc_conf_tab_note_length";
 	public static final String KEY_DC_CONF_TAB_CHORDS           = "key_dc_conf_tab_chords";
@@ -737,9 +740,6 @@ public class Dict {
 	public static final String KEY_DC_CONF_BTN_GLOB_RANGE       = "key_dc_conf_btn_glob_range";
 	public static final String KEY_DC_CONF_AREA_GLOB_ALL        = "key_dc_conf_area_glob_all";
 	public static final String KEY_DC_CONF_BTN_GLOB_ALL         = "key_dc_conf_btn_glob_all";
-	public static final String KEY_DC_CONF_RESTORE_SAVED        = "key_dc_conf_restore_saved";
-	public static final String KEY_DC_CONF_RESTORE_DEFAULT      = "key_dc_conf_restore_default";
-	public static final String KEY_DC_CONF_SAVE                 = "key_dc_conf_save";
 	public static final String KEY_EXPORT_RESULT_CLOSE          = "key_export_result_close";
 	public static final String KEY_EXPORT_RESULT_SHORT          = "key_export_result_short";
 	public static final String KEY_EXPORT_RESULT_META           = "key_export_result_meta";
@@ -1716,9 +1716,9 @@ public class Dict {
 	
 	// FileSelector
 	public static final String TITLE_FILE_SELECTOR              = "title_file_selector";
-	public static final String DC_ICON_TOOLTIP                  = "dc_icon_tooltip";
-	public static final String DC_ICON_TOOLTIP_WRONG            = "dc_icon_tooltip_wrong";
-	public static final String DC_ICON_TOOLTIP_OK               = "dc_icon_tooltip_ok";
+	public static final String CONFIG_ICON_TOOLTIP              = "config_icon_tooltip";
+	public static final String CONFIG_ICON_TOOLTIP_WRONG        = "config_icon_tooltip_wrong";
+	public static final String CONFIG_ICON_TOOLTIP_OK           = "config_icon_tooltip_ok";
 	
 	// PlayerView
 	public static final String TITLE_PLAYER                     = "title_player";
@@ -1826,6 +1826,7 @@ public class Dict {
 		keyBindingCategories.add(KEYCAT_INFO);
 		keyBindingCategories.add(KEYCAT_MSG);
 		keyBindingCategories.add(KEYCAT_FILE_SELECT);
+		keyBindingCategories.add(KEYCAT_FILE_CONF);
 		keyBindingCategories.add(KEYCAT_DC_CONF);
 		keyBindingCategories.add(KEYCAT_EXPORT_RESULT);
 		keyBindingCategories.add(KEYCAT_STRING_FILTER);
@@ -1897,20 +1898,20 @@ public class Dict {
 		set( TT_KEY_CBX_OPEN,              "Key binding(s) to open"                     );
 		set( TT_KEY_CBX_CHANNEL_SELECT,    "Key binding(s) to select the channel"       );
 		set( TT_KEY_CBX_SELECT_CHANNEL_N,  "Select Channel "                            );
-		set( TT_KEY_FILTER_OPEN,           "Key binding(s) to open"                     );
 		set( TT_KEY_TAB_SELECT,            "Key binding(s) to select"                   );
-		set( TT_KEY_DC_CONFIG_OPEN,        "Key binding(s) to open"                     );
+		set( TT_KEY_OPEN_ICON,             "Key binding(s) to open"                     );
 		
 		// key binding categories (windows)
-		set( KEYCAT_MAIN,                  "Main Window"                                                                 );
-		set( KEYCAT_PLAYER,                "Player"                                                                      );
-		set( KEYCAT_SOUNDCHECK,            "Soundcheck"                                                                  );
-		set( KEYCAT_INFO,                  "Info & Configuration"                                                        );
-		set( KEYCAT_MSG,                   "Message Window"                                                              );
-		set( KEYCAT_FILE_SELECT,           "File Selector"                                                               );
-		set( KEYCAT_DC_CONF,               "Decompile Config Window"                                                     );
-		set( KEYCAT_EXPORT_RESULT,         "Export Result Window"                                                        );
-		set( KEYCAT_STRING_FILTER,         "Table Filter"                                                                );
+		set( KEYCAT_MAIN,                  "Main Window"                                  );
+		set( KEYCAT_PLAYER,                "Player"                                       );
+		set( KEYCAT_SOUNDCHECK,            "Soundcheck"                                   );
+		set( KEYCAT_INFO,                  "Info & Configuration"                         );
+		set( KEYCAT_MSG,                   "Message Window"                               );
+		set( KEYCAT_FILE_SELECT,           "File Selector"                                );
+		set( KEYCAT_FILE_CONF,             "File-based Config Windows (general settings)" );
+		set( KEYCAT_DC_CONF,               "Decompile Config Window (specific settings)"  );
+		set( KEYCAT_EXPORT_RESULT,         "Export Result Window"                         );
+		set( KEYCAT_STRING_FILTER,         "Table Filter"                                 );
 		
 		// key binding IDs
 		set( KEY_MAIN_INFO,                    "Open Info & Config Details"                                                  );
@@ -2105,7 +2106,7 @@ public class Dict {
 		set( KEY_FILE_SELECT_CLOSE,            "Close the File Selector"                                                     );
 		set( KEY_FILE_SELECT_CHARSET_CBX,      "Open the combobox to select the charset"                                     );
 		set( KEY_FILE_SELECT_FOREIGN_EXE,      "Focus the Text field for the Command or full Path of the foreign program"    );
-		set( KEY_FILE_SELECT_DC_OPEN,          "Open the Decompile Configuration Window"                                     );
+		set( KEY_FILE_SELECT_CONFIG_OPEN,      "Open the File-based Configuration Window"                                    );
 		set( KEY_FILE_SELECTOR_IMP_MPL,        "In the IMPORT selector, select the MidicaPL Tab"                             );
 		set( KEY_FILE_SELECTOR_IMP_MID,        "In the IMPORT selector, select the MIDI Tab"                                 );
 		set( KEY_FILE_SELECTOR_IMP_ALDA,       "In the IMPORT selector, select the ALDA Tab"                                 );
@@ -2119,7 +2120,10 @@ public class Dict {
 		set( KEY_FILE_SELECTOR_EXP_ABC,        "In the EXPORT selector, select the ABC Tab"                                  );
 		set( KEY_FILE_SELECTOR_EXP_LY,         "In the EXPORT selector, select the LilyPond Tab"                             );
 		set( KEY_FILE_SELECTOR_EXP_MSCORE,     "In the EXPORT selector, select the MuscScore Tab"                            );
-		set( KEY_DC_CONF_CLOSE,                "Close the Decompile Configuration Window"                                    );
+		set( KEY_FILE_CONF_CLOSE,              "Close the file-based configuration window"                                   );
+		set( KEY_FILE_CONF_SAVE,               "Press the button to save the file config"                                    );
+		set( KEY_FILE_CONF_RESTORE_SAVED,      "Press the button to restore saved file config"                               );
+		set( KEY_FILE_CONF_RESTORE_DEFAULT,    "Press the button to restore default file config"                             );
 		set( KEY_DC_CONF_TAB_DEBUG,            "Select the Debug tab in the decompile config window"                         );
 		set( KEY_DC_CONF_TAB_NOTE_LENGTH,      "Select the Note Length tab in the decompile config window"                   );
 		set( KEY_DC_CONF_TAB_CHORDS,           "Select the Chords tab in the decompile config window"                        );
@@ -2160,9 +2164,6 @@ public class Dict {
 		set( KEY_DC_CONF_BTN_GLOB_RANGE,       "Press Button: Add many splits"                                               );
 		set( KEY_DC_CONF_AREA_GLOB_ALL,        "Focus text area: Edit Extra Split Ticks Directly"                            );
 		set( KEY_DC_CONF_BTN_GLOB_ALL,         "Press Button: Update Ticks"                                                  );
-		set( KEY_DC_CONF_RESTORE_SAVED,        "Press the button to restore saved decompile config"                          );
-		set( KEY_DC_CONF_RESTORE_DEFAULT,      "Press the button to restore default decompile config"                        );
-		set( KEY_DC_CONF_SAVE,                 "Press the button to save the decompile config"                               );
 		set( KEY_EXPORT_RESULT_CLOSE,          "Close the Export Result Window"                                              );
 		set( KEY_EXPORT_RESULT_SHORT,          "Toggle Checkbox: Show Ignored Short Message"                                 );
 		set( KEY_EXPORT_RESULT_META,           "Toggle Checkbox: Show Ignored Meta Message"                                  );
@@ -3279,9 +3280,9 @@ public class Dict {
 		
 		// FileSelector
 		set( TITLE_FILE_SELECTOR,                 "Midica Choose File"         );
-		set( DC_ICON_TOOLTIP,                     "Decompile Options"          );
-		set( DC_ICON_TOOLTIP_WRONG,               "Config contains errors"     );
-		set( DC_ICON_TOOLTIP_OK,                  "Config formally correct"    );
+		set( CONFIG_ICON_TOOLTIP,                 "Config Options"             );
+		set( CONFIG_ICON_TOOLTIP_WRONG,           "Config contains errors"     );
+		set( CONFIG_ICON_TOOLTIP_OK,              "Config formally correct"    );
 		
 		// PlayerView
 		set( TITLE_PLAYER,                        "Midica Player"              );
