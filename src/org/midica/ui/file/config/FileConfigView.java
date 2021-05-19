@@ -50,6 +50,10 @@ public abstract class FileConfigView extends JDialog {
 	protected FileConfigView(JDialog owner, ConfigIcon icon, String title) {
 		super(owner, title, true);
 		this.icon = icon;
+		
+		btnRestoreDefaults = new MidicaButton(Dict.get(Dict.DC_RESTORE_DEFAULTS));
+		btnRestore         = new MidicaButton(Dict.get(Dict.DC_RESTORE));
+		btnSave            = new MidicaButton(Dict.get(Dict.DC_SAVE));
 	}
 	
 	/**
@@ -213,7 +217,7 @@ public abstract class FileConfigView extends JDialog {
 	 * 
 	 * The specific key bindings should be implemented directly in this method.
 	 * The general bindings should be added
-	 * by calling {@link addGeneralKeyBindings()}.
+	 * by calling {@link #addGeneralKeyBindings()}.
 	 */
 	protected abstract void addKeyBindings();
 	

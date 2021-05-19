@@ -37,7 +37,26 @@ import org.midica.ui.widget.ConfigIcon;
  */
 public class DecompileConfigController extends FileConfigController {
 	
+	private static DecompileConfigController controller;
+	
 	private static TreeSet<Long> extraGlobalTicks = null;
+	
+	/**
+	 * Creates a singleton instance of the controller.
+	 * 
+	 * @param view  the window to be controlled
+	 * @param icon  the icon that is used to open the config window
+	 * @return the created controller.
+	 */
+	public static DecompileConfigController getInstance(DecompileConfigView view, ConfigIcon icon) {
+
+		if (null == controller)
+			controller = new DecompileConfigController(view, icon);
+		else
+			controller.init(view, icon);
+		
+		return controller;
+	}
 	
 	/**
 	 * Creates a controller for the decompile config window.
@@ -45,22 +64,13 @@ public class DecompileConfigController extends FileConfigController {
 	 * @param view  the window to be controlled
 	 * @param icon  the icon that is used to open the config window
 	 */
-	public DecompileConfigController(DecompileConfigView view, ConfigIcon icon) {
+	private DecompileConfigController(DecompileConfigView view, ConfigIcon icon) {
 		super(view, icon);
 	}
 	
-	/**
-	 * Returns the session config for decompilation settings.
-	 * 
-	 * @return the session config.
-	 */
-	public static HashMap<String, String> getSessionConfig() {
-		
-		// create session config, if not yet done
-		if (null == sessionConfig)
-			new DecompileConfigView(null, null);
-		
-		return sessionConfig;
+	@Override
+	protected void createDefaultView() {
+		new DecompileConfigView(null, null);
 	}
 	
 	/**
@@ -130,6 +140,8 @@ public class DecompileConfigController extends FileConfigController {
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		super.actionPerformed(e);
+		
 		Object              widget = e.getSource();
 		DecompileConfigView view   = (DecompileConfigView) this.view;
 		
@@ -275,20 +287,9 @@ public class DecompileConfigController extends FileConfigController {
 			}
 		}
 		
-		// restore saved settings
-		else if (widget == view.btnRestore) {
-			initSessionConfig(true);
-		}
-		
 		// restore default settings
 		else if (widget == view.btnRestoreDefaults) {
-			restoreDefaultSettings();
 			extraGlobalTicks = new TreeSet<Long>();
-		}
-		
-		// save settings
-		else if (widget == view.btnSave) {
-			saveSettings();
 		}
 	}
 	

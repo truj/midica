@@ -62,8 +62,13 @@ public class FileExtensionFilter extends FileFilter {
 		else if (FileSelector.FILE_TYPE_ALDA.equals(type)) {
 			allowedExtensions.add("alda");
 		}
-		else if (FileSelector.FILE_TYPE_WAV.equals(type)) {
+		else if (FileSelector.FILE_TYPE_AUDIO.equals(type)) {
 			allowedExtensions.add("wav");
+			allowedExtensions.add("au");
+			allowedExtensions.add("snd");
+			allowedExtensions.add("aif");
+			allowedExtensions.add("aiff");
+			allowedExtensions.add("aifc");
 		}
 		else if (FileSelector.FILE_TYPE_ABC.equals(type)) {
 			allowedExtensions.add("abc");

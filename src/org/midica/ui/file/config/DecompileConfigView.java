@@ -135,9 +135,6 @@ public class DecompileConfigView extends FileConfigView {
 		btnAddGlobalTicks         = new MidicaButton(Dict.get(Dict.BTN_ADD_TICKS));
 		areaGlobalsStr            = new JTextArea();
 		btnAllTicks               = new MidicaButton(Dict.get(Dict.BTN_UPDATE_TICKS));
-		btnRestoreDefaults        = new MidicaButton(Dict.get(Dict.DC_RESTORE_DEFAULTS));
-		btnRestore                = new MidicaButton(Dict.get(Dict.DC_RESTORE));
-		btnSave                   = new MidicaButton(Dict.get(Dict.DC_SAVE));
 		cbxLengthStrategy.setModel(DecompileConfigController.getComboboxModel(Config.DC_LENGTH_STRATEGY));
 		cbxMinTargetTicksOn.setModel(DecompileConfigController.getComboboxModel(Config.DC_MIN_TARGET_TICKS_ON));
 		cbxMaxTargetTicksOn.setModel(DecompileConfigController.getComboboxModel(Config.DC_MAX_TARGET_TICKS_ON));
@@ -145,7 +142,7 @@ public class DecompileConfigView extends FileConfigView {
 		cbxCtrlChangeMode.setModel(DecompileConfigController.getComboboxModel(Config.DC_CTRL_CHANGE_MODE));
 		
 		// create controller
-		controller = new DecompileConfigController(this, icon);
+		controller = DecompileConfigController.getInstance(this, icon);
 		
 		init();
 		addKeyBindings();

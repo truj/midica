@@ -19,6 +19,7 @@ import org.midica.config.Cli;
 import org.midica.config.Dict;
 import org.midica.config.KeyBindingManager;
 import org.midica.config.Laf;
+import org.midica.ui.file.config.AudioConfigView;
 import org.midica.ui.file.config.DecompileConfigView;
 import org.midica.ui.file.config.FileConfigView;
 
@@ -31,6 +32,7 @@ import org.midica.ui.file.config.FileConfigView;
  */
 public class ConfigIcon extends JLabel implements IOpenIcon {
 	
+	public static final int TYPE_NONE      = 0; // pseudo type
 	public static final int TYPE_DECOMPILE = 1;
 	public static final int TYPE_AUDIO     = 2;
 	
@@ -135,12 +137,10 @@ public class ConfigIcon extends JLabel implements IOpenIcon {
 	 */
 	@Override
 	public void open() {
-		if (ConfigIcon.TYPE_DECOMPILE == type) {
+		if (ConfigIcon.TYPE_DECOMPILE == type)
 			configView = new DecompileConfigView(winOwner, this);
-		}
-		else if (ConfigIcon.TYPE_AUDIO == type) {
-			// TODO: implement
-		}
+		else if (ConfigIcon.TYPE_AUDIO == type)
+			configView = new AudioConfigView(winOwner, this);
 		else
 			assert(false);
 		

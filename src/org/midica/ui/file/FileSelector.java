@@ -42,7 +42,7 @@ public class FileSelector extends JDialog {
 	// file types (NOT the same as file extensions)
 	public static final String FILE_TYPE_MPL        = "mpl";
 	public static final String FILE_TYPE_ALDA       = "alda";
-	public static final String FILE_TYPE_WAV        = "wav";
+	public static final String FILE_TYPE_AUDIO      = "audio";
 	public static final String FILE_TYPE_ABC        = "abc";
 	public static final String FILE_TYPE_MIDI       = "midi";
 	public static final String FILE_TYPE_LY         = "ly";
@@ -186,14 +186,14 @@ public class FileSelector extends JDialog {
 			tabs.put(FILE_TYPE_ALDA, Dict.TAB_ALDA);
 			
 			fileChoosers.add(new MidicaFileChooser(
-					FILE_TYPE_WAV,
+					FILE_TYPE_AUDIO,
 					filePurpose,
-					Config.get(Config.DIRECTORY_EXPORT_WAV),
+					Config.get(Config.DIRECTORY_EXPORT_AUDIO),
 					false,
 					null,
 					this
 				));
-				tabs.put(FILE_TYPE_WAV, Dict.TAB_WAV);
+				tabs.put(FILE_TYPE_AUDIO, Dict.TAB_AUDIO);
 				
 			fileChoosers.add(new MidicaFileChooser(
 				FILE_TYPE_ABC,
@@ -402,8 +402,8 @@ public class FileSelector extends JDialog {
 					Config.set(Config.DIRECTORY_EXPORT_MPL, directory);
 				else if (FILE_TYPE_ALDA.equals(fileType))
 					Config.set(Config.DIRECTORY_EXPORT_ALDA, directory);
-				else if (FILE_TYPE_WAV.equals(fileType))
-					Config.set(Config.DIRECTORY_EXPORT_WAV, directory);
+				else if (FILE_TYPE_AUDIO.equals(fileType))
+					Config.set(Config.DIRECTORY_EXPORT_AUDIO, directory);
 				else if (FILE_TYPE_ABC.equals(fileType))
 					Config.set(Config.DIRECTORY_EXPORT_ABC, directory);
 				else if (FILE_TYPE_LY.equals(fileType))
@@ -463,7 +463,7 @@ public class FileSelector extends JDialog {
 				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_MID,    0 );
 				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_MPL,    1 );
 				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_ALDA,   2 );
-				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_WAV,    3 );
+				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_AUDIO,  3 );
 				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_ABC,    4 );
 				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_LY,     5 );
 				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_MSCORE, 6 );

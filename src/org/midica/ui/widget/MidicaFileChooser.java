@@ -113,9 +113,18 @@ public class MidicaFileChooser extends JFileChooser {
 		if (Laf.isNimbus)
 			changeButtonColors();
 		
+		// get type for the config icon
+		int configType = ConfigIcon.TYPE_NONE;
+		if (needConfigIcon) {
+			if (FileSelector.FILE_TYPE_AUDIO == type)
+				configType = ConfigIcon.TYPE_AUDIO;
+			else
+				configType = ConfigIcon.TYPE_DECOMPILE;
+		}
+		
 		// insert the charset combobox and/or the config icon
 		if (needCharsetSel || needConfigIcon || needForeignExe || needDirectImport) {
-			insertExtraWidgets();
+			insertExtraWidgets(configType);
 		}
 	}
 	
@@ -425,9 +434,10 @@ public class MidicaFileChooser extends JFileChooser {
 	 * It consists of a spacer on the left side and the icon on the right side.
 	 * 
 	 * @param leftElement    file name label (used to copy the dimension)
+	 * @param configType     one of the available types in {@link ConfigIcon}
 	 * @return the created area
 	 */
-	private Container createConfigArea(Component leftElement) {
+	private Container createConfigArea(Component leftElement, int configType) {
 		
 		// copy the dimensions of the "file name" label
 		Dimension leftDimCorrected = leftElement.getPreferredSize();
@@ -440,7 +450,7 @@ public class MidicaFileChooser extends JFileChooser {
 		configArea.setLayout(new BoxLayout(configArea, BoxLayout.X_AXIS));
 		
 		// create the config icon
-		configIcon = new ConfigIcon(parentWindow, ConfigIcon.TYPE_DECOMPILE);
+		configIcon = new ConfigIcon(parentWindow, configType);
 		
 		// add elements (spacer, icon, spacer)
 		configArea.add(spacer);
@@ -493,8 +503,10 @@ public class MidicaFileChooser extends JFileChooser {
 	 * The code in this method is really ugly but necessary because
 	 * {@link JFileChooser} doesn't provide any other possibility to
 	 * add extra elements.
+	 * 
+	 * @param configType    one of the available types in {@link ConfigIcon}
 	 */
-	private void insertExtraWidgets() {
+	private void insertExtraWidgets(int configType) {
 		
 		// Get the component containing:
 		// - file name label and text field  (index 0)
@@ -564,7 +576,7 @@ public class MidicaFileChooser extends JFileChooser {
 			}
 		}
 		if (needConfigIcon) {
-			Container configArea = createConfigArea(leftElemOrig);
+			Container configArea = createConfigArea(leftElemOrig, configType);
 			fileAttrArea.add( fillerF    ); // cloned filler
 			fileAttrArea.add( configArea ); // config icon
 		}

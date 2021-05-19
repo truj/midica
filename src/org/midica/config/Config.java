@@ -26,6 +26,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.midica.file.write.AudioExporter;
 import org.midica.file.write.Decompiler;
 import org.midica.ui.file.FileSelector;
 import org.midica.ui.model.ComboboxStringOption;
@@ -68,7 +69,7 @@ public class Config {
 	public static final String DIRECTORY_EXPORT_MPL    = "directory_export_mpl";
 	public static final String DIRECTORY_EXPORT_MID    = "directory_export_mid";
 	public static final String DIRECTORY_EXPORT_ALDA   = "directory_export_alda";
-	public static final String DIRECTORY_EXPORT_WAV    = "directory_export_wav";
+	public static final String DIRECTORY_EXPORT_AUDIO  = "directory_export_audio";
 	public static final String DIRECTORY_EXPORT_ABC    = "directory_export_abc";
 	public static final String DIRECTORY_EXPORT_LY     = "directory_export_ly";
 	public static final String DIRECTORY_EXPORT_MSCORE = "directory_export_mscore";
@@ -214,6 +215,13 @@ public class Config {
 	public static final String DC_CTRL_CHANGE_MODE         = "dc_ctrl_change_mode";
 	public static final String DC_EXTRA_GLOBALS_STR        = "dc_extra_globals_str";
 	
+	// audio options
+	public static final String AU_ENCODING         = "au_encoding";
+	public static final String AU_SAMPLE_SIZE_BITS = "au_sample_size_bits";
+	public static final String AU_SAMPLE_RATE      = "au_sample_rate";
+	public static final String AU_CHANNELS         = "au_channels";
+	public static final String AU_IS_BIG_ENDIAN    = "au_is_big_endian";
+	
 	// private constants
 	private static File configFile;
 	private static HashMap<String, String>              defaults        = null;
@@ -280,7 +288,7 @@ public class Config {
 		defaults.put( DIRECTORY_EXPORT_MPL,    homeDir      );
 		defaults.put( DIRECTORY_EXPORT_MID,    homeDir      );
 		defaults.put( DIRECTORY_EXPORT_ALDA,   homeDir      );
-		defaults.put( DIRECTORY_EXPORT_WAV,    homeDir      );
+		defaults.put( DIRECTORY_EXPORT_AUDIO,  homeDir      );
 		defaults.put( DIRECTORY_EXPORT_ABC,    homeDir      );
 		defaults.put( DIRECTORY_EXPORT_LY,     homeDir      );
 		defaults.put( DIRECTORY_EXPORT_MSCORE, homeDir      );
@@ -359,6 +367,22 @@ public class Config {
 		dcDefaults.put( DC_EXTRA_GLOBALS_STR,             Decompiler.DEFAULT_EXTRA_GLOBALS_STR        );
 		
 		return dcDefaults;
+	}
+	
+	/**
+	 * Initializes all default audio export configuration values and copies
+	 * them to the current config.
+	 */
+	public static HashMap<String, String> getDefaultAudioExportConfig() {
+		HashMap<String, String> audioDefaults = new HashMap<>();
+		
+		audioDefaults.put( AU_ENCODING,              AudioExporter.DEFAULT_ENCODING         );
+		audioDefaults.put( AU_SAMPLE_SIZE_BITS, "" + AudioExporter.DEFAULT_SAMPLE_SIZE_BITS );
+		audioDefaults.put( AU_SAMPLE_RATE,      "" + AudioExporter.DEFAULT_SAMPLE_RATE      );
+		audioDefaults.put( AU_CHANNELS,         "" + AudioExporter.DEFAULT_CHANNELS         );
+		audioDefaults.put( AU_IS_BIG_ENDIAN,    "" + AudioExporter.DEFAULT_IS_BIG_ENDIAN    );
+		
+		return audioDefaults;
 	}
 	
 	/**
@@ -716,10 +740,10 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_ALDA,       KeyEvent.VK_NUMPAD3,  0                          );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_ALDA,       KeyEvent.VK_3,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_ALDA,       KeyEvent.VK_NUMPAD3,  InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_WAV,        KeyEvent.VK_4,        0                          );
-		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_WAV,        KeyEvent.VK_NUMPAD4,  0                          );
-		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_WAV,        KeyEvent.VK_4,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_WAV,        KeyEvent.VK_NUMPAD4,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_AUDIO,      KeyEvent.VK_4,        0                          );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_AUDIO,      KeyEvent.VK_NUMPAD4,  0                          );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_AUDIO,      KeyEvent.VK_4,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_AUDIO,      KeyEvent.VK_NUMPAD4,  InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_ABC,        KeyEvent.VK_5,        0                          );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_ABC,        KeyEvent.VK_NUMPAD5,  0                          );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_ABC,        KeyEvent.VK_5,        InputEvent.CTRL_DOWN_MASK  );

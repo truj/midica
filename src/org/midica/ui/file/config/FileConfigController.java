@@ -41,10 +41,10 @@ public abstract class FileConfigController implements WindowListener, DocumentLi
 	protected ConfigIcon     icon;
 	protected FileConfigView view;
 	
-	protected static HashSet<String>             configKeys;
-	protected static HashMap<String, Class<?>>   configClasses;
-	protected static HashMap<String, String>     sessionConfig;
-	protected static HashMap<String, JComponent> configWidgets;
+	protected HashSet<String>             configKeys;
+	protected HashMap<String, Class<?>>   configClasses;
+	protected HashMap<String, String>     sessionConfig;
+	protected HashMap<String, JComponent> configWidgets;
 	
 	/**
 	 * Creates a file config controller.
@@ -53,9 +53,45 @@ public abstract class FileConfigController implements WindowListener, DocumentLi
 	 * @param icon  the icon that is used to open the config window
 	 */
 	protected FileConfigController(FileConfigView view, ConfigIcon icon) {
-		this.view = view;
-		this.icon = icon;
+		init(view, icon);
+	}
+	
+	/**
+	 * Creates a default view.
+	 */
+	protected abstract void createDefaultView();
+	
+	/**
+	 * Returns the session config.
+	 * 
+	 * @return the session config.
+	 */
+	public HashMap<String, String> getSessionConfig() {
 		
+		// create session config, if not yet done
+		if (null == sessionConfig)
+			createDefaultView();
+		
+		return sessionConfig;
+	}
+	
+	/**
+	 * Initializes the controller.
+	 * 
+	 * Connects view and icon with the controller, if not yet done.
+	 * Initializes the session config, if not yet done.
+	 * Connects the session config to the widgets.
+	 * 
+	 * @param view  the window to be controlled
+	 * @param icon  the icon that is used to open the config window
+	 */
+	protected void init(FileConfigView view, ConfigIcon icon) {
+		if (view != null)
+			this.view = view;
+		if (icon != null)
+			this.icon = icon;
+		
+		// init session config if not yet done
 		if (null == sessionConfig) {
 			initSessionConfig(true);
 		}
@@ -66,6 +102,32 @@ public abstract class FileConfigController implements WindowListener, DocumentLi
 	
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		Object widget = e.getSource();
+		
+		// checkbox toggled
+		if (widget instanceof JCheckBox) {
+			applyConfig();
+		}
+		
+		// combobox changed
+		else if (widget instanceof JComboBox<?>) {
+			applyConfig();
+		}
+		
+		// restore saved settings
+		else if (widget == view.btnRestore) {
+			initSessionConfig(true);
+		}
+		
+		// restore default settings
+		else if (widget == view.btnRestoreDefaults) {
+			restoreDefaultSettings();
+		}
+		
+		// save settings
+		else if (widget == view.btnSave) {
+			saveSettings();
+		}
 	}
 	
 	@Override
@@ -246,9 +308,17 @@ public abstract class FileConfigController implements WindowListener, DocumentLi
 			valStr = cbx.isSelected() + "";
 		}
 		else if (widget instanceof JComboBox) {
-			JComboBox<?> cbx = (JComboBox<?>) widget;
-			NamedInteger item = (NamedInteger) cbx.getSelectedItem();
-			valStr = item.value + "";
+			JComboBox<?>     cbx   = (JComboBox<?>) widget;
+			ComboBoxModel<?> model = cbx.getModel();
+			Object           first = model.getElementAt(0);
+			if (first instanceof NamedInteger) {
+				NamedInteger item = (NamedInteger) cbx.getSelectedItem();
+				valStr = item.value + "";
+			}
+			else if (first instanceof String) {
+				String item = (String) cbx.getSelectedItem();
+				valStr = item;
+			}
 		}
 		
 		// check and apply value
@@ -275,6 +345,9 @@ public abstract class FileConfigController implements WindowListener, DocumentLi
 				else
 					bgColor = Laf.COLOR_ERROR;
 			}
+			else if (type == String.class) {
+				sessionConfig.put(id, valStr);
+			}
 		}
 		catch (Exception e) {
 			isOk    = false;
@@ -290,30 +363,6 @@ public abstract class FileConfigController implements WindowListener, DocumentLi
 	}
 	
 	/**
-	 * Applies the (hard-coded) default settings to
-	 * the session config and the widgets.
-	 */
-	protected void restoreDefaultSettings() {
-		HashMap<String, String> defaultSettings = getDefaultConfig();
-		for (String id : defaultSettings.keySet()) {
-			JComponent curWidget = configWidgets.get(id);
-			String     value     = defaultSettings.get(id);
-			restoreDefaultConfig(id, value, curWidget);
-		}
-	}
-	
-	/**
-	 * Saves the session config to the config file.
-	 */
-	protected void saveSettings() {
-		for (String id : sessionConfig.keySet()) {
-			String value = sessionConfig.get(id);
-			Config.set(id, value);
-		}
-		Config.writeConfigFile();
-	}
-	
-	/**
 	 * Adjusts the background color of fields that are not directly related to a
 	 * config variable, if overridden accordingly.
 	 * 
@@ -323,6 +372,31 @@ public abstract class FileConfigController implements WindowListener, DocumentLi
 	 * @param e  document event
 	 */
 	protected void handleDocumentChange(DocumentEvent e) {
+		applyConfig();
+	}
+	
+	/**
+	 * Saves the session config to the config file.
+	 */
+	private void saveSettings() {
+		for (String id : sessionConfig.keySet()) {
+			String value = sessionConfig.get(id);
+			Config.set(id, value);
+		}
+		Config.writeConfigFile();
+	}
+	
+	/**
+	 * Applies the (hard-coded) default settings to
+	 * the session config and the widgets.
+	 */
+	private void restoreDefaultSettings() {
+		HashMap<String, String> defaultSettings = getDefaultConfig();
+		for (String id : defaultSettings.keySet()) {
+			JComponent curWidget = configWidgets.get(id);
+			String     value     = defaultSettings.get(id);
+			restoreDefaultConfig(id, value, curWidget);
+		}
 	}
 	
 	/**
@@ -352,13 +426,22 @@ public abstract class FileConfigController implements WindowListener, DocumentLi
 			((JCheckBox) widget).setSelected(isTrue);
 		}
 		else if (widget instanceof JComboBox<?>) {
-			int value = Integer.parseInt(valueStr);
 			JComboBox<?>     cbx   = (JComboBox<?>) widget;
 			ComboBoxModel<?> model = cbx.getModel();
-			for (int i = 0; i < model.getSize(); i++) {
-				NamedInteger item = (NamedInteger) model.getElementAt(i);
-				if (item.value == value) {
-					cbx.setSelectedIndex(i);
+			Object           first = model.getElementAt(0);
+			if (first instanceof NamedInteger) {
+				int value = Integer.parseInt(valueStr);
+				for (int i = 0; i < model.getSize(); i++) {
+					NamedInteger item = (NamedInteger) model.getElementAt(i);
+					if (item.value == value)
+						cbx.setSelectedIndex(i);
+				}
+			}
+			else if (first instanceof String) {
+				for (int i = 0; i < model.getSize(); i++) {
+					String item = (String) model.getElementAt(i);
+					if (item.equals(valueStr))
+						cbx.setSelectedIndex(i);
 				}
 			}
 		}
@@ -385,7 +468,7 @@ public abstract class FileConfigController implements WindowListener, DocumentLi
 			else if (type == Float.class)
 				Float.parseFloat(valueStr);
 		}
-		catch (NumberFormatException e) {
+		catch (NullPointerException | NumberFormatException e) {
 			// use default instead
 			valueStr = getDefaultConfig().get(id);
 		}

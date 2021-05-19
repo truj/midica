@@ -45,7 +45,7 @@ import org.midica.file.write.LilypondExporter;
 import org.midica.file.write.MidiExporter;
 import org.midica.file.write.MidicaPLExporter;
 import org.midica.file.write.MusescoreExporter;
-import org.midica.file.write.WavExporter;
+import org.midica.file.write.AudioExporter;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.file.ExportResult;
 import org.midica.ui.file.ExportResultView;
@@ -501,8 +501,8 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		else if (FileSelector.FILE_TYPE_ALDA.equals(type)) {
 			exporter = new AldaExporter();
 		}
-		else if (FileSelector.FILE_TYPE_WAV.equals(type)) {
-			exporter = new WavExporter();
+		else if (FileSelector.FILE_TYPE_AUDIO.equals(type)) {
+			exporter = new AudioExporter();
 		}
 		else if (FileSelector.FILE_TYPE_MIDI.equals(type)) {
 			charsetKey = Config.CHARSET_EXPORT_MID;

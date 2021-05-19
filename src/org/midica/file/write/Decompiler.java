@@ -369,7 +369,7 @@ public abstract class Decompiler extends Exporter {
 	private void refreshConfig() {
 		
 		// apply direct configuration
-		HashMap<String, String> sessionConfig = DecompileConfigController.getSessionConfig();
+		HashMap<String, String> sessionConfig = DecompileConfigController.getInstance(null, null).getSessionConfig();
 		MUST_ADD_TICK_COMMENTS   = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_TICK_COMMENTS)   );
 		MUST_ADD_CONFIG          = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_CONFIG)          );
 		MUST_ADD_QUALITY_SCORE   = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_QUALITY_SCORE)   );
@@ -1911,7 +1911,7 @@ public abstract class Decompiler extends Exporter {
 		statLines.append(comment + NEW_LINE);
 		
 		// config values
-		HashMap<String, String> sessionConfig = DecompileConfigController.getSessionConfig();
+		HashMap<String, String> sessionConfig = DecompileConfigController.getInstance(null, null).getSessionConfig();
 		ArrayList<String> configKeys = new ArrayList<String>(sessionConfig.keySet());
 		Collections.sort(configKeys);
 		for (String key : configKeys) {

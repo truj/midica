@@ -692,7 +692,7 @@ public class Dict {
 	public static final String KEY_FILE_SELECTOR_EXP_MID        = "key_file_selector_exp_mid";
 	public static final String KEY_FILE_SELECTOR_EXP_MPL        = "key_file_selector_exp_mpl";
 	public static final String KEY_FILE_SELECTOR_EXP_ALDA       = "key_file_selector_exp_alda";
-	public static final String KEY_FILE_SELECTOR_EXP_WAV        = "key_file_selector_exp_wav";
+	public static final String KEY_FILE_SELECTOR_EXP_AUDIO      = "key_file_selector_exp_audio";
 	public static final String KEY_FILE_SELECTOR_EXP_ABC        = "key_file_selector_exp_abc";
 	public static final String KEY_FILE_SELECTOR_EXP_LY         = "key_file_selector_exp_ly";
 	public static final String KEY_FILE_SELECTOR_EXP_MSCORE     = "key_file_selector_exp_mscore";
@@ -804,7 +804,7 @@ public class Dict {
 	public static final String TAB_MIDI                    = "tab_midi";
 	public static final String TAB_MIDICAPL                = "tab_midicapl";
 	public static final String TAB_ALDA                    = "tab_alda";
-	public static final String TAB_WAV                     = "tab_wav";
+	public static final String TAB_AUDIO                   = "tab_audio";
 	public static final String TAB_ABC                     = "tab_abc";
 	public static final String TAB_LY                      = "tab_ly";
 	public static final String TAB_MSCORE                  = "tab_mscore";
@@ -907,6 +907,19 @@ public class Dict {
 	public static final String DC_SAVE                      = "dc_save";
 	public static final String CHANGED_IN_CONF_FILE         = "changed_in_conf_file";
 	public static final String TICKS_FOR_TARGET_PPQ         = "ticks_for_target_ppq";
+	
+	// AudioExportView / AudioExportController
+	public static final String TITLE_AU_CONFIG              = "title_au_config";
+	public static final String AUDIO_ENCODING               = "audio_encoding";
+	public static final String AUDIO_SAMPLE_SIZE_BITS       = "audio_sample_size_bits";
+	public static final String AUDIO_SAMPLE_SIZE_BITS_D     = "audio_sample_size_bits_d";
+	public static final String AUDIO_SAMPLE_RATE            = "audio_sample_rate";
+	public static final String AUDIO_SAMPLE_RATE_D          = "audio_sample_rate_d";
+	public static final String AUDIO_CHANNELS               = "audio_channels";
+	public static final String AUDIO_IS_BIG_ENDIAN          = "audio_is_big_endian";
+	public static final String AUDIO_IS_BIG_ENDIAN_D        = "audio_is_big_endian_d";
+	public static final String AU_MONO                      = "au_mono";
+	public static final String AU_STEREO                    = "au_stereo";
 	
 	// InfoView
 	public static final String TITLE_INFO_VIEW             = "title_info_view";
@@ -2116,7 +2129,7 @@ public class Dict {
 		set( KEY_FILE_SELECTOR_EXP_MID,        "In the EXPORT selector, select the MIDI Tab"                                 );
 		set( KEY_FILE_SELECTOR_EXP_MPL,        "In the EXPORT selector, select the MidicaPL Tab"                             );
 		set( KEY_FILE_SELECTOR_EXP_ALDA,       "In the EXPORT selector, select the ALDA Tab"                                 );
-		set( KEY_FILE_SELECTOR_EXP_WAV,        "In the EXPORT selector, select the WAV Tab"                                  );
+		set( KEY_FILE_SELECTOR_EXP_AUDIO,      "In the EXPORT selector, select the Audio Tab"                                );
 		set( KEY_FILE_SELECTOR_EXP_ABC,        "In the EXPORT selector, select the ABC Tab"                                  );
 		set( KEY_FILE_SELECTOR_EXP_LY,         "In the EXPORT selector, select the LilyPond Tab"                             );
 		set( KEY_FILE_SELECTOR_EXP_MSCORE,     "In the EXPORT selector, select the MuscScore Tab"                            );
@@ -2227,7 +2240,7 @@ public class Dict {
 		set( TAB_MIDI,                 "MIDI"                                                 );
 		set( TAB_MIDICAPL,             "MidicaPL"                                             );
 		set( TAB_ALDA,                 "ALDA"                                                 );
-		set( TAB_WAV,                  "WAV"                                                  );
+		set( TAB_AUDIO,                "Audio"                                                );
 		set( TAB_ABC,                  "ABC"                                                  );
 		set( TAB_LY,                   "LilyPond"                                             );
 		set( TAB_MSCORE,               "MuseScore"                                            );
@@ -2359,6 +2372,20 @@ public class Dict {
 		set( DC_SAVE,                      "Save settings"                                                             );
 		set( CHANGED_IN_CONF_FILE,         "Manually changed in Config file"                                           );
 		set( TICKS_FOR_TARGET_PPQ,         "ticks @ 480 PPQ"                                                           );
+		
+		// AudioExportView / AudioExportController
+		set( TITLE_AU_CONFIG,                  "Midica - Audio Export Settings"                            );
+		set( AUDIO_ENCODING,                   "Encoding"                                                  );
+		set( AUDIO_SAMPLE_SIZE_BITS,           "Sample Size in Bits"                                       );
+		set( AUDIO_SAMPLE_SIZE_BITS_D,         "<html>Must be divisible by 8 for PCM-based encodings.<br>"
+		                                     + "For PCM_FLOAT, only <b>32</b> and <b>64</b> is allowed."   );
+		set( AUDIO_SAMPLE_RATE,                "Sample Rate"                                               );
+		set( AUDIO_SAMPLE_RATE_D,              "Samples per second (Hz)"                                   );
+		set( AUDIO_CHANNELS,                   "Channels"                                                  );
+		set( AUDIO_IS_BIG_ENDIAN,              "Big Endian"                                                );
+		set( AUDIO_IS_BIG_ENDIAN_D,            "<html><b>Big endian</b> (if checked) or <b>Little endian</b> (otherwise)" );
+		set( AU_MONO,                          "Mono"                                                      );
+		set( AU_STEREO,                        "Stereo"                                                    );
 		
 		// InfoView
 		set( TITLE_INFO_VIEW,                        "Midica Info"                   );

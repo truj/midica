@@ -36,7 +36,7 @@ public class Midica {
 	private static final int VERSION_MINOR = 2;
 	
 	/** UNIX timestamp of the last commit */
-	public static final int COMMIT_TIME = 1621266004;
+	public static final int COMMIT_TIME = 1621455969;
 	
 	/** Branch name. Automatically changed by precommit.pl */
 	public static final String BRANCH = "export-formats";
