@@ -21,6 +21,7 @@ import org.midica.file.read.SoundfontParser;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.file.ExportResult;
 import org.midica.ui.file.config.AudioConfigController;
+import org.midica.ui.file.config.AudioConfigView;
 
 import com.sun.gervill.SF2Soundbank;
 import com.sun.kh.MidiToAudioRenderer;
@@ -183,7 +184,9 @@ public class AudioExporter extends Exporter {
 	 * Re-reads all config variables that are relevant for audio export.
 	 */
 	private void refreshConfig() {
-		HashMap<String, String> sessionConfig = AudioConfigController.getInstance(null, null).getSessionConfig();
+		HashMap<String, String> sessionConfig = AudioConfigController.getInstance(
+			new AudioConfigView(), null
+		).getSessionConfig();
 		ENCODING         =                       sessionConfig.get(Config.AU_ENCODING);
 		SAMPLE_SIZE_BITS = Integer.parseInt(     sessionConfig.get(Config.AU_SAMPLE_SIZE_BITS) );
 		SAMPLE_RATE      = Float.parseFloat(     sessionConfig.get(Config.AU_SAMPLE_RATE)      );

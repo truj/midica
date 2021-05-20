@@ -486,6 +486,7 @@ public class Dict {
 	public static final String KEYCAT_FILE_SELECT           = "key_file_select";
 	public static final String KEYCAT_FILE_CONF             = "key_file_conf";
 	public static final String KEYCAT_DC_CONF               = "key_dc_conf";
+	public static final String KEYCAT_AU_CONF               = "key_au_conf";
 	public static final String KEYCAT_EXPORT_RESULT         = "key_export_result";
 	public static final String KEYCAT_STRING_FILTER         = "key_string_filter";
 	
@@ -740,6 +741,11 @@ public class Dict {
 	public static final String KEY_DC_CONF_BTN_GLOB_RANGE       = "key_dc_conf_btn_glob_range";
 	public static final String KEY_DC_CONF_AREA_GLOB_ALL        = "key_dc_conf_area_glob_all";
 	public static final String KEY_DC_CONF_BTN_GLOB_ALL         = "key_dc_conf_btn_glob_all";
+	public static final String KEY_AU_CONF_ENCODING             = "key_au_conf_encoding";
+	public static final String KEY_AU_CONF_FLD_SAMPLE_SIZE_BITS = "key_au_conf_fld_sample_size_bits";
+	public static final String KEY_AU_CONF_FLD_SAMPLE_RATE      = "key_au_conf_fld_sample_rate";
+	public static final String KEY_AU_CONF_CHANNELS             = "key_au_conf_channels";
+	public static final String KEY_AU_CONF_IS_BIG_ENDIAN        = "key_au_conf_is_big_endian";
 	public static final String KEY_EXPORT_RESULT_CLOSE          = "key_export_result_close";
 	public static final String KEY_EXPORT_RESULT_SHORT          = "key_export_result_short";
 	public static final String KEY_EXPORT_RESULT_META           = "key_export_result_meta";
@@ -1841,6 +1847,7 @@ public class Dict {
 		keyBindingCategories.add(KEYCAT_FILE_SELECT);
 		keyBindingCategories.add(KEYCAT_FILE_CONF);
 		keyBindingCategories.add(KEYCAT_DC_CONF);
+		keyBindingCategories.add(KEYCAT_AU_CONF);
 		keyBindingCategories.add(KEYCAT_EXPORT_RESULT);
 		keyBindingCategories.add(KEYCAT_STRING_FILTER);
 	}
@@ -1915,16 +1922,17 @@ public class Dict {
 		set( TT_KEY_OPEN_ICON,             "Key binding(s) to open"                     );
 		
 		// key binding categories (windows)
-		set( KEYCAT_MAIN,                  "Main Window"                                  );
-		set( KEYCAT_PLAYER,                "Player"                                       );
-		set( KEYCAT_SOUNDCHECK,            "Soundcheck"                                   );
-		set( KEYCAT_INFO,                  "Info & Configuration"                         );
-		set( KEYCAT_MSG,                   "Message Window"                               );
-		set( KEYCAT_FILE_SELECT,           "File Selector"                                );
-		set( KEYCAT_FILE_CONF,             "File-based Config Windows (general settings)" );
-		set( KEYCAT_DC_CONF,               "Decompile Config Window (specific settings)"  );
-		set( KEYCAT_EXPORT_RESULT,         "Export Result Window"                         );
-		set( KEYCAT_STRING_FILTER,         "Table Filter"                                 );
+		set( KEYCAT_MAIN,                  "Main Window"                                    );
+		set( KEYCAT_PLAYER,                "Player"                                         );
+		set( KEYCAT_SOUNDCHECK,            "Soundcheck"                                     );
+		set( KEYCAT_INFO,                  "Info & Configuration"                           );
+		set( KEYCAT_MSG,                   "Message Window"                                 );
+		set( KEYCAT_FILE_SELECT,           "File Selector"                                  );
+		set( KEYCAT_FILE_CONF,             "File-based Config Windows (general settings)"   );
+		set( KEYCAT_DC_CONF,               "Decompile Config Window (specific settings)"    );
+		set( KEYCAT_AU_CONF,               "Audio Export Config Window (specific settings)" );
+		set( KEYCAT_EXPORT_RESULT,         "Export Result Window"                           );
+		set( KEYCAT_STRING_FILTER,         "Table Filter"                                   );
 		
 		// key binding IDs
 		set( KEY_MAIN_INFO,                    "Open Info & Config Details"                                                  );
@@ -2177,6 +2185,11 @@ public class Dict {
 		set( KEY_DC_CONF_BTN_GLOB_RANGE,       "Press Button: Add many splits"                                               );
 		set( KEY_DC_CONF_AREA_GLOB_ALL,        "Focus text area: Edit Extra Split Ticks Directly"                            );
 		set( KEY_DC_CONF_BTN_GLOB_ALL,         "Press Button: Update Ticks"                                                  );
+		set( KEY_AU_CONF_ENCODING,             "Open Selection: Encoding"                                                    );
+		set( KEY_AU_CONF_FLD_SAMPLE_SIZE_BITS, "Focus field: Sample Size in Bits"                                            );
+		set( KEY_AU_CONF_FLD_SAMPLE_RATE,      "Focus field: Sample Rate"                                                    );
+		set( KEY_AU_CONF_CHANNELS,             "Open Selection: Channels"                                                    );
+		set( KEY_AU_CONF_IS_BIG_ENDIAN,        "Toggle Checkbox: Big Endian"                                                 );
 		set( KEY_EXPORT_RESULT_CLOSE,          "Close the Export Result Window"                                              );
 		set( KEY_EXPORT_RESULT_SHORT,          "Toggle Checkbox: Show Ignored Short Message"                                 );
 		set( KEY_EXPORT_RESULT_META,           "Toggle Checkbox: Show Ignored Meta Message"                                  );

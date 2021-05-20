@@ -100,6 +100,27 @@ public class DecompileConfigView extends FileConfigView {
 	 */
 	public DecompileConfigView(JDialog owner, ConfigIcon icon) {
 		super(owner, icon, Dict.get(Dict.TITLE_DC_CONFIG));
+		initStructures();
+		initUi();
+		addKeyBindings();
+		pack();
+		addWindowListener(controller);
+	}
+	
+	/**
+	 * Creates a default window that is not intended to be used as a real window.
+	 * 
+	 * See {@link FileConfigView#FileConfigView()}.
+	 */
+	public DecompileConfigView() {
+		super();
+		initStructures();
+	}
+	
+	/**
+	 * Initializes widgets and creates a controller if not yet done.
+	 */
+	private void initStructures() {
 		
 		// init widgets
 		cbxAddTickComments        = new JCheckBox(Dict.get(Dict.DC_ADD_TICK_COMMENT));
@@ -143,17 +164,12 @@ public class DecompileConfigView extends FileConfigView {
 		
 		// create controller
 		controller = DecompileConfigController.getInstance(this, icon);
-		
-		init();
-		addKeyBindings();
-		pack();
-		addWindowListener(controller);
 	}
 	
 	/**
 	 * Initializes the content of the window.
 	 */
-	private void init() {
+	private void initUi() {
 		
 		// create top-level container
 		JPanel content = new JPanel();

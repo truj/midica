@@ -56,6 +56,27 @@ public class AudioConfigView extends FileConfigView {
 	 */
 	public AudioConfigView(JDialog owner, ConfigIcon icon) {
 		super(owner, icon, Dict.get(Dict.TITLE_AU_CONFIG));
+		initStructures();
+		initUi();
+		addKeyBindings();
+		pack();
+		addWindowListener(controller);
+	}
+	
+	/**
+	 * Creates a default window that is not intended to be used as a real window.
+	 * 
+	 * See {@link FileConfigView#FileConfigView()}.
+	 */
+	public AudioConfigView() {
+		super();
+		initStructures();
+	}
+	
+	/**
+	 * Initializes widgets and creates a controller if not yet done.
+	 */
+	private void initStructures() {
 		
 		// init widgets
 		cbxEncoding       = new JComboBox<>();
@@ -68,17 +89,12 @@ public class AudioConfigView extends FileConfigView {
 		
 		// create controller
 		controller = AudioConfigController.getInstance(this, icon);
-		
-		init();
-		addKeyBindings();
-		pack();
-		addWindowListener(controller);
 	}
 	
 	/**
 	 * Initializes the content of the window.
 	 */
-	private void init() {
+	private void initUi() {
 		
 		// create top-level container
 		JPanel content = new JPanel();
@@ -220,12 +236,12 @@ public class AudioConfigView extends FileConfigView {
 		// reset everything
 		keyBindingManager = new KeyBindingManager(this, this.getRootPane());
 		
-		// TODO: implement key bindings for:
-		// - cbxEncoding
-		// - fldSampleSizeBits
-		// - fldSampleRate
-		// - cbxChannels
-		// - cbxIsBigEndian
+		// specific bindings
+		keyBindingManager.addBindingsForComboboxOpen( cbxEncoding,       Dict.KEY_AU_CONF_ENCODING             );
+		keyBindingManager.addBindingsForFocus(        fldSampleSizeBits, Dict.KEY_AU_CONF_FLD_SAMPLE_SIZE_BITS );
+		keyBindingManager.addBindingsForFocus(        fldSampleRate,     Dict.KEY_AU_CONF_FLD_SAMPLE_RATE      );
+		keyBindingManager.addBindingsForComboboxOpen( cbxChannels,       Dict.KEY_AU_CONF_CHANNELS             );
+		keyBindingManager.addBindingsForCheckbox(     cbxIsBigEndian,    Dict.KEY_AU_CONF_IS_BIG_ENDIAN        );
 		
 		// restore/save buttons
 		addGeneralKeyBindings();

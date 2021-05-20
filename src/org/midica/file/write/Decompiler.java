@@ -42,6 +42,7 @@ import org.midica.midi.SequenceCreator;
 import org.midica.midi.Tempo;
 import org.midica.ui.file.ExportResult;
 import org.midica.ui.file.config.DecompileConfigController;
+import org.midica.ui.file.config.DecompileConfigView;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
 import org.midica.ui.model.MidicaTreeModel;
@@ -369,7 +370,9 @@ public abstract class Decompiler extends Exporter {
 	private void refreshConfig() {
 		
 		// apply direct configuration
-		HashMap<String, String> sessionConfig = DecompileConfigController.getInstance(null, null).getSessionConfig();
+		HashMap<String, String> sessionConfig = DecompileConfigController.getInstance(
+				new DecompileConfigView(), null
+		).getSessionConfig();
 		MUST_ADD_TICK_COMMENTS   = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_TICK_COMMENTS)   );
 		MUST_ADD_CONFIG          = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_CONFIG)          );
 		MUST_ADD_QUALITY_SCORE   = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_QUALITY_SCORE)   );
@@ -1911,7 +1914,9 @@ public abstract class Decompiler extends Exporter {
 		statLines.append(comment + NEW_LINE);
 		
 		// config values
-		HashMap<String, String> sessionConfig = DecompileConfigController.getInstance(null, null).getSessionConfig();
+		HashMap<String, String> sessionConfig = DecompileConfigController.getInstance(
+			new DecompileConfigView(), null
+		).getSessionConfig();
 		ArrayList<String> configKeys = new ArrayList<String>(sessionConfig.keySet());
 		Collections.sort(configKeys);
 		for (String key : configKeys) {

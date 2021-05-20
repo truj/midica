@@ -227,6 +227,7 @@ public class Config {
 	private static HashMap<String, String>              defaults        = null;
 	private static TreeMap<String, TreeSet<KeyBinding>> defaultBindings = null;
 	private static HashMap<String, String>              dcDefaults      = null;
+	private static HashMap<String, String>              auDefaults      = null;
 	private static TreeMap<String, String>              config          = null;
 	private static TreeMap<String, TreeSet<KeyBinding>> keyBindings     = null;
 	
@@ -323,10 +324,14 @@ public class Config {
 			set(key, defaults.get(key));
 		}
 		
-		// do the same thing with the decompile configuration
+		// do the same thing with file-based config settings
 		dcDefaults = getDefaultDecompileConfig();
 		for (String key : dcDefaults.keySet()) {
 			set(key, dcDefaults.get(key));
+		}
+		auDefaults = getDefaultAudioExportConfig();
+		for (String key : auDefaults.keySet()) {
+			set(key, auDefaults.get(key));
 		}
 		
 		// do the same thing with key bindings
@@ -374,15 +379,15 @@ public class Config {
 	 * them to the current config.
 	 */
 	public static HashMap<String, String> getDefaultAudioExportConfig() {
-		HashMap<String, String> audioDefaults = new HashMap<>();
+		HashMap<String, String> auDefaults = new HashMap<>();
 		
-		audioDefaults.put( AU_ENCODING,              AudioExporter.DEFAULT_ENCODING         );
-		audioDefaults.put( AU_SAMPLE_SIZE_BITS, "" + AudioExporter.DEFAULT_SAMPLE_SIZE_BITS );
-		audioDefaults.put( AU_SAMPLE_RATE,      "" + AudioExporter.DEFAULT_SAMPLE_RATE      );
-		audioDefaults.put( AU_CHANNELS,         "" + AudioExporter.DEFAULT_CHANNELS         );
-		audioDefaults.put( AU_IS_BIG_ENDIAN,    "" + AudioExporter.DEFAULT_IS_BIG_ENDIAN    );
+		auDefaults.put( AU_ENCODING,              AudioExporter.DEFAULT_ENCODING         );
+		auDefaults.put( AU_SAMPLE_SIZE_BITS, "" + AudioExporter.DEFAULT_SAMPLE_SIZE_BITS );
+		auDefaults.put( AU_SAMPLE_RATE,      "" + AudioExporter.DEFAULT_SAMPLE_RATE      );
+		auDefaults.put( AU_CHANNELS,         "" + AudioExporter.DEFAULT_CHANNELS         );
+		auDefaults.put( AU_IS_BIG_ENDIAN,    "" + AudioExporter.DEFAULT_IS_BIG_ENDIAN    );
 		
-		return audioDefaults;
+		return auDefaults;
 	}
 	
 	/**
@@ -821,6 +826,11 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_BTN_GLOB_RANGE,       KeyEvent.VK_R,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_AREA_GLOB_ALL,        KeyEvent.VK_E,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_BTN_GLOB_ALL,         KeyEvent.VK_U,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_AU_CONF_ENCODING,             KeyEvent.VK_E,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_AU_CONF_FLD_SAMPLE_SIZE_BITS, KeyEvent.VK_S,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
+		addDefaultKeyBinding( Dict.KEY_AU_CONF_FLD_SAMPLE_RATE,      KeyEvent.VK_S,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_AU_CONF_CHANNELS,             KeyEvent.VK_C,        InputEvent.ALT_DOWN_MASK   );
+		addDefaultKeyBinding( Dict.KEY_AU_CONF_IS_BIG_ENDIAN,        KeyEvent.VK_B,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_CLOSE,          KeyEvent.VK_ESCAPE,   0                          );
 		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_SHORT,          KeyEvent.VK_S,        0                          );
 		addDefaultKeyBinding( Dict.KEY_EXPORT_RESULT_META,           KeyEvent.VK_M,        0                          );
@@ -921,8 +931,13 @@ public class Config {
 					bw.newLine();
 				}
 				
-				// decompile config
+				// import/export based config
 				for (String key : dcDefaults.keySet()) {
+					String value = config.get(key);
+					bw.write(key + " " + value);
+					bw.newLine();
+				}
+				for (String key : auDefaults.keySet()) {
 					String value = config.get(key);
 					bw.write(key + " " + value);
 					bw.newLine();

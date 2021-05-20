@@ -70,7 +70,7 @@ public class DecompileConfigController extends FileConfigController {
 	
 	@Override
 	protected void createDefaultView() {
-		new DecompileConfigView(null, null);
+		new DecompileConfigView();
 	}
 	
 	/**

@@ -57,6 +57,16 @@ public abstract class FileConfigView extends JDialog {
 	}
 	
 	/**
+	 * Creates a default window that is not intended to be used as a real window.
+	 * Its only purpose is to initialize widgets in order
+	 * to avoid null pointer exceptions.
+	 * This is needed for exports without opening the config window.
+	 */
+	protected FileConfigView() {
+		super();
+	}
+	
+	/**
 	 * Opens the window.
 	 */
 	public void open() {

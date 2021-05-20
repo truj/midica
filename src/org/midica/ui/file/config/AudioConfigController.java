@@ -38,7 +38,7 @@ public class AudioConfigController extends FileConfigController {
 	 * @return the created controller.
 	 */
 	public static AudioConfigController getInstance(AudioConfigView view, ConfigIcon icon) {
-
+		
 		if (null == controller)
 			controller = new AudioConfigController(view, icon);
 		else
@@ -59,7 +59,7 @@ public class AudioConfigController extends FileConfigController {
 	
 	@Override
 	protected void createDefaultView() {
-		new AudioConfigView(null, null);
+		new AudioConfigView();
 	}
 	
 	@Override
