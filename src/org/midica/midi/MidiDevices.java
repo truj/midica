@@ -38,12 +38,12 @@ import com.sun.gervill.SoftSynthesizer;
  * This class encapsulates the Java MIDI functionality.
  * It is not meant to instantiate any objects and contains only static methods.
  * 
- * After parsing a file and creating a MIDI sequence, the parsing class sets the sequence
- * with setSequence().
+ * After parsing a file and creating a MIDI sequence, the parsing class sets
+ * the sequence with setSequence().
  * 
- * After starting the player or reparsing and resetting the sequence, setupDevices() is called
- * in order to create all devices, connect them with each other and pass the sequene to the
- * sequencer.
+ * After starting the player or reparsing and resetting the sequence, setupDevices()
+ * is called in order to create all devices, connect them with each other and pass
+ * the sequene to the sequencer.
  * 
  * The other methods of this class are mostly used by the player.
  * 
@@ -73,8 +73,8 @@ public final class MidiDevices {
 	private static int         skipQuarters      = 4;  //  4 quarter notes = 1 bar
 	private static int         skipFastQuarters  = 16; // 16 quarter notes = 4 bars
 	private static Soundbank   selectedSoundfont = null;
-	private static boolean[]   channelMute       = new boolean[ NUMBER_OF_CHANNELS ];
-	private static boolean[]   channelSolo       = new boolean[ NUMBER_OF_CHANNELS ];
+	private static boolean[]   channelMute       = new boolean[NUMBER_OF_CHANNELS];
+	private static boolean[]   channelSolo       = new boolean[NUMBER_OF_CHANNELS];
 	private static byte[]      channelVolumeMsb  = {
 		DEFAULT_CHANNEL_VOL_MSB, DEFAULT_CHANNEL_VOL_MSB, DEFAULT_CHANNEL_VOL_MSB, DEFAULT_CHANNEL_VOL_MSB,
 		DEFAULT_CHANNEL_VOL_MSB, DEFAULT_CHANNEL_VOL_MSB, DEFAULT_CHANNEL_VOL_MSB, DEFAULT_CHANNEL_VOL_MSB,
@@ -107,7 +107,7 @@ public final class MidiDevices {
 	 * 
 	 * @param sequence    The sequence to be set.
 	 */
-	public static void setSequence( Sequence sequence ) {
+	public static void setSequence(Sequence sequence) {
 		seq = sequence;
 	}
 	
@@ -127,7 +127,7 @@ public final class MidiDevices {
 	 * @return   **true**, if a sequence has been set. Otherwise, returns **false**.
 	 */
 	public static boolean isSequenceSet() {
-		if ( null == seq )
+		if (null == seq)
 			return false;
 		return true;
 	}
@@ -153,28 +153,28 @@ public final class MidiDevices {
 		Receiver rec = setupSynthesizer();
 		
 		// connect sequencer with synthesizer
-		trans.setReceiver( rec );
+		trans.setReceiver(rec);
 		
 		// initialize or restore user changes in the player
-		sequencer.setTempoFactor( tempoFactor );
+		sequencer.setTempoFactor(tempoFactor);
 		setMasterVolume();
 		setAllChannelVolumes();
-		for ( int i = 0; i < NUMBER_OF_CHANNELS; i++ ) {
-			setMute( i, channelMute[i] );
-			setSolo( i, channelSolo[i] );
+		for (int i = 0; i < NUMBER_OF_CHANNELS; i++) {
+			setMute(i, channelMute[i]);
+			setSolo(i, channelSolo[i]);
 		}
 		
 		// initialize channel activity state
-		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
-			playerController.setChannelActivity( channel, false );
+		for (byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++)
+			playerController.setChannelActivity(channel, false);
 		
 		// initialize note history
-		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
-			refreshNoteHistory( channel );
+		for (byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++)
+			refreshNoteHistory(channel);
 		
 		// initialize channel and instrument info
-		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
-			refreshInstrument( channel );
+		for (byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++)
+			refreshInstrument(channel);
 		
 		// initialize lyrics
 		refreshLyrics();
@@ -191,16 +191,16 @@ public final class MidiDevices {
 	 */
 	private static Transmitter setupSequencer() throws SequenceNotSetException, MidiUnavailableException, InvalidMidiDataException {
 		// initialize sequencer
-		if ( null == seq )
+		if (null == seq)
 			throw new SequenceNotSetException();
-		sequencer = MidiSystem.getSequencer( false );
+		sequencer = MidiSystem.getSequencer(false);
 		
 		// initialize listeners
-		MidiListener listener = new MidiListener( playerController );
-		sequencer.addMetaEventListener( listener );
+		MidiListener listener = new MidiListener(playerController);
+		sequencer.addMetaEventListener(listener);
 		
 		sequencer.open();
-		sequencer.setSequence( seq );
+		sequencer.setSequence(seq);
 		
 		return sequencer.getTransmitter();
 	}
@@ -218,7 +218,7 @@ public final class MidiDevices {
 		synthesizer = new SoftSynthesizer();
 		
 		// hardware or software?
-		boolean isSoftware = ( null == synthesizer.getDefaultSoundbank() ) ? false : true;
+		boolean isSoftware = (null == synthesizer.getDefaultSoundbank()) ? false : true;
 		
 		Receiver rec = null;
 		if (isSoftware) {
@@ -226,36 +226,36 @@ public final class MidiDevices {
 			
 			// load chosen soundfont and initialize it's instruments
 			boolean isCustomSoundfontLoaded = false;
-			if ( selectedSoundfont != null ) {
+			if (selectedSoundfont != null) {
 				
 				// soundfont supported?
-				if ( synthesizer.isSoundbankSupported(selectedSoundfont) ) {
-					isCustomSoundfontLoaded = synthesizer.loadAllInstruments( selectedSoundfont );
+				if (synthesizer.isSoundbankSupported(selectedSoundfont)) {
+					isCustomSoundfontLoaded = synthesizer.loadAllInstruments(selectedSoundfont);
 					
 					// load instruments from custom soundfont
 					if (isCustomSoundfontLoaded)
-						initInstrumentsIfNotYetDone( isSoftware );
+						initInstrumentsIfNotYetDone(isSoftware);
 					
 					// soundbank not loaded
 					else
-						playerController.showErrorMessage( Dict.get(Dict.ERROR_SOUNDFONT_LOADING_FAILED) );
+						playerController.showErrorMessage(Dict.get(Dict.ERROR_SOUNDFONT_LOADING_FAILED));
 				}
 				else {
 					// soundfont not supported
-					playerController.showErrorMessage( Dict.get(Dict.ERROR_SOUNDFONT_NOT_SUPPORTED) );
+					playerController.showErrorMessage(Dict.get(Dict.ERROR_SOUNDFONT_NOT_SUPPORTED));
 				}
 			}
 			
 			// load instruments from default soundfont
-			if ( ! isCustomSoundfontLoaded )
-				initInstrumentsIfNotYetDone( isSoftware );
+			if (! isCustomSoundfontLoaded)
+				initInstrumentsIfNotYetDone(isSoftware);
 			
 			rec = synthesizer.getReceiver();
 		}
 		else {
 			// hardware
 			rec = receiver = MidiSystem.getReceiver();
-			initInstrumentsIfNotYetDone( isSoftware );
+			initInstrumentsIfNotYetDone(isSoftware);
 		}
 		
 		return rec;
@@ -267,31 +267,31 @@ public final class MidiDevices {
 	 * @param soundfontAvailable  **true** if a software soundfont is available;
 	 *                            **false** if a hardware synthesizer is used.
 	 */
-	private static void initInstrumentsIfNotYetDone( boolean soundfontAvailable ) {
-		if ( null != instruments )
+	private static void initInstrumentsIfNotYetDone(boolean soundfontAvailable) {
+		if (null != instruments)
 			return;
 		
 		// initialize channels
 		instruments = new TreeMap<Byte, TreeMap<Integer, String>>();
-		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
-			instruments.put( channel, new TreeMap<Integer, String>() );
+		for (byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++)
+			instruments.put(channel, new TreeMap<Integer, String>());
 		
 		// software synthesizer
 		if (soundfontAvailable) {
 			ArrayList<HashMap<String, String>> soundfontInstruments = SoundfontParser.getSoundfontInstruments();
-			for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
-				initSoftwareInstruments( channel, soundfontInstruments );
+			for (byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++)
+				initSoftwareInstruments(channel, soundfontInstruments);
 		}
 		
 		// hardware synthesizer
 		else {
 			
 			// assume: 9: percussion, everything else: chromatic
-			for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ ) {
-				TreeMap<Integer, String> channelInstruments = instruments.get( channel );
+			for (byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++) {
+				TreeMap<Integer, String> channelInstruments = instruments.get(channel);
 				
 				// percussion
-				if ( 9 == channel ) {
+				if (9 == channel) {
 					// assume: MSB=0, LSB=0, program: 27-87
 					ArrayList<InstrumentElement> predefinedDrumkits = Dict.getDrumkitList();
 					for (InstrumentElement drumkit : predefinedDrumkits) {
@@ -320,36 +320,36 @@ public final class MidiDevices {
 	 * @param channel                 MIDI channel
 	 * @param soundfontInstruments    pre-analyzed soundfont instruments
 	 */
-	private static void initSoftwareInstruments( byte channel, ArrayList<HashMap<String, String>> soundfontInstruments ) {
+	private static void initSoftwareInstruments(byte channel, ArrayList<HashMap<String, String>> soundfontInstruments) {
 		
 		INSTRUMENT:
-		for ( HashMap<String, String> instr : soundfontInstruments ) {
+		for (HashMap<String, String> instr : soundfontInstruments) {
 			
 			// ignore categories
 			String category = instr.get("category");
-			if ( category != null )
+			if (category != null)
 				continue INSTRUMENT;
 			
 			// ignore un-supported channels
 			boolean isChannelSupported = false;
-			String[] allowedChannels = instr.get("channels_long").split( "," );
-			for ( String channelStr : allowedChannels )
-				if ( String.valueOf(channel).equals(channelStr) )
+			String[] allowedChannels = instr.get("channels_long").split(",");
+			for (String channelStr : allowedChannels)
+				if (String.valueOf(channel).equals(channelStr))
 					isChannelSupported = true;
-			if ( ! isChannelSupported )
+			if (! isChannelSupported)
 				continue INSTRUMENT;
 			
 			// get instrument data
 			int    bankMSB   = Integer.parseInt( instr.get("bank_msb") );
 			int    bankLSB   = Integer.parseInt( instr.get("bank_lsb") );
 			int    program   = Integer.parseInt( instr.get("program")  );
-			String instrName = instr.get( "name" );
+			String instrName = instr.get("name");
 			
 			// construct key for the data structure: program * 2^14 + bankMSB * 2^7 + bankLSB
-			int key = ( program << 14 ) | ( bankMSB << 7 ) | bankLSB;
+			int key = (program << 14) | (bankMSB << 7) | bankLSB;
 			
 			// remember instrument name
-			instruments.get( channel ).put( key, instrName );
+			instruments.get(channel).put(key, instrName);
 		}
 	}
 	
@@ -360,9 +360,9 @@ public final class MidiDevices {
 	 * 
 	 * @param channel    Channel number from 0 to 15.
 	 */
-	public static void refreshChannelActivity( byte channel ) {
-		boolean active = SequenceAnalyzer.getChannelActivity( channel, getTickPosition() );
-		playerController.setChannelActivity( channel, active );
+	public static void refreshChannelActivity(byte channel) {
+		boolean active = SequenceAnalyzer.getChannelActivity(channel, getTickPosition());
+		playerController.setChannelActivity(channel, active);
 	}
 	
 	/**
@@ -371,7 +371,7 @@ public final class MidiDevices {
 	 * changes the UI accordingly.
 	 */
 	public static void refreshLyrics() {
-		String lyrics = KaraokeAnalyzer.getLyricsForPlayer( getTickPosition() );
+		String lyrics = KaraokeAnalyzer.getLyricsForPlayer(getTickPosition());
 		playerController.setLyrics(lyrics);
 	}
 	
@@ -381,17 +381,17 @@ public final class MidiDevices {
 	public static void destroyDevices() {
 		
 		// destroy sequencer
-		if ( null != sequencer ) {
-			if ( sequencer.isRunning() )
+		if (null != sequencer) {
+			if (sequencer.isRunning())
 				sequencer.stop();
-			if ( sequencer.isOpen() )
+			if (sequencer.isOpen())
 				sequencer.close();
 		}
 		sequencer = null;
 		
 		// destroy software synthesizer
-		if ( null != synthesizer ) {
-			if ( synthesizer.isOpen() )
+		if (null != synthesizer) {
+			if (synthesizer.isOpen())
 				synthesizer.close();
 		}
 		synthesizer = null;
@@ -409,17 +409,17 @@ public final class MidiDevices {
 	 * @throws IllegalStateException
 	 */
 	public static void play() throws IllegalStateException {
-		if ( null != sequencer ) {
+		if (null != sequencer) {
 			// find out if we have to refresh the volume settings in the synthesizer
 			boolean rememberNeeded = false;
-			if ( 0 == sequencer.getTickPosition() )
+			if (0 == sequencer.getTickPosition())
 				rememberNeeded = true;
 			
 			// play
 			sequencer.start();
 			
 			// refresh if necessary
-			if ( rememberNeeded )
+			if (rememberNeeded)
 				rememberVolume();
 		}
 	}
@@ -432,7 +432,7 @@ public final class MidiDevices {
 	 * @throws IllegalStateException       if the sequencer is closed.
 	 */
 	public static void pause() throws InvalidMidiDataException, MidiUnavailableException, IllegalStateException {
-		if ( null != sequencer )
+		if (null != sequencer)
 			sequencer.stop();
 	}
 	
@@ -443,23 +443,23 @@ public final class MidiDevices {
 	 * @throws IllegalStateException       if the sequencer is closed.
 	 */
 	public static void stop() throws MidiUnavailableException, IllegalStateException {
-		if ( null != sequencer ) {
+		if (null != sequencer) {
 			sequencer.stop();
 		}
-		setTickPosition( 0 );
+		setTickPosition(0);
 	}
 	
 	/**
 	 * Increments the current position in the MIDI stream by 4 quarter notes.
 	 */
 	public static void forward() {
-		if ( null != sequencer ) {
+		if (null != sequencer) {
 			long totalTicks   = sequencer.getTickLength();
 			long currentTicks = sequencer.getTickPosition();
 			currentTicks += skipQuarters * SequenceCreator.getResolution();
-			if ( currentTicks >= totalTicks )
+			if (currentTicks >= totalTicks)
 				currentTicks = totalTicks - 1;
-			setTickPosition( currentTicks );
+			setTickPosition(currentTicks);
 		}
 	}
 	
@@ -467,13 +467,13 @@ public final class MidiDevices {
 	 * Increments the current position in the MIDI stream by 16 quarter notes.
 	 */
 	public static void fastForward() {
-		if ( null != sequencer ) {
+		if (null != sequencer) {
 			long totalTicks   = sequencer.getTickLength();
 			long currentTicks = sequencer.getTickPosition();
 			currentTicks += skipFastQuarters * SequenceCreator.getResolution();
-			if ( currentTicks >= totalTicks )
+			if (currentTicks >= totalTicks)
 				currentTicks = totalTicks - 1;
-			setTickPosition( currentTicks );
+			setTickPosition(currentTicks);
 		}
 	}
 	
@@ -481,12 +481,12 @@ public final class MidiDevices {
 	 * Decrements the current position in the MIDI stream by 4 quarter notes.
 	 */
 	public static void rewind() {
-		if ( null != sequencer ) {
+		if (null != sequencer) {
 			long currentTicks = sequencer.getTickPosition();
 			currentTicks -= skipQuarters * SequenceCreator.getResolution();
-			if ( currentTicks < 0 )
+			if (currentTicks < 0)
 				currentTicks = 0;
-			setTickPosition( currentTicks );
+			setTickPosition(currentTicks);
 		}
 	}
 	
@@ -494,12 +494,12 @@ public final class MidiDevices {
 	 * Decrements the current position in the MIDI stream by 16 quarter notes.
 	 */
 	public static void fastRewind() {
-		if ( null != sequencer ) {
+		if (null != sequencer) {
 			long currentTicks = sequencer.getTickPosition();
 			currentTicks -= skipFastQuarters * SequenceCreator.getResolution();
-			if ( currentTicks < 0 )
+			if (currentTicks < 0)
 				currentTicks = 0;
-			setTickPosition( currentTicks );
+			setTickPosition(currentTicks);
 		}
 	}
 	
@@ -509,7 +509,7 @@ public final class MidiDevices {
 	 * @return    Current tickstamp.
 	 */
 	public static long getTickPosition() {
-		if ( null != sequencer ) {
+		if (null != sequencer) {
 			return sequencer.getTickPosition();
 		}
 		else
@@ -522,12 +522,12 @@ public final class MidiDevices {
 	 * @return    Current time as **hh:mm:ss**.
 	 */
 	public static String getTimePosition() {
-		if ( null != sequencer ) {
+		if (null != sequencer) {
 			long microseconds = sequencer.getMicrosecondPosition();
-			return microsecondsToTimeString( microseconds );
+			return microsecondsToTimeString(microseconds);
 		}
 		else
-			return Dict.get( Dict.TIME_INFO_UNAVAILABLE );
+			return Dict.get(Dict.TIME_INFO_UNAVAILABLE);
 	}
 	
 	/**
@@ -536,7 +536,7 @@ public final class MidiDevices {
 	 * @return    tick length of the current MIDI stream.
 	 */
 	public static long getTickLength() {
-		if ( null != sequencer ) {
+		if (null != sequencer) {
 			return sequencer.getTickLength();
 		}
 		else
@@ -549,12 +549,12 @@ public final class MidiDevices {
 	 * @return    length of the current MIDI stream.
 	 */
 	public static String getTimeLength() {
-		if ( null != sequencer ) {
+		if (null != sequencer) {
 			long microseconds = sequencer.getMicrosecondLength();
-			return microsecondsToTimeString( microseconds );
+			return microsecondsToTimeString(microseconds);
 		}
 		else
-			return Dict.get( Dict.TIME_INFO_UNAVAILABLE );
+			return Dict.get(Dict.TIME_INFO_UNAVAILABLE);
 	}
 	
 	/**
@@ -563,7 +563,7 @@ public final class MidiDevices {
 	 * @param microseconds    number of microseconds to be transformed.
 	 * @return                time string in the format **hh:mm:ss**.
 	 */
-	public static String microsecondsToTimeString( long microseconds ) {
+	public static String microsecondsToTimeString(long microseconds) {
 		// get number of full seconds ignoring the rest of an opened second
 		int rest    = (int) microseconds / 1000000; // full seconds
 		int seconds = rest % 60;
@@ -571,7 +571,7 @@ public final class MidiDevices {
 		int minutes = rest % 60;
 		int hours   = rest / 60;
 		
-		return String.format( "%02d:%02d:%02d", hours, minutes, seconds );
+		return String.format("%02d:%02d:%02d", hours, minutes, seconds);
 	}
 	
 	/**
@@ -581,21 +581,21 @@ public final class MidiDevices {
 	 * 
 	 * @param pos    Tickstamp to be set.
 	 */
-	public static void setTickPosition( long pos ) {
-		if ( null != sequencer )
-			sequencer.setTickPosition( pos );
+	public static void setTickPosition(long pos) {
+		if (null != sequencer)
+			sequencer.setTickPosition(pos);
 		
 		// reload channel activity
-		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
-			refreshChannelActivity( channel );
+		for (byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++)
+			refreshChannelActivity(channel);
 		
 		// reload note history
-		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
-			refreshNoteHistory( channel );
+		for (byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++)
+			refreshNoteHistory(channel);
 		
 		// refresh instrument name, bank number and channel comment
-		for ( byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++ )
-			refreshInstrument( channel );
+		for (byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++)
+			refreshInstrument(channel);
 		
 		// refresh the lyrics
 		refreshLyrics();
@@ -619,9 +619,9 @@ public final class MidiDevices {
 	 */
 	private static void rememberVolume() {
 		try {
-			Thread.sleep( WAITING_TIME_BEFORE_REMEMBER );
+			Thread.sleep(WAITING_TIME_BEFORE_REMEMBER);
 		}
-		catch ( InterruptedException e ) {
+		catch (InterruptedException e) {
 		}
 		setMasterVolume();
 		setAllChannelVolumes();
@@ -633,9 +633,9 @@ public final class MidiDevices {
 	 * @return    **true**, if the sequencer is playing; otherwise: **false**.
 	 */
 	public static boolean isPlaying() {
-		if ( null == sequencer )
+		if (null == sequencer)
 			return false;
-		if ( sequencer.isRunning() )
+		if (sequencer.isRunning())
 			return true;
 		return false;
 	}
@@ -645,10 +645,10 @@ public final class MidiDevices {
 	 * 
 	 * @param factor    Tempo factor.
 	 */
-	public static void setTempo( float factor ) {
-		if ( null == sequencer )
+	public static void setTempo(float factor) {
+		if (null == sequencer)
 			return;
-		sequencer.setTempoFactor( factor );
+		sequencer.setTempoFactor(factor);
 		tempoFactor = factor;
 	}
 	
@@ -754,8 +754,8 @@ public final class MidiDevices {
 	public static void setChannelVolume(int channelNumber, byte volMsb, byte volLsb) {
 		
 		// store the new value
-		channelVolumeMsb[ channelNumber ] = volMsb;
-		channelVolumeLsb[ channelNumber ] = volLsb;
+		channelVolumeMsb[channelNumber] = volMsb;
+		channelVolumeLsb[channelNumber] = volLsb;
 		
 		sendChangeChannelVolumeMsg(channelNumber, volMsb, volLsb);
 	}
@@ -768,7 +768,7 @@ public final class MidiDevices {
 	 * @param volLsb           Least significant byte (number from 0 to 127).
 	 */
 	private static void sendChangeChannelVolumeMsg(int channelNumber, byte volMsb, byte volLsb) {
-		if ( null != receiver ) {
+		if (null != receiver) {
 			try {
 				ShortMessage msbMessage = new ShortMessage();
 				msbMessage.setMessage(
@@ -787,12 +787,12 @@ public final class MidiDevices {
 				);
 				receiver.send(lsbMessage, -1);
 			}
-			catch ( InvalidMidiDataException e ) {
+			catch (InvalidMidiDataException e) {
 				e.printStackTrace();
 			}
 		}
-		else if ( null != synthesizer ) {
-			MidiChannel channel = synthesizer.getChannels()[ channelNumber ];
+		else if (null != synthesizer) {
+			MidiChannel channel = synthesizer.getChannels()[channelNumber];
 			channel.controlChange(0x07, volMsb);
 			channel.controlChange(0x27, volLsb);
 		}
@@ -805,7 +805,7 @@ public final class MidiDevices {
 	 * @return           the MSB of the channel volume (0 to +127).
 	 */
 	public static byte getChannelVolume(byte channel) {
-		return channelVolumeMsb[ channel ];
+		return channelVolumeMsb[channel];
 	}
 	
 	/**
@@ -816,10 +816,10 @@ public final class MidiDevices {
 	 * @param mute       **true**: muted; **false**: not muted.
 	 */
 	public static void setMute(int channel, boolean mute) {
-		channelMute[ channel ] = mute;
-		if ( null == synthesizer )
+		channelMute[channel] = mute;
+		if (null == synthesizer)
 			return;
-		synthesizer.getChannels()[ channel ].setMute( mute );
+		synthesizer.getChannels()[channel].setMute(mute);
 	}
 	
 	/**
@@ -829,8 +829,8 @@ public final class MidiDevices {
 	 * @param channel    Channel number from 0 to 15.
 	 * @return           **true**, if the channel is muted. Otherwise: **false**.
 	 */
-	public static boolean getMute( int channel ) {
-		return channelMute[ channel ];
+	public static boolean getMute(int channel) {
+		return channelMute[channel];
 	}
 	
 	/**
@@ -841,8 +841,8 @@ public final class MidiDevices {
 	 * @param channel    Channel number from 0 to 15.
 	 * @return           **true**, if the channel is soloed. Otherwise: **false**.
 	 */
-	public static boolean getSolo( int channel ) {
-		return channelSolo[ channel ];
+	public static boolean getSolo(int channel) {
+		return channelSolo[channel];
 	}
 	
 	/**
@@ -853,11 +853,11 @@ public final class MidiDevices {
 	 * @param channel    Channel number from 0 to 15.
 	 * @param solo       **true**: solo; **false**: not solo.
 	 */
-	public static void setSolo( int channel, boolean solo ) {
-		channelSolo[ channel ] = solo;
-		if ( null == synthesizer )
+	public static void setSolo(int channel, boolean solo) {
+		channelSolo[channel] = solo;
+		if (null == synthesizer)
 			return;
-		synthesizer.getChannels()[ channel ].setSolo( solo );
+		synthesizer.getChannels()[channel].setSolo(solo);
 	}
 	
 	/**
@@ -866,8 +866,8 @@ public final class MidiDevices {
 	 * 
 	 * @param channel  Channel number from 0 to 15.
 	 */
-	public static void refreshNoteHistory( byte channel ) {
-		noteHistoryObservers.get( channel ).fireTableDataChanged();
+	public static void refreshNoteHistory(byte channel) {
+		noteHistoryObservers.get(channel).fireTableDataChanged();
 	}
 	
 	/**
@@ -876,20 +876,20 @@ public final class MidiDevices {
 	 * 
 	 * @param channel  Channel number from 0 to 15.
 	 */
-	public static void refreshInstrument( byte channel ) {
+	public static void refreshInstrument(byte channel) {
 		
 		// query information
 		long   tick           = getTickPosition();
-		Byte[] instrumentInfo = SequenceAnalyzer.getInstrument( channel, tick );
-		String comment        = SequenceAnalyzer.getChannelComment( channel, tick );
-		byte   bankMSB        = instrumentInfo[ 0 ];
-		byte   bankLSB        = instrumentInfo[ 1 ];
-		byte   program        = instrumentInfo[ 2 ];
+		Byte[] instrumentInfo = SequenceAnalyzer.getInstrument(channel, tick);
+		String comment        = SequenceAnalyzer.getChannelComment(channel, tick);
+		byte   bankMSB        = instrumentInfo[0];
+		byte   bankLSB        = instrumentInfo[1];
+		byte   program        = instrumentInfo[2];
 		
 		// channel not used at all?
-		if ( -1 == bankMSB ) {
+		if (-1 == bankMSB) {
 			// return default config
-			playerController.setChannelInfo( channel, "", "", "", "", "" );
+			playerController.setChannelInfo(channel, "", "", "", "", "");
 			
 			return;
 		}
@@ -897,34 +897,34 @@ public final class MidiDevices {
 		// bank number like it's used in the syntax
 		// if LSB is set: MSB, separator, LSB
 		// otherwise: MSB
-		String bankNum = Byte.toString( bankMSB );
-		if ( bankLSB > 0 )
-			bankNum += Dict.getSyntax( Dict.SYNTAX_BANK_SEP ) + Byte.toString( bankLSB );
+		String bankNum = Byte.toString(bankMSB);
+		if (bankLSB > 0)
+			bankNum += Dict.getSyntax(Dict.SYNTAX_BANK_SEP) + Byte.toString(bankLSB);
 		
 		// full bank number = MSB * 128 + LSB
 		int fullBankNum = (bankMSB << 7) + bankLSB;
-		String fullBankNumStr = Integer.toString( fullBankNum );
+		String fullBankNumStr = Integer.toString(fullBankNum);
 		
 		// bank number tooltip
 		String bankTooltip = fullBankNumStr + " (MSB: " + bankMSB + ", LSB: " + bankLSB + ")";
 		
 		// program number
-		String progNumStr = Byte.toString( program );
+		String progNumStr = Byte.toString(program);
 		
 		// instrument name
-		String instrName = Dict.get( Dict.UNKNOWN_INSTRUMENT );
+		String instrName = Dict.get(Dict.UNKNOWN_INSTRUMENT);
 		try {
 			// construct key for the data structure: program * 2^14 + bankMSB * 2^7 + bankLSB
-			int key     = ( ((int) program) << 14 ) | ( ((int) bankMSB) << 7 ) | ((int) bankLSB);
-			String name = instruments.get( channel ).get( key );
-			if ( null != name )
+			int key     = (((int) program) << 14) | (((int) bankMSB) << 7) | ((int) bankLSB);
+			String name = instruments.get(channel).get(key);
+			if (null != name)
 				instrName = name;
 		}
-		catch ( NullPointerException e ) {
+		catch (NullPointerException e) {
 			// nothing more to do
 		}
 		
-		playerController.setChannelInfo( channel, bankNum, bankTooltip, progNumStr, instrName, comment );
+		playerController.setChannelInfo(channel, bankNum, bankTooltip, progNumStr, instrName, comment);
 	}
 	
 	/**
@@ -932,9 +932,9 @@ public final class MidiDevices {
 	 * Initializes the data structure, if not yet done.
 	 */
 	public static void resetNoteHistoryObservers() {
-		if ( null == noteHistoryObservers )
+		if (null == noteHistoryObservers)
 			noteHistoryObservers = new ArrayList<AbstractTableModel>();
-		noteHistoryObservers.removeAll( noteHistoryObservers );
+		noteHistoryObservers.removeAll(noteHistoryObservers);
 	}
 	
 	/**
@@ -945,8 +945,8 @@ public final class MidiDevices {
 	 * @param observer    Note history observer.
 	 * @param channel     Channel number from 0 to 15.
 	 */
-	public static void addNoteHistoryObserver( AbstractTableModel observer, byte channel ) {
-		noteHistoryObservers.add( channel, observer );
+	public static void addNoteHistoryObserver(AbstractTableModel observer, byte channel) {
+		noteHistoryObservers.add(channel, observer);
 	}
 	
 	/**
@@ -954,7 +954,7 @@ public final class MidiDevices {
 	 * 
 	 * @param soundfont    Custom soundfont.
 	 */
-	public static void setSoundfont( Soundbank soundfont ) {
+	public static void setSoundfont(Soundbank soundfont) {
 		selectedSoundfont = soundfont;
 	}
 	
@@ -968,11 +968,11 @@ public final class MidiDevices {
 	public static Soundbank getSoundfont() {
 		
 		// selected soundfont available?
-		if ( selectedSoundfont != null )
+		if (selectedSoundfont != null)
 			return selectedSoundfont;
 		
 		// create a synthesizer, if not yet done
-		if ( null == synthesizer ) {
+		if (null == synthesizer) {
 			try {
 				synthesizer = MidiSystem.getSynthesizer();
 			}
@@ -1000,34 +1000,34 @@ public final class MidiDevices {
 	 * @param keep        **true** to keep the settings after playing the note, **false**
 	 *                    to restore the channel's state.
 	 */
-	public static void doSoundcheck( int channel, int[] instr, int note, byte volume, int velocity, int duration, boolean keep ) {
-		if ( null == synthesizer )
+	public static void doSoundcheck(int channel, int[] instr, int note, byte volume, int velocity, int duration, boolean keep) {
+		if (null == synthesizer)
 			return;
 		
 		// unpack instrument parts
-		int program = instr[ 0 ];
-		int bankMSB = instr[ 1 ];
-		int bankLSB = instr[ 2 ];
+		int program = instr[0];
+		int bankMSB = instr[1];
+		int bankLSB = instr[2];
 		
 		// set bank instrument and volume
-		MidiChannel midiChannel = synthesizer.getChannels()[ channel ];
-		midiChannel.controlChange( 0x00, bankMSB );
-		midiChannel.controlChange( 0x20, bankLSB );
-		midiChannel.programChange( program );
+		MidiChannel midiChannel = synthesizer.getChannels()[channel];
+		midiChannel.controlChange(0x00, bankMSB);
+		midiChannel.controlChange(0x20, bankLSB);
+		midiChannel.programChange(program);
 		sendChangeChannelVolumeMsg(channel, volume, volume);
 		
 		// note on
-		midiChannel.noteOn( note, velocity );
+		midiChannel.noteOn(note, velocity);
 		
 		// wait
 		try {
-			Thread.sleep( duration );
+			Thread.sleep(duration);
 		}
-		catch ( InterruptedException e ) {
+		catch (InterruptedException e) {
 		}
 		
 		// note off
-		midiChannel.noteOff( note );
+		midiChannel.noteOff(note);
 		
 		// keep or restore bank, instrument and volume
 		if (keep)
@@ -1048,13 +1048,13 @@ public final class MidiDevices {
 	public static void restoreChannelAfterSoundcheck(int channel) {
 		
 		// restore bank
-		MidiChannel midiChannel = synthesizer.getChannels()[ channel ];
-		Byte[] instrumentInfo = SequenceAnalyzer.getInstrument( (byte) channel, getTickPosition() );
-		byte oldBankMSB = instrumentInfo[ 0 ];
-		byte oldBankLSB = instrumentInfo[ 1 ];
-		byte oldProgram = instrumentInfo[ 2 ];
-		midiChannel.controlChange( 0x00, oldBankMSB );
-		midiChannel.controlChange( 0x20, oldBankLSB );
+		MidiChannel midiChannel = synthesizer.getChannels()[channel];
+		Byte[] instrumentInfo = SequenceAnalyzer.getInstrument((byte) channel, getTickPosition());
+		byte oldBankMSB = instrumentInfo[0];
+		byte oldBankLSB = instrumentInfo[1];
+		byte oldProgram = instrumentInfo[2];
+		midiChannel.controlChange(0x00, oldBankMSB);
+		midiChannel.controlChange(0x20, oldBankLSB);
 		
 		// restore program (instrument)
 		midiChannel.programChange(oldProgram);

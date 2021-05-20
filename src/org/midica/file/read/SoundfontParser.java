@@ -18,8 +18,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.sound.midi.Instrument;
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiSystem;
 import javax.sound.midi.Patch;
 import javax.sound.midi.Soundbank;
 import javax.sound.midi.SoundbankResource;

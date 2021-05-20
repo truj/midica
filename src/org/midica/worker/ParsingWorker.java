@@ -21,8 +21,8 @@ import org.midica.file.read.ParseException;
  * setVisible() method of the (modal) waiting dialog is called.
  * That causes the execution of {@link #doInBackground()} that parses the file.
  * 
- * After the parsing work is finished, {@link MidicaWorker#done()} is called and
- * closes the waiting dialog.
+ * After the parsing work is finished, {@link MidicaWorker#done()} is called
+ * and closes the waiting dialog.
  * 
  * @author Jan Trukenmüller
  */
@@ -39,8 +39,8 @@ public class ParsingWorker extends MidicaWorker {
 	 * @param parser  The parser do be executed in the background.
 	 * @param file    The file to be parsed.
 	 */
-	public ParsingWorker( WaitView view, IParser parser, File file ) {
-		super( view );
+	public ParsingWorker(WaitView view, IParser parser, File file) {
+		super(view);
 		this.parser = parser;
 		this.file   = file;
 	}
@@ -56,7 +56,7 @@ public class ParsingWorker extends MidicaWorker {
 		// parse
 		ParseException parseException = null;
 		try {
-			parser.parse( file );
+			parser.parse(file);
 		}
 		catch (ParseException e) {
 			parseException = e;

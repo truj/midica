@@ -69,11 +69,11 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * @param parser         The parser that has successfully parsed the current file.
 	 * @param currentFile    The last loaded (successfully parsed) file.
 	 */
-	public PlayerController( PlayerView view, SequenceParser parser, File currentFile ) {
+	public PlayerController(PlayerView view, SequenceParser parser, File currentFile) {
 		this.view        = view;
 		this.parser      = parser;
 		this.currentFile = currentFile;
-		this.refresher   = new RefresherThread( this );
+		this.refresher   = new RefresherThread(this);
 	}
 	
 	/**
@@ -278,22 +278,26 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 		}
 		
 		// init tick labels and progress slider
-		view.setTickAndTimeLength( MidiDevices.getTickLength(), MidiDevices.getTimeLength() );
+		view.setTickAndTimeLength(MidiDevices.getTickLength(), MidiDevices.getTimeLength());
 		view.initProgressSlider();
-		view.setGlobalSlidersAndFields( MidiDevices.getMasterVolume(), MidiDevices.getTempo(), SequenceParser.getTransposeLevel() );
+		view.setGlobalSlidersAndFields(
+			MidiDevices.getMasterVolume(),
+			MidiDevices.getTempo(),
+			SequenceParser.getTransposeLevel()
+		);
 		
 		// restore the channel based widgets in the view
-		for ( byte channel = 0; channel < MidiDevices.NUMBER_OF_CHANNELS; channel++ ) {
+		for (byte channel = 0; channel < MidiDevices.NUMBER_OF_CHANNELS; channel++) {
 			// channel volume
-			byte channelVolume = MidiDevices.getChannelVolume( channel );
-			view.setChannelVolumeField( channel, channelVolume );
-			view.setChannelVolumeSlider( channel, channelVolume );
+			byte channelVolume = MidiDevices.getChannelVolume(channel);
+			view.setChannelVolumeField(channel, channelVolume);
+			view.setChannelVolumeSlider(channel, channelVolume);
 			// mute
-			boolean mute = MidiDevices.getMute( channel );
-			view.setMute( channel, mute );
+			boolean mute = MidiDevices.getMute(channel);
+			view.setMute(channel, mute);
 			// solo
-			boolean solo = MidiDevices.getSolo( channel );
-			view.setSolo( channel, solo );
+			boolean solo = MidiDevices.getSolo(channel);
+			view.setSolo(channel, solo);
 		}
 		
 		refresher.start();
@@ -305,12 +309,12 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 */
 	public void refreshProgressBar() {
 		// don't do refresh if it's moved manually
-		if ( view.isProgressSliderAdjusting() )
+		if (view.isProgressSliderAdjusting())
 			return;
 		
 		long   ticks = MidiDevices.getTickPosition();
 		String time  = MidiDevices.getTimePosition();
-		view.refreshProgressBar( ticks, time );
+		view.refreshProgressBar(ticks, time);
 	}
 	
 	/**
@@ -318,7 +322,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * the MIDI sequence is reached.
 	 */
 	public void endOfSequence() {
-		view.togglePlayPauseButton( PlayerView.CMD_PAUSE );
+		view.togglePlayPauseButton(PlayerView.CMD_PAUSE);
 	}
 	
 	/**
@@ -327,8 +331,8 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * @param channel MIDI channel number.
 	 * @param active  **true** to turn the LED on, **false** to turn it off.
 	 */
-	public void setChannelActivity( int channel, boolean active ) {
-		view.setActivityLED( channel, active );
+	public void setChannelActivity(int channel, boolean active) {
+		view.setActivityLED(channel, active);
 	}
 	
 	/**
@@ -349,8 +353,8 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * @param instrName     instrument name
 	 * @param comment       channel comment
 	 */
-	public void setChannelInfo( byte channel, String bankNumShort, String bankNumLong, String program, String instrName, String comment ) {
-		view.setInstrumentInfo( channel, bankNumShort, bankNumLong, program, instrName, comment );
+	public void setChannelInfo(byte channel, String bankNumShort, String bankNumLong, String program, String instrName, String comment) {
+		view.setInstrumentInfo(channel, bankNumShort, bankNumLong, program, instrName, comment);
 	}
 	
 	/**
@@ -358,8 +362,8 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * 
 	 * @param text  HTML-formatted lyrics text.
 	 */
-	public void setLyrics( String text ) {
-		view.setLyrics( text );
+	public void setLyrics(String text) {
+		view.setLyrics(text);
 	}
 	
 	/**
@@ -377,7 +381,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * @param e    Event object.
 	 */
 	@Override
-	public void itemStateChanged( ItemEvent e ) {
+	public void itemStateChanged(ItemEvent e) {
 		
 		// get name, component and checked/unchecked
 		String    name      = ((Component) e.getSource()).getName();
@@ -385,22 +389,22 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 		boolean   isChecked = cbx.isSelected();
 		
 		// show/hide channels/lyrics
-		if ( name.startsWith(PlayerView.NAME_SHOW_LYRICS) ) {
+		if (name.startsWith(PlayerView.NAME_SHOW_LYRICS)) {
 			view.toggleLyrics();
 		}
 		
 		// mute a channel
-		else if ( name.startsWith(PlayerView.NAME_MUTE) ) {
-			name        = name.replaceFirst( PlayerView.NAME_MUTE, "" );
-			int channel = Integer.parseInt( name );
-			MidiDevices.setMute( channel, isChecked );
+		else if (name.startsWith(PlayerView.NAME_MUTE)) {
+			name        = name.replaceFirst(PlayerView.NAME_MUTE, "");
+			int channel = Integer.parseInt(name);
+			MidiDevices.setMute(channel, isChecked);
 		}
 		
 		// solo a channel
-		else if ( name.startsWith(PlayerView.NAME_SOLO) ) {
-			name        = name.replaceFirst( PlayerView.NAME_SOLO, "" );
-			int channel = Integer.parseInt( name );
-			MidiDevices.setSolo( channel, isChecked );
+		else if (name.startsWith(PlayerView.NAME_SOLO)) {
+			name        = name.replaceFirst(PlayerView.NAME_SOLO, "");
+			int channel = Integer.parseInt(name);
+			MidiDevices.setSolo(channel, isChecked);
 		}
 	}
 	
@@ -421,23 +425,23 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * @param e    Event object.
 	 */
 	@Override
-	public void stateChanged( ChangeEvent e ) {
+	public void stateChanged(ChangeEvent e) {
 		String name = ((Component) e.getSource()).getName();
 		
 		// handle progress slider changes
-		if ( PlayerView.NAME_PROGRESS.equals(name) ) {
+		if (PlayerView.NAME_PROGRESS.equals(name)) {
 			
 			// only react if it's moved manually
-			if ( ! view.isProgressSliderAdjusting() )
+			if (! view.isProgressSliderAdjusting())
 				return;
-			MidiDevices.setTickPosition( ((MidicaSlider) e.getSource()).getValue() );
+			MidiDevices.setTickPosition(((MidicaSlider) e.getSource()).getValue());
 		}
 		
 		// handle master volume slider changes
-		else if ( PlayerView.NAME_MASTER_VOL.equals(name) ) {
+		else if (PlayerView.NAME_MASTER_VOL.equals(name)) {
 			
 			// only react if it's moved manually
-			if ( ! view.isMasterVolumeSliderAdjusting() )
+			if (! view.isMasterVolumeSliderAdjusting())
 				return;
 			byte volume = (byte) ((MidicaSlider) e.getSource()).getValue();
 			view.setMasterVolumeField(volume);
@@ -445,34 +449,34 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 		}
 		
 		// handle tempo slider changes
-		else if ( PlayerView.NAME_TEMPO.equals(name) ) {
+		else if (PlayerView.NAME_TEMPO.equals(name)) {
 			
 			// only react if it's moved manually
-			if ( ! view.isTempoSliderAdjusting() )
+			if (! view.isTempoSliderAdjusting())
 				return;
-			int value = ( (MidicaSlider) e.getSource() ).getValue();
-			float tempo = ( (float) value ) / PlayerView.TEMPO_DEFAULT;
-			view.setTempoField( tempo );
-			MidiDevices.setTempo( tempo );
+			int value = ((MidicaSlider) e.getSource()).getValue();
+			float tempo = ((float) value) / PlayerView.TEMPO_DEFAULT;
+			view.setTempoField(tempo);
+			MidiDevices.setTempo(tempo);
 		}
 		
 		// handle transpose slider changes
-		else if ( PlayerView.NAME_TRANSPOSE.equals(name) ) {
+		else if (PlayerView.NAME_TRANSPOSE.equals(name)) {
 			// only react if it's moved manually
-			if ( ! view.isTransposeSliderAdjusting() )
+			if (! view.isTransposeSliderAdjusting())
 				return;
-			byte level = (byte) ( (MidicaSlider) e.getSource() ).getValue();
-			view.setTransposeField( level );
-			SequenceParser.setTransposeLevel( level );
+			byte level = (byte) ((MidicaSlider) e.getSource()).getValue();
+			view.setTransposeField(level);
+			SequenceParser.setTransposeLevel(level);
 			reparse();
 		}
 		
 		// handle channel volume slider changes
-		else if ( name.startsWith(PlayerView.NAME_CH_VOL) ) {
-			name = name.replaceFirst( PlayerView.NAME_CH_VOL, "" );
-			byte channel = Byte.parseByte( name );
+		else if (name.startsWith(PlayerView.NAME_CH_VOL)) {
+			name = name.replaceFirst(PlayerView.NAME_CH_VOL, "");
+			byte channel = Byte.parseByte(name);
 			// only react if it's moved manually
-			if ( ! view.isChVolSliderAdjusting(channel) )
+			if (! view.isChVolSliderAdjusting(channel))
 				return;
 			byte volume = (byte) ((MidicaSlider) e.getSource()).getValue();
 			view.setChannelVolumeField(channel, volume);
@@ -496,91 +500,91 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * @param e    Event object.
 	 */
 	@Override
-	public void mouseWheelMoved( MouseWheelEvent e ) {
+	public void mouseWheelMoved(MouseWheelEvent e) {
 		String name     = ((Component) e.getSource()).getName();
 		int amount      = e.getWheelRotation();
-		int sliderTicks = ( (MidicaSlider) e.getSource() ).getValue();
+		int sliderTicks = ((MidicaSlider) e.getSource()).getValue();
 		
 		// progress slider scrolls
-		if ( PlayerView.NAME_PROGRESS.equals(name) ) {
+		if (PlayerView.NAME_PROGRESS.equals(name)) {
 			// get and check new slider state
-			sliderTicks -= ( amount * PlayerView.PROGRESS_SCROLL );
+			sliderTicks -= (amount * PlayerView.PROGRESS_SCROLL);
 			int max = (int) MidiDevices.getTickLength();
-			if ( sliderTicks < 0 )
+			if (sliderTicks < 0)
 				sliderTicks = 0;
-			else if ( sliderTicks > max )
+			else if (sliderTicks > max)
 				sliderTicks = max;
 			
 			// set new slider state and apply the resulting actions
-			MidiDevices.setTickPosition( sliderTicks );
-			view.setProgressSlider( sliderTicks );
+			MidiDevices.setTickPosition(sliderTicks);
+			view.setProgressSlider(sliderTicks);
 		}
 		
 		// master volume slider scrolls
-		else if ( PlayerView.NAME_MASTER_VOL.equals(name) ) {
+		else if (PlayerView.NAME_MASTER_VOL.equals(name)) {
 			// get and check new slider state
 			sliderTicks -= amount * PlayerView.MASTER_VOL_SCROLL;
-			if ( sliderTicks < PlayerView.MASTER_VOL_MIN )
+			if (sliderTicks < PlayerView.MASTER_VOL_MIN)
 				sliderTicks = PlayerView.MASTER_VOL_MIN;
-			else if ( sliderTicks > PlayerView.MASTER_VOL_MAX )
+			else if (sliderTicks > PlayerView.MASTER_VOL_MAX)
 				sliderTicks = PlayerView.MASTER_VOL_MAX;
 			
 			// set new slider state and apply the resulting actions
-			view.setMasterVolumeSlider( (byte) sliderTicks );
-			view.setMasterVolumeField( (byte) sliderTicks );
-			MidiDevices.setMasterVolume( (byte) sliderTicks, (byte) sliderTicks );
+			view.setMasterVolumeSlider((byte) sliderTicks);
+			view.setMasterVolumeField((byte) sliderTicks);
+			MidiDevices.setMasterVolume((byte) sliderTicks, (byte) sliderTicks);
 		}
 		
 		// tempo slider scrolls
-		else if ( PlayerView.NAME_TEMPO.equals(name) ) {
+		else if (PlayerView.NAME_TEMPO.equals(name)) {
 			// get and check new slider state
-			sliderTicks -= ( amount * PlayerView.TEMPO_SCROLL );
-			if ( sliderTicks < PlayerView.TEMPO_MIN )
+			sliderTicks -= (amount * PlayerView.TEMPO_SCROLL);
+			if (sliderTicks < PlayerView.TEMPO_MIN)
 				sliderTicks = PlayerView.TEMPO_MIN;
-			else if ( sliderTicks > PlayerView.TEMPO_MAX )
+			else if (sliderTicks > PlayerView.TEMPO_MAX)
 				sliderTicks = PlayerView.TEMPO_MAX;
 			
 			// calculate tempo factor from tempo ticks
 			float tempoFactor = (float) sliderTicks / PlayerView.TEMPO_DEFAULT;
 			
 			// set new slider state and apply the resulting actions
-			view.setTempoSlider( tempoFactor );
-			view.setTempoField( tempoFactor );
-			MidiDevices.setTempo( tempoFactor );
+			view.setTempoSlider(tempoFactor);
+			view.setTempoField(tempoFactor);
+			MidiDevices.setTempo(tempoFactor);
 		}
 		
 		// transpose slider scrolls
-		else if ( PlayerView.NAME_TRANSPOSE.equals(name) ) {
+		else if (PlayerView.NAME_TRANSPOSE.equals(name)) {
 			// get and check new slider state
-			sliderTicks -= ( amount * PlayerView.TRANSPOSE_SCROLL );
-			if ( sliderTicks < PlayerView.TRANSPOSE_MIN )
+			sliderTicks -= (amount * PlayerView.TRANSPOSE_SCROLL);
+			if (sliderTicks < PlayerView.TRANSPOSE_MIN)
 				sliderTicks = PlayerView.TRANSPOSE_MIN;
-			else if ( sliderTicks > PlayerView.TRANSPOSE_MAX )
+			else if (sliderTicks > PlayerView.TRANSPOSE_MAX)
 				sliderTicks = PlayerView.TRANSPOSE_MAX;
 			
 			// set new slider state and apply the resulting actions
-			view.setTransposeSlider( (byte) sliderTicks );
-			view.setTransposeField( (byte) sliderTicks );
-			SequenceParser.setTransposeLevel( (byte) sliderTicks );
+			view.setTransposeSlider((byte) sliderTicks);
+			view.setTransposeField((byte) sliderTicks);
+			SequenceParser.setTransposeLevel((byte) sliderTicks);
 			reparse();
 		}
 		
 		// channel volume slider scrolls
-		else if ( name.startsWith(PlayerView.NAME_CH_VOL) ) {
+		else if (name.startsWith(PlayerView.NAME_CH_VOL)) {
 			// get channel
-			name = name.replaceFirst( PlayerView.NAME_CH_VOL, "" );
-			byte channel = Byte.parseByte( name );
+			name = name.replaceFirst(PlayerView.NAME_CH_VOL, "");
+			byte channel = Byte.parseByte(name);
 			
 			// get and check new slider state
 			sliderTicks -= amount * PlayerView.CH_VOL_SCROLL;
-			if ( sliderTicks < PlayerView.CH_VOL_MIN_VAL )
+			if (sliderTicks < PlayerView.CH_VOL_MIN_VAL)
 				sliderTicks = PlayerView.CH_VOL_MIN_VAL;
-			else if ( sliderTicks > PlayerView.CH_VOL_MAX_VAL )
+			else if (sliderTicks > PlayerView.CH_VOL_MAX_VAL)
 				sliderTicks = PlayerView.CH_VOL_MAX_VAL;
 			
 			// set new slider state and apply the resulting actions
-			view.setChannelVolumeSlider( channel, (byte) sliderTicks );
-			view.setChannelVolumeField( channel, (byte) sliderTicks );
+			view.setChannelVolumeSlider(channel, (byte) sliderTicks);
+			view.setChannelVolumeField(channel, (byte) sliderTicks);
 			byte chVol = (byte) sliderTicks;
 			MidiDevices.setChannelVolume(channel, chVol, chVol);
 		}
@@ -603,55 +607,55 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * 
 	 * @param e    Event object.
 	 */
-	private void handleTextFieldChanges( DocumentEvent e ) {
+	private void handleTextFieldChanges(DocumentEvent e) {
 		Document doc  = e.getDocument();
-		String   name = doc.getProperty( "name" ).toString();
+		String   name = doc.getProperty("name").toString();
 		try {
-			String text = doc.getText( 0, doc.getLength() );
+			String text = doc.getText(0, doc.getLength());
 			
 			// jump field changed
-			if ( PlayerView.NAME_JUMP.equals(name) ) {
+			if (PlayerView.NAME_JUMP.equals(name)) {
 				long max   = MidiDevices.getTickLength();
-				int  ticks = Integer.parseInt( text );
-				if ( ticks < 0 || ticks > max )
+				int  ticks = Integer.parseInt(text);
+				if (ticks < 0 || ticks > max)
 					throw new NumberFormatException();
 			}
 			
 			// master volume field changed
-			else if ( PlayerView.NAME_MASTER_VOL.equals(name) ) {
-				byte volume = Byte.parseByte( text );
-				if ( volume < 0 || volume > 127 )
+			else if (PlayerView.NAME_MASTER_VOL.equals(name)) {
+				byte volume = Byte.parseByte(text);
+				if (volume < 0 || volume > 127)
 					throw new NumberFormatException();
 			}
 			
 			// tempo field changed
-			else if ( PlayerView.NAME_TEMPO.equals(name) ) {
-				float tempoFactor = Float.parseFloat( text );
-				if ( tempoFactor < 0 )
+			else if (PlayerView.NAME_TEMPO.equals(name)) {
+				float tempoFactor = Float.parseFloat(text);
+				if (tempoFactor < 0)
 					throw new NumberFormatException();
 			}
 			
 			// transpose field changed
-			else if ( PlayerView.NAME_TRANSPOSE.equals(name) ) {
-				byte level = Byte.parseByte( text );
-				if ( level < PlayerView.TRANSPOSE_MIN || level > PlayerView.TRANSPOSE_MAX )
+			else if (PlayerView.NAME_TRANSPOSE.equals(name)) {
+				byte level = Byte.parseByte(text);
+				if (level < PlayerView.TRANSPOSE_MIN || level > PlayerView.TRANSPOSE_MAX)
 					throw new NumberFormatException();
 			}
 			
 			// channel volume field changed
-			else if ( name.startsWith(PlayerView.NAME_CH_VOL) ) {
-				byte volume = Byte.parseByte( text );
-				if ( volume < 0 || volume > 127 )
+			else if (name.startsWith(PlayerView.NAME_CH_VOL)) {
+				byte volume = Byte.parseByte(text);
+				if (volume < 0 || volume > 127)
 					throw new NumberFormatException();
 			}
 			
 			// no exception yet, so the field input is ok
-			view.setTextFieldColor( name, Laf.COLOR_OK );
+			view.setTextFieldColor(name, Laf.COLOR_OK);
 		}
-		catch ( NumberFormatException ex ) {
-			view.setTextFieldColor( name, Laf.COLOR_ERROR );
+		catch (NumberFormatException ex) {
+			view.setTextFieldColor(name, Laf.COLOR_ERROR);
 		}
-		catch ( BadLocationException ex ) {
+		catch (BadLocationException ex) {
 		}
 	}
 	
@@ -662,7 +666,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * @param e    Event object.
 	 */
 	@Override
-	public void changedUpdate( DocumentEvent e ) {
+	public void changedUpdate(DocumentEvent e) {
 		handleTextFieldChanges(e);
 	}
 	
@@ -673,7 +677,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * @param e    Event object.
 	 */
 	@Override
-	public void insertUpdate( DocumentEvent e ) {
+	public void insertUpdate(DocumentEvent e) {
 		handleTextFieldChanges(e);
 	}
 	
@@ -684,7 +688,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * @param e    Event object.
 	 */
 	@Override
-	public void removeUpdate( DocumentEvent e ) {
+	public void removeUpdate(DocumentEvent e) {
 		handleTextFieldChanges(e);
 	}
 	
@@ -703,40 +707,40 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * 
 	 * @param cmd    The pushed button's command string.
 	 */
-	private void performControlCommand( String cmd ) {
+	private void performControlCommand(String cmd) {
 		try {
-			if ( PlayerView.CMD_PLAY.equals(cmd) ) {
+			if (PlayerView.CMD_PLAY.equals(cmd)) {
 				MidiDevices.play();
 				view.togglePlayPauseButton(cmd);
 			}
-			else if ( PlayerView.CMD_PAUSE.equals(cmd) ) {
+			else if (PlayerView.CMD_PAUSE.equals(cmd)) {
 				MidiDevices.pause();
 				view.togglePlayPauseButton(cmd);
 			}
-			else if ( PlayerView.CMD_FWD.equals(cmd) ) {
+			else if (PlayerView.CMD_FWD.equals(cmd)) {
 				MidiDevices.forward();
 			}
-			else if ( PlayerView.CMD_REW.equals(cmd) ) {
+			else if (PlayerView.CMD_REW.equals(cmd)) {
 				MidiDevices.rewind();
 			}
-			else if ( PlayerView.CMD_FAST_FWD.equals(cmd) ) {
+			else if (PlayerView.CMD_FAST_FWD.equals(cmd)) {
 				MidiDevices.fastForward();
 			}
-			else if ( PlayerView.CMD_FAST_REW.equals(cmd) ) {
+			else if (PlayerView.CMD_FAST_REW.equals(cmd)) {
 				MidiDevices.fastRewind();
 			}
-			else if ( PlayerView.CMD_STOP.equals(cmd) ) {
+			else if (PlayerView.CMD_STOP.equals(cmd)) {
 				MidiDevices.stop();
-				view.togglePlayPauseButton( PlayerView.CMD_PAUSE );
+				view.togglePlayPauseButton(PlayerView.CMD_PAUSE);
 			}
 		}
-		catch ( InvalidMidiDataException e ) {
+		catch (InvalidMidiDataException e) {
 			showErrorMessage(e);
 		}
-		catch ( MidiUnavailableException e ) {
+		catch (MidiUnavailableException e) {
 			showErrorMessage(e);
 		}
-		catch ( IllegalStateException e ) {
+		catch (IllegalStateException e) {
 			showErrorMessage(e);
 		}
 	}
@@ -752,39 +756,39 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 		try {
 			long     currentTicks = MidiDevices.getTickPosition();
 			boolean  isPlaying    = MidiDevices.isPlaying();
-			WaitView waitView     = new WaitView( view );
+			WaitView waitView     = new WaitView(view);
 			
 			// start file parsing in the background and show the wait window
-			ParsingWorker worker = new ParsingWorker( waitView, parser, currentFile );
+			ParsingWorker worker = new ParsingWorker(waitView, parser, currentFile);
 			MidiDevices.destroyDevices();
 			worker.execute();
-			waitView.init( Dict.get(Dict.WAIT_REPARSE) );
+			waitView.init(Dict.get(Dict.WAIT_REPARSE));
 			
 			// wait until the file is parsed and than evaluate the parsing result
 			try {
 				ParseException parseException = (ParseException) worker.get();
 				view.updateParseStatusIcon();
-				if ( parseException != null ) {
+				if (parseException != null) {
 					throw parseException;
 				}
 			}
-			catch ( InterruptedException | ExecutionException workerException ) {
-				throw new ParseException( workerException.getMessage() );
+			catch (InterruptedException | ExecutionException workerException) {
+				throw new ParseException(workerException.getMessage());
 			}
 			
 			// setup the MIDI devices while showing another wait message
 			setupMidiDevices();
 			
 			// update player UI
-			MidiDevices.setTickPosition( currentTicks );
-			view.setTickAndTimeLength( MidiDevices.getTickLength(), MidiDevices.getTimeLength() );
+			MidiDevices.setTickPosition(currentTicks);
+			view.setTickAndTimeLength(MidiDevices.getTickLength(), MidiDevices.getTimeLength());
 			view.initProgressSlider();
 			if (isPlaying) {
-				view.togglePlayPauseButton( PlayerView.CMD_PLAY );
+				view.togglePlayPauseButton(PlayerView.CMD_PLAY);
 				MidiDevices.play();
 			}
 			else
-				view.togglePlayPauseButton( PlayerView.CMD_PAUSE );
+				view.togglePlayPauseButton(PlayerView.CMD_PAUSE);
 		}
 		catch (ParseException ex) {
 			showErrorMessage(ex.getFullMessage());
@@ -803,9 +807,9 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * 
 	 * @param e    Exception containing the error message to be shown.
 	 */
-	private void showErrorMessage( Exception e ) {
+	private void showErrorMessage(Exception e) {
 		errorMsg = new ErrorMsgView(view);
-		errorMsg.init( e.getMessage() );
+		errorMsg.init(e.getMessage());
 	}
 	
 	/**
@@ -814,7 +818,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	 * 
 	 * @param message    Error message.
 	 */
-	public void showErrorMessage( String message ) {
+	public void showErrorMessage(String message) {
 		errorMsg = new ErrorMsgView(view);
 		errorMsg.init(message);
 	}
@@ -830,14 +834,14 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	private void setupMidiDevices() throws Exception {
 		
 		// start file parsing in the background and show the wait window
-		WaitView waitView   = new WaitView( view );
-		DeviceWorker worker = new DeviceWorker( waitView, this );
+		WaitView waitView   = new WaitView(view);
+		DeviceWorker worker = new DeviceWorker(waitView, this);
 		worker.execute();
-		waitView.init( Dict.get(Dict.WAIT_SETUP_DEVICES) );
+		waitView.init(Dict.get(Dict.WAIT_SETUP_DEVICES));
 		
 		// wait for the worker and pass any exception to the calling method
 		Exception exception = worker.get();
-		if ( exception != null ) {
+		if (exception != null) {
 			throw exception;
 		}
 	}

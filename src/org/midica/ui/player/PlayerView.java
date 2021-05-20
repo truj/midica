@@ -52,17 +52,17 @@ public class PlayerView extends JDialog {
 	private static final long serialVersionUID = 1L;
 	
 	// karaoke constants
-	public static final int    KAR_WIDTH              =      460; // width for the karaoke field
-	public static final int    KAR_PAST_LINES         =        3; // show so many lines that begin in the past
-	public static final int    KAR_TOTAL_LINES        =        7; // show so many lines in total
-	public static final int    KAR_MAX_CHARS_PER_LINE =       28; // max characters per line - split line, if it's longer
-	public static final String KAR_FONT_SIZE          =   "20px"; // css-format
+	public static final int    KAR_WIDTH              =    460; // width for the karaoke field
+	public static final int    KAR_PAST_LINES         =      3; // show so many lines that begin in the past
+	public static final int    KAR_TOTAL_LINES        =      7; // show so many lines in total
+	public static final int    KAR_MAX_CHARS_PER_LINE =     28; // max characters per line - split line, if it's longer
+	public static final String KAR_FONT_SIZE          = "20px"; // css-format
 	
 	// Constants for sliders
 	// progress slider
-	public static final String    NAME_PROGRESS     = "name_progress";
-	public static final int       PROGRESS_SCROLL   =  100;
-	public static final Dimension MIN_PROGRESS_DIM  = new Dimension( 700, 42 );
+	public static final String    NAME_PROGRESS    = "name_progress";
+	public static final int       PROGRESS_SCROLL  =  100;
+	public static final Dimension MIN_PROGRESS_DIM = new Dimension(700, 42);
 	// tempo slider
 	public static final int    TEMPO_DEFAULT     =  300;
 	public static final int    TEMPO_MIN         =    0;
@@ -126,10 +126,10 @@ public class PlayerView extends JDialog {
 	public static final String CMD_FAST_FWD  = "cmd_fast_forward";
 	
 	// for activity control
-	public static final ImageIcon AC_ICON_INACTIVE   = new ImageIcon( ClassLoader.getSystemResource("org/midica/resources/channel-inactive.png") );
-	public static final ImageIcon AC_ICON_ACTIVE     = new ImageIcon( ClassLoader.getSystemResource("org/midica/resources/channel-active.png") );
-	public static final ImageIcon PARSE_SUCCESS_ICON = new ImageIcon( ClassLoader.getSystemResource("org/midica/resources/parse-success.png") );
-	public static final ImageIcon PARSE_FAILURE_ICON = new ImageIcon( ClassLoader.getSystemResource("org/midica/resources/parse-failure.png") );
+	public static final ImageIcon AC_ICON_INACTIVE   = new ImageIcon(ClassLoader.getSystemResource("org/midica/resources/channel-inactive.png"));
+	public static final ImageIcon AC_ICON_ACTIVE     = new ImageIcon(ClassLoader.getSystemResource("org/midica/resources/channel-active.png"));
+	public static final ImageIcon PARSE_SUCCESS_ICON = new ImageIcon(ClassLoader.getSystemResource("org/midica/resources/parse-success.png"));
+	public static final ImageIcon PARSE_FAILURE_ICON = new ImageIcon(ClassLoader.getSystemResource("org/midica/resources/parse-failure.png"));
 	
 	// for channel details
 	private static final int   NOTE_HISTORY_COL_WIDTH_NUMBER   =  70;
@@ -201,27 +201,27 @@ public class PlayerView extends JDialog {
 	 * @param parser       Parser object that can be used for reparsing the current file.
 	 * @param currentFile  Currently loaded and parsed file.
 	 */
-	public PlayerView( UiView view, SequenceParser parser, File currentFile ) {
-		super( view, Dict.get(Dict.TITLE_PLAYER), true );
+	public PlayerView(UiView view, SequenceParser parser, File currentFile) {
+		super(view, Dict.get(Dict.TITLE_PLAYER), true);
 		
 		this.currentFile = currentFile;
-		if ( null != currentFile ) {
-			setTitle( Dict.get(Dict.TITLE_PLAYER) + " - " + currentFile.getName() );
+		if (null != currentFile) {
+			setTitle(Dict.get(Dict.TITLE_PLAYER) + " - " + currentFile.getName());
 		}
 		
-		controller = new PlayerController( this, parser, currentFile );
+		controller = new PlayerController(this, parser, currentFile);
 		
 		// note history table width
 		NOTE_HISTORY_WIDTH = NOTE_HISTORY_COL_WIDTH_NAME + NOTE_HISTORY_COL_WIDTH_NUMBER
 		                   + NOTE_HISTORY_COL_WIDTH_TICK + NOTE_HISTORY_COL_WIDTH_VELOCITY;
 		
 		// add listeners
-		addWindowListener( controller );
+		addWindowListener(controller);
 		
 		init();
 		addKeyBindings();
 		pack();
-		setVisible( true );
+		setVisible(true);
 	}
 	
 	/**
@@ -234,7 +234,7 @@ public class PlayerView extends JDialog {
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
-		content.setLayout( layout );
+		content.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.anchor     = GridBagConstraints.NORTHWEST;
 		constraints.fill       = GridBagConstraints.BOTH;
@@ -247,18 +247,18 @@ public class PlayerView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// jump area
-		content.add( createJumpArea(), constraints );
+		content.add(createJumpArea(), constraints);
 		
 		// slider
 		constraints.insets = Laf.INSETS_WE;
 		constraints.gridy++;
-		content.add( createProgressSlider(), constraints );
+		content.add(createProgressSlider(), constraints);
 		
 		// control area
 		constraints.insets = Laf.INSETS_W;
 		constraints.gridy++;
 		constraints.gridwidth = 1;
-		content.add( createControlArea(), constraints );
+		content.add(createControlArea(), constraints);
 		
 		// channels or lyrics
 		constraints.insets = Laf.INSETS_SW;
@@ -269,8 +269,8 @@ public class PlayerView extends JDialog {
 		channelArea         = createChannelArea();
 		lyricsArea          = createLyricsArea();
 		channelLyricsArea   = new JPanel();
-		channelLyricsArea.add( channelArea );
-		content.add( channelLyricsArea, constraints );
+		channelLyricsArea.add(channelArea);
+		content.add(channelLyricsArea, constraints);
 		
 		// volume, tempo and transpose sliders
 		constraints.insets     = Laf.INSETS_SE;
@@ -279,7 +279,7 @@ public class PlayerView extends JDialog {
 		constraints.weightx    = 0;
 		constraints.gridx++;
 		constraints.gridy--;
-		content.add( createGlobalSliderAndButtonsArea(), constraints );
+		content.add(createGlobalSliderAndButtonsArea(), constraints);
 	}
 	
 	/**
@@ -293,7 +293,7 @@ public class PlayerView extends JDialog {
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
-		area.setLayout( layout );
+		area.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
 		constraints.insets     = Laf.INSETS_IN;
@@ -304,46 +304,46 @@ public class PlayerView extends JDialog {
 		constraints.weightx    = 0;
 		
 		// memorize button
-		btnMemorize = new MidicaButton( Dict.get(Dict.MEMORIZE) );
-		btnMemorize.addActionListener( controller );
-		btnMemorize.setActionCommand( CMD_MEMORIZE );
-		area.add( btnMemorize, constraints );
+		btnMemorize = new MidicaButton(Dict.get(Dict.MEMORIZE));
+		btnMemorize.addActionListener(controller);
+		btnMemorize.setActionCommand(CMD_MEMORIZE);
+		area.add(btnMemorize, constraints);
 		
 		// text field
 		constraints.gridx++;
 		fldJump = new JTextField();
-		fldJump.setName( NAME_JUMP );
-		fldJump.getDocument().putProperty( "name", NAME_JUMP );
-		fldJump.getDocument().addDocumentListener( controller );
-		fldJump.addActionListener( controller );
-		setTextFieldColor( fldJump.getName(), Laf.COLOR_NORMAL );
-		Dimension minField = new Dimension( 70, 26 );
-		fldJump.setPreferredSize( minField );
-		area.add( fldJump, constraints );
+		fldJump.setName(NAME_JUMP);
+		fldJump.getDocument().putProperty("name", NAME_JUMP);
+		fldJump.getDocument().addDocumentListener(controller);
+		fldJump.addActionListener(controller);
+		setTextFieldColor(fldJump.getName(), Laf.COLOR_NORMAL);
+		Dimension minField = new Dimension(70, 26);
+		fldJump.setPreferredSize(minField);
+		area.add(fldJump, constraints);
 		
 		// jump button
 		constraints.gridx++;
-		btnJump = new MidicaButton( Dict.get(Dict.JUMP) );
-		btnJump.addActionListener( controller );
-		btnJump.setActionCommand( CMD_JUMP );
-		area.add( btnJump, constraints );
+		btnJump = new MidicaButton(Dict.get(Dict.JUMP));
+		btnJump.addActionListener(controller);
+		btnJump.setActionCommand(CMD_JUMP);
+		area.add(btnJump, constraints);
 		
 		// spacer
 		constraints.gridx++;
-		JLabel spacer = new JLabel( " " );
-		area.add( spacer, constraints );
+		JLabel spacer = new JLabel(" ");
+		area.add(spacer, constraints);
 		
 		// lyrics checkbox
 		constraints.gridx++;
-		cbxLyrics = new JCheckBox( Dict.get(Dict.SHOW_LYRICS) );
-		cbxLyrics.setName( NAME_SHOW_LYRICS );
-		cbxLyrics.addItemListener( controller );
-		area.add( cbxLyrics, constraints );
+		cbxLyrics = new JCheckBox(Dict.get(Dict.SHOW_LYRICS));
+		cbxLyrics.setName(NAME_SHOW_LYRICS);
+		cbxLyrics.addItemListener(controller);
+		area.add(cbxLyrics, constraints);
 		
 		// spacer
 		constraints.gridx++;
 		JLabel spacer3 = new JLabel("   ");
-		area.add( spacer3, constraints );
+		area.add(spacer3, constraints);
 		
 		// parsing status icon
 		constraints.gridx++;
@@ -354,13 +354,13 @@ public class PlayerView extends JDialog {
 		// spacer
 		constraints.gridx++;
 		constraints.weightx = 1;
-		JLabel spacer2 = new JLabel( " " );
-		area.add( spacer2, constraints );
+		JLabel spacer2 = new JLabel(" ");
+		area.add(spacer2, constraints);
 		
 		// time and tick area
 		constraints.gridx++;
 		constraints.weightx = 0;
-		area.add( createTimeArea(), constraints );
+		area.add(createTimeArea(), constraints);
 		
 		return area;
 	}
@@ -378,11 +378,11 @@ public class PlayerView extends JDialog {
 		String fileName = SequenceParser.getFileName();
 		if (null == fileName) {
 			statusIcon = PARSE_FAILURE_ICON;
-			toolTip   += Dict.get( Dict.TIP_PARSE_FAILED );
+			toolTip   += Dict.get(Dict.TIP_PARSE_FAILED);
 		}
 		else {
 			statusIcon = PARSE_SUCCESS_ICON;
-			toolTip   += Dict.get( Dict.TIP_PARSE_SUCCESS );
+			toolTip   += Dict.get(Dict.TIP_PARSE_SUCCESS);
 		}
 		toolTip += "<br>" + currentFile.getAbsolutePath();
 		lblParseStatus.setToolTipText(toolTip);
@@ -399,7 +399,7 @@ public class PlayerView extends JDialog {
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
-		area.setLayout( layout );
+		area.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
 		constraints.insets     = Laf.INSETS_TICK_TIME;
@@ -411,44 +411,44 @@ public class PlayerView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// current ticks
-		lblCurrentTicks = new JLabel( "0" );
-		lblCurrentTicks.setForeground( Laf.COLOR_PL_TICKS );
-		lblCurrentTicks.setHorizontalAlignment( SwingConstants.RIGHT );
-		area.add( lblCurrentTicks, constraints );
+		lblCurrentTicks = new JLabel("0");
+		lblCurrentTicks.setForeground(Laf.COLOR_PL_TICKS);
+		lblCurrentTicks.setHorizontalAlignment(SwingConstants.RIGHT);
+		area.add(lblCurrentTicks, constraints);
 		
 		// /
 		constraints.gridx++;
 		JLabel slash = new JLabel("/");
-		slash.setForeground( Laf.COLOR_PL_TICKS );
-		area.add( slash, constraints );
+		slash.setForeground(Laf.COLOR_PL_TICKS);
+		area.add(slash, constraints);
 		
 		// total ticks
 		constraints.gridx++;
-		lblTotalTicks = new JLabel( "0" );
-		lblTotalTicks.setForeground( Laf.COLOR_PL_TICKS );
-		lblTotalTicks.setHorizontalAlignment( SwingConstants.RIGHT );
-		area.add( lblTotalTicks, constraints );
+		lblTotalTicks = new JLabel("0");
+		lblTotalTicks.setForeground(Laf.COLOR_PL_TICKS);
+		lblTotalTicks.setHorizontalAlignment(SwingConstants.RIGHT);
+		area.add(lblTotalTicks, constraints);
 		
 		// current time
 		constraints.gridy++;
 		constraints.gridx = 0;
-		lblCurrentTime = new JLabel( "00:00:00" );
-		lblCurrentTime.setForeground( Laf.COLOR_PL_TIME );
-		lblCurrentTime.setHorizontalAlignment( SwingConstants.RIGHT );
-		area.add( lblCurrentTime, constraints );
+		lblCurrentTime = new JLabel("00:00:00");
+		lblCurrentTime.setForeground(Laf.COLOR_PL_TIME);
+		lblCurrentTime.setHorizontalAlignment(SwingConstants.RIGHT);
+		area.add(lblCurrentTime, constraints);
 		
 		// /
 		constraints.gridx++;
 		JLabel slash2 = new JLabel("/");
-		slash2.setForeground( Laf.COLOR_PL_TIME );
-		area.add( slash2, constraints );
+		slash2.setForeground(Laf.COLOR_PL_TIME);
+		area.add(slash2, constraints);
 		
 		// total time
 		constraints.gridx++;
-		lblTotalTime = new JLabel( "00:00:00" );
-		lblTotalTime.setForeground( Laf.COLOR_PL_TIME );
-		lblTotalTime.setHorizontalAlignment( SwingConstants.RIGHT );
-		area.add( lblTotalTime, constraints );
+		lblTotalTime = new JLabel("00:00:00");
+		lblTotalTime.setForeground(Laf.COLOR_PL_TIME);
+		lblTotalTime.setHorizontalAlignment(SwingConstants.RIGHT);
+		area.add(lblTotalTime, constraints);
 		
 		return area;
 	}
@@ -464,7 +464,7 @@ public class PlayerView extends JDialog {
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
-		area.setLayout( layout );
+		area.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
 		constraints.insets     = Laf.INSETS_IN;
@@ -476,32 +476,32 @@ public class PlayerView extends JDialog {
 		constraints.weighty    = 1;
 		
 		// global sliders
-		area.add( createGlobalSliderArea(), constraints );
+		area.add(createGlobalSliderArea(), constraints);
 		
 		// reparse button
 		constraints.gridy ++;
 		constraints.weighty   = 0;
 		constraints.gridwidth = 1;
-		btnReparse = new MidicaButton( Dict.get(Dict.REPARSE) );
-		btnReparse.setActionCommand( CMD_REPARSE );
-		btnReparse.addActionListener( controller );
-		area.add( btnReparse, constraints );
+		btnReparse = new MidicaButton(Dict.get(Dict.REPARSE));
+		btnReparse.setActionCommand(CMD_REPARSE);
+		btnReparse.addActionListener(controller);
+		area.add(btnReparse, constraints);
 		
 		// soundcheck button
 		constraints.gridx ++;
-		btnSoundcheck = new MidicaButton( Dict.get(Dict.SOUNDCHECK) );
-		btnSoundcheck.setActionCommand( CMD_SOUNDCHECK );
-		btnSoundcheck.addActionListener( controller );
-		area.add( btnSoundcheck, constraints );
+		btnSoundcheck = new MidicaButton(Dict.get(Dict.SOUNDCHECK));
+		btnSoundcheck.setActionCommand(CMD_SOUNDCHECK);
+		btnSoundcheck.addActionListener(controller);
+		area.add(btnSoundcheck, constraints);
 		
 		// info button
 		constraints.gridx = 0;
 		constraints.gridy++;
 		constraints.gridwidth = 2;
-		btnInfo = new MidicaButton( Dict.get(Dict.SHOW_INFO_FROM_PLAYER) );
-		btnInfo.setActionCommand( CMD_INFO );
-		btnInfo.addActionListener( controller );
-		area.add( btnInfo, constraints );
+		btnInfo = new MidicaButton(Dict.get(Dict.SHOW_INFO_FROM_PLAYER));
+		btnInfo.setActionCommand(CMD_INFO);
+		btnInfo.addActionListener(controller);
+		area.add(btnInfo, constraints);
 		
 		return area;
 	}
@@ -513,11 +513,11 @@ public class PlayerView extends JDialog {
 	 */
 	private Container createGlobalSliderArea() {
 		JPanel area = new JPanel();
-		area.setBorder( BorderFactory.createEtchedBorder() );
+		area.setBorder(BorderFactory.createEtchedBorder());
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
-		area.setLayout( layout );
+		area.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
 		constraints.insets     = Laf.INSETS_IN;
@@ -529,64 +529,64 @@ public class PlayerView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// volume label
-		JLabel lblVol = new JLabel( Dict.get(Dict.SLIDER_MASTER_VOL) );
-		area.add( lblVol, constraints );
+		JLabel lblVol = new JLabel(Dict.get(Dict.SLIDER_MASTER_VOL));
+		area.add(lblVol, constraints);
 		
 		// tempo label
 		constraints.gridx++;
-		JLabel lblTempo = new JLabel( Dict.get(Dict.SLIDER_TEMPO) );
-		area.add( lblTempo, constraints );
+		JLabel lblTempo = new JLabel(Dict.get(Dict.SLIDER_TEMPO));
+		area.add(lblTempo, constraints);
 		
 		// transpose label
 		constraints.gridx++;
-		JLabel lblTrans = new JLabel( Dict.get(Dict.SLIDER_TRANSPOSE) );
-		area.add( lblTrans, constraints );
+		JLabel lblTrans = new JLabel(Dict.get(Dict.SLIDER_TRANSPOSE));
+		area.add(lblTrans, constraints);
 		
 		// volume slider
 		constraints.gridy++;
 		constraints.gridx   = 0;
 		constraints.weighty = 1;
-		area.add( createMasterVolumeSlider(), constraints );
+		area.add(createMasterVolumeSlider(), constraints);
 		
 		// tempo slider
 		constraints.gridx++;
-		area.add( createTempoSlider(), constraints );
+		area.add(createTempoSlider(), constraints);
 		
 		// tempo slider
 		constraints.gridx++;
-		area.add( createTransposeSlider(), constraints );
+		area.add(createTransposeSlider(), constraints);
 		
 		// volume input field
 		constraints.gridy++;
 		constraints.gridx   = 0;
 		constraints.weighty = 0;
 		fldVol = new JTextField();
-		fldVol.setName( NAME_MASTER_VOL );
-		fldVol.getDocument().putProperty( "name", NAME_MASTER_VOL );
-		fldVol.getDocument().addDocumentListener( controller );
-		fldVol.addActionListener( controller );
-		setTextFieldColor( fldVol.getName(), Laf.COLOR_NORMAL );
-		area.add( fldVol, constraints );
+		fldVol.setName(NAME_MASTER_VOL);
+		fldVol.getDocument().putProperty("name", NAME_MASTER_VOL);
+		fldVol.getDocument().addDocumentListener(controller);
+		fldVol.addActionListener(controller);
+		setTextFieldColor(fldVol.getName(), Laf.COLOR_NORMAL);
+		area.add(fldVol, constraints);
 		
 		// tempo input field
 		constraints.gridx++;
 		fldTempo = new JTextField();
-		fldTempo.setName( NAME_TEMPO );
-		fldTempo.getDocument().putProperty( "name", NAME_TEMPO );
-		fldTempo.getDocument().addDocumentListener( controller );
-		fldTempo.addActionListener( controller );
-		setTextFieldColor( fldTempo.getName(), Laf.COLOR_NORMAL );
-		area.add( fldTempo, constraints );
+		fldTempo.setName(NAME_TEMPO);
+		fldTempo.getDocument().putProperty("name", NAME_TEMPO);
+		fldTempo.getDocument().addDocumentListener(controller);
+		fldTempo.addActionListener(controller);
+		setTextFieldColor(fldTempo.getName(), Laf.COLOR_NORMAL);
+		area.add(fldTempo, constraints);
 		
 		// transpose input field
 		constraints.gridx++;
 		fldTranspose = new JTextField();
-		fldTranspose.setName( NAME_TRANSPOSE );
-		fldTranspose.getDocument().putProperty( "name", NAME_TRANSPOSE );
-		fldTranspose.getDocument().addDocumentListener( controller );
-		fldTranspose.addActionListener( controller );
-		setTextFieldColor( fldTranspose.getName(), Laf.COLOR_NORMAL );
-		area.add( fldTranspose, constraints );
+		fldTranspose.setName(NAME_TRANSPOSE);
+		fldTranspose.getDocument().putProperty("name", NAME_TRANSPOSE);
+		fldTranspose.getDocument().addDocumentListener(controller);
+		fldTranspose.addActionListener(controller);
+		setTextFieldColor(fldTranspose.getName(), Laf.COLOR_NORMAL);
+		area.add(fldTranspose, constraints);
 		
 		return area;
 	}
@@ -597,15 +597,15 @@ public class PlayerView extends JDialog {
 	 * @return The created process slider.
 	 */
 	private MidicaSlider createProgressSlider() {
-		progressSlider = new MidicaSlider( MidicaSlider.HORIZONTAL );
-		progressSlider.setName( NAME_PROGRESS );
-		progressSlider.addChangeListener( controller );
-		progressSlider.addMouseWheelListener( controller );
-		progressSlider.setMinimum( 0 );
-		progressSlider.setValue( 0 );
+		progressSlider = new MidicaSlider(MidicaSlider.HORIZONTAL);
+		progressSlider.setName(NAME_PROGRESS);
+		progressSlider.addChangeListener(controller);
+		progressSlider.addMouseWheelListener(controller);
+		progressSlider.setMinimum(0);
+		progressSlider.setValue(0);
 		
 		// set minimum size
-		progressSlider.setPreferredSize( MIN_PROGRESS_DIM );
+		progressSlider.setPreferredSize(MIN_PROGRESS_DIM);
 		
 		return progressSlider;
 	}
@@ -616,22 +616,22 @@ public class PlayerView extends JDialog {
 	 * @return The created volume slider.
 	 */
 	private MidicaSlider createMasterVolumeSlider() {
-		masterVolumeSlider = new MidicaSlider( MidicaSlider.VERTICAL );
-		masterVolumeSlider.setName( NAME_MASTER_VOL );
-		masterVolumeSlider.addChangeListener( controller );
-		masterVolumeSlider.addMouseWheelListener( controller );
-		masterVolumeSlider.setValue( 0 );
+		masterVolumeSlider = new MidicaSlider(MidicaSlider.VERTICAL);
+		masterVolumeSlider.setName(NAME_MASTER_VOL);
+		masterVolumeSlider.addChangeListener(controller);
+		masterVolumeSlider.addMouseWheelListener(controller);
+		masterVolumeSlider.setValue(0);
 		// labels
-		masterVolumeSlider.setMinimum( MASTER_VOL_MIN );
-		masterVolumeSlider.setMaximum( MASTER_VOL_MAX );
-		masterVolumeSlider.setMajorTickSpacing( MASTER_VOL_MAJOR );
-		masterVolumeSlider.setMinorTickSpacing( MASTER_VOL_MINOR );
+		masterVolumeSlider.setMinimum(MASTER_VOL_MIN);
+		masterVolumeSlider.setMaximum(MASTER_VOL_MAX);
+		masterVolumeSlider.setMajorTickSpacing(MASTER_VOL_MAJOR);
+		masterVolumeSlider.setMinorTickSpacing(MASTER_VOL_MINOR);
 		Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
-		for ( int i = MASTER_VOL_MIN; i <= MASTER_VOL_MAX; i += MASTER_VOL_LABEL ) {
+		for (int i = MASTER_VOL_MIN; i <= MASTER_VOL_MAX; i += MASTER_VOL_LABEL) {
 			int display = i;
-			labelTable.put( i, new JLabel(Integer.toString(display)) );
+			labelTable.put(i, new JLabel(Integer.toString(display)));
 		}
-		masterVolumeSlider.setLabelTable( labelTable );
+		masterVolumeSlider.setLabelTable(labelTable);
 		return masterVolumeSlider;
 	}
 	
@@ -641,37 +641,37 @@ public class PlayerView extends JDialog {
 	 * @param channel The MIDI channel.
 	 * @return The created volume slider.
 	 */
-	private MidicaSlider createChannelVolumeSlider( byte channel ) {
-		MidicaSlider volSlider = new MidicaSlider( MidicaSlider.HORIZONTAL ) {
+	private MidicaSlider createChannelVolumeSlider(byte channel) {
+		MidicaSlider volSlider = new MidicaSlider(MidicaSlider.HORIZONTAL) {
 			private static final long serialVersionUID = 1L;
 			
 			@Override
-			public void setValue( int value ) {
-				if ( value < CH_VOL_MIN_VAL )
-					super.setValue( CH_VOL_MIN_VAL );
-				else if ( value > CH_VOL_MAX_VAL )
-					super.setValue( CH_VOL_MAX_VAL );
+			public void setValue(int value) {
+				if (value < CH_VOL_MIN_VAL)
+					super.setValue(CH_VOL_MIN_VAL);
+				else if (value > CH_VOL_MAX_VAL)
+					super.setValue(CH_VOL_MAX_VAL);
 				else
-					super.setValue( value );
+					super.setValue(value);
 			}
 		};
-		volSlider.setName( NAME_CH_VOL + channel );
-		volSlider.addChangeListener( controller );
-		volSlider.addMouseWheelListener( controller );
-		volSlider.setValue( 0 );
+		volSlider.setName(NAME_CH_VOL + channel);
+		volSlider.addChangeListener(controller);
+		volSlider.addMouseWheelListener(controller);
+		volSlider.setValue(0);
 		// labels
-		volSlider.setMinimum( CH_VOL_MIN );
-		volSlider.setMaximum( CH_VOL_MAX );
-		volSlider.setMajorTickSpacing( CH_VOL_MAJOR );
-		volSlider.setMinorTickSpacing( CH_VOL_MINOR );
+		volSlider.setMinimum(CH_VOL_MIN);
+		volSlider.setMaximum(CH_VOL_MAX);
+		volSlider.setMajorTickSpacing(CH_VOL_MAJOR);
+		volSlider.setMinorTickSpacing(CH_VOL_MINOR);
 		
 		Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
-		for ( int i = 0; i <= CH_VOL_MAX; i += CH_VOL_SKIP ) {
+		for (int i = 0; i <= CH_VOL_MAX; i += CH_VOL_SKIP) {
 			int display = i;
-			String text = Integer.toString( display );
-			labelTable.put( i, new JLabel(text) );
+			String text = Integer.toString(display);
+			labelTable.put(i, new JLabel(text));
 		}
-		volSlider.setLabelTable( labelTable );
+		volSlider.setLabelTable(labelTable);
 		return volSlider;
 	}
 	
@@ -681,22 +681,22 @@ public class PlayerView extends JDialog {
 	 * @return The created tempo slider.
 	 */
 	private MidicaSlider createTempoSlider() {
-		tempoSlider = new MidicaSlider( MidicaSlider.VERTICAL );
-		tempoSlider.setName( NAME_TEMPO );
-		tempoSlider.addChangeListener( controller );
-		tempoSlider.addMouseWheelListener( controller );
-		tempoSlider.setValue( 0 );
+		tempoSlider = new MidicaSlider(MidicaSlider.VERTICAL);
+		tempoSlider.setName(NAME_TEMPO);
+		tempoSlider.addChangeListener(controller);
+		tempoSlider.addMouseWheelListener(controller);
+		tempoSlider.setValue(0);
 		// labels
-		tempoSlider.setMinimum( TEMPO_MIN );
-		tempoSlider.setMaximum( TEMPO_MAX );
-		tempoSlider.setMajorTickSpacing( TEMPO_MAJOR );
-		tempoSlider.setMinorTickSpacing( TEMPO_MINOR );
+		tempoSlider.setMinimum(TEMPO_MIN);
+		tempoSlider.setMaximum(TEMPO_MAX);
+		tempoSlider.setMajorTickSpacing(TEMPO_MAJOR);
+		tempoSlider.setMinorTickSpacing(TEMPO_MINOR);
 		Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
-		for ( int i = TEMPO_MIN; i <= TEMPO_MAX; i += TEMPO_LABEL ) {
+		for (int i = TEMPO_MIN; i <= TEMPO_MAX; i += TEMPO_LABEL) {
 			float display = (float) i / TEMPO_DEFAULT;
-			labelTable.put( i, new JLabel(Float.toString(display)) );
+			labelTable.put(i, new JLabel(Float.toString(display)));
 		}
-		tempoSlider.setLabelTable( labelTable );
+		tempoSlider.setLabelTable(labelTable);
 		return tempoSlider;
 	}
 	
@@ -706,16 +706,16 @@ public class PlayerView extends JDialog {
 	 * @return The created transpose slider.
 	 */
 	private MidicaSlider createTransposeSlider() {
-		transposeSlider = new MidicaSlider( MidicaSlider.VERTICAL );
-		transposeSlider.setName( NAME_TRANSPOSE );
-		transposeSlider.addChangeListener( controller );
-		transposeSlider.addMouseWheelListener( controller );
-		transposeSlider.setValue( 0 );
+		transposeSlider = new MidicaSlider(MidicaSlider.VERTICAL);
+		transposeSlider.setName(NAME_TRANSPOSE);
+		transposeSlider.addChangeListener(controller);
+		transposeSlider.addMouseWheelListener(controller);
+		transposeSlider.setValue(0);
 		// labels
-		transposeSlider.setMinimum( TRANSPOSE_MIN );
-		transposeSlider.setMaximum( TRANSPOSE_MAX );
-		transposeSlider.setMajorTickSpacing( TRANSPOSE_MAJOR );
-		transposeSlider.setMinorTickSpacing( TRANSPOSE_MINOR );
+		transposeSlider.setMinimum(TRANSPOSE_MIN);
+		transposeSlider.setMaximum(TRANSPOSE_MAX);
+		transposeSlider.setMajorTickSpacing(TRANSPOSE_MAJOR);
+		transposeSlider.setMinorTickSpacing(TRANSPOSE_MINOR);
 		return transposeSlider;
 	}
 	
@@ -730,7 +730,7 @@ public class PlayerView extends JDialog {
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
-		area.setLayout( layout );
+		area.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.BOTH;
 		constraints.insets     = Laf.INSETS_IN;
@@ -741,47 +741,47 @@ public class PlayerView extends JDialog {
 		constraints.weightx    = 0;
 		
 		// stop button
-		btnStop = new MidicaButton( Dict.get(Dict.CTRL_BTN_STOP), true );
-		btnStop.addActionListener( controller );
-		btnStop.setActionCommand( CMD_STOP );
-		area.add( btnStop, constraints );
+		btnStop = new MidicaButton(Dict.get(Dict.CTRL_BTN_STOP), true);
+		btnStop.addActionListener(controller);
+		btnStop.setActionCommand(CMD_STOP);
+		area.add(btnStop, constraints);
 		
 		// <<
 		constraints.gridx++;
-		btnFastRew = new MidicaButton( Dict.get(Dict.CTRL_BTN_FAST_REW), true );
-		btnFastRew.setActionCommand( CMD_FAST_REW );
-		btnFastRew.addActionListener( controller );
-		area.add( btnFastRew, constraints );
+		btnFastRew = new MidicaButton(Dict.get(Dict.CTRL_BTN_FAST_REW), true);
+		btnFastRew.setActionCommand(CMD_FAST_REW);
+		btnFastRew.addActionListener(controller);
+		area.add(btnFastRew, constraints);
 		
 		// <
 		constraints.gridx++;
-		btnRew = new MidicaButton( Dict.get(Dict.CTRL_BTN_REW), true );
-		btnRew.setActionCommand( CMD_REW );
-		btnRew.addActionListener( controller );
-		area.add( btnRew, constraints );
+		btnRew = new MidicaButton(Dict.get(Dict.CTRL_BTN_REW), true);
+		btnRew.setActionCommand(CMD_REW);
+		btnRew.addActionListener(controller);
+		area.add(btnRew, constraints);
 		
 		// play / pause
 		constraints.gridx++;
 		constraints.weightx = 1;
-		btnPlayPause = new MidicaButton( Dict.get(Dict.CTRL_BTN_PLAY), true );
-		btnPlayPause.setActionCommand( CMD_PLAY );
-		btnPlayPause.addActionListener( controller );
-		area.add( btnPlayPause, constraints );
+		btnPlayPause = new MidicaButton(Dict.get(Dict.CTRL_BTN_PLAY), true);
+		btnPlayPause.setActionCommand(CMD_PLAY);
+		btnPlayPause.addActionListener(controller);
+		area.add(btnPlayPause, constraints);
 		
 		// >
 		constraints.gridx++;
 		constraints.weightx = 0;
-		btnForw = new MidicaButton( Dict.get(Dict.CTRL_BTN_FWD), true );
-		btnForw.setActionCommand( CMD_FWD );
-		btnForw.addActionListener( controller );
-		area.add( btnForw, constraints );
+		btnForw = new MidicaButton(Dict.get(Dict.CTRL_BTN_FWD), true);
+		btnForw.setActionCommand(CMD_FWD);
+		btnForw.addActionListener(controller);
+		area.add(btnForw, constraints);
 		
 		// >>
 		constraints.gridx++;
-		btnFastForw = new MidicaButton( Dict.get(Dict.CTRL_BTN_FAST_FWD), true );
-		btnFastForw.setActionCommand( CMD_FAST_FWD );
-		btnFastForw.addActionListener( controller );
-		area.add( btnFastForw, constraints );
+		btnFastForw = new MidicaButton(Dict.get(Dict.CTRL_BTN_FAST_FWD), true);
+		btnFastForw.setActionCommand(CMD_FAST_FWD);
+		btnFastForw.addActionListener(controller);
+		area.add(btnFastForw, constraints);
 		
 		return area;
 	}
@@ -809,7 +809,7 @@ public class PlayerView extends JDialog {
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
-		area.setLayout( layout );
+		area.setLayout(layout);
 		GridBagConstraints constraints = new GridBagConstraints();
 		constraints.fill       = GridBagConstraints.NONE;
 		constraints.insets     = Laf.INSETS_IN;
@@ -821,131 +821,131 @@ public class PlayerView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// headlines
-		JLabel c = new JLabel( Dict.get(Dict.ABBR_CH_NUM) );
+		JLabel c = new JLabel(Dict.get(Dict.ABBR_CH_NUM));
 		Laf.makeBold(c);
-		c.setToolTipText( Dict.get(Dict.TIP_CH_NUM) );
-		area.add( c, constraints );
+		c.setToolTipText(Dict.get(Dict.TIP_CH_NUM));
+		area.add(c, constraints);
 		
 		constraints.gridx++;
-		JLabel m = new JLabel( Dict.get(Dict.ABBR_MUTE) );
+		JLabel m = new JLabel(Dict.get(Dict.ABBR_MUTE));
 		Laf.makeBold(m);
-		m.setToolTipText( Dict.get(Dict.TIP_MUTE) );
-		area.add( m, constraints );
+		m.setToolTipText(Dict.get(Dict.TIP_MUTE));
+		area.add(m, constraints);
 		
 		constraints.gridx++;
-		JLabel s = new JLabel( Dict.get(Dict.ABBR_SOLO) );
+		JLabel s = new JLabel(Dict.get(Dict.ABBR_SOLO));
 		Laf.makeBold(s);
-		s.setToolTipText( Dict.get(Dict.TIP_SOLO) );
-		area.add( s, constraints );
+		s.setToolTipText(Dict.get(Dict.TIP_SOLO));
+		area.add(s, constraints);
 		
 		constraints.gridx++;
-		JLabel a = new JLabel( Dict.get(Dict.ABBR_ACTIVITY) );
+		JLabel a = new JLabel(Dict.get(Dict.ABBR_ACTIVITY));
 		Laf.makeBold(a);
-		a.setToolTipText( Dict.get(Dict.TIP_ACTIVITY) );
-		area.add( a, constraints );
+		a.setToolTipText(Dict.get(Dict.TIP_ACTIVITY));
+		area.add(a, constraints);
 		
 		constraints.gridx++;
-		JLabel p = new JLabel( Dict.get(Dict.ABBR_PROG_NUM) );
+		JLabel p = new JLabel(Dict.get(Dict.ABBR_PROG_NUM));
 		Laf.makeBold(p);
-		p.setToolTipText( Dict.get(Dict.TIP_PROG_NUM) );
-		area.add( p, constraints );
+		p.setToolTipText(Dict.get(Dict.TIP_PROG_NUM));
+		area.add(p, constraints);
 		
 		constraints.gridx++;
-		JLabel b = new JLabel( Dict.get(Dict.ABBR_BANK_NUM) );
+		JLabel b = new JLabel(Dict.get(Dict.ABBR_BANK_NUM));
 		Laf.makeBold(b);
-		b.setToolTipText( Dict.get(Dict.TIP_BANK_NUM) );
-		area.add( b, constraints );
+		b.setToolTipText(Dict.get(Dict.TIP_BANK_NUM));
+		area.add(b, constraints);
 		
 		constraints.gridx++;
 		constraints.fill = GridBagConstraints.BOTH;
-		JLabel in = new JLabel( Dict.get(Dict.CH_HEAD_INSTRUMENT) );
+		JLabel in = new JLabel(Dict.get(Dict.CH_HEAD_INSTRUMENT));
 		Laf.makeBold(in);
-		area.add( in, constraints );
+		area.add(in, constraints);
 		
 		constraints.weightx = 1;
 		constraints.gridx++;
-		JLabel com = new JLabel( Dict.get(Dict.CH_HEAD_COMMENT) );
+		JLabel com = new JLabel(Dict.get(Dict.CH_HEAD_COMMENT));
 		Laf.makeBold(com);
-		area.add( com, constraints );
+		area.add(com, constraints);
 		
 		// size for the channel activity labels
-		Dimension activityDimension = new Dimension( 15, 15 );
+		Dimension activityDimension = new Dimension(15, 15);
 		
-		for ( byte i=0; i<16; i++ ) {
+		for (byte i=0; i<16; i++) {
 			// number label
 			constraints.gridy++;
 			constraints.gridx     = 0;
 			constraints.gridwidth = 1;
 			constraints.weightx   = 0;
-			MidicaButton showHideButton = new MidicaButton( Integer.toString(i) );
-			showHideButton.setActionCommand( CMD_SHOW_HIDE + i );
-			showHideButton.addActionListener( controller );
-			showHideButton.setMargin( Laf.INSETS_CHANNEL_BUTTON );
-			area.add( showHideButton, constraints );
+			MidicaButton showHideButton = new MidicaButton(Integer.toString(i));
+			showHideButton.setActionCommand(CMD_SHOW_HIDE + i);
+			showHideButton.addActionListener(controller);
+			showHideButton.setMargin(Laf.INSETS_CHANNEL_BUTTON);
+			area.add(showHideButton, constraints);
 			channelButtons.add(showHideButton);
 			
 			// mute checkbox
 			constraints.gridx++;
 			JCheckBox cbx = new JCheckBox();
-			cbx.setName( NAME_MUTE + i );
-			cbx.addItemListener( controller );
-			area.add( cbx, constraints );
-			muteCbx.add( cbx );
+			cbx.setName(NAME_MUTE + i);
+			cbx.addItemListener(controller);
+			area.add(cbx, constraints);
+			muteCbx.add(cbx);
 			
 			// solo checkbox
 			constraints.gridx++;
 			JCheckBox sCbx = new JCheckBox();
-			sCbx.setName( NAME_SOLO + i );
-			sCbx.addItemListener( controller );
-			area.add( sCbx, constraints );
-			soloCbx.add( sCbx );
+			sCbx.setName(NAME_SOLO + i);
+			sCbx.addItemListener(controller);
+			area.add(sCbx, constraints);
+			soloCbx.add(sCbx);
 			
 			// channel activity LED
 			constraints.gridx++;
 			JLabel lblAct = new JLabel();
-			lblAct.setSize( activityDimension );
-			lblAct.setPreferredSize( activityDimension );
-			channelActivityLEDs.add( lblAct );
-			setActivityLED( i, false );
-			area.add( lblAct, constraints );
+			lblAct.setSize(activityDimension);
+			lblAct.setPreferredSize(activityDimension);
+			channelActivityLEDs.add(lblAct);
+			setActivityLED(i, false);
+			area.add(lblAct, constraints);
 			
 			// program number
 			constraints.gridx++;
 			JLabel lblProgNum = new JLabel();
-			lblProgNum.setForeground( Laf.COLOR_PL_CH_PROGRAM_NUMBER );
-			area.add( lblProgNum, constraints );
-			channelProgramNumbers.add( lblProgNum );
+			lblProgNum.setForeground(Laf.COLOR_PL_CH_PROGRAM_NUMBER);
+			area.add(lblProgNum, constraints);
+			channelProgramNumbers.add(lblProgNum);
 			
 			// bank number
 			constraints.gridx++;
 			JLabel lblBankNum = new JLabel();
-			lblBankNum.setForeground( Laf.COLOR_PL_CH_BANK_NUMBER );
-			area.add( lblBankNum, constraints );
-			channelBankNumbers.add( lblBankNum );
+			lblBankNum.setForeground(Laf.COLOR_PL_CH_BANK_NUMBER);
+			area.add(lblBankNum, constraints);
+			channelBankNumbers.add(lblBankNum);
 			
 			// instrument label
 			constraints.gridx++;
 			FixedLabel lblInstr = new FixedLabel("", Laf.PLAYER_CH_LBL_INSTR_WIDTH);
-			lblInstr.setForeground( Laf.COLOR_PL_CH_INSTRUMENT );
-			area.add( lblInstr, constraints );
-			channelInstruments.add( lblInstr );
+			lblInstr.setForeground(Laf.COLOR_PL_CH_INSTRUMENT);
+			area.add(lblInstr, constraints);
+			channelInstruments.add(lblInstr);
 			
 			// comment label
 			constraints.gridx++;
 			constraints.weightx = 1;
 			FixedLabel lblDesc  = new FixedLabel("", Laf.PLAYER_CH_LBL_COMMENT_WIDTH);
-			lblDesc.setForeground( Laf.COLOR_PL_CH_COMMENT );
-			area.add( lblDesc, constraints );
-			channelComments.add( lblDesc );
+			lblDesc.setForeground(Laf.COLOR_PL_CH_COMMENT);
+			area.add(lblDesc, constraints);
+			channelComments.add(lblDesc);
 			
 			// channel detail area
 			constraints.gridy++;
 			constraints.gridx     = 0;
 			constraints.gridwidth = 8;
 			Container details     = createChannelDetailArea(i);
-			area.add( details, constraints );
-			details.setVisible( false );
-			channelDetails.add( details );
+			area.add(details, constraints);
+			details.setVisible(false);
+			channelDetails.add(details);
 		}
 		
 		return area;
@@ -960,7 +960,7 @@ public class PlayerView extends JDialog {
 		JPanel area = new JPanel();
 		
 		lblLyrics = new JLabel();
-		area.add( lblLyrics );
+		area.add(lblLyrics);
 		
 		return area;
 	}
@@ -974,7 +974,7 @@ public class PlayerView extends JDialog {
 	 */
 	private Container createChannelDetailArea(byte channel) {
 		JPanel area = new JPanel();
-		area.setBorder( BorderFactory.createEtchedBorder() );
+		area.setBorder(BorderFactory.createEtchedBorder());
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
@@ -990,14 +990,16 @@ public class PlayerView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// volume label
-		JLabel lblVol = new JLabel( Dict.get(Dict.CH_DETAILS_VOLUME) );
+		JLabel lblVol = new JLabel(Dict.get(Dict.CH_DETAILS_VOLUME));
 		Laf.makeBold(lblVol);
 		area.add(lblVol, constraints);
 		
 		// volume text field
 		constraints.gridx++;
 		JTextField fldChVol = new JTextField("0");
-		fldChVol.setPreferredSize( new Dimension(CHANNEL_DETAIL_VOL_FLD_WIDTH, Laf.textFieldHeight) );
+		fldChVol.setPreferredSize(
+			new Dimension(CHANNEL_DETAIL_VOL_FLD_WIDTH, Laf.textFieldHeight)
+		);
 		fldChVol.setName(NAME_CH_VOL + channel);
 		fldChVol.getDocument().putProperty("name", NAME_CH_VOL + channel);
 		fldChVol.getDocument().addDocumentListener(controller);
@@ -1008,7 +1010,7 @@ public class PlayerView extends JDialog {
 		
 		// apply to all button
 		constraints.gridx++;
-		MidicaButton applyToAllBtn = new MidicaButton( Dict.get(Dict.APPLY_TO_ALL_CHANNELS) );
+		MidicaButton applyToAllBtn = new MidicaButton(Dict.get(Dict.APPLY_TO_ALL_CHANNELS));
 		applyToAllBtn.setActionCommand(CMD_APPLY_TO_ALL + channel);
 		applyToAllBtn.addActionListener(controller);
 		area.add(applyToAllBtn, constraints);
@@ -1032,7 +1034,7 @@ public class PlayerView extends JDialog {
 		constraints.gridy++;
 		constraints.gridx   = 0;
 		constraints.weightx = 0;
-		JLabel lblNotes = new JLabel( Dict.get(Dict.LBL_NOTE_HISTORY) );
+		JLabel lblNotes = new JLabel(Dict.get(Dict.LBL_NOTE_HISTORY));
 		Laf.makeBold(lblNotes);
 		area.add(lblNotes, constraints);
 		
@@ -1053,24 +1055,24 @@ public class PlayerView extends JDialog {
 	 * @param channel MIDI channel number.
 	 * @return The created table.
 	 */
-	private Component createNoteHistoryTable( byte channel ) {
+	private Component createNoteHistoryTable(byte channel) {
 		
 		// table model and renderer
-		NoteHistoryTableModel        model    = new NoteHistoryTableModel( channel );
-		NoteHistoryTableCellRenderer renderer = new NoteHistoryTableCellRenderer( model );
+		NoteHistoryTableModel        model    = new NoteHistoryTableModel(channel);
+		NoteHistoryTableCellRenderer renderer = new NoteHistoryTableCellRenderer(model);
 		
 		// table
-		MidicaTable table = new MidicaTable( model );
-		table.setDefaultRenderer( Object.class, renderer );
-		table.getColumnModel().getColumn( 0 ).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_NUMBER   );
-		table.getColumnModel().getColumn( 1 ).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_NAME     );
-		table.getColumnModel().getColumn( 2 ).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_VELOCITY );
-		table.getColumnModel().getColumn( 3 ).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_TICK     );
-		JScrollPane pane = new JScrollPane( table );
+		MidicaTable table = new MidicaTable(model);
+		table.setDefaultRenderer(Object.class, renderer);
+		table.getColumnModel().getColumn(0).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_NUMBER   );
+		table.getColumnModel().getColumn(1).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_NAME     );
+		table.getColumnModel().getColumn(2).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_VELOCITY );
+		table.getColumnModel().getColumn(3).setPreferredWidth( NOTE_HISTORY_COL_WIDTH_TICK     );
+		JScrollPane pane = new JScrollPane(table);
 		
 		// size
-		Dimension dim = new Dimension( NOTE_HISTORY_WIDTH, NOTE_HISTORY_HEIGHT );
-		pane.setPreferredSize( dim );
+		Dimension dim = new Dimension(NOTE_HISTORY_WIDTH, NOTE_HISTORY_HEIGHT);
+		pane.setPreferredSize(dim);
 		
 		return pane;
 	}
@@ -1087,37 +1089,37 @@ public class PlayerView extends JDialog {
 		String unit;
 		int divisor;
 		float factor = 1;
-		if ( max < 500 ) {
+		if (max < 500) {
 			unit    = "";
 			divisor = 10;
 			factor  = 10;
 		}
-		else if ( max < 5000 ) {
+		else if (max < 5000) {
 			unit    = "";
 			divisor = 100;
 			factor  = 100;
 		}
-		else if ( max < 50000 ) {
+		else if (max < 50000) {
 			divisor = 1000;
 			unit    = " k";
 			factor  = 1;
 		}
-		else if ( max < 500000 ) {
+		else if (max < 500000) {
 			divisor = 10000;
 			unit    = " k";
 			factor  = 10;
 		}
-		else if ( max < 5000000 ) {
+		else if (max < 5000000) {
 			divisor = 100000;
 			unit    = " k";
 			factor  = 100;
 		}
-		else if ( max < 50000000 ) {
+		else if (max < 50000000) {
 			divisor = 1000000;
 			unit    = " M";
 			factor  = 1;
 		}
-		else if ( max < 500000000 ) {
+		else if (max < 500000000) {
 			divisor = 10000000;
 			unit    = " M";
 			factor  = 10;
@@ -1128,22 +1130,22 @@ public class PlayerView extends JDialog {
 			factor  = 100;
 		}
 		
-		if ( max / divisor > 12 ) {
+		if (max / divisor > 12) {
 			divisor *= 5;
 			factor  *= 5;
 		}
 		
 		// tick distances
-		progressSlider.setMajorTickSpacing( divisor / 2 );
-		progressSlider.setMinorTickSpacing( divisor / 10 );
+		progressSlider.setMajorTickSpacing(divisor / 2);
+		progressSlider.setMinorTickSpacing(divisor / 10);
 		
 		// labels
 		Hashtable<Integer, JLabel> dict = new Hashtable<Integer, JLabel>();
-		for ( int i=0; i<=max; i += divisor ) {
-			int display = Math.round( factor * i / divisor );
-			dict.put( i, new JLabel(Integer.toString(display) + unit) );
+		for (int i=0; i<=max; i += divisor) {
+			int display = Math.round(factor * i / divisor);
+			dict.put(i, new JLabel(Integer.toString(display) + unit));
 		}
-		progressSlider.setLabelTable( dict );
+		progressSlider.setLabelTable(dict);
 	}
 	
 	/**
@@ -1153,14 +1155,14 @@ public class PlayerView extends JDialog {
 	 * 
 	 * @param oldCmd    Old command which is to be left.
 	 */
-	public void togglePlayPauseButton( String oldCmd ) {
-		if ( CMD_PLAY.equals(oldCmd) ) {
-			btnPlayPause.setActionCommand( CMD_PAUSE );
-			btnPlayPause.setText( Dict.get(Dict.CTRL_BTN_PAUSE) );
+	public void togglePlayPauseButton(String oldCmd) {
+		if (CMD_PLAY.equals(oldCmd)) {
+			btnPlayPause.setActionCommand(CMD_PAUSE);
+			btnPlayPause.setText(Dict.get(Dict.CTRL_BTN_PAUSE));
 		}
-		else if ( CMD_PAUSE.equals(oldCmd) ) {
-			btnPlayPause.setActionCommand( CMD_PLAY );
-			btnPlayPause.setText( Dict.get(Dict.CTRL_BTN_PLAY) );
+		else if (CMD_PAUSE.equals(oldCmd)) {
+			btnPlayPause.setActionCommand(CMD_PLAY);
+			btnPlayPause.setText(Dict.get(Dict.CTRL_BTN_PLAY));
 		}
 	}
 	
@@ -1180,9 +1182,9 @@ public class PlayerView extends JDialog {
 	 * 
 	 * @param pos Current tickstamp in the MIDI stream.
 	 */
-	public void setMemory( long pos ) {
-		fldJump.setText( Long.toString(pos) );
-		setTextFieldColor( fldJump.getName(), Laf.COLOR_NORMAL );
+	public void setMemory(long pos) {
+		fldJump.setText(Long.toString(pos));
+		setTextFieldColor(fldJump.getName(), Laf.COLOR_NORMAL);
 	}
 	
 	/**
@@ -1201,13 +1203,13 @@ public class PlayerView extends JDialog {
 	 * 
 	 * @param volume  Value to set.
 	 */
-	public void setMasterVolumeField( byte volume ) {
-		if ( null == fldVol )
+	public void setMasterVolumeField(byte volume) {
+		if (null == fldVol)
 			return;
-		fldVol.getDocument().removeDocumentListener( controller );
-		fldVol.setText( Byte.toString(volume) );
-		fldVol.getDocument().addDocumentListener( controller );
-		setTextFieldColor( fldVol.getName(), Laf.COLOR_NORMAL );
+		fldVol.getDocument().removeDocumentListener(controller);
+		fldVol.setText(Byte.toString(volume));
+		fldVol.getDocument().addDocumentListener(controller);
+		setTextFieldColor(fldVol.getName(), Laf.COLOR_NORMAL);
 	}
 	
 	/**
@@ -1217,7 +1219,7 @@ public class PlayerView extends JDialog {
 	 * @throws NumberFormatException if the text cannot be parsed to a byte value.
 	 */
 	public byte getVolumeFromField() throws NumberFormatException {
-		return Byte.parseByte( fldVol.getText() );
+		return Byte.parseByte(fldVol.getText());
 	}
 	
 	/**
@@ -1225,19 +1227,19 @@ public class PlayerView extends JDialog {
 	 * 
 	 * @param tempoFactor  Value to be set.
 	 */
-	public void setTempoField( float tempoFactor ) {
-		if ( null == fldTempo )
+	public void setTempoField(float tempoFactor) {
+		if (null == fldTempo)
 			return;
 		
 		// limit the value to TEMPO_FRACT digits after the decimal point
-		int accuracy = (int) Math.pow( 10, TEMPO_FRACT );
-		tempoFactor = ( (float) Math.round(tempoFactor * accuracy) ) / accuracy;
+		int accuracy = (int) Math.pow(10, TEMPO_FRACT);
+		tempoFactor = ((float) Math.round(tempoFactor * accuracy)) / accuracy;
 		
 		// set the text field
-		fldTempo.getDocument().removeDocumentListener( controller );
-		fldTempo.setText( Float.toString(tempoFactor) );
-		fldTempo.getDocument().addDocumentListener( controller );
-		setTextFieldColor( fldTempo.getName(), Laf.COLOR_NORMAL );
+		fldTempo.getDocument().removeDocumentListener(controller);
+		fldTempo.setText(Float.toString(tempoFactor));
+		fldTempo.getDocument().addDocumentListener(controller);
+		setTextFieldColor(fldTempo.getName(), Laf.COLOR_NORMAL);
 	}
 	
 	/**
@@ -1247,7 +1249,7 @@ public class PlayerView extends JDialog {
 	 * @throws NumberFormatException if the text cannot be parsed to a float value.
 	 */
 	public float getTempoFromField() throws NumberFormatException {
-		return Float.parseFloat( fldTempo.getText() );
+		return Float.parseFloat(fldTempo.getText());
 	}
 	
 	/**
@@ -1255,13 +1257,13 @@ public class PlayerView extends JDialog {
 	 * 
 	 * @param level  Value to be set.
 	 */
-	public void setTransposeField( byte level ) {
-		if ( null == fldTranspose )
+	public void setTransposeField(byte level) {
+		if (null == fldTranspose)
 			return;
-		fldTranspose.getDocument().removeDocumentListener( controller );
-		fldTranspose.setText( Byte.toString(level) );
-		fldTranspose.getDocument().addDocumentListener( controller );
-		setTextFieldColor( fldTranspose.getName(), Laf.COLOR_NORMAL );
+		fldTranspose.getDocument().removeDocumentListener(controller);
+		fldTranspose.setText(Byte.toString(level));
+		fldTranspose.getDocument().addDocumentListener(controller);
+		setTextFieldColor(fldTranspose.getName(), Laf.COLOR_NORMAL);
 	}
 	
 	/**
@@ -1271,7 +1273,7 @@ public class PlayerView extends JDialog {
 	 * @throws NumberFormatException if the text cannot be parsed to a byte value.
 	 */
 	public byte getTransposeFromField() throws NumberFormatException {
-		return Byte.parseByte( fldTranspose.getText() );
+		return Byte.parseByte(fldTranspose.getText());
 	}
 	
 	/**
@@ -1281,9 +1283,9 @@ public class PlayerView extends JDialog {
 	 * @return Channel volume from the text field.
 	 * @throws NumberFormatException if the text cannot be parsed to a byte value.
 	 */
-	public byte getChannelVolumeFromField( byte channel ) throws NumberFormatException {
-		JTextField fld = channelVolumeFields.get( channel );
-		return Byte.parseByte( fld.getText() );
+	public byte getChannelVolumeFromField(byte channel) throws NumberFormatException {
+		JTextField fld = channelVolumeFields.get(channel);
+		return Byte.parseByte(fld.getText());
 	}
 	
 	/**
@@ -1292,12 +1294,12 @@ public class PlayerView extends JDialog {
 	 * @param channel  MIDI channel.
 	 * @param volume   Value to be set.
 	 */
-	public void setChannelVolumeField( byte channel, byte volume ) {
-		JTextField fldVolume = channelVolumeFields.get( channel );
-		fldVolume.getDocument().removeDocumentListener( controller );
-		fldVolume.setText( Integer.toString(volume) );
-		fldVolume.getDocument().addDocumentListener( controller );
-		setTextFieldColor( fldVolume.getName(), Laf.COLOR_NORMAL );
+	public void setChannelVolumeField(byte channel, byte volume) {
+		JTextField fldVolume = channelVolumeFields.get(channel);
+		fldVolume.getDocument().removeDocumentListener(controller);
+		fldVolume.setText(Integer.toString(volume));
+		fldVolume.getDocument().addDocumentListener(controller);
+		setTextFieldColor(fldVolume.getName(), Laf.COLOR_NORMAL);
 	}
 	
 	/**
@@ -1317,10 +1319,10 @@ public class PlayerView extends JDialog {
 	 * @param tickLength  Length of the MIDI stream in ticks.
 	 * @param timeLength  Length of the MIDI stream as a time string.
 	 */
-	public void setTickAndTimeLength( long tickLength, String timeLength ) {
-		progressSlider.setMaximum( (int) tickLength );
-		lblTotalTicks.setText( Long.toString(tickLength) );
-		lblTotalTime.setText( timeLength );
+	public void setTickAndTimeLength(long tickLength, String timeLength) {
+		progressSlider.setMaximum((int) tickLength);
+		lblTotalTicks.setText(Long.toString(tickLength));
+		lblTotalTime.setText(timeLength);
 	}
 	
 	/**
@@ -1330,10 +1332,10 @@ public class PlayerView extends JDialog {
 	 * @param midiTicks    Current tickstamp.
 	 * @param time         Current timestamp.
 	 */
-	public void refreshProgressBar( long midiTicks, String time ) {
-		progressSlider.setValue( (int) midiTicks );
-		lblCurrentTicks.setText( Long.toString(midiTicks) );
-		lblCurrentTime.setText( time );
+	public void refreshProgressBar(long midiTicks, String time) {
+		progressSlider.setValue((int) midiTicks);
+		lblCurrentTicks.setText(Long.toString(midiTicks));
+		lblCurrentTime.setText(time);
 	}
 	
 	/**
@@ -1343,8 +1345,8 @@ public class PlayerView extends JDialog {
 	 * 
 	 * @param ticks  Value to be set.
 	 */
-	public void setProgressSlider( int ticks ) {
-		progressSlider.setValue( ticks );
+	public void setProgressSlider(int ticks) {
+		progressSlider.setValue(ticks);
 	}
 	
 	/**
@@ -1357,8 +1359,8 @@ public class PlayerView extends JDialog {
 	 * 
 	 * @param volume  Value to be set.
 	 */
-	public void setMasterVolumeSlider( byte volume ) {
-		masterVolumeSlider.setValue( volume );
+	public void setMasterVolumeSlider(byte volume) {
+		masterVolumeSlider.setValue(volume);
 	}
 	
 	/**
@@ -1371,9 +1373,9 @@ public class PlayerView extends JDialog {
 	 * 
 	 * @param tempoFactor  Value to be set.
 	 */
-	public void setTempoSlider( float tempoFactor ) {
-		int tempoTicks = (int) ( tempoFactor * TEMPO_DEFAULT / 1f );
-		tempoSlider.setValue( tempoTicks );
+	public void setTempoSlider(float tempoFactor) {
+		int tempoTicks = (int) (tempoFactor * TEMPO_DEFAULT / 1f);
+		tempoSlider.setValue(tempoTicks);
 	}
 	
 	/**
@@ -1386,8 +1388,8 @@ public class PlayerView extends JDialog {
 	 * 
 	 * @param level  Value to be set.
 	 */
-	public void setTransposeSlider( byte level ) {
-		transposeSlider.setValue( level );
+	public void setTransposeSlider(byte level) {
+		transposeSlider.setValue(level);
 	}
 	
 	/**
@@ -1401,8 +1403,8 @@ public class PlayerView extends JDialog {
 	 * @param channel  MIDI channel.
 	 * @param volume   Value to be set.
 	 */
-	public void setChannelVolumeSlider( byte channel, byte volume ) {
-		channelVolumeSliders.get( channel ).setValue( volume );
+	public void setChannelVolumeSlider(byte channel, byte volume) {
+		channelVolumeSliders.get(channel).setValue(volume);
 	}
 	
 	/**
@@ -1462,12 +1464,12 @@ public class PlayerView extends JDialog {
 	 * @param channel  MIDI channel
 	 * @return **true**, if the slider is being changed. Otherwise: **false**.
 	 */
-	public boolean isChVolSliderAdjusting( byte channel ) {
+	public boolean isChVolSliderAdjusting(byte channel) {
 		try {
-			MidicaSlider slider = channelVolumeSliders.get( channel );
+			MidicaSlider slider = channelVolumeSliders.get(channel);
 			return slider.getValueIsAdjusting();
 		}
-		catch ( IndexOutOfBoundsException e ) {
+		catch (IndexOutOfBoundsException e) {
 			// the slider has not yet been put into the collection
 			return false;
 		}
@@ -1482,8 +1484,8 @@ public class PlayerView extends JDialog {
 	 * @param channel  MIDI channel number.
 	 * @param mute     **true** to check the checkbox, **false** to uncheck it.
 	 */
-	public void setMute( int channel, boolean mute ) {
-		muteCbx.get( channel ).setSelected( mute );
+	public void setMute(int channel, boolean mute) {
+		muteCbx.get(channel).setSelected(mute);
 	}
 	
 	/**
@@ -1495,8 +1497,8 @@ public class PlayerView extends JDialog {
 	 * @param channel  MIDI channel number.
 	 * @param solo     **true** to check the checkbox, **false** to uncheck it.
 	 */
-	public void setSolo( int channel, boolean solo ) {
-		soloCbx.get( channel ).setSelected( solo );
+	public void setSolo(int channel, boolean solo) {
+		soloCbx.get(channel).setSelected(solo);
 	}
 	
 	/**
@@ -1508,13 +1510,13 @@ public class PlayerView extends JDialog {
 	 * @param tempo   Value for the tempo slider.
 	 * @param level   Value for the transpose slider.
 	 */
-	public void setGlobalSlidersAndFields( byte volume, float tempo, byte level ) {
-		setMasterVolumeSlider( volume );
-		setTempoSlider( tempo );
-		setTransposeSlider( level );
-		setMasterVolumeField( volume );
-		setTempoField( tempo );
-		setTransposeField( level );
+	public void setGlobalSlidersAndFields(byte volume, float tempo, byte level) {
+		setMasterVolumeSlider(volume);
+		setTempoSlider(tempo);
+		setTransposeSlider(level);
+		setMasterVolumeField(volume);
+		setTempoField(tempo);
+		setTransposeField(level);
 	}
 	
 	/**
@@ -1522,8 +1524,8 @@ public class PlayerView extends JDialog {
 	 * 
 	 * @param text  HTML-formatted lyrics text.
 	 */
-	public void setLyrics( String text ) {
-		lblLyrics.setText( text );
+	public void setLyrics(String text) {
+		lblLyrics.setText(text);
 	}
 	
 	/**
@@ -1538,20 +1540,20 @@ public class PlayerView extends JDialog {
 	 * @param instrName     instrument name
 	 * @param comment       channel comment (META event INSTRUMENT NAME)
 	 */
-	public void setInstrumentInfo( int channel, String bankNumShort, String bankNumLong, String program, String instrName, String comment ) {
+	public void setInstrumentInfo(int channel, String bankNumShort, String bankNumLong, String program, String instrName, String comment) {
 		
 		// program number
-		channelProgramNumbers.get( channel ).setText( program );
+		channelProgramNumbers.get(channel).setText(program);
 		
 		// instrument name
-		channelInstruments.get( channel ).setText( instrName );
+		channelInstruments.get(channel).setText(instrName);
 		
 		// comment
-		channelComments.get( channel ).setText( comment );
+		channelComments.get(channel).setText(comment);
 		
 		// bank number
-		channelBankNumbers.get( channel ).setText( bankNumShort );
-		channelBankNumbers.get( channel ).setToolTipText( bankNumLong );
+		channelBankNumbers.get(channel).setText(bankNumShort);
+		channelBankNumbers.get(channel).setToolTipText(bankNumLong);
 	}
 	
 	/**
@@ -1561,15 +1563,15 @@ public class PlayerView extends JDialog {
 	 * @param channel  MIDI channel number.
 	 * @param active   **true** to show an active state, **false** to show an inactive state.
 	 */
-	public void setActivityLED( int channel, boolean active ) {
-		JLabel lbl = channelActivityLEDs.get( channel );
+	public void setActivityLED(int channel, boolean active) {
+		JLabel lbl = channelActivityLEDs.get(channel);
 		if (active) {
-			lbl.setToolTipText( Dict.get(Dict.ACTIVITY_ACTIVE) );
-			lbl.setIcon( AC_ICON_ACTIVE );
+			lbl.setToolTipText(Dict.get(Dict.ACTIVITY_ACTIVE));
+			lbl.setIcon(AC_ICON_ACTIVE);
 		}
 		else {
-			lbl.setToolTipText( Dict.get(Dict.ACTIVITY_INACTIVE) );
-			lbl.setIcon( AC_ICON_INACTIVE );
+			lbl.setToolTipText(Dict.get(Dict.ACTIVITY_INACTIVE));
+			lbl.setIcon(AC_ICON_INACTIVE);
 		}
 	}
 	
@@ -1581,19 +1583,19 @@ public class PlayerView extends JDialog {
 	 * @param name   The text field's name.
 	 * @param color  The designated background color.
 	 */
-	public void setTextFieldColor( String name, Color color ) {
-		if ( NAME_JUMP.equals(name) )
-			fldJump.setBackground( color );
-		else if ( NAME_MASTER_VOL.equals(name) )
-			fldVol.setBackground( color );
-		else if ( NAME_TEMPO.equals(name) )
-			fldTempo.setBackground( color );
-		else if ( NAME_TRANSPOSE.equals(name) )
-			fldTranspose.setBackground( color );
-		else if ( name.startsWith(NAME_CH_VOL) ) {
-			name = name.replaceFirst( NAME_CH_VOL, "" );
-			byte channel = Byte.parseByte( name );
-			channelVolumeFields.get( channel ).setBackground( color );
+	public void setTextFieldColor(String name, Color color) {
+		if (NAME_JUMP.equals(name))
+			fldJump.setBackground(color);
+		else if (NAME_MASTER_VOL.equals(name))
+			fldVol.setBackground(color);
+		else if (NAME_TEMPO.equals(name))
+			fldTempo.setBackground(color);
+		else if (NAME_TRANSPOSE.equals(name))
+			fldTranspose.setBackground(color);
+		else if (name.startsWith(NAME_CH_VOL)) {
+			name = name.replaceFirst(NAME_CH_VOL, "");
+			byte channel = Byte.parseByte(name);
+			channelVolumeFields.get(channel).setBackground(color);
 		}
 	}
 	
@@ -1608,11 +1610,11 @@ public class PlayerView extends JDialog {
 		
 		// choose the right content
 		channelLyricsArea.removeAll();
-		if ( cbxLyrics.isSelected() ) {
-			channelLyricsArea.add( lyricsArea );
+		if (cbxLyrics.isSelected()) {
+			channelLyricsArea.add(lyricsArea);
 		}
 		else {
-			channelLyricsArea.add( channelArea );
+			channelLyricsArea.add(channelArea);
 		}
 		
 		// make the changes visible
@@ -1628,17 +1630,17 @@ public class PlayerView extends JDialog {
 	 * 
 	 * @param channel  number of the MIDI channel that has been clicked.
 	 */
-	public void toggleChannelDetails( int channel ) {
-		Component detailArea = channelDetails.get( channel );
-		if ( detailArea.isVisible() ) {
+	public void toggleChannelDetails(int channel) {
+		Component detailArea = channelDetails.get(channel);
+		if (detailArea.isVisible()) {
 			// it's visible --> hide it
-			detailArea.setVisible( false );
+			detailArea.setVisible(false);
 		}
 		else {
 			// it's hidden --> hide all other areas and show this one
-			for ( Component area : channelDetails )
-				area.setVisible( false );
-			detailArea.setVisible( true );
+			for (Component area : channelDetails)
+				area.setVisible(false);
+			detailArea.setVisible(true);
 		}
 		pack();
 	}
@@ -1651,13 +1653,13 @@ public class PlayerView extends JDialog {
 	private void addKeyBindings() {
 		
 		// reset everything
-		keyBindingManager = new KeyBindingManager( this, this.getRootPane() );
+		keyBindingManager = new KeyBindingManager(this, this.getRootPane());
 		
 		// allow to use SPACE as a window-wide key binding for the play button
 		keyBindingManager.globalizeSpace();
 		
 		// add close bindings
-		keyBindingManager.addBindingsForClose( Dict.KEY_PLAYER_CLOSE );
+		keyBindingManager.addBindingsForClose(Dict.KEY_PLAYER_CLOSE);
 		
 		// add key bindings to normal buttons
 		keyBindingManager.addBindingsForButton( this.btnPlayPause,  Dict.KEY_PLAYER_PLAY         );
@@ -1756,6 +1758,10 @@ public class PlayerView extends JDialog {
 	 * Called when the player is opened and after reparsing the sequence.
 	 */
 	public void addKeyBindingsToSetProgressSliderToEnd() {
-		keyBindingManager.addBindingsForSliderSet( this.progressSlider, Dict.KEY_PLAYER_END, (int) SequenceCreator.getSequence().getTickLength() );
+		keyBindingManager.addBindingsForSliderSet(
+			this.progressSlider,
+			Dict.KEY_PLAYER_END,
+			(int) SequenceCreator.getSequence().getTickLength()
+		);
 	}
 }

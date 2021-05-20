@@ -33,7 +33,7 @@ public abstract class MidicaWorker extends SwingWorker<Exception, Void> {
 	 * 
 	 * @param view  The waiting dialog
 	 */
-	public MidicaWorker( WaitView view ) {
+	public MidicaWorker(WaitView view) {
 		this.view = view;
 	}
 	

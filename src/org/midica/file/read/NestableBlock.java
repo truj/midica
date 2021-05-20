@@ -362,7 +362,7 @@ public class NestableBlock {
 					// track line
 					int offsetLine = lineNumber;
 					int increment  = childBlock.getNumberOfLines() - 1;
-					traceElem.addToLine( increment );
+					traceElem.addToLine(increment);
 					lineNumber += increment;
 					
 					// track temp line (only in case of an exception before the child block's play() is called)
@@ -388,7 +388,7 @@ public class NestableBlock {
 								condChainHit = false;
 							}
 							if (MidicaPLParser.COND_TYPE_ELSIF == childConditionType || MidicaPLParser.COND_TYPE_ELSE == childConditionType) {
-								if ( ! condChainOpened )
+								if (! condChainOpened)
 									throw new ParseException( Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND) );
 							}
 							if (MidicaPLParser.COND_TYPE_ELSE == childConditionType)
@@ -430,7 +430,7 @@ public class NestableBlock {
 					
 					// reset conditions
 					String[] tokens = (String[]) element;
-					if ( ! "".equals(tokens[0]) ) {
+					if (! "".equals(tokens[0])) {
 						condChainOpened = false;
 						condChainHit    = false;
 					}
@@ -438,7 +438,7 @@ public class NestableBlock {
 					// parse line
 					String line;
 					if (shift != 0 || tuplet != null) {
-						if ( ! MidicaPLParser.VAR.equals(tokens[0]) ) {
+						if (! MidicaPLParser.VAR.equals(tokens[0])) {
 							line = String.join(" ", tokens);
 							line = parser.replaceVariables(line);
 							tokens = line.split("\\s+", 3);
@@ -450,7 +450,7 @@ public class NestableBlock {
 					if (tuplet != null) {
 						tokens = addTuplets(tokens);
 					}
-					parser.parseLine( String.join(" ", tokens) );
+					parser.parseLine(String.join(" ", tokens));
 					
 					// remove line from call stack
 					callStack.pop();

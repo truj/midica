@@ -39,8 +39,8 @@ public class DeviceWorker extends MidicaWorker {
 	 * @param view              The waiting dialog.
 	 * @param playerController  The controller class for the player.
 	 */
-	public DeviceWorker( WaitView view, PlayerController playerController ) {
-		super( view );
+	public DeviceWorker(WaitView view, PlayerController playerController) {
+		super(view);
 		this.playerController = playerController;
 	}
 	
@@ -55,9 +55,9 @@ public class DeviceWorker extends MidicaWorker {
 		// parse
 		Exception deviceException = null;
 		try {
-			MidiDevices.setupDevices( playerController );
+			MidiDevices.setupDevices(playerController);
 		}
-		catch ( Exception e ) {
+		catch (Exception e) {
 			deviceException = e;
 		}
 		
