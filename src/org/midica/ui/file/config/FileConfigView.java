@@ -51,9 +51,21 @@ public abstract class FileConfigView extends JDialog {
 		super(owner, title, true);
 		this.icon = icon;
 		
+		// init general structures
 		btnRestoreDefaults = new MidicaButton(Dict.get(Dict.DC_RESTORE_DEFAULTS));
 		btnRestore         = new MidicaButton(Dict.get(Dict.DC_RESTORE));
 		btnSave            = new MidicaButton(Dict.get(Dict.DC_SAVE));
+		
+		// init file specific structures
+		controller = initStructures();
+		initUi();
+		
+		// add general and file specific key bindings
+		addKeyBindings();
+		
+		// prepare for display
+		pack();
+		addWindowListener(controller);
 	}
 	
 	/**
@@ -64,7 +76,20 @@ public abstract class FileConfigView extends JDialog {
 	 */
 	protected FileConfigView() {
 		super();
+		controller = initStructures();
 	}
+	
+	/**
+	 * Initializes widgets and creates a controller if not yet done.
+	 * 
+	 * @return the created controller.
+	 */
+	protected abstract FileConfigController initStructures();
+	
+	/**
+	 * Initializes the content of the window.
+	 */
+	protected abstract void initUi();
 	
 	/**
 	 * Opens the window.
@@ -229,13 +254,15 @@ public abstract class FileConfigView extends JDialog {
 	 * The general bindings should be added
 	 * by calling {@link #addGeneralKeyBindings()}.
 	 */
-	protected abstract void addKeyBindings();
-	
-	/**
-	 * Adds general key bindings that are used by all file config windows.
-	 */
-	protected void addGeneralKeyBindings() {
+	private void addKeyBindings() {
 		
+		// reset everything
+		keyBindingManager = new KeyBindingManager(this, this.getRootPane());
+		
+		// add file specific bindings
+		addSpecificKeyBindings();
+		
+		// add general bindings
 		// close bindings
 		keyBindingManager.addBindingsForClose( Dict.KEY_FILE_CONF_CLOSE );
 		
@@ -243,5 +270,13 @@ public abstract class FileConfigView extends JDialog {
 		keyBindingManager.addBindingsForButton( btnSave,            Dict.KEY_FILE_CONF_SAVE            );
 		keyBindingManager.addBindingsForButton( btnRestore,         Dict.KEY_FILE_CONF_RESTORE_SAVED   );
 		keyBindingManager.addBindingsForButton( btnRestoreDefaults, Dict.KEY_FILE_CONF_RESTORE_DEFAULT );
+		
+		// set input and action maps
+		keyBindingManager.postprocess();
 	}
+	
+	/**
+	 * Adds file specific key bindings to the info window.
+	 */
+	protected abstract void addSpecificKeyBindings();
 }

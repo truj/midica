@@ -20,7 +20,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.midica.config.Dict;
-import org.midica.config.KeyBindingManager;
 import org.midica.config.Laf;
 import org.midica.config.NamedInteger;
 import org.midica.ui.widget.ConfigIcon;
@@ -56,11 +55,6 @@ public class AudioConfigView extends FileConfigView {
 	 */
 	public AudioConfigView(JDialog owner, ConfigIcon icon) {
 		super(owner, icon, Dict.get(Dict.TITLE_AU_CONFIG));
-		initStructures();
-		initUi();
-		addKeyBindings();
-		pack();
-		addWindowListener(controller);
 	}
 	
 	/**
@@ -70,13 +64,10 @@ public class AudioConfigView extends FileConfigView {
 	 */
 	public AudioConfigView() {
 		super();
-		initStructures();
 	}
 	
-	/**
-	 * Initializes widgets and creates a controller if not yet done.
-	 */
-	private void initStructures() {
+	@Override
+	protected FileConfigController initStructures() {
 		
 		// init widgets
 		cbxEncoding       = new JComboBox<>();
@@ -88,13 +79,11 @@ public class AudioConfigView extends FileConfigView {
 		cbxChannels.setModel(AudioConfigController.getComboboxModelChannels());
 		
 		// create controller
-		controller = AudioConfigController.getInstance(this, icon);
+		return AudioConfigController.getInstance(this, icon);
 	}
 	
-	/**
-	 * Initializes the content of the window.
-	 */
-	private void initUi() {
+	@Override
+	protected void initUi() {
 		
 		// create top-level container
 		JPanel content = new JPanel();
@@ -228,25 +217,12 @@ public class AudioConfigView extends FileConfigView {
 		return area;
 	}
 	
-	/**
-	 * Adds key bindings to the info window.
-	 */
-	protected void addKeyBindings() {
-		
-		// reset everything
-		keyBindingManager = new KeyBindingManager(this, this.getRootPane());
-		
-		// specific bindings
+	@Override
+	protected void addSpecificKeyBindings() {
 		keyBindingManager.addBindingsForComboboxOpen( cbxEncoding,       Dict.KEY_AU_CONF_ENCODING             );
 		keyBindingManager.addBindingsForFocus(        fldSampleSizeBits, Dict.KEY_AU_CONF_FLD_SAMPLE_SIZE_BITS );
 		keyBindingManager.addBindingsForFocus(        fldSampleRate,     Dict.KEY_AU_CONF_FLD_SAMPLE_RATE      );
 		keyBindingManager.addBindingsForComboboxOpen( cbxChannels,       Dict.KEY_AU_CONF_CHANNELS             );
 		keyBindingManager.addBindingsForCheckbox(     cbxIsBigEndian,    Dict.KEY_AU_CONF_IS_BIG_ENDIAN        );
-		
-		// restore/save buttons
-		addGeneralKeyBindings();
-		
-		// set input and action maps
-		keyBindingManager.postprocess();
 	}
 }

@@ -24,7 +24,6 @@ import javax.swing.JTextField;
 
 import org.midica.config.Config;
 import org.midica.config.Dict;
-import org.midica.config.KeyBindingManager;
 import org.midica.config.Laf;
 import org.midica.config.NamedInteger;
 import org.midica.ui.widget.ConfigIcon;
@@ -100,11 +99,6 @@ public class DecompileConfigView extends FileConfigView {
 	 */
 	public DecompileConfigView(JDialog owner, ConfigIcon icon) {
 		super(owner, icon, Dict.get(Dict.TITLE_DC_CONFIG));
-		initStructures();
-		initUi();
-		addKeyBindings();
-		pack();
-		addWindowListener(controller);
 	}
 	
 	/**
@@ -114,13 +108,10 @@ public class DecompileConfigView extends FileConfigView {
 	 */
 	public DecompileConfigView() {
 		super();
-		initStructures();
 	}
 	
-	/**
-	 * Initializes widgets and creates a controller if not yet done.
-	 */
-	private void initStructures() {
+	@Override
+	protected FileConfigController initStructures() {
 		
 		// init widgets
 		cbxAddTickComments        = new JCheckBox(Dict.get(Dict.DC_ADD_TICK_COMMENT));
@@ -163,13 +154,11 @@ public class DecompileConfigView extends FileConfigView {
 		cbxCtrlChangeMode.setModel(DecompileConfigController.getComboboxModel(Config.DC_CTRL_CHANGE_MODE));
 		
 		// create controller
-		controller = DecompileConfigController.getInstance(this, icon);
+		return DecompileConfigController.getInstance(this, icon);
 	}
 	
-	/**
-	 * Initializes the content of the window.
-	 */
-	private void initUi() {
+	@Override
+	protected void initUi() {
 		
 		// create top-level container
 		JPanel content = new JPanel();
@@ -806,13 +795,8 @@ public class DecompileConfigView extends FileConfigView {
 		return wrapTabContent(area);
 	}
 	
-	/**
-	 * Adds key bindings to the info window.
-	 */
-	protected void addKeyBindings() {
-		
-		// reset everything
-		keyBindingManager = new KeyBindingManager(this, this.getRootPane());
+	@Override
+	protected void addSpecificKeyBindings() {
 		
 		// tab bindings
 		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_CONF_TAB_DEBUG,       0 );
@@ -869,11 +853,5 @@ public class DecompileConfigView extends FileConfigView {
 		keyBindingManager.addBindingsForTabLevel3( btnAddGlobalTicks,      Dict.KEY_DC_CONF_BTN_GLOB_RANGE  );
 		keyBindingManager.addBindingsForTabLevel3( areaGlobalsStr,         Dict.KEY_DC_CONF_AREA_GLOB_ALL   );
 		keyBindingManager.addBindingsForTabLevel3( btnAllTicks,            Dict.KEY_DC_CONF_BTN_GLOB_ALL    );
-		
-		// restore/save buttons
-		addGeneralKeyBindings();
-		
-		// set input and action maps
-		keyBindingManager.postprocess();
 	}
 }
