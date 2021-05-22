@@ -15,8 +15,11 @@ import javax.sound.midi.Sequence;
 import javax.sound.midi.Soundbank;
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
 
 import org.midica.config.Config;
+import org.midica.config.Dict;
 import org.midica.file.read.SoundfontParser;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.file.ExportResult;
@@ -24,6 +27,7 @@ import org.midica.ui.file.config.AudioConfigController;
 import org.midica.ui.file.config.AudioConfigView;
 
 import com.sun.gervill.SF2Soundbank;
+import com.sun.gervill.SoftSynthesizer;
 import com.sun.kh.MidiToAudioRenderer;
 
 /**
@@ -64,6 +68,36 @@ public class AudioExporter extends Exporter {
 	public ExportResult export(File file) throws ExportException {
 		try {
 			
+			// get and apply the current session config
+			refreshConfig();
+			AudioFormat.Encoding encoding = getEncoding(ENCODING);
+			AudioFileFormat.Type fileType = getFileType(file);
+			
+			// check session config
+			if (SAMPLE_SIZE_BITS <= 0)
+				throw new ExportException(
+					Dict.get(Dict.ERROR_AU_SAMPLE_SIZE_NOT_POS) + SAMPLE_SIZE_BITS
+				);
+			if (0 != SAMPLE_SIZE_BITS % 8)
+				throw new ExportException(
+					Dict.get(Dict.ERROR_AU_SAMPLE_SIZE_NOT_DIV_8) + SAMPLE_SIZE_BITS
+				);
+			if ("PCM_FLOAT".equals(ENCODING))
+				if (32 != SAMPLE_SIZE_BITS && 64 != SAMPLE_SIZE_BITS)
+					throw new ExportException(
+						Dict.get(Dict.ERROR_AU_FLOAT_NOT_32_OR_64) + SAMPLE_SIZE_BITS
+					);
+			if (SAMPLE_RATE <= 0)
+				throw new ExportException(
+					Dict.get(Dict.ERROR_AU_SAMPLE_RATE_NOT_POS) + SAMPLE_RATE
+				);
+			if (null == fileType)
+				throw new ExportException(Dict.get(Dict.ERROR_AU_FILETYPE_UNKNOWN));
+			if (! AudioSystem.isFileTypeSupported(fileType))
+				throw new ExportException(
+					Dict.get(Dict.ERROR_AU_FILETYPE_NOT_SUPP) + fileType
+				);
+			
 			// user doesn't want to overwrite the file?
 			if (! createFile(file))
 				return new ExportResult(false);
@@ -81,14 +115,9 @@ public class AudioExporter extends Exporter {
 				soundfont = new SF2Soundbank(sf2File);
 			}
 			
-			// get and apply the current session config
-			refreshConfig();
-			AudioFormat.Encoding encoding = getEncoding(ENCODING);
-			AudioFileFormat.Type fileType = getFileType(file);
-			
 			// create format
 			int   frameSize = ((SAMPLE_SIZE_BITS + 7) / 8) * CHANNELS;
-			float frameRate = SAMPLE_RATE; // TODO: change for non-pcm, if necessary
+			float frameRate = SAMPLE_RATE;        // for PCM, frame rate == sample rate
 			AudioFormat format = new AudioFormat(
 				encoding,
 				SAMPLE_RATE,
@@ -99,11 +128,33 @@ public class AudioExporter extends Exporter {
 				IS_BIG_ENDIAN
 			);
 			
-			// create file
-			MidiToAudioRenderer.render(soundfont, seq, file, format, fileType);
+			// get audio stream
+			SoftSynthesizer  synth  = new SoftSynthesizer();
+			AudioInputStream stream = MidiToAudioRenderer.render(
+				soundfont, seq, format, synth
+			);
+			
+			// check stream
+			if (! AudioSystem.isFileTypeSupported(fileType, stream))
+				throw new ExportException(
+					Dict.get(Dict.ERROR_AU_FILETYPE_NOT_SUPP_F_STREAM) + fileType
+					+ " &nbsp; &#8644; &nbsp; " + stream.getFormat()
+				);
+			
+			// Write audio file to disk.
+			AudioSystem.write(stream, fileType, file);
+			
+			// We are finished, close synthesizer.
+			synth.close();
 		}
 		catch (Exception e) {
-			throw new ExportException(e.getMessage());
+			if (e instanceof ExportException)
+				throw (ExportException) e;
+			
+			throw new ExportException(
+				"<html>" + e.getClass().getName() + ":<br>"
+				+ "<b>" + e.getMessage() + "</b>"
+			);
 		}
 		
 		return new ExportResult(true);
@@ -118,10 +169,34 @@ public class AudioExporter extends Exporter {
 		encodings.add(AudioFormat.Encoding.PCM_SIGNED);
 		encodings.add(AudioFormat.Encoding.PCM_UNSIGNED);
 		encodings.add(AudioFormat.Encoding.PCM_FLOAT);
-		encodings.add(AudioFormat.Encoding.ALAW);
-		encodings.add(AudioFormat.Encoding.ULAW);
+		
+		// Java also supports ALAW and ULAW.
+		// But they are not supported by gervill.
 		
 		return encodings;
+	}
+	
+	/**
+	 * Returns a list of all file types that are supported by the operating system.
+	 * Each entry contains the name of the file type and the according file extension(s).
+	 * 
+	 * @return the supported file types.
+	 */
+	public static ArrayList<String> getSupportedFileTypes() {
+		ArrayList<String> types = new ArrayList<>();
+		
+		if (AudioSystem.isFileTypeSupported(AudioFileFormat.Type.WAVE))
+			types.add(AudioFileFormat.Type.WAVE + " (*.wav)");
+		if (AudioSystem.isFileTypeSupported(AudioFileFormat.Type.AU))
+			types.add(AudioFileFormat.Type.AU + " (*.au)");
+		if (AudioSystem.isFileTypeSupported(AudioFileFormat.Type.SND))
+			types.add(AudioFileFormat.Type.SND + " (*.snd)");
+		if (AudioSystem.isFileTypeSupported(AudioFileFormat.Type.AIFF))
+			types.add(AudioFileFormat.Type.AIFF + " (*.aiff, *.aif)");
+		if (AudioSystem.isFileTypeSupported(AudioFileFormat.Type.AIFC))
+			types.add(AudioFileFormat.Type.AIFC + " (*.aifc)");
+		
+		return types;
 	}
 	
 	/**

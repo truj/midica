@@ -123,8 +123,6 @@ public class AudioConfigController extends FileConfigController {
 					return false;
 		}
 		
-		// TODO: add more checks regarding the other possible formats
-		
 		return true;
 	}
 	

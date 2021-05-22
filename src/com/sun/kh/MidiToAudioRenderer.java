@@ -27,8 +27,6 @@
  */
 package com.sun.kh;
 
-import java.io.File;
-
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiEvent;
 import javax.sound.midi.MidiMessage;
@@ -36,15 +34,13 @@ import javax.sound.midi.Receiver;
 import javax.sound.midi.Sequence;
 import javax.sound.midi.Soundbank;
 import javax.sound.midi.Track;
-import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
 
 import com.sun.gervill.SoftSynthesizer;
 
 /**
- * This class can be used to export an audio file from a MIDI sequence
+ * This class can be used to create an audio stream from a MIDI sequence
  * using a user-defined soundfont.
  * 
  * Originally this class has been created by Karl Helgason as "Midi2WavRender.java".
@@ -54,13 +50,10 @@ import com.sun.gervill.SoftSynthesizer;
 public class MidiToAudioRenderer {
 
 	/*
-	 * Render sequence using selected or default soundbank into wave audio file.
+	 * Render sequence using selected or default soundbank into an audio stream.
 	 */
-	public static void render(Soundbank soundbank, Sequence sequence, File audioFile,
-			AudioFormat format, AudioFileFormat.Type fileType) throws Exception {
-		
-		// Create Synthesizer.
-		SoftSynthesizer synth = new SoftSynthesizer();
+	public static AudioInputStream render(Soundbank soundbank, Sequence sequence,
+			AudioFormat format, SoftSynthesizer synth) throws Exception {
 		
 		// Open AudioStream from AudioSynthesizer.
 		AudioInputStream stream = synth.openStream(format, null);
@@ -76,15 +69,11 @@ public class MidiToAudioRenderer {
 		// Play Sequence into AudioSynthesizer Receiver.
 		double total = send(sequence, synth.getReceiver());
 
-		// Calculate how long the WAVE file needs to be.
-		long len = (long) (stream.getFormat().getFrameRate() * (total + 4));
-		stream = new AudioInputStream(stream, stream.getFormat(), len);
+		// Calculate how many frames the file must have.
+		long targetFrames = (long) (stream.getFormat().getFrameRate() * (total + 4));
+		stream = new AudioInputStream(stream, stream.getFormat(), targetFrames);
 		
-		// Write audio file to disk.
-		AudioSystem.write(stream, fileType, audioFile);
-		
-		// We are finished, close synthesizer.
-		synth.close();
+		return stream;
 	}
 
 	/*

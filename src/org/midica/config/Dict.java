@@ -924,6 +924,8 @@ public class Dict {
 	public static final String AUDIO_CHANNELS               = "audio_channels";
 	public static final String AUDIO_IS_BIG_ENDIAN          = "audio_is_big_endian";
 	public static final String AUDIO_IS_BIG_ENDIAN_D        = "audio_is_big_endian_d";
+	public static final String AUDIO_FILE_TYPE              = "audio_file_type";
+	public static final String AUDIO_FILE_TYPE_D            = "audio_file_type_d";
 	public static final String AU_MONO                      = "au_mono";
 	public static final String AU_STEREO                    = "au_stereo";
 	
@@ -1492,6 +1494,11 @@ public class Dict {
 	// UiControler + PlayerControler
 	public static final String ERROR_IN_LINE               = "parsing_error_in_line";
 	
+	// SequenceParser
+	public static final String ERROR_NOTE_TOO_BIG          = "error_note_too_big";
+	public static final String ERROR_NOTE_TOO_SMALL        = "error_note_too_small";
+	public static final String ERROR_ANALYZE_POSTPROCESS   = "error_analyze_postprocess";
+	
 	// MidiParser
 	public static final String ERROR_ONLY_PPQ_SUPPORTED    = "error_only_ppq_supported";
 	
@@ -1587,8 +1594,6 @@ public class Dict {
 	public static final String ERROR_PARTIAL_RANGE_ORDER         = "error_partial_range_order";
 	public static final String ERROR_PARTIAL_RANGE_EMPTY         = "error_partial_range_empty";
 	public static final String ERROR_MODE_INSTR_NUM_OF_ARGS      = "error_mode_instr_num_of_args";
-	public static final String ERROR_NOTE_TOO_BIG                = "error_note_too_big";
-	public static final String ERROR_NOTE_TOO_SMALL              = "error_note_too_small";
 	public static final String ERROR_NOTE_LENGTH_INVALID         = "error_note_length_invalid";
 	public static final String ERROR_ZEROLENGTH_NOT_ALLOWED      = "error_zerolength_not_allowed";
 	public static final String ERROR_ZEROLENGTH_IN_SUM           = "error_zerolength_in_sum";
@@ -1633,23 +1638,8 @@ public class Dict {
 	public static final String ERROR_COND_EMPTY_ELEM_IN_IN_LIST  = "error_cond_empty_elem_in_in_list";
 	public static final String ERROR_CALL_IF_MUST_BE_ALONE       = "error_call_if_must_be_alone";
 	
-	// AldaImporter
-	public static final String ERROR_ALDA_NO_MIDI_FILE           = "error_alda_no_midi_file";
-	
-	// LilypondImporter
-	public static final String ERROR_LILYPOND_NO_MIDI_FILE       = "error_lilypond_no_midi_file";
-	public static final String ERROR_WRONG_DIVISION_TYPE         = "error_wrong_division_type";
-	public static final String ERROR_DIFFERENT_RESOLUTION        = "error_different_resolution";
-	
-	// MusescoreExporter
-	public static final String ERROR_MSCORE_NO_OUTPUT_FILE       = "error_mscore_no_output_file";
-	public static final String ERROR_MSCORE_MOVE_FAILED          = "error_mscore_move_failed";
-	
 	// NestableBlock
 	public static final String ERROR_BLOCK_ARG_ALREADY_SET      = "error_block_arg_already_set";
-	
-	// SequenceParser
-	public static final String ERROR_ANALYZE_POSTPROCESS        = "error_analyze_postprocess";
 	
 	// ParseException and StackTraceElement
 	public static final String EXCEPTION_CAUSED_BY_LINE         = "exception_caused_by_line";
@@ -1666,6 +1656,35 @@ public class Dict {
 	public static final String STACK_TRACE_FUNCTION             = "stack_trace_function";
 	public static final String STACK_TRACE_PATTERN              = "stack_trace_pattern";
 	
+	// AldaImporter
+	public static final String ERROR_ALDA_NO_MIDI_FILE           = "error_alda_no_midi_file";
+	
+	// LilypondImporter
+	public static final String ERROR_LILYPOND_NO_MIDI_FILE       = "error_lilypond_no_midi_file";
+	public static final String ERROR_WRONG_DIVISION_TYPE         = "error_wrong_division_type";
+	public static final String ERROR_DIFFERENT_RESOLUTION        = "error_different_resolution";
+	
+	// Exporter
+	public static final String ERROR_EXPORT                     = "error_export";
+	public static final String ERROR_FILE_NOT_WRITABLE          = "error_file_not_writable";
+	public static final String OVERWRITE_FILE                   = "overwrite_file";
+	public static final String EXPORTER_TICK                    = "exporter_tick";
+	public static final String CONFIRM_DIALOG_YES               = "confirm_dialog_yes";
+	public static final String CONFIRM_DIALOG_NO                = "confirm_dialog_no";
+	
+	// AudioExporter
+	public static final String ERROR_AU_SAMPLE_RATE_NOT_POS          = "error_au_sample_rate_not_pos";
+	public static final String ERROR_AU_SAMPLE_SIZE_NOT_POS          = "error_au_sample_size_not_pos";
+	public static final String ERROR_AU_SAMPLE_SIZE_NOT_DIV_8        = "error_au_sample_size_not_div_8";
+	public static final String ERROR_AU_FLOAT_NOT_32_OR_64           = "error_au_float_not_32_or_64";
+	public static final String ERROR_AU_FILETYPE_UNKNOWN             = "error_au_filetype_unknown";
+	public static final String ERROR_AU_FILETYPE_NOT_SUPP            = "error_au_filetype_not_supp";
+	public static final String ERROR_AU_FILETYPE_NOT_SUPP_F_STREAM   = "error_au_filetype_not_supp_f_stream";
+	
+	// MusescoreExporter
+	public static final String ERROR_MSCORE_NO_OUTPUT_FILE      = "error_mscore_no_output_file";
+	public static final String ERROR_MSCORE_MOVE_FAILED         = "error_mscore_move_failed";
+	
 	// WaitView
 	public static final String TITLE_WAIT                       = "title_wait";
 	public static final String WAIT_PARSE_MPL                   = "wait_parse_mpl";
@@ -1675,14 +1694,6 @@ public class Dict {
 	public static final String WAIT_REPARSE                     = "wait_reparse";
 	public static final String WAIT_SETUP_DEVICES               = "wait_setup_devices";
 	public static final String WAIT_EXPORT                      = "wait_export";
-	
-	// Exporter
-	public static final String ERROR_EXPORT                     = "error_export";
-	public static final String ERROR_FILE_NOT_WRITABLE          = "error_file_not_writable";
-	public static final String OVERWRITE_FILE                   = "overwrite_file";
-	public static final String EXPORTER_TICK                    = "exporter_tick";
-	public static final String CONFIRM_DIALOG_YES               = "confirm_dialog_yes";
-	public static final String CONFIRM_DIALOG_NO                = "confirm_dialog_no";
 	
 	// ExportResultView
 	public static final String TITLE_EXPORT_RESULT              = "title_export_result";
@@ -2390,13 +2401,16 @@ public class Dict {
 		set( TITLE_AU_CONFIG,                  "Midica - Audio Export Settings"                            );
 		set( AUDIO_ENCODING,                   "Encoding"                                                  );
 		set( AUDIO_SAMPLE_SIZE_BITS,           "Sample Size in Bits"                                       );
-		set( AUDIO_SAMPLE_SIZE_BITS_D,         "<html>Must be divisible by 8 for PCM-based encodings.<br>"
-		                                     + "For PCM_FLOAT, only <b>32</b> and <b>64</b> is allowed."   );
+		set( AUDIO_SAMPLE_SIZE_BITS_D,         "<html>Must be divisible by 8.<br>"
+		                                     + "For PCM_FLOAT, only <b>32</b> and <b>64</b> are allowed."   );
 		set( AUDIO_SAMPLE_RATE,                "Sample Rate"                                               );
 		set( AUDIO_SAMPLE_RATE_D,              "Samples per second (Hz)"                                   );
 		set( AUDIO_CHANNELS,                   "Channels"                                                  );
 		set( AUDIO_IS_BIG_ENDIAN,              "Big Endian"                                                );
 		set( AUDIO_IS_BIG_ENDIAN_D,            "<html><b>Big endian</b> (if checked) or <b>Little endian</b> (otherwise)" );
+		set( AUDIO_FILE_TYPE,                  "File Type"                                                 );
+		set( AUDIO_FILE_TYPE_D,                "The file type will be chosen based on the file extension.<br>"
+		                                     + "The operating system supports the following file types:"   );
 		set( AU_MONO,                          "Mono"                                                      );
 		set( AU_STEREO,                        "Stereo"                                                    );
 		
@@ -3073,16 +3087,19 @@ public class Dict {
 		// UiControler + PlayerControler
 		set( ERROR_IN_LINE,                       "<html>parsing error in file:<br>%s<br>line: %s<br>" );
 		
-		// Parser
-		set( ERROR_0_NOT_ALLOWED,                 "0 not allowed"                 );
-		set( ERROR_NEGATIVE_NOT_ALLOWED,          "negative number not allowed: " );
-		set( ERROR_NOT_AN_INTEGER,                "not an integer: "              );
-		set( ERROR_NOT_A_FLOAT,                   "not a valid number: "          );
+		// SequenceParser
+		set( ERROR_NOTE_TOO_BIG,                  "note number too big: "                                             );
+		set( ERROR_NOTE_TOO_SMALL,                "note number too small: "                                           );
+		set( ERROR_ANALYZE_POSTPROCESS,           "Error while postprocessing the sequence"                           );
 		
 		// MidiParser
 		set( ERROR_ONLY_PPQ_SUPPORTED,            "Only MIDI files with division type PPQ are supported." );
 		
 		// MidicaPLParser
+		set( ERROR_0_NOT_ALLOWED,                 "0 not allowed"                 );
+		set( ERROR_NEGATIVE_NOT_ALLOWED,          "negative number not allowed: " );
+		set( ERROR_NOT_AN_INTEGER,                "not an integer: "              );
+		set( ERROR_NOT_A_FLOAT,                   "not a valid number: "          );
 		set( ERROR_INSTRUMENTS_NOT_DEFINED,       "no instruments have been defined yet"                              );
 		set( ERROR_GLOBALS_IN_INSTR_DEF,          "global commands are not allowed inside an instrument definition"   );
 		set( ERROR_SINGLE_INSTR_IN_INSTR_DEF,     "instrument commands are not allowed inside an instrument definition block" );
@@ -3170,8 +3187,6 @@ public class Dict {
 		set( ERROR_PARTIAL_RANGE_ORDER,           "invalid range definition: range must be ascending: "               );
 		set( ERROR_PARTIAL_RANGE_EMPTY,           "empty range in channel definition"                                 );
 		set( ERROR_MODE_INSTR_NUM_OF_ARGS,        "wrong number of arguments in mode command 'INSTRUMENTS'"           );
-		set( ERROR_NOTE_TOO_BIG,                  "note number too big: "                                             );
-		set( ERROR_NOTE_TOO_SMALL,                "note number too small: "                                           );
 		set( ERROR_NOTE_LENGTH_INVALID,           "invalid note length expression or undefined pattern: "             );
 		set( ERROR_ZEROLENGTH_NOT_ALLOWED,        "zero-length not allowed for notes or chords"                       );
 		set( ERROR_ZEROLENGTH_IN_SUM,             "zero-length not allowed in length sum"                             );
@@ -3216,23 +3231,8 @@ public class Dict {
 		set( ERROR_COND_EMPTY_ELEM_IN_IN_LIST,    "Empty element in 'in' list: "                                      );
 		set( ERROR_CALL_IF_MUST_BE_ALONE,         "block option 'if' cannot be combined with another if"              );
 		
-		// AldaImporter
-		set( ERROR_ALDA_NO_MIDI_FILE,             "<html>ALDA failed to create a MIDI file.<br>In most cases that means:<br>Too many Instruments." );
-		
-		// LilypondImporter
-		set( ERROR_LILYPOND_NO_MIDI_FILE,         "<html>LilyPond didn't create any MIDI file.<br>Did you forget to include a \\midi block?" );
-		set( ERROR_WRONG_DIVISION_TYPE,           "Wrong division type. Only PPQ allowed."                            );
-		set( ERROR_DIFFERENT_RESOLUTION,          "Temporary MIDI files have different resolutions."                  );
-		
-		// MusescoreExporter
-		set( ERROR_MSCORE_NO_OUTPUT_FILE,         "<html>MuseScore didn't create any file."                           );
-		set( ERROR_MSCORE_MOVE_FAILED,            "Failed to move temporary file '%s' to '%s'"                        );
-		
 		// NestableBlock
 		set( ERROR_BLOCK_ARG_ALREADY_SET,         "Block argument has already been set before: "                      );
-		
-		// SequenceParser
-		set( ERROR_ANALYZE_POSTPROCESS,           "Error while postprocessing the sequence"                           );
 		
 		// ParseException and StackTraceElement
 		set( EXCEPTION_CAUSED_BY_LINE,            "Caused by this line:"                                              );
@@ -3249,6 +3249,35 @@ public class Dict {
 		set( STACK_TRACE_FUNCTION,                "Function "                                                         );
 		set( STACK_TRACE_PATTERN,                 "Pattern "                                                          );
 		
+		// AldaImporter
+		set( ERROR_ALDA_NO_MIDI_FILE,             "<html>ALDA failed to create a MIDI file.<br>In most cases that means:<br>Too many Instruments." );
+		
+		// LilypondImporter
+		set( ERROR_LILYPOND_NO_MIDI_FILE,         "<html>LilyPond didn't create any MIDI file.<br>Did you forget to include a \\midi block?" );
+		set( ERROR_WRONG_DIVISION_TYPE,           "Wrong division type. Only PPQ allowed."                            );
+		set( ERROR_DIFFERENT_RESOLUTION,          "Temporary MIDI files have different resolutions."                  );
+		
+		// Exporter
+		set( ERROR_EXPORT,                        "Export Error in the file "                                         );
+		set( ERROR_FILE_NOT_WRITABLE,             "File not writable"                                                 );
+		set( OVERWRITE_FILE,                      "Overwrite the file?"                                               );
+		set( EXPORTER_TICK,                       "Tick"                                                              );
+		set( CONFIRM_DIALOG_YES,                  "Yes"                                                               );
+		set( CONFIRM_DIALOG_NO,                   "No"                                                                );
+		
+		// AudioExporter
+		set( ERROR_AU_SAMPLE_RATE_NOT_POS,        "<html>Config Error: Sample Rate must be positive.<br>Current Value: ");
+		set( ERROR_AU_SAMPLE_SIZE_NOT_POS,        "<html>Config Error: Sample Size must be positive.<br>Current Value: ");
+		set( ERROR_AU_SAMPLE_SIZE_NOT_DIV_8,      "<html>Config Error: Sample Size must be divisible by 8.<br>Current Value: " );
+		set( ERROR_AU_FLOAT_NOT_32_OR_64,         "<html>Config Error: Sample Size must be 32 or 64 when using PCM_FLOAT<br>Current Value: " );
+		set( ERROR_AU_FILETYPE_UNKNOWN,           "File extension unknown. Cannot determine the right file type."     );
+		set( ERROR_AU_FILETYPE_NOT_SUPP,          "File type not supported by the system: "                           );
+		set( ERROR_AU_FILETYPE_NOT_SUPP_F_STREAM, "<html>File type not supported for the target audio format:<br>"    );
+		
+		// MusescoreExporter
+		set( ERROR_MSCORE_NO_OUTPUT_FILE,         "<html>MuseScore didn't create any file."                           );
+		set( ERROR_MSCORE_MOVE_FAILED,            "Failed to move temporary file '%s' to '%s'"                        );
+		
 		// WaitView
 		set( TITLE_WAIT,                          "Please Wait"                                                       );
 		set( WAIT_PARSE_MPL,                      "Parsing the MidicaPL file..."                                      );
@@ -3258,14 +3287,6 @@ public class Dict {
 		set( WAIT_REPARSE,                        "Reloading the File"                                                );
 		set( WAIT_SETUP_DEVICES,                  "Setting up MIDI devices and loading Soundfont"                     );
 		set( WAIT_EXPORT,                         "Exporting the file..."                                             );
-		
-		// Exporter
-		set( ERROR_EXPORT,                        "Export Error in the file "                                         );
-		set( ERROR_FILE_NOT_WRITABLE,             "File not writable"                                                 );
-		set( OVERWRITE_FILE,                      "Overwrite the file?"                                               );
-		set( EXPORTER_TICK,                       "Tick"                                                              );
-		set( CONFIRM_DIALOG_YES,                  "Yes"                                                               );
-		set( CONFIRM_DIALOG_NO,                   "No"                                                                );
 		
 		// ExportResultView
 		set( TITLE_EXPORT_RESULT,                 "Export Result"                                                     );

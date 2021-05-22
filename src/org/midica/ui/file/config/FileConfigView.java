@@ -250,9 +250,8 @@ public abstract class FileConfigView extends JDialog {
 	/**
 	 * Adds all key bindings to the info window (general and specific key bindings).
 	 * 
-	 * The specific key bindings should be implemented directly in this method.
-	 * The general bindings should be added
-	 * by calling {@link #addGeneralKeyBindings()}.
+	 * The general key bindings are added directly in this method.
+	 * The general bindings are added by calling {@link #addSpecificKeyBindings()}.
 	 */
 	private void addKeyBindings() {
 		

@@ -74,8 +74,6 @@ public abstract class FileConfigController implements WindowListener, DocumentLi
 	 * Creates a default view that is not intended to be used as a real window.
 	 * This is used to initialize data structures, if the user does not want
 	 * to config window is.
-	 * 
-	 * @return the created view.
 	 */
 	protected abstract void createDefaultView();
 	

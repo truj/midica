@@ -22,6 +22,7 @@ import javax.swing.JTextField;
 import org.midica.config.Dict;
 import org.midica.config.Laf;
 import org.midica.config.NamedInteger;
+import org.midica.file.write.AudioExporter;
 import org.midica.ui.widget.ConfigIcon;
 
 /**
@@ -204,7 +205,6 @@ public class AudioConfigView extends FileConfigView {
 		// checkbox
 		constrCenter.gridy++;
 		cbxIsBigEndian.addActionListener(controller);
-		constrCenter.gridwidth = 2;
 		area.add(cbxIsBigEndian, constrCenter);
 		
 		// description
@@ -212,7 +212,32 @@ public class AudioConfigView extends FileConfigView {
 		JLabel descIsBigEndian = new JLabel(Dict.get(Dict.AUDIO_IS_BIG_ENDIAN_D));
 		area.add(descIsBigEndian, constrRight);
 		
-		// TODO: add info about file type
+		// separator
+		constrLeft.gridy++;
+		constrFull.gridy = constrLeft.gridy;
+		area.add(Laf.createSeparator(), constrFull);
+		
+		// file type
+		// label
+		constrLeft.gridy++;
+		constrLeft.anchor  = GridBagConstraints.NORTHWEST;
+		JLabel lblFileType = new JLabel(Dict.get(Dict.AUDIO_FILE_TYPE));
+		Laf.makeBold(lblFileType);
+		area.add(lblFileType, constrLeft);
+		
+		// create description string
+		String fileTypeDescStr = "<html>" + Dict.get(Dict.AUDIO_FILE_TYPE_D);
+		fileTypeDescStr += "<br><ul>";
+		for (String type : AudioExporter.getSupportedFileTypes()) {
+			fileTypeDescStr += "<li>" + type + "</li>";
+		}
+		fileTypeDescStr += "</ul>";
+		
+		// description
+		constrCenter.gridy = constrLeft.gridy;
+		constrCenter.gridwidth = 2;
+		JLabel descFileTypeDesc = new JLabel(fileTypeDescStr);
+		area.add(descFileTypeDesc, constrCenter);
 		
 		return area;
 	}
