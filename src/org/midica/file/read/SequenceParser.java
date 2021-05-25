@@ -31,23 +31,12 @@ import org.midica.ui.info.InfoView;
  */
 public abstract class SequenceParser implements IParser {
 	
-	private static final int FORMAT_NONE      = -1;
-	public  static final int FORMAT_MIDICAPL  =  1;
-	public  static final int FORMAT_MIDI      =  2;
-	public  static final int FORMAT_ALDA      =  3;
-	public  static final int FORMAT_ABC       =  4;
-	public  static final int FORMAT_LY        =  5;
-	public  static final int FORMAT_MUSESCORE =  6;
-	
 	/**
 	 * Defines how much the parsed input has to be transposed.
 	 * A positive transpose level causes a transposition into higher pitches.
 	 * A negative level transposes into lower pitches.
 	 */
 	protected static byte transposeLevel = 0;
-	
-	/** Type of the last successfully parsed file, according to one of the FORMAT_... fields. */
-	private static int fileFormat = FORMAT_NONE;
 	
 	/** Last successfully parsed file. */
 	private static File sequenceFile = null;
@@ -115,7 +104,6 @@ public abstract class SequenceParser implements IParser {
 	 * @param file  The file to be parsed.
 	 */
 	protected void preprocess(File file) {
-		fileFormat   = FORMAT_NONE;
 		sequenceFile = null;
 		currentFile  = file;
 		SequenceAnalyzer.reset();
@@ -125,7 +113,7 @@ public abstract class SequenceParser implements IParser {
 	/**
 	 * Postprocesses the loaded MIDI sequence.
 	 * 
-	 * Retrieves information from the given sequence and makes them available
+	 * Retrieves information from the given sequence and makes it available
 	 * for the {@link InfoView}.
 	 * 
 	 * Makes the created sequence available for the player.
@@ -137,46 +125,37 @@ public abstract class SequenceParser implements IParser {
 	 * {@link SequenceCreator} will be published.
 	 * 
 	 * @param seq        The MIDI sequence to be analyzed.
-	 * @param format     one of the FORMAT_... fields, depending on the derived parser class.
-	 * @param charset    The charset that has been chosen in the file chooser.
+	 * @param charset    The charset that has been chosen in the file chooser (or assumed).
 	 * @throws ParseException if a marker event cannot be created during
 	 *                        the postprocessing of the analyzing process
 	 */
-	protected void postprocessSequence(Sequence seq, int format, String charset) throws ParseException {
+	protected void postprocessSequence(Sequence seq, String charset) throws ParseException {
 		
 		// analyze sequence and add marker events
 		SequenceAnalyzer.analyze(seq, charset);
 		
 		// publich successfully parsed file
 		sequenceFile = currentFile;
-		fileFormat   = format;
+		SequenceCreator.postprocess();
 		MidiDevices.setSequence(SequenceCreator.getSequence());
 	}
 	
 	/**
-	 * Returns the format of the successfully parsed file.
+	 * Returns the absolute path of the successfully parsed file.
+	 * Returns **null**, if no file has been parsed successfully.
 	 * 
-	 * @return the file format.
-	 */
-	public static int getFileFormat() {
-		return fileFormat;
-	}
-	
-	/**
-	 * Returns the absolute path of the successfully parsed file, if it matches the requested type.
-	 * Returns **null**, if the requested type doesn't match or no file has been parsed successfully.
-	 * 
-	 * @param  format    format type (according to one of the FORMAT_... fields)
 	 * @return file path or **null**.
 	 */
-	public static String getFilePath(int format) {
+	public static String getFilePath() {
 		if (null == sequenceFile)
 			return null;
-		if (FORMAT_NONE == fileFormat)
+		
+		int importFormat = SequenceCreator.getImportFormat();
+		if (SequenceCreator.IMPORT_FORMAT_NONE == importFormat)
 			return null;
-		if (format == fileFormat)
-			return sequenceFile.getAbsolutePath();
-		return null;
+		if (null == sequenceFile)
+			return null;
+		return sequenceFile.getAbsolutePath();
 	}
 	
 	/**

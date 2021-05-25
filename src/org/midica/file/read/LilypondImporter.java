@@ -22,6 +22,7 @@ import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.Foreign;
 import org.midica.file.ForeignException;
+import org.midica.midi.SequenceCreator;
 
 /**
  * This class is used to import a LilyPond file using the lilypond executable.
@@ -40,15 +41,9 @@ public class LilypondImporter extends MidiParser {
 	// foreign program description for error messages
 	private static String programName = Dict.get(Dict.FOREIGN_PROG_LY);
 	
-	/**
-	 * Returns the absolute path of the successfully parsed LilyPond file.
-	 * Returns **null**, if no file has been successfully parsed or the last successfully
-	 * parsed file is not a LilyPond file.
-	 * 
-	 * @return file path or **null**.
-	 */
-	public static String getFilePath() {
-		return getFilePath(FORMAT_LY);
+	@Override
+	protected int getImportFormat() {
+		return SequenceCreator.IMPORT_FORMAT_LY;
 	}
 	
 	/**
@@ -117,7 +112,7 @@ public class LilypondImporter extends MidiParser {
 			
 			// transform and analyze the sequence
 			createSequence(mergedSequence);
-			postprocessSequence(mergedSequence, FORMAT_LY, chosenCharset); // analyze the original sequence
+			postprocessSequence(mergedSequence, chosenCharset); // analyze the original sequence
 			
 			// unfortunately LilyPond includes channel volume messages
 			// so we have to treat them by expression

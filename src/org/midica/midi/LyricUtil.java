@@ -105,6 +105,11 @@ public final class LyricUtil {
 		}
 	}
 	
+	/**
+	 * Creates and returns a singleton object of this class.
+	 * 
+	 * @return a singleton object of this class.
+	 */
 	public static final LyricUtil getInstance() {
 		if (null == instance) {
 			instance = new LyricUtil();

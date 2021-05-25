@@ -18,11 +18,14 @@ import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.Foreign;
 import org.midica.file.ForeignException;
+import org.midica.midi.SequenceCreator;
 
 /**
- * This class is used to import an ABC file using the abc2midi executable (belongs to abcMIDI).
+ * This class is used to import an ABC file using the abc2midi executable
+ * (belongs to abcMIDI).
  * https://ifdo.ca/~seymour/runabc/top.html
- * This works only if abc2midi is available.
+ * 
+ * This works only if abc2midi is installed.
  * 
  * The process contains the following steps:
  * 
@@ -38,20 +41,9 @@ public class AbcImporter extends MidiParser {
 	private static String programName = Dict.get(Dict.FOREIGN_PROG_ABCMIDI);
 	
 	/**
-	 * Returns the absolute path of the successfully parsed ABC file.
-	 * Returns **null**, if no file has been successfully parsed or the successfully parsed file
-	 * is not an ABC file.
+	 * Parses an ABC file.
 	 * 
-	 * @return file path or **null**.
-	 */
-	public static String getFilePath() {
-		return getFilePath(FORMAT_ABC);
-	}
-	
-	/**
-	 * Parses an ALDA file.
-	 * 
-	 * @param file  ALDA file to be parsed.
+	 * @param file  ABC file to be parsed.
 	 */
 	public void parse(File file) throws ParseException {
 		
@@ -78,10 +70,15 @@ public class AbcImporter extends MidiParser {
 			
 			// transform and analyze the sequence
 			createSequence(sequence);
-			postprocessSequence(sequence, FORMAT_ABC, chosenCharset); // analyze the original sequence
+			postprocessSequence(sequence, chosenCharset); // analyze the original sequence
 		}
 		catch (ForeignException | InvalidMidiDataException | IOException e) {
 			throw new ParseException(e.getMessage());
 		}
+	}
+	
+	@Override
+	protected int getImportFormat() {
+		return SequenceCreator.IMPORT_FORMAT_ABC;
 	}
 }

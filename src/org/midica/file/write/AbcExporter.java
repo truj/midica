@@ -52,11 +52,6 @@ public class AbcExporter extends MidiExporter {
 		if (! createFile(file))
 			return new ExportResult(false);
 		
-		// charset // TODO: optimize
-		String sourceFileType = SequenceCreator.getFileType();
-		sourceCharset = "mid".equals(sourceFileType) ? Config.get(Config.CHARSET_MID) : Config.get(Config.CHARSET_MPL);
-		targetCharset = sourceCharset;
-		
 		try {
 			// create temp midi file
 			File tempfile = Foreign.createTempMidiFile();
@@ -81,5 +76,14 @@ public class AbcExporter extends MidiExporter {
 		catch (ForeignException | InvalidMidiDataException | IOException e) {
 			throw new ExportException(e.getMessage());
 		}
+	}
+	
+	@Override
+	protected String getTargetCharset() {
+		
+		// use the same charset for source and target
+		// TODO: check if ABC needs or supports one or more special charsets
+		
+		return SequenceCreator.getCharset();
 	}
 }

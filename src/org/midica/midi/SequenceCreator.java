@@ -39,10 +39,19 @@ public class SequenceCreator {
 	public static final int  NUM_META_TRACKS    =   2; // number of non-channel tracks
 	public static final int  NUM_TRACKS         = NUM_META_TRACKS + 16; // total number of tracks
 	
-	private static String   fileType   = null; // last parsing attempt ("midica" or "mid")
-	private static int      resolution = DEFAULT_RESOLUTION;
-	private static String   charset    = null;
-	private static Track[]  tracks     = null;
+	public static final int IMPORT_FORMAT_NONE      = -1;
+	public static final int IMPORT_FORMAT_MIDICAPL  =  1;
+	public static final int IMPORT_FORMAT_MIDI      =  2;
+	public static final int IMPORT_FORMAT_ALDA      =  3;
+	public static final int IMPORT_FORMAT_ABC       =  4;
+	public static final int IMPORT_FORMAT_LY        =  5;
+	public static final int IMPORT_FORMAT_MUSESCORE =  6;
+	
+	private static boolean  isSuccess    = false;              // last parsing attempt successful?
+	private static int      importFormat = IMPORT_FORMAT_NONE; // last parsing attempt
+	private static int      resolution   = DEFAULT_RESOLUTION;
+	private static String   charset      = null;  // chosen (or assumed) charset of the source file
+	private static Track[]  tracks       = null;
 	private static Sequence seq;
 	
 	/**                    channel   --     note  -- event      */
@@ -58,19 +67,18 @@ public class SequenceCreator {
 	 * Creates a new sequence and sets it's resolution to the default value.
 	 * Initiates all necessary data structures.
 	 * 
-	 * @param chosenCharset  Charset to be used for text-based messages.
-	 * @throws InvalidMidiDataException    if {@link Sequence}.PPQ is not a valid division type.
-	 *                                     This should never happen.
+	 * Only called by {@link MidicaPLParser}.
+	 * 
+	 * @param chosenCharset    Charset to be used for text-based messages.
+	 * @throws InvalidMidiDataException if {@link Sequence#PPQ} is not a valid division type.
+	 *                                  This should never happen.
 	 */
 	public static void reset(String chosenCharset) throws InvalidMidiDataException {
-		resolution = DEFAULT_RESOLUTION;
-		
 		if (null == chosenCharset) {
 			chosenCharset = Config.get(Config.CHARSET_MPL);
 		}
 		
-		reset(resolution, chosenCharset);
-		fileType = "midica";
+		reset(DEFAULT_RESOLUTION, chosenCharset, IMPORT_FORMAT_MIDICAPL);
 	}
 	
 	/**
@@ -78,12 +86,13 @@ public class SequenceCreator {
 	 * Initiates all necessary data structures.
 	 * This method is called by the {@link MidiParser}.
 	 * 
-	 * @param res                          Resolution of the new sequence.
-	 * @param chosenCharset                Charset to be used for text-based messages.
+	 * @param res            Resolution of the new sequence.
+	 * @param chosenCharset  Charset to be used for text-based messages.
+	 * @param importFormat   File type of the import file.
 	 * @throws InvalidMidiDataException    if {@link Sequence}.PPQ is not a valid division type.
 	 *                                     This should never happen.
 	 */
-	public static void reset(int res, String chosenCharset) throws InvalidMidiDataException {
+	public static void reset(int res, String chosenCharset, int importFormat) throws InvalidMidiDataException {
 		
 		// create a new sequence
 		resolution       = res;
@@ -95,27 +104,51 @@ public class SequenceCreator {
 			tracks[i] = seq.createTrack();
 			lastNoteOffEvent.put(i, new HashMap<Integer, MidiEvent>());
 		}
-		fileType = "mid";
+		SequenceCreator.importFormat = importFormat;
+		SequenceCreator.isSuccess    = false;
 		
 		return;
 	}
 	
 	/**
-	 * Returns the MIDI sequence.
+	 * Remembers that this parsing attempt was successful.
+	 */
+	public static void postprocess() {
+		SequenceCreator.isSuccess = true;
+	}
+	
+	/**
+	 * Returns the created MIDI sequence from the last import attempt, if any.
 	 * 
-	 * @return    MIDI sequence.
+	 * @return    MIDI sequence or **null**.
 	 */
 	public static Sequence getSequence() {
 		return seq;
 	}
 	
 	/**
-	 * Determins which file type was attempted to parse last.
+	 * Returns the import format of the last attempted import.
 	 * 
-	 * @return "midica" or "mid", depending on the file type.
+	 * The import format is one of the IMPORT_FILE_* constants.
+	 * If the last import attempt failed, {@link #IMPORT_FORMAT_NONE} is returned.
+	 * 
+	 * @return the import format, as described above.
 	 */
-	public static String getFileType() {
-		return fileType;
+	public static int getImportFormat() {
+		return importFormat;
+	}
+	
+	/**
+	 * Returns the chosen (or assumed) charset of the last successfully parsed sequence.
+	 * 
+	 * Returns **null** if the last import attempt failed.
+	 * 
+	 * @return the charset.
+	 */
+	public static String getCharset() {
+		if (isSuccess)
+			return charset;
+		return null;
 	}
 	
 	/**

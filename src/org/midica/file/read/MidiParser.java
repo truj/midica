@@ -58,17 +58,6 @@ public class MidiParser extends SequenceParser {
 	private static LyricUtil lyricUtil = LyricUtil.getInstance();
 	
 	/**
-	 * Returns the absolute path of the successfully parsed file.
-	 * Returns **null**, if no file has been successfully parsed or the successfully parsed file
-	 * is not a MIDI file.
-	 * 
-	 * @return file path or **null**.
-	 */
-	public static String getFilePath() {
-		return getFilePath(FORMAT_MIDI);
-	}
-	
-	/**
 	 * Parses a MIDI file.
 	 * 
 	 * @param file  MIDI file to be parsed.
@@ -82,14 +71,14 @@ public class MidiParser extends SequenceParser {
 		midiFileCharset    = null;
 		
 		// get chosen charset
-		ConfigComboboxModel charsetModel = ConfigComboboxModel.getModel(Config.CHARSET_MID);
+		ConfigComboboxModel  charsetModel = ConfigComboboxModel.getModel(Config.CHARSET_MID);
 		ComboboxStringOption chosenOption = (ComboboxStringOption) charsetModel.getSelectedItem();
 		chosenCharset = chosenOption.getIdentifier();
 		
 		try {
 			Sequence sequence = MidiSystem.getSequence(file);
 			createSequence(sequence);
-			postprocessSequence(sequence, FORMAT_MIDI, chosenCharset); // we want to analyze the loaded sequence - not the created one
+			postprocessSequence(sequence, chosenCharset); // we want to analyze the loaded sequence - not the created one
 			
 			// Many MIDI files out there contain channel volume messages.
 			// Transform them into expression messages.
@@ -102,6 +91,19 @@ public class MidiParser extends SequenceParser {
 			e.printStackTrace();
 			throw new ParseException(e.getMessage());
 		}
+	}
+	
+	/**
+	 * Returns the import format defined in {@link SequenceCreator}
+	 * as IMPORT_FORMAT_*.
+	 * 
+	 * Returns {@link SequenceCreator#IMPORT_FORMAT_MIDI} by default.
+	 * Can be overridden by foreign format importers like ALDA, ABC, and so on.
+	 * 
+	 * @return the import format.
+	 */
+	protected int getImportFormat() {
+		return SequenceCreator.IMPORT_FORMAT_MIDI;
 	}
 	
 	/**
@@ -121,7 +123,7 @@ public class MidiParser extends SequenceParser {
 			throw new ParseException(Dict.get(Dict.ERROR_ONLY_PPQ_SUPPORTED));
 		int resolution = sequence.getResolution();
 		try {
-			SequenceCreator.reset(resolution, chosenCharset);
+			SequenceCreator.reset(resolution, chosenCharset, getImportFormat());
 			// init percussion channel comment
 			SequenceCreator.initChannel(9, 0, Dict.get(Dict.PERCUSSION_CHANNEL), SequenceCreator.NOW);
 		}

@@ -274,17 +274,6 @@ public class MidicaPLParser extends SequenceParser {
 	private boolean           condChainHit        = false; // if / elsif chain had a hit
 	
 	/**
-	 * Returns the absolute path of the successfully parsed MidicaPL file.
-	 * Returns **null**, if no file has been successfully parsed or the successfully parsed file
-	 * is not a MidicaPL file.
-	 * 
-	 * @return file path or **null**.
-	 */
-	public static String getFilePath() {
-		return getFilePath(FORMAT_MIDICAPL);
-	}
-	
-	/**
 	 * Indicates if the current parser object parses the file chosen by the user.  
 	 * Otherwise it parses an included file.
 	 */
@@ -551,7 +540,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// EOF has been reached
 		if (isRootParser) {
-			postprocessSequence(SequenceCreator.getSequence(), FORMAT_MIDICAPL, chosenCharset);
+			postprocessSequence(SequenceCreator.getSequence(), chosenCharset);
 		}
 	}
 	

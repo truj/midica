@@ -34,9 +34,6 @@ import org.midica.ui.model.ConfigComboboxModel;
  */
 public class MidiExporter extends Exporter {
 	
-	/** File type of the currently loaded MIDI sequence. */
-	private String sourceFileType = null;
-	
 	/** (default) charset used to read the currently loaded file (or its text-based messages) */
 	protected String sourceCharset = null;
 	
@@ -66,17 +63,8 @@ public class MidiExporter extends Exporter {
 		exportResult = new ExportResult(true);
 		
 		// charset-related initializations
-		// TODO: replace "mid" by a constant
-		// TODO: also care about the source charsets of other imported formats
-		// TODO: also care about the target charsets of derived formats
-		targetCharset  = ((ComboboxStringOption) ConfigComboboxModel.getModel(Config.CHARSET_EXPORT_MID).getSelectedItem()).getIdentifier();
-		sourceFileType = SequenceCreator.getFileType();
-		if ("mid".equals(sourceFileType)) {
-			sourceCharset = Config.get(Config.CHARSET_MID);
-		}
-		else {
-			sourceCharset = Config.get(Config.CHARSET_MPL);
-		}
+		targetCharset = getTargetCharset();
+		sourceCharset = SequenceCreator.getCharset();
 		
 		try {
 			
@@ -95,6 +83,18 @@ public class MidiExporter extends Exporter {
 		}
 		
 		return exportResult;
+	}
+	
+	/**
+	 * Determins and returns the target charset from the according charset combobox.
+	 * 
+	 * Can be overridden to return a charset from a different combobox or a hard-coded
+	 * value, depending on the format.
+	 * 
+	 * @return the target charset.
+	 */
+	protected String getTargetCharset() {
+		return ((ComboboxStringOption) ConfigComboboxModel.getModel(Config.CHARSET_EXPORT_MID).getSelectedItem()).getIdentifier();
 	}
 	
 	/**

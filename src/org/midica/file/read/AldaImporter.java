@@ -18,6 +18,7 @@ import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.Foreign;
 import org.midica.file.ForeignException;
+import org.midica.midi.SequenceCreator;
 
 /**
  * This class is used to import an ALDA file using the alda executable.
@@ -37,15 +38,9 @@ public class AldaImporter extends MidiParser {
 	// foreign program description for error messages
 	private static String programName = Dict.get(Dict.FOREIGN_PROG_ALDA);
 	
-	/**
-	 * Returns the absolute path of the successfully parsed ALDA file.
-	 * Returns **null**, if no file has been successfully parsed or the successfully parsed file
-	 * is not an ALDA file.
-	 * 
-	 * @return file path or **null**.
-	 */
-	public static String getFilePath() {
-		return getFilePath(FORMAT_ALDA);
+	@Override
+	protected int getImportFormat() {
+		return SequenceCreator.IMPORT_FORMAT_ALDA;
 	}
 	
 	/**
@@ -88,7 +83,7 @@ public class AldaImporter extends MidiParser {
 			
 			// transform and analyze the sequence
 			createSequence(sequence);
-			postprocessSequence(sequence, FORMAT_ALDA, chosenCharset); // analyze the original sequence
+			postprocessSequence(sequence, chosenCharset); // analyze the original sequence
 		}
 		catch (ForeignException | InvalidMidiDataException | IOException e) {
 			throw new ParseException(e.getMessage());

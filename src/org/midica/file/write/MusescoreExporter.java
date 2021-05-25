@@ -24,7 +24,7 @@ import org.midica.ui.file.ExportResult;
 
 /**
  * This class is used to export a file from MIDI to something else using MuseScore.
- * This works only if MuseScore is available.
+ * This works only if MuseScore is installed.
  * 
  * Steps:
  * 
@@ -52,11 +52,6 @@ public class MusescoreExporter extends MidiExporter {
 		// user doesn't want to overwrite the file?
 		if (! createFile(file))
 			return new ExportResult(false);
-		
-		// charset // TODO: optimize
-		String sourceFileType = SequenceCreator.getFileType();
-		sourceCharset = "mid".equals(sourceFileType) ? Config.get(Config.CHARSET_MID) : Config.get(Config.CHARSET_MPL);
-		targetCharset = sourceCharset;
 		
 		try {
 			// create temp midi file
@@ -123,5 +118,14 @@ public class MusescoreExporter extends MidiExporter {
 		catch (ForeignException | InvalidMidiDataException | IOException e) {
 			throw new ExportException(e.getMessage());
 		}
+	}
+	
+	@Override
+	protected String getTargetCharset() {
+		
+		// use the same charset for source and target
+		// TODO: check if other target charsets should be selectable or not
+		
+		return SequenceCreator.getCharset();
 	}
 }

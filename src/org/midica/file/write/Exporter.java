@@ -18,9 +18,14 @@ import org.midica.config.Dict;
 import org.midica.ui.file.ExportResult;
 
 /**
- * This class can be extended by exporter classes which write a music file based on a MIDI sequence.
+ * This class can be extended by exporter classes which write a music file
+ * based on a MIDI sequence.
  * 
- * Directly derived classes are {@link org.midica.file.write.MidiExporter} and {@link org.midica.file.write.Decompiler}.
+ * Directly derived classes are:
+ * 
+ * - {@link org.midica.file.write.MidiExporter}
+ * - {@link org.midica.file.write.Decompiler}
+ * - {@link org.midica.file.write.AudioExporter}
  * 
  * @author Jan Trukenmüller
  */

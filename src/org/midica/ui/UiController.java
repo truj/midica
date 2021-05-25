@@ -272,34 +272,29 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		}
 		else if (UiView.NAME_REMEMBER_IMPORT.equals(name)) {
 			rememberConfigKey = Config.REMEMBER_IMPORT;
+			path              = SequenceParser.getFilePath();
 			if (FileSelector.FILE_TYPE_MPL.equals(currentFileType)) {
 				pathConfigKey = Config.PATH_MIDICAPL;
-				path          = MidicaPLParser.getFilePath();
 				typeConfigVal = FileSelector.FILE_TYPE_MPL;
 			}
 			else if (FileSelector.FILE_TYPE_MIDI.equals(currentFileType)) {
 				pathConfigKey = Config.PATH_MIDI;
-				path          = MidiParser.getFilePath();
 				typeConfigVal = FileSelector.FILE_TYPE_MIDI;
 			}
 			else if (FileSelector.FILE_TYPE_ALDA.equals(currentFileType)) {
 				pathConfigKey = Config.PATH_ALDA;
-				path          = AldaImporter.getFilePath();
 				typeConfigVal = FileSelector.FILE_TYPE_ALDA;
 			}
 			else if (FileSelector.FILE_TYPE_ABC.equals(currentFileType)) {
 				pathConfigKey = Config.PATH_ABC;
-				path          = AbcImporter.getFilePath();
 				typeConfigVal = FileSelector.FILE_TYPE_ABC;
 			}
 			else if (FileSelector.FILE_TYPE_LY.equals(currentFileType)) {
 				pathConfigKey = Config.PATH_LY;
-				path          = LilypondImporter.getFilePath();
 				typeConfigVal = FileSelector.FILE_TYPE_LY;
 			}
 			else if (FileSelector.FILE_TYPE_MSCORE_IMP.equals(currentFileType)) {
 				pathConfigKey = Config.PATH_MSCORE;
-				path          = MusescoreImporter.getFilePath();
 				typeConfigVal = FileSelector.FILE_TYPE_MSCORE_IMP;
 			}
 		}

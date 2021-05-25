@@ -245,7 +245,7 @@ if ($must_create_javadoc && $javadoc_path) {
 	        . " -doclet $doclet_name"
 	        . " -d '$javadoc_path'"
 	        . " -sourcepath '$source_path'"
-	        . " -subpackages org.midica com.sun.karlhelgason"
+	        . " -subpackages org.midica:com.sun.kh"
 	        . " -overview '$overview_path'"
 	        . " -private"
 	        . " -encoding utf-8"

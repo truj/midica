@@ -18,6 +18,7 @@ import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.Foreign;
 import org.midica.file.ForeignException;
+import org.midica.midi.SequenceCreator;
 
 /**
  * This class is used to import a file using the MuseScore.
@@ -36,15 +37,9 @@ public class MusescoreImporter extends MidiParser {
 	// foreign program description for error messages
 	private static String programName = Dict.get(Dict.FOREIGN_PROG_MSCORE);
 	
-	/**
-	 * Returns the absolute path of the successfully parsed file.
-	 * Returns **null**, if no file has been successfully imported or the successfully imported file
-	 * has not been imported by MuseScore.
-	 * 
-	 * @return file path or **null**.
-	 */
-	public static String getFilePath() {
-		return getFilePath(FORMAT_MUSESCORE);
+	@Override
+	protected int getImportFormat() {
+		return SequenceCreator.IMPORT_FORMAT_ABC;
 	}
 	
 	/**
@@ -77,7 +72,7 @@ public class MusescoreImporter extends MidiParser {
 			
 			// transform and analyze the sequence
 			createSequence(sequence);
-			postprocessSequence(sequence, FORMAT_MUSESCORE, chosenCharset); // analyze the original sequence
+			postprocessSequence(sequence, chosenCharset); // analyze the original sequence
 		}
 		catch (ForeignException | InvalidMidiDataException | IOException e) {
 			throw new ParseException(e.getMessage());
