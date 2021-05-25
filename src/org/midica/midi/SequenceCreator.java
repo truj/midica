@@ -66,7 +66,7 @@ public class SequenceCreator {
 		resolution = DEFAULT_RESOLUTION;
 		
 		if (null == chosenCharset) {
-			chosenCharset = Config.get( Config.CHARSET_MPL );
+			chosenCharset = Config.get(Config.CHARSET_MPL);
 		}
 		
 		reset(resolution, chosenCharset);
@@ -83,7 +83,7 @@ public class SequenceCreator {
 	 * @throws InvalidMidiDataException    if {@link Sequence}.PPQ is not a valid division type.
 	 *                                     This should never happen.
 	 */
-	public static void reset( int res, String chosenCharset ) throws InvalidMidiDataException {
+	public static void reset(int res, String chosenCharset) throws InvalidMidiDataException {
 		
 		// create a new sequence
 		resolution       = res;
@@ -128,7 +128,7 @@ public class SequenceCreator {
 	 * @param value      The value to set.
 	 * @param isLSB      **false**: set the MSB; **true**: set the LSB
 	 */
-	public static void setBank( int channel, long tick, int value, boolean isLSB ) throws InvalidMidiDataException {
+	public static void setBank(int channel, long tick, int value, boolean isLSB) throws InvalidMidiDataException {
 		
 		// choose the right controller
 		int controller = 0x00;
@@ -136,13 +136,13 @@ public class SequenceCreator {
 			controller = 0x20;
 		
 		// make sure that the tick is not negative
-		if ( tick < 0 )
+		if (tick < 0)
 			tick = 0;
 		
 		// set bank MSB or LSB
 		ShortMessage msg = new ShortMessage();
-		msg.setMessage( ShortMessage.CONTROL_CHANGE, channel, controller, value );
-		tracks[ channel + NUM_META_TRACKS ].add( new MidiEvent(msg, tick) );
+		msg.setMessage(ShortMessage.CONTROL_CHANGE, channel, controller, value);
+		tracks[channel + NUM_META_TRACKS].add( new MidiEvent(msg, tick) );
 	}
 	
 	/**
@@ -161,18 +161,18 @@ public class SequenceCreator {
 	 *                    during initialization.
 	 * @throws InvalidMidiDataException if invalid MIDI data is used to create a MIDI message.
 	 */
-	public static void initChannel( int channel, int instrNum, String comment, long tick ) throws InvalidMidiDataException {
+	public static void initChannel(int channel, int instrNum, String comment, long tick) throws InvalidMidiDataException {
 		
 		// meta message: instrument name
 		MetaMessage metaMsg = new MetaMessage();
-		byte[] data = CharsetUtils.getBytesFromText( comment, charset );
-		metaMsg.setMessage( MidiListener.META_INSTRUMENT_NAME, data, data.length );
-		tracks[ channel + NUM_META_TRACKS ].add( new MidiEvent(metaMsg, tick) );
+		byte[] data = CharsetUtils.getBytesFromText(comment, charset);
+		metaMsg.setMessage(MidiListener.META_INSTRUMENT_NAME, data, data.length);
+		tracks[channel + NUM_META_TRACKS].add( new MidiEvent(metaMsg, tick) );
 		
 		// program change
 		ShortMessage msg = new ShortMessage();
-		msg.setMessage( ShortMessage.PROGRAM_CHANGE, channel, instrNum, 0 );
-		tracks[ channel + NUM_META_TRACKS ].add( new MidiEvent(msg, tick) );
+		msg.setMessage(ShortMessage.PROGRAM_CHANGE, channel, instrNum, 0);
+		tracks[channel + NUM_META_TRACKS].add( new MidiEvent(msg, tick) );
 	}
 	
 	/**
@@ -185,9 +185,9 @@ public class SequenceCreator {
 	 * @param velocity     Velocity of the key stroke.
 	 * @throws InvalidMidiDataException if invalid MIDI data is used to create a MIDI message.
 	 */
-	public static void addMessageKeystroke( int channel, int note, long startTick, long endTick, int velocity ) throws InvalidMidiDataException {
-		addMessageNoteON( channel, note, startTick, velocity );
-		addMessageNoteOFF( channel, note, endTick );
+	public static void addMessageKeystroke(int channel, int note, long startTick, long endTick, int velocity) throws InvalidMidiDataException {
+		addMessageNoteON(channel, note, startTick, velocity);
+		addMessageNoteOFF(channel, note, endTick);
 	}
 	
 	/**
@@ -278,10 +278,10 @@ public class SequenceCreator {
 		int cmd = MidiListener.META_SET_TEMPO;
 		
 		MetaMessage msg = new MetaMessage();
-		byte[] data = new byte[ 3 ];
-		data[ 0 ] = (byte) ( (mpq >> 16) & 0xFF );
-		data[ 1 ] = (byte) ( (mpq >>  8) & 0xFF );
-		data[ 2 ] = (byte) (  mpq        & 0xFF );
+		byte[] data = new byte[3];
+		data[0] = (byte) ((mpq >> 16) & 0xFF);
+		data[1] = (byte) ((mpq >>  8) & 0xFF);
+		data[2] = (byte) ( mpq        & 0xFF);
 		
 		msg.setMessage(cmd, data, data.length);
 		MidiEvent event = new MidiEvent(msg, tick);
@@ -310,7 +310,9 @@ public class SequenceCreator {
 		// get and check exponent
 		Integer exp = validDemominators.get(denominator);
 		if (null == exp) {
-			throw new InvalidMidiDataException( Dict.get(Dict.ERROR_INVALID_TIME_DENOM) + denominator);
+			throw new InvalidMidiDataException(
+				Dict.get(Dict.ERROR_INVALID_TIME_DENOM) + denominator
+			);
 		}
 		
 		MetaMessage msg = new MetaMessage();
@@ -403,8 +405,8 @@ public class SequenceCreator {
 	public static void addMessageCopyright(String copyright) throws InvalidMidiDataException {
 		MetaMessage metaMsg = new MetaMessage();
 		byte[] data = CharsetUtils.getBytesFromText(copyright, charset);
-		metaMsg.setMessage( MidiListener.META_COPYRIGHT, data, data.length );
-		tracks[ 0 ].add( new MidiEvent(metaMsg, 0) );
+		metaMsg.setMessage(MidiListener.META_COPYRIGHT, data, data.length);
+		tracks[0].add( new MidiEvent(metaMsg, 0) );
 	}
 	
 	/**
@@ -455,9 +457,9 @@ public class SequenceCreator {
 	 * @param channel    Channel number from 0 to 15.
 	 * @param tick       Tickstamp of the event.
 	 */
-	public static void addMessageGeneric( MidiMessage msg, int channel, long tick ) {
-		MidiEvent event = new MidiEvent( msg, tick );
-		tracks[ channel + NUM_META_TRACKS ].add( event );
+	public static void addMessageGeneric(MidiMessage msg, int channel, long tick) {
+		MidiEvent event = new MidiEvent(msg, tick);
+		tracks[channel + NUM_META_TRACKS].add(event);
 	}
 	
 	/**
@@ -470,9 +472,9 @@ public class SequenceCreator {
 	 * @param msg     Generic MIDI message.
 	 * @param tick    Tickstamp of the event.
 	 */
-	public static void addMessageGeneric( MidiMessage msg, long tick ) {
-		MidiEvent event = new MidiEvent( msg, tick );
-		tracks[ 0 ].add( event );
+	public static void addMessageGeneric(MidiMessage msg, long tick) {
+		MidiEvent event = new MidiEvent(msg, tick);
+		tracks[0].add(event);
 	}
 	
 	/**
@@ -487,9 +489,9 @@ public class SequenceCreator {
 	 * @param track  Track number.
 	 * @param tick   Tickstamp of the event.
 	 */
-	public static void addMessageToTrack( MidiMessage msg, int track, long tick ) {
-		MidiEvent event = new MidiEvent( msg, tick );
-		tracks[ track ].add( event );
+	public static void addMessageToTrack(MidiMessage msg, int track, long tick) {
+		MidiEvent event = new MidiEvent(msg, tick);
+		tracks[track].add(event);
 	}
 	
 	/**
@@ -514,9 +516,9 @@ public class SequenceCreator {
 	 *                 that change their activity (and/or other properties) at this tick.
 	 * @throws InvalidMidiDataException if one of the marker messages cannot be created.
 	 */
-	public static void addMarkers( TreeMap<Long, TreeSet<Byte>> markers ) throws InvalidMidiDataException {
+	public static void addMarkers(TreeMap<Long, TreeSet<Byte>> markers) throws InvalidMidiDataException {
 		
-		for ( Entry<Long, TreeSet<Byte>> eventData : markers.entrySet() ) {
+		for (Entry<Long, TreeSet<Byte>> eventData : markers.entrySet()) {
 			
 			// get general parameters for the event to be created
 			long          tick              = eventData.getKey();
@@ -524,20 +526,20 @@ public class SequenceCreator {
 			int           length            = bitmaskedChannels.size();
 			
 			// message part (all channels in the current tick's marker)
-			byte[] content = new byte[ length ];
+			byte[] content = new byte[length];
 			int i = 0;
-			for ( Object channelObj : bitmaskedChannels.toArray() ) {
+			for (Object channelObj : bitmaskedChannels.toArray()) {
 				byte bitmaskedChannel = (byte) channelObj;
 				byte channel          = (byte) (bitmaskedChannel & MidiListener.MARKER_BITMASK_CHANNEL);
-				content[ i ]          = bitmaskedChannel;
+				content[i]            = bitmaskedChannel;
 				i++;
 			}
 			
 			// create and add the event
 			MetaMessage metaMsg = new MetaMessage();
-			metaMsg.setMessage( MidiListener.META_MARKER, content, length );
-			MidiEvent event = new MidiEvent( metaMsg, tick );
-			tracks[ 0 ].add( event );
+			metaMsg.setMessage(MidiListener.META_MARKER, content, length);
+			MidiEvent event = new MidiEvent(metaMsg, tick);
+			tracks[0].add(event);
 		}
 	}
 }

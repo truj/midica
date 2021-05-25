@@ -632,7 +632,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 					if (FileSelector.FILE_TYPE_MPL.equals(currentFileType))
 						view.getImportedFileTypeLbl().setText(Dict.get(Dict.IMPORTED_TYPE_MPL));
 					else if (FileSelector.FILE_TYPE_MIDI.equals(currentFileType))
-						view.getImportedFileTypeLbl().setText(Dict.get(Dict.IMPORTED_TYPE_MPL));
+						view.getImportedFileTypeLbl().setText(Dict.get(Dict.IMPORTED_TYPE_MIDI));
 					else if (FileSelector.FILE_TYPE_ALDA.equals(currentFileType))
 						view.getImportedFileTypeLbl().setText(Dict.get(Dict.IMPORTED_TYPE_ALDA));
 					else if (FileSelector.FILE_TYPE_ABC.equals(currentFileType))
