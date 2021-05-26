@@ -102,17 +102,25 @@ public class AudioExporter extends Exporter {
 			if (! createFile(file))
 				return new ExportResult(false);
 			
-			// get loaded soundfont and sequence
-			Soundbank soundfont = MidiDevices.getSoundfont();
-			Sequence  seq       = MidiDevices.getSequence();
+			// get loaded soundfont, sequence and the gervill synthesizer
+			Soundbank       soundfont = MidiDevices.getSoundfont();
+			Sequence        seq       = MidiDevices.getSequence();
+			SoftSynthesizer synth     = new SoftSynthesizer();
 			
 			// load the soundfont in the right format, if not yet done
 			if (soundfont.getClass() != SF2Soundbank.class) {
 				File   sf2File = null;
 				String sf2Path = SoundfontParser.getFilePath();
-				if (sf2Path != null)
+				
+				// custom soundfont has been loaded?
+				if (sf2Path != null) {
 					sf2File = new File(sf2Path);
-				soundfont = new SF2Soundbank(sf2File);
+					soundfont = new SF2Soundbank(sf2File);
+				}
+				else {
+					// use default soundfont
+					soundfont = synth.getDefaultSoundbank();
+				}
 			}
 			
 			// create format
@@ -129,7 +137,6 @@ public class AudioExporter extends Exporter {
 			);
 			
 			// get audio stream
-			SoftSynthesizer  synth  = new SoftSynthesizer();
 			AudioInputStream stream = MidiToAudioRenderer.render(
 				soundfont, seq, format, synth
 			);
@@ -197,6 +204,31 @@ public class AudioExporter extends Exporter {
 			types.add(AudioFileFormat.Type.AIFC + " (*.aifc)");
 		
 		return types;
+	}
+	
+	/**
+	 * Returns a comma-separated list of all supported file extensions for
+	 * audio exports.
+	 * 
+	 * @return list of supported audio file extensions.
+	 */
+	public static String getSupportedFileExtensions() {
+		ArrayList<String> extensions = new ArrayList<>();
+		
+		if (AudioSystem.isFileTypeSupported(AudioFileFormat.Type.WAVE))
+			extensions.add(".wav");
+		if (AudioSystem.isFileTypeSupported(AudioFileFormat.Type.AU))
+			extensions.add(".au");
+		if (AudioSystem.isFileTypeSupported(AudioFileFormat.Type.SND))
+			extensions.add(".snd");
+		if (AudioSystem.isFileTypeSupported(AudioFileFormat.Type.AIFF)) {
+			extensions.add(".aif");
+			extensions.add(".aiff");
+		}
+		if (AudioSystem.isFileTypeSupported(AudioFileFormat.Type.AIFC))
+			extensions.add(".aifc");
+		
+		return String.join(", ", extensions);
 	}
 	
 	/**

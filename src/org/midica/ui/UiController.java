@@ -560,10 +560,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			}
 		}
 		catch (ExportException ex) {
-			if (Cli.isCliMode)
-				Cli.exportErrorMsg = ex.getErrorMessage();
-			else
-				showErrorMessage(ex.getErrorMessage());
+			showErrorMessage(ex.getErrorMessage());
 		}
 	}
 	

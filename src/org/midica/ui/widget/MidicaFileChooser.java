@@ -102,13 +102,22 @@ public class MidicaFileChooser extends JFileChooser {
 		this.parentWindow      = parent;
 		this.needCharsetSel    = charsetSel;
 		this.confKeyForeignExe = confKeyForeignExe;
-		this.needConfigIcon    = FileSelector.WRITE == purpose
-		                    && ! FileSelector.FILE_TYPE_MIDI.equals(type);
 		this.needForeignExe    = confKeyForeignExe != null;
-		this.needDirectImport  = FileSelector.WRITE == purpose && (
-		                              FileSelector.FILE_TYPE_MPL.equals(type)
-		                           || FileSelector.FILE_TYPE_ALDA.equals(type)
-		                         );
+		this.needConfigIcon    = false;
+		this.needDirectImport  = false;
+		if (FileSelector.WRITE == purpose) {
+			if (FileSelector.FILE_TYPE_MPL.equals(type)
+			  || FileSelector.FILE_TYPE_ALDA.equals(type)
+			  || FileSelector.FILE_TYPE_AUDIO.equals(type)) {
+				this.needConfigIcon = true;
+			}
+		}
+		if (FileSelector.WRITE == purpose) {
+			if (FileSelector.FILE_TYPE_MPL.equals(type)
+			  || FileSelector.FILE_TYPE_ALDA.equals(type)) {
+				this.needDirectImport = true;
+			}
+		}
 		
 		if (Laf.isNimbus)
 			changeButtonColors();
@@ -116,10 +125,12 @@ public class MidicaFileChooser extends JFileChooser {
 		// get type for the config icon
 		int configType = ConfigIcon.TYPE_NONE;
 		if (needConfigIcon) {
-			if (FileSelector.FILE_TYPE_AUDIO == type)
+			if (FileSelector.FILE_TYPE_MPL == type || FileSelector.FILE_TYPE_ALDA == type)
+				configType = ConfigIcon.TYPE_DECOMPILE;
+			else if (FileSelector.FILE_TYPE_AUDIO == type)
 				configType = ConfigIcon.TYPE_AUDIO;
 			else
-				configType = ConfigIcon.TYPE_DECOMPILE;
+				assert false;
 		}
 		
 		// insert the charset combobox and/or the config icon
@@ -442,7 +453,7 @@ public class MidicaFileChooser extends JFileChooser {
 		// copy the dimensions of the "file name" label
 		Dimension leftDimCorrected = leftElement.getPreferredSize();
 		leftDimCorrected.width += WIDTH_CORRECTION;
-		JLabel spacer = new JLabel("");
+		JLabel spacer = new JLabel(Dict.get(Dict.FILE_OPTIONS));
 		spacer.setPreferredSize(leftDimCorrected);
 		
 		// create the config area

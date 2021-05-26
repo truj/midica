@@ -76,12 +76,12 @@ public class MusescoreExporter extends MidiExporter {
 			
 			// create temp dir and temp file path
 			Path tempDir        = Foreign.createTempDirectory();
-			File tempTargetFile = Foreign.createTempFile("", tempDir);
-			String tempTargetPath = tempTargetFile.getAbsolutePath() + "." + extension;
+			File tempTargetFile = Foreign.createTempFile(extension, tempDir);
+			String tempTargetPath = tempTargetFile.getAbsolutePath();
 			
 			// convert from the MIDI tempfile to ABC
-			String[] midi2abc = {execPath, "-i", tempMidiFile.getAbsolutePath(), "-o", tempTargetPath};
-			Foreign.execute(midi2abc, programName, false);
+			String[] cmd = {execPath, "-i", tempMidiFile.getAbsolutePath(), "-o", tempTargetPath};
+			Foreign.execute(cmd, programName, false);
 			
 			// get all MIDI files, created by lilypond
 			File[] files = Foreign.getFiles(tempDir);

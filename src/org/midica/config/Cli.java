@@ -12,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.midica.file.read.SoundfontParser;
+import org.midica.file.write.AudioExporter;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.UiController;
 import org.midica.ui.file.FileSelector;
@@ -48,6 +49,10 @@ public class Cli {
 	private static String  exportPathMpl    = null;
 	private static String  exportPathMidi   = null;
 	private static String  exportPathAlda   = null;
+	private static String  exportPathAudio  = null;
+	private static String  exportPathAbc    = null;
+	private static String  exportPathLy     = null;
+	private static String  exportPathMscore = null;
 	
 	/**
 	 * This class is only used statically so a public constructor is not needed.
@@ -152,6 +157,21 @@ public class Cli {
 						exportPathAlda = path;
 						stdoutOk       = true;
 					}
+					else if ("export-audio".equals(option)) {
+						exportPathAudio = path;
+					}
+					else if ("export-abc".equals(option)) {
+						exportPathAbc = path;
+						stdoutOk      = true;
+					}
+					else if ("export-ly".equals(option)) {
+						exportPathLy = path;
+						stdoutOk     = true;
+					}
+					else if ("export-mscore".equals(option)) {
+						exportPathMscore = path;
+						stdoutOk         = true;
+					}
 					else {
 						help(false, "Unknown export format: --" + option);
 					}
@@ -225,7 +245,7 @@ public class Cli {
 		msg.append("--import-alda=PATH    : Import from the specified ALDA file by calling the\n");
 		msg.append("                        alda program. (ALDA needs to be installed.)\n");
 		msg.append("--import-abc=PATH     : Import from the specified ABC file by calling\n");
-		msg.append("                        midi2abc. (abcMIDI needs to be installed.)\n");
+		msg.append("                        abc2midi. (abcMIDI needs to be installed.)\n");
 		msg.append("--import-ly=PATH      : Import from the specified LilyPond file by calling\n");
 		msg.append("                        lilypond. (LilyPond needs to be installed.)\n");
 		msg.append("--import-mscore=PATH  : Import from the specified file using MuseScore\n");
@@ -233,6 +253,15 @@ public class Cli {
 		msg.append("--export-midi=PATH    : Export to the specified MIDI file.\n");
 		msg.append("--export=PATH         : Export to the specified MidicaPL file. (*)\n");
 		msg.append("--export-alda=PATH    : Export to the specified ALDA file. (*)\n");
+		msg.append("--export-audio=PATH   : Export to the specified audio file.\n");
+		msg.append("                        (Supported file Extensions: "
+			+ AudioExporter.getSupportedFileExtensions() + ")\n");
+		msg.append("--export-abc=PATH     : Export to the specified ABC file by calling\n");
+		msg.append("                        midi2abc. (abcMIDI needs to be installed.)\n");
+		msg.append("--export-ly=PATH      : Export to the specified Lilypond file by calling\n");
+		msg.append("                        midi2ly. (Lilypond needs to be installed.)\n");
+		msg.append("--export-mscore=PATH  : Export to the specified file using MuseScore.\n");
+		msg.append("                        (MuseScore needs to be installed.)\n");
 		msg.append("\n");
 		msg.append("(*) A file is exported to STDOUT if the export PATH is a dash (-).\n");
 		msg.append("    E.g. --export=-");
@@ -333,6 +362,22 @@ public class Cli {
 			exportPath     = exportPathAlda;
 			exportType     = FileSelector.FILE_TYPE_ALDA;
 			exportToStdout = "-".equals(exportPath);
+		}
+		else if (exportPathAudio != null) {
+			exportPath = exportPathAudio;
+			exportType = FileSelector.FILE_TYPE_AUDIO;
+		}
+		else if (exportPathAbc != null) {
+			exportPath = exportPathAbc;
+			exportType = FileSelector.FILE_TYPE_ABC;
+		}
+		else if (exportPathLy != null) {
+			exportPath = exportPathLy;
+			exportType = FileSelector.FILE_TYPE_LY;
+		}
+		else if (exportPathMscore != null) {
+			exportPath = exportPathMscore;
+			exportType = FileSelector.FILE_TYPE_MSCORE_EXP;
 		}
 		else {
 			exportPath = null;

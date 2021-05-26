@@ -108,6 +108,10 @@ public class MidiExporter extends Exporter {
 	 */
 	protected Sequence cloneSequence() throws InvalidMidiDataException {
 		
+		// needed for derived classes
+		targetCharset = getTargetCharset();
+		sourceCharset = SequenceCreator.getCharset();
+		
 		Sequence oldSeq = MidiDevices.getSequence();
 		Sequence newSeq = new Sequence(oldSeq.getDivisionType(), oldSeq.getResolution());
 		

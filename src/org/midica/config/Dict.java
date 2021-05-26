@@ -829,6 +829,7 @@ public class Dict {
 	public static final String FOREIGN_PROG_MIDI2LY        = "foreign_prog_midi2ly";
 	public static final String FOREIGN_PROG_MSCORE         = "foreign_prog_mscore";
 	public static final String DIRECT_IMPORT               = "direct_import";
+	public static final String FILE_OPTIONS                = "file_options";
 	
 	// Foreign
 	public static final String FOREIGN_CREATE_TMPDIR       = "foreign_create_tmpdir";
@@ -2283,6 +2284,7 @@ public class Dict {
 		set( FOREIGN_PROG_MIDI2LY,     "midi2ly"                                              );
 		set( FOREIGN_PROG_MSCORE,      "MuseScore"                                            );
 		set( DIRECT_IMPORT,            "Directly import the exported file"                    );
+		set( FILE_OPTIONS,             "Options:"                                             );
 		
 		// Foreign
 		set( FOREIGN_CREATE_TMPDIR,  "Failed to create temporary directory. Error Message: "  );
