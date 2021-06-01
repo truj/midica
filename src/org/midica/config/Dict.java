@@ -1685,6 +1685,7 @@ public class Dict {
 	// MusescoreExporter
 	public static final String ERROR_MSCORE_NO_OUTPUT_FILE      = "error_mscore_no_output_file";
 	public static final String ERROR_MSCORE_MOVE_FAILED         = "error_mscore_move_failed";
+	public static final String ERROR_MSCORE_EXT_NOT_ALLOWED     = "error_mscore_ext_not_allowed";
 	
 	// WaitView
 	public static final String TITLE_WAIT                       = "title_wait";
@@ -3279,6 +3280,7 @@ public class Dict {
 		// MusescoreExporter
 		set( ERROR_MSCORE_NO_OUTPUT_FILE,         "<html>MuseScore didn't create any file."                           );
 		set( ERROR_MSCORE_MOVE_FAILED,            "Failed to move temporary file '%s' to '%s'"                        );
+		set( ERROR_MSCORE_EXT_NOT_ALLOWED,        "File Extension not support: '%s'"                                  );
 		
 		// WaitView
 		set( TITLE_WAIT,                          "Please Wait"                                                       );

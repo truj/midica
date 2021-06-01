@@ -21,6 +21,8 @@ import org.midica.file.Foreign;
 import org.midica.file.ForeignException;
 import org.midica.midi.SequenceCreator;
 import org.midica.ui.file.ExportResult;
+import org.midica.ui.file.FileExtensionFilter;
+import org.midica.ui.file.FileSelector;
 
 /**
  * This class is used to export a file from MIDI to something else using MuseScore.
@@ -41,6 +43,20 @@ public class MusescoreExporter extends MidiExporter {
 	private static String programName = Dict.get(Dict.FOREIGN_PROG_MSCORE);
 	
 	/**
+	 * {@inheritDoc}
+	 * 
+	 * For Musescore exports, RP-026 tags shall be avoided.
+	 * Musescore doesn't understand the meaning anyway and would
+	 * show them as text instead.
+	 * 
+	 * @return **false**.
+	 */
+	@Override
+	protected boolean mustIncludeRp026Tags() {
+		return false;
+	}
+	
+	/**
 	 * Exports a file.
 	 * 
 	 * @param file    file to be exported
@@ -49,11 +65,35 @@ public class MusescoreExporter extends MidiExporter {
 	 */
 	public ExportResult export(File file) throws ExportException {
 		
-		// user doesn't want to overwrite the file?
-		if (! createFile(file))
-			return new ExportResult(false);
-		
 		try {
+			// get target file prefix and extension
+			String prefix    = null;
+			String extension = null;
+			int extIndex = file.getName().lastIndexOf('.');
+			if (extIndex > 0) {
+				prefix    = file.getName().substring(0, extIndex);
+				extension = file.getName().substring(extIndex + 1);
+			}
+			
+			// check extension
+			FileExtensionFilter filter = new FileExtensionFilter(FileSelector.FILE_TYPE_MSCORE_EXP);
+			if (! filter.accept(file)) {
+				throw new ExportException(String.format(
+					Dict.get(Dict.ERROR_MSCORE_EXT_NOT_ALLOWED),
+					extension
+				));
+			}
+			
+			// user doesn't want to overwrite the file?
+			if (! createFile(file))
+				return new ExportResult(false);
+			
+			// Delete the file, if it exists (or has just been created).
+			// Needed for multi-file exports, e.g. svg, when we get something like:
+			// test-1.svg, test-2.svg, test-3.svg.
+			// Than we don't want to create an empty test.svg additionally.
+			file.delete();
+			
 			// create temp midi file
 			File tempMidiFile = Foreign.createTempMidiFile();
 			
@@ -65,19 +105,11 @@ public class MusescoreExporter extends MidiExporter {
 			// create the convert command
 			String execPath = Config.get(Config.EXEC_PATH_EXP_MSCORE);
 			
-			// get target file extension
-			String extension = null;
-			int extIndex = file.getName().lastIndexOf('.');
-			if (extIndex > 0) {
-				extension = file.getName().substring(extIndex + 1);
-			}
-			
-			// TODO: check extension
-			
 			// create temp dir and temp file path
-			Path tempDir        = Foreign.createTempDirectory();
-			File tempTargetFile = Foreign.createTempFile(extension, tempDir);
-			String tempTargetPath = tempTargetFile.getAbsolutePath();
+			Path   tempDir        = Foreign.createTempDirectory();
+			String tempTargetPath = new File(
+				tempDir + File.separator + prefix + "." + extension
+			).getAbsolutePath();
 			
 			// convert from the MIDI tempfile to ABC
 			String[] cmd = {execPath, "-i", tempMidiFile.getAbsolutePath(), "-o", tempTargetPath};

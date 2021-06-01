@@ -103,7 +103,6 @@ public class FileExtensionFilter extends FileFilter {
 			allowedExtensions.add("pdf");
 			allowedExtensions.add("png");
 			allowedExtensions.add("svg");
-			allowedExtensions.add("wav");
 			allowedExtensions.add("flac");
 			allowedExtensions.add("ogg");
 			allowedExtensions.add("mp3");

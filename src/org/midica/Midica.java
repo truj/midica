@@ -26,17 +26,17 @@ public class Midica {
 	private static final int VERSION_MAJOR = 1;
 	
 	/** Middle version number. This has to be incremented manually. */
-	private static final int VERSION_MIDDLE = 3;
+	private static final int VERSION_MIDDLE = 4;
 	
 	/**
 	 * Minor version number. This is intended to be incremented automatically by precommit.pl.
 	 * After switching to a new major version, this has to be set to "-1" manually, so that
 	 * precommit.pl starts with "0" again.
 	 */
-	private static final int VERSION_MINOR = 2;
+	private static final int VERSION_MINOR = -1;
 	
 	/** UNIX timestamp of the last commit */
-	public static final int COMMIT_TIME = 1622052548;
+	public static final int COMMIT_TIME = 1622579750;
 	
 	/** Branch name. Automatically changed by precommit.pl */
 	public static final String BRANCH = "export-formats";

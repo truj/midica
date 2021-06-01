@@ -61,6 +61,10 @@ If you prefer to write your music in ALDA or ABC, you need to:
     - As MIDI files
     - As MidicaPL files (experimental)
     - As ALDA files (experimental)
+    - As Audio files (wav, au, snd, aiff, aifc)
+    - As ABC files (if [midi2abc](https://ifdo.ca/~seymour/runabc/top.html) is installed)
+    - As Lilypond files (if [midi2ly](https://lilypond.org/) is installed)
+    - As PDF, PNG, SVG, FLAC, OGG, MP3, MXL, MusicXML or MSCX (if [MuseScore](https://musescore.org/) is installed)
 - **Integrated MIDI player** featuring:
     - Regulation of volume, tempo and pitch transposition
     - Memorizing a position in the MIDI sequence and jumping back to that position
@@ -74,11 +78,12 @@ If you prefer to write your music in ALDA or ABC, you need to:
     - displaying syllables in italic, shortly before they must be sung
 - **Converter**
     - converts various formats to MIDI (MidicaPL, ALDA, ABC, LilyPond, MusicXML, MuseScore, Guitar Pro, Capella, Bagpipe, Overture, Score Writer, PowerTab)
-    - converts MIDI to various formats (MidicaPL, ALDA)
+    - converts MIDI to various formats (MidicaPL, ALDA, Audio, ABC, Lilypond, MuseScore, MusicXML and others)
 - **Soundfonts**
     - Loading Soundfonts and using them for playback
     - Analyzing Soundfont contents
     - Test Soundfonts with the Soundcheck window
+    - Using the loaded soundfont for Audio exports
 - **Configuration** of
     - GUI language (currently English or German)
     - Note System - (6 different systems), e.g. International (C,D,E,F,G,A,B), German (C,D,E,F,G,A,H), Italian (Do,Re,Mi,Fa,Sol,La,Si)
@@ -331,7 +336,7 @@ ARGUMENTS:
 --import-alda=PATH    : Import from the specified ALDA file by calling the
                         alda program. (ALDA needs to be installed.)
 --import-abc=PATH     : Import from the specified ABC file by calling
-                        midi2abc. (abcMIDI needs to be installed.)
+                        abc2midi. (abcMIDI needs to be installed.)
 --import-ly=PATH      : Import from the specified LilyPond file by calling
                         lilypond. (LilyPond needs to be installed.)
 --import-mscore=PATH  : Import from the specified file using MuseScore
@@ -339,6 +344,14 @@ ARGUMENTS:
 --export-midi=PATH    : Export to the specified MIDI file.
 --export=PATH         : Export to the specified MidicaPL file. (*)
 --export-alda=PATH    : Export to the specified ALDA file. (*)
+--export-audio=PATH   : Export to the specified audio file.
+                        (Supported file Extensions: .wav, .au, .aif, .aiff)
+--export-abc=PATH     : Export to the specified ABC file by calling
+                        midi2abc. (abcMIDI needs to be installed.)
+--export-ly=PATH      : Export to the specified Lilypond file by calling
+                        midi2ly. (Lilypond needs to be installed.)
+--export-mscore=PATH  : Export to the specified file using MuseScore.
+                        (MuseScore needs to be installed.)
 
 (*) A file is exported to STDOUT if the export PATH is a dash (-).
     E.g. --export=-

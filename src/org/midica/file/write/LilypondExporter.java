@@ -39,6 +39,20 @@ public class LilypondExporter extends MidiExporter {
 	private static String programName = Dict.get(Dict.FOREIGN_PROG_MIDI2LY);
 	
 	/**
+	 * {@inheritDoc}
+	 * 
+	 * For Lilypond exports, RP-026 tags shall be avoided.
+	 * Lilypond doesn't understand the meaning anyway and would
+	 * show them as text instead.
+	 * 
+	 * @return **false**.
+	 */
+	@Override
+	protected boolean mustIncludeRp026Tags() {
+		return false;
+	}
+	
+	/**
 	 * Exports an LilyPond file.
 	 * 
 	 * @param file  LilyPond file to be exported.

@@ -122,11 +122,13 @@ public class MidiExporter extends Exporter {
 			Track newTrack = newSeq.createTrack();
 			
 			// add a charset event
-			if (0 == trackNum) {
-				String csChange = "{@" + targetCharset + "}";
-				byte[] data     = CharsetUtils.getBytesFromText(csChange, "US-ASCII");
-				MetaMessage msg = new MetaMessage(MidiListener.META_LYRICS, data, data.length);
-				newTrack.add(new MidiEvent(msg, 0));
+			if (mustIncludeRp026Tags()) {
+				if (0 == trackNum) {
+					String csChange = "{@" + targetCharset + "}";
+					byte[] data     = CharsetUtils.getBytesFromText(csChange, "US-ASCII");
+					MetaMessage msg = new MetaMessage(MidiListener.META_LYRICS, data, data.length);
+					newTrack.add(new MidiEvent(msg, 0));
+				}
 			}
 			
 			EVENT:
@@ -149,9 +151,15 @@ public class MidiExporter extends Exporter {
 					// convert charset of text-based messages
 					else if (type >= 0x01 && type <= 0x0F) {
 						String text = CharsetUtils.getTextFromBytes(data, sourceCharset, fileCharset);
-						event       = convertCharset(event, text, fileCharset, type, event.getTick(), trackNum);
 						
-						// charset switch detected in the sequence?
+						// remove meta info, if needed
+						if (MidiListener.META_LYRICS == type && ! mustIncludeRp026Tags()) {
+							if (0 == trackNum && 0 == event.getTick() && text.startsWith("{#"))
+								continue EVENT;
+						}
+						
+						// handle charset switches in the sequence
+						event = convertCharset(event, text, fileCharset, type, event.getTick(), trackNum);
 						if (MidiListener.META_TEXT == type || MidiListener.META_LYRICS == type) {
 							String newCharset = CharsetUtils.findCharsetSwitch(text);
 							if (newCharset != null) {
@@ -176,6 +184,18 @@ public class MidiExporter extends Exporter {
 		}
 		
 		return newSeq;
+	}
+	
+	/**
+	 * Determins if RP-026 tags (charset switch or meta info) shall be included into
+	 * the exported MIDI file or not.
+	 * 
+	 * Returns **true** per default but can be overridden by a derived class.
+	 * 
+	 * @return **true** to indicate that RP-026 tags should be used.
+	 */
+	protected boolean mustIncludeRp026Tags() {
+		return true;
 	}
 	
 	/**
