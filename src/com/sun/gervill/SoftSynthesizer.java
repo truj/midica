@@ -714,6 +714,14 @@ public final class SoftSynthesizer implements AudioSynthesizer,
                         	SF2SoundbankReader reader = new SF2SoundbankReader();
                         	sbk = reader.getSoundbank(is);
                         }
+                        else if ("com.sun.media.sound.DLSSoundbank".equals(sbk.getClass().getCanonicalName())) {
+                        	// DLS: not yet implemented
+                        	continue;
+                        }
+                        else {
+                        	// JARSoundbank or something else: not yet implemented
+                        	continue;
+                        }
                     } finally {
                         is.close();
                     }
