@@ -1,12 +1,12 @@
 /*
- * Copyright 2007 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2007, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 package com.sun.gervill;
 
@@ -51,7 +51,7 @@ import javax.sound.sampled.AudioFormat.Encoding;
  *
  * @author Karl Helgason
  */
-public class DLSSoundbank implements Soundbank {
+public final class DLSSoundbank implements Soundbank {
 
     static private class DLSID {
         long i1;
@@ -69,7 +69,7 @@ public class DLSSoundbank implements Soundbank {
         private DLSID() {
         }
 
-        public DLSID(long i1, int s1, int s2, int x1, int x2, int x3, int x4,
+        DLSID(long i1, int s1, int s2, int x1, int x2, int x3, int x4,
                 int x5, int x6, int x7, int x8) {
             this.i1 = i1;
             this.s1 = s1;
@@ -103,7 +103,7 @@ public class DLSSoundbank implements Soundbank {
         public int hashCode() {
             return (int)i1;
         }
-                
+
         public boolean equals(Object obj) {
             if (!(obj instanceof DLSID)) {
                 return false;
@@ -174,10 +174,10 @@ public class DLSSoundbank implements Soundbank {
     private long major = -1;
     private long minor = -1;
 
-    private DLSInfo info = new DLSInfo();
+    private final DLSInfo info = new DLSInfo();
 
-    private List<DLSInstrument> instruments = new ArrayList<DLSInstrument>();
-    private List<DLSSample> samples = new ArrayList<DLSSample>();
+    private final List<DLSInstrument> instruments = new ArrayList<DLSInstrument>();
+    private final List<DLSSample> samples = new ArrayList<DLSSample>();
 
     private boolean largeFormat = false;
     private File sampleFile;
@@ -548,7 +548,7 @@ public class DLSSoundbank implements Soundbank {
         long count = riff.readUnsignedInt();
 
         if (size - 8 != 0)
-            riff.skipBytes(size - 8);
+            riff.skip(size - 8);
 
         for (int i = 0; i < count; i++) {
             DLSModulator modulator = new DLSModulator();
@@ -568,7 +568,7 @@ public class DLSSoundbank implements Soundbank {
         long count = riff.readUnsignedInt();
 
         if (size - 8 != 0)
-            riff.skipBytes(size - 8);
+            riff.skip(size - 8);
 
         for (int i = 0; i < count; i++) {
             DLSModulator modulator = new DLSModulator();
@@ -661,7 +661,7 @@ public class DLSSoundbank implements Soundbank {
         long loops = riff.readInt();
 
         if (size > 20)
-            riff.skipBytes(size - 20);
+            riff.skip(size - 20);
 
         for (int i = 0; i < loops; i++) {
             DLSSampleLoop loop = new DLSSampleLoop();
@@ -671,7 +671,7 @@ public class DLSSoundbank implements Soundbank {
             loop.length = riff.readUnsignedInt();
             sampleOptions.loops.add(loop);
             if (size2 > 16)
-                riff.skipBytes(size2 - 16);
+                riff.skip(size2 - 16);
         }
     }
 
@@ -781,7 +781,7 @@ public class DLSSoundbank implements Soundbank {
                     }
                     if (sampleformat == 3) {
                         audioformat = new AudioFormat(
-                                AudioFloatConverter.PCM_FLOAT, samplerate, bits,
+                                Encoding.PCM_FLOAT, samplerate, bits,
                                 channels, framesize, samplerate, false);
                     }
 
@@ -965,7 +965,7 @@ public class DLSSoundbank implements Soundbank {
             sampleformat = 1;
         else if (audioformat.getEncoding().equals(Encoding.PCM_SIGNED))
             sampleformat = 1;
-        else if (audioformat.getEncoding().equals(AudioFloatConverter.PCM_FLOAT))
+        else if (audioformat.getEncoding().equals(Encoding.PCM_FLOAT))
             sampleformat = 3;
 
         fmt_chunk.writeUnsignedShort(sampleformat);

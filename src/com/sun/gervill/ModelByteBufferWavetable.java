@@ -1,12 +1,12 @@
 /*
- * Copyright 2007 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2007, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 package com.sun.gervill;
 
@@ -36,18 +36,18 @@ import javax.sound.sampled.AudioFormat.Encoding;
  *
  * @author Karl Helgason
  */
-public class ModelByteBufferWavetable implements ModelWavetable {
+public final class ModelByteBufferWavetable implements ModelWavetable {
 
     private class Buffer8PlusInputStream extends InputStream {
 
-        private boolean bigendian;
-        private int framesize_pc;
+        private final boolean bigendian;
+        private final int framesize_pc;
         int pos = 0;
         int pos2 = 0;
         int markpos = 0;
         int markpos2 = 0;
 
-        public Buffer8PlusInputStream() {
+        Buffer8PlusInputStream() {
             framesize_pc = format.getFrameSize() / format.getChannels();
             bigendian = format.isBigEndian();
         }
@@ -127,7 +127,7 @@ public class ModelByteBufferWavetable implements ModelWavetable {
 
     private float loopStart = -1;
     private float loopLength = -1;
-    private ModelByteBuffer buffer;
+    private final ModelByteBuffer buffer;
     private ModelByteBuffer buffer8 = null;
     private AudioFormat format = null;
     private float pitchcorrection = 0;
@@ -205,7 +205,8 @@ public class ModelByteBufferWavetable implements ModelWavetable {
         }
         if (buffer.array() == null) {
             return AudioFloatInputStream.getInputStream(new AudioInputStream(
-                    buffer.getInputStream(), format, buffer.capacity()));
+                    buffer.getInputStream(), format,
+                    buffer.capacity() / format.getFrameSize()));
         }
         if (buffer8 != null) {
             if (format.getEncoding().equals(Encoding.PCM_SIGNED)

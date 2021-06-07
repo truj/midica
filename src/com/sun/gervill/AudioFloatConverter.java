@@ -1,12 +1,12 @@
 /*
- * Copyright 2007 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2007, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 package com.sun.gervill;
 
@@ -35,25 +35,23 @@ import javax.sound.sampled.AudioFormat.Encoding;
 /**
  * This class is used to convert between 8,16,24,32,32+ bit signed/unsigned
  * big/litle endian fixed/floating point byte buffers and float buffers.
- * 
+ *
  * @author Karl Helgason
  */
 public abstract class AudioFloatConverter {
 
-    public static final Encoding PCM_FLOAT = new Encoding("PCM_FLOAT");
-
     /***************************************************************************
-     * 
+     *
      * LSB Filter, used filter least significant byte in samples arrays.
-     * 
+     *
      * Is used filter out data in lsb byte when SampleSizeInBits is not
      * dividable by 8.
-     * 
+     *
      **************************************************************************/
 
     private static class AudioFloatLSBFilter extends AudioFloatConverter {
 
-        private AudioFloatConverter converter;
+        private final AudioFloatConverter converter;
 
         final private int offset;
 
@@ -63,8 +61,7 @@ public abstract class AudioFloatConverter {
 
         private byte[] mask_buffer;
 
-        public AudioFloatLSBFilter(AudioFloatConverter converter,
-                AudioFormat format) {
+        AudioFloatLSBFilter(AudioFloatConverter converter, AudioFormat format) {
             int bits = format.getSampleSizeInBits();
             boolean bigEndian = format.isBigEndian();
             this.converter = converter;
@@ -121,9 +118,9 @@ public abstract class AudioFloatConverter {
     }
 
     /***************************************************************************
-     * 
+     *
      * 64 bit float, little/big-endian
-     * 
+     *
      **************************************************************************/
 
     // PCM 64 bit float, little-endian
@@ -231,9 +228,9 @@ public abstract class AudioFloatConverter {
     }
 
     /***************************************************************************
-     * 
+     *
      * 32 bit float, little/big-endian
-     * 
+     *
      **************************************************************************/
 
     // PCM 32 bit float, little-endian
@@ -311,9 +308,9 @@ public abstract class AudioFloatConverter {
     }
 
     /***************************************************************************
-     * 
+     *
      * 8 bit signed/unsigned
-     * 
+     *
      **************************************************************************/
 
     // PCM 8 bit, signed
@@ -360,9 +357,9 @@ public abstract class AudioFloatConverter {
     }
 
     /***************************************************************************
-     * 
+     *
      * 16 bit signed/unsigned, little/big-endian
-     * 
+     *
      **************************************************************************/
 
     // PCM 16 bit, signed, little-endian
@@ -372,7 +369,7 @@ public abstract class AudioFloatConverter {
             int ix = in_offset;
             int len = out_offset + out_len;
             for (int ox = out_offset; ox < len; ox++) {
-                out_buff[ox] = ((short) ((in_buff[ix++] & 0xFF) | 
+                out_buff[ox] = ((short) ((in_buff[ix++] & 0xFF) |
                            (in_buff[ix++] << 8))) * (1.0f / 32767.0f);
             }
 
@@ -399,7 +396,7 @@ public abstract class AudioFloatConverter {
             int ix = in_offset;
             int ox = out_offset;
             for (int i = 0; i < out_len; i++) {
-                out_buff[ox++] = ((short) ((in_buff[ix++] << 8) | 
+                out_buff[ox++] = ((short) ((in_buff[ix++] << 8) |
                         (in_buff[ix++] & 0xFF))) * (1.0f / 32767.0f);
             }
             return out_buff;
@@ -471,9 +468,9 @@ public abstract class AudioFloatConverter {
     }
 
     /***************************************************************************
-     * 
+     *
      * 24 bit signed/unsigned, little/big-endian
-     * 
+     *
      **************************************************************************/
 
     // PCM 24 bit, signed, little-endian
@@ -601,9 +598,9 @@ public abstract class AudioFloatConverter {
     }
 
     /***************************************************************************
-     * 
+     *
      * 32 bit signed/unsigned, little/big-endian
-     * 
+     *
      **************************************************************************/
 
     // PCM 32 bit, signed, little-endian
@@ -674,7 +671,7 @@ public abstract class AudioFloatConverter {
             int ox = out_offset;
             for (int i = 0; i < out_len; i++) {
                 int x = (in_buff[ix++] & 0xFF) | ((in_buff[ix++] & 0xFF) << 8) |
-                        ((in_buff[ix++] & 0xFF) << 16) | 
+                        ((in_buff[ix++] & 0xFF) << 16) |
                         ((in_buff[ix++] & 0xFF) << 24);
                 x -= 0x7FFFFFFF;
                 out_buff[ox++] = x * (1.0f / (float)0x7FFFFFFF);
@@ -732,9 +729,9 @@ public abstract class AudioFloatConverter {
     }
 
     /***************************************************************************
-     * 
+     *
      * 32+ bit signed/unsigned, little/big-endian
-     * 
+     *
      **************************************************************************/
 
     // PCM 32+ bit, signed, little-endian
@@ -742,7 +739,7 @@ public abstract class AudioFloatConverter {
 
         final int xbytes;
 
-        public AudioFloatConversion32xSL(int xbytes) {
+        AudioFloatConversion32xSL(int xbytes) {
             this.xbytes = xbytes;
         }
 
@@ -783,7 +780,7 @@ public abstract class AudioFloatConverter {
 
         final int xbytes;
 
-        public AudioFloatConversion32xSB(int xbytes) {
+        AudioFloatConversion32xSB(int xbytes) {
             this.xbytes = xbytes;
         }
 
@@ -825,7 +822,7 @@ public abstract class AudioFloatConverter {
 
         final int xbytes;
 
-        public AudioFloatConversion32xUL(int xbytes) {
+        AudioFloatConversion32xUL(int xbytes) {
             this.xbytes = xbytes;
         }
 
@@ -868,7 +865,7 @@ public abstract class AudioFloatConverter {
 
         final int xbytes;
 
-        public AudioFloatConversion32xUB(int xbytes) {
+        AudioFloatConversion32xUB(int xbytes) {
             this.xbytes = xbytes;
         }
 
@@ -910,7 +907,7 @@ public abstract class AudioFloatConverter {
         AudioFloatConverter conv = null;
         if (format.getFrameSize() == 0)
             return null;
-        if (format.getFrameSize() != 
+        if (format.getFrameSize() !=
                 ((format.getSampleSizeInBits() + 7) / 8) * format.getChannels()) {
             return null;
         }
@@ -930,7 +927,7 @@ public abstract class AudioFloatConverter {
                 } else if (format.getSampleSizeInBits() > 32) {
                     conv = new AudioFloatConversion32xSB(((format
                             .getSampleSizeInBits() + 7) / 8) - 4);
-                } 
+                }
             } else {
                 if (format.getSampleSizeInBits() <= 8) {
                     conv = new AudioFloatConversion8S();
@@ -982,23 +979,23 @@ public abstract class AudioFloatConverter {
                             format.getSampleSizeInBits() + 7) / 8) - 4);
                 }
             }
-        } else if (format.getEncoding().equals(PCM_FLOAT)) {
+        } else if (format.getEncoding().equals(Encoding.PCM_FLOAT)) {
             if (format.getSampleSizeInBits() == 32) {
                 if (format.isBigEndian())
                     conv = new AudioFloatConversion32B();
                 else
                     conv = new AudioFloatConversion32L();
             } else if (format.getSampleSizeInBits() == 64) {
-                if (format.isBigEndian()) 
+                if (format.isBigEndian())
                     conv = new AudioFloatConversion64B();
-                else 
-                    conv = new AudioFloatConversion64L();                
+                else
+                    conv = new AudioFloatConversion64L();
             }
 
         }
 
-        if ((format.getEncoding().equals(Encoding.PCM_SIGNED) || 
-                format.getEncoding().equals(Encoding.PCM_UNSIGNED)) && 
+        if ((format.getEncoding().equals(Encoding.PCM_SIGNED) ||
+                format.getEncoding().equals(Encoding.PCM_UNSIGNED)) &&
                 (format.getSampleSizeInBits() % 8 != 0)) {
             conv = new AudioFloatLSBFilter(conv, format);
         }
@@ -1010,49 +1007,51 @@ public abstract class AudioFloatConverter {
 
     private AudioFormat format;
 
-    public AudioFormat getFormat() {
+    public final AudioFormat getFormat() {
         return format;
     }
 
     public abstract float[] toFloatArray(byte[] in_buff, int in_offset,
             float[] out_buff, int out_offset, int out_len);
 
-    public float[] toFloatArray(byte[] in_buff, float[] out_buff,
+    public final float[] toFloatArray(byte[] in_buff, float[] out_buff,
             int out_offset, int out_len) {
         return toFloatArray(in_buff, 0, out_buff, out_offset, out_len);
     }
 
-    public float[] toFloatArray(byte[] in_buff, int in_offset,
+    public final float[] toFloatArray(byte[] in_buff, int in_offset,
             float[] out_buff, int out_len) {
         return toFloatArray(in_buff, in_offset, out_buff, 0, out_len);
     }
 
-    public float[] toFloatArray(byte[] in_buff, float[] out_buff, int out_len) {
+    public final float[] toFloatArray(byte[] in_buff, float[] out_buff,
+                                      int out_len) {
         return toFloatArray(in_buff, 0, out_buff, 0, out_len);
     }
 
-    public float[] toFloatArray(byte[] in_buff, float[] out_buff) {
+    public final float[] toFloatArray(byte[] in_buff, float[] out_buff) {
         return toFloatArray(in_buff, 0, out_buff, 0, out_buff.length);
     }
 
     public abstract byte[] toByteArray(float[] in_buff, int in_offset,
             int in_len, byte[] out_buff, int out_offset);
 
-    public byte[] toByteArray(float[] in_buff, int in_len, byte[] out_buff,
-            int out_offset) {
+    public final byte[] toByteArray(float[] in_buff, int in_len,
+                                    byte[] out_buff, int out_offset) {
         return toByteArray(in_buff, 0, in_len, out_buff, out_offset);
     }
 
-    public byte[] toByteArray(float[] in_buff, int in_offset, int in_len,
-            byte[] out_buff) {
+    public final byte[] toByteArray(float[] in_buff, int in_offset, int in_len,
+                                    byte[] out_buff) {
         return toByteArray(in_buff, in_offset, in_len, out_buff, 0);
     }
 
-    public byte[] toByteArray(float[] in_buff, int in_len, byte[] out_buff) {
+    public final byte[] toByteArray(float[] in_buff, int in_len,
+                                    byte[] out_buff) {
         return toByteArray(in_buff, 0, in_len, out_buff, 0);
     }
 
-    public byte[] toByteArray(float[] in_buff, byte[] out_buff) {
+    public final byte[] toByteArray(float[] in_buff, byte[] out_buff) {
         return toByteArray(in_buff, 0, in_buff.length, out_buff, 0);
     }
 }

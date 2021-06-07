@@ -1,12 +1,12 @@
 /*
- * Copyright 2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 package com.sun.gervill;
 
@@ -39,22 +39,22 @@ import javax.sound.sampled.spi.FormatConversionProvider;
  * This class is used to convert between 8,16,24,32 bit signed/unsigned
  * big/litle endian fixed/floating stereo/mono/multi-channel audio streams and
  * perform sample-rate conversion if needed.
- * 
+ *
  * @author Karl Helgason
  */
-public class AudioFloatFormatConverter extends FormatConversionProvider {
+public final class AudioFloatFormatConverter extends FormatConversionProvider {
 
     private static class AudioFloatFormatConverterInputStream extends
             InputStream {
-        private AudioFloatConverter converter;
+        private final AudioFloatConverter converter;
 
-        private AudioFloatInputStream stream;
+        private final AudioFloatInputStream stream;
 
         private float[] readfloatbuffer;
 
-        private int fsize = 0;
+        private final int fsize;
 
-        public AudioFloatFormatConverterInputStream(AudioFormat targetFormat,
+        AudioFloatFormatConverterInputStream(AudioFormat targetFormat,
                 AudioFloatInputStream stream) {
             this.stream = stream;
             converter = AudioFloatConverter.getConverter(targetFormat);
@@ -116,17 +116,17 @@ public class AudioFloatFormatConverter extends FormatConversionProvider {
     private static class AudioFloatInputStreamChannelMixer extends
             AudioFloatInputStream {
 
-        private int targetChannels;
+        private final int targetChannels;
 
-        private int sourceChannels;
+        private final int sourceChannels;
 
-        private AudioFloatInputStream ais;
+        private final AudioFloatInputStream ais;
 
-        private AudioFormat targetFormat;
+        private final AudioFormat targetFormat;
 
         private float[] conversion_buffer;
 
-        public AudioFloatInputStreamChannelMixer(AudioFloatInputStream ais,
+        AudioFloatInputStreamChannelMixer(AudioFloatInputStream ais,
                 int targetChannels) {
             this.sourceChannels = ais.getFormat().getChannels();
             this.targetChannels = targetChannels;
@@ -175,7 +175,6 @@ public class AudioFloatFormatConverter extends FormatConversionProvider {
                 for (int c = 0; c < targetChannels; c++) {
                     for (int i = 0, ix = off + c; i < len2; i++, ix += cs) {
                         b[ix] = conversion_buffer[i];
-                        ;
                     }
                 }
             } else if (targetChannels == 1) {
@@ -186,7 +185,6 @@ public class AudioFloatFormatConverter extends FormatConversionProvider {
                 for (int c = 1; c < sourceChannels; c++) {
                     for (int i = c, ix = off; i < len2; i += cs, ix++) {
                         b[ix] += conversion_buffer[i];
-                        ;
                     }
                 }
                 float vol = 1f / ((float) sourceChannels);
@@ -228,37 +226,37 @@ public class AudioFloatFormatConverter extends FormatConversionProvider {
     private static class AudioFloatInputStreamResampler extends
             AudioFloatInputStream {
 
-        private AudioFloatInputStream ais;
+        private final AudioFloatInputStream ais;
 
-        private AudioFormat targetFormat;
+        private final AudioFormat targetFormat;
 
         private float[] skipbuffer;
 
         private SoftAbstractResampler resampler;
 
-        private float[] pitch = new float[1];
+        private final float[] pitch = new float[1];
 
-        private float[] ibuffer2;
+        private final float[] ibuffer2;
 
-        private float[][] ibuffer;
+        private final float[][] ibuffer;
 
         private float ibuffer_index = 0;
 
         private int ibuffer_len = 0;
 
-        private int nrofchannels = 0;
+        private final int nrofchannels;
 
         private float[][] cbuffer;
 
-        private int buffer_len = 512;
+        private final int buffer_len = 512;
 
-        private int pad;
+        private final int pad;
 
-        private int pad2;
+        private final int pad2;
 
-        private float[] ix = new float[1];
+        private final float[] ix = new float[1];
 
-        private int[] ox = new int[1];
+        private final int[] ox = new int[1];
 
         private float[][] mark_ibuffer = null;
 
@@ -266,7 +264,7 @@ public class AudioFloatFormatConverter extends FormatConversionProvider {
 
         private int mark_ibuffer_len = 0;
 
-        public AudioFloatInputStreamResampler(AudioFloatInputStream ais,
+        AudioFloatInputStreamResampler(AudioFloatInputStream ais,
                 AudioFormat format) {
             this.ais = ais;
             AudioFormat sourceFormat = ais.getFormat();
@@ -390,6 +388,7 @@ public class AudioFloatFormatConverter extends FormatConversionProvider {
                 return -1;
             if (len < 0)
                 return 0;
+            int offlen = off + len;
             int remain = len / nrofchannels;
             int destPos = 0;
             int in_end = ibuffer_len;
@@ -423,7 +422,7 @@ public class AudioFloatFormatConverter extends FormatConversionProvider {
             for (int c = 0; c < nrofchannels; c++) {
                 int ix = 0;
                 float[] buff = cbuffer[c];
-                for (int i = c; i < b.length; i += nrofchannels) {
+                for (int i = c + off; i < offlen; i += nrofchannels) {
                     b[i] = buff[ix++];
                 }
             }
@@ -447,7 +446,7 @@ public class AudioFloatFormatConverter extends FormatConversionProvider {
         }
 
         public long skip(long len) throws IOException {
-            if (len > 0)
+            if (len < 0)
                 return 0;
             if (skipbuffer == null)
                 skipbuffer = new float[1024 * targetFormat.getFrameSize()];
@@ -469,8 +468,9 @@ public class AudioFloatFormatConverter extends FormatConversionProvider {
 
     }
 
-    private Encoding[] formats = { Encoding.PCM_SIGNED, Encoding.PCM_UNSIGNED,
-            AudioFloatConverter.PCM_FLOAT };
+    private final Encoding[] formats = {Encoding.PCM_SIGNED,
+                                        Encoding.PCM_UNSIGNED,
+                                        Encoding.PCM_FLOAT};
 
     public AudioInputStream getAudioInputStream(Encoding targetEncoding,
             AudioInputStream sourceStream) {
@@ -482,7 +482,7 @@ public class AudioFloatFormatConverter extends FormatConversionProvider {
         float samplerate = format.getSampleRate();
         int bits = format.getSampleSizeInBits();
         boolean bigendian = format.isBigEndian();
-        if (targetEncoding.equals(AudioFloatConverter.PCM_FLOAT))
+        if (targetEncoding.equals(Encoding.PCM_FLOAT))
             bits = 32;
         AudioFormat targetFormat = new AudioFormat(encoding, samplerate, bits,
                 channels, channels * bits / 8, samplerate, bigendian);
@@ -521,19 +521,19 @@ public class AudioFloatFormatConverter extends FormatConversionProvider {
 
     public Encoding[] getSourceEncodings() {
         return new Encoding[] { Encoding.PCM_SIGNED, Encoding.PCM_UNSIGNED,
-                AudioFloatConverter.PCM_FLOAT };
+                Encoding.PCM_FLOAT };
     }
 
     public Encoding[] getTargetEncodings() {
         return new Encoding[] { Encoding.PCM_SIGNED, Encoding.PCM_UNSIGNED,
-                AudioFloatConverter.PCM_FLOAT };
+                Encoding.PCM_FLOAT };
     }
 
     public Encoding[] getTargetEncodings(AudioFormat sourceFormat) {
         if (AudioFloatConverter.getConverter(sourceFormat) == null)
             return new Encoding[0];
         return new Encoding[] { Encoding.PCM_SIGNED, Encoding.PCM_UNSIGNED,
-                AudioFloatConverter.PCM_FLOAT };
+                Encoding.PCM_FLOAT };
     }
 
     public AudioFormat[] getTargetFormats(Encoding targetEncoding,
@@ -572,17 +572,17 @@ public class AudioFloatFormatConverter extends FormatConversionProvider {
             }
         }
 
-        if (targetEncoding.equals(AudioFloatConverter.PCM_FLOAT)) {
-            formats.add(new AudioFormat(AudioFloatConverter.PCM_FLOAT,
+        if (targetEncoding.equals(Encoding.PCM_FLOAT)) {
+            formats.add(new AudioFormat(Encoding.PCM_FLOAT,
                     AudioSystem.NOT_SPECIFIED, 32, channels, channels * 4,
                     AudioSystem.NOT_SPECIFIED, false));
-            formats.add(new AudioFormat(AudioFloatConverter.PCM_FLOAT,
+            formats.add(new AudioFormat(Encoding.PCM_FLOAT,
                     AudioSystem.NOT_SPECIFIED, 32, channels, channels * 4,
                     AudioSystem.NOT_SPECIFIED, true));
-            formats.add(new AudioFormat(AudioFloatConverter.PCM_FLOAT,
+            formats.add(new AudioFormat(Encoding.PCM_FLOAT,
                     AudioSystem.NOT_SPECIFIED, 64, channels, channels * 8,
                     AudioSystem.NOT_SPECIFIED, false));
-            formats.add(new AudioFormat(AudioFloatConverter.PCM_FLOAT,
+            formats.add(new AudioFormat(Encoding.PCM_FLOAT,
                     AudioSystem.NOT_SPECIFIED, 64, channels, channels * 8,
                     AudioSystem.NOT_SPECIFIED, true));
         }

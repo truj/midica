@@ -1,12 +1,12 @@
 /*
- * Copyright 2007 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2007, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 package com.sun.gervill;
 
@@ -50,40 +50,40 @@ import javax.sound.midi.SoundbankResource;
  *
  * @author Karl Helgason
  */
-public class SF2Soundbank implements Soundbank {
+public final class SF2Soundbank implements Soundbank {
 
     // version of the Sound Font RIFF file
-    protected int major = 2;
-    protected int minor = 1;
+    int major = 2;
+    int minor = 1;
     // target Sound Engine
-    protected String targetEngine = "EMU8000";
+    String targetEngine = "EMU8000";
     // Sound Font Bank Name
-    protected String name = "untitled";
+    String name = "untitled";
     // Sound ROM Name
-    protected String romName = null;
+    String romName = null;
     // Sound ROM Version
-    protected int romVersionMajor = -1;
-    protected int romVersionMinor = -1;
+    int romVersionMajor = -1;
+    int romVersionMinor = -1;
     // Date of Creation of the Bank
-    protected String creationDate = null;
+    String creationDate = null;
     // Sound Designers and Engineers for the Bank
-    protected String engineers = null;
+    String engineers = null;
     // Product for which the Bank was intended
-    protected String product = null;
+    String product = null;
     // Copyright message
-    protected String copyright = null;
+    String copyright = null;
     // Comments
-    protected String comments = null;
+    String comments = null;
     // The SoundFont tools used to create and alter the bank
-    protected String tools = null;
+    String tools = null;
     // The Sample Data loaded from the SoundFont
     private ModelByteBuffer sampleData = null;
     private ModelByteBuffer sampleData24 = null;
     private File sampleFile = null;
     private boolean largeFormat = false;
-    private List<SF2Instrument> instruments = new ArrayList<SF2Instrument>();
-    private List<SF2Layer> layers = new ArrayList<SF2Layer>();
-    private List<SF2Sample> samples = new ArrayList<SF2Sample>();
+    private final List<SF2Instrument> instruments = new ArrayList<SF2Instrument>();
+    private final List<SF2Layer> layers = new ArrayList<SF2Layer>();
+    private final List<SF2Sample> samples = new ArrayList<SF2Sample>();
 
     public SF2Soundbank() {
     }
@@ -276,6 +276,9 @@ public class SF2Soundbank implements Soundbank {
                     count--;
                 }
 
+                if (presets_bagNdx.isEmpty()) {
+                    throw new RIFFInvalidDataException();
+                }
                 int offset = presets_bagNdx.get(0);
                 // Offset should be 0 (but just case)
                 for (int i = 0; i < offset; i++) {
@@ -360,6 +363,9 @@ public class SF2Soundbank implements Soundbank {
                     count--;
                 }
 
+                if (instruments_bagNdx.isEmpty()) {
+                    throw new RIFFInvalidDataException();
+                }
                 int offset = instruments_bagNdx.get(0);
                 // Offset should be 0 (but just case)
                 for (int i = 0; i < offset; i++) {
@@ -401,6 +407,9 @@ public class SF2Soundbank implements Soundbank {
                     modulator.amount = chunk.readShort();
                     modulator.amountSourceOperator = chunk.readUnsignedShort();
                     modulator.transportOperator = chunk.readUnsignedShort();
+                    if (i < 0 || i >= instruments_splits_gen.size()) {
+                        throw new RIFFInvalidDataException();
+                    }
                     SF2LayerRegion split = instruments_splits_gen.get(i);
                     if (split != null)
                         split.modulators.add(modulator);
@@ -424,7 +433,8 @@ public class SF2Soundbank implements Soundbank {
                     sample.name = chunk.readString(20);
                     long start = chunk.readUnsignedInt();
                     long end = chunk.readUnsignedInt();
-                    sample.data = sampleData.subbuffer(start * 2, end * 2, true);
+                    if (sampleData != null)
+                        sample.data = sampleData.subbuffer(start * 2, end * 2, true);
                     if (sampleData24 != null)
                         sample.data24 = sampleData24.subbuffer(start, end, true);
                     /*
@@ -462,6 +472,9 @@ public class SF2Soundbank implements Soundbank {
                     int sampleid = split.generators.get(
                             SF2LayerRegion.GENERATOR_SAMPLEID);
                     split.generators.remove(SF2LayerRegion.GENERATOR_SAMPLEID);
+                    if (sampleid < 0 || sampleid >= samples.size()) {
+                        throw new RIFFInvalidDataException();
+                    }
                     split.sample = samples.get(sampleid);
                 } else {
                     globalsplit = split;
@@ -488,6 +501,9 @@ public class SF2Soundbank implements Soundbank {
                     int instrumentid = split.generators.get(
                             SF2InstrumentRegion.GENERATOR_INSTRUMENT);
                     split.generators.remove(SF2LayerRegion.GENERATOR_INSTRUMENT);
+                    if (instrumentid < 0 || instrumentid >= layers.size()) {
+                        throw new RIFFInvalidDataException();
+                    }
                     split.layer = layers.get(instrumentid);
                 } else {
                     globalsplit = split;

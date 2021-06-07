@@ -1,12 +1,12 @@
 /*
- * Copyright 2008 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2008, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 package com.sun.gervill;
 
@@ -45,30 +45,30 @@ import javax.sound.sampled.Control.Type;
 
 /**
  * Software audio mixer
- * 
+ *
  * @author Karl Helgason
  */
-public class SoftMixingMixer implements Mixer {
+public final class SoftMixingMixer implements Mixer {
 
     private static class Info extends Mixer.Info {
-        public Info() {
+        Info() {
             super(INFO_NAME, INFO_VENDOR, INFO_DESCRIPTION, INFO_VERSION);
         }
     }
 
-    protected static final String INFO_NAME = "Gervill Sound Mixer";
+    static final String INFO_NAME = "Gervill Sound Mixer";
 
-    protected static final String INFO_VENDOR = "OpenJDK Proposal";
+    static final String INFO_VENDOR = "OpenJDK Proposal";
 
-    protected static final String INFO_DESCRIPTION = "Software Sound Mixer";
+    static final String INFO_DESCRIPTION = "Software Sound Mixer";
 
-    protected static final String INFO_VERSION = "1.0";
+    static final String INFO_VERSION = "1.0";
 
-    protected final static Mixer.Info info = new Info();
+    static final Mixer.Info info = new Info();
 
-    protected Object control_mutex = this;
+    final Object control_mutex = this;
 
-    protected boolean implicitOpen = false;
+    boolean implicitOpen = false;
 
     private boolean open = false;
 
@@ -82,15 +82,15 @@ public class SoftMixingMixer implements Mixer {
 
     private AudioInputStream pusher_stream = null;
 
-    private float controlrate = 147f;
+    private final float controlrate = 147f;
 
-    private long latency = 100000; // 100 msec
+    private final long latency = 100000; // 100 msec
 
-    private boolean jitter_correction = false;
+    private final boolean jitter_correction = false;
 
-    private List<LineListener> listeners = new ArrayList<LineListener>();
+    private final List<LineListener> listeners = new ArrayList<LineListener>();
 
-    private javax.sound.sampled.Line.Info[] sourceLineInfo;
+    private final javax.sound.sampled.Line.Info[] sourceLineInfo;
 
     public SoftMixingMixer() {
 
@@ -118,16 +118,16 @@ public class SoftMixingMixer implements Mixer {
                         AudioSystem.NOT_SPECIFIED, bits, channels, channels
                                 * bits / 8, AudioSystem.NOT_SPECIFIED, true));
             }
-            formats.add(new AudioFormat(AudioFloatConverter.PCM_FLOAT,
+            formats.add(new AudioFormat(Encoding.PCM_FLOAT,
                     AudioSystem.NOT_SPECIFIED, 32, channels, channels * 4,
                     AudioSystem.NOT_SPECIFIED, false));
-            formats.add(new AudioFormat(AudioFloatConverter.PCM_FLOAT,
+            formats.add(new AudioFormat(Encoding.PCM_FLOAT,
                     AudioSystem.NOT_SPECIFIED, 32, channels, channels * 4,
                     AudioSystem.NOT_SPECIFIED, true));
-            formats.add(new AudioFormat(AudioFloatConverter.PCM_FLOAT,
+            formats.add(new AudioFormat(Encoding.PCM_FLOAT,
                     AudioSystem.NOT_SPECIFIED, 64, channels, channels * 8,
                     AudioSystem.NOT_SPECIFIED, false));
-            formats.add(new AudioFormat(AudioFloatConverter.PCM_FLOAT,
+            formats.add(new AudioFormat(Encoding.PCM_FLOAT,
                     AudioSystem.NOT_SPECIFIED, 64, channels, channels * 8,
                     AudioSystem.NOT_SPECIFIED, true));
         }
@@ -364,10 +364,10 @@ public class SoftMixingMixer implements Mixer {
                         if (defaultmixer != null)
                         {
                             // Search for suitable line
-                            
+
                             DataLine.Info idealinfo = null;
                             AudioFormat idealformat = null;
-                            
+
                             Line.Info[] lineinfos = defaultmixer.getSourceLineInfo();
                             idealFound:
                             for (int i = 0; i < lineinfos.length; i++) {
@@ -377,39 +377,39 @@ public class SoftMixingMixer implements Mixer {
                                     AudioFormat[] formats = info.getFormats();
                                     for (int j = 0; j < formats.length; j++) {
                                         AudioFormat format = formats[j];
-                                        if(format.getChannels() == 2 || 
+                                        if(format.getChannels() == 2 ||
                                                 format.getChannels() == AudioSystem.NOT_SPECIFIED)
-                                        if(format.getEncoding().equals(Encoding.PCM_SIGNED) || 
+                                        if(format.getEncoding().equals(Encoding.PCM_SIGNED) ||
                                                 format.getEncoding().equals(Encoding.PCM_UNSIGNED))
-                                        if(format.getSampleRate() == AudioSystem.NOT_SPECIFIED || 
+                                        if(format.getSampleRate() == AudioSystem.NOT_SPECIFIED ||
                                                 format.getSampleRate() == 48000.0)
-                                        if(format.getSampleSizeInBits() == AudioSystem.NOT_SPECIFIED || 
+                                        if(format.getSampleSizeInBits() == AudioSystem.NOT_SPECIFIED ||
                                                 format.getSampleSizeInBits() == 16)
                                         {
                                             idealinfo = info;
                                             int ideal_channels = format.getChannels();
-                                            boolean ideal_signed = format.getEncoding().equals(Encoding.PCM_SIGNED); 
+                                            boolean ideal_signed = format.getEncoding().equals(Encoding.PCM_SIGNED);
                                             float ideal_rate = format.getSampleRate();
-                                            boolean ideal_endian = format.isBigEndian();                                            
-                                            int ideal_bits = format.getSampleSizeInBits();                                            
+                                            boolean ideal_endian = format.isBigEndian();
+                                            int ideal_bits = format.getSampleSizeInBits();
                                             if(ideal_bits == AudioSystem.NOT_SPECIFIED) ideal_bits = 16;
                                             if(ideal_channels == AudioSystem.NOT_SPECIFIED) ideal_channels = 2;
                                             if(ideal_rate == AudioSystem.NOT_SPECIFIED) ideal_rate = 48000;
-                                            idealformat = new AudioFormat(ideal_rate, ideal_bits, 
+                                            idealformat = new AudioFormat(ideal_rate, ideal_bits,
                                                     ideal_channels, ideal_signed, ideal_endian);
                                             break idealFound;
                                         }
                                     }
-                                }                                    
+                                }
                             }
-                            
+
                             if(idealformat != null)
                             {
                                 format = idealformat;
                                 line = (SourceDataLine) defaultmixer.getLine(idealinfo);
                             }
                         }
-                        
+
                         if(line == null)
                             line = AudioSystem.getSourceDataLine(format);
                     } finally {
@@ -516,11 +516,11 @@ public class SoftMixingMixer implements Mixer {
         }
     }
 
-    protected float getControlRate() {
+    float getControlRate() {
         return controlrate;
     }
 
-    protected SoftMixingMainMixer getMainMixer() {
+    SoftMixingMainMixer getMainMixer() {
         if (!isOpen())
             return null;
         return mainmixer;

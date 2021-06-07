@@ -1,12 +1,12 @@
 /*
- * Copyright 2007 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2007, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 package com.sun.gervill;
 
@@ -34,13 +34,13 @@ import javax.sound.sampled.SourceDataLine;
  *
  * @author Karl Helgason
  */
-public class SoftAudioPusher implements Runnable {
+public final class SoftAudioPusher implements Runnable {
 
     private volatile boolean active = false;
     private SourceDataLine sourceDataLine = null;
     private Thread audiothread;
-    private AudioInputStream ais;
-    private byte[] buffer;
+    private final AudioInputStream ais;
+    private final byte[] buffer;
 
     public SoftAudioPusher(SourceDataLine sourceDataLine, AudioInputStream ais,
             int workbuffersizer) {
@@ -54,6 +54,7 @@ public class SoftAudioPusher implements Runnable {
             return;
         active = true;
         audiothread = new Thread(this);
+        audiothread.setDaemon(true);
         audiothread.setPriority(Thread.MAX_PRIORITY);
         audiothread.start();
     }

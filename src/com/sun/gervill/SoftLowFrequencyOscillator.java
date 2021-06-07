@@ -1,12 +1,12 @@
 /*
- * Copyright 2007 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2007, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 package com.sun.gervill;
 
@@ -29,21 +29,28 @@ package com.sun.gervill;
  *
  * @author Karl Helgason
  */
-public class SoftLowFrequencyOscillator implements SoftProcess {
+public final class SoftLowFrequencyOscillator implements SoftProcess {
 
-    private int max_count = 10;
+    private final int max_count = 10;
     private int used_count = 0;
-    private double[][] out = new double[max_count][1];
-    private double[][] delay = new double[max_count][1];
-    private double[][] delay2 = new double[max_count][1];
-    private double[][] freq = new double[max_count][1];
-    private int[] delay_counter = new int[max_count];
-    private double[] sin_phase = new double[max_count];
-    private double[] sin_stepfreq = new double[max_count];
-    private double[] sin_step = new double[max_count];
+    private final double[][] out = new double[max_count][1];
+    private final double[][] delay = new double[max_count][1];
+    private final double[][] delay2 = new double[max_count][1];
+    private final double[][] freq = new double[max_count][1];
+    private final int[] delay_counter = new int[max_count];
+    private final double[] sin_phase = new double[max_count];
+    private final double[] sin_stepfreq = new double[max_count];
+    private final double[] sin_step = new double[max_count];
     private double control_time = 0;
     private double sin_factor = 0;
-    private static double PI2 = 2.0 * Math.PI;
+    private static final double PI2 = 2.0 * Math.PI;
+
+    public SoftLowFrequencyOscillator() {
+        // If sin_step is 0 then sin_stepfreq must be -INF
+        for (int i = 0; i < sin_stepfreq.length; i++) {
+            sin_stepfreq[i] = Double.NEGATIVE_INFINITY;
+        }
+    }
 
     public void reset() {
         for (int i = 0; i < used_count; i++) {
@@ -53,7 +60,8 @@ public class SoftLowFrequencyOscillator implements SoftProcess {
             freq[i][0] = 0;
             delay_counter[i] = 0;
             sin_phase[i] = 0;
-            sin_stepfreq[i] = 0;
+            // If sin_step is 0 then sin_stepfreq must be -INF
+            sin_stepfreq[i] = Double.NEGATIVE_INFINITY;
             sin_step[i] = 0;
         }
         used_count = 0;

@@ -1,12 +1,12 @@
 /*
- * Copyright 2007 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2007, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 package com.sun.gervill;
 
@@ -36,14 +36,16 @@ import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.Soundbank;
 import javax.sound.midi.spi.SoundbankReader;
 
+import sun.reflect.misc.ReflectUtil;
+
 /**
- * JarSoundbankReader is used to read sounbank object from jar files.
+ * JarSoundbankReader is used to read soundbank object from jar files.
  *
  * @author Karl Helgason
  */
-public class JARSoundbankReader extends SoundbankReader {
+public final class JARSoundbankReader extends SoundbankReader {
 
-    public boolean isZIP(URL url) {
+    private static boolean isZIP(URL url) {
         boolean ok = false;
         try {
             InputStream stream = url.openStream();
@@ -81,14 +83,14 @@ public class JARSoundbankReader extends SoundbankReader {
             while (line != null) {
                 if (!line.startsWith("#")) {
                     try {
-                        Class c = Class.forName(line.trim(), true, ucl);
-                        Object o = c.newInstance();
-                        if (o instanceof Soundbank) {
+                        Class<?> c = Class.forName(line.trim(), false, ucl);
+                        if (Soundbank.class.isAssignableFrom(c)) {
+                            Object o = ReflectUtil.newInstance(c);
                             soundbanks.add((Soundbank) o);
                         }
-                    } catch (ClassNotFoundException  e) {
-                    } catch (InstantiationException  e) {
-                    } catch (IllegalAccessException  e) {
+                    } catch (ClassNotFoundException ignored) {
+                    } catch (InstantiationException ignored) {
+                    } catch (IllegalAccessException ignored) {
                     }
                 }
                 line = r.readLine();

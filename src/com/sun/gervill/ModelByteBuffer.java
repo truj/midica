@@ -1,12 +1,12 @@
 /*
- * Copyright 2007 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2007, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 package com.sun.gervill;
 
@@ -38,23 +38,23 @@ import java.util.Collection;
  *
  * @author Karl Helgason
  */
-public class ModelByteBuffer {
+public final class ModelByteBuffer {
 
     private ModelByteBuffer root = this;
     private File file;
     private long fileoffset;
     private byte[] buffer;
     private long offset;
-    private long len;
+    private final long len;
 
     private class RandomFileInputStream extends InputStream {
 
-        private RandomAccessFile raf;
+        private final RandomAccessFile raf;
         private long left;
         private long mark = 0;
         private long markleft = 0;
 
-        public RandomFileInputStream() throws IOException {
+        RandomFileInputStream() throws IOException {
             raf = new RandomAccessFile(root.file, "r");
             raf.seek(root.fileoffset + arrayOffset());
             left = capacity();
@@ -85,11 +85,12 @@ public class ModelByteBuffer {
         }
 
         public long skip(long n) throws IOException {
+            if( n < 0)
+                return 0;
             if (n > left)
                 n = left;
-            n = super.skip(n);
-            if (n == -1)
-                return -1;
+            long p = raf.getFilePointer();
+            raf.seek(p + n);
             left -= n;
             return n;
         }
@@ -107,11 +108,12 @@ public class ModelByteBuffer {
         }
 
         public int read(byte[] b) throws IOException {
+            int len = b.length;
             if (len > left)
                 len = (int)left;
             if (left == 0)
                 return -1;
-            int len = raf.read(b);
+            len = raf.read(b, 0, len);
             if (len == -1)
                 return -1;
             left -= len;
@@ -119,12 +121,12 @@ public class ModelByteBuffer {
         }
 
         public int read() throws IOException {
-            if (len == 0)
+            if (left == 0)
                 return -1;
             int b = raf.read();
             if (b == -1)
                 return -1;
-            len--;
+            left--;
             return b;
         }
 
@@ -137,15 +139,15 @@ public class ModelByteBuffer {
             long beginIndex, long endIndex, boolean independent) {
         this.root = parent.root;
         this.offset = 0;
-        this.len = parent.len;
+        long parent_len = parent.len;
         if (beginIndex < 0)
             beginIndex = 0;
-        if (beginIndex > len)
-            beginIndex = len;
+        if (beginIndex > parent_len)
+            beginIndex = parent_len;
         if (endIndex < 0)
             endIndex = 0;
-        if (endIndex > len)
-            endIndex = len;
+        if (endIndex > parent_len)
+            endIndex = parent_len;
         if (beginIndex > endIndex)
             beginIndex = endIndex;
         offset = beginIndex;

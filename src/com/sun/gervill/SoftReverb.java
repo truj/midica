@@ -1,12 +1,12 @@
 /*
- * Copyright 2007 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2007, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 package com.sun.gervill;
 
@@ -33,14 +33,14 @@ import java.util.Arrays;
  *
  * @author Karl Helgason
  */
-public class SoftReverb implements SoftAudioProcessor {
+public final class SoftReverb implements SoftAudioProcessor {
 
-    private static class Delay {
+    private final static class Delay {
 
         private float[] delaybuffer;
         private int rovepos = 0;
 
-        public Delay() {
+        Delay() {
             delaybuffer = null;
         }
 
@@ -52,35 +52,32 @@ public class SoftReverb implements SoftAudioProcessor {
             rovepos = 0;
         }
 
-        public void processReplace(float[] in, float[] out) {
-            float[] delaybuffer = this.delaybuffer;
+        public void processReplace(float[] inout) {
             if (delaybuffer == null)
                 return;
-            int len = in.length;
+            int len = inout.length;
             int rnlen = delaybuffer.length;
             int rovepos = this.rovepos;
 
             for (int i = 0; i < len; i++) {
-                float x = in[i];
-                out[i] = delaybuffer[rovepos];
+                float x = inout[i];
+                inout[i] = delaybuffer[rovepos];
                 delaybuffer[rovepos] = x;
-                rovepos = rovepos + 1;
-                if (rovepos == rnlen)
+                if (++rovepos == rnlen)
                     rovepos = 0;
-                //rovepos = (rovepos + 1) % rnlen;
             }
             this.rovepos = rovepos;
         }
     }
 
-    private static class AllPass {
+    private final static class AllPass {
 
-        private float[] delaybuffer;
-        private int delaybuffersize;
+        private final float[] delaybuffer;
+        private final int delaybuffersize;
         private int rovepos = 0;
         private float feedback;
 
-        public AllPass(int size) {
+        AllPass(int size) {
             delaybuffer = new float[size];
             delaybuffersize = size;
         }
@@ -88,110 +85,103 @@ public class SoftReverb implements SoftAudioProcessor {
         public void setFeedBack(float feedback) {
             this.feedback = feedback;
         }
-        int ucount = 0;
 
-        public void processReplace(float in[], float out[]) {
-            int len = in.length;
+        public void processReplace(float inout[]) {
+            int len = inout.length;
+            int delaybuffersize = this.delaybuffersize;
+            int rovepos = this.rovepos;
             for (int i = 0; i < len; i++) {
-
                 float delayout = delaybuffer[rovepos];
-
-                // undenormalise(delayout)
-                /*
-                if (((delayout > 0.0) && (delayout < 1.0E-10))
-                        || ((delayout < 0.0) && (delayout > -1.0E-10)))
-                    delayout = 0;
-                */
-
-                float input = in[i];
-                out[i] = -input + delayout;
+                float input = inout[i];
+                inout[i] = delayout - input;
                 delaybuffer[rovepos] = input + delayout * feedback;
                 if (++rovepos == delaybuffersize)
                     rovepos = 0;
             }
+            this.rovepos = rovepos;
+        }
 
-            ucount++;
-            if (ucount == 10) {
-                ucount = 0;
-                for (int i = 0; i < delaybuffer.length; i++) {
-                    double v = delaybuffer[i];
-                    if (((v > 0.0) && (v < 1.0E-10))
-                            || ((v < 0.0) && (v > -1.0E-10))) {
-                        delaybuffer[i] = 0;
-                    }
-                }
+        public void processReplace(float in[], float out[]) {
+            int len = in.length;
+            int delaybuffersize = this.delaybuffersize;
+            int rovepos = this.rovepos;
+            for (int i = 0; i < len; i++) {
+                float delayout = delaybuffer[rovepos];
+                float input = in[i];
+                out[i] = delayout - input;
+                delaybuffer[rovepos] = input + delayout * feedback;
+                if (++rovepos == delaybuffersize)
+                    rovepos = 0;
             }
-
+            this.rovepos = rovepos;
         }
     }
 
-    private static class Comb {
+    private final static class Comb {
 
-        private float[] delaybuffer;
-        private int delaybuffersize;
+        private final float[] delaybuffer;
+        private final int delaybuffersize;
         private int rovepos = 0;
         private float feedback;
         private float filtertemp = 0;
         private float filtercoeff1 = 0;
         private float filtercoeff2 = 1;
 
-        public Comb(int size) {
+        Comb(int size) {
             delaybuffer = new float[size];
             delaybuffersize = size;
         }
 
         public void setFeedBack(float feedback) {
             this.feedback = feedback;
+            filtercoeff2 = (1 - filtercoeff1)* feedback;
         }
-        int ucount = 0;
 
         public void processMix(float in[], float out[]) {
             int len = in.length;
-
-            float filtercoeff2 = this.filtercoeff2 * feedback;
-
+            int delaybuffersize = this.delaybuffersize;
+            int rovepos = this.rovepos;
+            float filtertemp = this.filtertemp;
+            float filtercoeff1 = this.filtercoeff1;
+            float filtercoeff2 = this.filtercoeff2;
             for (int i = 0; i < len; i++) {
                 float delayout = delaybuffer[rovepos];
-
                 // One Pole Lowpass Filter
                 filtertemp = (delayout * filtercoeff2)
                         + (filtertemp * filtercoeff1);
-
-                // undenormalise(filtertemp)
-                /*
-                if (((filtertemp > 0.0) && (filtertemp < 1.0E-10))
-                        || ((filtertemp < 0.0) && (filtertemp > -1.0E-10)))
-                    filtertemp = 0;
-                */
                 out[i] += delayout;
-                delaybuffer[rovepos] = in[i] + (filtertemp);// * feedback);
-
+                delaybuffer[rovepos] = in[i] + filtertemp;
                 if (++rovepos == delaybuffersize)
                     rovepos = 0;
-
             }
-            ucount++;
-            if (ucount == 10) {
-                ucount = 0;
-                if (((filtertemp > 0.0) && (filtertemp < 1.0E-10))
-                        || ((filtertemp < 0.0) && (filtertemp > -1.0E-10))) {
-                    filtertemp = 0;
-                }
-                for (int i = 0; i < delaybuffer.length; i++) {
-                    double v = delaybuffer[i];
-                    if (((v > 0.0) && (v < 1.0E-10))
-                            || ((v < 0.0) && (v > -1.0E-10))) {
-                        delaybuffer[i] = 0;
-                    }
-                }
+            this.filtertemp  = filtertemp;
+            this.rovepos = rovepos;
+        }
+
+        public void processReplace(float in[], float out[]) {
+            int len = in.length;
+            int delaybuffersize = this.delaybuffersize;
+            int rovepos = this.rovepos;
+            float filtertemp = this.filtertemp;
+            float filtercoeff1 = this.filtercoeff1;
+            float filtercoeff2 = this.filtercoeff2;
+            for (int i = 0; i < len; i++) {
+                float delayout = delaybuffer[rovepos];
+                // One Pole Lowpass Filter
+                filtertemp = (delayout * filtercoeff2)
+                        + (filtertemp * filtercoeff1);
+                out[i] = delayout;
+                delaybuffer[rovepos] = in[i] + filtertemp;
+                if (++rovepos == delaybuffersize)
+                    rovepos = 0;
             }
-
-
+            this.filtertemp  = filtertemp;
+            this.rovepos = rovepos;
         }
 
         public void setDamp(float val) {
             filtercoeff1 = val;
-            filtercoeff2 = 1 - filtercoeff1;
+            filtercoeff2 = (1 - filtercoeff1)* feedback;
         }
     }
     private float roomsize;
@@ -203,8 +193,11 @@ public class SoftReverb implements SoftAudioProcessor {
     private AllPass[] allpassL;
     private AllPass[] allpassR;
     private float[] input;
-    private float[] outR;
-    private float[] outL;
+    private float[] out;
+    private float[] pre1;
+    private float[] pre2;
+    private float[] pre3;
+    private boolean denormal_flip = false;
     private boolean mix = true;
     private SoftAudioBuffer inputA;
     private SoftAudioBuffer left;
@@ -215,6 +208,7 @@ public class SoftReverb implements SoftAudioProcessor {
     private float dirty_predelay;
     private float dirty_gain;
     private float samplerate;
+    private boolean light = true;
 
     public void init(float samplerate, float controlrate) {
         this.samplerate = samplerate;
@@ -281,7 +275,7 @@ public class SoftReverb implements SoftAudioProcessor {
     public void setMixMode(boolean mix) {
         this.mix = mix;
     }
-    
+
     private boolean silent = true;
 
     public void processAudio() {
@@ -294,7 +288,7 @@ public class SoftReverb implements SoftAudioProcessor {
                 left.clear();
                 right.clear();
             }
-            return;            
+            return;
         }
 
         float[] inputA = this.inputA.array();
@@ -307,56 +301,98 @@ public class SoftReverb implements SoftAudioProcessor {
 
         float again = gain * 0.018f / 2;
 
-        for (int i = 0; i < numsamples; i++)
-            input[i] = inputA[i] * again;
+        denormal_flip = !denormal_flip;
+        if(denormal_flip)
+            for (int i = 0; i < numsamples; i++)
+                input[i] = inputA[i] * again + 1E-20f;
+        else
+            for (int i = 0; i < numsamples; i++)
+                input[i] = inputA[i] * again - 1E-20f;
 
-        delay.processReplace(input, input);
+        delay.processReplace(input);
 
+        if(light && (right != null))
+        {
+            if (pre1 == null || pre1.length < numsamples)
+            {
+                pre1 = new float[numsamples];
+                pre2 = new float[numsamples];
+                pre3 = new float[numsamples];
+            }
 
-        if (right != null) {
-            if (outR == null || outR.length < numsamples)
-                outR = new float[numsamples];
-            Arrays.fill(outR, 0);
-            for (int i = 0; i < combR.length; i++)
-                combR[i].processMix(input, outR);
             for (int i = 0; i < allpassL.length; i++)
-                allpassR[i].processReplace(outR, outR);
+                allpassL[i].processReplace(input);
 
-            if (mix) {
-                for (int i = 0; i < numsamples; i++)
-                    right[i] += outR[i];
-            } else {
-                for (int i = 0; i < numsamples; i++)
-                    right[i] = outR[i];
+            combL[0].processReplace(input, pre3);
+            combL[1].processReplace(input, pre3);
+
+            combL[2].processReplace(input, pre1);
+            for (int i = 4; i < combL.length-2; i+=2)
+                combL[i].processMix(input, pre1);
+
+            combL[3].processReplace(input, pre2);;
+            for (int i = 5; i < combL.length-2; i+=2)
+                combL[i].processMix(input, pre2);
+
+            if (!mix)
+            {
+                Arrays.fill(right, 0);
+                Arrays.fill(left, 0);
+            }
+            for (int i = combR.length-2; i < combR.length; i++)
+                combR[i].processMix(input, right);
+            for (int i = combL.length-2; i < combL.length; i++)
+                combL[i].processMix(input, left);
+
+            for (int i = 0; i < numsamples; i++)
+            {
+                float p = pre1[i] - pre2[i];
+                float m = pre3[i];
+                left[i] += m + p;
+                right[i] += m - p;
             }
         }
+        else
+        {
+            if (out == null || out.length < numsamples)
+                out = new float[numsamples];
 
+            if (right != null) {
+                if (!mix)
+                    Arrays.fill(right, 0);
+                allpassR[0].processReplace(input, out);
+                for (int i = 1; i < allpassR.length; i++)
+                    allpassR[i].processReplace(out);
+                for (int i = 0; i < combR.length; i++)
+                    combR[i].processMix(out, right);
+            }
 
-        if (outL == null || outL.length < numsamples)
-            outL = new float[numsamples];
-        Arrays.fill(outL, 0);
-        for (int i = 0; i < combL.length; i++)
-            combL[i].processMix(input, outL);
-        for (int i = 0; i < allpassL.length; i++)
-            allpassL[i].processReplace(outL, outL);
-        
-        if (mix) {
-            for (int i = 0; i < numsamples; i++)
-                left[i] += outL[i];
-        } else {
-            for (int i = 0; i < numsamples; i++)
-                left[i] = outL[i];
+            if (!mix)
+                Arrays.fill(left, 0);
+            allpassL[0].processReplace(input, out);
+            for (int i = 1; i < allpassL.length; i++)
+                allpassL[i].processReplace(out);
+            for (int i = 0; i < combL.length; i++)
+                combL[i].processMix(out, left);
         }
 
+
+
+
+
+
         if (silent_input) {
-            float avgpower = 0; 
+            silent = true;
             for (int i = 0; i < numsamples; i++)
-                avgpower += outL[i]*outL[i];
-            avgpower /= numsamples;
-            avgpower = (float)Math.sqrt(avgpower);
-            if(avgpower < 0.00001)
-                silent = true;
-        } 
+            {
+                float v = left[i];
+                if(v > 1E-10 || v < -1E-10)
+                {
+                    silent = false;
+                    break;
+                }
+            }
+        }
 
     }
 
@@ -440,7 +476,7 @@ public class SoftReverb implements SoftAudioProcessor {
     public void setRoomSize(float value) {
         roomsize = 1 - (0.17f / value);
 
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < combL.length; i++) {
             combL[i].feedback = roomsize;
             combR[i].feedback = roomsize;
         }
@@ -464,10 +500,16 @@ public class SoftReverb implements SoftAudioProcessor {
             damp = 0;
 
         // damp = value * 0.4f;
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < combL.length; i++) {
             combL[i].setDamp(damp);
             combR[i].setDamp(damp);
         }
 
     }
+
+    public void setLightMode(boolean light)
+    {
+        this.light = light;
+    }
 }
+

@@ -1,12 +1,12 @@
 /*
- * Copyright 2007 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2007, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,16 +18,17 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 package com.sun.gervill;
 
 import java.util.TreeMap;
 
+import javax.sound.midi.MidiDevice;
+import javax.sound.midi.MidiDeviceReceiver;
 import javax.sound.midi.MidiMessage;
-import javax.sound.midi.Receiver;
 import javax.sound.midi.ShortMessage;
 
 /**
@@ -35,13 +36,13 @@ import javax.sound.midi.ShortMessage;
  *
  * @author Karl Helgason
  */
-public class SoftReceiver implements Receiver {
+public final class SoftReceiver implements MidiDeviceReceiver {
 
-    protected boolean open = true;
-    private Object control_mutex;
-    private SoftSynthesizer synth;
-    protected TreeMap<Long, Object> midimessages;
-    protected SoftMainMixer mainmixer;
+    boolean open = true;
+    private final Object control_mutex;
+    private final SoftSynthesizer synth;
+    TreeMap<Long, Object> midimessages;
+    SoftMainMixer mainmixer;
 
     public SoftReceiver(SoftSynthesizer synth) {
         this.control_mutex = synth.control_mutex;
@@ -49,6 +50,10 @@ public class SoftReceiver implements Receiver {
         this.mainmixer = synth.getMainMixer();
         if (mainmixer != null)
             this.midimessages = mainmixer.midimessages;
+    }
+
+    public MidiDevice getMidiDevice() {
+        return synth;
     }
 
     public void send(MidiMessage message, long timeStamp) {
@@ -60,6 +65,7 @@ public class SoftReceiver implements Receiver {
 
         if (timeStamp != -1) {
             synchronized (control_mutex) {
+                mainmixer.activity();
                 while (midimessages.get(timeStamp) != null)
                     timeStamp++;
                 if (message instanceof ShortMessage

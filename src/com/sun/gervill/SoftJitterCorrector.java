@@ -1,12 +1,12 @@
 /*
- * Copyright 2007 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2007, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 package com.sun.gervill;
 
@@ -36,7 +36,7 @@ import javax.sound.sampled.AudioInputStream;
  *
  * @author Karl Helgason
  */
-public class SoftJitterCorrector extends AudioInputStream {
+public final class SoftJitterCorrector extends AudioInputStream {
 
     private static class JitterStream extends InputStream {
 
@@ -48,7 +48,7 @@ public class SoftJitterCorrector extends AudioInputStream {
         int writepos = 0;
         int readpos = 0;
         byte[][] buffers;
-        Object buffers_mutex = new Object();
+        private final Object buffers_mutex = new Object();
 
         // Adapative Drift Statistics
         int w_count = 1000;
@@ -112,7 +112,7 @@ public class SoftJitterCorrector extends AudioInputStream {
             }
         }
 
-        public JitterStream(AudioInputStream s, int buffersize,
+        JitterStream(AudioInputStream s, int buffersize,
                 int smallbuffersize) {
             this.w_count = 10 * (buffersize / smallbuffersize);
             if (w_count < 100)
@@ -216,6 +216,7 @@ public class SoftJitterCorrector extends AudioInputStream {
             };
 
             thread = new Thread(runnable);
+            thread.setDaemon(true);
             thread.setPriority(Thread.MAX_PRIORITY);
             thread.start();
         }

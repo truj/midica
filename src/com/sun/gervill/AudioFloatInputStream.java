@@ -1,12 +1,12 @@
 /*
- * Copyright 2007 Sun Microsystems, Inc.  All Rights Reserved.
+ * Copyright (c) 2007, 2013, Oracle and/or its affiliates. All rights reserved.
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
  *
  * This code is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License version 2 only, as
- * published by the Free Software Foundation.  Sun designates this
+ * published by the Free Software Foundation.  Oracle designates this
  * particular file as subject to the "Classpath" exception as provided
- * by Sun in the LICENSE file that accompanied this code.
+ * by Oracle in the LICENSE file that accompanied this code.
  *
  * This code is distributed in the hope that it will be useful, but WITHOUT
  * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
@@ -18,9 +18,9 @@
  * 2 along with this work; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA.
  *
- * Please contact Sun Microsystems, Inc., 4150 Network Circle, Santa Clara,
- * CA 95054 USA or visit www.sun.com if you need additional information or
- * have any questions.
+ * Please contact Oracle, 500 Oracle Parkway, Redwood Shores, CA 94065 USA
+ * or visit www.oracle.com if you need additional information or have any
+ * questions.
  */
 package com.sun.gervill;
 
@@ -48,14 +48,14 @@ public abstract class AudioFloatInputStream {
 
         private int pos = 0;
         private int markpos = 0;
-        private AudioFloatConverter converter;
-        private AudioFormat format;
-        private byte[] buffer;
-        private int buffer_offset;
-        private int buffer_len;
-        private int framesize_pc;
+        private final AudioFloatConverter converter;
+        private final AudioFormat format;
+        private final byte[] buffer;
+        private final int buffer_offset;
+        private final int buffer_len;
+        private final int framesize_pc;
 
-        public BytaArrayAudioFloatInputStream(AudioFloatConverter converter,
+        BytaArrayAudioFloatInputStream(AudioFloatConverter converter,
                 byte[] buffer, int offset, int len) {
             this.converter = converter;
             this.format = converter.getFormat();
@@ -125,12 +125,12 @@ public abstract class AudioFloatInputStream {
     private static class DirectAudioFloatInputStream
             extends AudioFloatInputStream {
 
-        private AudioInputStream stream;
+        private final AudioInputStream stream;
         private AudioFloatConverter converter;
-        private int framesize_pc; // framesize / channels
+        private final int framesize_pc; // framesize / channels
         private byte[] buffer;
 
-        public DirectAudioFloatInputStream(AudioInputStream stream) {
+        DirectAudioFloatInputStream(AudioInputStream stream) {
             converter = AudioFloatConverter.getConverter(stream.getFormat());
             if (converter == null) {
                 AudioFormat format = stream.getFormat();
@@ -255,11 +255,11 @@ public abstract class AudioFloatInputStream {
 
     public abstract int read(float[] b, int off, int len) throws IOException;
 
-    public int read(float[] b) throws IOException {
+    public final int read(float[] b) throws IOException {
         return read(b, 0, b.length);
     }
 
-    public float read() throws IOException {
+    public final float read() throws IOException {
         float[] b = new float[1];
         int ret = read(b, 0, 1);
         if (ret == -1 || ret == 0)
