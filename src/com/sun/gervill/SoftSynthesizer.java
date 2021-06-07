@@ -708,6 +708,12 @@ public final class SoftSynthesizer implements AudioSynthesizer,
                     Soundbank sbk;
                     try {
                         sbk = MidiSystem.getSoundbank(new BufferedInputStream(is));
+                        
+                        // SF2
+                        if ("com.sun.media.sound.SF2Soundbank".equals(sbk.getClass().getCanonicalName())) {
+                        	SF2SoundbankReader reader = new SF2SoundbankReader();
+                        	sbk = reader.getSoundbank(is);
+                        }
                     } finally {
                         is.close();
                     }
