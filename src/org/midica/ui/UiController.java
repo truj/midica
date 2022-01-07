@@ -51,6 +51,7 @@ import org.midica.ui.file.ExportResult;
 import org.midica.ui.file.ExportResultView;
 import org.midica.ui.file.FileExtensionFilter;
 import org.midica.ui.file.FileSelector;
+import org.midica.ui.file.SoundUrlHelper;
 import org.midica.ui.info.InfoView;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
@@ -131,7 +132,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		}
 		if (null == soundfontSelector) {
 			soundfontSelector = new FileSelector(view, this);
-			soundfontSelector.init(FileSelector.FILE_TYPE_SOUNDFONT, FileSelector.READ);
+			soundfontSelector.init(FileSelector.FILE_TYPE_SOUND_FILE, FileSelector.READ);
 		}
 		if (null == exportSelector) {
 			exportSelector = new FileSelector(view, this);
@@ -207,6 +208,12 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 				parseChosenFile(type, chooser.getSelectedFile());
 		}
 		
+		// URL chosen with the file selector
+		else if (SoundUrlHelper.CMD_URL_CHOSEN.equals(cmd)) {
+			String url = SoundUrlHelper.getSoundUrl();
+			parseChosenFile(FileSelector.FILE_TYPE_SOUND_URL, url);
+		}
+		
 		// cancel or ESC in FileChooser pressed
 		else if (CMD_CANCELED.equals(cmd)) {
 			importSelector.setVisible(false);
@@ -259,16 +266,28 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		}
 		
 		// find out the config variables to change
-		String rememberConfigKey = "";
-		String typeConfigVal     = "";
-		String pathConfigKey     = "";
-		String path              = "";
+		String rememberConfigKey  = "";
+		String typeConfigVal      = "";
+		String pathConfigKey      = "";
+		String path               = "";
+		String urlSoundFormat     = null;
+		int    soundSource        = SoundfontParser.FROM_UNKNOWN;
+		String soundSourceStr     = null;
 		
 		// find out which checkbox has been changed
-		if (UiView.NAME_REMEMBER_SF.equals(name)) {
-			rememberConfigKey = Config.REMEMBER_SF2;
-			pathConfigKey     = Config.PATH_SF2;
-			path              = SoundfontParser.getFilePath();
+		if (UiView.NAME_REMEMBER_SOUND.equals(name)) {
+			soundSource       = SoundfontParser.getSource();
+			rememberConfigKey = Config.REMEMBER_SOUND;
+			path              = SoundfontParser.getFullPath();
+			if (SoundfontParser.FROM_FILE == soundSource) {
+				pathConfigKey  = Config.PATH_SOUND;
+				soundSourceStr = FileSelector.FILE_TYPE_SOUND_FILE;
+			}
+			else if (SoundfontParser.FROM_URL == soundSource) {
+				pathConfigKey  = Config.SOUND_URL;
+				urlSoundFormat = SoundfontParser.getSoundFormat();
+				soundSourceStr = FileSelector.FILE_TYPE_SOUND_URL;
+			}
 		}
 		else if (UiView.NAME_REMEMBER_IMPORT.equals(name)) {
 			rememberConfigKey = Config.REMEMBER_IMPORT;
@@ -305,12 +324,14 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			Config.set(rememberConfigKey, "true");
 			
 			// remember file path and type, if a file is loaded!
-			if (path != null) {
+			if (path != null)
 				Config.set(pathConfigKey, path);
-			}
-			if (!typeConfigVal.equals("")) {
+			if (! typeConfigVal.equals(""))
 				Config.set(Config.IMPORT_TYPE, typeConfigVal);
-			}
+			if (urlSoundFormat != null)
+				Config.set(Config.URL_SOUND_FORMAT, urlSoundFormat);
+			if (soundSourceStr != null)
+				Config.set(Config.SOUND_SOURCE, soundSourceStr);
 		}
 		else {
 			Config.set( rememberConfigKey, "false" );
@@ -335,16 +356,27 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	}
 	
 	/**
-	 * Parses the chosen file using the right parser for the right file type.
-	 * A wait dialog is shown during the parsing.
+	 * Parses the chosen file or URL using the right parser for the right file type.
+	 * A wait dialog is shown during parsing.
 	 * The parsing itself is executed by a {@link SwingWorker}.
 	 * 
-	 * @param type  File type.
-	 * @param file  Selected file.
+	 * @param type       Import type.
+	 * @param fileOrUrl  Selected file or URL (as string).
 	 */
-	public void parseChosenFile(String type, File file) {
+	public void parseChosenFile(String type, Object fileOrUrl) {
 		
 		initSelectorsIfNotYetDone();
+		
+		// file or URL?
+		boolean isUrl  = fileOrUrl instanceof String;
+		boolean isFile = fileOrUrl instanceof File;
+		assert isUrl || isFile;
+		File   file = null;
+		String url  = null;
+		if (isUrl)
+			url = (String) fileOrUrl;
+		else
+			file = (File) fileOrUrl;
 		
 		// initialize variables based on the file type to be parsed
 		WaitView     waitView = new WaitView(view);
@@ -391,10 +423,15 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			waitMsg    = String.format(Dict.get(Dict.WAIT_PARSE_FOREIGN), Dict.get(Dict.FOREIGN_PROG_MSCORE));
 			pathKey    = Config.PATH_MSCORE;
 		}
-		else if (FileSelector.FILE_TYPE_SOUNDFONT.equals(type)) {
+		else if (FileSelector.FILE_TYPE_SOUND_FILE.equals(type)) {
 			parser   = soundfontParser;
 			selector = soundfontSelector;
 			waitMsg  = Dict.get(Dict.WAIT_PARSE_SF2);
+		}
+		else if (FileSelector.FILE_TYPE_SOUND_URL.equals(type)) {
+			parser   = soundfontParser;
+			selector = soundfontSelector;
+			waitMsg  = Dict.get(Dict.WAIT_PARSE_URL);
 		}
 		else {
 			return;
@@ -403,7 +440,8 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		// Reset the filename for the case that it cannot be parsed.
 		// But don't do that for soundfonts because the last successfully
 		// parsed soundfont file will stay valid.
-		if (! FileSelector.FILE_TYPE_SOUNDFONT.equals(type)) {
+		if (! FileSelector.FILE_TYPE_SOUND_FILE.equals(type)
+			&& ! FileSelector.FILE_TYPE_SOUND_URL.equals(type)) {
 			displayFilename(type, Dict.get(Dict.UNCHOSEN_FILE));
 		}
 		
@@ -411,7 +449,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		selector.setVisible(false);
 		
 		// start file parsing in the background and show the wait window
-		ParsingWorker worker = new ParsingWorker(waitView, parser, file);
+		ParsingWorker worker = new ParsingWorker(waitView, parser, fileOrUrl);
 		worker.execute();
 		waitView.init(waitMsg);
 		
@@ -429,11 +467,24 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			}
 			
 			// show the filename of the successfully parsed file
-			displayFilename(type, file.getName());
-			if (FileSelector.FILE_TYPE_SOUNDFONT.equals(type)) {
-				String remember = Config.get(Config.REMEMBER_SF2);
-				if ("true".equals(remember)) {
-					Config.set(Config.PATH_SF2, file.getAbsolutePath());
+			if (isFile)
+				displayFilename(type, file.getName());
+			else
+				displayFilename(type, url);
+			if (FileSelector.FILE_TYPE_SOUND_FILE.equals(type)
+				|| FileSelector.FILE_TYPE_SOUND_URL.equals(type)) {
+				
+				String rememberSound  = Config.get(Config.REMEMBER_SOUND);
+				if (rememberSound.equals("true")) {
+					if (FileSelector.FILE_TYPE_SOUND_FILE.equals(type)) {
+						Config.set(Config.PATH_SOUND, file.getAbsolutePath());
+					}
+					else if (FileSelector.FILE_TYPE_SOUND_URL.equals(type)) {
+						Config.set(Config.SOUND_URL, url);
+						String urlSoundFormat = SoundfontParser.getSoundFormat();
+						Config.set(Config.URL_SOUND_FORMAT, urlSoundFormat);
+					}
+					Config.set(Config.SOUND_SOURCE, type);
 				}
 			}
 			else {
@@ -646,8 +697,8 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	 * @param filename    File name.
 	 */
 	private void displayFilename(String type, String filename) {
-		boolean notImported = ! FileSelector.FILE_TYPE_SOUNDFONT.equals(type)
-			&& filename.equals(Dict.get(Dict.UNCHOSEN_FILE));
+		boolean isSound     = FileSelector.FILE_TYPE_SOUND_FILE.equals(type) || FileSelector.FILE_TYPE_SOUND_URL.equals(type);
+		boolean notImported = ! isSound && filename.equals(Dict.get(Dict.UNCHOSEN_FILE));
 		
 		if (FileSelector.FILE_TYPE_MPL.equals(type)) {
 			// show imported file
@@ -674,10 +725,11 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			view.getImportedFileLbl().setText(filename);
 			view.getImportedFileTypeLbl().setText(Dict.get(Dict.IMPORTED_TYPE_MSCORE));
 		}
-		else if (FileSelector.FILE_TYPE_SOUNDFONT.equals(type)) {
-			// show soundfont file
-			view.getChosenSoundfontFileLbl().setText(filename);
-			view.getChosenSoundfontFileLbl().setToolTipText(filename);
+		else if (isSound) {
+			String shortName = SoundfontParser.getShortName();
+			String longName  = SoundfontParser.getFullPath();
+			view.getChosenSoundfontFileLbl().setText(shortName);
+			view.getChosenSoundfontFileLbl().setToolTipText(longName);
 		}
 		
 		// don't display the file type if no file is imported
@@ -685,8 +737,9 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			view.getImportedFileTypeLbl().setText(Dict.get(Dict.UNCHOSEN_FILE));
 			view.getImportedFileLbl().setToolTipText(null);
 		}
-		else {
-			view.getImportedFileLbl().setToolTipText(filename);
+		else if (!isSound) {
+			String path = SequenceParser.getFilePath();
+			view.getImportedFileLbl().setToolTipText(path);
 		}
 	}
 	
@@ -751,7 +804,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	public void windowOpened(WindowEvent e) {
 		
 		// files already parsed?
-		if ( SoundfontParser.getFileName()  != null
+		if ( SoundfontParser.getFullPath()  != null
 			|| MidicaPLParser.getFileName() != null
 			|| MidiParser.getFileName()     != null ) {
 			
@@ -761,8 +814,10 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		}
 		
 		// check config
-		String rememberSf     = Config.get( Config.REMEMBER_SF2    );
-		String soundfontPath  = Config.get( Config.PATH_SF2        );
+		String rememberSound  = Config.get( Config.REMEMBER_SOUND  );
+		String soundPath      = Config.get( Config.PATH_SOUND      );
+		String soundUrl       = Config.get( Config.SOUND_URL       );
+		String soundSourceStr = Config.get( Config.SOUND_SOURCE    );
 		String rememberImport = Config.get( Config.REMEMBER_IMPORT );
 		String midicaplPath   = Config.get( Config.PATH_MIDICAPL   );
 		String midiPath       = Config.get( Config.PATH_MIDI       );
@@ -777,10 +832,15 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		// we would get a null pointer exception in the SequenceParser.
 		synchronized(UiController.class) {
 			
-			// load soundfont, if needed
-			if (!Cli.useSoundfont) {
-				if ("true".equals(rememberSf) && ! soundfontPath.equals("")) {
-					parseChosenFile(FileSelector.FILE_TYPE_SOUNDFONT, new File(soundfontPath));
+			// load sound, if needed
+			if ("true".equals(rememberSound) && ! Cli.useSoundbank) {
+				if (FileSelector.FILE_TYPE_SOUND_FILE.equals(soundSourceStr)) {
+					if (! "".equals(soundPath))
+						parseChosenFile(FileSelector.FILE_TYPE_SOUND_FILE, new File(soundPath));
+				}
+				else if (FileSelector.FILE_TYPE_SOUND_URL.equals(soundSourceStr)) {
+					if (! soundUrl.equals(""))
+						parseChosenFile(FileSelector.FILE_TYPE_SOUND_URL, soundUrl);
 				}
 			}
 			

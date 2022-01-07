@@ -690,6 +690,11 @@ public class Dict {
 	public static final String KEY_FILE_SELECTOR_IMP_ABC        = "key_file_selector_imp_abc";
 	public static final String KEY_FILE_SELECTOR_IMP_LY         = "key_file_selector_imp_ly";
 	public static final String KEY_FILE_SELECTOR_IMP_MSCORE     = "key_file_selector_imp_mscore";
+	public static final String KEY_FILE_SELECTOR_SND_FILE       = "key_file_selector_snd_file";
+	public static final String KEY_FILE_SELECTOR_SND_URL        = "key_file_selector_snd_url";
+	public static final String KEY_FILE_SELECTOR_SND_URL_FLD    = "key_file_selector_url_fld";
+	public static final String KEY_FILE_SELECTOR_SND_FORMAT_CBX = "key_file_selector_url_format_cbx";
+	public static final String KEY_FILE_SELECTOR_SND_DOWNLOAD   = "key_file_selector_url_download";
 	public static final String KEY_FILE_SELECTOR_EXP_MID        = "key_file_selector_exp_mid";
 	public static final String KEY_FILE_SELECTOR_EXP_MPL        = "key_file_selector_exp_mpl";
 	public static final String KEY_FILE_SELECTOR_EXP_ALDA       = "key_file_selector_exp_alda";
@@ -788,14 +793,12 @@ public class Dict {
 	public static final String IMPORTED_TYPE_ABC           = "imported_type_abc";
 	public static final String IMPORTED_TYPE_LY            = "imported_type_ly";
 	public static final String IMPORTED_TYPE_MSCORE        = "imported_type_mscore";
-	public static final String SOUNDFONT                   = "soundfont";
-	public static final String CURRENT_SOUNDFONT           = "current_soundfont";
-	public static final String REMEMBER_SF                 = "remember_sf";
-	public static final String REMEMBER_SF_TT              = "remember_sf_tt";
-	public static final String REMEMBER_MPL                = "remember_mpl";
-	public static final String REMEMBER_MPL_TT             = "remember_mpl_tt";
-	public static final String REMEMBER_MID                = "remember_mid";
-	public static final String REMEMBER_MID_TT             = "remember_mid_tt";
+	public static final String SOUNDBANK                   = "soundbank";
+	public static final String CURRENT_SOUNDBANK           = "current_soundbank";
+	public static final String REMEMBER_SOUND              = "remember_sound";
+	public static final String REMEMBER_SOUND_TT           = "remember_sound_tt";
+	public static final String REMEMBER_IMPORT             = "remember_import";
+	public static final String REMEMBER_IMPORT_TT          = "remember_import_tt";
 	public static final String PLAYER_BUTTON               = "player_button";
 	public static final String UNCHOSEN_FILE               = "unchosen_file";
 	public static final String SF_LOADED_BY_SOURCE         = "sf_loaded_by_source";
@@ -805,31 +808,6 @@ public class Dict {
 	public static final String CONF_ERROR_OK               = "conf_error_ok";
 	public static final String CONF_ERROR_ERROR            = "conf_error_error";
 	public static final String ERROR_NOT_YET_IMPLEMENTED   = "error_not_yet_implemented";
-	
-	// MidicaFileChooser
-	public static final String TAB_MIDI                    = "tab_midi";
-	public static final String TAB_MIDICAPL                = "tab_midicapl";
-	public static final String TAB_ALDA                    = "tab_alda";
-	public static final String TAB_AUDIO                   = "tab_audio";
-	public static final String TAB_ABC                     = "tab_abc";
-	public static final String TAB_LY                      = "tab_ly";
-	public static final String TAB_MSCORE                  = "tab_mscore";
-	public static final String CHARSET                     = "charset";
-	public static final String CHARSET_DESC_MPL_READ       = "charset_desc_mpl_read";
-	public static final String CHARSET_DESC_MID_READ       = "charset_desc_mid_read";
-	public static final String CHARSET_DESC_MPL_WRITE      = "charset_desc_mpl_write";
-	public static final String CHARSET_DESC_MID_WRITE      = "charset_desc_mid_write";
-	public static final String FOREIGN_URL                 = "foreign_url";
-	public static final String FOREIGN_PROG                = "foreign_prog";
-	public static final String FOREIGN_PROG_DESC           = "foreign_prog_desc";
-	public static final String FOREIGN_PROG_ALDA           = "foreign_prog_alda";
-	public static final String FOREIGN_PROG_ABCMIDI        = "foreign_prog_abcmidi";
-	public static final String FOREIGN_PROG_LY             = "foreign_prog_ly";
-	public static final String FOREIGN_PROG_MIDI2ABC       = "foreign_prog_midi2abc";
-	public static final String FOREIGN_PROG_MIDI2LY        = "foreign_prog_midi2ly";
-	public static final String FOREIGN_PROG_MSCORE         = "foreign_prog_mscore";
-	public static final String DIRECT_IMPORT               = "direct_import";
-	public static final String FILE_OPTIONS                = "file_options";
 	
 	// Foreign
 	public static final String FOREIGN_CREATE_TMPDIR       = "foreign_create_tmpdir";
@@ -1011,6 +989,7 @@ public class Dict {
 	public static final String TIMESTAMP_FORMAT            = "timestamp_format";
 	public static final String NAME                        = "name";
 	public static final String FILE                        = "file";
+	public static final String SOUND_SOURCE                = "sound_source";
 	public static final String VERSION                     = "version";
 	public static final String DESCRIPTION                 = "description";
 	public static final String INFO_COL_NOTE_NUM           = "info_col_note_num";
@@ -1495,6 +1474,15 @@ public class Dict {
 	// UiControler + PlayerControler
 	public static final String ERROR_IN_LINE               = "parsing_error_in_line";
 	
+	// SoundbankParser // TODO: rename from SoundfontParser
+	public static final String UNKNOWN_SOUND_EXT           = "unknown_sound_ext";
+	public static final String INVALID_URL                 = "invalid_url";
+	public static final String UNKNOWN_HOST                = "unknown_host";
+	public static final String INVALID_RIFF                = "invalid_riff";
+	public static final String CANNOT_OPEN_SOUND           = "cannot_open_sound";
+	public static final String SOUND_FROM_FILE             = "sound_from_file";
+	public static final String SOUND_FROM_URL              = "sound_from_url";
+	
 	// SequenceParser
 	public static final String ERROR_NOTE_TOO_BIG          = "error_note_too_big";
 	public static final String ERROR_NOTE_TOO_SMALL        = "error_note_too_small";
@@ -1692,6 +1680,7 @@ public class Dict {
 	public static final String WAIT_PARSE_MPL                   = "wait_parse_mpl";
 	public static final String WAIT_PARSE_MID                   = "wait_parse_mid";
 	public static final String WAIT_PARSE_SF2                   = "wait_parse_sf2";
+	public static final String WAIT_PARSE_URL                   = "wait_parse_url";
 	public static final String WAIT_PARSE_FOREIGN               = "wait_parse_foreign";
 	public static final String WAIT_REPARSE                     = "wait_reparse";
 	public static final String WAIT_SETUP_DEVICES               = "wait_setup_devices";
@@ -1746,11 +1735,41 @@ public class Dict {
 	public static final String TITLE_ERROR                      = "title_error";
 	public static final String TITLE_CONFIRMATION               = "title_confirmation";
 	
-	// FileSelector
+	// FileSelector / MidicaFileChooser
 	public static final String TITLE_FILE_SELECTOR              = "title_file_selector";
 	public static final String CONFIG_ICON_TOOLTIP              = "config_icon_tooltip";
 	public static final String CONFIG_ICON_TOOLTIP_WRONG        = "config_icon_tooltip_wrong";
 	public static final String CONFIG_ICON_TOOLTIP_OK           = "config_icon_tooltip_ok";
+	public static final String TAB_SOUND_FILE                   = "tab_sound_file";
+	public static final String TAB_SOUND_URL                    = "tab_sound_url";
+	public static final String TAB_MIDI                    = "tab_midi";
+	public static final String TAB_MIDICAPL                = "tab_midicapl";
+	public static final String TAB_ALDA                    = "tab_alda";
+	public static final String TAB_AUDIO                   = "tab_audio";
+	public static final String TAB_ABC                     = "tab_abc";
+	public static final String TAB_LY                      = "tab_ly";
+	public static final String TAB_MSCORE                  = "tab_mscore";
+	public static final String CHARSET                     = "charset";
+	public static final String CHARSET_DESC_MPL_READ       = "charset_desc_mpl_read";
+	public static final String CHARSET_DESC_MID_READ       = "charset_desc_mid_read";
+	public static final String CHARSET_DESC_MPL_WRITE      = "charset_desc_mpl_write";
+	public static final String CHARSET_DESC_MID_WRITE      = "charset_desc_mid_write";
+	public static final String FOREIGN_URL                 = "foreign_url";
+	public static final String FOREIGN_PROG                = "foreign_prog";
+	public static final String FOREIGN_PROG_DESC           = "foreign_prog_desc";
+	public static final String FOREIGN_PROG_ALDA           = "foreign_prog_alda";
+	public static final String FOREIGN_PROG_ABCMIDI        = "foreign_prog_abcmidi";
+	public static final String FOREIGN_PROG_LY             = "foreign_prog_ly";
+	public static final String FOREIGN_PROG_MIDI2ABC       = "foreign_prog_midi2abc";
+	public static final String FOREIGN_PROG_MIDI2LY        = "foreign_prog_midi2ly";
+	public static final String FOREIGN_PROG_MSCORE         = "foreign_prog_mscore";
+	public static final String DIRECT_IMPORT               = "direct_import";
+	public static final String FILE_OPTIONS                = "file_options";
+	public static final String SOUND_URL                   = "sound_url";
+	public static final String SOUND_FORMAT                = "sound_format";
+	public static final String SOUND_TYPE_SF2              = "sound_type_sf2";
+	public static final String SOUND_TYPE_DLS              = "sound_type_dls";
+	public static final String SOUND_DOWNLOAD              = "sound_download";
 	
 	// PlayerView
 	public static final String TITLE_PLAYER                     = "title_player";
@@ -2147,6 +2166,11 @@ public class Dict {
 		set( KEY_FILE_SELECTOR_IMP_ABC,        "In the IMPORT selector, select the ABC Tab"                                  );
 		set( KEY_FILE_SELECTOR_IMP_LY,         "In the IMPORT selector, select the LilyPond Tab"                             );
 		set( KEY_FILE_SELECTOR_IMP_MSCORE,     "In the IMPORT selector, select the MuscScore Tab"                            );
+		set( KEY_FILE_SELECTOR_SND_FILE,       "In the SOUNDBANK selector, select the File Tab"                              );
+		set( KEY_FILE_SELECTOR_SND_URL,        "In the SOUNDBANK selector, select the URL Tab"                               );
+		set( KEY_FILE_SELECTOR_SND_URL_FLD,    "In the SOUNDBANK selector, focus the URL text field"                         );
+		set( KEY_FILE_SELECTOR_SND_FORMAT_CBX, "In the SOUNDBANK selector, open the FORMAT combobox"                         );
+		set( KEY_FILE_SELECTOR_SND_DOWNLOAD,   "In the SOUNDBANK selector, press the DOWNLOAD button"                        );
 		set( KEY_FILE_SELECTOR_EXP_MID,        "In the EXPORT selector, select the MIDI Tab"                                 );
 		set( KEY_FILE_SELECTOR_EXP_MPL,        "In the EXPORT selector, select the MidicaPL Tab"                             );
 		set( KEY_FILE_SELECTOR_EXP_ALDA,       "In the EXPORT selector, select the ALDA Tab"                                 );
@@ -2245,14 +2269,12 @@ public class Dict {
 		set( UNKNOWN_DRUMKIT_NAME,         "unknown"                       );
 		set( UNKNOWN_SYNTAX,               "?"                             );
 		set( UNKNOWN_INSTRUMENT,           "unknown"                       );
-		set( SOUNDFONT,                    "Soundfont"                     );
-		set( CURRENT_SOUNDFONT,            "Current Soundfont"             );
-		set( REMEMBER_SF,                  "Remember"                      );
-		set( REMEMBER_SF_TT,               "Load the chosen soundfont automatically at the next startup" );
-		set( REMEMBER_MPL,                 "Remember"                      );
-		set( REMEMBER_MPL_TT,              "Load the chosen MidicaPL file automatically at the next startup" );
-		set( REMEMBER_MID,                 "Remember"                      );
-		set( REMEMBER_MID_TT,              "Load the chosen MIDI file automatically at the next startup" );
+		set( SOUNDBANK,                    "Soundbank"                     );
+		set( CURRENT_SOUNDBANK,            "Current Soundbank"             );
+		set( REMEMBER_SOUND,               "Remember"                      );
+		set( REMEMBER_SOUND_TT,            "Load the chosen soundbank automatically at the next startup" );
+		set( REMEMBER_IMPORT,              "Remember"                      );
+		set( REMEMBER_IMPORT_TT,           "Load the chosen file automatically at the next startup" );
 		set( PLAYER_BUTTON,                "Start Player"                  );
 		set( UNCHOSEN_FILE,                "no file loaded"                );
 		set( SF_LOADED_BY_SOURCE,          "[loaded by MidicaPL file]"     );
@@ -2263,29 +2285,40 @@ public class Dict {
 		set( ERROR_NOT_YET_IMPLEMENTED,    "This functionality is not yet implemented" );
 		
 		// FileSelector / MidicaFileChooser
-		set( TAB_MIDI,                 "MIDI"                                                 );
-		set( TAB_MIDICAPL,             "MidicaPL"                                             );
-		set( TAB_ALDA,                 "ALDA"                                                 );
-		set( TAB_AUDIO,                "Audio"                                                );
-		set( TAB_ABC,                  "ABC"                                                  );
-		set( TAB_LY,                   "LilyPond"                                             );
-		set( TAB_MSCORE,               "MuseScore"                                            );
-		set( CHARSET,                  "Charset"                                              );
-		set( CHARSET_DESC_MPL_READ,    "Encoding of the source file:"                         );
-		set( CHARSET_DESC_MID_READ,    "Default encoding of text-based messages in the source file. Used if neither a BOM nor a {@...} tag is found:" );
-		set( CHARSET_DESC_MPL_WRITE,   "Encoding of the file to be saved:"                    );
-		set( CHARSET_DESC_MID_WRITE,   "Encoding for text-based messages in the target file:" );
-		set( FOREIGN_URL,              "URL"                                                  );
-		set( FOREIGN_PROG,             "Program"                                              );
-		set( FOREIGN_PROG_DESC,        "Command or full path to the program %s:"              );
-		set( FOREIGN_PROG_ALDA,        "ALDA"                                                 );
-		set( FOREIGN_PROG_ABCMIDI,     "abcMIDI"                                              );
-		set( FOREIGN_PROG_LY,          "LilyPond"                                             );
-		set( FOREIGN_PROG_MIDI2ABC,    "midi2abc"                                             );
-		set( FOREIGN_PROG_MIDI2LY,     "midi2ly"                                              );
-		set( FOREIGN_PROG_MSCORE,      "MuseScore"                                            );
-		set( DIRECT_IMPORT,            "Directly import the exported file"                    );
-		set( FILE_OPTIONS,             "Options:"                                             );
+		set( TITLE_FILE_SELECTOR,       "Midica Choose File"                                   );
+		set( CONFIG_ICON_TOOLTIP,       "Config Options"                                       );
+		set( CONFIG_ICON_TOOLTIP_WRONG, "Config contains errors"                               );
+		set( CONFIG_ICON_TOOLTIP_OK,    "Config formally correct"                              );
+		set( TAB_SOUND_FILE,            "File"                                                 );
+		set( TAB_SOUND_URL,             "URL"                                                  );
+		set( TAB_MIDI,                  "MIDI"                                                 );
+		set( TAB_MIDICAPL,              "MidicaPL"                                             );
+		set( TAB_ALDA,                  "ALDA"                                                 );
+		set( TAB_AUDIO,                 "Audio"                                                );
+		set( TAB_ABC,                   "ABC"                                                  );
+		set( TAB_LY,                    "LilyPond"                                             );
+		set( TAB_MSCORE,                "MuseScore"                                            );
+		set( CHARSET,                   "Charset"                                              );
+		set( CHARSET_DESC_MPL_READ,     "Encoding of the source file:"                         );
+		set( CHARSET_DESC_MID_READ,     "Default encoding of text-based messages in the source file. Used if neither a BOM nor a {@...} tag is found:" );
+		set( CHARSET_DESC_MPL_WRITE,    "Encoding of the file to be saved:"                    );
+		set( CHARSET_DESC_MID_WRITE,    "Encoding for text-based messages in the target file:" );
+		set( FOREIGN_URL,               "URL"                                                  );
+		set( FOREIGN_PROG,              "Program"                                              );
+		set( FOREIGN_PROG_DESC,         "Command or full path to the program %s:"              );
+		set( FOREIGN_PROG_ALDA,         "ALDA"                                                 );
+		set( FOREIGN_PROG_ABCMIDI,      "abcMIDI"                                              );
+		set( FOREIGN_PROG_LY,           "LilyPond"                                             );
+		set( FOREIGN_PROG_MIDI2ABC,     "midi2abc"                                             );
+		set( FOREIGN_PROG_MIDI2LY,      "midi2ly"                                              );
+		set( FOREIGN_PROG_MSCORE,       "MuseScore"                                            );
+		set( DIRECT_IMPORT,             "Directly import the exported file"                    );
+		set( FILE_OPTIONS,              "Options:"                                             );
+		set( SOUND_URL,                 "Soundbank URL"                                        );
+		set( SOUND_FORMAT,              "Soundbank Format"                                     );
+		set( SOUND_TYPE_SF2,            "Soundfont (SF2)"                                      );
+		set( SOUND_TYPE_DLS,            "Downloadable Sounds (DLS)"                            );
+		set( SOUND_DOWNLOAD,            "Download Sound"                                       );
 		
 		// Foreign
 		set( FOREIGN_CREATE_TMPDIR,  "Failed to create temporary directory. Error Message: "  );
@@ -2498,6 +2531,7 @@ public class Dict {
 		set( TIMESTAMP_FORMAT,                       "yyyy-MM-dd HH:mm:ss"           );
 		set( NAME,                                   "Name"                          );
 		set( FILE,                                   "File"                          );
+		set( SOUND_SOURCE,                           "Source"                        );
 		set( VERSION,                                "Version"                       );
 		set( DESCRIPTION,                            "Description"                   );
 		set( INFO_COL_NOTE_NUM,                      "Number"                        );
@@ -3090,6 +3124,16 @@ public class Dict {
 		// UiControler + PlayerControler
 		set( ERROR_IN_LINE,                       "<html>parsing error in file:<br>%s<br>line: %s<br>" );
 		
+		// SoundbankParser // TODO: rename from SoundfontParser
+		set( UNKNOWN_SOUND_EXT, "<html>Allowed file extensions: *.sf2 or *.dls"
+		                      + "<br>Invalid file extension in file:<br>" );
+		set( INVALID_URL,       "Invalid url: "                           );
+		set( UNKNOWN_HOST,      "Unknown Host: "                          );
+		set( INVALID_RIFF,      "Invalid RIFF format: "                   );
+		set( CANNOT_OPEN_SOUND, "Unable to load soundbank: "              );
+		set( SOUND_FROM_FILE,   "[File] "                                 );
+		set( SOUND_FROM_URL,    "[URL] "                                  );
+		
 		// SequenceParser
 		set( ERROR_NOTE_TOO_BIG,                  "note number too big: "                                             );
 		set( ERROR_NOTE_TOO_SMALL,                "note number too small: "                                           );
@@ -3286,7 +3330,8 @@ public class Dict {
 		set( TITLE_WAIT,                          "Please Wait"                                                       );
 		set( WAIT_PARSE_MPL,                      "Parsing the MidicaPL file..."                                      );
 		set( WAIT_PARSE_MID,                      "Parsing the MIDI file..."                                          );
-		set( WAIT_PARSE_SF2,                      "Parsing the Soundfont"                                             );
+		set( WAIT_PARSE_SF2,                      "Parsing the Soundbank"                                             );
+		set( WAIT_PARSE_URL,                      "Downloading the Soundbank"                                         );
 		set( WAIT_PARSE_FOREIGN,                  "Importing the file using %s"                                       );
 		set( WAIT_REPARSE,                        "Reloading the File"                                                );
 		set( WAIT_SETUP_DEVICES,                  "Setting up MIDI devices and loading Soundfont"                     );
@@ -3342,12 +3387,6 @@ public class Dict {
 		set( CLOSE,                               "Close"                      );
 		set( TITLE_ERROR,                         "Midica Error"               );
 		set( TITLE_CONFIRMATION,                  "Midica Confirmation"        );
-		
-		// FileSelector
-		set( TITLE_FILE_SELECTOR,                 "Midica Choose File"         );
-		set( CONFIG_ICON_TOOLTIP,                 "Config Options"             );
-		set( CONFIG_ICON_TOOLTIP_WRONG,           "Config contains errors"     );
-		set( CONFIG_ICON_TOOLTIP_OK,              "Config formally correct"    );
 		
 		// PlayerView
 		set( TITLE_PLAYER,                        "Midica Player"              );
@@ -3485,8 +3524,8 @@ public class Dict {
 		set( UNKNOWN_DRUMKIT_NAME,                   "unbekannt"                             );
 		set( UNKNOWN_SYNTAX,                         "?"                                     );
 		set( UNKNOWN_INSTRUMENT,                     "unbekannt"                             );
-		set( SOUNDFONT,                              "Soundfont-Datei"                       );
-		set( CURRENT_SOUNDFONT,                      "Momentanes Soundfont"                  );
+		set( SOUNDBANK,                              "Soundbank-Datei"                       );
+		set( CURRENT_SOUNDBANK,                      "Momentane Soundbank"                   );
 		set( PLAYER_BUTTON,                          "Abspielen"                             );
 		set( UNCHOSEN_FILE,                          "keine Datei geladen"                   );
 		set( SF_LOADED_BY_SOURCE,                    "[durch MidicaPL-Datei geladen]"        );

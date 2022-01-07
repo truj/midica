@@ -26,6 +26,7 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.midica.file.read.SoundfontParser;
 import org.midica.file.write.AudioExporter;
 import org.midica.file.write.Decompiler;
 import org.midica.ui.file.FileSelector;
@@ -73,7 +74,8 @@ public class Config {
 	public static final String DIRECTORY_EXPORT_ABC    = "directory_export_abc";
 	public static final String DIRECTORY_EXPORT_LY     = "directory_export_ly";
 	public static final String DIRECTORY_EXPORT_MSCORE = "directory_export_mscore";
-	public static final String PATH_SF2                = "path_sf2";
+	public static final String PATH_SOUND              = "path_sound";
+	public static final String SOUND_URL               = "sound_url";
 	public static final String PATH_MIDICAPL           = "path_midicapl";
 	public static final String PATH_MIDI               = "path_midi";
 	public static final String PATH_ALDA               = "path_alda";
@@ -87,10 +89,13 @@ public class Config {
 	public static final String EXEC_PATH_EXP_ABC       = "exec_path_exp_abc";
 	public static final String EXEC_PATH_EXP_LY        = "exec_path_exp_ly";
 	public static final String EXEC_PATH_EXP_MSCORE    = "exec_path_exp_mscore";
-	public static final String REMEMBER_SF2            = "remember_sf2";
+	public static final String REMEMBER_SOUND          = "remember_sound";
 	public static final String REMEMBER_IMPORT         = "remember_import";
 	public static final String IMPORT_TYPE             = "import_type";
+	public static final String SOUND_SOURCE            = "sound_source";
+	public static final String URL_SOUND_FORMAT        = "url_sound_format";
 	public static final String TAB_FILE_IMPORT         = "tab_file_import";
+	public static final String TAB_FILE_SOUND          = "tab_file_sound";
 	public static final String TAB_FILE_EXPORT         = "tab_file_export";
 	
 	// charsets
@@ -294,8 +299,9 @@ public class Config {
 		defaults.put( DIRECTORY_EXPORT_LY,     homeDir      );
 		defaults.put( DIRECTORY_EXPORT_MSCORE, homeDir      );
 		defaults.put( REMEMBER_IMPORT,         "false"      );
-		defaults.put( REMEMBER_SF2,            "false"      );
-		defaults.put( PATH_SF2,                ""           );
+		defaults.put( REMEMBER_SOUND,          "false"      );
+		defaults.put( PATH_SOUND,              ""           );
+		defaults.put( SOUND_URL,               ""           );
 		defaults.put( PATH_MIDICAPL,           ""           );
 		defaults.put( PATH_MIDI,               ""           );
 		defaults.put( PATH_ALDA,               ""           );
@@ -310,7 +316,10 @@ public class Config {
 		defaults.put( EXEC_PATH_EXP_LY,        "midi2ly"    );
 		defaults.put( EXEC_PATH_EXP_MSCORE,    "musescore3" );
 		defaults.put( IMPORT_TYPE,             FileSelector.FILE_TYPE_MPL );
+		defaults.put( SOUND_SOURCE,            FileSelector.FILE_TYPE_SOUND_FILE );
+		defaults.put( URL_SOUND_FORMAT,        SoundfontParser.SOUND_FORMAT_DLS );
 		defaults.put( TAB_FILE_IMPORT,         "0"          );
+		defaults.put( TAB_FILE_SOUND,          "0"          );
 		defaults.put( TAB_FILE_EXPORT,         "0"          );
 		
 		defaults.put( CHARSET_MPL,        DEFAULT_CHARSET_MPL        );
@@ -733,6 +742,17 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_IMP_MSCORE,     KeyEvent.VK_NUMPAD6,  0                          );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_IMP_MSCORE,     KeyEvent.VK_6,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_IMP_MSCORE,     KeyEvent.VK_NUMPAD6,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_FILE,       KeyEvent.VK_1,        0                          );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_FILE,       KeyEvent.VK_NUMPAD1,  0                          );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_FILE,       KeyEvent.VK_1,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_FILE,       KeyEvent.VK_NUMPAD1,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_URL,        KeyEvent.VK_2,        0                          );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_URL,        KeyEvent.VK_NUMPAD2,  0                          );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_URL,        KeyEvent.VK_2,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_URL,        KeyEvent.VK_NUMPAD2,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_URL_FLD,    KeyEvent.VK_U,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_FORMAT_CBX, KeyEvent.VK_F,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_DOWNLOAD,   KeyEvent.VK_D,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_MID,        KeyEvent.VK_1,        0                          );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_MID,        KeyEvent.VK_NUMPAD1,  0                          );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_MID,        KeyEvent.VK_1,        InputEvent.CTRL_DOWN_MASK  );

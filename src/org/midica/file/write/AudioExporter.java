@@ -20,12 +20,12 @@ import javax.sound.sampled.AudioSystem;
 
 import org.midica.config.Config;
 import org.midica.config.Dict;
-import org.midica.file.read.SoundfontParser;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.file.ExportResult;
 import org.midica.ui.file.config.AudioConfigController;
 import org.midica.ui.file.config.AudioConfigView;
 
+import com.sun.gervill.DLSSoundbank;
 import com.sun.gervill.SF2Soundbank;
 import com.sun.gervill.SoftSynthesizer;
 import com.sun.kh.MidiToAudioRenderer;
@@ -107,20 +107,9 @@ public class AudioExporter extends Exporter {
 			Sequence        seq       = MidiDevices.getSequence();
 			SoftSynthesizer synth     = new SoftSynthesizer();
 			
-			// load the soundfont in the right format, if not yet done
-			if (soundfont.getClass() != SF2Soundbank.class) {
-				File   sf2File = null;
-				String sf2Path = SoundfontParser.getFilePath();
-				
-				// custom soundfont has been loaded?
-				if (sf2Path != null) {
-					sf2File = new File(sf2Path);
-					soundfont = new SF2Soundbank(sf2File);
-				}
-				else {
-					// use default soundfont
-					soundfont = synth.getDefaultSoundbank();
-				}
+			// make sure the soundbank has a format/class that the synthesizer can handle
+			if (soundfont.getClass() != SF2Soundbank.class && soundfont.getClass() != DLSSoundbank.class) {
+				soundfont = synth.getDefaultSoundbank();
 			}
 			
 			// create format

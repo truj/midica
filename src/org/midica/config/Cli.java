@@ -16,6 +16,7 @@ import org.midica.file.write.AudioExporter;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.UiController;
 import org.midica.ui.file.FileSelector;
+import org.midica.ui.file.SoundUrlHelper;
 
 /**
  * This class handles command line options.
@@ -34,12 +35,14 @@ public class Cli {
 	public static boolean keepAlive = true;
 	
 	// import/export related fields
-	public  static boolean useSoundfont     = false;
+	public  static boolean useSoundbank     = false;
 	public  static boolean isImport         = false;
 	public  static boolean isExport         = false;
 	public  static boolean exportToStdout   = false;
 	public  static String  exportErrorMsg   = null;
-	private static String  soundfontPath    = null;
+	private static String  soundbankPath    = null;
+	private static String  soundbankUrl     = null;
+	private static String  soundbankFormat  = null;
 	private static String  importPathMpl    = null;
 	private static String  importPathMidi   = null;
 	private static String  importPathAlda   = null;
@@ -68,8 +71,9 @@ public class Cli {
 	public static void parseArguments(String[] args) {
 		Pattern patImport      = Pattern.compile("^\\-\\-(import|import\\-.+?)=(.+)$");
 		Pattern patExport      = Pattern.compile("^\\-\\-(export|export\\-.+?)=(.+)$");
-		Pattern patSoundfont   = Pattern.compile("^\\-\\-(soundfont)=(.+)$");
-		Pattern patInvalidPath = Pattern.compile("^\\-\\-((im|ex)port(\\-[\\w-]+?)|soundfont)(=|$)$");
+		Pattern patSoundbank   = Pattern.compile("^\\-\\-(sound\\-path)=(.+)$");
+		Pattern patSoundUrl    = Pattern.compile("^\\-\\-(sound\\-url\\-.+?)=(.+)$");
+		Pattern patInvalidPath = Pattern.compile("^\\-\\-((im|ex)port(\\-[\\w-]+?)|sound[\\w\\-]+?)(=|$)$");
 		
 		for (String arg : args) {
 			if ("--cli".equals(arg)) {
@@ -85,18 +89,37 @@ public class Cli {
 			else if ("--help".equals(arg)) {
 				help(true, null);
 			}
-			else if (patSoundfont.matcher(arg).matches()) {
-				if (useSoundfont) {
-					help(false, "More than one soundfont is not allowed!");
+			else if (patSoundbank.matcher(arg).matches()) {
+				if (useSoundbank) {
+					help(false, "More than one soundbank is not allowed!");
 				}
 				else {
-					useSoundfont = true;
-					Matcher m = patSoundfont.matcher(arg);
+					useSoundbank = true;
+					Matcher m = patSoundbank.matcher(arg);
 					m.matches();
-					soundfontPath = m.group(2);
-					if ("-".equals(soundfontPath)) {
+					soundbankPath = m.group(2);
+					if ("-".equals(soundbankPath)) {
 						help(false, arg + " not possible. Use a real PATH.");
 					}
+				}
+			}
+			else if (patSoundUrl.matcher(arg).matches()) {
+				if (useSoundbank) {
+					help(false, "More than one soundbank is not allowed!");
+				}
+				else {
+					useSoundbank = true;
+					Matcher m = patSoundUrl.matcher(arg);
+					m.matches();
+					String format = m.group(1);
+					soundbankUrl  = m.group(2);
+					
+					if ("sound-url-sf2".equals(format))
+						soundbankFormat = SoundfontParser.SOUND_FORMAT_SF2;
+					else if ("sound-url-dls".equals(format))
+						soundbankFormat = SoundfontParser.SOUND_FORMAT_DLS;
+					else
+						help(false, "Unknown soundbank format: --" + format);
 				}
 			}
 			else if (patImport.matcher(arg).matches()) {
@@ -239,7 +262,9 @@ public class Cli {
 		msg.append("                        Without this argument the config is read from and\n");
 		msg.append("                        written into the file '.midica.conf' in the current\n");
 		msg.append("                        user's home directory.\n");
-		msg.append("--soundfont=PATH      : Use the specified soundfont file.\n");
+		msg.append("--sound-path=PATH     : Use the specified soundbank file (.sf2 or .dls).\n");
+		msg.append("--sound-url-sf2=URL   : Use the specified SF2 soundfont URL.\n");
+		msg.append("--sound-url-dls=URL   : Use the specified DLS soundbank URL.\n");
 		msg.append("--import=PATH         : Import from the specified MidicaPL file.\n");
 		msg.append("--import-midi=PATH    : Import from the specified MIDI file.\n");
 		msg.append("--import-alda=PATH    : Import from the specified ALDA file by calling the\n");
@@ -278,17 +303,31 @@ public class Cli {
 	}
 	
 	/**
-	 * Loads a soundfont file due to a command line argument.
+	 * Loads a soundbank file or URL due to a command line argument.
 	 * 
 	 * @param uiController    the UI controller
 	 */
-	public static void loadSoundfont(UiController uiController) {
-		File soundfontFile = new File(soundfontPath);
-		uiController.parseChosenFile(FileSelector.FILE_TYPE_SOUNDFONT, soundfontFile);
+	public static void loadSoundbank(UiController uiController) {
+		Object fileOrUrl        = null;
+		String fileSelectorType = null;
+		
+		// file?
+		if (soundbankPath != null) {
+			fileOrUrl        = new File(soundbankPath);
+			fileSelectorType = FileSelector.FILE_TYPE_SOUND_FILE;
+		}
+		else {
+			// url
+			fileOrUrl        = soundbankUrl;
+			fileSelectorType = FileSelector.FILE_TYPE_SOUND_URL;
+			SoundUrlHelper.setSoundUrlFormat(soundbankFormat);
+		}
+		uiController.parseChosenFile(fileSelectorType, fileOrUrl);
 		
 		// loading failed?
-		if (null == SoundfontParser.getFileName()) {
-			help(false, "Failed to load Soundfont: " + soundfontPath);
+		if (null == SoundfontParser.getFullPath()) {
+			String pathOrUrl = soundbankPath != null ? soundbankPath : soundbankUrl;
+			help(false, "Failed to load Soundbank: " + pathOrUrl);
 		}
 	}
 	

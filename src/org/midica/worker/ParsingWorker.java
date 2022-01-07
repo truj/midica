@@ -7,19 +7,18 @@
 
 package org.midica.worker;
 
-import java.io.File;
-
 import org.midica.file.read.IParser;
 import org.midica.file.read.ParseException;
 
 
 /**
- * This class is used to parse a file in the background while a
+ * This class is used to parse a file (or URL) in the background while a
  * {@link WaitView} is shown.
  * 
  * This worker is executed in the background before the (blocking)
  * setVisible() method of the (modal) waiting dialog is called.
- * That causes the execution of {@link #doInBackground()} that parses the file.
+ * That causes the execution of {@link #doInBackground()} that parses
+ * the file or URL.
  * 
  * After the parsing work is finished, {@link MidicaWorker#done()} is called
  * and closes the waiting dialog.
@@ -28,25 +27,25 @@ import org.midica.file.read.ParseException;
  */
 public class ParsingWorker extends MidicaWorker {
 	
-	private IParser parser = null;
-	private File    file   = null;
+	private IParser parser    = null;
+	private Object  fileOrUrl = null;
 	
 	/**
 	 * Creates a parsing worker that parses a file in the background while
 	 * a waiting dialog is shown.
 	 * 
-	 * @param view    The waiting dialog.
-	 * @param parser  The parser do be executed in the background.
-	 * @param file    The file to be parsed.
+	 * @param view         The waiting dialog.
+	 * @param parser       The parser do be executed in the background.
+	 * @param fileOrUrl    The file or url to be parsed.
 	 */
-	public ParsingWorker(WaitView view, IParser parser, File file) {
+	public ParsingWorker(WaitView view, IParser parser, Object fileOrUrl) {
 		super(view);
-		this.parser = parser;
-		this.file   = file;
+		this.parser    = parser;
+		this.fileOrUrl = fileOrUrl;
 	}
 	
 	/**
-	 * Parses the file in the background.
+	 * Parses the file or URL in the background.
 	 * This method is executed after calling {@link #execute()}.
 	 * 
 	 * @return the parse exception or **null** if no exception is caught.
@@ -56,7 +55,7 @@ public class ParsingWorker extends MidicaWorker {
 		// parse
 		ParseException parseException = null;
 		try {
-			parser.parse(file);
+			parser.parse(fileOrUrl);
 		}
 		catch (ParseException e) {
 			parseException = e;

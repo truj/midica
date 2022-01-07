@@ -19,6 +19,7 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -27,6 +28,7 @@ import org.midica.config.Dict;
 import org.midica.config.KeyBindingManager;
 import org.midica.ui.UiController;
 import org.midica.ui.UiView;
+import org.midica.ui.widget.MidicaButton;
 import org.midica.ui.widget.MidicaFileChooser;
 
 /**
@@ -48,12 +50,14 @@ public class FileSelector extends JDialog {
 	public static final String FILE_TYPE_LY         = "ly";
 	public static final String FILE_TYPE_MSCORE_IMP = "mscore_import";
 	public static final String FILE_TYPE_MSCORE_EXP = "mscore_export";
-	public static final String FILE_TYPE_SOUNDFONT  = "sf2";
+	public static final String FILE_TYPE_SOUND_FILE = "sound_file";
+	public static final String FILE_TYPE_SOUND_URL  = "sound_url";
 	public static final byte   READ                 = 1;
 	public static final byte   WRITE                = 2;
 	
-	private String fileType;
-	private byte   filePurpose;
+	private String  fileType;
+	private byte    filePurpose;
+	private boolean isSound;
 	
 	ArrayList<MidicaFileChooser>    fileChoosers = null;
 	UiController                    controller   = null;
@@ -85,15 +89,18 @@ public class FileSelector extends JDialog {
 	public void init(String type, byte filePurpose) {
 		this.fileType     = type;
 		this.filePurpose  = filePurpose;
+		this.isSound      = false;
 		this.fileChoosers = new ArrayList<>();
 		this.tabs         = new HashMap<>();
 		
 		String  directory     = "";
 		boolean charSetSelect = false;
 		if (READ == this.filePurpose) {
-			if (type.equals(FILE_TYPE_SOUNDFONT)) {
+			if (type.equals(FILE_TYPE_SOUND_FILE)) {
+				this.isSound  = true;
     			directory     = Config.get(Config.DIRECTORY_SF2);
     			charSetSelect = false;
+    			tabs.put(type, Dict.TAB_SOUND_FILE);
     		}
 			else {
     			directory     = Config.get(Config.DIRECTORY_MPL);
@@ -113,7 +120,10 @@ public class FileSelector extends JDialog {
 		));
 		
 		// create more file choosers, if needed
-		if (READ == this.filePurpose && ! type.equals(FILE_TYPE_SOUNDFONT)) {
+		if (isSound) {
+			fileChoosers.add(null); // placeholder for the URL form
+		}
+		else if (READ == this.filePurpose) {
 			fileChoosers.add(new MidicaFileChooser(
 				FILE_TYPE_MIDI,
 				filePurpose,
@@ -228,6 +238,8 @@ public class FileSelector extends JDialog {
 		
 		// complete file choosers
 		for (MidicaFileChooser chooser : fileChoosers) {
+			if (null == chooser)
+				continue;
 			chooser.setFileFilter(new FileExtensionFilter(chooser.getType()));
 			chooser.setAcceptAllFileFilterUsed(false);
 			chooser.addActionListener(controller);
@@ -242,6 +254,8 @@ public class FileSelector extends JDialog {
 			@Override
 			public void windowActivated(WindowEvent e) {
 				for (MidicaFileChooser chooser : fileChoosers) {
+					if (null == chooser)
+						continue;
 					chooser.rescanCurrentDirectory();
 				}
 			}
@@ -284,59 +298,78 @@ public class FileSelector extends JDialog {
 	 */
 	private void initUI() {
 		
-		// only one file chooser? - add it directly
-		if (1 == fileChoosers.size()) {
-			add(fileChoosers.get(0));
-		}
-		else {
-			// more than one file chooser - tabbed pane
-			content = new JTabbedPane(JTabbedPane.LEFT);
-			add(content);
+		content = new JTabbedPane(JTabbedPane.LEFT);
+		add(content);
+		
+		// add file choosers (and url chooser)
+		for (MidicaFileChooser chooser : fileChoosers) {
 			
-			for (MidicaFileChooser chooser : fileChoosers) {
+			// URL chooser
+			if (null == chooser) {
+				String tabString = Dict.get(Dict.TAB_SOUND_URL);
+				JComponent urlForm = SoundUrlHelper.createUrlForm(controller, this);
+				content.addTab(tabString, urlForm);
+			}
+			
+			// file chooser
+			else {
 				String tabString = Dict.get(tabs.get(chooser.getType()));
 				content.addTab(tabString, chooser);
 			}
-			
-			// add listener to change the file type according to the chosen tab
-			content.addChangeListener(new ChangeListener() {
-				@Override
-				public void stateChanged(ChangeEvent e) {
-					int index = content.getSelectedIndex();
-					fileType  = fileChoosers.get(index).getType();
+		}
+		
+		// add listener to change the file type according to the chosen tab
+		content.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				int index = content.getSelectedIndex();
+				if (fileChoosers.get(index) != null) {
+					fileType = fileChoosers.get(index).getType();
 				}
-			});
-			
-			// get configured index
-			int index;
-			try {
-				if (READ == this.filePurpose)
-					index = Integer.parseInt(Config.get(Config.TAB_FILE_IMPORT));
+			}
+		});
+		
+		// get configured index
+		int index;
+		try {
+			if (READ == this.filePurpose)
+				if (isSound)
+					index = Integer.parseInt(Config.get(Config.TAB_FILE_SOUND));
 				else
-					index = Integer.parseInt(Config.get(Config.TAB_FILE_EXPORT));
-			}
-			catch (NumberFormatException e) {
-				index = 0;
-			}
-			
-			// set configured index
-			try {
-				content.setSelectedIndex(index);
-			}
-			catch (IndexOutOfBoundsException e) {
-			}
-			
-			// remember tab changes
-			content.addChangeListener(new ChangeListener() {
-				@Override
-				public void stateChanged(ChangeEvent e) {
-					int index = content.getSelectedIndex();
-					if (READ == filePurpose)
-						Config.set(Config.TAB_FILE_IMPORT, index + "");
+					index = Integer.parseInt(Config.get(Config.TAB_FILE_IMPORT));
+			else
+				index = Integer.parseInt(Config.get(Config.TAB_FILE_EXPORT));
+		}
+		catch (NumberFormatException e) {
+			index = 0;
+		}
+		
+		// set configured index
+		try {
+			content.setSelectedIndex(index);
+		}
+		catch (IndexOutOfBoundsException e) {
+		}
+		
+		// remember tab changes
+		content.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				int index = content.getSelectedIndex();
+				if (READ == filePurpose)
+					if (isSound)
+						Config.set(Config.TAB_FILE_SOUND, index + "");
 					else
-						Config.set(Config.TAB_FILE_EXPORT, index + "");
-				}
-			});
+						Config.set(Config.TAB_FILE_IMPORT, index + "");
+				else
+					Config.set(Config.TAB_FILE_EXPORT, index + "");
+			}
+		});
+		
+		// set configured sound url and format
+		if (isSound) {
+			SoundUrlHelper.setUrl(Config.get(Config.SOUND_URL));
+			SoundUrlHelper.setSoundUrlFormat(Config.get(Config.URL_SOUND_FORMAT));
 		}
 		
 		addKeyBindings();
@@ -364,6 +397,8 @@ public class FileSelector extends JDialog {
 		// get the selected file from the right file chooser
 		File file = null;
 		for (MidicaFileChooser chooser : fileChoosers) {
+			if (null == chooser)
+				continue;
 			if (fileType.equals(chooser.getType())) {
 				file = chooser.getSelectedFile();
 				break;
@@ -392,7 +427,7 @@ public class FileSelector extends JDialog {
 					Config.set(Config.DIRECTORY_LY, directory);
 				else if (FILE_TYPE_MSCORE_IMP.equals(fileType))
 					Config.set(Config.DIRECTORY_MSCORE, directory);
-    			else if (FILE_TYPE_SOUNDFONT.equals(fileType))
+    			else if (FILE_TYPE_SOUND_FILE.equals(fileType))
     				Config.set(Config.DIRECTORY_SF2, directory);
     		}
 			else {
@@ -432,6 +467,8 @@ public class FileSelector extends JDialog {
 		ArrayList<JComponent>   fields = new ArrayList<>();
 		ArrayList<JComponent>   icons  = new ArrayList<>();
 		for (MidicaFileChooser chooser : fileChoosers) {
+			if (null == chooser)
+				continue;
 			JComboBox<?> cbx  = chooser.getCharsetSelectionCbx();
 			JComponent   fld  = chooser.getForeignExecField();
 			JComponent   icon = chooser.getConfigIcon();
@@ -449,15 +486,34 @@ public class FileSelector extends JDialog {
 		if (icons.size() > 0)
 			keyBindingManager.addBindingsForIconLabelOfVisibleTab(icons, Dict.KEY_FILE_SELECT_CONFIG_OPEN);
 		
+		// sound url specific bindings
+		if (isSound) {
+			ArrayList<JTextField> urlFields = new ArrayList<>();
+			urlFields.add(SoundUrlHelper.getUrlField());
+			keyBindingManager.addBindingsForFocusOfVisibleElement(urlFields, Dict.KEY_FILE_SELECTOR_SND_URL_FLD);
+			ArrayList<JComboBox<?>> comboboxes = new ArrayList<>();
+			comboboxes.add(SoundUrlHelper.getFormatCbx());
+			keyBindingManager.addBindingsForComboboxOfVisibleElement(comboboxes, Dict.KEY_FILE_SELECTOR_SND_FORMAT_CBX);
+			ArrayList<MidicaButton> buttons = new ArrayList<>();
+			buttons.add(SoundUrlHelper.getDownloadButton());
+			keyBindingManager.addBindingsForButtonOfVisibleElement(buttons, Dict.KEY_FILE_SELECTOR_SND_DOWNLOAD);
+		}
+		
 		// add key binding to choose a tab
 		if (content != null) {
 			if (READ == this.filePurpose) {
-				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_MPL,    0 );
-				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_MID,    1 );
-				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_ALDA,   2 );
-				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_ABC,    3 );
-				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_LY,     4 );
-				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_MSCORE, 5 );
+				if (isSound) {
+					keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_SND_FILE, 0 );
+					keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_SND_URL,  1 );
+				}
+				else {
+					keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_MPL,    0 );
+					keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_MID,    1 );
+					keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_ALDA,   2 );
+					keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_ABC,    3 );
+					keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_LY,     4 );
+					keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_IMP_MSCORE, 5 );
+				}
 			}
 			else {
 				keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_FILE_SELECTOR_EXP_MID,    0 );

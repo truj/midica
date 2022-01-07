@@ -43,9 +43,11 @@ public class AbcImporter extends MidiParser {
 	/**
 	 * Parses an ABC file.
 	 * 
-	 * @param file  ABC file to be parsed.
+	 * @param fileAsObj  ABC file to be parsed.
 	 */
-	public void parse(File file) throws ParseException {
+	@Override
+	public void parse(Object fileAsObj) throws ParseException {
+		File file = (File) fileAsObj;
 		
 		// reset file name and file type
 		preprocess(file);

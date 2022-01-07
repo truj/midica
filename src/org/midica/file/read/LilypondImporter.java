@@ -49,9 +49,11 @@ public class LilypondImporter extends MidiParser {
 	/**
 	 * Parses a LilyPond file.
 	 * 
-	 * @param file  LilyPond file to be parsed.
+	 * @param fileAsObj  LilyPond file to be parsed.
 	 */
-	public void parse(File file) throws ParseException {
+	@Override
+	public void parse(Object fileAsObj) throws ParseException {
+		File file = (File) fileAsObj;
 		
 		// reset file name and file type
 		preprocess(file);

@@ -60,9 +60,10 @@ public class MidiParser extends SequenceParser {
 	/**
 	 * Parses a MIDI file.
 	 * 
-	 * @param file  MIDI file to be parsed.
+	 * @param fileAsObj  MIDI file to be parsed.
 	 */
-	public void parse(File file) throws ParseException {
+	public void parse(Object fileAsObj) throws ParseException {
+		File file = (File) fileAsObj;
 		
 		// reset file name and file type
 		preprocess(file);

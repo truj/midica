@@ -663,27 +663,27 @@ public class InfoView extends JDialog {
 		// get general soundfont info
 		HashMap<String, String> soundfontInfo = SoundfontParser.getSoundfontInfo();
 		
-		// file translation
-		constraints.insets = Laf.INSETS_NW;
-		constraints.anchor = GridBagConstraints.NORTHEAST;
-		JLabel lblFile     = new JLabel(Dict.get(Dict.FILE) + ": ");
-		Laf.makeBold(lblFile);
-		area.add(lblFile, constraints);
+		// sound source translation
+		constraints.insets  = Laf.INSETS_NW;
+		constraints.anchor  = GridBagConstraints.NORTHEAST;
+		JLabel lblSndSource = new JLabel(Dict.get(Dict.SOUND_SOURCE) + ": ");
+		Laf.makeBold(lblSndSource);
+		area.add(lblSndSource, constraints);
 		
-		// file name
+		// sound source
 		constraints.insets = Laf.INSETS_NE;
 		constraints.gridx++;
 		constraints.anchor  = GridBagConstraints.NORTHWEST;
 		constraints.weightx = 1;
-		String fileName     = SoundfontParser.getFileName();
-		String filePath     = SoundfontParser.getFilePath();
-		if (null == fileName || null == filePath) {
-			fileName = Dict.get(Dict.UNCHOSEN_FILE);
-			filePath = Dict.get(Dict.UNCHOSEN_FILE);
+		String shortSoundName = SoundfontParser.getShortName();
+		String fullSoundName  = SoundfontParser.getFullPath();
+		if (null == shortSoundName || null == fullSoundName) {
+			shortSoundName = Dict.get(Dict.UNCHOSEN_FILE);
+			fullSoundName  = Dict.get(Dict.UNCHOSEN_FILE);
 		}
-		FlowLabel lblFileContent = new FlowLabel(fileName, CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE);
-		lblFileContent.setToolTipText(filePath);
-		area.add(lblFileContent, constraints);
+		FlowLabel lblSndSourceContent = new FlowLabel(shortSoundName, CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		lblSndSourceContent.setToolTipText(fullSoundName);
+		area.add(lblSndSourceContent, constraints);
 		
 		// name translation
 		constraints.insets = Laf.INSETS_W;

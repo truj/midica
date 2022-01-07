@@ -10,6 +10,9 @@ package org.midica.file.read;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -26,23 +29,42 @@ import javax.sound.sampled.AudioInputStream;
 
 import org.midica.config.Dict;
 import org.midica.midi.MidiDevices;
+import org.midica.ui.file.SoundUrlHelper;
 
+import com.sun.gervill.DLSSoundbank;
+import com.sun.gervill.RIFFInvalidFormatException;
 import com.sun.gervill.SF2Soundbank;
 
 /**
- * This class is used in order to load a user-defined soundfont file.
+ * This class is used in order to load a user-defined
+ * soundfont or DLS file or a URL.
  * 
- * It's also used for retrieving information from the currently loaded (or standard) soundfont.
+ * It's also used for retrieving information from the currently loaded
+ * (or standard) soundfont.
  * 
  * @author Jan Trukenmüller
  */
+// TODO: rename class
 public class SoundfontParser implements IParser {
+	
+	public static final int FROM_UNKNOWN = 0;
+	public static final int FROM_FILE    = 1;
+	public static final int FROM_URL     = 2;
+	
+	public static final String SOUND_FORMAT_SF2 = "SF2";
+	public static final String SOUND_FORMAT_DLS = "DLS";
 	
 	/** The currently loaded user-defined soundfont. */
 	private static Soundbank soundfont = null;
 	
 	/** The successfully loaded soundfont file. */
-	private static File soundfontFile = null;
+	private static File soundFile = null;
+	
+	/** The successfully loaded sound URL. */
+	private static URL soundUrl = null;
+	
+	/** The format of the successfully loaded sound file or URL (SF2 or DLS). */
+	private static String soundFormat = null;
 	
 	/** Data structure for general information of the currently loaded soundfont. */
 	private static HashMap<String, String> generalInfo = null;
@@ -54,19 +76,61 @@ public class SoundfontParser implements IParser {
 	private static ArrayList<HashMap<String, Object>> soundfontResources = null;
 	
 	/**
-	 * Parses a soundfont file.
+	 * Parses a soundfont file or URL.
 	 * 
-	 * @param file             Soundfont file chosen by the user.
-	 * @throws ParseException  If the file can not be loaded correctly.
+	 * @param fileOrUrl        file or url (as string) chosen by the user
+	 * @throws ParseException  if the file can not be loaded correctly.
 	 */
-	public void parse(File file) throws ParseException {
+	public void parse(Object fileOrUrl) throws ParseException {
 		
-		// reset file - in case the parsing fails
-		soundfontFile = null;
-		
+		String fullPath = fileOrUrl.toString();
 		try {
-			// load the soundfont
-			soundfont = new SF2Soundbank(file);
+			// convert file or string to URL
+			URL  url  = null;
+			File file = null;
+			if (fileOrUrl instanceof String) {
+				String urlStr = (String) fileOrUrl;
+				url = new URL(urlStr);
+			}
+			else {
+				file = (File) fileOrUrl;
+				url  = file.toURI().toURL();
+			}
+			
+			// get format
+			String format = null;
+			if (file != null) {
+				String fileName      = file.getName();
+				String fileExtension = "";
+				int index = fileName.lastIndexOf('.');
+				if (index > 0)
+					fileExtension = fileName.substring(index + 1).toLowerCase();
+				if ("dls".equals(fileExtension))
+					format = SOUND_FORMAT_DLS;
+				else if ("sf2".equals(fileExtension))
+					format = SOUND_FORMAT_SF2;
+				else
+					throw new ParseException(Dict.UNKNOWN_SOUND_EXT + fileName);
+			}
+			else {
+				format = SoundUrlHelper.getSoundFormat();
+			}
+			
+			// reset file - in case the parsing fails
+			soundFile   = null;
+			soundUrl    = null;
+			soundFormat = null;
+			
+			if (SOUND_FORMAT_DLS.equals(format)) {
+				// load URL
+				soundfont   = new DLSSoundbank(url);
+				soundFormat = SOUND_FORMAT_DLS;
+			}
+			else {
+				// load the soundfont
+				soundfont   = new SF2Soundbank(url);
+				soundFormat = SOUND_FORMAT_SF2;
+			}
 			MidiDevices.setSoundfont(soundfont);
 			
 			// read it and build up data structures
@@ -75,44 +139,95 @@ public class SoundfontParser implements IParser {
 			parseSoundfontInfo();
 			
 			// parsing successful - save the file info
-			soundfontFile = file;
+			if (file != null)
+				soundFile = file;
+			else
+				soundUrl = url;
+		}
+		catch (MalformedURLException e) {
+			throw new ParseException(Dict.get(Dict.INVALID_URL) + fullPath);
+		}
+		catch (UnknownHostException e) {
+			throw new ParseException(Dict.get(Dict.UNKNOWN_HOST) + e.getMessage());
+		}
+		catch (RIFFInvalidFormatException e) {
+			throw new ParseException(Dict.get(Dict.INVALID_RIFF) + e.getMessage());
 		}
 		catch (IOException e) {
-			throw new ParseException(e.getMessage());
+			throw new ParseException(Dict.get(Dict.CANNOT_OPEN_SOUND) + e.getMessage());
 		}
 	}
 	
 	/**
-	 * Returns the base name of the successfully loaded custom soundfont
-	 * file.
-	 * If no custom soundfont is loaded successfully, **null** is returned.
+	 * Returns the format of the successfully selected soundbank.
 	 * 
-	 * @return the soundfont file name or **null**.
+	 * @return **sf2**, **dls** or **null**.
 	 */
-	public static String getFileName() {
-		if (null == soundfontFile) {
-			return null;
-		}
-		return soundfontFile.getName();
+	public static String getSoundFormat() {
+		return soundFormat;
 	}
 	
 	/**
-	 * Returns the absolute path of the successfully loaded custom soundfont
-	 * file.
-	 * If no custom soundfont is loaded successfully, **null** is returned.
+	 * Indicates where the currently loaded soundbank has come from.
 	 * 
-	 * @return the soundfont file path or **null**.
+	 * @return **FROM_FILE**, **FROM_URL** or **FROM_UNKNOWN**.
 	 */
-	public static String getFilePath() {
-		if (null == soundfontFile) {
-			return null;
+	public static int getSource() {
+		if (soundFile != null)
+			return FROM_FILE;
+		if (soundUrl != null)
+			return FROM_URL;
+		return FROM_UNKNOWN;
+	}
+	
+	/**
+	 * Returns a short name of the successfully loaded sound file or url
+	 * for displaying in the main window.
+	 * 
+	 * In case of a file the base name of the file is used.
+	 * 
+	 * In case of a URL it's a possibly shortened form of the url.
+	 * 
+	 * If no custom file or URL is loaded successfully, **null** is returned.
+	 * 
+	 * @return the soundfont file name or shortened URL or **null**.
+	 */
+	public static String getShortName() {
+		if (soundFile != null) {
+			String prefix = Dict.get(Dict.SOUND_FROM_FILE);
+			return prefix + soundFile.getName();
 		}
+		if (soundUrl != null) {
+			String prefix = Dict.get(Dict.SOUND_FROM_URL);
+			String urlPath = soundUrl.getPath();
+			int index = urlPath.lastIndexOf('/');
+			return prefix + urlPath.substring(index + 1);
+		}
+		return null;
+	}
+	
+	/**
+	 * Returns the long version of the successfully loaded custom sound
+	 * file or URL.
+	 * 
+	 * In case of a file, the absolute path is returned.
+	 * 
+	 * In case of a URL, the full URL is returned.
+	 * 
+	 * If no custom sound is loaded successfully, **null** is returned.
+	 * 
+	 * @return the sound file path or URL or **null**.
+	 */
+	public static String getFullPath() {
 		try {
-			return soundfontFile.getCanonicalPath();
+			if (soundFile != null)
+				return soundFile.getCanonicalPath();
+			if (soundUrl != null)
+				return soundUrl.toString();
 		}
 		catch (IOException e) {
-			return null;
 		}
+		return null;
 	}
 	
 	/**

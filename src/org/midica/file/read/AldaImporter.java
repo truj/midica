@@ -46,9 +46,11 @@ public class AldaImporter extends MidiParser {
 	/**
 	 * Parses an ALDA file.
 	 * 
-	 * @param file  ALDA file to be parsed.
+	 * @param fileAsObj  ALDA file to be parsed.
 	 */
-	public void parse(File file) throws ParseException {
+	@Override
+	public void parse(Object fileAsObj) throws ParseException {
+		File file = (File) fileAsObj;
 		
 		// reset file name and file type
 		preprocess(file);

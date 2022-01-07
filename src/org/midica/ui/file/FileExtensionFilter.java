@@ -56,8 +56,9 @@ public class FileExtensionFilter extends FileFilter {
 			allowedExtensions.add("midi");
 			allowedExtensions.add("kar");
 		}
-		else if (FileSelector.FILE_TYPE_SOUNDFONT.equals(type)) {
+		else if (FileSelector.FILE_TYPE_SOUND_FILE.equals(type)) {
 			allowedExtensions.add("sf2");
+			allowedExtensions.add("dls");
 		}
 		else if (FileSelector.FILE_TYPE_ALDA.equals(type)) {
 			allowedExtensions.add("alda");

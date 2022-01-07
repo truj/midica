@@ -417,10 +417,10 @@ public class MidicaPLParser extends SequenceParser {
 	/**
 	 * Parses a MidicaPL source file. Creates a MIDI sequence from that file.
 	 * 
-	 * @param file  MidicaPL source file.
+	 * @param fileAsObj  MidicaPL source file.
 	 */
-	public void parse(File file) throws ParseException {
-		this.file = file;
+	public void parse(Object fileAsObj) throws ParseException {
+		this.file = (File) fileAsObj;
 		
 		// clean up and make parser ready for parsing
 		if (isRootParser) {

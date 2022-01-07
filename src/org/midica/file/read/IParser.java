@@ -7,8 +7,6 @@
 
 package org.midica.file.read;
 
-import java.io.File;
-
 /**
  * This interface can be implemented by parser classes which can
  * parse an input file.
@@ -27,10 +25,10 @@ public interface IParser {
 	/**
 	 * Parses an input file.
 	 * 
-	 * @param file             Input file written in a format that the derived
-	 *                         parser class can parse.
-	 * @throws ParseException  If the file can not be parsed correctly.
+	 * @param fileOrUrl        Input file or URL (as string) written in a format that
+	 *                         the derived parser class can parse.
+	 * @throws ParseException  If the file or URL can not be parsed correctly.
 	 */
-	public void parse( File file ) throws ParseException;
+	public void parse(Object fileOrUrl) throws ParseException;
 	
 }

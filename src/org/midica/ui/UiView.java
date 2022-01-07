@@ -51,7 +51,7 @@ public class UiView extends JFrame {
 	public static final String NAME_SELECT_SYNTAX     = "name_select_syntax";
 	public static final String NAME_SELECT_PERCUSSION = "name_select_percussion";
 	public static final String NAME_SELECT_INSTRUMENT = "name_select_instrument";
-	public static final String NAME_REMEMBER_SF       = "name_remember_sf";
+	public static final String NAME_REMEMBER_SOUND    = "name_remember_sound";
 	public static final String NAME_REMEMBER_IMPORT   = "name_remember_import";
 	
 	public static final String CMD_SELECT_LANGUAGE     = "select_language";
@@ -88,7 +88,7 @@ public class UiView extends JFrame {
 	private MidicaButton                    btnSelectImport        = null;
 	private MidicaButton                    btnSelectSoundfont     = null;
 	private MidicaButton                    btnExport              = null;
-	private JCheckBox                       cbxRememberSf          = null;
+	private JCheckBox                       cbxRememberSound       = null;
 	private JCheckBox                       cbxRememberImport      = null;
 	
 	/**
@@ -478,8 +478,8 @@ public class UiView extends JFrame {
 		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.gridheight = 1;
-		cbxRememberImport = new JCheckBox(Dict.get(Dict.REMEMBER_MPL));
-		cbxRememberImport.setToolTipText(Dict.get(Dict.REMEMBER_MPL_TT));
+		cbxRememberImport = new JCheckBox(Dict.get(Dict.REMEMBER_IMPORT));
+		cbxRememberImport.setToolTipText(Dict.get(Dict.REMEMBER_IMPORT_TT));
 		cbxRememberImport.addItemListener(controller);
 		String remember = Config.get(Config.REMEMBER_IMPORT);
 		if ("true".equals(remember)) {
@@ -540,7 +540,7 @@ public class UiView extends JFrame {
 	 */
 	private Container createSoundfontArea() {
 		JPanel area = new JPanel();
-		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.SOUNDFONT)) );
+		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.SOUNDBANK)) );
 		
 		// layout
 		GridBagLayout layout = new GridBagLayout();
@@ -554,10 +554,10 @@ public class UiView extends JFrame {
 		constraints.gridwidth  = 1;
 		constraints.weightx    = 0.5;
 		
-		// soundfont label
-		JLabel lblSndFont = new JLabel(Dict.get(Dict.SOUNDFONT));
-		Laf.makeBold(lblSndFont);
-		area.add(lblSndFont, constraints);
+		// soundbank label
+		JLabel lblSndBnk = new JLabel(Dict.get(Dict.SOUNDBANK));
+		Laf.makeBold(lblSndBnk);
+		area.add(lblSndBnk, constraints);
 		constraints.insets = Laf.INSETS_IN;
 		
 		// file selector button
@@ -568,20 +568,20 @@ public class UiView extends JFrame {
 		btnSelectSoundfont.addActionListener(controller);
 		area.add(btnSelectSoundfont, constraints);
 		
-		// remember soundfont checkbox
+		// remember sound checkbox
 		constraints.insets = Laf.INSETS_LBL_IMPORT_EXPORT;
 		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.gridheight = 1;
-		cbxRememberSf = new JCheckBox(Dict.get(Dict.REMEMBER_SF));
-		cbxRememberSf.setToolTipText(Dict.get(Dict.REMEMBER_SF_TT));
-		cbxRememberSf.addItemListener(controller);
-		String remember = Config.get(Config.REMEMBER_SF2);
+		cbxRememberSound = new JCheckBox(Dict.get(Dict.REMEMBER_SOUND));
+		cbxRememberSound.setToolTipText(Dict.get(Dict.REMEMBER_SOUND_TT));
+		cbxRememberSound.addItemListener(controller);
+		String remember = Config.get(Config.REMEMBER_SOUND);
 		if ("true".equals(remember)) {
-			cbxRememberSf.setSelected(true);
+			cbxRememberSound.setSelected(true);
 		}
-		cbxRememberSf.setName(NAME_REMEMBER_SF);
-		area.add(cbxRememberSf, constraints);
+		cbxRememberSound.setName(NAME_REMEMBER_SOUND);
+		area.add(cbxRememberSound, constraints);
 		constraints.insets = Laf.INSETS_IN;
 		
 		// line
@@ -591,7 +591,7 @@ public class UiView extends JFrame {
 		
 		// file name label
 		constraints.gridy++;
-		JLabel lblImportedFile = new JLabel(Dict.get(Dict.CURRENT_SOUNDFONT));
+		JLabel lblImportedFile = new JLabel(Dict.get(Dict.CURRENT_SOUNDBANK));
 		Laf.makeBold(lblImportedFile);
 		area.add(lblImportedFile, constraints);
 		constraints.insets = Laf.INSETS_IN;
@@ -601,10 +601,11 @@ public class UiView extends JFrame {
 		lblChosenSoundfontFile = new JLabel(Dict.get(Dict.UNCHOSEN_FILE));
 		lblChosenSoundfontFile.setPreferredSize(MAX_FILE_NAME_DIM);
 		area.add(lblChosenSoundfontFile, constraints);
-		String soundfontFileName = SoundfontParser.getFileName();
-		if (soundfontFileName != null) {
-			lblChosenSoundfontFile.setText(soundfontFileName);
-			lblChosenSoundfontFile.setToolTipText(soundfontFileName);
+		String soundShortName = SoundfontParser.getShortName();
+		String soundFullPath  = SoundfontParser.getFullPath();
+		if (soundShortName != null) { // may be != null after switching the language
+			lblChosenSoundfontFile.setText(soundShortName);
+			lblChosenSoundfontFile.setToolTipText(soundFullPath);
 		}
 		
 		return area;

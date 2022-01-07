@@ -45,9 +45,11 @@ public class MusescoreImporter extends MidiParser {
 	/**
 	 * Imports a file using MuseScore.
 	 * 
-	 * @param file  file to be imported.
+	 * @param fileAsObj  file to be imported.
 	 */
-	public void parse(File file) throws ParseException {
+	@Override
+	public void parse(Object fileAsObj) throws ParseException {
+		File file = (File) fileAsObj;
 		
 		// reset file name and file type
 		preprocess(file);
