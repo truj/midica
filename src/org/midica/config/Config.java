@@ -26,7 +26,6 @@ import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.midica.file.read.SoundfontParser;
 import org.midica.file.write.AudioExporter;
 import org.midica.file.write.Decompiler;
 import org.midica.ui.file.FileSelector;
@@ -93,7 +92,6 @@ public class Config {
 	public static final String REMEMBER_IMPORT         = "remember_import";
 	public static final String IMPORT_TYPE             = "import_type";
 	public static final String SOUND_SOURCE            = "sound_source";
-	public static final String URL_SOUND_FORMAT        = "url_sound_format";
 	public static final String TAB_FILE_IMPORT         = "tab_file_import";
 	public static final String TAB_FILE_SOUND          = "tab_file_sound";
 	public static final String TAB_FILE_EXPORT         = "tab_file_export";
@@ -317,7 +315,6 @@ public class Config {
 		defaults.put( EXEC_PATH_EXP_MSCORE,    "musescore3" );
 		defaults.put( IMPORT_TYPE,             FileSelector.FILE_TYPE_MPL );
 		defaults.put( SOUND_SOURCE,            FileSelector.FILE_TYPE_SOUND_FILE );
-		defaults.put( URL_SOUND_FORMAT,        SoundfontParser.SOUND_FORMAT_DLS );
 		defaults.put( TAB_FILE_IMPORT,         "0"          );
 		defaults.put( TAB_FILE_SOUND,          "0"          );
 		defaults.put( TAB_FILE_EXPORT,         "0"          );
@@ -751,7 +748,6 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_URL,        KeyEvent.VK_2,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_URL,        KeyEvent.VK_NUMPAD2,  InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_URL_FLD,    KeyEvent.VK_U,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_FORMAT_CBX, KeyEvent.VK_F,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_DOWNLOAD,   KeyEvent.VK_D,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_MID,        KeyEvent.VK_1,        0                          );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_MID,        KeyEvent.VK_NUMPAD1,  0                          );

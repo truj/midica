@@ -715,8 +715,9 @@ public final class SoftSynthesizer implements AudioSynthesizer,
                         	sbk = reader.getSoundbank(is);
                         }
                         else if ("com.sun.media.sound.DLSSoundbank".equals(sbk.getClass().getCanonicalName())) {
-                        	// DLS: not yet implemented
-                        	continue;
+                        	// DLS
+                        	DLSSoundbankReader reader = new DLSSoundbankReader();
+                        	sbk = reader.getSoundbank(is);
                         }
                         else {
                         	// JARSoundbank or something else: not yet implemented

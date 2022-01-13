@@ -270,7 +270,6 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		String typeConfigVal      = "";
 		String pathConfigKey      = "";
 		String path               = "";
-		String urlSoundFormat     = null;
 		int    soundSource        = SoundfontParser.FROM_UNKNOWN;
 		String soundSourceStr     = null;
 		
@@ -285,7 +284,6 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			}
 			else if (SoundfontParser.FROM_URL == soundSource) {
 				pathConfigKey  = Config.SOUND_URL;
-				urlSoundFormat = SoundfontParser.getSoundFormat();
 				soundSourceStr = FileSelector.FILE_TYPE_SOUND_URL;
 			}
 		}
@@ -328,8 +326,6 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 				Config.set(pathConfigKey, path);
 			if (! typeConfigVal.equals(""))
 				Config.set(Config.IMPORT_TYPE, typeConfigVal);
-			if (urlSoundFormat != null)
-				Config.set(Config.URL_SOUND_FORMAT, urlSoundFormat);
 			if (soundSourceStr != null)
 				Config.set(Config.SOUND_SOURCE, soundSourceStr);
 		}
@@ -481,8 +477,6 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 					}
 					else if (FileSelector.FILE_TYPE_SOUND_URL.equals(type)) {
 						Config.set(Config.SOUND_URL, url);
-						String urlSoundFormat = SoundfontParser.getSoundFormat();
-						Config.set(Config.URL_SOUND_FORMAT, urlSoundFormat);
 					}
 					Config.set(Config.SOUND_SOURCE, type);
 				}

@@ -40,11 +40,9 @@ public class SoundUrlHelper {
 		
 	public static final String CMD_URL_CHOSEN = "cmd_url_chosen";
 	
-	private static String url         = null;
-	private static String soundFormat = null;
+	private static String url = null;
 	
-	private static JTextField fldUrl = null;
-	private static JComboBox<ComboboxStringOption> cbxFormat = null;
+	private static JTextField   fldUrl  = null;
 	private static MidicaButton btnOpen = null;
 	
 	/**
@@ -91,16 +89,6 @@ public class SoundUrlHelper {
 		fldUrl = new JTextField();
 		area.add(fldUrl, constraints);
 		
-		// format label
-		constraints.gridy++;
-		JLabel lblFormat = new JLabel(Dict.get(Dict.SOUND_FORMAT));
-		area.add(lblFormat, constraints);
-		
-		// format selectbox
-		constraints.gridy++;
-		cbxFormat = new JComboBox<ComboboxStringOption>();
-		area.add(cbxFormat, constraints);
-		
 		// vertical spacer
 		constraints.gridy++;
 		constraints.weighty = 1;
@@ -128,21 +116,7 @@ public class SoundUrlHelper {
 		MidicaButton btnClose = new MidicaButton(Dict.get(Dict.CLOSE), false);
 		area.add(btnClose, constraints);
 		
-		// create and add selectbox model
-		ArrayList<ComboboxStringOption> cbxOptions = new ArrayList<>();
-		cbxOptions.add(new ComboboxStringOption(SoundfontParser.SOUND_FORMAT_DLS, Dict.get(Dict.SOUND_TYPE_DLS)));
-		cbxOptions.add(new ComboboxStringOption(SoundfontParser.SOUND_FORMAT_SF2, Dict.get(Dict.SOUND_TYPE_SF2)));
-		ConfigComboboxModel.initModel(cbxOptions, Config.URL_SOUND_FORMAT);
-		cbxFormat.setModel(ConfigComboboxModel.getModel(Config.URL_SOUND_FORMAT));
-		
 		// add listeners
-		cbxFormat.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				ComboboxStringOption item = (ComboboxStringOption) cbxFormat.getSelectedItem();
-				soundFormat = item.getIdentifier();
-			}
-		});
 		fldUrl.getDocument().addDocumentListener(new DocumentListener() {
 			@Override
 			public void removeUpdate(DocumentEvent e) {
@@ -176,15 +150,6 @@ public class SoundUrlHelper {
 	}
 	
 	/**
-	 * Returns the selected sound format.
-	 * 
-	 * @return selected sound format
-	 */
-	public static String getSoundFormat() {
-		return soundFormat;
-	}
-	
-	/**
 	 * Writes the url into the text field.
 	 * Needed on startup, when remember_sound is set.
 	 * 
@@ -195,16 +160,6 @@ public class SoundUrlHelper {
 	}
 	
 	/**
-	 * Sets the sound url format.
-	 * Needed on startup, when remember_sound is set.
-	 * 
-	 * @param format
-	 */
-	public static void setSoundUrlFormat(String format) {
-		soundFormat = format;
-	}
-	
-	/**
 	 * Returns the url text field.
 	 * Needed for the initialization of key bindings.
 	 * 
@@ -212,16 +167,6 @@ public class SoundUrlHelper {
 	 */
 	public static JTextField getUrlField() {
 		return fldUrl;
-	}
-	
-	/**
-	 * Returns the format combobox.
-	 * Needed for the initialization of key bindings.
-	 * 
-	 * @return
-	 */
-	public static JComboBox<ComboboxStringOption> getFormatCbx() {
-		return cbxFormat;
 	}
 	
 	/**

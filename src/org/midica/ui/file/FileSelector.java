@@ -366,10 +366,9 @@ public class FileSelector extends JDialog {
 			}
 		});
 		
-		// set configured sound url and format
+		// set configured sound url
 		if (isSound) {
 			SoundUrlHelper.setUrl(Config.get(Config.SOUND_URL));
-			SoundUrlHelper.setSoundUrlFormat(Config.get(Config.URL_SOUND_FORMAT));
 		}
 		
 		addKeyBindings();
@@ -491,9 +490,6 @@ public class FileSelector extends JDialog {
 			ArrayList<JTextField> urlFields = new ArrayList<>();
 			urlFields.add(SoundUrlHelper.getUrlField());
 			keyBindingManager.addBindingsForFocusOfVisibleElement(urlFields, Dict.KEY_FILE_SELECTOR_SND_URL_FLD);
-			ArrayList<JComboBox<?>> comboboxes = new ArrayList<>();
-			comboboxes.add(SoundUrlHelper.getFormatCbx());
-			keyBindingManager.addBindingsForComboboxOfVisibleElement(comboboxes, Dict.KEY_FILE_SELECTOR_SND_FORMAT_CBX);
 			ArrayList<MidicaButton> buttons = new ArrayList<>();
 			buttons.add(SoundUrlHelper.getDownloadButton());
 			keyBindingManager.addBindingsForButtonOfVisibleElement(buttons, Dict.KEY_FILE_SELECTOR_SND_DOWNLOAD);

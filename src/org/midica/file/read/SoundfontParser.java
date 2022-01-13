@@ -7,12 +7,18 @@
 
 package org.midica.file.read;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,7 +35,6 @@ import javax.sound.sampled.AudioInputStream;
 
 import org.midica.config.Dict;
 import org.midica.midi.MidiDevices;
-import org.midica.ui.file.SoundUrlHelper;
 
 import com.sun.gervill.DLSSoundbank;
 import com.sun.gervill.RIFFInvalidFormatException;
@@ -83,78 +88,80 @@ public class SoundfontParser implements IParser {
 	 */
 	public void parse(Object fileOrUrl) throws ParseException {
 		
+		// define the sound formats to be tried
+		ArrayList<String> formats = new ArrayList<String>();
+		formats.add(SOUND_FORMAT_SF2);
+		formats.add(SOUND_FORMAT_DLS);
+		
+		// file or url?
 		String fullPath = fileOrUrl.toString();
+		URL  url        = null;
+		File file       = null;
+		File cachedFile = null;
 		try {
-			// convert file or string to URL
-			URL  url  = null;
-			File file = null;
 			if (fileOrUrl instanceof String) {
-				String urlStr = (String) fileOrUrl;
-				url = new URL(urlStr);
+				url = new URL((String) fileOrUrl);
+				cachedFile = getCachedFile(url);
+				Collections.reverse(formats); // try dls first
 			}
 			else {
 				file = (File) fileOrUrl;
-				url  = file.toURI().toURL();
+				if (!file.exists()) {
+					throw new ParseException(Dict.get(Dict.ERROR_FILE_EXISTS) + fileOrUrl);
+				}
 			}
-			
-			// get format
-			String format = null;
-			if (file != null) {
-				String fileName      = file.getName();
-				String fileExtension = "";
-				int index = fileName.lastIndexOf('.');
-				if (index > 0)
-					fileExtension = fileName.substring(index + 1).toLowerCase();
-				if ("dls".equals(fileExtension))
-					format = SOUND_FORMAT_DLS;
-				else if ("sf2".equals(fileExtension))
-					format = SOUND_FORMAT_SF2;
-				else
-					throw new ParseException(Dict.UNKNOWN_SOUND_EXT + fileName);
-			}
-			else {
-				format = SoundUrlHelper.getSoundFormat();
-			}
-			
-			// reset file - in case the parsing fails
-			soundFile   = null;
-			soundUrl    = null;
-			soundFormat = null;
-			
-			if (SOUND_FORMAT_DLS.equals(format)) {
-				// load URL
-				soundfont   = new DLSSoundbank(url);
-				soundFormat = SOUND_FORMAT_DLS;
-			}
-			else {
-				// load the soundfont
-				soundfont   = new SF2Soundbank(url);
-				soundFormat = SOUND_FORMAT_SF2;
-			}
-			MidiDevices.setSoundfont(soundfont);
-			
-			// read it and build up data structures
-			parseSoundfontInstruments();
-			parseSoundfontResources();
-			parseSoundfontInfo();
-			
-			// parsing successful - save the file info
-			if (file != null)
-				soundFile = file;
-			else
-				soundUrl = url;
 		}
 		catch (MalformedURLException e) {
 			throw new ParseException(Dict.get(Dict.INVALID_URL) + fullPath);
 		}
-		catch (UnknownHostException e) {
-			throw new ParseException(Dict.get(Dict.UNKNOWN_HOST) + e.getMessage());
+		
+		// try both formats
+		File fileToParse = file != null ? file : cachedFile;
+		StringBuffer errorMsg = new StringBuffer("<html>");
+		boolean success = false;
+		for (String format : formats) {
+			try {
+				errorMsg.append(String.format(Dict.get(Dict.SOUND_FORMAT_FAILED), format));
+				if (SOUND_FORMAT_DLS.equals(format)) {
+					soundfont   = new DLSSoundbank(fileToParse);
+					soundFormat = SOUND_FORMAT_DLS;
+				}
+				else {
+					soundfont   = new SF2Soundbank(fileToParse);
+					soundFormat = SOUND_FORMAT_SF2;
+				}
+				success = true;
+				break;
+			}
+			catch (RIFFInvalidFormatException e) {
+				errorMsg.append(Dict.get(Dict.INVALID_RIFF) + "<br>" + e.getMessage() + "<br><br>");
+			}
+			catch (IOException e) {
+				errorMsg.append(Dict.get(Dict.CANNOT_OPEN_SOUND) + "<br>" + e.getMessage() + "<br><br>");
+			}
 		}
-		catch (RIFFInvalidFormatException e) {
-			throw new ParseException(Dict.get(Dict.INVALID_RIFF) + e.getMessage());
+		
+		// success or error?
+		if (success) {
+			MidiDevices.setSoundfont(soundfont);
 		}
-		catch (IOException e) {
-			throw new ParseException(Dict.get(Dict.CANNOT_OPEN_SOUND) + e.getMessage());
+		else {
+			throw new ParseException(errorMsg.toString());
+		}
+		
+		// read it and build up data structures
+		parseSoundfontInstruments();
+		parseSoundfontResources();
+		parseSoundfontInfo();
+		
+		// parsing successful - save the file info
+		if (file != null) {
+			soundFile = file;
+			soundUrl  = null;
+		}
+		else {
+			soundUrl  = url;
+			soundFile = null;
 		}
 	}
 	
@@ -164,6 +171,7 @@ public class SoundfontParser implements IParser {
 	 * @return **sf2**, **dls** or **null**.
 	 */
 	public static String getSoundFormat() {
+		// TODO: use from InfoView
 		return soundFormat;
 	}
 	
@@ -280,6 +288,68 @@ public class SoundfontParser implements IParser {
 			parseSoundfontResources();
 		
 		return soundfontResources;
+	}
+	
+	/**
+	 * Download and cache the url, if not yet done, and/or returns the cached file.
+	 * 
+	 * @param url  the url to be downloaded.
+	 * @return the cached file.
+	 * @throws ParseException if something goes wrong
+	 */
+	private File getCachedFile(URL url) throws ParseException {
+		
+		// get url hash
+		String hash = null;
+		try {
+			MessageDigest md = MessageDigest.getInstance("SHA-256");
+			byte[] digest = md.digest(url.toString().getBytes());
+			StringBuffer hexStr = new StringBuffer();
+			for (byte b : digest) {
+				hexStr.append(Integer.toHexString(0xFF & b));
+			}
+			hash = hexStr.toString();
+		}
+		catch (NoSuchAlgorithmException e) {
+			throw new ParseException("SHA-256 not supported");
+		}
+		
+		// create cache directory, if not yet done
+		String homeDir = System.getProperty("user.home");
+		File cacheDir = new File(homeDir + File.separator + ".midica.d" + File.separator + "sound_cache");
+		cacheDir.mkdirs();
+		if (!cacheDir.exists())
+			throw new ParseException(Dict.get(Dict.COULDNT_CREATE_CACHE_DIR) + cacheDir);
+		
+		// file already cached?
+		File cachedFile = new File(cacheDir + File.separator + hash);
+		if (cachedFile.exists()) {
+			return cachedFile;
+		}
+		
+		// download and cache file
+		try {
+			
+			// create temp file
+			Path tmpPath = Files.createTempFile(null, null);
+			File tmpFile = tmpPath.toFile();
+			tmpFile.deleteOnExit();
+			
+			// download soundbank to temp file
+			try (BufferedInputStream in = new BufferedInputStream(url.openStream())) {
+				Files.copy(in, tmpPath, StandardCopyOption.REPLACE_EXISTING);
+			}
+			
+			// move temp file to cache
+			Files.move(tmpPath, cachedFile.toPath());
+			return cachedFile;
+		}
+		catch (UnknownHostException e) {
+			throw new ParseException(Dict.get(Dict.UNKNOWN_HOST) + e.getMessage());
+		}
+		catch (IOException e) {
+			throw new ParseException(Dict.get(Dict.DOWNLOAD_PROBLEM) + url);
+		}
 	}
 	
 	/**

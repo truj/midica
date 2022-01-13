@@ -79,11 +79,13 @@ If you prefer to write your music in ALDA or ABC, you need to:
 - **Converter**
     - converts various formats to MIDI (MidicaPL, ALDA, ABC, LilyPond, MusicXML, MuseScore, Guitar Pro, Capella, Bagpipe, Overture, Score Writer, PowerTab)
     - converts MIDI to various formats (MidicaPL, ALDA, Audio, ABC, Lilypond, MuseScore, MusicXML and others)
-- **Soundfonts**
-    - Loading Soundfonts and using them for playback
-    - Analyzing Soundfont contents
-    - Test Soundfonts with the Soundcheck window
-    - Using the loaded soundfont for Audio exports
+- **Soundbanks**
+    - Loading Soundfonts (SF2) or Downloadable Sounds (DLS) and using them for playback
+      - either from an SF2 or DLS file
+      - or via download (with caching, both formats work)
+    - Analyzing Soundbank contents
+    - Test Soundbanks with the Soundcheck window
+    - Using the loaded soundbank for Audio exports
 - **Configuration** of
     - GUI language (currently English or German)
     - Note System - (6 different systems), e.g. International (C,D,E,F,G,A,B), German (C,D,E,F,G,A,H), Italian (Do,Re,Mi,Fa,Sol,La,Si)
@@ -330,7 +332,8 @@ ARGUMENTS:
                         Without this argument the config is read from and
                         written into the file '.midica.conf' in the current
                         user's home directory.
---soundfont=PATH      : Use the specified soundfont file.
+--soundbank=PATH      : Use the specified soundbank file (.sf2 or .dls).
+--soundbank=URL       : Use the specified soundbank URL (SF2 or DLS).
 --import=PATH         : Import from the specified MidicaPL file.
 --import-midi=PATH    : Import from the specified MIDI file.
 --import-alda=PATH    : Import from the specified ALDA file by calling the

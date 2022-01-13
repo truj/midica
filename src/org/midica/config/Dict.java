@@ -693,7 +693,6 @@ public class Dict {
 	public static final String KEY_FILE_SELECTOR_SND_FILE       = "key_file_selector_snd_file";
 	public static final String KEY_FILE_SELECTOR_SND_URL        = "key_file_selector_snd_url";
 	public static final String KEY_FILE_SELECTOR_SND_URL_FLD    = "key_file_selector_url_fld";
-	public static final String KEY_FILE_SELECTOR_SND_FORMAT_CBX = "key_file_selector_url_format_cbx";
 	public static final String KEY_FILE_SELECTOR_SND_DOWNLOAD   = "key_file_selector_url_download";
 	public static final String KEY_FILE_SELECTOR_EXP_MID        = "key_file_selector_exp_mid";
 	public static final String KEY_FILE_SELECTOR_EXP_MPL        = "key_file_selector_exp_mpl";
@@ -1478,8 +1477,11 @@ public class Dict {
 	public static final String UNKNOWN_SOUND_EXT           = "unknown_sound_ext";
 	public static final String INVALID_URL                 = "invalid_url";
 	public static final String UNKNOWN_HOST                = "unknown_host";
+	public static final String SOUND_FORMAT_FAILED         = "sound_format_failed";
 	public static final String INVALID_RIFF                = "invalid_riff";
 	public static final String CANNOT_OPEN_SOUND           = "cannot_open_sound";
+	public static final String DOWNLOAD_PROBLEM            = "download_problem";
+	public static final String COULDNT_CREATE_CACHE_DIR    = "couldnt_create_cache_dir";
 	public static final String SOUND_FROM_FILE             = "sound_from_file";
 	public static final String SOUND_FROM_URL              = "sound_from_url";
 	
@@ -1766,9 +1768,6 @@ public class Dict {
 	public static final String DIRECT_IMPORT               = "direct_import";
 	public static final String FILE_OPTIONS                = "file_options";
 	public static final String SOUND_URL                   = "sound_url";
-	public static final String SOUND_FORMAT                = "sound_format";
-	public static final String SOUND_TYPE_SF2              = "sound_type_sf2";
-	public static final String SOUND_TYPE_DLS              = "sound_type_dls";
 	public static final String SOUND_DOWNLOAD              = "sound_download";
 	
 	// PlayerView
@@ -2169,7 +2168,6 @@ public class Dict {
 		set( KEY_FILE_SELECTOR_SND_FILE,       "In the SOUNDBANK selector, select the File Tab"                              );
 		set( KEY_FILE_SELECTOR_SND_URL,        "In the SOUNDBANK selector, select the URL Tab"                               );
 		set( KEY_FILE_SELECTOR_SND_URL_FLD,    "In the SOUNDBANK selector, focus the URL text field"                         );
-		set( KEY_FILE_SELECTOR_SND_FORMAT_CBX, "In the SOUNDBANK selector, open the FORMAT combobox"                         );
 		set( KEY_FILE_SELECTOR_SND_DOWNLOAD,   "In the SOUNDBANK selector, press the DOWNLOAD button"                        );
 		set( KEY_FILE_SELECTOR_EXP_MID,        "In the EXPORT selector, select the MIDI Tab"                                 );
 		set( KEY_FILE_SELECTOR_EXP_MPL,        "In the EXPORT selector, select the MidicaPL Tab"                             );
@@ -2315,9 +2313,6 @@ public class Dict {
 		set( DIRECT_IMPORT,             "Directly import the exported file"                    );
 		set( FILE_OPTIONS,              "Options:"                                             );
 		set( SOUND_URL,                 "Soundbank URL"                                        );
-		set( SOUND_FORMAT,              "Soundbank Format"                                     );
-		set( SOUND_TYPE_SF2,            "Soundfont (SF2)"                                      );
-		set( SOUND_TYPE_DLS,            "Downloadable Sounds (DLS)"                            );
 		set( SOUND_DOWNLOAD,            "Download Sound"                                       );
 		
 		// Foreign
@@ -3124,15 +3119,18 @@ public class Dict {
 		// UiControler + PlayerControler
 		set( ERROR_IN_LINE,                       "<html>parsing error in file:<br>%s<br>line: %s<br>" );
 		
-		// SoundbankParser // TODO: rename from SoundfontParser
-		set( UNKNOWN_SOUND_EXT, "<html>Allowed file extensions: *.sf2 or *.dls"
-		                      + "<br>Invalid file extension in file:<br>" );
-		set( INVALID_URL,       "Invalid url: "                           );
-		set( UNKNOWN_HOST,      "Unknown Host: "                          );
-		set( INVALID_RIFF,      "Invalid RIFF format: "                   );
-		set( CANNOT_OPEN_SOUND, "Unable to load soundbank: "              );
-		set( SOUND_FROM_FILE,   "[File] "                                 );
-		set( SOUND_FROM_URL,    "[URL] "                                  );
+		// SoundbankParser  // TODO: rename from SoundfontParser
+		set( UNKNOWN_SOUND_EXT,        "<html>Allowed file extensions: *.sf2 or *.dls"
+		                             + "<br>Invalid file extension in file:<br>"   );
+		set( INVALID_URL,              "Invalid url: "                             );
+		set( UNKNOWN_HOST,             "Unknown Host: "                            );
+		set( SOUND_FORMAT_FAILED,      "<b>Tried %s format</b><br><b>Failed:</b> " );
+		set( INVALID_RIFF,             "Invalid RIFF format"                       );
+		set( CANNOT_OPEN_SOUND,        "Unable to load soundbank"                  );
+		set( DOWNLOAD_PROBLEM,         "Unable to download from "                  );
+		set( COULDNT_CREATE_CACHE_DIR, "Unable to create cache directory: "        );
+		set( SOUND_FROM_FILE,          "[File] "                                   );
+		set( SOUND_FROM_URL,           "[URL] "                                    );
 		
 		// SequenceParser
 		set( ERROR_NOTE_TOO_BIG,                  "note number too big: "                                             );

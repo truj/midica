@@ -8,6 +8,7 @@
 package org.midica.config;
 
 import java.io.File;
+import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -16,7 +17,6 @@ import org.midica.file.write.AudioExporter;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.UiController;
 import org.midica.ui.file.FileSelector;
-import org.midica.ui.file.SoundUrlHelper;
 
 /**
  * This class handles command line options.
@@ -41,8 +41,6 @@ public class Cli {
 	public  static boolean exportToStdout   = false;
 	public  static String  exportErrorMsg   = null;
 	private static String  soundbankPath    = null;
-	private static String  soundbankUrl     = null;
-	private static String  soundbankFormat  = null;
 	private static String  importPathMpl    = null;
 	private static String  importPathMidi   = null;
 	private static String  importPathAlda   = null;
@@ -71,9 +69,8 @@ public class Cli {
 	public static void parseArguments(String[] args) {
 		Pattern patImport      = Pattern.compile("^\\-\\-(import|import\\-.+?)=(.+)$");
 		Pattern patExport      = Pattern.compile("^\\-\\-(export|export\\-.+?)=(.+)$");
-		Pattern patSoundbank   = Pattern.compile("^\\-\\-(sound\\-path)=(.+)$");
-		Pattern patSoundUrl    = Pattern.compile("^\\-\\-(sound\\-url\\-.+?)=(.+)$");
-		Pattern patInvalidPath = Pattern.compile("^\\-\\-((im|ex)port(\\-[\\w-]+?)|sound[\\w\\-]+?)(=|$)$");
+		Pattern patSoundbank   = Pattern.compile("^\\-\\-(soundbank)=(.+)$");
+		Pattern patInvalidPath = Pattern.compile("^\\-\\-((im|ex)port(\\-[\\w-]+?)|soundbank)(=|$)$");
 		
 		for (String arg : args) {
 			if ("--cli".equals(arg)) {
@@ -99,27 +96,8 @@ public class Cli {
 					m.matches();
 					soundbankPath = m.group(2);
 					if ("-".equals(soundbankPath)) {
-						help(false, arg + " not possible. Use a real PATH.");
+						help(false, arg + " not possible. Use a PATH or URL.");
 					}
-				}
-			}
-			else if (patSoundUrl.matcher(arg).matches()) {
-				if (useSoundbank) {
-					help(false, "More than one soundbank is not allowed!");
-				}
-				else {
-					useSoundbank = true;
-					Matcher m = patSoundUrl.matcher(arg);
-					m.matches();
-					String format = m.group(1);
-					soundbankUrl  = m.group(2);
-					
-					if ("sound-url-sf2".equals(format))
-						soundbankFormat = SoundfontParser.SOUND_FORMAT_SF2;
-					else if ("sound-url-dls".equals(format))
-						soundbankFormat = SoundfontParser.SOUND_FORMAT_DLS;
-					else
-						help(false, "Unknown soundbank format: --" + format);
 				}
 			}
 			else if (patImport.matcher(arg).matches()) {
@@ -262,9 +240,8 @@ public class Cli {
 		msg.append("                        Without this argument the config is read from and\n");
 		msg.append("                        written into the file '.midica.conf' in the current\n");
 		msg.append("                        user's home directory.\n");
-		msg.append("--sound-path=PATH     : Use the specified soundbank file (.sf2 or .dls).\n");
-		msg.append("--sound-url-sf2=URL   : Use the specified SF2 soundfont URL.\n");
-		msg.append("--sound-url-dls=URL   : Use the specified DLS soundbank URL.\n");
+		msg.append("--soundbank=PATH      : Use the specified soundbank file (.sf2 or .dls).\n");
+		msg.append("--soundbank=URL       : Use the specified soundbank URL (SF2 or DLS).\n");
 		msg.append("--import=PATH         : Import from the specified MidicaPL file.\n");
 		msg.append("--import-midi=PATH    : Import from the specified MIDI file.\n");
 		msg.append("--import-alda=PATH    : Import from the specified ALDA file by calling the\n");
@@ -311,23 +288,26 @@ public class Cli {
 		Object fileOrUrl        = null;
 		String fileSelectorType = null;
 		
-		// file?
-		if (soundbankPath != null) {
+		// file or url?
+		try {
+			new URL(soundbankPath);
+			fileOrUrl = soundbankPath;
+			fileSelectorType = FileSelector.FILE_TYPE_SOUND_URL;
+		}
+		catch (Exception e) {
 			fileOrUrl        = new File(soundbankPath);
 			fileSelectorType = FileSelector.FILE_TYPE_SOUND_FILE;
+			if (!((File)fileOrUrl).exists()) {
+				help(false, "Soundbank file does not exist: " + soundbankPath);
+			}
 		}
-		else {
-			// url
-			fileOrUrl        = soundbankUrl;
-			fileSelectorType = FileSelector.FILE_TYPE_SOUND_URL;
-			SoundUrlHelper.setSoundUrlFormat(soundbankFormat);
-		}
+		
+		// parse
 		uiController.parseChosenFile(fileSelectorType, fileOrUrl);
 		
 		// loading failed?
 		if (null == SoundfontParser.getFullPath()) {
-			String pathOrUrl = soundbankPath != null ? soundbankPath : soundbankUrl;
-			help(false, "Failed to load Soundbank: " + pathOrUrl);
+			help(false, "Failed to load Soundbank: " + soundbankPath);
 		}
 	}
 	
