@@ -280,8 +280,14 @@ public abstract class Decompiler extends Exporter {
 		model.postprocess();
 		
 		// charset
-		String targetCharset = ((ComboboxStringOption) ConfigComboboxModel.getModel(Config.CHARSET_EXPORT_MPL).getSelectedItem()).getIdentifier();
-		// TODO: ALDA charset
+		String targetCharset = "UTF-8";
+		try {
+			// TODO: ALDA charset
+			targetCharset = ((ComboboxStringOption) ConfigComboboxModel.getModel(Config.CHARSET_EXPORT_MPL).getSelectedItem()).getIdentifier();
+		}
+		catch (NullPointerException e) {
+			e.printStackTrace(); // bug #72
+		}
 		
 		try {
 			
