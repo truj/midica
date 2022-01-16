@@ -705,24 +705,23 @@ public final class SoftSynthesizer implements AudioSynthesizer,
                 try {
                     InputStream is = AccessController.doPrivileged(action);
                     if(is == null) continue;
-                    Soundbank sbk;
+                    Soundbank sbk = null;
                     try {
-                        sbk = MidiSystem.getSoundbank(new BufferedInputStream(is));
                         
-                        // SF2
-                        if ("com.sun.media.sound.SF2Soundbank".equals(sbk.getClass().getCanonicalName())) {
-                        	SF2SoundbankReader reader = new SF2SoundbankReader();
-                        	sbk = reader.getSoundbank(is);
-                        }
-                        else if ("com.sun.media.sound.DLSSoundbank".equals(sbk.getClass().getCanonicalName())) {
-                        	// DLS
-                        	DLSSoundbankReader reader = new DLSSoundbankReader();
-                        	sbk = reader.getSoundbank(is);
-                        }
-                        else {
-                        	// JARSoundbank or something else: not yet implemented
-                        	continue;
-                        }
+                    	// try DLS first
+                    	try {
+                    		sbk = new DLSSoundbank(new BufferedInputStream(is));
+                    	}
+                    	catch (Exception exSf2) {
+                    		
+                    		// re-open input stream
+                    		is.close();
+                    		is = AccessController.doPrivileged(action);
+                    		if(is == null) continue;
+                    		
+                    		// try SF2 next
+                    		sbk = new SF2Soundbank(new BufferedInputStream(is));
+                    	}
                     } finally {
                         is.close();
                     }
