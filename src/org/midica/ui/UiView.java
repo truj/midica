@@ -27,7 +27,7 @@ import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.config.KeyBindingManager;
 import org.midica.config.Laf;
-import org.midica.file.read.SoundfontParser;
+import org.midica.file.read.SoundbankParser;
 import org.midica.ui.model.ComboboxStringOption;
 import org.midica.ui.model.ConfigComboboxModel;
 import org.midica.ui.widget.MidicaButton;
@@ -601,8 +601,8 @@ public class UiView extends JFrame {
 		lblChosenSoundbankFile = new JLabel(Dict.get(Dict.UNCHOSEN_FILE));
 		lblChosenSoundbankFile.setPreferredSize(MAX_FILE_NAME_DIM);
 		area.add(lblChosenSoundbankFile, constraints);
-		String soundShortName = SoundfontParser.getShortName();
-		String soundFullPath  = SoundfontParser.getFullPath();
+		String soundShortName = SoundbankParser.getShortName();
+		String soundFullPath  = SoundbankParser.getFullPath();
 		if (soundShortName != null) { // may be != null after switching the language
 			lblChosenSoundbankFile.setText(soundShortName);
 			lblChosenSoundbankFile.setToolTipText(soundFullPath);

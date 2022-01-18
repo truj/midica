@@ -992,17 +992,17 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "FUNCTION test1 test2", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNCTION_NUM_OF_ARGS)) );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-soundfont-twice")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-soundbank-twice")) );
 		assertEquals( 6, e.getLineNumber() );
 		assertEquals( "SOUNDBANK ../working/java-emergency-soundfont.sf2", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOUNDBANK_ALREADY_PARSED)) );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-soundfont-inside-block")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-soundbank-inside-block")) );
 		assertEquals( 6, e.getLineNumber() );
 		assertEquals( "SOUNDBANK ../working/java-emergency-soundfont.sf2", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK) + "SOUNDBANK") );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-soundfont-inside-function")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-soundbank-inside-function")) );
 		assertEquals( 6, e.getLineNumber() );
 		assertEquals( "SOUNDBANK ../working/java-emergency-soundfont.sf2", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK) + "SOUNDBANK") );
@@ -1653,27 +1653,27 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "INCLUDE inc/instruments.midica  inc/instruments.midica", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FILE_NUM_OF_ARGS)) );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundfont-file-doesnt-exist")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundbank-file-doesnt-exist")) );
 		assertEquals( 3, e.getLineNumber() );
 		assertEquals( "SOUNDBANK  soundfont.sf2", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FILE_EXISTS)) );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundfont-file-not-normal")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundbank-file-not-normal")) );
 		assertEquals( 3, e.getLineNumber() );
 		assertEquals( "SOUNDBANK  .", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FILE_NORMAL)) );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundfont-file-no-args")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundbank-file-no-args")) );
 		assertEquals( 3, e.getLineNumber() );
 		assertEquals( "SOUNDBANK", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOUNDBANK_NUM_OF_ARGS)) );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundfont-file-too-many-args")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundbank-file-too-many-args")) );
 		assertEquals( 3, e.getLineNumber() );
 		assertEquals( "SOUNDBANK  ../working/java-emergency-soundfont.sf2  ../working/java-emergency-soundfont.sf2", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOUNDBANK_NUM_OF_ARGS)) );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundfont-file-invalid")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundbank-file-invalid")) );
 		assertEquals( 3, e.getLineNumber() );
 		assertEquals( "SOUNDBANK  inc/instruments.midica", e.getLineContent() );
 		

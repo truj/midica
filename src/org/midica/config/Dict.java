@@ -1474,7 +1474,7 @@ public class Dict {
 	// UiControler + PlayerControler
 	public static final String ERROR_IN_LINE               = "parsing_error_in_line";
 	
-	// SoundbankParser // TODO: rename from SoundfontParser
+	// SoundbankParser
 	public static final String UNKNOWN_SOUND_EXT           = "unknown_sound_ext";
 	public static final String INVALID_URL                 = "invalid_url";
 	public static final String UNKNOWN_HOST                = "unknown_host";
@@ -3121,7 +3121,7 @@ public class Dict {
 		// UiControler + PlayerControler
 		set( ERROR_IN_LINE,                       "<html>parsing error in file:<br>%s<br>line: %s<br>" );
 		
-		// SoundbankParser  // TODO: rename from SoundfontParser
+		// SoundbankParser
 		set( UNKNOWN_SOUND_EXT,        "<html>Allowed file extensions: *.sf2 or *.dls"
 		                             + "<br>Invalid file extension in file:<br>"   );
 		set( INVALID_URL,              "Invalid url: "                             );

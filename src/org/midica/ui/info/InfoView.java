@@ -44,7 +44,7 @@ import org.midica.config.KeyBinding;
 import org.midica.config.KeyBindingManager;
 import org.midica.config.Laf;
 import org.midica.file.read.SequenceParser;
-import org.midica.file.read.SoundfontParser;
+import org.midica.file.read.SoundbankParser;
 import org.midica.midi.KaraokeAnalyzer;
 import org.midica.midi.MessageClassifier;
 import org.midica.midi.SequenceAnalyzer;
@@ -661,7 +661,7 @@ public class InfoView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// get general soundbank info
-		HashMap<String, String> soundbankInfo = SoundfontParser.getSoundbankInfo();
+		HashMap<String, String> soundbankInfo = SoundbankParser.getSoundbankInfo();
 		
 		// sound source translation
 		constraints.insets  = Laf.INSETS_NW;
@@ -675,8 +675,8 @@ public class InfoView extends JDialog {
 		constraints.gridx++;
 		constraints.anchor  = GridBagConstraints.NORTHWEST;
 		constraints.weightx = 1;
-		String shortSoundName = SoundfontParser.getShortName();
-		String fullSoundName  = SoundfontParser.getFullPath();
+		String shortSoundName = SoundbankParser.getShortName();
+		String fullSoundName  = SoundbankParser.getFullPath();
 		if (null == shortSoundName || null == fullSoundName) {
 			shortSoundName = Dict.get(Dict.UNCHOSEN_FILE);
 			fullSoundName  = Dict.get(Dict.UNCHOSEN_FILE);

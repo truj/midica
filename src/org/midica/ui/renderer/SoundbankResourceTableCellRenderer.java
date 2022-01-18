@@ -15,7 +15,7 @@ import javax.swing.JComponent;
 import javax.swing.JTable;
 
 import org.midica.config.Laf;
-import org.midica.file.read.SoundfontParser;
+import org.midica.file.read.SoundbankParser;
 
 /**
  * Cell renderer for the resources table in the
@@ -40,7 +40,7 @@ public class SoundbankResourceTableCellRenderer extends MidicaTableCellRenderer 
 	 * Creates a cell renderer for the soundbank resources table.
 	 */
 	public SoundbankResourceTableCellRenderer() {
-		this.resources = SoundfontParser.getSoundbankResources();
+		this.resources = SoundbankParser.getSoundbankResources();
 	}
 	
 	@Override

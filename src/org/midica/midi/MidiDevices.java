@@ -28,7 +28,7 @@ import javax.sound.midi.Transmitter;
 import javax.swing.table.AbstractTableModel;
 
 import org.midica.config.Dict;
-import org.midica.file.read.SoundfontParser;
+import org.midica.file.read.SoundbankParser;
 import org.midica.ui.info.InstrumentElement;
 import org.midica.ui.player.PlayerController;
 
@@ -278,7 +278,7 @@ public final class MidiDevices {
 		
 		// software synthesizer
 		if (soundbankAvailable) {
-			ArrayList<HashMap<String, String>> soundbankInstruments = SoundfontParser.getSoundbankInstruments();
+			ArrayList<HashMap<String, String>> soundbankInstruments = SoundbankParser.getSoundbankInstruments();
 			for (byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++)
 				initSoftwareInstruments(channel, soundbankInstruments);
 		}

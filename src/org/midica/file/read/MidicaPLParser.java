@@ -3134,7 +3134,7 @@ public class MidicaPLParser extends SequenceParser {
 				inclFile = inclFile.getCanonicalFile();
 				
 				// check if this file is already loaded
-				String oldPath = SoundfontParser.getFullPath();
+				String oldPath = SoundbankParser.getFullPath();
 				String newPath = inclFile.getCanonicalPath();
 				if (oldPath != null && oldPath.equals(newPath)) {
 					return;
@@ -3149,7 +3149,7 @@ public class MidicaPLParser extends SequenceParser {
 					throw new ParseException(Dict.get(Dict.ERROR_FILE_READABLE) + inclFile.getCanonicalPath());
 				
 				// parse it
-				SoundfontParser parser = new SoundfontParser();
+				SoundbankParser parser = new SoundbankParser();
 				parser.parse(inclFile);
 				
 				// set the file name label in the main window

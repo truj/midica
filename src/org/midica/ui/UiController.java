@@ -36,7 +36,7 @@ import org.midica.file.read.MidicaPLParser;
 import org.midica.file.read.MusescoreImporter;
 import org.midica.file.read.ParseException;
 import org.midica.file.read.SequenceParser;
-import org.midica.file.read.SoundfontParser;
+import org.midica.file.read.SoundbankParser;
 import org.midica.file.write.AbcExporter;
 import org.midica.file.write.AldaExporter;
 import org.midica.file.write.ExportException;
@@ -85,7 +85,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	private AbcImporter       abcImporter             = null;
 	private LilypondImporter  lyImporter              = null;
 	private MusescoreImporter mscoreImporter          = null;
-	private SoundfontParser   soundbankParser         = null;
+	private SoundbankParser   soundbankParser         = null;
 	private PlayerView        player                  = null;
 	private File              currentFile             = null;
 	private String            currentFileType         = null;
@@ -102,7 +102,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		abcImporter     = new AbcImporter();
 		lyImporter      = new LilypondImporter();
 		mscoreImporter  = new MusescoreImporter();
-		soundbankParser = new SoundfontParser();
+		soundbankParser = new SoundbankParser();
 		
 		// initView() must be called after the parsers are created.
 		// Otherwise a null parser may be passed to the ParsingWorker's
@@ -270,19 +270,19 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		String typeConfigVal      = "";
 		String pathConfigKey      = "";
 		String path               = "";
-		int    soundSource        = SoundfontParser.FROM_UNKNOWN;
+		int    soundSource        = SoundbankParser.FROM_UNKNOWN;
 		String soundSourceStr     = null;
 		
 		// find out which checkbox has been changed
 		if (UiView.NAME_REMEMBER_SOUND.equals(name)) {
-			soundSource       = SoundfontParser.getSource();
+			soundSource       = SoundbankParser.getSource();
 			rememberConfigKey = Config.REMEMBER_SOUND;
-			path              = SoundfontParser.getFullPath();
-			if (SoundfontParser.FROM_FILE == soundSource) {
+			path              = SoundbankParser.getFullPath();
+			if (SoundbankParser.FROM_FILE == soundSource) {
 				pathConfigKey  = Config.PATH_SOUND;
 				soundSourceStr = FileSelector.FILE_TYPE_SOUND_FILE;
 			}
-			else if (SoundfontParser.FROM_URL == soundSource) {
+			else if (SoundbankParser.FROM_URL == soundSource) {
 				pathConfigKey  = Config.SOUND_URL;
 				soundSourceStr = FileSelector.FILE_TYPE_SOUND_URL;
 			}
@@ -720,8 +720,8 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			view.getImportedFileTypeLbl().setText(Dict.get(Dict.IMPORTED_TYPE_MSCORE));
 		}
 		else if (isSound) {
-			String shortName = SoundfontParser.getShortName();
-			String longName  = SoundfontParser.getFullPath();
+			String shortName = SoundbankParser.getShortName();
+			String longName  = SoundbankParser.getFullPath();
 			view.getChosenSoundbankFileLbl().setText(shortName);
 			view.getChosenSoundbankFileLbl().setToolTipText(longName);
 		}
@@ -798,7 +798,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	public void windowOpened(WindowEvent e) {
 		
 		// files already parsed?
-		if ( SoundfontParser.getFullPath()  != null
+		if ( SoundbankParser.getFullPath()  != null
 			|| MidicaPLParser.getFileName() != null
 			|| MidiParser.getFileName()     != null ) {
 			

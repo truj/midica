@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.midica.config.Dict;
-import org.midica.file.read.SoundfontParser;
+import org.midica.file.read.SoundbankParser;
 import org.midica.ui.tablesorter.OptionalNumber;
 
 /**
@@ -64,7 +64,7 @@ public class SoundbankInstrumentsTableModel extends MidicaTableModel {
 		columnClasses[ 4 ] = String.class;
 		
 		// get soundbank instruments
-		instruments = SoundfontParser.getSoundbankInstruments();
+		instruments = SoundbankParser.getSoundbankInstruments();
 	}
 	
 	/**
@@ -100,18 +100,18 @@ public class SoundbankInstrumentsTableModel extends MidicaTableModel {
 		else if (1 == colIndex) {
 			
 			// Don't show the bank number if it's a category.
-			boolean isCategory = instruments.get( rowIndex ).get("category") != null;
+			boolean isCategory = instruments.get(rowIndex).get("category") != null;
 			if (isCategory)
 				return new OptionalNumber("");
 			
 			// if the LSB is 0, only show the MSB
 			String lsb = instruments.get(rowIndex).get("bank_lsb");
-			if ( lsb.equals("0") )
-				return new OptionalNumber( instruments.get(rowIndex).get("bank_msb") );
+			if (lsb.equals("0"))
+				return new OptionalNumber(instruments.get(rowIndex).get("bank_msb"));
 			
 			// show MSB and LSB, separated according to the configured syntax
 			String display = instruments.get(rowIndex).get("bank_msb")
-			     + Dict.getSyntax( Dict.SYNTAX_BANK_SEP )
+			     + Dict.getSyntax(Dict.SYNTAX_BANK_SEP)
 			     + instruments.get(rowIndex).get("bank_lsb");
 			return new OptionalNumber(display);
 		}

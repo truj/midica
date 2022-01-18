@@ -49,8 +49,7 @@ import com.sun.gervill.SF2Soundbank;
  * 
  * @author Jan Trukenmüller
  */
-// TODO: rename class
-public class SoundfontParser implements IParser {
+public class SoundbankParser implements IParser {
 	
 	public static final int FROM_UNKNOWN = 0;
 	public static final int FROM_FILE    = 1;

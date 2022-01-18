@@ -12,7 +12,7 @@ import java.net.URL;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.midica.file.read.SoundfontParser;
+import org.midica.file.read.SoundbankParser;
 import org.midica.file.write.AudioExporter;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.UiController;
@@ -306,7 +306,7 @@ public class Cli {
 		uiController.parseChosenFile(fileSelectorType, fileOrUrl);
 		
 		// loading failed?
-		if (null == SoundfontParser.getFullPath()) {
+		if (null == SoundbankParser.getFullPath()) {
 			help(false, "Failed to load Soundbank: " + soundbankPath);
 		}
 	}

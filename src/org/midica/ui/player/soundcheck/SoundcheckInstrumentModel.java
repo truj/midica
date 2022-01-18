@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.TreeMap;
 
 import org.midica.config.Dict;
-import org.midica.file.read.SoundfontParser;
+import org.midica.file.read.SoundbankParser;
 import org.midica.ui.model.MidicaTableModel;
 import org.midica.ui.tablesorter.BankNumber;
 import org.midica.ui.tablesorter.OptionalNumber;
@@ -77,7 +77,7 @@ public class SoundcheckInstrumentModel extends MidicaTableModel {
 		int channel = SoundcheckController.getChannel();
 		
 		// get instruments from the soundbank
-		ArrayList<HashMap<String, String>> sbInstruments = SoundfontParser.getSoundbankInstruments();
+		ArrayList<HashMap<String, String>> sbInstruments = SoundbankParser.getSoundbankInstruments();
 		
 		// process instruments
 		HashMap<String, String> currentMainCategory = null;

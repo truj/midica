@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.midica.config.Dict;
-import org.midica.file.read.SoundfontParser;
+import org.midica.file.read.SoundbankParser;
 import org.midica.ui.tablesorter.OptionalNumber;
 
 
@@ -61,7 +61,7 @@ public class SoundbankResourceTableModel extends MidicaTableModel {
 		columnClasses[ 5 ] = String.class;
 		
 		// get soundbank instruments
-		resources = SoundfontParser.getSoundbankResources();
+		resources = SoundbankParser.getSoundbankResources();
 	}
 	
 	/**
@@ -72,7 +72,7 @@ public class SoundbankResourceTableModel extends MidicaTableModel {
 	 */
 	@Override
 	public int getRowCount() {
-		if ( null == resources )
+		if (null == resources)
 			return 0;
 		return resources.size();
 	}
@@ -85,19 +85,19 @@ public class SoundbankResourceTableModel extends MidicaTableModel {
 	 * @return    Table cell text.
 	 */
 	@Override
-	public Object getValueAt( int rowIndex, int colIndex ) {
+	public Object getValueAt(int rowIndex, int colIndex) {
 		
 		// index
-		if ( 0 == colIndex ) {
-			return new OptionalNumber( resources.get(rowIndex).get("index") );
+		if (0 == colIndex) {
+			return new OptionalNumber(resources.get(rowIndex).get("index"));
 		}
 		
 		// type
-		else if ( 1 == colIndex ) {
-			String type = (String) resources.get( rowIndex ).get( "type" );
+		else if (1 == colIndex) {
+			String type = (String) resources.get(rowIndex).get("type");
 			
 			// Don't show the type, if it's a category.
-			String category = (String) resources.get( rowIndex ).get("category");
+			String category = (String) resources.get(rowIndex).get("category");
 			if (category != null)
 				return "";
 			
@@ -105,23 +105,23 @@ public class SoundbankResourceTableModel extends MidicaTableModel {
 		}
 		
 		// name
-		else if ( 2 == colIndex ) {
-			return resources.get( rowIndex ).get( "name" );
+		else if (2 == colIndex) {
+			return resources.get(rowIndex).get("name");
 		}
 		
 		// frames
-		else if ( 3 == colIndex ) {
-			return new OptionalNumber( resources.get(rowIndex).get("frame_length") );
+		else if (3 == colIndex) {
+			return new OptionalNumber(resources.get(rowIndex).get("frame_length"));
 		}
 		
 		// format
-		else if ( 4 == colIndex ) {
-			return resources.get( rowIndex ).get( "format" );
+		else if (4 == colIndex) {
+			return resources.get(rowIndex).get("format");
 		}
 		
 		// class
-		else if ( 5 == colIndex ) {
-			return resources.get( rowIndex ).get( "class" );
+		else if (5 == colIndex) {
+			return resources.get(rowIndex).get("class");
 		}
 		
 		// default
