@@ -1,5 +1,5 @@
 INCLUDE inc/instruments.midica
 
-SOUNDFONT  inc/instruments.midica
+SOUNDBANK  inc/instruments.midica
 
 0 c /4

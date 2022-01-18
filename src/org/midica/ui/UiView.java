@@ -57,7 +57,7 @@ public class UiView extends JFrame {
 	public static final String CMD_SELECT_LANGUAGE     = "select_language";
 	public static final String CMD_START_PLAYER        = "start_player";
 	public static final String CMD_IMPORT              = "cmd_import";
-	public static final String CMD_OPEN_SNDFNT_FILE    = "cmd_open_soundfont_file";
+	public static final String CMD_OPEN_SNDBNK_FILE    = "cmd_open_soundbank_file";
 	public static final String CMD_SHOW_INFO_WINDOW    = "cmd_show_info_window";
 	public static final String CMD_EXPORT              = "cmd_export";
 	
@@ -73,7 +73,7 @@ public class UiView extends JFrame {
 	private UiController                    controller             = null;
 	private JLabel                          lblChosenImportedFile  = null;
 	private JLabel                          lblChosenImportedType  = null;
-	private JLabel                          lblChosenSoundfontFile = null;
+	private JLabel                          lblChosenSoundbankFile = null;
 	private JComboBox<ComboboxStringOption> cbxGuiLang             = null;
 	private JComboBox<ComboboxStringOption> cbxNoteSys             = null;
 	private JComboBox<ComboboxStringOption> cbxHalfTone            = null;
@@ -86,7 +86,7 @@ public class UiView extends JFrame {
 	private MidicaButton                    btnInfo                = null;
 	private MidicaButton                    btnPlayer              = null;
 	private MidicaButton                    btnSelectImport        = null;
-	private MidicaButton                    btnSelectSoundfont     = null;
+	private MidicaButton                    btnSelectSoundbank     = null;
 	private MidicaButton                    btnExport              = null;
 	private JCheckBox                       cbxRememberSound       = null;
 	private JCheckBox                       cbxRememberImport      = null;
@@ -224,11 +224,11 @@ public class UiView extends JFrame {
 		constraints.weighty = 1;
 		area.add(Box.createGlue(), constraints);
 		
-		// soundfont area
+		// soundbank area
 		constraints.gridy++;
 		constraints.insets  = Laf.INSETS_IN;
 		constraints.weighty = 0;
-		area.add(createSoundfontArea(), constraints);
+		area.add(createSoundbankArea(), constraints);
 		
 		// spacer
 		constraints.gridy++;
@@ -533,12 +533,12 @@ public class UiView extends JFrame {
 	}
 	
 	/**
-	 * Creates the soundfont area with the selection button, the remember checkbox and
-	 * a label for the loaded soundfont file name.
+	 * Creates the soundbank area with the selection button, the remember checkbox and
+	 * a label for the loaded soundbank file name.
 	 * 
 	 * @return    The created area.
 	 */
-	private Container createSoundfontArea() {
+	private Container createSoundbankArea() {
 		JPanel area = new JPanel();
 		area.setBorder( Laf.createTitledBorder(Dict.get(Dict.SOUNDBANK)) );
 		
@@ -563,10 +563,10 @@ public class UiView extends JFrame {
 		// file selector button
 		constraints.gridx++;
 		constraints.gridheight = 2;
-		btnSelectSoundfont = new MidicaButton(Dict.get(Dict.CHOOSE_FILE));
-		btnSelectSoundfont.setActionCommand(CMD_OPEN_SNDFNT_FILE);
-		btnSelectSoundfont.addActionListener(controller);
-		area.add(btnSelectSoundfont, constraints);
+		btnSelectSoundbank = new MidicaButton(Dict.get(Dict.CHOOSE_FILE));
+		btnSelectSoundbank.setActionCommand(CMD_OPEN_SNDBNK_FILE);
+		btnSelectSoundbank.addActionListener(controller);
+		area.add(btnSelectSoundbank, constraints);
 		
 		// remember sound checkbox
 		constraints.insets = Laf.INSETS_LBL_IMPORT_EXPORT;
@@ -596,16 +596,16 @@ public class UiView extends JFrame {
 		area.add(lblImportedFile, constraints);
 		constraints.insets = Laf.INSETS_IN;
 		
-		// chosen soundfont file name
+		// chosen soundbank file name
 		constraints.gridy++;
-		lblChosenSoundfontFile = new JLabel(Dict.get(Dict.UNCHOSEN_FILE));
-		lblChosenSoundfontFile.setPreferredSize(MAX_FILE_NAME_DIM);
-		area.add(lblChosenSoundfontFile, constraints);
+		lblChosenSoundbankFile = new JLabel(Dict.get(Dict.UNCHOSEN_FILE));
+		lblChosenSoundbankFile.setPreferredSize(MAX_FILE_NAME_DIM);
+		area.add(lblChosenSoundbankFile, constraints);
 		String soundShortName = SoundfontParser.getShortName();
 		String soundFullPath  = SoundfontParser.getFullPath();
 		if (soundShortName != null) { // may be != null after switching the language
-			lblChosenSoundfontFile.setText(soundShortName);
-			lblChosenSoundfontFile.setToolTipText(soundFullPath);
+			lblChosenSoundbankFile.setText(soundShortName);
+			lblChosenSoundbankFile.setToolTipText(soundFullPath);
 		}
 		
 		return area;
@@ -684,12 +684,12 @@ public class UiView extends JFrame {
 	}
 	
 	/**
-	 * Returns the label displaying the successfully imported soundfont file.
+	 * Returns the label displaying the successfully imported bank file.
 	 * 
 	 * @return    Label displaying the file name.
 	 */
-	public JLabel getChosenSoundfontFileLbl() {
-		return lblChosenSoundfontFile;
+	public JLabel getChosenSoundbankFileLbl() {
+		return lblChosenSoundbankFile;
 	}
 	
 	/**
@@ -746,7 +746,7 @@ public class UiView extends JFrame {
 		keyBindingManager.addBindingsForButton( this.btnInfo,            Dict.KEY_MAIN_INFO             );
 		keyBindingManager.addBindingsForButton( this.btnPlayer,          Dict.KEY_MAIN_PLAYER           );
 		keyBindingManager.addBindingsForButton( this.btnSelectImport,    Dict.KEY_MAIN_IMPORT           );
-		keyBindingManager.addBindingsForButton( this.btnSelectSoundfont, Dict.KEY_MAIN_IMPORT_SF        );
+		keyBindingManager.addBindingsForButton( this.btnSelectSoundbank, Dict.KEY_MAIN_IMPORT_SB        );
 		keyBindingManager.addBindingsForButton( this.btnExport,          Dict.KEY_MAIN_EXPORT           );
 		
 		// add key bindings to focus comboboxes

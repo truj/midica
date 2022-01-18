@@ -16,7 +16,7 @@ import org.midica.ui.tablesorter.OptionalNumber;
 
 
 /**
- * This class represents the data model of the soundfont resources table
+ * This class represents the data model of the soundbank resources table
  * in the configuration details view of the info window.
  * 
  * Each row represents either a category or a certain resource.
@@ -29,27 +29,27 @@ import org.midica.ui.tablesorter.OptionalNumber;
  * 
  * @author Jan Trukenmüller
  */
-public class SoundfontResourceTableModel extends MidicaTableModel {
+public class SoundbankResourceTableModel extends MidicaTableModel {
 
 	private static final long serialVersionUID = 1L;
     
 	private ArrayList<HashMap<String, Object>> resources = null;
 	
 	/**
-	 * Creates a new instance of the soundfont resource table data model.
+	 * Creates a new instance of the soundbank resource table data model.
 	 * Initializes the table header names according to the currently
 	 * configured language.
 	 */
-	public SoundfontResourceTableModel() {
+	public SoundbankResourceTableModel() {
 		
 		// table header
 		columnNames = new String[ 6 ];
-		columnNames[ 0 ] = Dict.get( Dict.INFO_COL_SF_RES_INDEX       );
-		columnNames[ 1 ] = Dict.get( Dict.INFO_COL_SF_RES_TYPE        );
-		columnNames[ 2 ] = Dict.get( Dict.INFO_COL_SF_RES_NAME        );
-		columnNames[ 3 ] = Dict.get( Dict.INFO_COL_SF_RES_FRAMELENGTH );
-		columnNames[ 4 ] = Dict.get( Dict.INFO_COL_SF_RES_FORMAT      );
-		columnNames[ 5 ] = Dict.get( Dict.INFO_COL_SF_RES_CLASS       );
+		columnNames[ 0 ] = Dict.get( Dict.INFO_COL_SB_RES_INDEX       );
+		columnNames[ 1 ] = Dict.get( Dict.INFO_COL_SB_RES_TYPE        );
+		columnNames[ 2 ] = Dict.get( Dict.INFO_COL_SB_RES_NAME        );
+		columnNames[ 3 ] = Dict.get( Dict.INFO_COL_SB_RES_FRAMELENGTH );
+		columnNames[ 4 ] = Dict.get( Dict.INFO_COL_SB_RES_FORMAT      );
+		columnNames[ 5 ] = Dict.get( Dict.INFO_COL_SB_RES_CLASS       );
 		
 		// column classes, used for sorting
 		columnClasses = new Class[ 6 ];
@@ -60,8 +60,8 @@ public class SoundfontResourceTableModel extends MidicaTableModel {
 		columnClasses[ 4 ] = String.class;
 		columnClasses[ 5 ] = String.class;
 		
-		// get soundfont instruments
-		resources = SoundfontParser.getSoundfontResources();
+		// get soundbank instruments
+		resources = SoundfontParser.getSoundbankResources();
 	}
 	
 	/**

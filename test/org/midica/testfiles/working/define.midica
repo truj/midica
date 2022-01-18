@@ -26,7 +26,7 @@ def    CHORD   crd    //  using the old comment symbol
 inc      test                          // ch0: 2160, ch9: 2160
 incl_f   inc/channel-cmds.midica       %  ch0: 2640, ch9: 2160
 INCLUDE  inc/channel-cmds.midica       // ch0: 3120, ch9: 2160
-load_sf  java-emergency-soundfont.sf2  %  comment
+load_sb  java-emergency-soundfont.sf2  %  comment
 
 0 / _   // zero-length
 

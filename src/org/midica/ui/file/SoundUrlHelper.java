@@ -11,9 +11,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -21,13 +19,9 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
-import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.config.Laf;
-import org.midica.file.read.SoundfontParser;
 import org.midica.ui.UiController;
-import org.midica.ui.model.ComboboxStringOption;
-import org.midica.ui.model.ConfigComboboxModel;
 import org.midica.ui.widget.MidicaButton;
 
 /**

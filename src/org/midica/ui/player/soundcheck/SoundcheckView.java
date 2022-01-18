@@ -61,7 +61,7 @@ public class SoundcheckView extends JDialog {
 	private static final int    TEXT_FIELD_WIDTH      =  60;
 	private static final int    WIDTH_COL_PROG        =  40;
 	private static final int    WIDTH_COL_BANK        =  50;
-	private static final int    WIDTH_COL_NAME_SF     = 200;
+	private static final int    WIDTH_COL_NAME_SB     = 200;
 	private static final int    WIDTH_COL_NAME_SYNTAX = 200;
 	private static final int    HEIGHT_TABLE_INSTR    = 200;
 	private static final int    WIDTH_COL_NOTE_NUM    =  40;
@@ -109,7 +109,7 @@ public class SoundcheckView extends JDialog {
 		dimTextField = new Dimension(TEXT_FIELD_WIDTH, Laf.textFieldHeight);
 		
 		// size of instruments table and notes list
-		int widthInstr = WIDTH_COL_PROG + WIDTH_COL_BANK + WIDTH_COL_NAME_SF + WIDTH_COL_NAME_SYNTAX;
+		int widthInstr = WIDTH_COL_PROG + WIDTH_COL_BANK + WIDTH_COL_NAME_SB + WIDTH_COL_NAME_SYNTAX;
 		dimTblInstr    = new Dimension( widthInstr, HEIGHT_TABLE_INSTR );
 		dimTblNote     = new Dimension( widthInstr, HEIGHT_TABLE_NOTE  );
 		
@@ -179,7 +179,7 @@ public class SoundcheckView extends JDialog {
 		tblInstrument.setDefaultRenderer(Object.class, instrRenderer);
 		tblInstrument.getColumnModel().getColumn( 0 ).setPreferredWidth( WIDTH_COL_PROG        );
 		tblInstrument.getColumnModel().getColumn( 1 ).setPreferredWidth( WIDTH_COL_BANK        );
-		tblInstrument.getColumnModel().getColumn( 2 ).setPreferredWidth( WIDTH_COL_NAME_SF     );
+		tblInstrument.getColumnModel().getColumn( 2 ).setPreferredWidth( WIDTH_COL_NAME_SB     );
 		tblInstrument.getColumnModel().getColumn( 3 ).setPreferredWidth( WIDTH_COL_NAME_SYNTAX );
 		tblInstrument.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		tblInstrument.getSelectionModel().addListSelectionListener(controller);

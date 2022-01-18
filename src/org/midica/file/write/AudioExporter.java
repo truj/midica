@@ -102,14 +102,14 @@ public class AudioExporter extends Exporter {
 			if (! createFile(file))
 				return new ExportResult(false);
 			
-			// get loaded soundfont, sequence and the gervill synthesizer
-			Soundbank       soundfont = MidiDevices.getSoundfont();
+			// get loaded soundbank, sequence and the gervill synthesizer
+			Soundbank       soundbank = MidiDevices.getSoundbank();
 			Sequence        seq       = MidiDevices.getSequence();
 			SoftSynthesizer synth     = new SoftSynthesizer();
 			
 			// make sure the soundbank has a format/class that the synthesizer can handle
-			if (soundfont.getClass() != SF2Soundbank.class && soundfont.getClass() != DLSSoundbank.class) {
-				soundfont = synth.getDefaultSoundbank();
+			if (soundbank.getClass() != SF2Soundbank.class && soundbank.getClass() != DLSSoundbank.class) {
+				soundbank = synth.getDefaultSoundbank();
 			}
 			
 			// create format
@@ -127,7 +127,7 @@ public class AudioExporter extends Exporter {
 			
 			// get audio stream
 			AudioInputStream stream = MidiToAudioRenderer.render(
-				soundfont, seq, format, synth
+				soundbank, seq, format, synth
 			);
 			
 			// check stream

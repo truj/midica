@@ -9,5 +9,5 @@ def PERCUSSION_CHANNEL perc
 def CALL inc
 def GLOBAL glob
 DEFINE PARTIAL_SYNC_RANGE ..
-def SOUNDFONT load_sf
+def SOUNDBANK load_sb
 def LENGTH_ZERO _

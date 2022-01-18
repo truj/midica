@@ -114,7 +114,8 @@ public class MidicaPLParser extends SequenceParser {
 	public static String GLOBAL             = null;
 	public static String CALL               = null;
 	public static String INCLUDE            = null;
-	public static String SOUNDFONT          = null;
+	public static String SOUNDBANK          = null;
+	public static String SOUNDFONT          = null; // TODO: delete in a later version
 	public static String INSTRUMENT         = null;
 	public static String INSTRUMENTS        = null;
 	public static String META               = null;
@@ -234,7 +235,7 @@ public class MidicaPLParser extends SequenceParser {
 	private   static Deque<Integer>                     patternLineStack     = null;
 	private   static Deque<File>                        patternFileStack     = null;
 	private   static HashSet<String>                    redefinitions        = null;
-	private   static boolean                            soundfontParsed      = false;
+	private   static boolean                            soundbankParsed      = false;
 	protected static HashMap<String, String>            constants            = null;
 	protected static HashMap<String, String>            variables            = null;
 	private   static Pattern                            varPattern           = null;
@@ -324,6 +325,7 @@ public class MidicaPLParser extends SequenceParser {
 		GLOBAL             = Dict.getSyntax( Dict.SYNTAX_GLOBAL             );
 		CALL               = Dict.getSyntax( Dict.SYNTAX_CALL               );
 		INCLUDE            = Dict.getSyntax( Dict.SYNTAX_INCLUDE            );
+		SOUNDBANK          = Dict.getSyntax( Dict.SYNTAX_SOUNDBANK          );
 		SOUNDFONT          = Dict.getSyntax( Dict.SYNTAX_SOUNDFONT          );
 		INSTRUMENT         = Dict.getSyntax( Dict.SYNTAX_INSTRUMENT         );
 		INSTRUMENTS        = Dict.getSyntax( Dict.SYNTAX_INSTRUMENTS        );
@@ -1060,7 +1062,7 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// root-level commands (that are not allowed to appear inside of a block)
-		// define, chord, const, include, soundfont
+		// define, chord, const, include, soundbank
 		else {
 			parseRootLevelCmd(tokens);
 		}
@@ -1106,6 +1108,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( CHORD.equals(cmd)                 ) {}
 		else if ( CALL.equals(cmd)                  ) {}
 		else if ( INCLUDE.equals(cmd)               ) {}
+		else if ( SOUNDBANK.equals(cmd)             ) {}
 		else if ( SOUNDFONT.equals(cmd)             ) {}
 		else if ( DEFINE.equals(cmd)                ) {}
 		else if ( CONST.equals(cmd)                 ) {}
@@ -1760,7 +1763,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * - DEFINE
 	 * - CHORD
 	 * - INCLUDE
-	 * - SOUNDFONT
+	 * - SOUNDBANK
 	 * 
 	 * Checks if we are in the root level.
 	 * 
@@ -1785,8 +1788,8 @@ public class MidicaPLParser extends SequenceParser {
 		else if (INCLUDE.equals(cmd) || ORIGINAL_INCLUDE.equals(cmd)) {
 			parseINCLUDE(tokens);
 		}
-		else if (SOUNDFONT.equals(cmd)) {
-			parseSOUNDFONT(tokens);
+		else if (SOUNDBANK.equals(cmd) || SOUNDFONT.equals(cmd)) {
+			parseSOUNDBANK(tokens);
 		}
 		else if (DEFINE.equals(cmd) || ORIGINAL_DEFINE.equals(cmd)) {
 			parseDEFINE(tokens);
@@ -3100,23 +3103,23 @@ public class MidicaPLParser extends SequenceParser {
 	}
 	
 	/**
-	 * Parses a SOUNDFONT command.
-	 * A SOUNDFONT command includes a soundfont file.
+	 * Parses a SOUNDBANK command.
+	 * A SOUNDBANK command includes a soundbank file.
 	 * 
 	 * @param tokens             Token array.
-	 * @throws ParseException    If the soundfont cannot be loaded.
+	 * @throws ParseException    If the soundbank cannot be loaded.
 	 */
-	private void parseSOUNDFONT(String[] tokens) throws ParseException {
+	private void parseSOUNDBANK(String[] tokens) throws ParseException {
 		
-		// prevent more than one soundfont include
-		if (soundfontParsed) {
-			throw new ParseException(Dict.get(Dict.ERROR_SOUNDFONT_ALREADY_PARSED));
+		// prevent more than one soundbank include
+		if (soundbankParsed) {
+			throw new ParseException(Dict.get(Dict.ERROR_SOUNDBANK_ALREADY_PARSED));
 		}
-		soundfontParsed = true;
+		soundbankParsed = true;
 		
 		if (2 == tokens.length) {
 			try {
-				// create File object with absolute path for soundfont file
+				// create File object with absolute path for soundbank file
 				String inclPath = tokens[1];
 				File   inclFile = new File(inclPath);
 				if (! inclFile.isAbsolute()) {
@@ -3150,14 +3153,14 @@ public class MidicaPLParser extends SequenceParser {
 				parser.parse(inclFile);
 				
 				// set the file name label in the main window
-				Midica.uiController.soundfontLoadedBySourceCode();
+				Midica.uiController.soundbankLoadedBySourceCode();
 			}
 			catch (IOException e) {
-				throw new ParseException(Dict.get(Dict.ERROR_SOUNDFONT_IO) + e.getMessage());
+				throw new ParseException(Dict.get(Dict.ERROR_SOUNDBANK_IO) + e.getMessage());
 			}
 		}
 		else
-			throw new ParseException(Dict.get(Dict.ERROR_SOUNDFONT_NUM_OF_ARGS));
+			throw new ParseException(Dict.get(Dict.ERROR_SOUNDBANK_NUM_OF_ARGS));
 	}
 	
 	/**
@@ -3229,6 +3232,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_DOT.equals(cmdId)                ) DOT                = cmdName;
 		else if ( Dict.SYNTAX_CALL.equals(cmdId)               ) CALL               = cmdName;
 		else if ( Dict.SYNTAX_INCLUDE.equals(cmdId)            ) INCLUDE            = cmdName;
+		else if ( Dict.SYNTAX_SOUNDBANK.equals(cmdId)          ) SOUNDBANK          = cmdName;
 		else if ( Dict.SYNTAX_SOUNDFONT.equals(cmdId)          ) SOUNDFONT          = cmdName;
 		else if ( Dict.SYNTAX_INSTRUMENT.equals(cmdId)         ) INSTRUMENT         = cmdName;
 		else if ( Dict.SYNTAX_INSTRUMENTS.equals(cmdId)        ) INSTRUMENTS        = cmdName;
@@ -3622,7 +3626,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * This command assigns a certain instrument to a certain channel.
 	 * A bank number can also be assigned for the channel.
 	 * 
-	 * TODO: test soundfonts with bankLSB > 0
+	 * TODO: test soundbanks with bankLSB > 0
 	 * 
 	 * @param tokens             Token array.
 	 * @param isFake             **true**, if this is called inside a function definition or block
@@ -4852,7 +4856,7 @@ public class MidicaPLParser extends SequenceParser {
 			patternLineStack     = new ArrayDeque<>();
 			patternFileStack     = new ArrayDeque<>();
 			redefinitions        = new HashSet<>();
-			soundfontParsed      = false;
+			soundbankParsed      = false;
 			isSoftKaraoke        = false;
 			constants            = new HashMap<>();
 			variables            = new HashMap<>();

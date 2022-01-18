@@ -57,14 +57,14 @@ import org.midica.ui.model.MessageTreeNode;
 import org.midica.ui.model.MidicaTreeModel;
 import org.midica.ui.model.NoteTableModel;
 import org.midica.ui.model.PercussionTableModel;
-import org.midica.ui.model.SoundfontInstrumentsTableModel;
-import org.midica.ui.model.SoundfontResourceTableModel;
+import org.midica.ui.model.SoundbankInstrumentsTableModel;
+import org.midica.ui.model.SoundbankResourceTableModel;
 import org.midica.ui.model.SyntaxTableModel;
 import org.midica.ui.renderer.InstrumentTableCellRenderer;
 import org.midica.ui.renderer.MessageTableCellRenderer;
 import org.midica.ui.renderer.MidicaTableCellRenderer;
-import org.midica.ui.renderer.SoundfontInstrumentTableCellRenderer;
-import org.midica.ui.renderer.SoundfontResourceTableCellRenderer;
+import org.midica.ui.renderer.SoundbankInstrumentTableCellRenderer;
+import org.midica.ui.renderer.SoundbankResourceTableCellRenderer;
 import org.midica.ui.renderer.SyntaxTableCellRenderer;
 import org.midica.ui.tablefilter.FilterIcon;
 import org.midica.ui.tablefilter.FilterIconWithLabel;
@@ -86,7 +86,7 @@ import org.midica.ui.widget.MidicaTree;
  *     - Percussion instrument shortcuts
  *     - Syntax keywords for MidicaPL
  *     - Instrument shortcuts for non-percussion instruments
- * - Information about the currently loaded soundfont
+ * - Information about the currently loaded soundbank
  *     - General information
  *     - Drum kits and Instruments
  *     - Resources
@@ -117,17 +117,17 @@ public class InfoView extends JDialog {
 	private static final int COL_WIDTH_INSTR_NAME        = 300;
 	private static final int COL_WIDTH_DRUMKIT_NUM       =  80;
 	private static final int COL_WIDTH_DRUMKIT_NAME      = 300;
-	private static final int COL_WIDTH_SF_INSTR_PROGRAM  =  80;
-	private static final int COL_WIDTH_SF_INSTR_BANK     =  80;
-	private static final int COL_WIDTH_SF_INSTR_NAME     = 300;
-	private static final int COL_WIDTH_SF_INSTR_CHANNELS = 100;
-	private static final int COL_WIDTH_SF_INSTR_KEYS     = 120;
-	private static final int COL_WIDTH_SF_RES_INDEX      =  45;
-	private static final int COL_WIDTH_SF_RES_TYPE       =  55;
-	private static final int COL_WIDTH_SF_RES_NAME       = 130;
-	private static final int COL_WIDTH_SF_RES_FRAMES     =  60;
-	private static final int COL_WIDTH_SF_RES_FORMAT     = 260;
-	private static final int COL_WIDTH_SF_RES_CLASS      = 130;
+	private static final int COL_WIDTH_SB_INSTR_PROGRAM  =  80;
+	private static final int COL_WIDTH_SB_INSTR_BANK     =  80;
+	private static final int COL_WIDTH_SB_INSTR_NAME     = 300;
+	private static final int COL_WIDTH_SB_INSTR_CHANNELS = 100;
+	private static final int COL_WIDTH_SB_INSTR_KEYS     = 120;
+	private static final int COL_WIDTH_SB_RES_INDEX      =  45;
+	private static final int COL_WIDTH_SB_RES_TYPE       =  55;
+	private static final int COL_WIDTH_SB_RES_NAME       = 130;
+	private static final int COL_WIDTH_SB_RES_FRAMES     =  60;
+	private static final int COL_WIDTH_SB_RES_FORMAT     = 260;
+	private static final int COL_WIDTH_SB_RES_CLASS      = 130;
 	private static final int COL_WIDTH_MSG_TICK          =  80;
 	private static final int COL_WIDTH_MSG_STATUS        =  45;
 	private static final int COL_WIDTH_MSG_TRACK         =  30;
@@ -157,7 +157,7 @@ public class InfoView extends JDialog {
 	
 	// width/height constants for FlowLabels
 	private static final int CPL_MIDI_INFO             =  73; // CPL: characters per line
-	private static final int CPL_SOUNDFONT_INFO        =  73;
+	private static final int CPL_SOUNDBANK_INFO        =  73;
 	private static final int CPL_MSG_DETAILS           =  28;
 	private static final int CPL_ABOUT                 =  35;
 	private static final int CPL_KEYBINDING_DESC       =  45;
@@ -165,7 +165,7 @@ public class InfoView extends JDialog {
 	private static final int PWIDTH_MSG_DETAIL_CONTENT = 170;
 	private static final int PWIDTH_ABOUT              = 200;
 	private static final int PWIDTH_KEYBINDING_DESC    =   1;
-	private static final int MAX_HEIGHT_SOUNDFONT_DESC = 155; // max height
+	private static final int MAX_HEIGHT_SOUNDBANK_DESC = 155; // max height
 	private static final int MAX_HEIGHT_KARAOKE_INFO   =  45; // max height
 	
 	// filter widget names (used as hashmap key in filterWidgets and as name property)
@@ -190,8 +190,8 @@ public class InfoView extends JDialog {
 	private static Dimension syntaxTableDim     = null;
 	private static Dimension instrTableDim      = null;
 	private static Dimension drumkitTableDim    = null;
-	private static Dimension sfInstrTableDim    = null;
-	private static Dimension sfResourceTableDim = null;
+	private static Dimension sbInstrTableDim    = null;
+	private static Dimension sbResourceTableDim = null;
 	private static Dimension msgTreeDim         = null;
 	private static Dimension keyBindingTreeDim  = null;
 	private static Dimension msgDetailsDim      = null;
@@ -206,7 +206,7 @@ public class InfoView extends JDialog {
 	private KeyBindingManager     keyBindingManager  = null;
 	private JTabbedPane           content            = null;
 	private JTabbedPane           contentConfig      = null;
-	private JTabbedPane           contentSoundfont   = null;
+	private JTabbedPane           contentSoundbank   = null;
 	private JTabbedPane           contentMidi        = null;
 	private JSplitPane            contentKeybindings = null;
 	
@@ -249,12 +249,12 @@ public class InfoView extends JDialog {
 		                    + COL_WIDTH_SYNTAX_DESC;
 		int instrWidth      = COL_WIDTH_INSTR_NUM        + COL_WIDTH_INSTR_NAME;
 		int drumkitWidth    = COL_WIDTH_DRUMKIT_NUM      + COL_WIDTH_DRUMKIT_NAME;
-		int sfInstrWidth    = COL_WIDTH_SF_INSTR_PROGRAM + COL_WIDTH_SF_INSTR_BANK
-		                    + COL_WIDTH_SF_INSTR_NAME    + COL_WIDTH_SF_INSTR_CHANNELS
-		                    + COL_WIDTH_SF_INSTR_KEYS;
-		int sfResourceWidth = COL_WIDTH_SF_RES_INDEX  + COL_WIDTH_SF_RES_TYPE
-		                    + COL_WIDTH_SF_RES_NAME   + COL_WIDTH_SF_RES_FRAMES
-		                    + COL_WIDTH_SF_RES_FORMAT + COL_WIDTH_SF_RES_CLASS;
+		int sbInstrWidth    = COL_WIDTH_SB_INSTR_PROGRAM + COL_WIDTH_SB_INSTR_BANK
+		                    + COL_WIDTH_SB_INSTR_NAME    + COL_WIDTH_SB_INSTR_CHANNELS
+		                    + COL_WIDTH_SB_INSTR_KEYS;
+		int sbResourceWidth = COL_WIDTH_SB_RES_INDEX  + COL_WIDTH_SB_RES_TYPE
+		                    + COL_WIDTH_SB_RES_NAME   + COL_WIDTH_SB_RES_FRAMES
+		                    + COL_WIDTH_SB_RES_FORMAT + COL_WIDTH_SB_RES_CLASS;
 		int msgTableWidth   = COL_WIDTH_MSG_TICK   + COL_WIDTH_MSG_STATUS
 		                    + COL_WIDTH_MSG_TRACK  + COL_WIDTH_MSG_CHANNEL
 		                    + COL_WIDTH_MSG_LENGTH + COL_WIDTH_MSG_SUMMARY
@@ -264,8 +264,8 @@ public class InfoView extends JDialog {
 		syntaxTableDim     = new Dimension( syntaxWidth,     TABLE_HEIGHT          );
 		instrTableDim      = new Dimension( instrWidth,      TABLE_HEIGHT          );
 		drumkitTableDim    = new Dimension( drumkitWidth,    TABLE_HEIGHT          );
-		sfInstrTableDim    = new Dimension( sfInstrWidth,    TABLE_HEIGHT          );
-		sfResourceTableDim = new Dimension( sfResourceWidth, TABLE_HEIGHT          );
+		sbInstrTableDim    = new Dimension( sbInstrWidth,    TABLE_HEIGHT          );
+		sbResourceTableDim = new Dimension( sbResourceWidth, TABLE_HEIGHT          );
 		msgTableDim        = new Dimension( msgTableWidth,   MSG_TABLE_PREF_HEIGHT );
 		
 		// initialize dimensions for trees, collapse-all/expand-all buttons and message details
@@ -301,7 +301,7 @@ public class InfoView extends JDialog {
 		// add tabs
 		tableStringFilterIcons = new HashMap<>();
 		content.addTab( Dict.get(Dict.TAB_CONFIG),        createConfigArea()       );
-		content.addTab( Dict.get(Dict.TAB_SOUNDFONT),     createSoundfontArea()    );
+		content.addTab( Dict.get(Dict.TAB_SOUNDBANK),     createSoundbankArea()    );
 		content.addTab( Dict.get(Dict.TAB_MIDI_SEQUENCE), createMidiSequenceArea() );
 		content.addTab( Dict.get(Dict.TAB_KEYBINDINGS),   createKeyBindingArea()   );
 		content.addTab( Dict.get(Dict.TAB_ABOUT),         createAboutArea()        );
@@ -333,25 +333,25 @@ public class InfoView extends JDialog {
 	}
 	
 	/**
-	 * Creates the soundfont tab.
+	 * Creates the soundbank tab.
 	 * This contains the following sub tabs:
 	 * 
-	 * - General soundfont info
+	 * - General soundbank info
 	 * - Instruments and drum kits
 	 * - Resources
 	 * 
-	 * @return the created soundfont area.
+	 * @return the created soundbank area.
 	 */
-	private Container createSoundfontArea() {
+	private Container createSoundbankArea() {
 		// content
-		contentSoundfont = new JTabbedPane(JTabbedPane.TOP);
+		contentSoundbank = new JTabbedPane(JTabbedPane.TOP);
 		
 		// add tabs
-		contentSoundfont.addTab( Dict.get(Dict.TAB_SOUNDFONT_INFO),        createSoundfontInfoArea()       );
-		contentSoundfont.addTab( Dict.get(Dict.TAB_SOUNDFONT_INSTRUMENTS), createSoundfontInstrumentArea() );
-		contentSoundfont.addTab( Dict.get(Dict.TAB_SOUNDFONT_RESOURCES),   createSoundfontResourceArea()   );
+		contentSoundbank.addTab( Dict.get(Dict.TAB_SOUNDBANK_INFO),        createSoundbankInfoArea()       );
+		contentSoundbank.addTab( Dict.get(Dict.TAB_SOUNDBANK_INSTRUMENTS), createSoundbankInstrumentArea() );
+		contentSoundbank.addTab( Dict.get(Dict.TAB_SOUNDBANK_RESOURCES),   createSoundbankResourceArea()   );
 		
-		return contentSoundfont;
+		return contentSoundbank;
 	}
 	
 	/**
@@ -362,7 +362,7 @@ public class InfoView extends JDialog {
 	 * - Used banks, instruments and played notes
 	 * - MIDI Messages (containing tree, details and table)
 	 * 
-	 * @return the created soundfont area.
+	 * @return the created sequence area.
 	 */
 	private Container createMidiSequenceArea() {
 		// content
@@ -640,11 +640,11 @@ public class InfoView extends JDialog {
 	}
 	
 	/**
-	 * Creates the area for general soundfont information.
+	 * Creates the area for general soundbank information.
 	 * 
-	 * @return the created soundfont info area.
+	 * @return the created soundbank info area.
 	 */
-	private Container createSoundfontInfoArea() {
+	private Container createSoundbankInfoArea() {
 		// content
 		JPanel area = new JPanel();
 		
@@ -660,8 +660,8 @@ public class InfoView extends JDialog {
 		constraints.weightx    = 0;
 		constraints.weighty    = 0;
 		
-		// get general soundfont info
-		HashMap<String, String> soundfontInfo = SoundfontParser.getSoundfontInfo();
+		// get general soundbank info
+		HashMap<String, String> soundbankInfo = SoundfontParser.getSoundbankInfo();
 		
 		// sound source translation
 		constraints.insets  = Laf.INSETS_NW;
@@ -681,7 +681,7 @@ public class InfoView extends JDialog {
 			shortSoundName = Dict.get(Dict.UNCHOSEN_FILE);
 			fullSoundName  = Dict.get(Dict.UNCHOSEN_FILE);
 		}
-		FlowLabel lblSndSourceContent = new FlowLabel(shortSoundName, CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		FlowLabel lblSndSourceContent = new FlowLabel(shortSoundName, CPL_SOUNDBANK_INFO, PWIDTH_GENERAL_INFO_VALUE);
 		lblSndSourceContent.setToolTipText(fullSoundName);
 		area.add(lblSndSourceContent, constraints);
 		
@@ -699,7 +699,7 @@ public class InfoView extends JDialog {
 		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor       = GridBagConstraints.NORTHWEST;
-		FlowLabel lblNameContent = new FlowLabel(soundfontInfo.get("name"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		FlowLabel lblNameContent = new FlowLabel(soundbankInfo.get("name"), CPL_SOUNDBANK_INFO, PWIDTH_GENERAL_INFO_VALUE);
 		area.add(lblNameContent, constraints);
 		
 		// version translation
@@ -715,7 +715,7 @@ public class InfoView extends JDialog {
 		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		FlowLabel lblVersionContent = new FlowLabel(soundfontInfo.get("version"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		FlowLabel lblVersionContent = new FlowLabel(soundbankInfo.get("version"), CPL_SOUNDBANK_INFO, PWIDTH_GENERAL_INFO_VALUE);
 		area.add(lblVersionContent, constraints);
 		
 		// vendor translation
@@ -723,7 +723,7 @@ public class InfoView extends JDialog {
 		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.anchor = GridBagConstraints.NORTHEAST;
-		JLabel lblVendor  = new JLabel(Dict.get(Dict.SOUNDFONT_VENDOR) + ": ");
+		JLabel lblVendor  = new JLabel(Dict.get(Dict.SOUNDBANK_VENDOR) + ": ");
 		Laf.makeBold(lblVendor);
 		area.add(lblVendor, constraints);
 		
@@ -731,7 +731,7 @@ public class InfoView extends JDialog {
 		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		FlowLabel lblVendorContent = new FlowLabel(soundfontInfo.get("vendor"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		FlowLabel lblVendorContent = new FlowLabel(soundbankInfo.get("vendor"), CPL_SOUNDBANK_INFO, PWIDTH_GENERAL_INFO_VALUE);
 		area.add(lblVendorContent, constraints);
 		
 		// creation date translation
@@ -739,7 +739,7 @@ public class InfoView extends JDialog {
 		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.anchor     = GridBagConstraints.NORTHEAST;
-		JLabel lblCreationDate = new JLabel(Dict.get(Dict.SOUNDFONT_CREA_DATE) + ": ");
+		JLabel lblCreationDate = new JLabel(Dict.get(Dict.SOUNDBANK_CREA_DATE) + ": ");
 		Laf.makeBold(lblCreationDate);
 		area.add(lblCreationDate, constraints);
 		
@@ -747,7 +747,7 @@ public class InfoView extends JDialog {
 		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		FlowLabel lblCreationDateContent = new FlowLabel(soundfontInfo.get("creation_date"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		FlowLabel lblCreationDateContent = new FlowLabel(soundbankInfo.get("creation_date"), CPL_SOUNDBANK_INFO, PWIDTH_GENERAL_INFO_VALUE);
 		area.add(lblCreationDateContent, constraints);
 		
 		// creation tools translation
@@ -755,7 +755,7 @@ public class InfoView extends JDialog {
 		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.anchor = GridBagConstraints.NORTHEAST;
-		JLabel lblTools    = new JLabel(Dict.get(Dict.SOUNDFONT_CREA_TOOLS) + ": ");
+		JLabel lblTools    = new JLabel(Dict.get(Dict.SOUNDBANK_CREA_TOOLS) + ": ");
 		Laf.makeBold(lblTools);
 		area.add(lblTools, constraints);
 		
@@ -763,7 +763,7 @@ public class InfoView extends JDialog {
 		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		FlowLabel lblToolsContent = new FlowLabel(soundfontInfo.get("tools"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		FlowLabel lblToolsContent = new FlowLabel(soundbankInfo.get("tools"), CPL_SOUNDBANK_INFO, PWIDTH_GENERAL_INFO_VALUE);
 		area.add(lblToolsContent, constraints);
 		
 		// product translation
@@ -771,7 +771,7 @@ public class InfoView extends JDialog {
 		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.anchor = GridBagConstraints.NORTHEAST;
-		JLabel lblProduct  = new JLabel(Dict.get(Dict.SOUNDFONT_PRODUCT) + ": ");
+		JLabel lblProduct  = new JLabel(Dict.get(Dict.SOUNDBANK_PRODUCT) + ": ");
 		Laf.makeBold(lblProduct);
 		area.add(lblProduct, constraints);
 		
@@ -779,7 +779,7 @@ public class InfoView extends JDialog {
 		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		FlowLabel lblProductContent = new FlowLabel(soundfontInfo.get("product"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		FlowLabel lblProductContent = new FlowLabel(soundbankInfo.get("product"), CPL_SOUNDBANK_INFO, PWIDTH_GENERAL_INFO_VALUE);
 		area.add(lblProductContent, constraints);
 		
 		// target engine translation
@@ -787,7 +787,7 @@ public class InfoView extends JDialog {
 		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.anchor     = GridBagConstraints.NORTHEAST;
-		JLabel lblTargetEngine = new JLabel(Dict.get(Dict.SOUNDFONT_TARGET_ENGINE) + ": ");
+		JLabel lblTargetEngine = new JLabel(Dict.get(Dict.SOUNDBANK_TARGET_ENGINE) + ": ");
 		Laf.makeBold(lblTargetEngine);
 		area.add(lblTargetEngine, constraints);
 		
@@ -795,7 +795,7 @@ public class InfoView extends JDialog {
 		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		FlowLabel lblTargetEngineContent = new FlowLabel(soundfontInfo.get("target_engine"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		FlowLabel lblTargetEngineContent = new FlowLabel(soundbankInfo.get("target_engine"), CPL_SOUNDBANK_INFO, PWIDTH_GENERAL_INFO_VALUE);
 		area.add(lblTargetEngineContent, constraints);
 		
 		// chromatic instruments translation
@@ -803,7 +803,7 @@ public class InfoView extends JDialog {
 		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.anchor = GridBagConstraints.NORTHEAST;
-		JLabel lblChromatic  = new JLabel(Dict.get(Dict.SF_INSTR_CAT_CHROMATIC) + ": ");
+		JLabel lblChromatic  = new JLabel(Dict.get(Dict.SB_INSTR_CAT_CHROMATIC) + ": ");
 		Laf.makeBold(lblChromatic);
 		area.add(lblChromatic, constraints);
 		
@@ -811,7 +811,7 @@ public class InfoView extends JDialog {
 		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		FlowLabel lblChromaticContent = new FlowLabel(soundfontInfo.get("chromatic_count"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		FlowLabel lblChromaticContent = new FlowLabel(soundbankInfo.get("chromatic_count"), CPL_SOUNDBANK_INFO, PWIDTH_GENERAL_INFO_VALUE);
 		area.add(lblChromaticContent, constraints);
 		
 		// drum kits translation
@@ -819,13 +819,13 @@ public class InfoView extends JDialog {
 		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.anchor       = GridBagConstraints.NORTHEAST;
-		JLabel lblDrumkitsSingle = new JLabel(Dict.get(Dict.SOUNDFONT_DRUMKITS) + ": ");
+		JLabel lblDrumkitsSingle = new JLabel(Dict.get(Dict.SOUNDBANK_DRUMKITS) + ": ");
 		Laf.makeBold(lblDrumkitsSingle);
 		area.add(lblDrumkitsSingle, constraints);
 		
 		// drum kits content
-		int drumSingle = Integer.parseInt(soundfontInfo.get("drumkit_single_count"));
-		int drumMulti  = Integer.parseInt(soundfontInfo.get("drumkit_multi_count"));
+		int drumSingle = Integer.parseInt(soundbankInfo.get("drumkit_single_count"));
+		int drumMulti  = Integer.parseInt(soundbankInfo.get("drumkit_multi_count"));
 		int drumTotal  = drumSingle + drumMulti;
 		String drumkitsContent = drumTotal  + " ("
 		                       + drumSingle + " " + Dict.get(Dict.SINGLE_CHANNEL) + ", "
@@ -833,7 +833,7 @@ public class InfoView extends JDialog {
 		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		FlowLabel lblDrumkitsSingleContent = new FlowLabel(drumkitsContent, CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		FlowLabel lblDrumkitsSingleContent = new FlowLabel(drumkitsContent, CPL_SOUNDBANK_INFO, PWIDTH_GENERAL_INFO_VALUE);
 		area.add(lblDrumkitsSingleContent, constraints);
 		
 		// resources translation
@@ -841,22 +841,22 @@ public class InfoView extends JDialog {
 		constraints.gridx  = 0;
 		constraints.gridy++;
 		constraints.anchor  = GridBagConstraints.NORTHEAST;
-		JLabel lblResources = new JLabel(Dict.get(Dict.TAB_SOUNDFONT_RESOURCES) + ": ");
+		JLabel lblResources = new JLabel(Dict.get(Dict.TAB_SOUNDBANK_RESOURCES) + ": ");
 		Laf.makeBold(lblResources);
 		area.add(lblResources, constraints);
 		
 		// resources content
-		int resLayer   = Integer.parseInt( soundfontInfo.get("layer_count")            );
-		int resSample  = Integer.parseInt( soundfontInfo.get("sample_count")           );
-		int resUnknown = Integer.parseInt( soundfontInfo.get("unknown_resource_count") );
+		int resLayer   = Integer.parseInt( soundbankInfo.get("layer_count")            );
+		int resSample  = Integer.parseInt( soundbankInfo.get("sample_count")           );
+		int resUnknown = Integer.parseInt( soundbankInfo.get("unknown_resource_count") );
 		int resourcesTotal = resLayer + resSample + resUnknown;
 		String resourcesContent = resourcesTotal + " ("
-		             + resLayer   + " " + Dict.get(Dict.SF_RESOURCE_CAT_LAYER)  + ", "
-		             + resSample  + " " + Dict.get(Dict.SF_RESOURCE_CAT_SAMPLE) + ")";
+		             + resLayer   + " " + Dict.get(Dict.SB_RESOURCE_CAT_LAYER)  + ", "
+		             + resSample  + " " + Dict.get(Dict.SB_RESOURCE_CAT_SAMPLE) + ")";
 		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		FlowLabel lblLayersContent = new FlowLabel(resourcesContent, CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		FlowLabel lblLayersContent = new FlowLabel(resourcesContent, CPL_SOUNDBANK_INFO, PWIDTH_GENERAL_INFO_VALUE);
 		area.add(lblLayersContent, constraints);
 		
 		// total length translation
@@ -872,10 +872,10 @@ public class InfoView extends JDialog {
 		constraints.insets = Laf.INSETS_E;
 		constraints.gridx++;
 		constraints.anchor  = GridBagConstraints.NORTHWEST;
-		String totalContent = soundfontInfo.get("frames_count")  + " " + Dict.get(Dict.FRAMES) + ", "
-		                    + soundfontInfo.get("seconds_count") + " " + Dict.get(Dict.SEC)    + ", "
-		                    + soundfontInfo.get("bytes_count")   + " " + Dict.get(Dict.BYTES);
-		FlowLabel lblTotalContent = new FlowLabel(totalContent, CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		String totalContent = soundbankInfo.get("frames_count")  + " " + Dict.get(Dict.FRAMES) + ", "
+		                    + soundbankInfo.get("seconds_count") + " " + Dict.get(Dict.SEC)    + ", "
+		                    + soundbankInfo.get("bytes_count")   + " " + Dict.get(Dict.BYTES);
+		FlowLabel lblTotalContent = new FlowLabel(totalContent, CPL_SOUNDBANK_INFO, PWIDTH_GENERAL_INFO_VALUE);
 		area.add(lblTotalContent, constraints);
 		
 		// average length translation
@@ -891,10 +891,10 @@ public class InfoView extends JDialog {
 		constraints.insets = Laf.INSETS_W;
 		constraints.gridx++;
 		constraints.anchor = GridBagConstraints.NORTHWEST;
-		String avgContent  = soundfontInfo.get("frames_avg")  + " " + Dict.get(Dict.FRAMES) + ", "
-		                   + soundfontInfo.get("seconds_avg") + " " + Dict.get(Dict.SEC)    + ", "
-                           + soundfontInfo.get("bytes_avg")   + " " + Dict.get(Dict.BYTES);
-		FlowLabel lblAverageContent = new FlowLabel(avgContent, CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		String avgContent  = soundbankInfo.get("frames_avg")  + " " + Dict.get(Dict.FRAMES) + ", "
+		                   + soundbankInfo.get("seconds_avg") + " " + Dict.get(Dict.SEC)    + ", "
+                           + soundbankInfo.get("bytes_avg")   + " " + Dict.get(Dict.BYTES);
+		FlowLabel lblAverageContent = new FlowLabel(avgContent, CPL_SOUNDBANK_INFO, PWIDTH_GENERAL_INFO_VALUE);
 		area.add(lblAverageContent, constraints);
 		
 		// description translation
@@ -911,8 +911,8 @@ public class InfoView extends JDialog {
 		constraints.gridx++;
 		constraints.anchor  = GridBagConstraints.NORTHWEST;
 		constraints.weighty = 1;
-		FlowLabel lblDescriptionContent = new FlowLabel(soundfontInfo.get("description"), CPL_SOUNDFONT_INFO, PWIDTH_GENERAL_INFO_VALUE);
-		lblDescriptionContent.setHeightLimit(MAX_HEIGHT_SOUNDFONT_DESC);
+		FlowLabel lblDescriptionContent = new FlowLabel(soundbankInfo.get("description"), CPL_SOUNDBANK_INFO, PWIDTH_GENERAL_INFO_VALUE);
+		lblDescriptionContent.setHeightLimit(MAX_HEIGHT_SOUNDBANK_DESC);
 		area.add(lblDescriptionContent, constraints);
 		
 		return area;
@@ -2469,11 +2469,11 @@ public class InfoView extends JDialog {
 	}
 	
 	/**
-	 * Creates the area for instruments and drumkits of the currently loaded soundfont.
+	 * Creates the area for instruments and drumkits of the currently loaded soundbank.
 	 * 
-	 * @return the created soundfont instruments area.
+	 * @return the created soundbank instruments area.
 	 */
-	private Container createSoundfontInstrumentArea() {
+	private Container createSoundbankInstrumentArea() {
 		// content
 		JPanel area = new JPanel();
 		
@@ -2492,9 +2492,9 @@ public class InfoView extends JDialog {
 		constraints.anchor     = GridBagConstraints.NORTH;
 		
 		// label
-		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel(Dict.get(Dict.TAB_SOUNDFONT_INSTRUMENTS), this);
+		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel(Dict.get(Dict.TAB_SOUNDBANK_INSTRUMENTS), this);
 		area.add(labelWithFilter, constraints);
-		tableStringFilterIcons.put(Dict.KEY_INFO_SF_INSTR_FILTER, labelWithFilter);
+		tableStringFilterIcons.put(Dict.KEY_INFO_SB_INSTR_FILTER, labelWithFilter);
 		
 		// table
 		constraints.insets  = Laf.INSETS_SWE;
@@ -2502,29 +2502,29 @@ public class InfoView extends JDialog {
 		constraints.weighty = 1;
 		constraints.gridy++;
 		MidicaTable table = new MidicaTable();
-		table.setModel(new SoundfontInstrumentsTableModel());
-		table.setDefaultRenderer(Object.class, new SoundfontInstrumentTableCellRenderer());
+		table.setModel(new SoundbankInstrumentsTableModel());
+		table.setDefaultRenderer(Object.class, new SoundbankInstrumentTableCellRenderer());
 		JScrollPane scroll = new JScrollPane(table);
-		scroll.setPreferredSize(sfInstrTableDim);
+		scroll.setPreferredSize(sbInstrTableDim);
 		labelWithFilter.setTable(table);
 		area.add(scroll, constraints);
 		
 		// set column sizes and colors
-		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_SF_INSTR_PROGRAM  );
-		table.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_SF_INSTR_BANK     );
-		table.getColumnModel().getColumn( 2 ).setPreferredWidth( COL_WIDTH_SF_INSTR_NAME     );
-		table.getColumnModel().getColumn( 3 ).setPreferredWidth( COL_WIDTH_SF_INSTR_CHANNELS );
-		table.getColumnModel().getColumn( 4 ).setPreferredWidth( COL_WIDTH_SF_INSTR_KEYS     );
+		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_SB_INSTR_PROGRAM  );
+		table.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_SB_INSTR_BANK     );
+		table.getColumnModel().getColumn( 2 ).setPreferredWidth( COL_WIDTH_SB_INSTR_NAME     );
+		table.getColumnModel().getColumn( 3 ).setPreferredWidth( COL_WIDTH_SB_INSTR_CHANNELS );
+		table.getColumnModel().getColumn( 4 ).setPreferredWidth( COL_WIDTH_SB_INSTR_KEYS     );
 		
 		return area;
 	}
 	
 	/**
-	 * Creates the area for resources of the currently loaded soundfont.
+	 * Creates the area for resources of the currently loaded soundbank.
 	 * 
-	 * @return the created soundfont resource area.
+	 * @return the created soundbank resource area.
 	 */
-	private Container createSoundfontResourceArea() {
+	private Container createSoundbankResourceArea() {
 		// content
 		JPanel area = new JPanel();
 		
@@ -2542,9 +2542,9 @@ public class InfoView extends JDialog {
 		constraints.weighty    = 0;
 		
 		// label
-		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel(Dict.get(Dict.TAB_SOUNDFONT_RESOURCES), this);
+		FilterIconWithLabel labelWithFilter = new FilterIconWithLabel(Dict.get(Dict.TAB_SOUNDBANK_RESOURCES), this);
 		area.add(labelWithFilter, constraints);
-		tableStringFilterIcons.put(Dict.KEY_INFO_SF_RES_FILTER, labelWithFilter);
+		tableStringFilterIcons.put(Dict.KEY_INFO_SB_RES_FILTER, labelWithFilter);
 		
 		// table
 		constraints.insets  = Laf.INSETS_SWE;
@@ -2552,20 +2552,20 @@ public class InfoView extends JDialog {
 		constraints.weighty = 1;
 		constraints.gridy++;
 		MidicaTable table = new MidicaTable();
-		table.setModel(new SoundfontResourceTableModel());
-		table.setDefaultRenderer(Object.class, new SoundfontResourceTableCellRenderer());
+		table.setModel(new SoundbankResourceTableModel());
+		table.setDefaultRenderer(Object.class, new SoundbankResourceTableCellRenderer());
 		JScrollPane scroll = new JScrollPane(table);
-		scroll.setPreferredSize(sfResourceTableDim);
+		scroll.setPreferredSize(sbResourceTableDim);
 		labelWithFilter.setTable(table);
 		area.add(scroll, constraints);
 		
 		// set column sizes and colors
-		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_SF_RES_INDEX  );
-		table.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_SF_RES_TYPE   );
-		table.getColumnModel().getColumn( 2 ).setPreferredWidth( COL_WIDTH_SF_RES_NAME   );
-		table.getColumnModel().getColumn( 3 ).setPreferredWidth( COL_WIDTH_SF_RES_FRAMES );
-		table.getColumnModel().getColumn( 4 ).setPreferredWidth( COL_WIDTH_SF_RES_FORMAT );
-		table.getColumnModel().getColumn( 5 ).setPreferredWidth( COL_WIDTH_SF_RES_CLASS  );
+		table.getColumnModel().getColumn( 0 ).setPreferredWidth( COL_WIDTH_SB_RES_INDEX  );
+		table.getColumnModel().getColumn( 1 ).setPreferredWidth( COL_WIDTH_SB_RES_TYPE   );
+		table.getColumnModel().getColumn( 2 ).setPreferredWidth( COL_WIDTH_SB_RES_NAME   );
+		table.getColumnModel().getColumn( 3 ).setPreferredWidth( COL_WIDTH_SB_RES_FRAMES );
+		table.getColumnModel().getColumn( 4 ).setPreferredWidth( COL_WIDTH_SB_RES_FORMAT );
+		table.getColumnModel().getColumn( 5 ).setPreferredWidth( COL_WIDTH_SB_RES_CLASS  );
 		
 		return area;
 	}
@@ -3360,7 +3360,7 @@ public class InfoView extends JDialog {
 		
 		// level-1 tabs
 		keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_INFO_CONF,        0 );
-		keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_INFO_SF,          1 );
+		keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_INFO_SB,          1 );
 		keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_INFO_MIDI,        2 );
 		keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_INFO_KEYBINDINGS, 3 );
 		keyBindingManager.addBindingsForTabLevel1( content, Dict.KEY_INFO_ABOUT,       4 );
@@ -3372,10 +3372,10 @@ public class InfoView extends JDialog {
 		keyBindingManager.addBindingsForTabLevel2( contentConfig, Dict.KEY_INFO_CONF_INSTR,   0, 3 );
 		keyBindingManager.addBindingsForTabLevel2( contentConfig, Dict.KEY_INFO_CONF_DRUMKIT, 0, 4 );
 		
-		// level-2 tabs (soundfont)
-		keyBindingManager.addBindingsForTabLevel2( contentSoundfont, Dict.KEY_INFO_SF_GENERAL, 1, 0 );
-		keyBindingManager.addBindingsForTabLevel2( contentSoundfont, Dict.KEY_INFO_SF_INSTR,   1, 1 );
-		keyBindingManager.addBindingsForTabLevel2( contentSoundfont, Dict.KEY_INFO_SF_RES,     1, 2 );
+		// level-2 tabs (soundbank)
+		keyBindingManager.addBindingsForTabLevel2( contentSoundbank, Dict.KEY_INFO_SB_GENERAL, 1, 0 );
+		keyBindingManager.addBindingsForTabLevel2( contentSoundbank, Dict.KEY_INFO_SB_INSTR,   1, 1 );
+		keyBindingManager.addBindingsForTabLevel2( contentSoundbank, Dict.KEY_INFO_SB_RES,     1, 2 );
 		
 		// level-2 tabs (midi)
 		keyBindingManager.addBindingsForTabLevel2( contentMidi, Dict.KEY_INFO_MIDI_GENERAL, 2, 0 );
@@ -3390,9 +3390,9 @@ public class InfoView extends JDialog {
 		keyBindingManager.addBindingsForTabLevel3( tableStringFilterIcons.get(Dict.KEY_INFO_CONF_INSTR_FILTER),   Dict.KEY_INFO_CONF_INSTR_FILTER   );
 		keyBindingManager.addBindingsForTabLevel3( tableStringFilterIcons.get(Dict.KEY_INFO_CONF_DRUMKIT_FILTER), Dict.KEY_INFO_CONF_DRUMKIT_FILTER );
 		
-		// level-3: soundfont tables / string filters
-		keyBindingManager.addBindingsForTabLevel3( tableStringFilterIcons.get(Dict.KEY_INFO_SF_INSTR_FILTER), Dict.KEY_INFO_SF_INSTR_FILTER );
-		keyBindingManager.addBindingsForTabLevel3( tableStringFilterIcons.get(Dict.KEY_INFO_SF_RES_FILTER),   Dict.KEY_INFO_SF_RES_FILTER   );
+		// level-3: soundbank tables / string filters
+		keyBindingManager.addBindingsForTabLevel3( tableStringFilterIcons.get(Dict.KEY_INFO_SB_INSTR_FILTER), Dict.KEY_INFO_SB_INSTR_FILTER );
+		keyBindingManager.addBindingsForTabLevel3( tableStringFilterIcons.get(Dict.KEY_INFO_SB_RES_FILTER),   Dict.KEY_INFO_SB_RES_FILTER   );
 		
 		// level-3: midi / banks
 		keyBindingManager.addBindingsForTabLevel3( expandCollapseButtons.get(0), Dict.KEY_INFO_MIDI_BANKS_TOT_MIN  );

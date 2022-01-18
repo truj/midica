@@ -814,7 +814,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	
 	/**
 	 * Shows an error message based on a message string.
-	 * This is also called from {@link MidiDevices} if a soundfont file fails to load.
+	 * This is also called from {@link MidiDevices} if a soundbank file/URL fails to load.
 	 * 
 	 * @param message    Error message.
 	 */
@@ -825,7 +825,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 	
 	/**
 	 * Sets up sequencer, synthesizer and so on.
-	 * This operation may be time consuming if a large soundfont has to be
+	 * This operation may be time consuming if a large soundbank has to be
 	 * loaded. For this reason this operation is done by a worker in the
 	 * background while a 'please wait' message is displayed.
 	 * 

@@ -98,7 +98,7 @@ public class FileSelector extends JDialog {
 		if (READ == this.filePurpose) {
 			if (type.equals(FILE_TYPE_SOUND_FILE)) {
 				this.isSound  = true;
-    			directory     = Config.get(Config.DIRECTORY_SF2);
+    			directory     = Config.get(Config.DIRECTORY_SB);
     			charSetSelect = false;
     			tabs.put(type, Dict.TAB_SOUND_FILE);
     		}
@@ -427,7 +427,7 @@ public class FileSelector extends JDialog {
 				else if (FILE_TYPE_MSCORE_IMP.equals(fileType))
 					Config.set(Config.DIRECTORY_MSCORE, directory);
     			else if (FILE_TYPE_SOUND_FILE.equals(fileType))
-    				Config.set(Config.DIRECTORY_SF2, directory);
+    				Config.set(Config.DIRECTORY_SB, directory);
     		}
 			else {
 				if (FILE_TYPE_MIDI.equals(fileType))

@@ -65,7 +65,7 @@ public class Config {
 	public static final String DIRECTORY_ABC           = "directory_abc";
 	public static final String DIRECTORY_LY            = "directory_ly";
 	public static final String DIRECTORY_MSCORE        = "directory_mscore";
-	public static final String DIRECTORY_SF2           = "directory_sf2";
+	public static final String DIRECTORY_SB            = "directory_sb";
 	public static final String DIRECTORY_EXPORT_MPL    = "directory_export_mpl";
 	public static final String DIRECTORY_EXPORT_MID    = "directory_export_mid";
 	public static final String DIRECTORY_EXPORT_ALDA   = "directory_export_alda";
@@ -288,7 +288,7 @@ public class Config {
 		defaults.put( DIRECTORY_ABC,           homeDir      );
 		defaults.put( DIRECTORY_LY,            homeDir      );
 		defaults.put( DIRECTORY_MSCORE,        homeDir      );
-		defaults.put( DIRECTORY_SF2,           homeDir      );
+		defaults.put( DIRECTORY_SB,            homeDir      );
 		defaults.put( DIRECTORY_EXPORT_MPL,    homeDir      );
 		defaults.put( DIRECTORY_EXPORT_MID,    homeDir      );
 		defaults.put( DIRECTORY_EXPORT_ALDA,   homeDir      );
@@ -406,7 +406,7 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_MAIN_INFO,                    KeyEvent.VK_I,        0                          );
 		addDefaultKeyBinding( Dict.KEY_MAIN_PLAYER,                  KeyEvent.VK_P,        0                          );
 		addDefaultKeyBinding( Dict.KEY_MAIN_IMPORT,                  KeyEvent.VK_O,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_MAIN_IMPORT_SF,               KeyEvent.VK_S,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
+		addDefaultKeyBinding( Dict.KEY_MAIN_IMPORT_SB,               KeyEvent.VK_S,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_MAIN_EXPORT,                  KeyEvent.VK_S,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_LANGUAGE,            KeyEvent.VK_L,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_NOTE,                KeyEvent.VK_N,        InputEvent.ALT_DOWN_MASK   );
@@ -607,10 +607,10 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_INFO_CONF_SYNTAX,             KeyEvent.VK_S,        0                          );
 		addDefaultKeyBinding( Dict.KEY_INFO_CONF_INSTR,              KeyEvent.VK_I,        0                          );
 		addDefaultKeyBinding( Dict.KEY_INFO_CONF_DRUMKIT,            KeyEvent.VK_D,        0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_SF,                      KeyEvent.VK_S,        0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_SF_GENERAL,              KeyEvent.VK_G,        0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_SF_INSTR,                KeyEvent.VK_I,        0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_SF_RES,                  KeyEvent.VK_R,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_SB,                      KeyEvent.VK_S,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_SB_GENERAL,              KeyEvent.VK_G,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_SB_INSTR,                KeyEvent.VK_I,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_SB_RES,                  KeyEvent.VK_R,        0                          );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI,                    KeyEvent.VK_M,        0                          );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_GENERAL,            KeyEvent.VK_G,        0                          );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_KARAOKE,            KeyEvent.VK_K,        0                          );
@@ -628,10 +628,10 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_INFO_CONF_INSTR_FILTER,       KeyEvent.VK_F,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_INFO_CONF_DRUMKIT_FILTER,     KeyEvent.VK_F,        0                          );
 		addDefaultKeyBinding( Dict.KEY_INFO_CONF_DRUMKIT_FILTER,     KeyEvent.VK_F,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_INFO_SF_INSTR_FILTER,         KeyEvent.VK_F,        0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_SF_INSTR_FILTER,         KeyEvent.VK_F,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_INFO_SF_RES_FILTER,           KeyEvent.VK_F,        0                          );
-		addDefaultKeyBinding( Dict.KEY_INFO_SF_RES_FILTER,           KeyEvent.VK_F,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_INFO_SB_INSTR_FILTER,         KeyEvent.VK_F,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_SB_INSTR_FILTER,         KeyEvent.VK_F,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_INFO_SB_RES_FILTER,           KeyEvent.VK_F,        0                          );
+		addDefaultKeyBinding( Dict.KEY_INFO_SB_RES_FILTER,           KeyEvent.VK_F,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_FILTER,         KeyEvent.VK_F,        0                          );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_MSG_FILTER,         KeyEvent.VK_F,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_BANKS_TOT_PL,       KeyEvent.VK_PLUS,     0                          );

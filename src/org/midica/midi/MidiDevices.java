@@ -72,7 +72,7 @@ public final class MidiDevices {
 	// number of bars to skip on forward/rewind
 	private static int         skipQuarters      = 4;  //  4 quarter notes = 1 bar
 	private static int         skipFastQuarters  = 16; // 16 quarter notes = 4 bars
-	private static Soundbank   selectedSoundfont = null;
+	private static Soundbank   selectedSoundbank = null;
 	private static boolean[]   channelMute       = new boolean[NUMBER_OF_CHANNELS];
 	private static boolean[]   channelSolo       = new boolean[NUMBER_OF_CHANNELS];
 	private static byte[]      channelVolumeMsb  = {
@@ -207,7 +207,7 @@ public final class MidiDevices {
 	
 	/**
 	 * Initializes a software or hardware synthesizer.
-	 * If a soundfont file has been selected, loads this file into the synthesizer.
+	 * If a soundbank file has been selected, loads this file into the synthesizer.
 	 * 
 	 * @return    A receiver object, connected to the hardware or software synthesizer.
 	 * @throws MidiUnavailableException    if a device is not reachable.
@@ -224,30 +224,30 @@ public final class MidiDevices {
 		if (isSoftware) {
 			synthesizer.open();
 			
-			// load chosen soundfont and initialize it's instruments
-			boolean isCustomSoundfontLoaded = false;
-			if (selectedSoundfont != null) {
+			// load chosen soundbank and initialize it's instruments
+			boolean isCustomSoundbankLoaded = false;
+			if (selectedSoundbank != null) {
 				
-				// soundfont supported?
-				if (synthesizer.isSoundbankSupported(selectedSoundfont)) {
-					isCustomSoundfontLoaded = synthesizer.loadAllInstruments(selectedSoundfont);
+				// soundbank supported?
+				if (synthesizer.isSoundbankSupported(selectedSoundbank)) {
+					isCustomSoundbankLoaded = synthesizer.loadAllInstruments(selectedSoundbank);
 					
-					// load instruments from custom soundfont
-					if (isCustomSoundfontLoaded)
+					// load instruments from custom soundbank
+					if (isCustomSoundbankLoaded)
 						initInstrumentsIfNotYetDone(isSoftware);
 					
 					// soundbank not loaded
 					else
-						playerController.showErrorMessage(Dict.get(Dict.ERROR_SOUNDFONT_LOADING_FAILED));
+						playerController.showErrorMessage(Dict.get(Dict.ERROR_SOUNDBANK_LOADING_FAILED));
 				}
 				else {
-					// soundfont not supported
-					playerController.showErrorMessage(Dict.get(Dict.ERROR_SOUNDFONT_NOT_SUPPORTED));
+					// soundbank not supported
+					playerController.showErrorMessage(Dict.get(Dict.ERROR_SOUNDBANK_NOT_SUPPORTED));
 				}
 			}
 			
-			// load instruments from default soundfont
-			if (! isCustomSoundfontLoaded)
+			// load instruments from default soundbank
+			if (! isCustomSoundbankLoaded)
 				initInstrumentsIfNotYetDone(isSoftware);
 			
 			rec = synthesizer.getReceiver();
@@ -262,12 +262,12 @@ public final class MidiDevices {
 	}
 	
 	/**
-	 * Initializes the instruments of the right soundfont, if not yet done.
+	 * Initializes the instruments of the right soundbank, if not yet done.
 	 * 
-	 * @param soundfontAvailable  **true** if a software soundfont is available;
+	 * @param soundbankAvailable  **true** if a software soundbank is available;
 	 *                            **false** if a hardware synthesizer is used.
 	 */
-	private static void initInstrumentsIfNotYetDone(boolean soundfontAvailable) {
+	private static void initInstrumentsIfNotYetDone(boolean soundbankAvailable) {
 		if (null != instruments)
 			return;
 		
@@ -277,10 +277,10 @@ public final class MidiDevices {
 			instruments.put(channel, new TreeMap<Integer, String>());
 		
 		// software synthesizer
-		if (soundfontAvailable) {
-			ArrayList<HashMap<String, String>> soundfontInstruments = SoundfontParser.getSoundfontInstruments();
+		if (soundbankAvailable) {
+			ArrayList<HashMap<String, String>> soundbankInstruments = SoundfontParser.getSoundbankInstruments();
 			for (byte channel = 0; channel < NUMBER_OF_CHANNELS; channel++)
-				initSoftwareInstruments(channel, soundfontInstruments);
+				initSoftwareInstruments(channel, soundbankInstruments);
 		}
 		
 		// hardware synthesizer
@@ -314,16 +314,16 @@ public final class MidiDevices {
 	}
 	
 	/**
-	 * Initializes the instruments of a software soundfont, that are
+	 * Initializes the instruments of a software soundbank, that are
 	 * supported for the given channel.
 	 * 
 	 * @param channel                 MIDI channel
-	 * @param soundfontInstruments    pre-analyzed soundfont instruments
+	 * @param soundbankInstruments    pre-analyzed soundbank instruments
 	 */
-	private static void initSoftwareInstruments(byte channel, ArrayList<HashMap<String, String>> soundfontInstruments) {
+	private static void initSoftwareInstruments(byte channel, ArrayList<HashMap<String, String>> soundbankInstruments) {
 		
 		INSTRUMENT:
-		for (HashMap<String, String> instr : soundfontInstruments) {
+		for (HashMap<String, String> instr : soundbankInstruments) {
 			
 			// ignore categories
 			String category = instr.get("category");
@@ -950,26 +950,26 @@ public final class MidiDevices {
 	}
 	
 	/**
-	 * Sets the given soundfont so that it can be used by the synthesizer.
+	 * Sets the given soundbank so that it can be used by the synthesizer.
 	 * 
-	 * @param soundfont    Custom soundfont.
+	 * @param soundbank    Custom soundbank.
 	 */
-	public static void setSoundfont(Soundbank soundfont) {
-		selectedSoundfont = soundfont;
+	public static void setSoundbank(Soundbank soundbank) {
+		selectedSoundbank = soundbank;
 	}
 	
 	/**
-	 * Returns the currently selected soundfont if available,
-	 * or otherwise the default soundfont if available, or **null**
+	 * Returns the currently selected soundbank if available,
+	 * or otherwise the default soundbank if available, or **null**
 	 * if neither is available.
 	 * 
-	 * @return the soundfont.
+	 * @return the soundbank.
 	 */
-	public static Soundbank getSoundfont() {
+	public static Soundbank getSoundbank() {
 		
-		// selected soundfont available?
-		if (selectedSoundfont != null)
-			return selectedSoundfont;
+		// selected soundbank available?
+		if (selectedSoundbank != null)
+			return selectedSoundbank;
 		
 		// create a synthesizer, if not yet done
 		if (null == synthesizer) {
@@ -981,7 +981,7 @@ public final class MidiDevices {
 			}
 		}
 		
-		// return default soundfont or null if a default soundfont doesn't exist
+		// return default soundbank or null if a default soundbank doesn't exist
 		return synthesizer.getDefaultSoundbank();
 	}
 	

@@ -77,7 +77,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	
 	private UiView            view                    = null;
 	private FileSelector      importSelector          = null;
-	private FileSelector      soundfontSelector       = null;
+	private FileSelector      soundbankSelector       = null;
 	private FileSelector      exportSelector          = null;
 	private MidicaPLParser    mplParser               = null;
 	private MidiParser        midiParser              = null;
@@ -85,7 +85,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	private AbcImporter       abcImporter             = null;
 	private LilypondImporter  lyImporter              = null;
 	private MusescoreImporter mscoreImporter          = null;
-	private SoundfontParser   soundfontParser         = null;
+	private SoundfontParser   soundbankParser         = null;
 	private PlayerView        player                  = null;
 	private File              currentFile             = null;
 	private String            currentFileType         = null;
@@ -102,12 +102,12 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		abcImporter     = new AbcImporter();
 		lyImporter      = new LilypondImporter();
 		mscoreImporter  = new MusescoreImporter();
-		soundfontParser = new SoundfontParser();
+		soundbankParser = new SoundfontParser();
 		
 		// initView() must be called after the parsers are created.
 		// Otherwise a null parser may be passed to the ParsingWorker's
 		// constructor. This error would appear on startup with remembered
-		// soundfont files in about 1 of 5 cases.
+		// soundbank files in about 1 of 5 cases.
 		initView();
 	}
 	
@@ -130,9 +130,9 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			importSelector = new FileSelector(view, this);
 			importSelector.init(FileSelector.FILE_TYPE_MPL, FileSelector.READ);
 		}
-		if (null == soundfontSelector) {
-			soundfontSelector = new FileSelector(view, this);
-			soundfontSelector.init(FileSelector.FILE_TYPE_SOUND_FILE, FileSelector.READ);
+		if (null == soundbankSelector) {
+			soundbankSelector = new FileSelector(view, this);
+			soundbankSelector.init(FileSelector.FILE_TYPE_SOUND_FILE, FileSelector.READ);
 		}
 		if (null == exportSelector) {
 			exportSelector = new FileSelector(view, this);
@@ -150,12 +150,12 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	}
 	
 	/**
-	 * Sets the soundfont file name label after loading a soundfont by MidicaPL source code.
+	 * Sets the soundbank file name label after loading a soundbank by MidicaPL source code.
 	 */
-	public void soundfontLoadedBySourceCode() {
-		String text = Dict.get(Dict.SF_LOADED_BY_SOURCE);
-		view.getChosenSoundfontFileLbl().setText(text);
-		view.getChosenSoundfontFileLbl().setToolTipText(text);
+	public void soundbankLoadedBySourceCode() {
+		String text = Dict.get(Dict.SB_LOADED_BY_SOURCE);
+		view.getChosenSoundbankFileLbl().setText(text);
+		view.getChosenSoundbankFileLbl().setToolTipText(text);
 	}
 	
 	/**
@@ -185,10 +185,10 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			importSelector.setVisible(true);
 		}
 		
-		// button pressed: open soundfont file
-		else if (UiView.CMD_OPEN_SNDFNT_FILE.equals(cmd)) {
+		// button pressed: open soundbank file
+		else if (UiView.CMD_OPEN_SNDBNK_FILE.equals(cmd)) {
 			currentFilePurpose = FILE_PURPOSE_PARSE;
-			soundfontSelector.setVisible(true);
+			soundbankSelector.setVisible(true);
 		}
 		
 		// button pressed: export file
@@ -217,7 +217,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		// cancel or ESC in FileChooser pressed
 		else if (CMD_CANCELED.equals(cmd)) {
 			importSelector.setVisible(false);
-			soundfontSelector.setVisible(false);
+			soundbankSelector.setVisible(false);
 			exportSelector.setVisible(false);
 		}
 		
@@ -420,13 +420,13 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			pathKey    = Config.PATH_MSCORE;
 		}
 		else if (FileSelector.FILE_TYPE_SOUND_FILE.equals(type)) {
-			parser   = soundfontParser;
-			selector = soundfontSelector;
-			waitMsg  = Dict.get(Dict.WAIT_PARSE_SF2);
+			parser   = soundbankParser;
+			selector = soundbankSelector;
+			waitMsg  = Dict.get(Dict.WAIT_PARSE_SB);
 		}
 		else if (FileSelector.FILE_TYPE_SOUND_URL.equals(type)) {
-			parser   = soundfontParser;
-			selector = soundfontSelector;
+			parser   = soundbankParser;
+			selector = soundbankSelector;
 			waitMsg  = Dict.get(Dict.WAIT_PARSE_URL);
 		}
 		else {
@@ -434,8 +434,8 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		}
 		
 		// Reset the filename for the case that it cannot be parsed.
-		// But don't do that for soundfonts because the last successfully
-		// parsed soundfont file will stay valid.
+		// But don't do that for soundbanks because the last successfully
+		// parsed soundbank file/URL will stay valid.
 		if (! FileSelector.FILE_TYPE_SOUND_FILE.equals(type)
 			&& ! FileSelector.FILE_TYPE_SOUND_URL.equals(type)) {
 			displayFilename(type, Dict.get(Dict.UNCHOSEN_FILE));
@@ -684,7 +684,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	}
 	
 	/**
-	 * Displays the parsed sequence or soundfont file name.
+	 * Displays the parsed sequence or soundbank file name.
 	 * In case of a sequence, also displays the file type.
 	 * 
 	 * @param type        File type.
@@ -722,8 +722,8 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 		else if (isSound) {
 			String shortName = SoundfontParser.getShortName();
 			String longName  = SoundfontParser.getFullPath();
-			view.getChosenSoundfontFileLbl().setText(shortName);
-			view.getChosenSoundfontFileLbl().setToolTipText(longName);
+			view.getChosenSoundbankFileLbl().setText(shortName);
+			view.getChosenSoundbankFileLbl().setToolTipText(longName);
 		}
 		
 		// don't display the file type if no file is imported

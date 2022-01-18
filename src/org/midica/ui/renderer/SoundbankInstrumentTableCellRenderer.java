@@ -20,7 +20,7 @@ import org.midica.file.read.SoundfontParser;
 
 /**
  * Cell renderer for the instruments and drum kits table in the
- * **Soundfont** > **Instruments & Drum Kits** tab of the info window.
+ * **Soundbank** > **Instruments & Drum Kits** tab of the info window.
  * 
  * The categories are displayed in another color than the plain syntax
  * elements.
@@ -30,7 +30,7 @@ import org.midica.file.read.SoundfontParser;
  * 
  * @author Jan Trukenmüller
  */
-public class SoundfontInstrumentTableCellRenderer extends MidicaTableCellRenderer {
+public class SoundbankInstrumentTableCellRenderer extends MidicaTableCellRenderer {
 	
 	private static final long serialVersionUID = 1L;
 	
@@ -38,11 +38,11 @@ public class SoundfontInstrumentTableCellRenderer extends MidicaTableCellRendere
 	private ArrayList<HashMap<String, String>> instruments;
 	
 	/**
-	 * Creates a cell renderer for the soundfont-based instruments and drum kits
+	 * Creates a cell renderer for the soundbank-based instruments and drum kits
 	 * table.
 	 */
-	public SoundfontInstrumentTableCellRenderer() {
-		this.instruments = SoundfontParser.getSoundfontInstruments();
+	public SoundbankInstrumentTableCellRenderer() {
+		this.instruments = SoundfontParser.getSoundbankInstruments();
 	}
 	
 	@Override

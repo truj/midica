@@ -13,7 +13,7 @@ package org.midica.file.read;
  * 
  * It's implemented by the following classes:
  * 
- * - {@link SoundfontParser} -- loads a soundfont file (.sf2)
+ * - {@link SoundfontParser} -- loads a soundbank file (.sf2 / .dls) or URL
  * - {@link SequenceParser} -- parses a MIDI stream using one of the following sub classes:
  *     - {@link MidiParser} -- parses the stream from a MIDI file (.mid)
  *     - {@link MidicaPLParser} -- parses the stream from a MidicaPL file (.midica)

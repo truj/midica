@@ -42,10 +42,10 @@ import com.sun.gervill.SF2Soundbank;
 
 /**
  * This class is used in order to load a user-defined
- * soundfont or DLS file or a URL.
+ * soundbank or DLS file or a URL.
  * 
  * It's also used for retrieving information from the currently loaded
- * (or standard) soundfont.
+ * (or standard) soundbank.
  * 
  * @author Jan Trukenmüller
  */
@@ -59,10 +59,10 @@ public class SoundfontParser implements IParser {
 	public static final String SOUND_FORMAT_SF2 = "SF2";
 	public static final String SOUND_FORMAT_DLS = "DLS";
 	
-	/** The currently loaded user-defined soundfont. */
-	private static Soundbank soundfont = null;
+	/** The currently loaded user-defined soundbank. */
+	private static Soundbank soundbank = null;
 	
-	/** The successfully loaded soundfont file. */
+	/** The successfully loaded soundbank file. */
 	private static File soundFile = null;
 	
 	/** The successfully loaded sound URL. */
@@ -71,17 +71,17 @@ public class SoundfontParser implements IParser {
 	/** The format of the successfully loaded sound file or URL (SF2 or DLS). */
 	private static String soundFormat = null;
 	
-	/** Data structure for general information of the currently loaded soundfont. */
+	/** Data structure for general information of the currently loaded soundbank. */
 	private static HashMap<String, String> generalInfo = null;
 	
-	/** Data structure for instruments and drum kits of the currently loaded soundfont. */
-	private static ArrayList<HashMap<String, String>> soundfontInstruments = null;
+	/** Data structure for instruments and drum kits of the currently loaded soundbank. */
+	private static ArrayList<HashMap<String, String>> soundbankInstruments = null;
 	
-	/** Data structure for resources of the currently loaded soundfont. */
-	private static ArrayList<HashMap<String, Object>> soundfontResources = null;
+	/** Data structure for resources of the currently loaded soundbank. */
+	private static ArrayList<HashMap<String, Object>> soundbankResources = null;
 	
 	/**
-	 * Parses a soundfont file or URL.
+	 * Parses a soundbank file or URL.
 	 * 
 	 * @param fileOrUrl        file or url (as string) chosen by the user
 	 * @throws ParseException  if the file can not be loaded correctly.
@@ -123,11 +123,11 @@ public class SoundfontParser implements IParser {
 			try {
 				errorMsg.append(String.format(Dict.get(Dict.SOUND_FORMAT_FAILED), format));
 				if (SOUND_FORMAT_DLS.equals(format)) {
-					soundfont   = new DLSSoundbank(fileToParse);
+					soundbank   = new DLSSoundbank(fileToParse);
 					soundFormat = SOUND_FORMAT_DLS;
 				}
 				else {
-					soundfont   = new SF2Soundbank(fileToParse);
+					soundbank   = new SF2Soundbank(fileToParse);
 					soundFormat = SOUND_FORMAT_SF2;
 				}
 				success = true;
@@ -143,16 +143,16 @@ public class SoundfontParser implements IParser {
 		
 		// success or error?
 		if (success) {
-			MidiDevices.setSoundfont(soundfont);
+			MidiDevices.setSoundbank(soundbank);
 		}
 		else {
 			throw new ParseException(errorMsg.toString());
 		}
 		
 		// read it and build up data structures
-		parseSoundfontInstruments();
-		parseSoundfontResources();
-		parseSoundfontInfo();
+		parseSoundbankInstruments();
+		parseSoundbankResources();
+		parseSoundbankInfo();
 		
 		// parsing successful - save the file info
 		if (file != null) {
@@ -198,7 +198,7 @@ public class SoundfontParser implements IParser {
 	 * 
 	 * If no custom file or URL is loaded successfully, **null** is returned.
 	 * 
-	 * @return the soundfont file name or shortened URL or **null**.
+	 * @return the soundbank file name or shortened URL or **null**.
 	 */
 	public static String getShortName() {
 		if (soundFile != null) {
@@ -239,55 +239,55 @@ public class SoundfontParser implements IParser {
 	}
 	
 	/**
-	 * Returns general information from the currently loaded soundfont.
+	 * Returns general information from the currently loaded soundbank.
 	 * 
-	 * @return general soundfont information.
+	 * @return general soundbank information.
 	 */
-	public static HashMap<String, String> getSoundfontInfo() {
+	public static HashMap<String, String> getSoundbankInfo() {
 		
 		// parse, if not yet done
 		if (null == generalInfo) {
 			
-			// The soundfont info parsing relies on the other data structures.
+			// The soundbank info parsing relies on the other data structures.
 			// so we have to parse them first, before building up the info
 			// structure itself.
-			if (null == soundfontInstruments)
-				parseSoundfontInstruments();
-			if (null == soundfontResources)
-				parseSoundfontResources();
+			if (null == soundbankInstruments)
+				parseSoundbankInstruments();
+			if (null == soundbankResources)
+				parseSoundbankResources();
 			
 			// Now we can parse the info.
-			parseSoundfontInfo();
+			parseSoundbankInfo();
 		}
 		
 		return generalInfo;
 	}
 	
 	/**
-	 * Returns instruments and drum kits from the currently loaded soundfont.
+	 * Returns instruments and drum kits from the currently loaded soundbank.
 	 * 
-	 * @return Instruments from the soundfont.
+	 * @return Instruments from the soundbank.
 	 */
-	public static ArrayList<HashMap<String, String>> getSoundfontInstruments() {
+	public static ArrayList<HashMap<String, String>> getSoundbankInstruments() {
 		
 		// parse, if not yet done
-		if (null == soundfontInstruments)
-			parseSoundfontInstruments();
+		if (null == soundbankInstruments)
+			parseSoundbankInstruments();
 		
-		return soundfontInstruments;
+		return soundbankInstruments;
 	}
 	
 	/**
-	 * Returns resources from the currently loaded soundfont.
+	 * Returns resources from the currently loaded soundbank.
 	 * 
-	 * @return Resources from the soundfont.
+	 * @return Resources from the soundbank.
 	 */
-	public static ArrayList<HashMap<String, Object>> getSoundfontResources() {
+	public static ArrayList<HashMap<String, Object>> getSoundbankResources() {
 		// parse, if not yet done
-		if (null == soundfontResources)
-			parseSoundfontResources();
+		if (null == soundbankResources)
+			parseSoundbankResources();
 		
-		return soundfontResources;
+		return soundbankResources;
 	}
 	
 	/**
@@ -353,15 +353,15 @@ public class SoundfontParser implements IParser {
 	}
 	
 	/**
-	 * Retrieves general information from the currently loaded soundfont.
+	 * Retrieves general information from the currently loaded soundbank.
 	 */
-	private static void parseSoundfontInfo() {
+	private static void parseSoundbankInfo() {
 		
 		generalInfo = new HashMap<String, String>();
-		Soundbank soundfont = MidiDevices.getSoundfont();
+		Soundbank soundbank = MidiDevices.getSoundbank();
 		
-		// no soundfont loaded?
-		if (null == soundfont) {
+		// no soundbank loaded?
+		if (null == soundbank) {
 			generalInfo.put( "name",                     "-" );
 			generalInfo.put( "version",                  "-" );
 			generalInfo.put( "vendor",                   "-" );
@@ -389,29 +389,29 @@ public class SoundfontParser implements IParser {
 		
 		// get general information
 		String unknown     = Dict.get(Dict.UNKNOWN);
-		String name        = soundfont.getName();
-		String version     = soundfont.getVersion();
-		String vendor      = soundfont.getVendor();
-		String description = soundfont.getDescription();
+		String name        = soundbank.getName();
+		String version     = soundbank.getVersion();
+		String vendor      = soundbank.getVendor();
+		String description = soundbank.getDescription();
 		generalInfo.put( "name",        name        != null ? name        : unknown );
 		generalInfo.put( "version",     version     != null ? version     : unknown );
 		generalInfo.put( "vendor",      vendor      != null ? vendor      : unknown );
 		generalInfo.put( "description", description != null ? description : unknown );
 		
-		// get sf2 specific information
+		// get sf2/dls specific information
 		String creationDate    = unknown;
 		String tools           = unknown;
 		String product         = unknown;
 		String targetEngine    = unknown;
 		try {
-			Method getCreationDate = soundfont.getClass().getMethod("getCreationDate");
-			Method getTools        = soundfont.getClass().getMethod("getTools");
-			Method getProduct      = soundfont.getClass().getMethod("getProduct");
-			Method getTargetEngine = soundfont.getClass().getMethod("getTargetEngine");
-			creationDate = (String) getCreationDate.invoke(soundfont, (Object[]) null);
-			tools        = (String) getTools.invoke(soundfont, (Object[]) null);
-			product      = (String) getProduct.invoke(soundfont, (Object[]) null);
-			targetEngine = (String) getTargetEngine.invoke(soundfont, (Object[]) null);
+			Method getCreationDate = soundbank.getClass().getMethod("getCreationDate");
+			Method getTools        = soundbank.getClass().getMethod("getTools");
+			Method getProduct      = soundbank.getClass().getMethod("getProduct");
+			Method getTargetEngine = soundbank.getClass().getMethod("getTargetEngine");
+			creationDate = (String) getCreationDate.invoke(soundbank, (Object[]) null);
+			tools        = (String) getTools.invoke(soundbank, (Object[]) null);
+			product      = (String) getProduct.invoke(soundbank, (Object[]) null);
+			targetEngine = (String) getTargetEngine.invoke(soundbank, (Object[]) null);
 		}
 		catch(Exception e) {
 		}
@@ -429,8 +429,8 @@ public class SoundfontParser implements IParser {
 		int drumSingleCount   = 0;
 		int drumMultiCount    = 0;
 		int unknownInstrCount = 0;
-		if (soundfontInstruments != null) {
-			for (HashMap<String, String> instrument : soundfontInstruments) {
+		if (soundbankInstruments != null) {
+			for (HashMap<String, String> instrument : soundbankInstruments) {
 				String type = instrument.get("type");
 				if ("chromatic".equals(type))
 					chromaticCount++;
@@ -454,8 +454,8 @@ public class SoundfontParser implements IParser {
 		long   framesCount     = 0;
 		double secondsCount    = 0;
 		long   bytesCount      = 0;
-		if (soundfontResources != null) {
-			for (HashMap<String, Object> resource : soundfontResources) {
+		if (soundbankResources != null) {
+			for (HashMap<String, Object> resource : soundbankResources) {
 				String type = (String) resource.get("type");
 				if ("Layer".equals(type))
 					layerCount++;
@@ -515,29 +515,29 @@ public class SoundfontParser implements IParser {
 	}
 	
 	/**
-	 * Retrieves instruments and drum kits from the currently loaded soundfont.
+	 * Retrieves instruments and drum kits from the currently loaded soundbank.
 	 */
-	private static void parseSoundfontInstruments() {
+	private static void parseSoundbankInstruments() {
 		
 		// initialize
-		soundfontInstruments = new ArrayList<HashMap<String, String>>();
-		Soundbank soundfont  = MidiDevices.getSoundfont();
+		soundbankInstruments = new ArrayList<HashMap<String, String>>();
+		Soundbank soundbank  = MidiDevices.getSoundbank();
 		boolean needCategoryDrumkitSingle = false;
 		boolean needCategoryDrumkitMulti  = false;
 		boolean needCategoryChromatic     = false;
 		boolean needCategoryUnknown       = false;
 		
-		// no soundfont loaded?
-		if (null == soundfont)
+		// no soundbank loaded?
+		if (null == soundbank)
 			return;
 		
 		// collect instruments
-		Instrument[] instruments = soundfont.getInstruments();
+		Instrument[] instruments = soundbank.getInstruments();
 		for (int i=0; i < instruments.length; i++) {
 			
 			// add general instrument data
 			HashMap<String, String> instrument = new HashMap<String, String>();
-			soundfontInstruments.add(instrument);
+			soundbankInstruments.add(instrument);
 			Instrument midiInstr = instruments[ i ];
 			Patch      patch     = midiInstr.getPatch();
 			int        bank      = patch.getBank();
@@ -559,7 +559,7 @@ public class SoundfontParser implements IParser {
 				syntaxChrom = instrument.get("program");
 			String postfix = "";
 			if (bankLsb != 0)
-				// TODO: test with a soundfont that uses the LSB
+				// TODO: test with a soundbank that uses the LSB
 				postfix = Dict.getSyntax(Dict.SYNTAX_PROG_BANK_SEP) + bankMsb + Dict.getSyntax(Dict.SYNTAX_BANK_SEP) + bankLsb;
 			else if (bankMsb != 0)
 				postfix = Dict.getSyntax(Dict.SYNTAX_PROG_BANK_SEP) + bankMsb;
@@ -567,13 +567,13 @@ public class SoundfontParser implements IParser {
 			syntaxChrom += postfix;
 			
 			// get channels and keys
-			boolean[] sf2Channels = null;
-			String[]  sf2keys     = null;
+			boolean[] sbChannels = null;
+			String[]  sbkeys     = null;
 			try {
 				Method getChannels = midiInstr.getClass().getMethod("getChannels");
 				Method getKeys     = midiInstr.getClass().getMethod("getKeys");
-				sf2Channels = (boolean[]) getChannels.invoke(midiInstr, (Object[]) null);
-				sf2keys     = (String[]) getKeys.invoke(midiInstr, (Object[]) null);
+				sbChannels = (boolean[]) getChannels.invoke(midiInstr, (Object[]) null);
+				sbkeys     = (String[]) getKeys.invoke(midiInstr, (Object[]) null);
 			}
 			catch(Exception e) {
 				needCategoryUnknown = true;
@@ -590,10 +590,10 @@ public class SoundfontParser implements IParser {
 			boolean            hasChromaticChannel = false;
 			boolean            hasDrumChannel      = false;
 			ArrayList<Integer> channels            = new ArrayList<Integer>();
-			for (int channel = 0; channel < sf2Channels.length; channel++) {
+			for (int channel = 0; channel < sbChannels.length; channel++) {
 				
 				// channel not supported?
-				if ( ! sf2Channels[channel] )
+				if (! sbChannels[channel])
 					continue;
 				
 				// remember the channel
@@ -621,10 +621,10 @@ public class SoundfontParser implements IParser {
 			
 			// process keys
 			ArrayList<Integer> keys = new ArrayList<Integer>();
-			for (int key = 0; key < sf2keys.length; key++) {
+			for (int key = 0; key < sbkeys.length; key++) {
 				
 				// key not available?
-				if (null == sf2keys[key])
+				if (null == sbkeys[key])
 					continue;
 				
 				// remember the key
@@ -660,29 +660,29 @@ public class SoundfontParser implements IParser {
 			HashMap<String, String> category = new HashMap<String, String>();
 			category.put( "category", "category" );
 			category.put( "type",     "category_chromatic" );
-			category.put( "name",     Dict.get(Dict.SF_INSTR_CAT_CHROMATIC) );
-			soundfontInstruments.add(category);
+			category.put( "name",     Dict.get(Dict.SB_INSTR_CAT_CHROMATIC) );
+			soundbankInstruments.add(category);
 		}
 		if (needCategoryDrumkitSingle) {
 			HashMap<String, String> category = new HashMap<String, String>();
 			category.put( "category", "category" );
 			category.put( "type",     "category_drumkit_single" );
-			category.put( "name",     Dict.get(Dict.SF_INSTR_CAT_DRUMKIT_SINGLE) );
-			soundfontInstruments.add(category);
+			category.put( "name",     Dict.get(Dict.SB_INSTR_CAT_DRUMKIT_SINGLE) );
+			soundbankInstruments.add(category);
 		}
 		if (needCategoryDrumkitMulti) {
 			HashMap<String, String> category = new HashMap<String, String>();
 			category.put( "category", "category" );
 			category.put( "type",     "category_drumkit_multi" );
-			category.put( "name",     Dict.get(Dict.SF_INSTR_CAT_DRUMKIT_MULTI) );
-			soundfontInstruments.add(category);
+			category.put( "name",     Dict.get(Dict.SB_INSTR_CAT_DRUMKIT_MULTI) );
+			soundbankInstruments.add(category);
 		}
 		if (needCategoryUnknown) {
 			HashMap<String, String> category = new HashMap<String, String>();
 			category.put( "category", "category" );
 			category.put( "type",     "category_unknown" );
-			category.put( "name",     Dict.get(Dict.SF_INSTR_CAT_UNKNOWN) );
-			soundfontInstruments.add(category);
+			category.put( "name",     Dict.get(Dict.SB_INSTR_CAT_UNKNOWN) );
+			soundbankInstruments.add(category);
 		}
 		
 		// sort instruments
@@ -736,33 +736,33 @@ public class SoundfontParser implements IParser {
 				return 0;
 			}
 		};
-		Collections.sort(soundfontInstruments, instrumentComparator);
+		Collections.sort(soundbankInstruments, instrumentComparator);
 		
 		return;
 	}
 	
 	/**
-	 * Retrieves resources from the soundfont.
+	 * Retrieves resources from the soundbank.
 	 */
-	public static void parseSoundfontResources() {
+	public static void parseSoundbankResources() {
 		
 		// initialize
-		soundfontResources  = new ArrayList<HashMap<String, Object>>();
-		Soundbank soundfont = MidiDevices.getSoundfont();
+		soundbankResources  = new ArrayList<HashMap<String, Object>>();
+		Soundbank soundbank = MidiDevices.getSoundbank();
 		boolean needCategorySample  = false;
 		boolean needCategoryLayer   = false;
 		boolean needCategoryUnknown = false;
 		
-		// no soundfont loaded?
-		if (null == soundfont)
+		// no soundbank loaded?
+		if (null == soundbank)
 			return;
 		
 		// collect resources
-		SoundbankResource[] resources = soundfont.getResources();
+		SoundbankResource[] resources = soundbank.getResources();
 		for (int i=0; i < resources.length; i++) {
 			
 			HashMap<String, Object> resource = new HashMap<String, Object>();
-			soundfontResources.add(resource);
+			soundbankResources.add(resource);
 			
 			// apply general information and defaults
 			resource.put( "index",        i );
@@ -864,27 +864,27 @@ public class SoundfontParser implements IParser {
 			HashMap<String, Object> category = new HashMap<String, Object>();
 			category.put( "category", "category" );
 			category.put( "type",     "category_sample" );
-			category.put( "name",     Dict.get(Dict.SF_RESOURCE_CAT_SAMPLE) );
-			soundfontResources.add(category);
+			category.put( "name",     Dict.get(Dict.SB_RESOURCE_CAT_SAMPLE) );
+			soundbankResources.add(category);
 		}
 		if (needCategoryLayer) {
 			HashMap<String, Object> category = new HashMap<String, Object>();
 			category.put( "category", "category" );
 			category.put( "type",     "category_layer" );
-			category.put( "name",     Dict.get(Dict.SF_RESOURCE_CAT_LAYER) );
-			soundfontResources.add(category);
+			category.put( "name",     Dict.get(Dict.SB_RESOURCE_CAT_LAYER) );
+			soundbankResources.add(category);
 		}
 		if (needCategoryUnknown) {
 			HashMap<String, Object> category = new HashMap<String, Object>();
 			category.put( "category", "category" );
 			category.put( "type",     "category_unknown" );
-			category.put( "name",     Dict.get(Dict.SF_RESOURCE_CAT_UNKNOWN) );
-			soundfontResources.add(category);
+			category.put( "name",     Dict.get(Dict.SB_RESOURCE_CAT_UNKNOWN) );
+			soundbankResources.add(category);
 		}
 		
 		// sort resources
 		// samples first, then layers, then unknown types
-		// inside a type category: keep the order of the soundfont (order by index)
+		// inside a type category: keep the order of the soundbank (order by index)
 		Comparator<HashMap<String, Object>> instrumentComparator = new Comparator<HashMap<String, Object>>() {
 			
 			/** Sorting priority for the type. */
@@ -923,7 +923,7 @@ public class SoundfontParser implements IParser {
 				return 0;
 			}
 		};
-		Collections.sort(soundfontResources, instrumentComparator);
+		Collections.sort(soundbankResources, instrumentComparator);
 		
 		return;
 	}

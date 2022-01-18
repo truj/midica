@@ -16,7 +16,7 @@ import org.midica.ui.player.PlayerController;
  * {@link WaitView} is shown.
  * 
  * Setting up the MIDI devices may be time consuming because it includes
- * loading a soundfont file and that file may be large.
+ * loading a soundbank file and that file may be large.
  * 
  * The worker is executed in the background before the (blocking)
  * setVisible() method of the (modal) waiting dialog is called.

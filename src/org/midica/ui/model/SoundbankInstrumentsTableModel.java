@@ -15,7 +15,7 @@ import org.midica.file.read.SoundfontParser;
 import org.midica.ui.tablesorter.OptionalNumber;
 
 /**
- * This class represents the data model of the soundfont instruments and drumkits table
+ * This class represents the data model of the soundbank instruments and drumkits table
  * in the configuration details view of the info window.
  * 
  * Each row represents either a category or a certain instrument or drum kit.
@@ -34,26 +34,26 @@ import org.midica.ui.tablesorter.OptionalNumber;
  * 
  * @author Jan Trukenmüller
  */
-public class SoundfontInstrumentsTableModel extends MidicaTableModel {
+public class SoundbankInstrumentsTableModel extends MidicaTableModel {
 
 	private static final long serialVersionUID = 1L;
     
 	private ArrayList<HashMap<String, String>> instruments = null;
 	
 	/**
-	 * Creates a new instance of the soundfont instruments table data model.
+	 * Creates a new instance of the soundbank instruments table data model.
 	 * Initializes the table header names according to the currently
 	 * configured language.
 	 */
-	public SoundfontInstrumentsTableModel() {
+	public SoundbankInstrumentsTableModel() {
 		
 		// table header
 		columnNames = new String[ 5 ];
-		columnNames[ 0 ] = Dict.get( Dict.INFO_COL_SF_INSTR_PROGRAM  );
-		columnNames[ 1 ] = Dict.get( Dict.INFO_COL_SF_INSTR_BANK     );
-		columnNames[ 2 ] = Dict.get( Dict.INFO_COL_SF_INSTR_NAME     );
-		columnNames[ 3 ] = Dict.get( Dict.INFO_COL_SF_INSTR_CHANNELS );
-		columnNames[ 4 ] = Dict.get( Dict.INFO_COL_SF_INSTR_KEYS     );
+		columnNames[ 0 ] = Dict.get( Dict.INFO_COL_SB_INSTR_PROGRAM  );
+		columnNames[ 1 ] = Dict.get( Dict.INFO_COL_SB_INSTR_BANK     );
+		columnNames[ 2 ] = Dict.get( Dict.INFO_COL_SB_INSTR_NAME     );
+		columnNames[ 3 ] = Dict.get( Dict.INFO_COL_SB_INSTR_CHANNELS );
+		columnNames[ 4 ] = Dict.get( Dict.INFO_COL_SB_INSTR_KEYS     );
 		
 		// column classes, used for sorting
 		columnClasses = new Class[ 5 ];
@@ -63,8 +63,8 @@ public class SoundfontInstrumentsTableModel extends MidicaTableModel {
 		columnClasses[ 3 ] = String.class;
 		columnClasses[ 4 ] = String.class;
 		
-		// get soundfont instruments
-		instruments = SoundfontParser.getSoundfontInstruments();
+		// get soundbank instruments
+		instruments = SoundfontParser.getSoundbankInstruments();
 	}
 	
 	/**
