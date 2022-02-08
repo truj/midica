@@ -13,6 +13,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -3104,7 +3106,7 @@ public class MidicaPLParser extends SequenceParser {
 	
 	/**
 	 * Parses a SOUNDBANK command.
-	 * A SOUNDBANK command includes a soundbank file.
+	 * A SOUNDBANK command includes a soundbank by file path or URL.
 	 * 
 	 * @param tokens             Token array.
 	 * @throws ParseException    If the soundbank cannot be loaded.
@@ -3117,40 +3119,68 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		soundbankParsed = true;
 		
+		// URLs like http://example.com/path/sb.dls must be regarded as valid. Because '//' is a comment,
+		// they contain more spaces, e.g.: http:/ /example.com/path/sb.dls
+		// That means:
+		// If (and only if) one part ends with '/' and the next one begins with '/',
+		// both parts must be concatenated and regarded as one single token.
+		if (tokens.length > 2) {
+			ArrayList<String> copy = new ArrayList<>(Arrays.asList(tokens));
+			for (int i = tokens.length - 1; i > 1; i--) {
+				if (tokens[i].startsWith("/") && tokens[i-1].endsWith("/")) {
+					copy.remove(i);
+					copy.set(i - 1, tokens[i-1] + tokens[i]);
+				}
+			}
+			if (2 == copy.size()) {
+				tokens = new String[] {copy.get(0), copy.get(1)};
+			}
+		}
+		
 		if (2 == tokens.length) {
 			try {
 				// create File object with absolute path for soundbank file
 				String inclPath = tokens[1];
-				File   inclFile = new File(inclPath);
-				if (! inclFile.isAbsolute()) {
-					File currentDir = file.getParentFile();
-					inclFile = new File(
-						currentDir.getCanonicalPath(), // parent
-						inclPath                       // child
-					);
+				
+				// file or url?
+				Object fileOrUrl        = null;
+				String newCanonicalPath = null;
+				try {
+					new URL(inclPath);
+					fileOrUrl        = inclPath;
+					newCanonicalPath = inclPath;
 				}
-				
-				// make it canonical
-				inclFile = inclFile.getCanonicalFile();
-				
-				// check if this file is already loaded
-				String oldPath = SoundbankParser.getFullPath();
-				String newPath = inclFile.getCanonicalPath();
-				if (oldPath != null && oldPath.equals(newPath)) {
-					return;
+				catch (MalformedURLException ex) {
+					File inclFile = new File(inclPath);
+					if (! inclFile.isAbsolute()) {
+						File currentDir = file.getParentFile();
+						inclFile = new File(
+							currentDir.getCanonicalPath(), // parent
+							inclPath                       // child
+						);
+					}
+					inclFile         = inclFile.getCanonicalFile(); // make it canonical
+					newCanonicalPath = inclFile.getCanonicalPath();
+					fileOrUrl        = inclFile;
+					
+					// check if this file is already loaded
+					String oldPath = SoundbankParser.getFullPath();
+					if (oldPath != null && oldPath.equals(newCanonicalPath)) {
+						return;
+					}
+					
+					// check if the file can be parsed
+					if (! inclFile.exists())
+						throw new ParseException(Dict.get(Dict.ERROR_FILE_EXISTS) + newCanonicalPath);
+					if (! inclFile.isFile())
+						throw new ParseException(Dict.get(Dict.ERROR_FILE_NORMAL) + newCanonicalPath);
+					if (! inclFile.canRead())
+						throw new ParseException(Dict.get(Dict.ERROR_FILE_READABLE) + newCanonicalPath);
 				}
-				
-				// check if the file can be parsed
-				if (! inclFile.exists())
-					throw new ParseException(Dict.get(Dict.ERROR_FILE_EXISTS) + inclFile.getCanonicalPath());
-				if (! inclFile.isFile())
-					throw new ParseException(Dict.get(Dict.ERROR_FILE_NORMAL) + inclFile.getCanonicalPath());
-				if (! inclFile.canRead())
-					throw new ParseException(Dict.get(Dict.ERROR_FILE_READABLE) + inclFile.getCanonicalPath());
 				
 				// parse it
 				SoundbankParser parser = new SoundbankParser();
-				parser.parse(inclFile);
+				parser.parse(fileOrUrl);
 				
 				// set the file name label in the main window
 				Midica.uiController.soundbankLoadedBySourceCode();

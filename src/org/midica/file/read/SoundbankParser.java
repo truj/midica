@@ -170,7 +170,6 @@ public class SoundbankParser implements IParser {
 	 * @return **sf2**, **dls** or **null**.
 	 */
 	public static String getSoundFormat() {
-		// TODO: use from InfoView
 		return soundFormat;
 	}
 	
