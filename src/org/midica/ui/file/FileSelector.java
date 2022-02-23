@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -248,7 +249,8 @@ public class FileSelector extends JDialog {
 		// UI
 		initUI();
 		
-		// refresh directory when (re)activated
+		// file chooser: refresh directory when (re)activated
+		// url chooser: refresh URL cache info
 		this.addWindowListener(new WindowListener() {
 			
 			@Override
@@ -258,6 +260,7 @@ public class FileSelector extends JDialog {
 						continue;
 					chooser.rescanCurrentDirectory();
 				}
+				SoundUrlHelper.displayCacheInfo();
 			}
 			
 			@Override
@@ -493,6 +496,22 @@ public class FileSelector extends JDialog {
 			ArrayList<MidicaButton> buttons = new ArrayList<>();
 			buttons.add(SoundUrlHelper.getDownloadButton());
 			keyBindingManager.addBindingsForButtonOfVisibleElement(buttons, Dict.KEY_FILE_SELECTOR_SND_DOWNLOAD);
+			
+			// delete cache checkboxes
+			ArrayList<JCheckBox> cbxsOne = new ArrayList<>();
+			cbxsOne.add(SoundUrlHelper.getCheckBox(false));
+			keyBindingManager.addBindingsForCheckboxOfVisibleElement(cbxsOne, Dict.KEY_FILE_SELECTOR_SND_CBX_ONE);
+			ArrayList<JCheckBox> cbxsAll = new ArrayList<>();
+			cbxsAll.add(SoundUrlHelper.getCheckBox(true));
+			keyBindingManager.addBindingsForCheckboxOfVisibleElement(cbxsAll, Dict.KEY_FILE_SELECTOR_SND_CBX_ALL);
+			
+			// delete cache buttons
+			ArrayList<MidicaButton> btnsOne = new ArrayList<>();
+			btnsOne.add(SoundUrlHelper.getDeleteCacheBtn(false));
+			keyBindingManager.addBindingsForButtonOfVisibleElement(btnsOne, Dict.KEY_FILE_SELECTOR_SND_BTN_ONE);
+			ArrayList<MidicaButton> btnsAll = new ArrayList<>();
+			btnsAll.add(SoundUrlHelper.getDeleteCacheBtn(true));
+			keyBindingManager.addBindingsForButtonOfVisibleElement(btnsAll, Dict.KEY_FILE_SELECTOR_SND_BTN_ALL);
 		}
 		
 		// add key binding to choose a tab

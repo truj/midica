@@ -326,6 +326,54 @@ public class KeyBindingManager {
 	}
 	
 	/**
+	 * Adds a key binding for a list of checkboxes to be toggled when possible.
+	 * All checkboxes use the same key binding ID but at most one of them is visible.
+	 * 
+	 * @param checkboxes    the list of checkboxes
+	 * @param id            the key binding ID
+	 */
+	public void addBindingsForCheckboxOfVisibleElement(ArrayList<JCheckBox> checkboxes, String id) {
+		
+		// fill input map
+		addInputs(id);
+		
+		// tooltips
+		for (JCheckBox cbx : checkboxes) {
+			addTooltip(cbx, id, Dict.TT_KEY_CBX_OPEN);
+		}
+		
+		// fill action map
+		actionMap.put(id, new AbstractAction() {
+			
+			private static final long serialVersionUID = 1L;
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				if (mustIgnore(e))
+					return;
+				
+				for (JCheckBox cbx : checkboxes) {
+					
+					if (cbx.isShowing()) {
+						
+						// focus
+						cbx.requestFocus();
+						
+						// toggle checkbox
+						if (cbx.isSelected())
+							cbx.setSelected(false);
+						else
+							cbx.setSelected(true);
+						
+						return;
+					}
+				}
+			}
+		});
+	}
+	
+	/**
 	 * Adds a key binding for a list of icon labels to be pressed when possible.
 	 * All buttons use the same key binding ID but at most one of them is visible.
 	 * 

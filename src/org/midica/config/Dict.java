@@ -693,8 +693,12 @@ public class Dict {
 	public static final String KEY_FILE_SELECTOR_IMP_MSCORE     = "key_file_selector_imp_mscore";
 	public static final String KEY_FILE_SELECTOR_SND_FILE       = "key_file_selector_snd_file";
 	public static final String KEY_FILE_SELECTOR_SND_URL        = "key_file_selector_snd_url";
-	public static final String KEY_FILE_SELECTOR_SND_URL_FLD    = "key_file_selector_url_fld";
-	public static final String KEY_FILE_SELECTOR_SND_DOWNLOAD   = "key_file_selector_url_download";
+	public static final String KEY_FILE_SELECTOR_SND_URL_FLD    = "key_file_selector_snd_url_fld";
+	public static final String KEY_FILE_SELECTOR_SND_DOWNLOAD   = "key_file_selector_snd_url_download";
+	public static final String KEY_FILE_SELECTOR_SND_CBX_ONE    = "key_file_selector_snd_cbx_one";
+	public static final String KEY_FILE_SELECTOR_SND_CBX_ALL    = "key_file_selector_snd_cbx_all";
+	public static final String KEY_FILE_SELECTOR_SND_BTN_ONE    = "key_file_selector_snd_btn_one";
+	public static final String KEY_FILE_SELECTOR_SND_BTN_ALL    = "key_file_selector_snd_btn_all";
 	public static final String KEY_FILE_SELECTOR_EXP_MID        = "key_file_selector_exp_mid";
 	public static final String KEY_FILE_SELECTOR_EXP_MPL        = "key_file_selector_exp_mpl";
 	public static final String KEY_FILE_SELECTOR_EXP_ALDA       = "key_file_selector_exp_alda";
@@ -1768,8 +1772,16 @@ public class Dict {
 	public static final String FOREIGN_PROG_MSCORE         = "foreign_prog_mscore";
 	public static final String DIRECT_IMPORT               = "direct_import";
 	public static final String FILE_OPTIONS                = "file_options";
-	public static final String SOUND_URL                   = "sound_url";
-	public static final String SOUND_DOWNLOAD              = "sound_download";
+	public static final String SND_URL                     = "snd_url";
+	public static final String SND_CACHE_LBL_YES_ONE       = "snd_cache_lbl_yes_one";
+	public static final String SND_CACHE_LBL_YES_ALL       = "snd_cache_lbl_yes_all";
+	public static final String SND_CACHE_LBL_NO_ONE        = "snd_cache_lbl_no_one";
+	public static final String SND_CACHE_LBL_NO_ALL        = "snd_cache_lbl_no_all";
+	public static final String SND_CACHE_DEL_ONE           = "snd_cache_del_one";
+	public static final String SND_CACHE_DEL_ALL           = "snd_cache_del_all";
+	public static final String SND_CACHE_DELETE            = "snd_cache_delete";
+	public static final String SND_DOWNLOAD_URL            = "snd_download_url";
+	public static final String SND_DOWNLOAD_CACHE          = "snd_download_cache";
 	
 	// PlayerView
 	public static final String TITLE_PLAYER                     = "title_player";
@@ -2170,6 +2182,10 @@ public class Dict {
 		set( KEY_FILE_SELECTOR_SND_URL,        "In the SOUNDBANK selector, select the URL Tab"                               );
 		set( KEY_FILE_SELECTOR_SND_URL_FLD,    "In the SOUNDBANK selector, focus the URL text field"                         );
 		set( KEY_FILE_SELECTOR_SND_DOWNLOAD,   "In the SOUNDBANK selector, press the DOWNLOAD button"                        );
+		set( KEY_FILE_SELECTOR_SND_CBX_ONE,    "In the SOUNDBANK selector, toggle checkbox 'delete cached soundbank from above URL'" );
+		set( KEY_FILE_SELECTOR_SND_CBX_ALL,    "In the SOUNDBANK selector, toggle checkbox 'delete ALL cached soundbanks'"   );
+		set( KEY_FILE_SELECTOR_SND_CBX_ONE,    "In the SOUNDBANK selector, press button 'delete cached soundbank from above URL'" );
+		set( KEY_FILE_SELECTOR_SND_CBX_ALL,    "In the SOUNDBANK selector, press button 'delete ALL cached soundbanks'"      );
 		set( KEY_FILE_SELECTOR_EXP_MID,        "In the EXPORT selector, select the MIDI Tab"                                 );
 		set( KEY_FILE_SELECTOR_EXP_MPL,        "In the EXPORT selector, select the MidicaPL Tab"                             );
 		set( KEY_FILE_SELECTOR_EXP_ALDA,       "In the EXPORT selector, select the ALDA Tab"                                 );
@@ -2313,8 +2329,16 @@ public class Dict {
 		set( FOREIGN_PROG_MSCORE,       "MuseScore"                                            );
 		set( DIRECT_IMPORT,             "Directly import the exported file"                    );
 		set( FILE_OPTIONS,              "Options:"                                             );
-		set( SOUND_URL,                 "Soundbank URL"                                        );
-		set( SOUND_DOWNLOAD,            "Download Sound"                                       );
+		set( SND_URL,                   "Soundbank URL"                                        );
+		set( SND_CACHE_LBL_YES_ONE,     "<html>The above URL is Cached. Size: <b>%.2f</b> MB"      );
+		set( SND_CACHE_LBL_YES_ALL,     "<html><b>%d</b> URLs cached (Total size: <b>%.2f</b> MB)" );
+		set( SND_CACHE_LBL_NO_ONE,      "The above URL is not yet cached."                     );
+		set( SND_CACHE_LBL_NO_ALL,      "No Soundbank URLs are cached."                        );
+		set( SND_CACHE_DEL_ONE,         "Delete the cached soundbank from the above URL"       );
+		set( SND_CACHE_DEL_ALL,         "Delete ALL cached soundbanks"                         );
+		set( SND_CACHE_DELETE,          "Delete Cache"                                         );
+		set( SND_DOWNLOAD_URL,          "Download Sound"                                       );
+		set( SND_DOWNLOAD_CACHE,        "Open Cached File"                                     );
 		
 		// Foreign
 		set( FOREIGN_CREATE_TMPDIR,  "Failed to create temporary directory. Error Message: "  );

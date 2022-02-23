@@ -748,7 +748,11 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_URL,        KeyEvent.VK_2,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_URL,        KeyEvent.VK_NUMPAD2,  InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_URL_FLD,    KeyEvent.VK_U,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_DOWNLOAD,   KeyEvent.VK_D,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_DOWNLOAD,   KeyEvent.VK_O,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_CBX_ONE,    KeyEvent.VK_D,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_CBX_ALL,    KeyEvent.VK_D,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_BTN_ONE,    KeyEvent.VK_DELETE,   InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_SND_BTN_ALL,    KeyEvent.VK_DELETE,   InputEvent.ALT_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_MID,        KeyEvent.VK_1,        0                          );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_MID,        KeyEvent.VK_NUMPAD1,  0                          );
 		addDefaultKeyBinding( Dict.KEY_FILE_SELECTOR_EXP_MID,        KeyEvent.VK_1,        InputEvent.CTRL_DOWN_MASK  );

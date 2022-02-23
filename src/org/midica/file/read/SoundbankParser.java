@@ -289,6 +289,34 @@ public class SoundbankParser implements IParser {
 	}
 	
 	/**
+	 * Returns the hash of the given url.
+	 * 
+	 * @param url the url to be hashed.
+	 * @return the hash value of the given url
+	 * @throws NoSuchAlgorithmException if SHA-256 is not supported by the JVM.
+	 */
+	public static String getUrlHash(String url) throws NoSuchAlgorithmException {
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		byte[] digest = md.digest(url.getBytes());
+		StringBuffer hexStr = new StringBuffer();
+		for (byte b : digest) {
+			hexStr.append(Integer.toHexString(0xFF & b));
+		}
+		return hexStr.toString();
+	}
+	
+	/**
+	 * Returns the path of the URL cache directory.
+	 * 
+	 * @return cache directory
+	 * @throws IOException
+	 */
+	public static String getUrlCacheDir() {
+		String homeDir = System.getProperty("user.home");
+		return homeDir + File.separator + ".midica.d" + File.separator + "sound_cache";
+	}
+	
+	/**
 	 * Download and cache the url, if not yet done, and/or returns the cached file.
 	 * 
 	 * @param url  the url to be downloaded.
@@ -300,21 +328,14 @@ public class SoundbankParser implements IParser {
 		// get url hash
 		String hash = null;
 		try {
-			MessageDigest md = MessageDigest.getInstance("SHA-256");
-			byte[] digest = md.digest(url.toString().getBytes());
-			StringBuffer hexStr = new StringBuffer();
-			for (byte b : digest) {
-				hexStr.append(Integer.toHexString(0xFF & b));
-			}
-			hash = hexStr.toString();
+			hash = getUrlHash(url.toString());
 		}
 		catch (NoSuchAlgorithmException e) {
 			throw new ParseException("SHA-256 not supported");
 		}
 		
 		// create cache directory, if not yet done
-		String homeDir = System.getProperty("user.home");
-		File cacheDir = new File(homeDir + File.separator + ".midica.d" + File.separator + "sound_cache");
+		File cacheDir = new File(getUrlCacheDir());
 		cacheDir.mkdirs();
 		if (!cacheDir.exists())
 			throw new ParseException(Dict.get(Dict.COULDNT_CREATE_CACHE_DIR) + cacheDir);
