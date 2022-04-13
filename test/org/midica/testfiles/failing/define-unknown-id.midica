@@ -1,0 +1,7 @@
+INCLUDE inc/instruments.midica
+
+DEFINE UNKNOWN_ID something
+
+crd test c,d,e
+
+0  test  /4

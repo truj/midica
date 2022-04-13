@@ -13,6 +13,7 @@ import java.util.Deque;
 import java.util.regex.Pattern;
 
 import org.midica.config.Dict;
+import org.midica.file.Instrument;
 
 /**
  * This class represents a nestable block, used by the MidicaPL parser.
@@ -237,46 +238,79 @@ public class NestableBlock {
 	 * 
 	 * @param tokens  command tokens
 	 * @return resulting command tokens.
+	 * @throws ParseException if there's an unexpected problem with a compact channel command
 	 */
-	private String[] addTuplets(String[] tokens) {
+	private String[] addTuplets(String[] tokens) throws ParseException {
+		
+		if (null == tuplet)
+			return tokens;
+		
+		if (null == plus)
+			plus = Pattern.compile( Pattern.quote(MidicaPLParser.LENGTH_PLUS) );
+		
+		// compact channel command?
+		if (parser.isCompactCmd(tokens[0])) {
+			int channel = parser.getCompactChannel(tokens[0]);
+			
+			// current compact length WITHOUT any tuplets
+			String naturalLength = MidicaPLParser.instruments.get(channel).getNaturalLength();
+			
+			// transform from 3 to 2 tokens, if necessary
+			tokens = parser.reorganizeCompactCmd(tokens);
+			
+			// apply tuplet to each command part
+			ArrayList<String> transformedNotes = new ArrayList<>();
+			for (String noteAndLength : whitespaces.split(tokens[1])) {
+				
+				// get note length
+				String noteLength;
+				String[] parts = noteAndLength.split(Pattern.quote(MidicaPLParser.COMPACT_NOTE_SEP), 2);
+				if (parts.length > 1)
+					noteLength = naturalLength = parts[1];
+				else
+					noteLength = naturalLength;
+				
+				// apply tuplet
+				noteLength = addTupletToLength(noteLength);
+				transformedNotes.add(parts[0] + MidicaPLParser.COMPACT_NOTE_SEP + noteLength);
+			}
+			tokens[1] = String.join(" ", transformedNotes);
+			
+			// reset length
+			MidicaPLParser.instruments.get(channel).setNaturalLength(naturalLength);
+			
+			return tokens;
+		}
 		
 		if (tokens.length < 3)
 			return tokens;
 		
+		// normal channel command?
 		try {
-			// channel command?
 			parser.toChannel(tokens[0]);
 			
-			// no exception - channel command
-			
-			if (null == plus)
-				plus = Pattern.compile( Pattern.quote(MidicaPLParser.LENGTH_PLUS) );
+			// no exception - normal channel command
 			
 			// add tuplet to all summands inside of the duration column
 			// e.g. *1+/8 --> *1t4:3+/8t4:3
-			if (tuplet != null) {
-				// separate duration from options
-				String[] durationAndOptions = whitespaces.split(tokens[2], 2);
+			
+			// separate duration from options
+			String[] durationAndOptions = whitespaces.split(tokens[2], 2);
+			
+			if (MidicaPLParser.LENGTH_ZERO.equals(durationAndOptions[0])) {
+				// zero-length - ignore tuplets
+				return tokens;
+			}
+			else if (MidicaPLParser.patterns.containsKey(durationAndOptions[0])) {
+				// pattern - ignore tuplets
+			}
+			else {
+				// normal channel command - apply tuplet
+				tokens[2] = addTupletToLength(durationAndOptions[0]);
 				
-				if (MidicaPLParser.LENGTH_ZERO.equals(durationAndOptions[0])) {
-					// zero-length - ignore tuplets
-					return tokens;
-				}
-				else if (MidicaPLParser.patterns.containsKey(durationAndOptions[0])) {
-					// pattern - ignore tuplets
-				}
-				else {
-					// normal channel command - apply tuplet
-					String[] atoms = plus.split(durationAndOptions[0], -1);
-					for (int j=0; j < atoms.length; j++) {
-						atoms[j] += tuplet;
-					}
-					tokens[2] = String.join(MidicaPLParser.LENGTH_PLUS, atoms);
-					
-					// add options again, if necessary
-					if (durationAndOptions.length > 1)
-						tokens[2] += " " + durationAndOptions[1];
-				}
+				// add options again, if necessary
+				if (durationAndOptions.length > 1)
+					tokens[2] += " " + durationAndOptions[1];
 			}
 		}
 		catch (ParseException e) {
@@ -286,7 +320,24 @@ public class NestableBlock {
 		return tokens;
 	}
 	
-	
+	/**
+	 * Applies the tuplet to all summands of the given length string.
+	 * 
+	 * E.g.: *1+/8 --> *1t4:3+/8t4:3
+	 * 
+	 * @param lengthStr
+	 * @return
+	 */
+	private String addTupletToLength(String lengthStr) {
+		
+		String[] atoms = plus.split(lengthStr, -1);
+		for (int j=0; j < atoms.length; j++) {
+			atoms[j] += tuplet;
+		}
+		lengthStr = String.join(MidicaPLParser.LENGTH_PLUS, atoms);
+		
+		return lengthStr;
+	}
 	
 	/**
 	 * Adds a new content element to this block.
@@ -445,7 +496,7 @@ public class NestableBlock {
 						}
 					}
 					if (shift != 0) {
-						tokens = parser.addShiftToOptions(tokens, shift);
+						tokens = parser.addShift(tokens, shift);
 					}
 					if (tuplet != null) {
 						tokens = addTuplets(tokens);
@@ -464,6 +515,12 @@ public class NestableBlock {
 		// restore tickstamps, if needed
 		if (multiple) {
 			parser.restoreTickstamps(tickstamps);
+		}
+		
+		// reset compact syntax after a tuplet block
+		for (Instrument instr : MidicaPLParser.instruments) {
+			String naturalLength = instr.getNaturalLength();
+			instr.setNoteLength(naturalLength);
 		}
 		
 		// remove call stack element

@@ -103,6 +103,8 @@ public class MidicaPLParser extends SequenceParser {
 	public static String CHORD              = null;
 	public static String CHORD_ASSIGNER     = null;
 	public static String CHORD_SEPARATOR    = null;
+	public static String COMPACT_CHANNEL    = null;
+	public static String COMPACT_NOTE_SEP   = null;
 	public static String COMMENT            = null;
 	public static String CONST              = null;
 	public static String VAR                = null;
@@ -251,6 +253,7 @@ public class MidicaPLParser extends SequenceParser {
 	private   static Pattern                            chordAssignPattern   = null;
 	private   static Pattern                            varAssignPattern     = null;
 	private   static Pattern                            chordSepPattern      = null;
+	private   static Pattern                            compactChPattern     = null;
 	private   static boolean                            isSoftKaraoke        = false;
 	
 	private static boolean isDefineParsRun     = false; // parsing run for define commands
@@ -314,6 +317,8 @@ public class MidicaPLParser extends SequenceParser {
 		CHORD              = Dict.getSyntax( Dict.SYNTAX_CHORD              );
 		CHORD_ASSIGNER     = Dict.getSyntax( Dict.SYNTAX_CHORD_ASSIGNER     );
 		CHORD_SEPARATOR    = Dict.getSyntax( Dict.SYNTAX_CHORD_SEPARATOR    );
+		COMPACT_CHANNEL    = Dict.getSyntax( Dict.SYNTAX_COMPACT_CHANNEL    );
+		COMPACT_NOTE_SEP   = Dict.getSyntax( Dict.SYNTAX_COMPACT_NOTE_SEP   );
 		COMMENT            = Dict.getSyntax( Dict.SYNTAX_COMMENT            );
 		CONST              = Dict.getSyntax( Dict.SYNTAX_CONST              );
 		VAR                = Dict.getSyntax( Dict.SYNTAX_VAR                );
@@ -647,6 +652,9 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// splitting notes of the chord: ',' and/or whitespace(s)
 		chordSepPattern = Pattern.compile("\\s*" + Pattern.quote(CHORD_SEPARATOR) + "\\s*|\\s+");
+		
+		// compact syntax
+		compactChPattern = Pattern.compile("^(\\d{1,2}|" + Pattern.quote(P) + ")" + Pattern.quote(COMPACT_CHANNEL) + "$");
 	}
 	
 	/**
@@ -684,11 +692,14 @@ public class MidicaPLParser extends SequenceParser {
 			return;
 		}
 		
-		// only 2 tokens for meta or call commands
+		// only 2 tokens for meta or call commands, and for compact syntax
 		if (isChInstMetaParsRun && isMetaCmd(tokens[0])) {
 			tokens = line.split("\\s+", 2);
 		}
 		else if (CALL.equals(tokens[0])) {
+			tokens = line.split("\\s+", 2);
+		}
+		else if (isCompactCmd(tokens[0])) {
 			tokens = line.split("\\s+", 2);
 		}
 		
@@ -857,10 +868,20 @@ public class MidicaPLParser extends SequenceParser {
 	private void parseTokens(String[] tokens) throws ParseException {
 		
 		// replace variables for channel commands
-		if (isDefaultParsRun && MODE_DEFAULT == currentMode && tokens.length > 2) {
+		if (isDefaultParsRun && MODE_DEFAULT == currentMode) {
+			boolean replaceVars = false;
 			
-			// channel command?
-			if (tokens[0].matches("^\\d{1,2}$") || tokens[0].contains(VAR_SYMBOL)) {
+			// compact channel command?
+			if (isCompactCmd(tokens[0]))
+				replaceVars = true;
+			
+			// usual channel command?
+			if (tokens.length > 2)
+				if (tokens[0].matches("^\\d{1,2}$") || tokens[0].contains(VAR_SYMBOL))
+					replaceVars = true;
+			
+			// normal or compact channel command - replace variables
+			if (replaceVars) {
 				tokens[0] = replaceVariables(tokens[0]);  // replace channel
 				tokens[1] = replaceVariables(tokens[1]);  // replace note/chord
 			}
@@ -979,6 +1000,15 @@ public class MidicaPLParser extends SequenceParser {
 			
 			// apply or fake command
 			parseChannelCmd(tokens, isFake);
+		}
+		
+		// compact (multi-note) channel command
+		else if (isCompactCmd(tokens[0])) {
+			if (isFunct)
+				currentFunction.add(String.join(" ", tokens)); // add to function
+			else if (isBlock)
+				nestableBlkStack.peek().add(tokens); // add to block
+			parseCompactCmd(tokens, isFake);
 		}
 		
 		// variable definition / assignment
@@ -1135,6 +1165,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( ORIGINAL_DEFINE.equals(cmd)       ) {}
 		else if ( ORIGINAL_INCLUDE.equals(cmd)      ) {}
 		else if ( cmd.matches("^\\d+$")             ) {}
+		else if ( isCompactCmd(cmd)                 ) {}
 		else if ( "".equals(cmd)                    ) {} // empty line. needed to get the right line numbers in stack traces
 		else if ( varPattern.matcher(cmd).matches() ) {
 			// Line begins with a variable - check only in the default run.
@@ -1488,8 +1519,9 @@ public class MidicaPLParser extends SequenceParser {
 	 * - percussion shortcuts
 	 * 
 	 * @param tokens Channel command token array.
+	 * @throws ParseException if something goes wrong
 	 */
-	private void replaceShortcuts(String[] tokens) {
+	private void replaceShortcuts(String[] tokens) throws ParseException {
 		
 		// percussion channel shortcut?
 		if (P.equals(tokens[0])) {
@@ -2349,7 +2381,7 @@ public class MidicaPLParser extends SequenceParser {
 					if (! functionLine.startsWith(VAR)) {
 						functionLine = replaceVariables(functionLine);
 						String[] functionTokens = functionLine.split("\\s+", 3);
-						functionTokens = addShiftToOptions(functionTokens, shift);
+						functionTokens = addShift(functionTokens, shift);
 						functionLine   = String.join(" ", functionTokens);
 					}
 				}
@@ -3014,11 +3046,13 @@ public class MidicaPLParser extends SequenceParser {
 	
 	/**
 	 * Adds the shift option to the given command, if it's a note, chord or call command.
+	 * Applies the shift option to all notes, if it's a compact command.
 	 * 
 	 * @param tokens  command tokens
 	 * @return the resulting command tokens.
+	 * @throws ParseException if something goes wrong.
 	 */
-	public String[] addShiftToOptions(String[] tokens, int shift) {
+	public String[] addShift(String[] tokens, int shift) throws ParseException {
 		
 		String shiftOptionStr = MidicaPLParser.SHIFT + MidicaPLParser.OPT_ASSIGNER + shift;
 		String line           = String.join(" ", (String[]) tokens);
@@ -3030,6 +3064,54 @@ public class MidicaPLParser extends SequenceParser {
 			else
 				line += MidicaPLParser.OPT_SEPARATOR + shiftOptionStr;
 			return line.split("\\s+", 3);
+		}
+		
+		// compact command?
+		if (isCompactCmd(tokens[0])) {
+			tokens = reorganizeCompactCmd(tokens);
+			Matcher matcher = compactChPattern.matcher(tokens[0]);
+			if (matcher.matches()) {
+				int channel = toChannel(matcher.group(1));
+				
+				// percussion channel - nothing to do
+				if (9 == channel)
+					return tokens;
+				
+				// notes/chords/rests (and maybe lengths)
+				ArrayList<String> shiftedNotes = new ArrayList<>();
+				for (String noteAndLength : whitespace.split(tokens[1])) {
+					String[] parts = noteAndLength.split(Pattern.quote(COMPACT_NOTE_SEP), 2);
+					
+					if (REST.equals(parts[0])) {
+						shiftedNotes.add(noteAndLength);
+					}
+					else {
+						// chord?
+						List<Integer> notes    = parseChord(parts[0]);
+						List<String>  noteStrs = new ArrayList<String>();
+						if (notes != null) {
+							for (int i = 0; i < notes.size(); i++)
+								noteStrs.add((notes.get(i) + shift) + "");
+							parts[0] = String.join(CHORD_SEPARATOR, noteStrs);
+						}
+						
+						// single note?
+						else {
+							int note = parseNote(parts[0]);
+							note += shift;
+							parts[0] = note + "";
+						}
+						
+						if (parts.length > 1)
+							shiftedNotes.add(parts[0] + COMPACT_NOTE_SEP + parts[1]);
+						else
+							shiftedNotes.add(parts[0]);
+					}
+				}
+				tokens[1] = String.join(" ", shiftedNotes);
+				
+				return tokens;
+			}
 		}
 		
 		// channel command?
@@ -3972,6 +4054,125 @@ public class MidicaPLParser extends SequenceParser {
 	}
 	
 	/**
+	 * Returns the channel of a compact (multi-note) channel command.
+	 * 
+	 * @param token  the command (first token) to be checked
+	 * @return the channel number
+	 * @throws ParseException if the channel cannot be determined
+	 */
+	public int getCompactChannel(String token) throws ParseException {
+		Matcher matcher = compactChPattern.matcher(token);
+		if (matcher.matches())
+			return toChannel(matcher.group(1));
+		else
+			throw new ParseException("Unable to determine channel from compact command.\n This should not happen. Please report.");
+	}
+	
+	/**
+	 * Transforms compact channel commands with 3 tokens to those with only 2 tokens, if necessary.
+	 * 
+	 * Needed in order to apply tuplets or shifts.
+	 * 
+	 * @param tokens  the original tokens
+	 * @return
+	 * @throws ParseException
+	 */
+	public String[] reorganizeCompactCmd(String[] tokens) throws ParseException {
+		
+		if (tokens.length > 3) {
+			throw new ParseException(
+				"More than 3 tokens in a compact command."
+				+ "\n This should not happen. Please report."
+			);
+		}
+		if (3 == tokens.length) {
+			String[] newTokens = new String[2];
+			newTokens[0] = tokens[0];
+			newTokens[1] = tokens[1] + " " + tokens[2];
+			return newTokens;
+		}
+		
+		return tokens;
+	}
+	
+	/**
+	 * Checks if the given token indicates a compact (multi-note) channel command.
+	 * 
+	 * @param token  the command (first token) to be checked
+	 * @return **true** if the token indicates a compact channel command; otherwise **false**.
+	 */
+	public boolean isCompactCmd(String token) {
+		
+		// define run? - return value doesn't matter
+		if (null == compactChPattern || varPattern == null)
+			return false;
+		
+		// compact command without variables?
+		Matcher matcher = compactChPattern.matcher(token);
+		if (matcher.matches())
+			return true;
+		
+		// channel is a variable?
+		if (token.endsWith(COMPACT_CHANNEL)) {
+			String channel = token.replaceAll(Pattern.quote(COMPACT_CHANNEL) + "$", ""); // cut away trailing ":"
+			Matcher varMatcher = varPattern.matcher(channel);
+			if (varMatcher.matches())
+				return true;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Parses a compact (multi-note) channel command.
+	 * 
+	 * @param tokens             Token array.
+	 * @param isFake             **true**, if this is called inside a function definition or block
+	 * @throws ParseException    If the command cannot be parsed.
+	 */
+	private void parseCompactCmd(String[] tokens, boolean isFake) throws ParseException {
+		
+		Matcher matcher = compactChPattern.matcher(tokens[0]);
+		if (matcher.matches()) {
+			int channel = toChannel(matcher.group(1));
+			
+			// notes/chords/rests (and maybe lengths)
+			for (String noteAndLength : whitespace.split(tokens[1])) {
+				
+				// note length available?
+				String[] parts = noteAndLength.split(Pattern.quote(COMPACT_NOTE_SEP), 2);
+				if (parts.length > 1) {
+					if (! isFake)
+						instruments.get(channel).setNoteLength(parts[1]);
+				}
+				
+				// create normal channel command
+				String[] chCmdTokens = new String[] {
+					channel  + "",
+					parts[0] + "",   // note/chord/rest
+					instruments.get(channel).getNoteLength(),
+				};
+				
+				if (!isFake)
+					parseTokens(chCmdTokens);
+			}
+		}
+		else {
+			// channel is a variable?
+			if (isFake) {
+				String  channel    = tokens[0].replaceAll(Pattern.quote(COMPACT_CHANNEL) + "$", ""); // cut away trailing ":"
+				Matcher varMatcher = varPattern.matcher(channel);
+				if (varMatcher.matches())
+					return;
+			}
+			
+			throw new ParseException(
+				"Compact Channel Command invalid\n This should not happen. Please report."
+			);
+		}
+	}
+	
+	/**
 	 * Parses a channel command.
 	 * A channel command is a channel-based command like a note or a rest.
 	 * 
@@ -4488,7 +4689,7 @@ public class MidicaPLParser extends SequenceParser {
 			return false;
 		}
 		
-		// call this method again with each chord, adding the multiple option
+		// call this method again (indirectly) with each chord, adding the multiple option
 		int i = 1;
 		for (Integer chordElement : chordElements) {
 			// create and process a new token array for each note of the chord

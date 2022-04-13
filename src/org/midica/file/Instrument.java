@@ -24,6 +24,8 @@ import org.midica.file.write.MidicaPLExporter;
  * 
  * - **tickstamp**      - This is the current position of the parsed/exported file, counted in MIDI ticks.
  * - **velocity**       - Velocity of key strokes.
+ * - **noteLength**     - Note length string, only used for compact syntax and for ALDA
+ * - **naturalLength**  - Note length without any block tuplets (only used for compact syntax)
  * - **durationRatio**  - Ratio between key press duration and note length duration.  
  *                        Low values result in staccato, high values in legato.  
  *                        Minimum: >0.0 (>0%)  
@@ -75,10 +77,13 @@ public class Instrument implements Comparable<Instrument> {
 	private long currentTicks = MIN_CURRENT_TICKS;
 	/** Ratio between key press duration and note length duration */
 	private float durationRatio = DEFAULT_DURATION_RATIO;
+	/** current note length for compact syntax or ALDA */
+	private String noteLength = DEFAULT_NOTE_LENGTH;
+	/** current note length for compact syntax WITHOUT block-tuplets */
+	private String naturalLength = noteLength;
 	
 	// fields for foreign languages (e.g. alda)
-	private byte   octave     = DEFAULT_OCTAVE;
-	private String noteLength = DEFAULT_NOTE_LENGTH;
+	private byte octave = DEFAULT_OCTAVE;
 	
 	/**
 	 * Creates a new Instrument object representing a channel during the parsing or export
@@ -262,6 +267,8 @@ public class Instrument implements Comparable<Instrument> {
 		             +  ", velocity: "         + velocity
 		             +  ", currentTicks: "     + currentTicks
 		             +  ", durationRatio: "    + durationRatio
+		             +  ", noteLength: "       + noteLength
+		             +  ", naturalLength: "    + naturalLength
 		             ;
 		return "\n{" + inner + "}";
 	}
@@ -366,5 +373,23 @@ public class Instrument implements Comparable<Instrument> {
 	 */
 	public void setNoteLength(String noteLength) {
 		this.noteLength = noteLength;
+	}
+	
+	/**
+	 * Returns the currently configured natural length.
+	 * 
+	 * @return note length without block tuplets
+	 */
+	public String getNaturalLength() {
+		return naturalLength;
+	}
+	
+	/**
+	 * Sets the natural length of the channel (note length without block tuplets).
+	 * 
+	 * @param naturalLength    note length without block tuplets
+	 */
+	public void setNaturalLength(String naturalLength) {
+		this.naturalLength = naturalLength;
 	}
 }

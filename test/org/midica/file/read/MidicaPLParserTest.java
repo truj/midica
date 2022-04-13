@@ -873,6 +873,134 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals(Dict.get(Dict.SOUND_FROM_URL) + "soundbank-emg.sf2", SoundbankParser.getShortName());
 		assertEquals(SoundbankParser.SOUND_FORMAT_SF2, SoundbankParser.getSoundFormat());
 		assertEquals(SoundbankParser.FROM_URL, SoundbankParser.getSource());
+		
+		parse(getWorkingFile("compact-syntax"));
+		// channel 0
+		messages = getMessagesByStatus("90");
+		{
+			int i = 0;
+			
+			// root level: 0: c
+			assertEquals( "0/0/90/c / 64", messages.get(i++).toString() );
+			
+			// root level: 0: d e:/8 f g g:/4
+			assertEquals( "480/0/90/d / 64", messages.get(i++).toString() );
+			assertEquals( "960/0/90/e / 64", messages.get(i++).toString() );
+			assertEquals( "1200/0/90/f / 64", messages.get(i++).toString() );
+			assertEquals( "1440/0/90/g / 64", messages.get(i++).toString() );
+			assertEquals( "1680/0/90/g / 64", messages.get(i++).toString() );
+			
+			// root level: 0: a b,c+,d+,e+:/1 - f+:/8 g+:4
+			assertEquals( "2160/0/90/a / 64", messages.get(i++).toString() );
+			assertEquals( "2640/0/90/b / 64", messages.get(i++).toString() );
+			assertEquals( "2640/0/90/c+ / 64", messages.get(i++).toString() );
+			assertEquals( "2640/0/90/d+ / 64", messages.get(i++).toString() );
+			assertEquals( "2640/0/90/e+ / 64", messages.get(i++).toString() );
+			assertEquals( "6480/0/90/f+ / 64", messages.get(i++).toString() );
+			assertEquals( "6720/0/90/g+ / 64", messages.get(i++).toString() );
+			
+			// t=3:2, s=-12:
+				// 0: c d:8
+				assertEquals( "7200/0/90/c- / 64", messages.get(i++).toString() );
+				assertEquals( "7520/0/90/d- / 64", messages.get(i++).toString() );
+				
+				// 0: c d,e - f
+				assertEquals( "7680/0/90/c- / 64", messages.get(i++).toString() );
+				assertEquals( "7840/0/90/d- / 64", messages.get(i++).toString() );
+				assertEquals( "7840/0/90/e- / 64", messages.get(i++).toString() );
+				assertEquals( "8160/0/90/f- / 64", messages.get(i++).toString() );
+				
+				// 0: c d e:/2
+				assertEquals( "8320/0/90/c- / 64", messages.get(i++).toString() );
+				assertEquals( "8480/0/90/d- / 64", messages.get(i++).toString() );
+				assertEquals( "8640/0/90/e- / 64", messages.get(i++).toString() );
+				
+				// t=2:1, s=+12:
+					// 0: c d:8
+					assertEquals( "9280/0/90/c / 64", messages.get(i++).toString() );
+					assertEquals( "9600/0/90/d / 64", messages.get(i++).toString() );
+					
+					// 0: c d,e - f
+					assertEquals( "9680/0/90/c / 64", messages.get(i++).toString() );
+					assertEquals( "9760/0/90/d / 64", messages.get(i++).toString() );
+					assertEquals( "9760/0/90/e / 64", messages.get(i++).toString() );
+					assertEquals( "9920/0/90/f / 64", messages.get(i++).toString() );
+					
+					// 0: c d e:/2
+					assertEquals( "10000/0/90/c / 64", messages.get(i++).toString() );
+					assertEquals( "10080/0/90/d / 64", messages.get(i++).toString() );
+					assertEquals( "10160/0/90/e / 64", messages.get(i++).toString() );
+					
+				// 0: c d:8
+				assertEquals( "10480/0/90/c- / 64", messages.get(i++).toString() );
+				assertEquals( "11120/0/90/d- / 64", messages.get(i++).toString() );
+				
+			// 0: c d:8
+			assertEquals( "11280/0/90/c / 64", messages.get(i++).toString() );
+			assertEquals( "11520/0/90/d / 64", messages.get(i++).toString() );
+		}
+		// channel 1
+		messages = getMessagesByStatus("91");
+		{
+			int i = 0;
+			assertEquals( "0/1/91/c / 64", messages.get(i++).toString() );      // /4
+			assertEquals( "480/1/91/c / 64", messages.get(i++).toString() );    // /2t
+			assertEquals( "1120/1/91/c / 64", messages.get(i++).toString() );   // /4tt  (q=2)
+			assertEquals( "1333/1/91/c / 64", messages.get(i++).toString() );   // /4tt
+			assertEquals( "1546/1/91/c / 64", messages.get(i++).toString() );   // /4t
+			assertEquals( "1866/1/91/c / 64", messages.get(i++).toString() );   // /4
+		}
+		// channel 2
+		messages = getMessagesByStatus("92");
+		{
+			int i = 0;
+			
+			// normal variables
+			assertEquals( "0/2/92/c / 64", messages.get(i++).toString() );
+			assertEquals( "240/2/92/c / 64", messages.get(i++).toString() );
+			
+			// first function call
+			assertEquals( "480/2/92/c / 64", messages.get(i++).toString() );
+			assertEquals( "600/2/92/c / 64", messages.get(i++).toString() );
+			assertEquals( "720/2/92/d / 64", messages.get(i++).toString() );
+			assertEquals( "1200/2/92/c / 64", messages.get(i++).toString() );
+			
+			// second function call
+			assertEquals( "1320/2/92/c / 64", messages.get(i++).toString() );
+			assertEquals( "1440/2/92/c / 64", messages.get(i++).toString() );
+			assertEquals( "1560/2/92/d / 64", messages.get(i++).toString() );
+			assertEquals( "2040/2/92/c / 64", messages.get(i++).toString() );
+		}
+		// channel 9
+		messages = getMessagesByStatus("99");
+		{
+			int i = 0;
+			
+			// root level: p: bd1:4
+			assertEquals( "0/9/99/bass_drum_1 (bd1) / 64", messages.get(i++).toString() );
+			assertEquals( "480/9/99/bass_drum_1 (bd1) / 64", messages.get(i++).toString() );
+			assertEquals( "960/9/99/bass_drum_1 (bd1) / 64", messages.get(i++).toString() );
+			
+			// t
+			assertEquals( "1440/9/99/bass_drum_1 (bd1) / 64", messages.get(i++).toString() );
+			assertEquals( "1760/9/99/bass_drum_1 (bd1) / 64", messages.get(i++).toString() );
+			assertEquals( "2080/9/99/bass_drum_1 (bd1) / 64", messages.get(i++).toString() );
+			
+			// tt
+			assertEquals( "2400/9/99/bass_drum_1 (bd1) / 64", messages.get(i++).toString() );
+			assertEquals( "2613/9/99/bass_drum_1 (bd1) / 64", messages.get(i++).toString() );
+			assertEquals( "2826/9/99/bass_drum_1 (bd1) / 64", messages.get(i++).toString() );
+			
+			// t
+			assertEquals( "3039/9/99/bass_drum_1 (bd1) / 64", messages.get(i++).toString() );
+			assertEquals( "3359/9/99/bass_drum_1 (bd1) / 64", messages.get(i++).toString() );
+			assertEquals( "3679/9/99/bass_drum_1 (bd1) / 64", messages.get(i++).toString() );
+			
+			// root level
+			assertEquals( "3999/9/99/bass_drum_1 (bd1) / 64", messages.get(i++).toString() );
+			assertEquals( "4479/9/99/bass_drum_1 (bd1) / 64", messages.get(i++).toString() );
+			assertEquals( "4959/9/99/bass_drum_1 (bd1) / 64", messages.get(i++).toString() );
+		}
 	}
 	
 	/**
@@ -1703,6 +1831,11 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "DEFINE CHORD crd crd", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_DEFINE_NUM_OF_ARGS)) );
 		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("define-unknown-id")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "DEFINE UNKNOWN_ID something", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_COMMAND_ID)) );
+		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("define-assigner-double")) );
 		assertEquals( 5, e.getLineNumber() );
 		assertEquals( "DEFINE CHORD == CRD", e.getLineContent() );
@@ -2039,6 +2172,16 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 3, e.getLineNumber() );
 		assertEquals( "0 - - tr=5", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_INVALID_OPTION) + OPT_TREMOLO) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("compact-channel-var-invalid")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertEquals( "test: c:/4", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_CMD) + "test:") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("compact-channel-var-undef")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertEquals( "$y: c:/4", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_NOT_DEFINED) + "$y") );
 	}
 	
 	/**

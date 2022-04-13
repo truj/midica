@@ -30,6 +30,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.midica.config.Cli;
 import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.config.Laf;
@@ -518,6 +519,14 @@ public class MidicaFileChooser extends JFileChooser {
 	 * @param configType    one of the available types in {@link ConfigIcon}
 	 */
 	private void insertExtraWidgets(int configType) {
+		
+		// Unit tests may fail in some circumstances in this method (happened on a Mac),
+		// while everything works in normal GUI mode. So just create the charset comboboxes
+		// and then return.
+		if (Cli.isCliMode) {
+			createCharsetAreas(new JLabel(), new JLabel());
+			return;
+		}
 		
 		// Get the component containing:
 		// - file name label and text field  (index 0)

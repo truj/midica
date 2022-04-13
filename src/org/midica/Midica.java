@@ -36,10 +36,10 @@ public class Midica {
 	private static final int VERSION_MINOR = 2;
 	
 	/** UNIX timestamp of the last commit */
-	public static final int COMMIT_TIME = 1645653166;
+	public static final int COMMIT_TIME = 1649872953;
 	
 	/** Branch name. Automatically changed by precommit.pl */
-	public static final String BRANCH = "master";
+	public static final String BRANCH = "compact-syntax";
 	
 	/** Full version string. */
 	public static final String VERSION = VERSION_MAJOR + "." + VERSION_MIDDLE + "." + VERSION_MINOR + ("master".equals(BRANCH) ? "" : "-" + BRANCH);
