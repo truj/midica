@@ -962,14 +962,60 @@ class MidicaPLParserTest extends MidicaPLParser {
 			// first function call
 			assertEquals( "480/2/92/c / 64", messages.get(i++).toString() );
 			assertEquals( "600/2/92/c / 64", messages.get(i++).toString() );
-			assertEquals( "720/2/92/d / 64", messages.get(i++).toString() );
-			assertEquals( "1200/2/92/c / 64", messages.get(i++).toString() );
+			assertEquals( "720/2/92/d / 20", messages.get(i++).toString() );
+			assertEquals( "1200/2/92/c / 30", messages.get(i++).toString() );
 			
 			// second function call
-			assertEquals( "1320/2/92/c / 64", messages.get(i++).toString() );
-			assertEquals( "1440/2/92/c / 64", messages.get(i++).toString() );
-			assertEquals( "1560/2/92/d / 64", messages.get(i++).toString() );
-			assertEquals( "2040/2/92/c / 64", messages.get(i++).toString() );
+			assertEquals( "1320/2/92/c / 30", messages.get(i++).toString() );
+			assertEquals( "1440/2/92/c / 30", messages.get(i++).toString() );
+			assertEquals( "1560/2/92/d / 20", messages.get(i++).toString() );
+			assertEquals( "2040/2/92/c / 30", messages.get(i++).toString() );
+		}
+		// channel 3
+		messages = getMessagesByStatus("93");
+		{
+			int i = 0;
+			
+			assertEquals( "0/3/93/c / 64", messages.get(i++).toString() );
+			
+			// first pattern call
+			assertEquals( "480/3/93/c / 64", messages.get(i++).toString() );
+			assertEquals( "960/3/93/d / 30", messages.get(i++).toString() );   // v=30
+			assertEquals( "1200/3/93/e / 30", messages.get(i++).toString() );
+			assertEquals( "1320/3/93/c / 30", messages.get(i++).toString() );  // /2
+			
+			assertEquals( "2280/3/93/c / 64", messages.get(i++).toString() );
+			
+			// second pattern call
+			assertEquals( "2760/3/93/c+ / 64", messages.get(i++).toString() );
+			assertEquals( "3240/3/93/d+ / 40", messages.get(i++).toString() ); // v=40
+			assertEquals( "3480/3/93/e+ / 40", messages.get(i++).toString() );
+			assertEquals( "3600/3/93/c+ / 40", messages.get(i++).toString() ); // /4
+			
+			assertEquals( "4080/3/93/c / 64", messages.get(i++).toString() );
+		}
+		// channel 4
+		messages = getMessagesByStatus("94");
+		{
+			int i = 0;
+			
+			assertEquals( "0/4/94/c / 64", messages.get(i++).toString() );
+			
+			// first pattern call
+			assertEquals( "480/4/94/c / 64", messages.get(i++).toString() );
+			assertEquals( "960/4/94/d / 30", messages.get(i++).toString() );   // v=30
+			assertEquals( "1200/4/94/e / 30", messages.get(i++).toString() );
+			assertEquals( "1320/4/94/c / 30", messages.get(i++).toString() );  // /2
+			
+			assertEquals( "2280/4/94/c / 64", messages.get(i++).toString() );
+			
+			// second pattern call
+			assertEquals( "2760/4/94/c+ / 64", messages.get(i++).toString() );
+			assertEquals( "3240/4/94/d+ / 40", messages.get(i++).toString() ); // v=40
+			assertEquals( "3480/4/94/e+ / 40", messages.get(i++).toString() );
+			assertEquals( "3600/4/94/c+ / 40", messages.get(i++).toString() ); // /4
+			
+			assertEquals( "4080/4/94/c / 64", messages.get(i++).toString() );
 		}
 		// channel 9
 		messages = getMessagesByStatus("99");
@@ -2182,6 +2228,21 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 5, e.getLineNumber() );
 		assertEquals( "$y: c:/4", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_NOT_DEFINED) + "$y") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("compact-unknown-pattern")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "0: c c c,d,e:pat_none c c", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOTE_LENGTH_INVALID) + "pat_none") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("compact-invalid-option")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "0: c c (v=127,l=text,d=50%) c (s=1) c", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_COMPACT_INVALID_OPTION), "shift", "(s=1)")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("compact-unknown-option")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "0: c c (v=127,l=text,d=50%) c (unk=1) c", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_OPTION) + "unk") );
 	}
 	
 	/**

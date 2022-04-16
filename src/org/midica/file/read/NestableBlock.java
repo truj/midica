@@ -260,11 +260,11 @@ public class NestableBlock {
 			
 			// apply tuplet to each command part
 			ArrayList<String> transformedNotes = new ArrayList<>();
-			for (String noteAndLength : whitespaces.split(tokens[1])) {
+			for (String compactElement : whitespaces.split(tokens[1])) {
 				
 				// get note length
 				String noteLength;
-				String[] parts = noteAndLength.split(Pattern.quote(MidicaPLParser.COMPACT_NOTE_SEP), 2);
+				String[] parts = compactElement.split(Pattern.quote(MidicaPLParser.COMPACT_NOTE_SEP), 2);
 				if (parts.length > 1)
 					noteLength = naturalLength = parts[1];
 				else

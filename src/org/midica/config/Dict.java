@@ -84,6 +84,8 @@ public class Dict {
 	public static final String SYNTAX_DEFINE             = "DEFINE";
 	public static final String SYNTAX_COMPACT_CHANNEL    = "COMPACT_CHANNEL";
 	public static final String SYNTAX_COMPACT_NOTE_SEP   = "COMPACT_NOTE_SEP";
+	public static final String SYNTAX_COMPACT_OPT_OPEN   = "COMPACT_OPT_OPEN";
+	public static final String SYNTAX_COMPACT_OPT_CLOSE  = "COMPACT_OPT_CLOSE";
 	public static final String SYNTAX_COMMENT            = "COMMENT";
 	public static final String SYNTAX_CONST              = "CONST";
 	public static final String SYNTAX_VAR                = "VAR";
@@ -1042,6 +1044,7 @@ public class Dict {
 	public static final String SYNTAX_CAT_OPTION           = "syntax_cat_option";
 	public static final String SYNTAX_CAT_CONDITON         = "syntax_cat_condition";
 	public static final String SYNTAX_CAT_GLOBAL           = "syntax_cat_global";
+	public static final String SYNTAX_CAT_COMPACT          = "syntax_cat_compact";
 	public static final String SYNTAX_CAT_OTHER            = "syntax_cat_other";
 	public static final String SYNTAX_CAT_META             = "syntax_cat_meta";
 	public static final String SYNTAX_CAT_NOTE_LENGTH      = "syntax_cat_note_length";
@@ -1584,6 +1587,7 @@ public class Dict {
 	public static final String ERROR_CALL_PARAM_NAME_WITH_SPEC   = "error_call_param_name_with_spec";
 	public static final String ERROR_CALL_DUPLICATE_PARAM_NAME   = "error_call_duplicate_param_name";
 	public static final String ERROR_CALL_PARAM_MORE_ASSIGNERS   = "error_call_param_more_assigners";
+	public static final String ERROR_COMPACT_INVALID_OPTION      = "error_compact_invalid_option";
 	public static final String ERROR_INVALID_TIME_DENOM          = "error_invalid_time_denom";
 	public static final String ERROR_INVALID_TIME_SIG            = "error_invalid_time_sig";
 	public static final String ERROR_INVALID_KEY_SIG             = "error_invalid_key_sig";
@@ -2600,6 +2604,7 @@ public class Dict {
 		set( SYNTAX_CAT_OPTION,                      "Option Syntax"                 );
 		set( SYNTAX_CAT_CONDITON,                    "Conditions"                    );
 		set( SYNTAX_CAT_GLOBAL,                      "Global Commands"               );
+		set( SYNTAX_CAT_COMPACT,                     "Compact Syntax"                );
 		set( SYNTAX_CAT_OTHER,                       "Other Commands"                );
 		set( SYNTAX_CAT_META,                        "Meta Commands"                 );
 		set( SYNTAX_CAT_NOTE_LENGTH,                 "Note Length Definitions"       );
@@ -2688,6 +2693,8 @@ public class Dict {
 		set( SYNTAX_DEFINE,             "syntax element definition"                        );
 		set( SYNTAX_COMPACT_CHANNEL,    "Channel suffix for compact syntax"                );
 		set( SYNTAX_COMPACT_NOTE_SEP,   "Separates note name and length in compact syntax" );
+		set( SYNTAX_COMPACT_OPT_OPEN,   "Starts an option in compact syntax"               );
+		set( SYNTAX_COMPACT_OPT_CLOSE,  "Ends an option in compact syntax"                 );
 		set( SYNTAX_COMMENT,            "comment"                                          );
 		set( SYNTAX_CONST,              "constant definition"                              );
 		set( SYNTAX_VAR,                "variable definition"                              );
@@ -3254,6 +3261,7 @@ public class Dict {
 		set( ERROR_CALL_PARAM_NAME_WITH_SPEC,     "parameter name contains special characters: "                      );
 		set( ERROR_CALL_DUPLICATE_PARAM_NAME,     "duplicate parameter name: "                                        );
 		set( ERROR_CALL_PARAM_MORE_ASSIGNERS,     "named parameter must not contain more than one assign symbol: "    );
+		set( ERROR_COMPACT_INVALID_OPTION,        "option invalid for compact commands: %s - Erroneous part: %s"      );
 		set( ERROR_INVALID_TIME_DENOM,            "invalid denominator in time signature: "                           );
 		set( ERROR_INVALID_TIME_SIG,              "invalid time signature argument: "                                 );
 		set( ERROR_INVALID_KEY_SIG,               "invalid key signature argument: "                                  );
@@ -3956,6 +3964,8 @@ public class Dict {
 		setSyntax( SYNTAX_DEFINE,              "DEFINE"       );
 		setSyntax( SYNTAX_COMPACT_CHANNEL,     ":"            );
 		setSyntax( SYNTAX_COMPACT_NOTE_SEP,    ":"            );
+		setSyntax( SYNTAX_COMPACT_OPT_OPEN,    "("            );
+		setSyntax( SYNTAX_COMPACT_OPT_CLOSE,   ")"            );
 		setSyntax( SYNTAX_COMMENT,             "//"           );
 		setSyntax( SYNTAX_CONST,               "CONST"        );
 		setSyntax( SYNTAX_VAR,                 "VAR"          );
@@ -4121,9 +4131,13 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_PARTIAL_SYNC_RANGE );
 		addSyntaxForInfoView( SYNTAX_PARTIAL_SYNC_SEP   );
 		
+		addSyntaxCategory(get(SYNTAX_CAT_COMPACT));
+		addSyntaxForInfoView( SYNTAX_COMPACT_CHANNEL   );
+		addSyntaxForInfoView( SYNTAX_COMPACT_NOTE_SEP  );
+		addSyntaxForInfoView( SYNTAX_COMPACT_OPT_OPEN  );
+		addSyntaxForInfoView( SYNTAX_COMPACT_OPT_CLOSE );
+		
 		addSyntaxCategory(get(SYNTAX_CAT_OTHER));
-		addSyntaxForInfoView( SYNTAX_COMPACT_CHANNEL  );
-		addSyntaxForInfoView( SYNTAX_COMPACT_NOTE_SEP );
 		addSyntaxForInfoView( SYNTAX_COMMENT          );
 		addSyntaxForInfoView( SYNTAX_REST             );
 		addSyntaxForInfoView( SYNTAX_P                );

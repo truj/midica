@@ -14,7 +14,7 @@ INCLUDE inc/instruments.midica
 	}
 	0: c d:8                           // c-:/2t (10480)  d-:/8t (11120)
 }
-0: c d:16                              // c:/8 (11280)  d:/16 (11520)
+0: (v=64) c d:16                       // c:/8 (11280)  d:/16 (11520)
 
 
 1: c
@@ -31,15 +31,47 @@ INCLUDE inc/instruments.midica
 VAR $ch     = 2
 VAR $note   = c
 VAR $length = /8
+VAR $vel1   = 20
+VAR $vel2   = 30
 $ch: $note:$length $note:$length
 
-CALL f($ch, note=$note, length=/16) q=2
-FUNCTION f
+CALL f2($ch, note=$note, length=/16) q=2
+FUNCTION f2
 	$[0]: ${note}:${length}
-	$[0]: ${note}:${length} d:/4
+	$[0]: ${note}:${length} (v=$vel1,l=text,d=50%) d:/4 (velocity=$vel2)
 	$[0]: ${note}:${length}
 END
 
+
+// patterns
+CHORD crd = c+,d+,e+
+3: c c,d,e:pat_complex(/2,x=30) c crd:pat_complex(/4,x=40) c
+PATTERN pat_complex
+	0      /4
+	1      /8  v=${x}
+	2      /16
+	0      $[0]
+END
+
+
+// patterns inside of blocks in side a function call
+{
+	{
+		CALL f4(ch=4)
+	}
+}
+FUNCTION f4
+	{
+		CALL f4b(${ch}, /2, 30, /4, 40, c)
+	}
+END
+FUNCTION f4b
+	{
+		{
+			$[0]: c c,d,e:pat_complex($[1],x=$[2]) c crd:pat_complex($[3],x=$[4]) $[5]
+		}
+	}
+END
 
 
 p: bd1:4                    // 0
