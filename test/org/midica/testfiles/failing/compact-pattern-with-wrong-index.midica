@@ -1,0 +1,10 @@
+INCLUDE inc/instruments.midica
+
+0: c d e:8 f,e,d,c:pat(foo,bar) a b c
+
+PATTERN pat
+	: 0 1
+	: 0 1 2
+	: 0 1 a
+	: 0 1
+END

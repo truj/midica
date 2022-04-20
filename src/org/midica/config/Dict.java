@@ -1588,6 +1588,7 @@ public class Dict {
 	public static final String ERROR_CALL_DUPLICATE_PARAM_NAME   = "error_call_duplicate_param_name";
 	public static final String ERROR_CALL_PARAM_MORE_ASSIGNERS   = "error_call_param_more_assigners";
 	public static final String ERROR_COMPACT_INVALID_OPTION      = "error_compact_invalid_option";
+	public static final String ERROR_COMPACT_PAT_CALL_WITH_OPT   = "error_compact_pat_call_with_opt";
 	public static final String ERROR_INVALID_TIME_DENOM          = "error_invalid_time_denom";
 	public static final String ERROR_INVALID_TIME_SIG            = "error_invalid_time_sig";
 	public static final String ERROR_INVALID_KEY_SIG             = "error_invalid_key_sig";
@@ -3262,6 +3263,9 @@ public class Dict {
 		set( ERROR_CALL_DUPLICATE_PARAM_NAME,     "duplicate parameter name: "                                        );
 		set( ERROR_CALL_PARAM_MORE_ASSIGNERS,     "named parameter must not contain more than one assign symbol: "    );
 		set( ERROR_COMPACT_INVALID_OPTION,        "option invalid for compact commands: %s - Erroneous part: %s"      );
+		set( ERROR_COMPACT_PAT_CALL_WITH_OPT,     "<html>Pattern call contains additional data: %s<br>"
+		                                        + "Pattern call: %s<br>"
+		                                        + "(Forgotten whitespace?)" );
 		set( ERROR_INVALID_TIME_DENOM,            "invalid denominator in time signature: "                           );
 		set( ERROR_INVALID_TIME_SIG,              "invalid time signature argument: "                                 );
 		set( ERROR_INVALID_KEY_SIG,               "invalid key signature argument: "                                  );

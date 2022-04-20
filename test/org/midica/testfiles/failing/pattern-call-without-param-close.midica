@@ -1,0 +1,9 @@
+INCLUDE inc/instruments.midica
+
+0 c,d,e  simple(foo, bar q=2, m
+
+PATTERN simple
+	0      /4
+	1      /4
+	2      /4
+END

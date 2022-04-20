@@ -74,6 +74,21 @@ FUNCTION f4b
 END
 
 
+// compact patterns
+CHORD cmaj         = c,d,e
+CHORD cmaj_reverse = e,d,c
+5: c,d,e:pat_outer(70)  c+  e,d,c:pat_outer(60)  c+  cmaj:pat_outer(50)  c+  cmaj_reverse:pat_outer(40)  c+
+PATTERN pat_outer
+	: (v=$[0]) 0
+	: 0 1 2 2,1,0:pat_inner(/2,v1=20,v2=30)
+	: 0 -:8 0
+END
+PATTERN pat_inner
+	: (v=${v1}) 0 1 2:$[0]
+	: (v=${v2}) 0 1 0:$[0]
+END
+
+
 p: bd1:4                    // 0
 9: bd1 bd1                  // 480 960
 { t, s=5

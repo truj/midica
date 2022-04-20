@@ -2467,9 +2467,10 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// remember channel state
 		Instrument instr = instruments.get(channel);
-		long  outerStartTicks = instr.getCurrentTicks();
-		int   outerVelocity   = instr.getVelocity();
-		float outerDuration   = instr.getDurationRatio();
+		long   outerStartTicks = instr.getCurrentTicks();
+		int    outerVelocity   = instr.getVelocity();
+		float  outerDuration   = instr.getDurationRatio();
+		String outerNoteLength = instr.getNoteLength();
 		
 		// process pattern call options (outer options)
 		boolean outerMultiple = false;
@@ -2601,13 +2602,41 @@ public class MidicaPLParser extends SequenceParser {
 						parseTokens(patLineTokens);
 						continue PATTERN_LINE;
 					}
+					
+					// compact pattern line?
+					if (COMPACT_CHANNEL.equals(patLineTokens[0])) {
+						// replace first token (: => :channel)
+						patLineTokens[0] = channel + patLineTokens[0];
+						for (int j = 1; j < patLineTokens.length; j++) {
+							String compactElement = patLineTokens[j];
+							
+							// option: (name=value)?
+							if (compactOptPattern.matcher(compactElement).matches())
+								continue;
+							
+							// rest/note/chord
+							String[] parts = compactElement.split(Pattern.quote(COMPACT_NOTE_SEP), 2);
+							String chord = parts[0];
+							if (REST.equals(chord))
+								continue;
+							
+							patLineTokens[j] = patternIndicesToChord(chord, noteNumbers);
+							if (parts.length > 1)
+								patLineTokens[j] += COMPACT_NOTE_SEP + parts[1];
+						}
+						patternLine = String.join(" ", patLineTokens);
+						currentLineContent = patternLine;
+						String[] compactTokens = patternLine.split(" ", 2);
+						parseTokens(compactTokens);
+						
+						continue PATTERN_LINE;
+					}
 				}
 				
 				// from now on assume a normal pattern line, beginning with indices
-				String[] patternTokens         = patternLine.split("\\s+", 3);
-				patternTokens                  = reorganizePatternCallTokens(patternTokens, 1); // for nested pattern calls
-				String[]          indexStrings = patternTokens[0].split(Pattern.quote(PATTERN_INDEX_SEP), -1);
-				ArrayList<String> lineNotes    = new ArrayList<String>();
+				String[] patternTokens      = patternLine.split("\\s+", 3);
+				patternTokens               = reorganizePatternCallTokens(patternTokens, 1); // for nested pattern calls
+				ArrayList<String> lineNotes = new ArrayList<String>();
 				
 				// process pattern line options (inner options)
 				boolean innerMultiple = false;
@@ -2646,20 +2675,9 @@ public class MidicaPLParser extends SequenceParser {
 					lineNotes.add(REST);
 				}
 				else {
-					// INDEX:
-					for (String indexStr : indexStrings) {
-						try {
-							int index = Integer.parseInt(indexStr);
-							int note  = noteNumbers[index];
-							lineNotes.add(note + "");
-						}
-						catch (NumberFormatException e) {
-							throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INDEX_INVALID) + indexStr);
-						}
-						catch (IndexOutOfBoundsException e) {
-							throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH) + indexStr);
-						}
-					}
+					// note or chord
+					String noteOrChord = patternIndicesToChord(patLineTokens[0], noteNumbers);
+					lineNotes.add(noteOrChord);
 				}
 				
 				// construct resulting pattern line options
@@ -2698,10 +2716,11 @@ public class MidicaPLParser extends SequenceParser {
 				parseTokens(lineTokens.toArray(new String[0]));
 			}
 			
-			// reset channel state (velocity + duration)
+			// reset channel state (velocity, duration, note length)
 			if (! isFake) {
 				instr.setVelocity(outerVelocity);
 				instr.setDurationRatio(outerDuration);
+				instr.setNoteLength(outerNoteLength);
 			}
 		}
 		
@@ -2718,6 +2737,38 @@ public class MidicaPLParser extends SequenceParser {
 		patternFileStack.pop();
 		paramStackIndexed.pop();
 		paramStackNamed.pop();
+	}
+	
+	/**
+	 * Translates a string with comma-separated indices to a chord with comma-separated notes.
+	 * 
+	 * Needed for pattern calls.
+	 * 
+	 * @param indicesStr    the comma-separated indices string (e.g. "0,2,3")
+	 * @param noteNumbers   the note numbers to be used for the chord (e.g. [64, 66, 67, 76])
+	 * @return the chord (e.g. "64,67,76")
+	 * @throws ParseException if an index is not a positie integer or too high for the given noteNumbers.
+	 */
+	private String patternIndicesToChord(String indicesStr, Integer[] noteNumbers) throws ParseException {
+		ArrayList<String> notes = new ArrayList<>();
+		
+		// note or chord
+		String[] indexStrings = indicesStr.split(Pattern.quote(PATTERN_INDEX_SEP), -1);
+		for (String indexStr : indexStrings) {
+			try {
+				int index = Integer.parseInt(indexStr);
+				int note  = noteNumbers[index];
+				notes.add(note + "");
+			}
+			catch (NumberFormatException e) {
+				throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INDEX_INVALID) + indexStr);
+			}
+			catch (IndexOutOfBoundsException e) {
+				throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH) + indexStr);
+			}
+		}
+		
+		return String.join(CHORD_SEPARATOR, notes);
 	}
 	
 	/**
@@ -2819,24 +2870,25 @@ public class MidicaPLParser extends SequenceParser {
 			if (BLOCK_OPEN.equals(tokens[0]) || BLOCK_CLOSE.equals(tokens[0])) {
 				// ok
 			}
+			
+			// rest?
 			else if (REST.equals(tokens[0])) {
 				// ok
 			}
+			
+			// compact channel command?
+			else if (COMPACT_CHANNEL.equals(tokens[0])) {
+				// ok - checks will be done later when the pattern is called
+			}
+			
+			// normal channel command
 			else {
 				if (tokens.length < 2) {
 					throw new ParseException(Dict.get(Dict.ERROR_PATTERN_NUM_OF_ARGS));
 				}
 				
 				// check if indices are numbers
-				String[] indexStrings = tokens[0].split(Pattern.quote(PATTERN_INDEX_SEP), -1);
-				for (String indexStr : indexStrings) {
-					try {
-						Integer.parseInt(indexStr);
-					}
-					catch (NumberFormatException e) {
-						throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INDEX_INVALID) + indexStr);
-					}
-				}
+				checkPatternIndices(tokens[0]);
 				
 				// check options
 				if (tokens.length > 2) {
@@ -2864,6 +2916,26 @@ public class MidicaPLParser extends SequenceParser {
 	}
 	
 	/**
+	 * Checks if the given string consists of comma-separated note index numbers.
+	 * 
+	 * Needed to check a pattern at pattern line parsing time (before any pattern call).
+	 * 
+	 * @param indicesStr
+	 * @throws ParseException
+	 */
+	private void checkPatternIndices(String indicesStr) throws ParseException {
+		String[] indexStrings = indicesStr.split(Pattern.quote(PATTERN_INDEX_SEP), -1);
+		for (String indexStr : indexStrings) {
+			try {
+				Integer.parseInt(indexStr);
+			}
+			catch (NumberFormatException e) {
+				throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INDEX_INVALID) + indexStr);
+			}
+		}
+	}
+	
+	/**
 	 * Ensures that (nested or real) pattern call tokens contain the pattern call
 	 * and the options token in the right position.
 	 * 
@@ -2880,12 +2952,24 @@ public class MidicaPLParser extends SequenceParser {
 	 * - index 1: pattern call
 	 * - index 2: options
 	 * 
+	 * For nested compact pattern calls:
+	 * 
+	 * - index 0: :
+	 * - index 1: the rest
+	 * 
 	 * @param tokens         tokens to be checked or changed
 	 * @param indexOffset    pattern call index (**2** for real calls, **1** for nested calls)
 	 * @return the corrected tokens, if changed, or the original tokens, if no change was necessary.
 	 * @throws ParseException on syntax errors.
 	 */
 	private String[] reorganizePatternCallTokens(String[] tokens, int indexOffset) throws ParseException {
+		
+		// compact inline tokens
+		if (COMPACT_CHANNEL.equals(tokens[0])) {
+			if (3 == tokens.length)
+				tokens = new String[] {tokens[0], tokens[1] + " " + tokens[2]};
+			return tokens;
+		}
 		
 		int iPat = indexOffset;      // index containing the pattern call
 		int iOpt = indexOffset + 1;  // index containing the options
@@ -4204,16 +4288,24 @@ public class MidicaPLParser extends SequenceParser {
 						boolean isPattern = false;
 						Matcher patCallMatcher = callPattern.matcher(parts[1]);
 						if (patCallMatcher.matches()) {
-							String patternName = patCallMatcher.group(1);
+							String patternName  = patCallMatcher.group(1);
+							String optionString = patCallMatcher.group(4);
 							if (patterns.containsKey(patternName)) {
 								
 								// create pattern command
-								isPattern = true;
+								isPattern   = true;
 								chCmdTokens = new String[] {
 									channel  + "",
 									parts[0] + "",   // chord
 									parts[1],        // pattern
 								};
+							}
+							
+							// pattern options are not allowed in compact syntax
+							if (optionString != null) {
+								throw new ParseException(
+									String.format(Dict.get(Dict.ERROR_COMPACT_PAT_CALL_WITH_OPT), optionString, compactElement)
+								);
 							}
 						}
 						
