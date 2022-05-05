@@ -5,4 +5,7 @@ INSTRUMENTS
 	3    FIDDLE                  Fiddle
 	4    STEEL_GUITAR            Western Guitar
 	5    GLOCKENSPIEL            Glockenspiel
+	6    PAN_FLUTE               Flute
+	7    CLAVINET                Clavinet
+	8    CELESTA                 Celesta
 END

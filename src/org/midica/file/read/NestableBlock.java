@@ -13,7 +13,6 @@ import java.util.Deque;
 import java.util.regex.Pattern;
 
 import org.midica.config.Dict;
-import org.midica.file.Instrument;
 
 /**
  * This class represents a nestable block, used by the MidicaPL parser.
@@ -234,7 +233,7 @@ public class NestableBlock {
 	}
 	
 	/**
-	 * Adds the tuplets to the duration column of a channel command.
+	 * Applies the block's tuplets to the given tokens.
 	 * 
 	 * @param tokens  command tokens
 	 * @return resulting command tokens.
@@ -252,9 +251,6 @@ public class NestableBlock {
 		if (parser.isCompactCmd(tokens[0])) {
 			int channel = parser.getCompactChannel(tokens[0]);
 			
-			// current compact length WITHOUT any tuplets
-			String naturalLength = MidicaPLParser.instruments.get(channel).getNaturalLength();
-			
 			// transform from 3 to 2 tokens, if necessary
 			tokens = parser.reorganizeCompactCmd(tokens);
 			
@@ -263,21 +259,17 @@ public class NestableBlock {
 			for (String compactElement : whitespaces.split(tokens[1])) {
 				
 				// get note length
-				String noteLength;
-				String[] parts = compactElement.split(Pattern.quote(MidicaPLParser.COMPACT_NOTE_SEP), 2);
-				if (parts.length > 1)
-					noteLength = naturalLength = parts[1];
-				else
-					noteLength = naturalLength;
+				String newNoteLength = getLengthFromCompactElement(compactElement);
+				if (newNoteLength != null)
+					parser.adjustCompactNoteLength(channel, newNoteLength, true);
+				String noteLength = MidicaPLParser.instruments.get(channel).getNaturalLength();
 				
-				// apply tuplet
+				// apply tuplet (if necessary)
 				noteLength = addTupletToLength(noteLength);
-				transformedNotes.add(parts[0] + MidicaPLParser.COMPACT_NOTE_SEP + noteLength);
+				String tupetizedElement = tupletizeCompactElement(compactElement, noteLength);
+				transformedNotes.add(tupetizedElement);
 			}
 			tokens[1] = String.join(" ", transformedNotes);
-			
-			// reset length
-			MidicaPLParser.instruments.get(channel).setNaturalLength(naturalLength);
 			
 			return tokens;
 		}
@@ -318,6 +310,97 @@ public class NestableBlock {
 		}
 		
 		return tokens;
+	}
+	
+	/**
+	 * Calculates and returns the length defined by a compact syntax element.
+	 * 
+	 * Returns **null** if the element does not define a new length.
+	 * That's the case for:
+	 * 
+	 * - notes without length definitions
+	 * - pattern calls
+	 * - compact options that don't include (...,length=...,...)
+	 * 
+	 * @param compactElement    the element to analyze
+	 * @return the length definition or **null**
+	 * @throws ParseException if compact options cannot be parsed
+	 */
+	public String getLengthFromCompactElement(String compactElement) throws ParseException {
+		String[] parts = compactElement.split(Pattern.quote(MidicaPLParser.COMPACT_NOTE_SEP), 2);
+		
+		// note:... or chord:pattern(...)
+		if (parts.length > 1) {
+			
+			// pattern call?
+			if (parser.isCompactPatternCall(parts[1]))
+				return null;
+			
+			// note
+			return parts[1];
+		}
+		
+		// (...,length=...,...)
+		ArrayList<CommandOption> options = parser.parseCompactOptions(parts[0], false);
+		if (options != null) {
+			
+			// (name=value,name2=value2) ==> name=value,name2=value2
+			for (CommandOption opt : options) {
+				if (MidicaPLParser.OPT_LENGTH.equals(opt.getName()))
+					return opt.getLength();
+			}
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Applies the given (tupletized) length to the given compact element, if possible.
+	 * The length is applied to normal notes/chords/rests and the (length=...) option.
+	 * 
+	 * Pattern calls or other compact options are left unchanged.
+	 * 
+	 * @param compactElement      the compact element
+	 * @param tupletizedLength    tupletized note length string
+	 * @return the tupletized or unchanged compact element.
+	 * @throws ParseException if compact options cannot be parsed
+	 */
+	public String tupletizeCompactElement(String compactElement, String tupletizedLength) throws ParseException {
+		
+		String[] parts = compactElement.split(Pattern.quote(MidicaPLParser.COMPACT_NOTE_SEP), 2);
+		
+		// has a length definition or pattern?
+		if (parts.length > 1) {
+			
+			// pattern call?
+			if (parser.isCompactPatternCall(parts[1]))
+				return compactElement;
+			
+			// normal length definition - tupletize it
+			return parts[0] + MidicaPLParser.COMPACT_NOTE_SEP + tupletizedLength;
+		}
+		
+		// option(s)? : (name=value,name2=value2)
+		ArrayList<CommandOption> options = parser.parseCompactOptions(parts[0], false);
+		if (options != null) {
+			
+			// tupletize length=... but leave other options unchanged
+			ArrayList<String> tupletizedOptions = new ArrayList<>();
+			for (CommandOption opt : options) {
+				String optName = opt.getName();
+				if (MidicaPLParser.OPT_LENGTH.equals(optName))
+					tupletizedOptions.add(optName + MidicaPLParser.OPT_ASSIGNER + tupletizedLength);
+				else
+					tupletizedOptions.add(optName + MidicaPLParser.OPT_ASSIGNER + opt.getRawValue());
+			}
+			
+			// re-build (name=value,name2=value2)
+			return MidicaPLParser.COMPACT_OPT_OPEN
+				+ String.join(MidicaPLParser.OPT_SEPARATOR, tupletizedOptions)
+				+ MidicaPLParser.COMPACT_OPT_CLOSE;
+		}
+		
+		return parts[0] + MidicaPLParser.COMPACT_NOTE_SEP + tupletizedLength;
 	}
 	
 	/**
@@ -499,9 +582,11 @@ public class NestableBlock {
 						tokens = parser.addShift(tokens, shift);
 					}
 					if (tuplet != null) {
+						MidicaPLParser.isPlayingTupletBlock = true;
 						tokens = addTuplets(tokens);
 					}
 					parser.parseLine(String.join(" ", tokens));
+					MidicaPLParser.isPlayingTupletBlock = false;
 					
 					// remove line from call stack
 					callStack.pop();
@@ -515,12 +600,6 @@ public class NestableBlock {
 		// restore tickstamps, if needed
 		if (multiple) {
 			parser.restoreTickstamps(tickstamps);
-		}
-		
-		// reset compact syntax after a tuplet block
-		for (Instrument instr : MidicaPLParser.instruments) {
-			String naturalLength = instr.getNaturalLength();
-			instr.setNoteLength(naturalLength);
 		}
 		
 		// remove call stack element

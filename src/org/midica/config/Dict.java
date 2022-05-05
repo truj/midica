@@ -136,6 +136,7 @@ public class Dict {
 	public static final String SYNTAX_OPT_ASSIGNER       = "OPT_ASSIGNER";
 	public static final String SYNTAX_PROG_BANK_SEP      = "PROGRAM_BANK_SEPARATOR";
 	public static final String SYNTAX_BANK_SEP           = "BANK_SEPARATOR";
+	public static final String SYNTAX_LENGTH             = "LENGTH";
 	public static final String SYNTAX_VELOCITY           = "VELOCITY";
 	public static final String SYNTAX_V                  = "VELOCITY_SHORT";
 	public static final String SYNTAX_DURATION           = "DURATION";
@@ -1618,6 +1619,7 @@ public class Dict {
 	public static final String ERROR_VEL_NOT_LESS_THAN_1         = "error_vel_not_less_than_1";
 	public static final String ERROR_TUPLET_INVALID              = "error_tuplet_invalid";
 	public static final String ERROR_DURATION_MORE_THAN_0        = "error_duration_more_than_0";
+	public static final String ERROR_OPT_LENGTH_MORE_THAN_0      = "error_opt_length_more_than_0";
 	public static final String ERROR_UNKNOWN_OPTION              = "error_unknown_option: ";
 	public static final String ERROR_UNKNOWN_NOTE                = "error_unknown_note";
 	public static final String ERROR_UNKNOWN_PERCUSSION          = "error_unknown_percussion";
@@ -2746,6 +2748,7 @@ public class Dict {
 		set( SYNTAX_OPT_ASSIGNER,       "option assignment character"                      );
 		set( SYNTAX_PROG_BANK_SEP,      "Separator between program number and bank select" );
 		set( SYNTAX_BANK_SEP,           "MSB / LSB separator for bank select"              );
+		set( SYNTAX_LENGTH,             "note length option (for compact syntax)"          );
 		set( SYNTAX_VELOCITY,           "velocity option (long)"                           );
 		set( SYNTAX_V,                  "velocity option (short)"                          );
 		set( SYNTAX_DURATION,           "duration option (long)"                           );
@@ -3295,6 +3298,7 @@ public class Dict {
 		set( ERROR_VEL_NOT_LESS_THAN_1,           "velocity must be more than 0"                                      );
 		set( ERROR_TUPLET_INVALID,                "Invalid tuplet definition: "                                       );
 		set( ERROR_DURATION_MORE_THAN_0,          "duration must be more than 0.0 (or 0%)"                            );
+		set( ERROR_OPT_LENGTH_MORE_THAN_0,        "a zero-length is not allowed in a compact option"                  );
 		set( ERROR_UNKNOWN_OPTION,                "unknown option: "                                                  );
 		set( ERROR_UNKNOWN_NOTE,                  "unknown note: "                                                    );
 		set( ERROR_UNKNOWN_PERCUSSION,            "unknown percussion ID: "                                           );
@@ -4020,6 +4024,7 @@ public class Dict {
 		setSyntax( SYNTAX_OPT_ASSIGNER,        "="            );
 		setSyntax( SYNTAX_PROG_BANK_SEP,       ","            );
 		setSyntax( SYNTAX_BANK_SEP,            "/"            );
+		setSyntax( SYNTAX_LENGTH,              "length"       );
 		setSyntax( SYNTAX_VELOCITY,            "velocity"     );
 		setSyntax( SYNTAX_V,                   "v"            );
 		setSyntax( SYNTAX_DURATION,            "duration"     );
@@ -4173,6 +4178,7 @@ public class Dict {
 		addSyntaxCategory(get(SYNTAX_CAT_OPTION));
 		addSyntaxForInfoView( SYNTAX_OPT_SEPARATOR    );
 		addSyntaxForInfoView( SYNTAX_OPT_ASSIGNER     );
+		addSyntaxForInfoView( SYNTAX_LENGTH           );
 		addSyntaxForInfoView( SYNTAX_VELOCITY         );
 		addSyntaxForInfoView( SYNTAX_V                );
 		addSyntaxForInfoView( SYNTAX_DURATION         );

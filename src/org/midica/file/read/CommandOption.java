@@ -12,28 +12,39 @@ package org.midica.file.read;
  * It can be:
  * 
  * - a channel option
- * - an option for n CALL command
+ * - an option for a CALL command
+ * - an outer option for a pattern call command
+ * - an inner option for a pattern line
  * - an option for an opening or closing brace of a nestable block
+ * - an option in a compact syntax string
  * 
  * @author Jan Trukenmüller
  */
 public class CommandOption {
 	
-	private String name          = null;
-	private Object value         = null;
-	private String valueAsString = null;
+	private String name     = null; // unified name
+	private Object value    = null;
+	private String rawName  = null; // name according to the currently configured syntax
+	private String rawValue = null; // value as a MidicaPL string
 	
 	/**
 	 * Initializes the option with a name and a value.
 	 * 
-	 * @param name     Option name.
-	 * @param value    Option value.
+	 * @param name      Option name in a canonized form, independent from the current syntax configuration.
+	 * @param value     Option value.
+	 * @param rawName   Option name according to the current syntax configuration.
+	 * @param rawValue  Option value as a string, according to the current MidicaPL configuration.
 	 * @throws ParseException if the given name is invalid.
 	 */
-	public void set(String name, Object value) throws ParseException {
-		this.name = name;
+	public void set(String name, Object value, String rawName, String rawValue) throws ParseException {
+		this.name     = name;
+		this.rawName  = rawName;
+		this.rawValue = rawValue;
 		if (MidicaPLParser.OPT_MULTIPLE.equals(name)) {
 			this.value = (Boolean) value;
+		}
+		else if (MidicaPLParser.OPT_LENGTH.equals(name)) {
+			this.value = (String) value;
 		}
 		else if (MidicaPLParser.OPT_VELOCITY.equals(name)) {
 			this.value = (Integer) value;
@@ -72,17 +83,15 @@ public class CommandOption {
 	}
 	
 	/**
-	 * Sets a string representation for the value.
-	 * Currently only used for tremolo (needed for patterns).
-	 * 
-	 * @param value  string representation of the option value
+	 * Returns the raw name, like it is used in MidicaPL syntax.
+	 * @return the raw name.
 	 */
-	public void setValueString(String value) {
-		valueAsString = value;
+	public String getRawName() {
+		return rawName;
 	}
 	
 	/**
-	 * Returns the option name.
+	 * Returns the (unified) option name.
 	 * @return option name.
 	 */
 	public String getName() {
@@ -94,8 +103,8 @@ public class CommandOption {
 	 * 
 	 * @return the string representation of the value or **null**.
 	 */
-	public String getValueString() {
-		return valueAsString;
+	public String getRawValue() {
+		return rawValue;
 	}
 	
 	/**
@@ -104,6 +113,14 @@ public class CommandOption {
 	 */
 	public Integer getQuantity() {
 		return (Integer) value;
+	}
+	
+	/**
+	 * Returns the note length.
+	 * @return note length.
+	 */
+	public String getLength() {
+		return (String) value;
 	}
 	
 	/**

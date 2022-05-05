@@ -53,6 +53,7 @@ public class MidicaPLParser extends SequenceParser {
 	 *******************/
 	
 	// identifiers for options
+	public static final String OPT_LENGTH   = "length";
 	public static final String OPT_VELOCITY = "velocity";
 	public static final String OPT_MULTIPLE = "multiple";
 	public static final String OPT_DURATION = "duration";
@@ -65,11 +66,16 @@ public class MidicaPLParser extends SequenceParser {
 	public static final String OPT_ELSIF    = "elsif";
 	public static final String OPT_ELSE     = "else";
 	
-	private static final HashSet<String> allowedCompactOptions = new HashSet<>(
+	private static final HashSet<String> compactOptionsWithRest = new HashSet<>(
 		Arrays.asList(new String[] {
 			OPT_VELOCITY,
 			OPT_DURATION,
 			OPT_LYRICS,
+		})
+	);
+	private static final HashSet<String> compactOptionsWithoutRest = new HashSet<>(
+		Arrays.asList(new String[] {
+			OPT_LENGTH,
 		})
 	);
 	
@@ -145,6 +151,7 @@ public class MidicaPLParser extends SequenceParser {
 	public static String META_SK_AUTHOR     = null;
 	public static String META_SK_COPYRIGHT  = null;
 	public static String META_SK_INFO       = null;
+	public static String LENGTH             = null;
 	public static String LENGTH_ZERO        = null;
 	public static String LENGTH_32          = null;
 	public static String LENGTH_16          = null;
@@ -222,51 +229,51 @@ public class MidicaPLParser extends SequenceParser {
 	
 	private static Pattern whitespace = Pattern.compile("\\s+");
 	
-	private   static HashMap<String, ArrayList<String>> fileCache               = null;
-	private   static HashMap<String, ArrayList<String>> functions               = null;
-	private   static HashMap<String, File>              functionToFile          = null;
-	private   static HashMap<String, Integer>           functionToLineOffset    = null;
-	public    static HashMap<String, ArrayList<String>> patterns                = null;
-	private   static HashMap<String, File>              patternToFile           = null;
-	private   static HashMap<String, Integer>           patternToLineOffset     = null;
-	private   static TreeMap<String, TreeSet<Integer>>  chords                  = null;
-	private   static boolean                            instrumentsParsed       = false;
-	private   static HashMap<String, StringBuilder>     metaInfo                = null;
-	private   static HashMap<String, ArrayList<String>> softKaraokeInfo         = null;
-	private   static boolean                            frstInstrBlkOver        = false;
-	private   static String                             chosenCharset           = null;
-	private   static HashSet<String>                    definedFunctionNames    = null;
-	private   static HashSet<String>                    definedPatternNames     = null;
-	private   static int                                nestableBlkDepth        = 0;
-	private   static Deque<NestableBlock>               nestableBlkStack        = null;
-	private   static Deque<StackTraceElement>           stackTrace              = null;
-	private   static Deque<String>                      functionNameStack       = null;
-	private   static Deque<Integer>                     functionLineStack       = null;
-	private   static Deque<File>                        functionFileStack       = null;
-	private   static Deque<HashMap<String, String>>     paramStackNamed         = null;
-	private   static Deque<ArrayList<String>>           paramStackIndexed       = null;
-	private   static Deque<String>                      patternNameStack        = null;
-	private   static Deque<Integer>                     patternLineStack        = null;
-	private   static Deque<File>                        patternFileStack        = null;
-	private   static HashSet<String>                    redefinitions           = null;
-	private   static boolean                            soundbankParsed         = false;
-	protected static HashMap<String, String>            constants               = null;
-	protected static HashMap<String, String>            variables               = null;
-	private   static Pattern                            varPattern              = null;
-	private   static Pattern                            callPattern             = null;
-	private   static Pattern                            condPattern             = null;
-	private   static Pattern                            condInPattern           = null;
-	private   static Pattern                            crlfSkPattern           = null;
-	private   static Pattern                            sharpPattern            = null;
-	private   static Pattern                            flatPattern             = null;
-	private   static Pattern                            optAssignPattern        = null;
-	private   static Pattern                            chordAssignPattern      = null;
-	private   static Pattern                            varAssignPattern        = null;
-	private   static Pattern                            chordSepPattern         = null;
-	private   static Pattern                            compactChannelPattern   = null;
-	private   static Pattern                            compactOptPattern       = null;
-	private   static Pattern                            compactOptAssignPattern = null;
-	private   static boolean                            isSoftKaraoke           = false;
+	private   static HashMap<String, ArrayList<String>> fileCache             = null;
+	private   static HashMap<String, ArrayList<String>> functions             = null;
+	private   static HashMap<String, File>              functionToFile        = null;
+	private   static HashMap<String, Integer>           functionToLineOffset  = null;
+	public    static HashMap<String, ArrayList<String>> patterns              = null;
+	private   static HashMap<String, File>              patternToFile         = null;
+	private   static HashMap<String, Integer>           patternToLineOffset   = null;
+	private   static TreeMap<String, TreeSet<Integer>>  chords                = null;
+	private   static boolean                            instrumentsParsed     = false;
+	private   static HashMap<String, StringBuilder>     metaInfo              = null;
+	private   static HashMap<String, ArrayList<String>> softKaraokeInfo       = null;
+	private   static boolean                            frstInstrBlkOver      = false;
+	private   static String                             chosenCharset         = null;
+	private   static HashSet<String>                    definedFunctionNames  = null;
+	private   static HashSet<String>                    definedPatternNames   = null;
+	private   static int                                nestableBlkDepth      = 0;
+	private   static Deque<NestableBlock>               nestableBlkStack      = null;
+	private   static Deque<StackTraceElement>           stackTrace            = null;
+	private   static Deque<String>                      functionNameStack     = null;
+	private   static Deque<Integer>                     functionLineStack     = null;
+	private   static Deque<File>                        functionFileStack     = null;
+	private   static Deque<HashMap<String, String>>     paramStackNamed       = null;
+	private   static Deque<ArrayList<String>>           paramStackIndexed     = null;
+	private   static Deque<String>                      patternNameStack      = null;
+	private   static Deque<Integer>                     patternLineStack      = null;
+	private   static Deque<File>                        patternFileStack      = null;
+	private   static HashSet<String>                    redefinitions         = null;
+	private   static boolean                            soundbankParsed       = false;
+	protected static HashMap<String, String>            constants             = null;
+	protected static HashMap<String, String>            variables             = null;
+	private   static Pattern                            varPattern            = null;
+	private   static Pattern                            callPattern           = null;
+	private   static Pattern                            condPattern           = null;
+	private   static Pattern                            condInPattern         = null;
+	private   static Pattern                            crlfSkPattern         = null;
+	private   static Pattern                            sharpPattern          = null;
+	private   static Pattern                            flatPattern           = null;
+	private   static Pattern                            optAssignPattern      = null;
+	private   static Pattern                            chordAssignPattern    = null;
+	private   static Pattern                            varAssignPattern      = null;
+	private   static Pattern                            chordSepPattern       = null;
+	private   static Pattern                            compactChannelPattern = null;
+	private   static Pattern                            compactOptPattern     = null;
+	private   static boolean                            isSoftKaraoke         = false;
+	public    static boolean                            isPlayingTupletBlock  = false;
 	
 	private static boolean isDefineParsRun     = false; // parsing run for define commands
 	private static boolean isConstParsRun      = false; // parsing run for constant definitions
@@ -412,6 +419,7 @@ public class MidicaPLParser extends SequenceParser {
 		T                  = Dict.getSyntax( Dict.SYNTAX_T                  );
 		TUPLET             = Dict.getSyntax( Dict.SYNTAX_TUPLET             );
 		V                  = Dict.getSyntax( Dict.SYNTAX_V                  );
+		LENGTH             = Dict.getSyntax( Dict.SYNTAX_LENGTH             );
 		VELOCITY           = Dict.getSyntax( Dict.SYNTAX_VELOCITY           );
 		TRIPLET            = Dict.getSyntax( Dict.SYNTAX_TRIPLET            );
 		TUPLET_INTRO       = Dict.getSyntax( Dict.SYNTAX_TUPLET_INTRO       );
@@ -557,8 +565,8 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// allow an empty sequence?
-		if (isRootParser && ! instrumentsParsed) {
-			postprocessInstruments();
+		if (isRootParser) {
+			postprocessInstrumentsIfNotYetDone();
 		}
 		
 		// EOF has been reached
@@ -674,9 +682,6 @@ public class MidicaPLParser extends SequenceParser {
 		compactOptPattern = Pattern.compile(
 			"^" + Pattern.quote(COMPACT_OPT_OPEN) + "(.+)" + Pattern.quote(COMPACT_OPT_CLOSE) + "$"
 		);
-		compactOptAssignPattern = Pattern.compile(
-			"^(.+?)" + Pattern.quote(OPT_ASSIGNER) + "(.+)$"
-		);
 	}
 	
 	/**
@@ -781,9 +786,7 @@ public class MidicaPLParser extends SequenceParser {
 	public ArrayList<Long> rememberTickstamps() throws ParseException {
 		
 		// allow drum-only sequences beginning with an empty multiple block or empty function call
-		if (! instrumentsParsed) {
-			postprocessInstruments();
-		}
+		postprocessInstrumentsIfNotYetDone();
 		
 		ArrayList<Long> tickstampByChannel = new ArrayList<>();
 		for (int channel = 0; channel < 16; channel++) {
@@ -1875,9 +1878,7 @@ public class MidicaPLParser extends SequenceParser {
 			if (MODE_INSTRUMENTS == currentMode) {
 				// create defined and undefined instruments for all channels
 				// but only if not yet done
-				if (! instrumentsParsed) {
-					postprocessInstruments();
-				}
+				postprocessInstrumentsIfNotYetDone();
 			}
 			if (MODE_SOFT_KARAOKE == currentMode) {
 				currentMode         = MODE_META;
@@ -2448,9 +2449,9 @@ public class MidicaPLParser extends SequenceParser {
 		String  outerOptStr    = null;
 		Matcher patCallMatcher = callPattern.matcher(tokens[2]);
 		if (patCallMatcher.matches()) {
-			patternName  = patCallMatcher.group(1);
-			paramString  = patCallMatcher.group(3);
-			outerOptStr  = patCallMatcher.group(4);
+			patternName = patCallMatcher.group(1);
+			paramString = patCallMatcher.group(3);
+			outerOptStr = patCallMatcher.group(4);
 		}
 		else {
 			throw new ParseException("Pattern Call Error\nThis should not happen. Please report.");
@@ -2461,16 +2462,15 @@ public class MidicaPLParser extends SequenceParser {
 		ArrayList<String> patternLines = patterns.get(patternName);
 		
 		// init instruments if not yet done
-		if (! instrumentsParsed) {
-			postprocessInstruments();
-		}
+		postprocessInstrumentsIfNotYetDone();
 		
 		// remember channel state
 		Instrument instr = instruments.get(channel);
-		long   outerStartTicks = instr.getCurrentTicks();
-		int    outerVelocity   = instr.getVelocity();
-		float  outerDuration   = instr.getDurationRatio();
-		String outerNoteLength = instr.getNoteLength();
+		long   outerStartTicks    = instr.getCurrentTicks();
+		int    outerVelocity      = instr.getVelocity();
+		float  outerDuration      = instr.getDurationRatio();
+		String outerNoteLength    = instr.getNoteLength();
+		String outerNaturalLength = instr.getNaturalLength();
 		
 		// process pattern call options (outer options)
 		boolean outerMultiple = false;
@@ -2663,7 +2663,7 @@ public class MidicaPLParser extends SequenceParser {
 							innerQuantity = opt.getQuantity();
 						}
 						else if (OPT_TREMOLO.equals(optName)) {
-							innerTremolo = opt.getValueString();
+							innerTremolo = opt.getRawValue();
 						}
 						else
 							throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INVALID_INNER_OPT) + optName);
@@ -2721,6 +2721,7 @@ public class MidicaPLParser extends SequenceParser {
 				instr.setVelocity(outerVelocity);
 				instr.setDurationRatio(outerDuration);
 				instr.setNoteLength(outerNoteLength);
+				instr.setNaturalLength(outerNaturalLength);
 			}
 		}
 		
@@ -3188,7 +3189,8 @@ public class MidicaPLParser extends SequenceParser {
 				for (String compactElement : whitespace.split(tokens[1])) {
 					String[] parts = compactElement.split(Pattern.quote(COMPACT_NOTE_SEP), 2);
 					
-					if (REST.equals(parts[0])) {
+					// rest or option? - leave unchanged
+					if (REST.equals(parts[0]) || compactOptPattern.matcher(compactElement).matches()) {
 						shiftedNotes.add(compactElement);
 					}
 					else {
@@ -3532,6 +3534,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_T.equals(cmdId)                  ) T                  = cmdName;
 		else if ( Dict.SYNTAX_TUPLET.equals(cmdId)             ) TUPLET             = cmdName;
 		else if ( Dict.SYNTAX_V.equals(cmdId)                  ) V                  = cmdName;
+		else if ( Dict.SYNTAX_LENGTH.equals(cmdId)             ) LENGTH             = cmdName;
 		else if ( Dict.SYNTAX_VELOCITY.equals(cmdId)           ) VELOCITY           = cmdName;
 		else if ( Dict.SYNTAX_TRIPLET.equals(cmdId)            ) TRIPLET            = cmdName;
 		else if ( Dict.SYNTAX_TUPLET_INTRO.equals(cmdId)       ) TUPLET_INTRO       = cmdName;
@@ -4072,9 +4075,7 @@ public class MidicaPLParser extends SequenceParser {
 	private void parseGlobalCmd(String[] tokens, boolean isFake) throws ParseException {
 		
 		// allow global commands in drum-only sequences without an INSTRUMENTS block
-		if (! instrumentsParsed) {
-			postprocessInstruments();
-		}
+		postprocessInstrumentsIfNotYetDone();
 		
 		String channelDesc = "0" + PARTIAL_SYNC_RANGE + "15";
 		int    tokenCount  = tokens.length;
@@ -4242,6 +4243,8 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void parseCompactCmd(String[] tokens, boolean isFake) throws ParseException {
 		
+		postprocessInstrumentsIfNotYetDone();
+		
 		Matcher matcher = compactChannelPattern.matcher(tokens[0]);
 		if (matcher.matches()) {
 			int channel = toChannel(matcher.group(1));
@@ -4251,29 +4254,43 @@ public class MidicaPLParser extends SequenceParser {
 				String[] chCmdTokens = null;
 				
 				// option: (name=value)?
-				Matcher optMatcher = compactOptPattern.matcher(compactElement);
-				if (optMatcher.matches()) {
-					
-					// (name=value) ==> name=value
-					String optStr = compactElement.replaceFirst("^" + Pattern.quote(COMPACT_OPT_OPEN), "");
-					optStr = optStr.replaceFirst(Pattern.quote(COMPACT_OPT_CLOSE) + "$", "");
-					ArrayList<CommandOption> options = parseOptions(optStr, isFake);
+				ArrayList<CommandOption> options = parseCompactOptions(compactElement, isFake);
+				if (options != null) {
 					
 					// check options
+					ArrayList<String>        restOptions    = new ArrayList<>();
+					ArrayList<CommandOption> nonRestOptions = new ArrayList<>();
 					for (CommandOption opt : options) {
 						String optName = opt.getName();
-						if (! allowedCompactOptions.contains(optName)) {
+						if (compactOptionsWithRest.contains(optName)) {
+							restOptions.add(opt.getRawName() + OPT_ASSIGNER + opt.getRawValue());
+						}
+						else if (compactOptionsWithoutRest.contains(optName)) {
+							nonRestOptions.add(opt);
+						}
+						else {
 							throw new ParseException(
 								String.format(Dict.get(Dict.ERROR_COMPACT_INVALID_OPTION), optName, compactElement)
 							);
 						}
 					}
 					
+					// handle non-rest options
+					for (CommandOption opt : nonRestOptions) {
+						if (OPT_LENGTH.equals(opt.getName())) {
+							if (!isFake)
+								adjustCompactNoteLength(channel, opt.getLength(), false);
+						}
+					}
+					
+					if (0 == restOptions.size())
+						continue;
+					
 					// create zero-length rest with the option(s)
 					chCmdTokens = new String[] {
 						channel  + "",
 						REST + "",
-						LENGTH_ZERO + " " + optStr,
+						LENGTH_ZERO + " " + String.join(OPT_SEPARATOR, restOptions),
 					};
 				}
 				
@@ -4311,8 +4328,14 @@ public class MidicaPLParser extends SequenceParser {
 						
 						// note length
 						if (! isPattern && ! isFake) {
-							instruments.get(channel).setNoteLength(parts[1]);
+							adjustCompactNoteLength(channel, parts[1], false);
 						}
+					}
+					
+					// no note length switch
+					else {
+						if (!isFake)
+							adjustCompactNoteLength(channel, null, false);
 					}
 					
 					// create normal channel command
@@ -4341,6 +4364,62 @@ public class MidicaPLParser extends SequenceParser {
 			throw new ParseException(
 				"Compact Channel Command invalid\n This should not happen. Please report."
 			);
+		}
+	}
+	
+	/**
+	 * Checks if the given string is a pattern call or a normal length definition.
+	 * 
+	 * @param lengthOrPatternCall    pattern call or length definition
+	 * @return **true** if the string is a pattern call, otherwise **false**
+	 */
+	public boolean isCompactPatternCall(String lengthOrPatternCall) {
+		Matcher patCallMatcher = callPattern.matcher(lengthOrPatternCall);
+		if (patCallMatcher.matches()) {
+			String patternName = patCallMatcher.group(1);
+			String paramString = patCallMatcher.group(3);
+			if (paramString != null || definedPatternNames.contains(patternName)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Sets the channel's compact note length (and natural length)
+	 * of compact commands, if necessary.
+	 * 
+	 * @param channel            MIDI channel
+	 * @param length             length string from the syntax
+	 * @param fromTupletBlock    **true** if called from a tuplet block, otherwise **false**
+	 */
+	public void adjustCompactNoteLength(int channel, String length, boolean fromTupletBlock) {
+		
+		if (fromTupletBlock) {
+			if (length != null) {
+				MidicaPLParser.instruments.get(channel).setNaturalLength(length);
+			}
+		}
+		else {
+			
+			// no note length given
+			if (null == length) {
+				
+				// Important, if this is the first compact note after a tuplet block
+				// without a length definition
+				if (! isPlayingTupletBlock) {
+					String naturalLength = instruments.get(channel).getNaturalLength();
+					instruments.get(channel).setNoteLength(naturalLength);
+				}
+			}
+			
+			// note length provided
+			else {
+				instruments.get(channel).setNoteLength(length);
+				if (! isPlayingTupletBlock)
+					instruments.get(channel).setNaturalLength(length);
+			}
 		}
 	}
 	
@@ -4402,9 +4481,7 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		
 		// allow drum-only sequences without an INSTRUMENTS block
-		if (! instrumentsParsed) {
-			postprocessInstruments();
-		}
+		postprocessInstrumentsIfNotYetDone();
 		
 		// process options
 		boolean multiple = false;
@@ -4547,6 +4624,29 @@ public class MidicaPLParser extends SequenceParser {
 	}
 	
 	/**
+	 * Parses the options of a compact element.
+	 * 
+	 * An element with compact options looks like: (name1=value1,name2=value2,...).
+	 * If another type of compact element is given, **null** is returned.
+	 * 
+	 * @param compactElement    the element to be parsed
+	 * @param isFake            **true**, if this is called inside a function definition, pattern definition or block.
+	 * @return the options with their values, or **null** if the given element doesn't contain options.
+	 * @throws ParseException if the options cannot be parsed.
+	 */
+	public ArrayList<CommandOption> parseCompactOptions(String compactElement, boolean isFake) throws ParseException {
+		
+		Matcher optMatcher = compactOptPattern.matcher(compactElement);
+		if (optMatcher.matches()) {
+			String optStr = compactElement.replaceFirst("^" + Pattern.quote(COMPACT_OPT_OPEN), "");
+			optStr = optStr.replaceFirst(Pattern.quote(COMPACT_OPT_CLOSE) + "$", "");
+			return parseOptions(optStr, isFake);
+		}
+		
+		return null;
+	}
+	
+	/**
 	 * Parses the options part of a command.
 	 * 
 	 * The options may still contain unreplaced variables or parameters.
@@ -4586,7 +4686,7 @@ public class MidicaPLParser extends SequenceParser {
 					
 					String condition = opt.getCondition();
 					condition = replaceVariables(condition);
-					opt.set(opt.getName(), condition);
+					opt.set(opt.getName(), condition, rawOptParts[0], rawOptParts[1]);
 				}
 				else {
 					if (rawOptParts.length > 1) {
@@ -4627,111 +4727,122 @@ public class MidicaPLParser extends SequenceParser {
 			return null;
 		
 		// construct name and value
-		String        optName = optParts[0];
-		CommandOption cmdOpt  = new CommandOption();
+		String        optName  = optParts[0];
+		String        rawName  = optName;
+		String        rawValue = optParts.length > 1 ? optParts[1] : null;
+		CommandOption cmdOpt   = new CommandOption();
 		
 		if (isCondCheckParsRun && ! IF.equals(optName) && ! ELSIF.equals(optName) && ! ELSE.equals(optName))
 			return null;
 		
 		if (V.equals(optName) || VELOCITY.equals(optName)) {
-			if (optParts.length < 2 || "".equals(optParts[1])) {
+			if (optParts.length < 2 || "".equals(rawValue)) {
 				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
 			}
 			optName = OPT_VELOCITY;
-			int val = toInt(optParts[1]);
+			int val = toInt(rawValue);
 			if (val > 127)
 				throw new ParseException(Dict.get(Dict.ERROR_VEL_NOT_MORE_THAN_127));
 			if (val < 1)
 				throw new ParseException(Dict.get(Dict.ERROR_VEL_NOT_LESS_THAN_1));
-			cmdOpt.set(optName, val);
+			cmdOpt.set(optName, val, rawName, rawValue);
 		}
 		else if (D.equals(optName) || DURATION.equals(optName)) {
-			if (optParts.length < 2 || "".equals(optParts[1])) {
+			if (optParts.length < 2 || "".equals(rawValue)) {
 				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
 			}
 			optName = OPT_DURATION;
-			String[] valueParts = optParts[1].split(Pattern.quote(DURATION_PERCENT), -1);
+			String[] valueParts = rawValue.split(Pattern.quote(DURATION_PERCENT), -1);
 			float    val        = toFloat(valueParts[0]);
 			if (valueParts.length > 1)
 				val /= 100; // percentage --> numeric
 			if (val <= 0.0)
 				throw new ParseException(Dict.get(Dict.ERROR_DURATION_MORE_THAN_0));
-			cmdOpt.set(optName, val);
+			cmdOpt.set(optName, val, rawName, rawValue);
+		}
+		else if (LENGTH.equals(optName)) {
+			if (optParts.length < 2 || "".equals(rawValue)) {
+				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
+			}
+			optName = OPT_LENGTH;
+			int length = parseDuration(rawValue);
+			if (length <= 0)
+				throw new ParseException(Dict.get(Dict.ERROR_OPT_LENGTH_MORE_THAN_0) + optName);
+			cmdOpt.set(optName, rawValue, rawName, rawValue);
 		}
 		else if (Q.equals(optName) || QUANTITY.equals(optName)) {
-			if (optParts.length < 2 || "".equals(optParts[1])) {
+			if (optParts.length < 2 || "".equals(rawValue)) {
 				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
 			}
 			optName = OPT_QUANTITY;
-			cmdOpt.set(optName, toInt(optParts[1], true));
+			cmdOpt.set(optName, toInt(rawValue, true), rawName, rawValue);
 		}
 		else if (M.equals(optName) || MULTIPLE.equals(optName)) {
 			optName = OPT_MULTIPLE;
-			cmdOpt.set(optName, true);
+			cmdOpt.set(optName, true, rawName, rawValue);
 			if (optParts.length > 1)
 				throw new ParseException(Dict.get(Dict.ERROR_OPTION_VAL_NOT_ALLOWED) + optName);
 		}
 		else if (L.equals(optName) || LYRICS.equals(optName)) {
-			if (optParts.length < 2 || "".equals(optParts[1])) {
+			if (optParts.length < 2 || "".equals(rawValue)) {
 				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
 			}
 			optName = OPT_LYRICS;
-			cmdOpt.set(optName, optParts[1]);
+			cmdOpt.set(optName, rawValue, rawName, rawValue);
 		}
 		else if (T.equals(optName) || TUPLET.equals(optName)) {
 			optName = OPT_TUPLET;
 			if (1 == optParts.length) {
-				cmdOpt.set(optName, TRIPLET);
+				cmdOpt.set(optName, TRIPLET, rawName, rawValue);
 			}
 			else {
 				Pattern pattern = Pattern.compile("^(\\d+)" + Pattern.quote(TUPLET_FOR) + "(\\d+)$");
-				Matcher matcher = pattern.matcher(optParts[1]);
+				Matcher matcher = pattern.matcher(rawValue);
 				if (matcher.matches()) {
 					String num1 = matcher.group(1);
 					String num2 = matcher.group(2);
 					if ("0".equals(num1) || "0".equals(num2))
-						throw new ParseException(Dict.get(Dict.ERROR_TUPLET_INVALID) + optParts[1]);
-					cmdOpt.set(optName, optParts[1]);
+						throw new ParseException(Dict.get(Dict.ERROR_TUPLET_INVALID) + rawValue);
+					cmdOpt.set(optName, rawValue, rawName, rawValue);
 				}
 				else {
-					throw new ParseException(Dict.get(Dict.ERROR_TUPLET_INVALID) + optParts[1]);
+					throw new ParseException(Dict.get(Dict.ERROR_TUPLET_INVALID) + rawValue);
 				}
 			}
 		}
 		else if (TR.equals(optName) || TREMOLO.equals(optName)) {
-			if (optParts.length < 2 || "".equals(optParts[1])) {
+			if (optParts.length < 2 || "".equals(rawValue)) {
 				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
 			}
 			optName = OPT_TREMOLO;
-			cmdOpt.setValueString(optParts[1]);
-			cmdOpt.set(optName, parseDuration(optParts[1]));
+			cmdOpt.set(optName, parseDuration(rawValue), rawName, rawValue);
 		}
 		else if (S.equals(optName) || SHIFT.equals(optName)) {
-			if (optParts.length < 2 || "".equals(optParts[1])) {
+			if (optParts.length < 2 || "".equals(rawValue)) {
 				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
 			}
 			optName = OPT_SHIFT;
-			cmdOpt.set(optName, toInt(optParts[1], false));
+			cmdOpt.set(optName, toInt(rawValue, false), rawName, rawValue);
 		}
 		else if (IF.equals(optName)) {
-			if (isCondCheckParsRun && (optParts.length < 2 || "".equals(optParts[1]))) {
+			if (isCondCheckParsRun && (optParts.length < 2 || "".equals(rawValue))) {
 				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
 			}
-			String val = optParts.length >= 2 ? optParts[1] : "";
+			String val = optParts.length >= 2 ? rawValue : "";
 			optName = OPT_IF;
-			cmdOpt.set(optName, val);
+			cmdOpt.set(optName, val, rawName, rawValue);
 		}
 		else if (ELSIF.equals(optName)) {
-			if (isCondCheckParsRun && (optParts.length < 2 || "".equals(optParts[1]))) {
+			if (isCondCheckParsRun && (optParts.length < 2 || "".equals(rawValue))) {
 				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
 			}
-			String val = optParts.length >= 2 ? optParts[1] : "";
+			String val = optParts.length >= 2 ? rawValue : "";
 			optName = OPT_ELSIF;
-			cmdOpt.set(optName, val);
+			cmdOpt.set(optName, val, rawName, rawValue);
 		}
 		else if (ELSE.equals(optName)) {
 			optName = OPT_ELSE;
-			cmdOpt.set(optName, true);
+			cmdOpt.set(optName, true, rawName, rawValue);
 			if (optParts.length > 1)
 				throw new ParseException(Dict.get(Dict.ERROR_OPTION_VAL_NOT_ALLOWED) + optName);
 		}
@@ -4961,14 +5072,23 @@ public class MidicaPLParser extends SequenceParser {
 	}
 	
 	/**
-	 * Postprocesses a finished INSTRUMENTS block.
-	 * Initializes the percussion channel.
-	 * Initializes all necessary data structures for all channels. Thereby all undefined
-	 * channels will be initialized with a fake instrument so that the data structures work.
+	 * Postprocesses a finished INSTRUMENTS block, if not yet done.
+	 * 
+	 * In this case:
+	 * 
+	 * - Initializes the percussion channel.
+	 * - Initializes all necessary data structures for all channels.
+	 * 
+	 * Thereby all undefined channels will be initialized with a fake instrument
+	 * so that the data structures work.
 	 * 
 	 * @throws ParseException    if something went wrong.
 	 */
-	private void postprocessInstruments() throws ParseException {
+	private void postprocessInstrumentsIfNotYetDone() throws ParseException {
+		
+		// postprocessing already done?
+		if (instrumentsParsed)
+			return;
 		
 		// sort instruments ascending
 		Collections.sort(instruments);
@@ -5261,6 +5381,7 @@ public class MidicaPLParser extends SequenceParser {
 			redefinitions        = new HashSet<>();
 			soundbankParsed      = false;
 			isSoftKaraoke        = false;
+			isPlayingTupletBlock = false;
 			constants            = new HashMap<>();
 			variables            = new HashMap<>();
 			varPattern           = null;

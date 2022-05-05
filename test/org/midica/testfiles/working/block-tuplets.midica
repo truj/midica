@@ -1,9 +1,11 @@
 INCLUDE inc/instruments.midica
 
+// channel 0:
+
 0 c /4                                // 480
 { tuplet                              // (3:2) = 2/3 of each note length
     0 c /4                            //     320 (480 * 2/3)
-    CALL test q=2                     //     960 (480*2)
+    CALL test_0 q=2                   //     960 (480*2)
     { t=7:5                           //     (7:5) = 5/7 of each note length
         0 e /4                        //         229   (480 * 2/3 * 5/7)
         0 f /8+/8                     //         228 2*(240 * 2/3 * 5/7)
@@ -17,6 +19,20 @@ INCLUDE inc/instruments.midica
 
 // total: 480 + 320 + 960 + 229 + 228 + 171 + 320 + 960 = 3668
 
-FUNCTION test
+FUNCTION test_0
 	0 g+ /4
 END
+
+// channel 1:
+
+{ t
+	1:  c d e                                // 320 + 320 + 320   = 960
+	CALL test_1 ( channel = 1 ) q = 2        // (1440 * 2/3) * 2  = 1920
+	1: b c+                                  // 320 + 320         = 640
+}
+
+FUNCTION test_1
+	${channel}: f g a                        // 480 * 3 = 1440
+END
+
+// total: 960 + 1920 + 640 = 3520

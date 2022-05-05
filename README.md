@@ -135,31 +135,21 @@ In this Readme we just show some short examples to get an impression of the lang
 
 ## Example 1
 
-This example only uses simple channel commands and lyrics:
+This example uses only one channel and lyrics:
 
 	// use Piano in channel 0
 	INSTRUMENTS
 		0  ACOUSTIC_GRAND_PIANO  Piano
 	END
 	
-	0  c  /8.  v=95, l=Hap   // v = velocity, 95 = forte
-	0  c  /16        l=py_   // l = lyrics (syllable)
+	// Every line beginning with "0:" defines events in channel 0
+	0: (v=95)                   // (...=...) set an option to a value; v = velocity; 95 = forte
+	0: (l=Hap) c:8.             // (l=...) defines a syllable. "c:8." = dotted eighth middle C
+	0: (l=py_) c:16             // _ = space; c:16 = sixteenth middle C
 	
-	0  d  /4   l=birth
-	0  c  /4   l=day_        // '_' = space
-	0  f  /4   l=to_
-	
-	0  e  /2   l=you\c\r     // \c = comma, \r = new line
-	0  c  /8.  l=hap
-	0  c  /16  l=py_
-	
-	0  d  /4   l=birth
-	0  c  /4   l=day_
-	0  g  /4   l=to_
-	
-	0  f  /2   l=you.\n      // \n = new paragraph
-	0  c  /8.  l=Hap
-	0  c  /16  l=py...
+	// More special characters in syllables:  \c = comma, \r = new line, \n = new paragraph
+	0: (l=birth) d:4 (l=day_) c (l=to_) f (l=you\c\r) e:2   (l=Hap) c:8. (l=py_)   c:16
+	0: (l=birth) d:4 (l=day_) c (l=to_) g (l=you.\n)  f:2   (l=Hap) c:8. (l=py...) c:16
 
 This results in a MIDI sequence like this:
 
@@ -181,29 +171,31 @@ This example uses nestable blocks and global commands:
 	
 	{ q=2                      // outer block to be repeated twice
 	    { q=3                  // inner block to be repeated 3 times
-	        1  d-  /8  v=70    // channel 1: play D3 as an 8th note, using mezzo piano
-	        0  d   /8  v=70    // channel 0: play D4 and switch to mezzo piano
-	        0  -   /8          // play a rest
-	        0  d   /8
-	        0  eb  /8
-	        0  d   /8
-	        0  eb  /8
-	        *                   // synchronize: bring all channels to the same time
+	        
+	        // in channel 1: switch to mezzo piano (v=70) and play D3 as an 8th note
+	        1: (v=70)  d-:8
+	        
+	        // in channel 0: switch to mezzo piano and play some notes and rests ("-" = rest)
+	        0: (v=70)  d:8 - d eb d eb
+	        
+	        // synchronize: bring all channels to the same time
+	        *
 	    }
-	    1  d-  /4
-	    1  f-  /4
-	    1  c-  /4
-	    0  d   /8
-	    0  -   /8
-	    0  d   /8
-	    0  eb  /8
-	    0  f   /8
-	    0  eb  /8
+	    
+	    1:  d-:4  f-  c-
+	    0:  d:8   -   d   eb  f  eb
 	}
 
 This results in a MIDI sequence like this:
 
 <img src="img/example-score.svg" title="Example Score">
+
+Instead of the nested blocks we could have written this equivalent code:
+
+	0: (v=70)  d:8 - d eb d eb   d - d eb d eb   d - d eb d eb   d - d eb f eb
+	0:         d:8 - d eb d eb   d - d eb d eb   d - d eb d eb   d - d eb f eb
+	1: (v=70)  d-:4 -:/2         d-:4 -:/2       d-:4 -:/2       d-:4  f-  c-
+	1:         d-:4 -:/2         d-:4 -:/2       d-:4 -:/2       d-:4  f-  c-
 
 ## Example 3
 
@@ -222,15 +214,10 @@ This example uses a guitar picking pattern with several chords. It produces the 
 	CHORD asus4  a-2 e- a- d
 	CHORD amin   a-2 e- a- c
 	
-	// define the picking pattern (Travis picking)
+	// Define the picking pattern (Travis picking)
+	// The numbers inside the pattern aren't channel numbers but note indices
 	PATTERN travis
-		0,3 /4      // the numbers inside the pattern
-		1   /8      // aren't channel numbers
-		2   /8      // but note indices
-		0   /8
-		3   /8
-		1   /8
-		2   /8
+	    : 0,3:4  1:8 2 0 3 1 2
 	END
 	
 	// play the chords using this pattern
@@ -249,55 +236,43 @@ This results in the following sequence:
 
 ## Example 4
 
-This example uses functions. It produces the first beats of "Another one bites the Dust":
+This example uses functions and percussion instruments.<br>
+It produces the first beats of "Another one bites the Dust":
 
+	// Use bass in channel 5
+	// Drums are always in channel 9 (automatically)
 	INSTRUMENTS
-		5  E_BASS_FINGER  Bass
+	    5  E_BASS_FINGER  Bass
 	END
 	
 	// anacrusis
 	* time 1/8
-	5 a-2 /16  d=30%
-	5 g-2 /16
+	5: (d=30%) a-2:16  g-2              // d=30% --> staccato
 	
-	// regular
+	// regular bars
 	* time 4/4
-	CALL drum-and-bass(firstBar)
-	CALL drum-and-bass()  q=2
+	CALL drum-and-bass(bar=1)
+	CALL drum-and-bass(bar=2) q=2       // q=quantity, so the function will be called twice
 	
 	FUNCTION drum-and-bass
-		CALL bassline($[0])
-		CALL drums
-		CALL drums
-		CALL drums
-		CALL drums
+	    CALL bassline(${bar})
+	    CALL drums  q=4                 // "drums()" is called 4 times without parameters
 	END
 	
 	FUNCTION bassline
-		5 e-2 /4   q=3, d=30%
-		5 -   /8.
-		5 e-2 /16
-		5 e-2 /8   q=2
-		5 g-2 /8
-		5 e-2 /16
-		5 a-2 /16
-		{ if $[0]
-			5 -   /4+/8
-			5 a-2 /16
-			5 g-2 /16
-		}
-		{ else
-			5 -  /2
-		}
+	    5:        e-2:4 e-2 e-2 -:8. e-2:16     e-2:8 e-2 g-2 e-2:16 a-2
+	    { if $[0] == 1
+	        5:    -:4+8  a-2:16 g-2
+	    }
+	    { else
+	        5:    -:2
+	    }
 	END
 	
-	// p = percussion channel (channel 9)
+	// p = 9 = percussion channel
 	// hhc = hi-hat-closed, bd1 = base-drum-1, sd1 = snare-drum-1
 	FUNCTION drums
-		p hhc,bd1     /8 v=127
-		p hhc         /8 v=80
-		p hhc,bd1,sd1 /8 v=127
-		p hhc         /8 v=80
+	    p:   (v=127) hhc,bd1:8    (v=80) hhc   (v=127) hhc,bd1,sd1   (v=80) hhc
 	END
 
 The resulting sequence looks like this:

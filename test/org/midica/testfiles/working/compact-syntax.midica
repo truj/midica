@@ -1,5 +1,6 @@
 INCLUDE inc/instruments.midica
 
+// channel 0
 0: c                                   // c:/4 (0)
 0: d e:/8 f g g:/4                     // d:/4 (480)  e:/8 (960)  f:/8 (1200)  g:/8 (1440)  g:/4 (1680)
 0: a b,c+,d+,e+:/1 - f+:/8 g+:4        // a:/4 (2160)  b,c+,d+,e+:/1 (2640)  -:/1 (4560)  f+:/8 (6480)  g+:/4 (6720)
@@ -8,26 +9,28 @@ INCLUDE inc/instruments.midica
 	0: c d,e - f                       // c-:/8t (7680)  d-,e-:/8t (7840)  -:/8t (8000)  f-:/8t (8160)
 	0: c d e:/2                        // c-:/8t (8320)  d-:/8t (8480)  e-:/2t (8640)
 	{ t=2:1, s=+12
-		0: c d:8                       // c-:/2tt=2:1 (9280)  d-:/8tt=2:1 (9600)
-		0: c d,e - f                   // c-:/8tt=2:1 (9680)  d-,e-:/8tt=2:1 (9760)  -:/8tt=2:1 (9840)  f-:/8tt=2:1 (9920)
-		0: c d e:/2                    // c-:/8tt=2:1 (10000)  d-:/8tt=2:1 (10080)  e-:/2tt=2:1 (10160)
+		0: c d:8                       // c-:/2tt2:1 (9280)  d-:/8tt2:1 (9600)
+		0: c d,e - f                   // c-:/8tt2:1 (9680)  d-,e-:/8tt2:1 (9760)  -:/8tt2:1 (9840)  f-:/8tt2:1 (9920)
+		0: c d e:/2                    // c-:/8tt2:1 (10000)  d-:/8tt2:1 (10080)  e-:/2tt2:1 (10160)
 	}
 	0: c d:8                           // c-:/2t (10480)  d-:/8t (11120)
 }
 0: (v=64) c d:16                       // c:/8 (11280)  d:/16 (11520)
 
 
-1: c
+// channel 1
+1: (v=64) c
 { t
 	1: c:2
 	{ t, q=2
-		1: c:4
+		1: (v=100) c:4 (v=64)
 	}
 	1: c
 }
 1: c
 
 
+// channel 2
 VAR $ch     = 2
 VAR $note   = c
 VAR $length = /8
@@ -43,7 +46,7 @@ FUNCTION f2
 END
 
 
-// patterns
+// channel 3: patterns
 CHORD crd = c+,d+,e+
 3: c c,d,e:pat_complex(/2,x=30) c crd:pat_complex(/4,x=40) c
 PATTERN pat_complex
@@ -54,7 +57,7 @@ PATTERN pat_complex
 END
 
 
-// patterns inside of blocks in side a function call
+// channel 4: patterns inside of blocks in side a function call
 {
 	{
 		CALL f4(ch=4)
@@ -74,7 +77,7 @@ FUNCTION f4b
 END
 
 
-// compact patterns
+// channel 5: compact patterns
 CHORD cmaj         = c,d,e
 CHORD cmaj_reverse = e,d,c
 5: c,d,e:pat_outer(70)  c+  e,d,c:pat_outer(60)  c+  cmaj:pat_outer(50)  c+  cmaj_reverse:pat_outer(40)  c+
@@ -89,6 +92,65 @@ PATTERN pat_inner
 END
 
 
+// channel 6: compact cmd in a function with option, called with shift
+VAR $ch    = 6
+VAR $fffff = v=127
+CALL f6
+CALL f6 s=-12
+FUNCTION f6
+	$ch: (v=30) a b c (v=40) d e f
+	$ch: ($fffff) a+ b+ c+
+END
+
+
+// channel 7: length change from inside a block
+VAR $c = 7
+$c:   c:8
+CALL f7
+FUNCTION f7
+	{ q=2
+		$c:  c:16 d      // c(240)  d(360) c(480) d(600)
+	}
+	{ q=2
+		$c:  e f         // e(720)  f(840) e(960) f(1080)
+	}
+END
+
+
+// channel 8: compact length option
+VAR $c = 8
+$c: (v=25,length=/4+/2) c d e         // c(0)  d(1440)  e(2880)
+CALL f8
+FUNCTION f8
+	$c: (length=/16) f                // f(4320)
+	{ q=2
+		$c:  c d                      // c(4440)  d(4560) c(4680) d(4800)
+	}
+	$c: c:4                            // c(4920)
+	{ t
+		$c: c+:8 d+ e+                 // c+(5400)  d+(5560)  e+(5720)
+		$c: c (length=/2) d e f        // c(5880)  (length...)  d(6040)  e(6680)  f(7320)
+	}
+	$c: c d:4                          // c(7960)  d(8920)
+	{ t
+		$c: c (length=/2) d e f        // c(9400)  (length...)  d(9720)  e(10360)  f(11000)
+	}
+	{
+		$c: c d                        // c(11640)  d(12600)
+	}
+	{ t
+		$c: f c,d,e:pat7 f g           // f(13560)
+		                               // c(14200) d(14440) e(14680)
+		                               // f(14920)  g(15560)
+	}
+	$c: c d                            // c(16200)  d(17160)
+END
+PATTERN pat7
+	: 0:8 1 2
+END
+
+
+// channel 9
 p: bd1:4                    // 0
 9: bd1 bd1                  // 480 960
 { t, s=5
