@@ -1069,8 +1069,8 @@ CALL  c0m108
 
 // m. 109-112
 FUNCTION c1m109_112
-	$c  g   /4        $p
-	$c  g-  /4  q=11
+	$c  g   /4
+	$c  g-  /4  q=11, $p
 END
 CALL  c1m109_112
 
@@ -1111,19 +1111,16 @@ END
 CALL  c2m20
 
 // m. 21
-FUNCTION c2m21
-	$c  d    /16
-	$c  f#   /16
-	$c  g    /16
-	$c  a    /16
-	$c  bb   /16
-	$c  c+   /16
-	$c  d+   /16
-	$c  e+   /16
-	$c  f#+  /8
-	$c  -    /8
-END
-CALL  c2m21
+$c  d    /16
+$c  f#   /16
+$c  g    /16
+$c  a    /16
+$c  bb   /16
+$c  c+   /16
+$c  d+   /16
+$c  e+   /16
+$c  f#+  /8
+$c  -    /8
 
 // m. 22
 FUNCTION c2m22
@@ -1156,7 +1153,7 @@ END
 CALL  c2m23
 
 // m. 24-28
-CALL  c2m21
+CALL  c2m22
 CALL  c2m22  q=2
 CALL  c2m23
 CALL  c2m22
@@ -1208,8 +1205,12 @@ CALL  c2m22
 }
 
 // m. 35
-{ q=6
+{ q=4
 	$c  f  /16
+	$c  a  /16
+}
+{ q=2
+	$c  d  /16
 	$c  a  /16
 }
 
@@ -1265,18 +1266,18 @@ $c  f+   /8
 $c  eb+  /8
 $c  bb-  /8  q=2
 $c  g    /8
-$c  bb+  /8
+$c  bb   /8
 $c  eb+  /8
 
 // m. 61
 $c  eb+  /8
 $c  ab-  /8  q=2
 $c  ab   /8
-$c  c    /8
+$c  c+   /8
 $c  eb+  /8
 
 // m. 62
-$c  eb+  /8
+$c  d+   /8
 $c  b-   /8  q=2
 $c  g    /8
 $c  b    /8
@@ -1383,27 +1384,26 @@ FUNCTION c3m21second  // only definition yet
 	$c  a   /16
 	$c  f#  /16
 END
-FUNCTION c3m23second  // only definition yet
+FUNCTION c3m23  // only definition yet
+	$c  g   /4
 	$c  -   /4+/16
 	$c  d+  /16
 	$c  bb  /16
 	$c  g   /16
 END
-$c  f#  /4            // m. 21/1
+$c  f#  /4         // m. 21/1
 CALL  c3m21second
-$c  d   /4            // m. 22/1
+$c  d   /4         // m. 22/1
 CALL  c3m21second  // m. 22/2
-$c  g   /4            // m. 23/1
-CALL  c3m23second
-$c  f#  /4            // m. 24/1
+CALL  c3m23        // m. 23
+$c  f#  /4         // m. 24/1
 CALL  c3m21second  // m. 24/2
-$c  d   /4            // m. 25/1
+$c  d   /4         // m. 25/1
 CALL  c3m21second  // m. 25/2
-$c  d   /4            // m. 26/1
+$c  d   /4         // m. 26/1
 CALL  c3m21second  // m. 26/2
-$c  g   /4            // m. 27/1
-CALL  c3m23second  // m. 27/2
-$c  f#  /4            // m. 28/1
+CALL  c3m23        // m. 27
+$c  f#  /4         // m. 28/1
 CALL  c3m21second  // m. 28/2
 
 // m. 29-31
@@ -1489,7 +1489,7 @@ $c  eb  /16
 // m. 59
 $c  d    /4
 $c  -    /8
-$c  d    /8
+$c  f    /8
 $c  d    /16
 $c  c    /16
 $c  bb-  /16
@@ -1655,10 +1655,16 @@ FUNCTION c4m21_31
 			$c  d   /16
 		}
 
-		// m. 23-24 == 27-28
-		{ q=12
+		// m. 23 == 27
+		{ q=6
 			$c  d-   /16
 			$c  bb-  /16
+		}
+		
+		// m. 24 == 28
+		{ q=6
+			$c  d-   /16
+			$c  a-   /16
 		}
 	}
 	
@@ -1749,8 +1755,8 @@ FUNCTION c4m55_64
 	$c  e-   /16
 	$c  d-   /16
 	$c  c-   /16
-	$c  bb-  /16
-	$c  a-   /16
+	$c  bb-2 /16
+	$c  a-2  /16
 	$c  g-2  /16
 	$c  f-2  /8
 	$c  -    /8
@@ -1758,7 +1764,7 @@ FUNCTION c4m55_64
 	// m. 59
 	$c  bb-2  /16
 	$c  bb-   /16
-	$c  a-2   /16
+	$c  a-    /16
 	$c  g-    /16
 	$c  f-    /16
 	$c  eb-   /16
@@ -1794,9 +1800,9 @@ FUNCTION c4m55_64
 	// m. 62
 	$c  b-2  /16
 	$c  b-   /16
-	$c  a-2  /16
-	$c  g-2  /16
-	$c  f-2  /16
+	$c  a-   /16
+	$c  g-   /16
+	$c  f-   /16
 	$c  eb-  /16
 	$c  d-   /16
 	$c  c-   /16
@@ -2030,7 +2036,7 @@ CALL  rest_full_measure  q=16
 
 // m. 55-64
 FUNCTION  c5m55
-	$c  d-2   /8
+	$c  d-2   /8     $f
 	$c  -     /4.
 	$c  d-2   /8
 	$c  -     /8
@@ -2137,7 +2143,7 @@ CALL  c2m20
 // m. 29-37
 $c  bb-,d,g  /2.  q=3  // m. 29-31
 $c  d,g,b    /2.       // m. 32
-$c  eb,g,c   /2.       // m. 33
+$c  eb,g,c+  /2.       // m. 33
 $c  e,a,c#+  /2.       // m. 34
 $c  f,a,d+   /2.       // m. 35
 $c  e,a,d+   /2.       // m. 36
@@ -2169,13 +2175,13 @@ $c  d+       /8
 $c  -        /8
 $c  d,g,bb   /2+/8     // m. 56
 $c  -        /8
-$c  e,g,c    /2+/8     // m. 57
+$c  e,g,c+   /2+/8     // m. 57
 $c  -        /8
 $c  c,f,a    /2+/8     // m. 58
 $c  -        /8
 $c  d,f,a    /2+/8     // m. 59
 $c  -        /8
-$c  bb,eb,g  /2+/8     // m. 60
+$c  bb-,eb,g /2+/8     // m. 60
 $c  -        /8
 $c  c,f,ab   /2+/8     // m. 61
 $c  -        /8
@@ -2205,8 +2211,7 @@ $c  -           /2
 $c  g,c+,eb+    /4  q=3  // m. 76
 $c  bb,d+,f+    /4       // m. 77
 $c  -           /2
-$c  bb,eb+,g+   /4       // m. 78
-$c  -           /2
+$c  bb,eb+,g+   /4  q=3  // m. 78
 $c  bb,eb+,bb+  /4       // m. 79
 $c  -           /2
 $c  eb,bb       /2.      // m. 80

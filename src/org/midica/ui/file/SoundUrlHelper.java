@@ -186,11 +186,11 @@ public class SoundUrlHelper {
 	}
 	
 	/**
-	 * Creates the area for controling one cache type (chosen url or whole cache).
+	 * Creates the area for controlling one cache type (chosen url or whole cache).
 	 * Contains: info label and sub area (with checkbox and button).
 	 * 
-	 * @param allUrls
-	 * @return
+	 * @param allUrls  **true** for the whole cache, **false** for the chosen URL
+	 * @return the created cache controlling area
 	 */
 	public static JComponent createCacheArea(boolean allUrls) {
 		
@@ -224,8 +224,8 @@ public class SoundUrlHelper {
 	 * Creates the DELETE part sub area for one cache type (chosen url or whole cache).
 	 * Contains: checkbox and button.
 	 * 
-	 * @param allUrls
-	 * @return
+	 * @param allUrls  **true** for the whole cache, **false** for the chosen URL
+	 * @return the created area
 	 */
 	public static JComponent createDelCacheArea(boolean allUrls) {
 		
@@ -349,7 +349,7 @@ public class SoundUrlHelper {
 	 * Returns one of the delete-cache buttons.
 	 * 
 	 * @param allUrls  **true** to get the button to delete ALL urls, **false** for ONE url.
-	 * @return
+	 * @return the requested button
 	 */
 	public static MidicaButton getDeleteCacheBtn(boolean allUrls) {
 		if (allUrls)

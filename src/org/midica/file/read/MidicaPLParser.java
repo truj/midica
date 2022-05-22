@@ -4180,13 +4180,14 @@ public class MidicaPLParser extends SequenceParser {
 	}
 	
 	/**
-	 * Transforms compact channel commands with 3 tokens to those with only 2 tokens, if necessary.
+	 * Transforms compact channel commands with 3 tokens to those with only 2 tokens,
+	 * if necessary.
 	 * 
 	 * Needed in order to apply tuplets or shifts.
 	 * 
 	 * @param tokens  the original tokens
-	 * @return
-	 * @throws ParseException
+	 * @return the reorganized tokens
+	 * @throws ParseException if the given tokens contain more than 3 elements
 	 */
 	public String[] reorganizeCompactCmd(String[] tokens) throws ParseException {
 		

@@ -408,8 +408,8 @@ public class NestableBlock {
 	 * 
 	 * E.g.: *1+/8 --> *1t4:3+/8t4:3
 	 * 
-	 * @param lengthStr
-	 * @return
+	 * @param lengthStr  the length string to be tupletized
+	 * @return the resulting length string
 	 */
 	private String addTupletToLength(String lengthStr) {
 		
