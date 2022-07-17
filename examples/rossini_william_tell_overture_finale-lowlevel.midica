@@ -158,10 +158,10 @@ CALL  v_all_pp
 	3   b-      /16
 	4   e-      /16
 	6   b-,g#-  /16
-	11  b-      /16  $p
-	12  g#-     /16  $p
-	13  e-      /16  $p
-	14  e-      /16  $p
+	11  b-      /16
+	12  g#-     /16
+	13  e-      /16
+	14  e-      /16
 }
 
 // m. 19
@@ -181,7 +181,7 @@ FUNCTION m19_half_low
 	4   e-      /16  q=2
 	6   b-,g#-  /8
 	6   b-,g#-  /16  q=2
-	10  b-2     /8
+	10  e-      /8
 	10  -       /8
 	14  e-      /8
 	14  e-      /16  q=2
@@ -247,12 +247,12 @@ CALL  m21
 // m. 22
 *
 FUNCTION m22
-	3   f        /8
+	3   f#       /8
 	3   d#       /8
 	3   b-       /8
 	3   b-       /16  q=2
 	4   b-2,b-   /8
-	4   b-2,f#-  /8
+	4   b-2,f#-  /8   q=2
 	4   e-       /16  q=2
 	6   b-2,d#   /8   q=3
 	6   b-,g#-   /16  q=2
@@ -345,7 +345,7 @@ FUNCTION m26_2
 	1   b+      /16  q=2
 	2   g#,b    /16  q=2
 	3   b-,b    /16  q=2
-	4   c-,b-   /16  q=2
+	4   e-,b-   /16  q=2
 	5   b-      /16  q=2
 	6   g#-,e   /16  q=2
 	7   e,g#    /16  q=2
@@ -955,7 +955,7 @@ FUNCTION m53_without_trumpet
 	4  g#-     /8
 	4  a-      /8
 	6  e,g#    /8
-	6  f#-,g#- /8          $p_marcato
+	6  f#-,g#- /4          $p_marcato
 	6  e,g#    /8          $p
 	CALL  m50_violin1
 	14 e-      /8
@@ -1286,8 +1286,8 @@ FUNCTION m75_77_without_viola_in_77
 	11 e+2     /8
 	11 e+2     /16  q=2
 	11 e+2     /8   q=2
-	11 g#+2    /4           tr=/16
-	11 f#+2    /8   q=2
+	11 g#+2    /4.          tr=/16
+	11 f#+2    /16  q=2
 	11 e+2     /16  q=2
 	11 d#+2    /16  q=2
 	11 e+2     /16  q=2
@@ -1295,8 +1295,8 @@ FUNCTION m75_77_without_viola_in_77
 	12 e+      /8
 	12 e+      /16  q=2
 	12 e+      /8   q=2
-	12 g#+     /4           tr=/16
-	12 f#+     /8   q=2
+	12 g#+     /4.          tr=/16
+	12 f#+     /16  q=2
 	12 e+      /16  q=2
 	12 d#+     /16  q=2
 	12 e+      /16  q=2
@@ -1606,7 +1606,7 @@ FUNCTION m89_2
 	5  b-         /8
 	6  b-,f#      /8
 	7  b          /8
-	7  b-2,b-     /8
+	8  b-2,b-     /8
 	p  bd2,cc2,to /8
 	10 b-2        /8
 	11 f#+        /16
@@ -1683,7 +1683,7 @@ CALL  m91_without_violin1
 *
 FUNCTION m92
 	{
-		4  c#     /2+/8  m, $legato
+		4  c#     /1+/8  m, $legato
 		6  c+,e+  /2     m, $legato
 		11 a      /16
 		11 g#     /16
@@ -2506,7 +2506,7 @@ CALL  m168_1_high
 	3  e,e+   /16
 	3  g#,g#+ /16
 	4  g#-,e  /16  q=2
-	6  e,g#-  /16  q=2
+	6  e,g#   /16  q=2
 	10 e-     /16  q=2
 	11 e+,g#+ /16  q=2
 }
@@ -2563,8 +2563,7 @@ CALL  m168_1_high
 // m. 174
 *
 { m
-	8  e-     /2     m,  $legato
-	8  e      /2+/8
+	8  e-,e   /2      $legato
 }
 FUNCTION m174_without_trombone
 	CALL d_all_legato
@@ -2580,16 +2579,16 @@ FUNCTION m174_without_trombone
 	3  g#,e+  /1     m
 	4  e-     /8.
 	4  e      /16
-	4  e      /4     m
+	4  e      /4+8   m
 	5  b-,g#  /8.
 	5  b-,g#  /16
-	5  b-,g#  /8
+	5  b-,g#  /4+8  m
 	6  e,g#   /8.
 	6  e,g#   /16
-	6  e,g#   /8
+	6  e,g#   /4+8  m
 	7  e,b    /8.
 	7  e,b    /16
-	7  e,b    /8
+	7  e,b    /4+8  m
 	CALL  m167_drum
 	10 e-     /2        tr=/32
 	10 -      /4     m
@@ -2609,19 +2608,22 @@ FUNCTION m174_without_trombone
 	12 a      /16
 	12 b      /16
 	12 c#+    /16
-	13 e,g#   /2        tr=/16
+	13 e,g#   /2        tr=/16,  $staccato
 	14 e-     /8.
 	14 e      /16
-	14 e      /8
+	14 e      /4+8  m
 	15 e-2    /8.
 	15 e-     /16
-	15 e-     /8
+	15 e-     /4+8  m
 	CALL d_all_staccato
 END
 CALL  m174_without_trombone
 
 // m. 175
 *
+{ m
+	8  e     /8  $staccato
+}
 FUNCTION m175
 	0  b+2   /16     $legato
 	0  c#+3  /16
@@ -2643,9 +2645,12 @@ FUNCTION m175
 	4  b-    /8
 	4  g#-   /8
 	4  e-    /8
-	5  b-,g# /8   q=4
-	6  e,g#  /8   q=4
-	7  e,b   /8   q=4
+	5  -     /8
+	5  b-,g# /8   q=3
+	6  -     /8
+	6  e,g#  /8   q=3
+	7  -     /8
+	7  e,b   /8   q=3
 	8  -     /8
 	8  b-    /8
 	8  g#-   /8
@@ -2791,7 +2796,7 @@ FUNCTION m182
 	12 d#+      /16  q=3, $staccato
 	13 e,e+     /8
 	13 -        /8
-	13 g#,c+    /8                tr=/16
+	13 g#,c+    /4                tr=/16
 	14 e-       /8
 	14 -        /8
 	14 g#-2     /8
@@ -2856,7 +2861,7 @@ FUNCTION m183
 	12 f#+        /16  q=3, $staccato
 	13 e,c#+      /8
 	13 -          /8
-	13 d#,b       /8                tr=/16
+	13 d#,b       /4                tr=/16
 	14 c#-        /8
 	14 -          /8
 	14 b-2        /8
@@ -3128,10 +3133,10 @@ FUNCTION m194_to_195_without_violins
 	7  g#,e+  /1
 	8  b-2,b- /1
 	CALL  m194_drums  q=2
-	10 b-2    /2  q=2,   tr=/32
+	10 b-2    /2  q=2,   tr=/32,  $staccato
 	10 -      /4       m
-	13 g#,e+  /2  q=2,   tr=/16
-	14 b-     /2  q=2,   tr=/16
+	13 g#,e+  /2  q=2,   tr=/16,  $staccato
+	14 b-     /2  q=2,   tr=/16,  $staccato
 	15 b-3    /8  q=8,   $staccato
 	CALL  d_all_staccato
 END
@@ -3184,10 +3189,10 @@ FUNCTION m196_to_197_without_violins
 	7  b-,b    /1
 	8  b-2,b-  /1
 	CALL  m194_drums  q=2
-	10 b-2     /2  q=2,    tr=/32
+	10 b-2     /2  q=2,    tr=/32,  $staccato
 	10 -       /4       m
-	13 d#,b    /2  q=2,    tr=/16
-	14 b-2     /2  q=2,    tr=/16
+	13 d#,b    /2  q=2,    tr=/16,  $staccato
+	14 b-2     /2  q=2,    tr=/16,  $staccato
 	15 b-3     /8  q=8,    $staccato
 	CALL  d_all_staccato
 END
@@ -3196,8 +3201,8 @@ CALL  m196_to_197_without_violins
 // m. 198-199
 *
 { m
-	8  e-     /2     m,  $legato
-	8  e      /2+/8
+	8  e-,e   /2  $legato
+	8  e      /8  $staccato
 }
 CALL  m174_without_trombone
 *
@@ -3527,16 +3532,17 @@ END
 	6  b-,f#   /1
 	7  b       /1
 	8  b-2,b-  /1
-	10 b-2     /2   q=2,    tr=/32
-	10 -       /4        m
-	11 b       /16
-	12 b-      /16
-	13 f#,a    /2           tr=/16
-	14 b-      /2           tr=/16
-	15 b-3     /8
+	10 b-2     /2           tr=/32
+	11 b       /16                  $staccato
+	12 b-      /16                  $staccato
+	13 f#,a    /2           tr=/16, $staccato
+	14 b-      /2           tr=/16, $staccato
+	15 b-3     /8                   $staccato
+	CALL  m167_drum
 	CALL  v_all_ff
 	CALL  m167_drum
-	11 c+      /16          $staccato
+	10 b-2     /2           tr=/32
+	11 c+      /16
 	11 c#+     /16
 	11 d+      /16
 	11 d#+     /16
@@ -3551,7 +3557,7 @@ END
 	11 c+2     /16
 	11 c#+2    /16
 	11 d#+2    /16
-	12 c       /16          $staccato
+	12 c       /16
 	12 c#      /16
 	12 d       /16
 	12 d#      /16
@@ -3629,9 +3635,9 @@ FUNCTION m236_low_ch5_10
 	10 -       /4     m
 END
 FUNCTION m236_low_ch12_15
-	12 g#,e+   /2          tr=/16,  $legato
-	13 e,b     /2          tr=/16,  $legato
-	14 e-      /2          tr=/16,  $legato
+	12 g#,e+   /2          tr=/16
+	13 e,b     /2          tr=/16
+	14 e-      /2          tr=/16
 	15 e-2     /8     q=4,          $staccato
 END
 {
@@ -4135,7 +4141,7 @@ END
 }
 
 // m. 252
-*  tempo  60
+*
 {
 	CALL  d_all_legato
 	0  e+2        /2
@@ -4188,7 +4194,6 @@ FUNCTION d_all_staccato
 	6  -  -  $staccato
 	7  -  -  $staccato
 	8  -  -  $staccato
-	p  -  -  $staccato
 	10 -  -  $staccato
 	11 -  -  $staccato
 	12 -  -  $staccato
@@ -4207,7 +4212,6 @@ FUNCTION d_all_legato
 	6  -  -  $legato
 	7  -  -  $legato
 	8  -  -  $legato
-	p  -  -  $legato
 	10 -  -  $legato
 	11 -  -  $legato
 	12 -  -  $legato
