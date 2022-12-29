@@ -14,7 +14,7 @@ CALL func(foo, bar)
 
 FUNCTION func
 	0: c d e
-	0: c d e
+	0:
 	0: c d e
 	0: c d e
 	0: c d e

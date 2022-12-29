@@ -908,7 +908,8 @@ public class MidicaPLParser extends SequenceParser {
 			// normal or compact channel command - replace variables
 			if (replaceVars) {
 				tokens[0] = replaceVariables(tokens[0]);  // replace channel
-				tokens[1] = replaceVariables(tokens[1]);  // replace note/chord
+				if (tokens.length > 1)
+					tokens[1] = replaceVariables(tokens[1]);  // replace note(s)/chord(s)
 			}
 		}
 		
@@ -4245,6 +4246,10 @@ public class MidicaPLParser extends SequenceParser {
 	private void parseCompactCmd(String[] tokens, boolean isFake) throws ParseException {
 		
 		postprocessInstrumentsIfNotYetDone();
+		
+		// only the channel but no notes - nothing to do
+		if (tokens.length == 1)
+			return;
 		
 		Matcher matcher = compactChannelPattern.matcher(tokens[0]);
 		if (matcher.matches()) {

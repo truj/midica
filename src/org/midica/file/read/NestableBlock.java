@@ -254,6 +254,10 @@ public class NestableBlock {
 			// transform from 3 to 2 tokens, if necessary
 			tokens = parser.reorganizeCompactCmd(tokens);
 			
+			// no elements?
+			if (tokens.length == 1)
+				return tokens;
+			
 			// apply tuplet to each command part
 			ArrayList<String> transformedNotes = new ArrayList<>();
 			for (String compactElement : whitespaces.split(tokens[1])) {

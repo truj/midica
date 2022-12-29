@@ -59,7 +59,9 @@ END
 
 // channel 4: patterns inside of blocks in side a function call
 {
+	4:         // no-op command
 	{
+		4:     // no-op command
 		CALL f4(ch=4)
 	}
 }
@@ -142,6 +144,7 @@ FUNCTION f8
 		$c: f c,d,e:pat7 f g           // f(13560)
 		                               // c(14200) d(14440) e(14680)
 		                               // f(14920)  g(15560)
+		$c:                            // no-op command
 	}
 	$c: c d                            // c(16200)  d(17160)
 END
@@ -157,10 +160,13 @@ p: bd1:4                    // 0
 	p: bd1 bd1 bd1          // 1440  1760  2080
 	{ t
 		p: bd1 bd1 bd1      // 2400  2613  2826
+		p:                  // no-op command
 	}
 	p: bd1 bd1 bd1          // 3039  3359  3679
 }
 p: bd1 bd1 bd1              // 3999  4479  4959
 
-
+// no-op compact commands
+0:
+p:
 

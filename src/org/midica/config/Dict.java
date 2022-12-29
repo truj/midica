@@ -3268,7 +3268,7 @@ public class Dict {
 		set( ERROR_COMPACT_INVALID_OPTION,        "option invalid for compact commands: %s - Erroneous part: %s"      );
 		set( ERROR_COMPACT_PAT_CALL_WITH_OPT,     "<html>Pattern call contains additional data: %s<br>"
 		                                        + "Pattern call: %s<br>"
-		                                        + "(Forgotten whitespace?)" );
+		                                        + "(Forgotten whitespace after call? Failed to close parameter list? Faulty whitespace in parameter list?)" );
 		set( ERROR_INVALID_TIME_DENOM,            "invalid denominator in time signature: "                           );
 		set( ERROR_INVALID_TIME_SIG,              "invalid time signature argument: "                                 );
 		set( ERROR_INVALID_KEY_SIG,               "invalid key signature argument: "                                  );
