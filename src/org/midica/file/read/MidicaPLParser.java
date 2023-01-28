@@ -182,6 +182,9 @@ public class MidicaPLParser extends SequenceParser {
 	public static String PARAM_NAMED_CLOSE  = null;
 	public static String PARAM_INDEX_OPEN   = null;
 	public static String PARAM_INDEX_CLOSE  = null;
+	public static String MAGIC_VAR_ALL      = null;
+	public static String MAGIC_VAR_NC       = null;
+	public static String MAGIC_VAR_REV      = null;
 	public static String M                  = null;
 	public static String MULTIPLE           = null;
 	public static String OPT_ASSIGNER       = null;
@@ -252,6 +255,7 @@ public class MidicaPLParser extends SequenceParser {
 	private   static Deque<File>                        functionFileStack     = null;
 	private   static Deque<HashMap<String, String>>     paramStackNamed       = null;
 	private   static Deque<ArrayList<String>>           paramStackIndexed     = null;
+	private   static Deque<HashMap<String, String>>     magicVarStack         = null;
 	private   static Deque<String>                      patternNameStack      = null;
 	private   static Deque<Integer>                     patternLineStack      = null;
 	private   static Deque<File>                        patternFileStack      = null;
@@ -272,6 +276,7 @@ public class MidicaPLParser extends SequenceParser {
 	private   static Pattern                            chordSepPattern       = null;
 	private   static Pattern                            compactChannelPattern = null;
 	private   static Pattern                            compactOptPattern     = null;
+	private   static Pattern                            invalidNoteIdxPattern = null;
 	private   static boolean                            isSoftKaraoke         = false;
 	public    static boolean                            isPlayingTupletBlock  = false;
 	
@@ -400,6 +405,9 @@ public class MidicaPLParser extends SequenceParser {
 		PARAM_NAMED_CLOSE  = Dict.getSyntax( Dict.SYNTAX_PARAM_NAMED_CLOSE  );
 		PARAM_INDEX_OPEN   = Dict.getSyntax( Dict.SYNTAX_PARAM_INDEX_OPEN   );
 		PARAM_INDEX_CLOSE  = Dict.getSyntax( Dict.SYNTAX_PARAM_INDEX_CLOSE  );
+		MAGIC_VAR_ALL      = Dict.getSyntax( Dict.SYNTAX_MAGIC_VAR_ALL      );
+		MAGIC_VAR_NC       = Dict.getSyntax( Dict.SYNTAX_MAGIC_VAR_NC       );
+		MAGIC_VAR_REV      = Dict.getSyntax( Dict.SYNTAX_MAGIC_VAR_REV      );
 		M                  = Dict.getSyntax( Dict.SYNTAX_M                  );
 		MULTIPLE           = Dict.getSyntax( Dict.SYNTAX_MULTIPLE           );
 		OPT_ASSIGNER       = Dict.getSyntax( Dict.SYNTAX_OPT_ASSIGNER       );
@@ -682,6 +690,9 @@ public class MidicaPLParser extends SequenceParser {
 		compactOptPattern = Pattern.compile(
 			"^" + Pattern.quote(COMPACT_OPT_OPEN) + "(.+)" + Pattern.quote(COMPACT_OPT_CLOSE) + "$"
 		);
+		
+		// invalid note index inside of a block inside a pattern
+		invalidNoteIdxPattern = Pattern.compile("^\\[\\d+\\]$");
 	}
 	
 	/**
@@ -2550,6 +2561,19 @@ public class MidicaPLParser extends SequenceParser {
 		patternFileStack.push(file);
 		paramStackIndexed.push(paramsIndexed);
 		paramStackNamed.push(paramsNamed);
+		magicVarStack.push(new HashMap<>());
+		
+		// add magic variables to call stack
+		HashMap<String, String> magicVars = magicVarStack.peek();
+		String magicAll = "0";
+		String magicRev = (notes.size() - 1) + "";
+		for (int i = 1; i < notes.size(); i++)
+			magicAll += CHORD_SEPARATOR + i;
+		for (int i = notes.size() - 2; i >= 0; i--)
+			magicRev += CHORD_SEPARATOR + i;
+		magicVars.put(MAGIC_VAR_ALL, magicAll);
+		magicVars.put(MAGIC_VAR_REV, magicRev);
+		magicVars.put(MAGIC_VAR_NC,  notes.size() + "");
 		
 		// check recursion
 		if (patternNameStack.size() > MAX_RECURSION_DEPTH_PATTERN) {
@@ -2739,6 +2763,7 @@ public class MidicaPLParser extends SequenceParser {
 		patternFileStack.pop();
 		paramStackIndexed.pop();
 		paramStackNamed.pop();
+		magicVarStack.pop();
 	}
 	
 	/**
@@ -2766,7 +2791,12 @@ public class MidicaPLParser extends SequenceParser {
 				throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INDEX_INVALID) + indexStr);
 			}
 			catch (IndexOutOfBoundsException e) {
-				throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH) + indexStr);
+				if (nestableBlkDepth == 0) {
+					throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH) + indexStr);
+				}
+				else {
+					notes.add("[" + indexStr + "]");
+				}
 			}
 		}
 		
@@ -2889,8 +2919,15 @@ public class MidicaPLParser extends SequenceParser {
 					throw new ParseException(Dict.get(Dict.ERROR_PATTERN_NUM_OF_ARGS));
 				}
 				
-				// check if indices are numbers
-				checkPatternIndices(tokens[0]);
+				// variable instead of pattern indices?
+				if (varPattern.matcher(tokens[0]).find()) {
+					// Don't check pattern indices yet - probably $ALL or $REV
+					// They will be checked later, when the pattern is called
+				}
+				else {
+					// check if indices are numbers
+					checkPatternIndices(tokens[0]);
+				}
 				
 				// check options
 				if (tokens.length > 2) {
@@ -3504,6 +3541,9 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_PARAM_NAMED_CLOSE.equals(cmdId)  ) PARAM_NAMED_CLOSE  = cmdName;
 		else if ( Dict.SYNTAX_PARAM_INDEX_OPEN.equals(cmdId)   ) PARAM_INDEX_OPEN   = cmdName;
 		else if ( Dict.SYNTAX_PARAM_INDEX_CLOSE.equals(cmdId)  ) PARAM_INDEX_CLOSE  = cmdName;
+		else if ( Dict.SYNTAX_MAGIC_VAR_ALL.equals(cmdId)      ) MAGIC_VAR_ALL      = cmdName;
+		else if ( Dict.SYNTAX_MAGIC_VAR_NC.equals(cmdId)       ) MAGIC_VAR_NC       = cmdName;
+		else if ( Dict.SYNTAX_MAGIC_VAR_REV.equals(cmdId)      ) MAGIC_VAR_REV      = cmdName;
 		else if ( Dict.SYNTAX_M.equals(cmdId)                  ) M                  = cmdName;
 		else if ( Dict.SYNTAX_MULTIPLE.equals(cmdId)           ) MULTIPLE           = cmdName;
 		else if ( Dict.SYNTAX_OPT_ASSIGNER.equals(cmdId)       ) OPT_ASSIGNER       = cmdName;
@@ -3776,7 +3816,17 @@ public class MidicaPLParser extends SequenceParser {
 						varValue = params.get(name);
 					}
 					else {
-						varValue = variables.get(varName);
+						
+						// magic variable?
+						HashMap<String, String> magicVars = magicVarStack.peek();
+						if (magicVars != null && magicVars.containsKey(varName)) {
+							varValue = magicVars.get(varName);
+						}
+						
+						// normal variable
+						else {
+							varValue = variables.get(varName);
+						}
 					}
 				}
 				catch (ParseException e) {
@@ -4449,6 +4499,14 @@ public class MidicaPLParser extends SequenceParser {
 		if (isFake && tokens[1].contains(CHORD_SEPARATOR))
 			return;
 		
+		// don't throw exceptions for note indices in a conditional pattern block
+		if (isFake && nestableBlkDepth > 0 && patternNameStack.size() > 0) {
+			if (invalidNoteIdxPattern.matcher(tokens[1]).matches()) {
+				return;
+			}
+			
+		}
+		
 		int note = parseNote(tokens[1], channel);
 		
 		// separate the duration from further arguments
@@ -4881,6 +4939,11 @@ public class MidicaPLParser extends SequenceParser {
 		else if (note.matches("^\\d+$"))
 			return toInt(note);
 		else {
+			// invalid pattern index inside a block?
+			if (patternNameStack.size() > 0 && invalidNoteIdxPattern.matcher(note).matches())
+				throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH_2) + note);
+			
+			// other invalid note or percussion instrument
 			if (9 == channel)
 				throw new ParseException(Dict.get(Dict.ERROR_UNKNOWN_PERCUSSION) + note);
 			throw new ParseException(Dict.get(Dict.ERROR_UNKNOWN_NOTE) + note);
@@ -4907,7 +4970,14 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		else {
 			noteVal = Dict.getNote(noteName);
+			
 			if (Dict.UNKNOWN_CODE == noteVal) {
+				
+				// invalid pattern index inside a block?
+				if (patternNameStack.size() > 0 && invalidNoteIdxPattern.matcher(noteName).matches())
+					throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH_2) + noteName);
+				
+				// other invalid note
 				throw new ParseException(Dict.get(Dict.ERROR_UNKNOWN_NOTE) + noteName);
 			}
 		}
@@ -5381,6 +5451,7 @@ public class MidicaPLParser extends SequenceParser {
 			functionFileStack    = new ArrayDeque<>();
 			paramStackNamed      = new ArrayDeque<>();
 			paramStackIndexed    = new ArrayDeque<>();
+			magicVarStack        = new ArrayDeque<>();
 			patternNameStack     = new ArrayDeque<>();
 			patternLineStack     = new ArrayDeque<>();
 			patternFileStack     = new ArrayDeque<>();

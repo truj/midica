@@ -19,11 +19,10 @@
 // 
 // Pattern naming conventions used in this example file:
 // - Patterns for normal channels (not percussion)...
-//   - start with p_
+//   - start with p
 //   - followed by a description of their content where the following characters are used:
 //     - 2=half note; 4=4th note; 8=8th note; s=16th note
 //     - tr16 = triller with 16th notes; tr32 = triller with 32th notes
-//   - end with _1, _2, or _3 (The number determins the number of notes in the chord)
 // - Patterns for the percussion channel...
 //   - start with perc
 //   - end with a number (the number of the measure where they occur for the first time)
@@ -94,26 +93,26 @@ CALL  d_all_staccato
 CALL  v_all_ff
 
 // measure 1-4
-7:  b:p_intro_1    b:8 g# e g#    b g# b e+
+7:  b:p_intro    b:8 g# e g#    b g# b e+
 
 // m. 5-8
 *
-6:  e,g#:p_intro_2                  e,g#:8 b-,f# g#-,e b-,f#     e,g# g#,b f#,a e,g#
-7:  b:8 g# e g#       b g# b  e+    b:p_intro_1
+6:  e,g#:p_intro                    e,g#:8 b-,f# g#-,e b-,f#     e,g# g#,b f#,a e,g#
+7:  b:8 g# e g#       b g# b  e+    b:p_intro
 
 // m. 9-10
 *
-5:  b-,b:p_intro_2
+5:  b-,b:p_intro
 6:  b-,f#:8 e,g# b-,f# f#,a            e,g# b-,f# g#-,e e,g#
-7:  b:p_intro_1
+7:  b:p_intro
 
 // m. 11-14
 *
 { q=4
-	5:   b-,b:p_8ss88_2
-	6:   b-,f#:p_8ss88_2
-	7:   b:p_8ss88_1
-	10:  b-2:p_8ss88_1
+	5:   b-,b:p8ss88
+	6:   b-,f#:p8ss88
+	7:   b:p8ss88
+	10:  b-2:p8ss88
 }
 
 // m. 15-17
@@ -125,7 +124,7 @@ CALL  d_all_legato
 6:   d#,f#:1+8
 7:   b:1+8
 8:   b-,d#,f#:1+8
-10:  b-2:p_2tr32_1   b-2:p_2tr32_1   b-2:8 -:4.
+10:  b-2:p2tr32   b-2:p2tr32   b-2:8 -:4.
 
 // m. 18
 *
@@ -133,52 +132,52 @@ CALL  d_all_legato
 *
 CALL  d_all_staccato
 CALL  v_all_pp
-3:   b-:p_ss_1
-4:   e-:p_ss_1
-6:   b-,g#-:p_ss_2
-11:  b-:p_ss_1
-12:  g#-:p_ss_1
-13:  e-:p_ss_1
-14:  e-:p_ss_1
+3:   b-:pss
+4:   e-:pss
+6:   b-,g#-:pss
+11:  b-:pss
+12:  g#-:pss
+13:  e-:pss
+14:  e-:pss
 
 // m. 19-21
 *
 CALL m19_to_26_1(contrabass=0)
 FUNCTION m19_to_26_1
-	//   19                  20                        21                          22
-	3:   b-:p_8ss8ss_1       e:8 f# g# b-:16 b-        b-:p_8ss_1 e:8 g#:16 g#     f#:8 d# b- b-:16 b-
-	4:   e-:p_8ss8ss_1       e-:p_888ss_1              e-:p_8ss8ss_1               b-2,b-:8 b-2,f#- b-2,f#- e-:16 e-
-	6:   b-,g#-:p_8ss8ss_2   b-,g#-:p_888ss_2          b-,g#-:p_8ss8ss_2           b-2,d#:p_888_2 b-,g#-:p_ss_2
-	10:  e-:p_8r8r_1         e-:p_888r_1               e-:p_8r8r_1                 b-2:p_888r_1
-	11:  b-:p_8ss8ss_1       e:8 f# g# b-:16 b-        b-:p_8ss_1 e:8 g#:16 g#     f#:8 d# b- b-:16 b-
-	12:  g#-:p_8ss8ss_1      b-:8 b- b- g#-:16 g#-     g#-:p_8ss_1 b-:p_8ss_1      b-:p_888_1 g#-:16 g#-
-	13:  e-:p_8ss8ss_1       g#-,e-:p_888_2 e-:16 e-   e-:p_8ss_1 g#-,e-:p_8ss_2   d#-,f#-:p_888_2 e-:16 e-
-	14:  e-:p_8ss8ss_1       e-:p_888ss_1              e-:p_8ss8ss_1               b-:p_888_1 e-:16 e-
+	//   19               20                   21                   22
+	3:   b-:p8ss8ss       e:8 f# g# b-:pss     b-:p8ss e:8 g#:pss   f#:8 d# b-:p8ss
+	4:   e-:p8ss8ss       e-:p888ss            e-:p8ss8ss           b-2,b-:8 b-2,f#- b-2,f#- e-:pss
+	6:   b-,g#-:p8ss8ss   b-,g#-:p888ss        b-,g#-:p8ss8ss       b-2,d#:p888 b-,g#-:pss
+	10:  e-:p8r8r         e-:p888r             e-:p8r8r             b-2:p888r
+	11:  b-:p8ss8ss       e:8 f# g# b-:pss     b-:p8ss e:8 g#:pss   f#:8 d# b-:p8ss
+	12:  g#-:p8ss8ss      b-:p888 g#-:pss      g#-:p8ss b-:p8ss     b-:p888 g#-:pss
+	13:  e-:p8ss8ss       g#-,e-:p888 e-:pss   e-:p8ss g#-,e-:p8ss  d#-,f#-:p888 e-:pss
+	14:  e-:p8ss8ss       e-:p888ss            e-:p8ss8ss           b-:p888 e-:pss
 	{ if ${contrabass} == 1
-		//   59               60                   61                          62
-		15:  e-2:p_8ss8ss_1   e-2:p_888ss_1        e-2:p_8ss8ss_1              b-3:p_888_1 e-2:p_ss_1
+		//   59            60                  61                   62
+		15:  e-2:p8ss8ss   e-2:p888ss          e-2:p8ss8ss          b-3:p888 e-2:pss
 	}
 	* 3,4,6,10,11,12,13,14,15
 	
-	//   23                 24                                25                                26/1
-	3:   b-:p_8ss8ss_1      e:8 f# g#       $ff e:16 g#       $leg  b:4+16  $stac  a:16 g# f#   e:8 g# e
-	4:   e-:p_8ss8ss_1      e-:p_888_1      $ff e-:16 e-      f#-,a-:p_8ss8ss_2                 e-,g#-:8 e-,b-:p_88_2
-	6:   b-,g#-:p_8ss8ss_2  b-,g#-:p_888_2  $ff b-,g#-:p_ss_2 b-2,d#:p_8ss8ss_2                 e-,g#-:p_888_2
-	10:  e-:p_8r8r_1        e-:p_888r_1     $ff               b-2:p_8r8r_1                      e-:8 e- e-
-	11:  b-:p_8ss8ss_1      e:8 f# g#       $ff e:16 g#       $leg  b:4+16  $stac  a:16 g# f#   e:8 g# e
-	12:  g#-:p_8ss8ss_1     b-:8 b- b-      $ff e:16 e        d#:p_8ss8ss_1                     e:8 e e
-	13:  e-:p_8ss8ss_1      g#-,e-:p_888_2  $ff g#-,b-:p_ss_2 a-,f#-:p_8ss8ss_2                 g#-,b-:p_888_2
-	14:  e-:p_8ss8ss_1      e-:p_888_1      $ff e-:16 e-      b-2:p_8ss8ss_1                    e-:8 e- e-
+	//   23              24                            25                                26/1
+	3:   b-:p8ss8ss      e:8 f# g#    $ff e:16 g#      $leg  b:4+16  $stac  a:16 g# f#   e:8 g# e
+	4:   e-:p8ss8ss      e-:p888      $ff e-:16 e-     f#-,a-:p8ss8ss                    e-,g#-:8 e-,b-:p88
+	6:   b-,g#-:p8ss8ss  b-,g#-:p888  $ff b-,g#-:pss   b-2,d#:p8ss8ss                    e-,g#-:p888
+	10:  e-:p8r8r        e-:p888r     $ff              b-2:p8r8r                         e-:8 e- e-
+	11:  b-:p8ss8ss      e:8 f# g#    $ff e:16 g#      $leg  b:4+16  $stac  a:16 g# f#   e:8 g# e
+	12:  g#-:p8ss8ss     b-:p888      $ff e:16 e       d#:p8ss8ss                        e:8 e e
+	13:  e-:p8ss8ss      g#-,e-:p888  $ff g#-,b-:pss   a-,f#-:p8ss8ss                    g#-,b-:p888
+	14:  e-:p8ss8ss      e-:p888      $ff e-:16 e-     b-2:p8ss8ss                       e-:8 e- e-
 	{ if ${contrabass} == 1
-		//   63               64
-		15:  e-2:p_8ss8ss_1   e-2:p_888_1 $ff e-2:p_ss_1
+		//   63            64
+		15:  e-2:p8ss8ss   e-2:p888   $ff e-2:pss
 	}
 	{ else
 		//   23-24
 		15:  -:1
 	}
-	//                                                        25 == 65                                26/1 == 66/1
-	15:                                                       $ff b-3:p_8ss8ss_1                      e-2:p_888_1
+	//                                                 25 == 65                          26/1 == 66/1
+	15:                                                $ff b-3:p8ss8ss                   e-2:p888
 	*
 END
 
@@ -192,40 +191,40 @@ FUNCTION m26_2_to_34_1
 		VAR $trombone_dyn = $ff
 	}
 	
-	//   26/2          27                28                                 29                                  30
-	0:   b+:16 b+      b+:p_8ss8ss_1     e+2:8 f#+2 g#+2 b+:16 b+           b+:p_8ss_1 e+2:8 g#+2:p_ss_1        f#+2:8 d#+2 b+ b+:p_ss_1
-	1:   b+:16 b+      b+:p_8ss8ss_1     e+2:8 f#+2 g#+2 b+:16 b+           b+:p_8ss_1 e+2:8 g#+2:p_ss_1        f#+2:8 d#+2 b+ b+:p_ss_1
-	2:   g#,b:p_ss_2   g#,b:p_8ss8ss_2   g#,e+:8 g#,f#+ g#,g#+ g#,b:p_ss_2  g#,b:p_8ss_2 g#,e+:8 e+,g#+:p_ss_2  d#+,f#+:8 b,d#+ b g#,b:p_ss_2
-	3:   b-,b:p_ss_2   b-,b:p_8ss8ss_2   e,e+:8 f#,f#+ g#,g#+ b-,b:p_ss_2   b-,b:p_8ss_2 b-,b:8 g#,g#+:p_ss_2   f#,f#+:8 d#,d#+ b-,b b-,b:p_ss_2
-	4:   e-,b-:p_ss_2  e-,b-:p_8ss8ss_2  e-,b-:p_888ss_2                    e-,b-:p_8ss8ss_2                    b-2,f#-:p_888_2 e-,b-:p_ss_2
-	5:   b-:16 b-      b-:p_8ss8ss_1     b-:p_888ss_1                       b-:p_8ss8ss_1                       b-:p_888ss_1
-	6:   g#-,e:p_ss_2  g#-,e:p_8ss8ss_2  g#-,e:p_888ss_2                    g#-,e:p_8ss8ss_2                    b-2,d#:p_888_2 g#-,e:p_ss_2
-	7:   e,g#:p_ss_2   e,g#:p_8ss8ss_2   e,g#:p_888ss_2                     e,g#:p_8ss8ss_2                     b-,b:p_888_2 e,g#:p_ss_2 
-	8:   -:8           e-:p_8r8r_1       e-:p_888r_1                        e-:p_8r8r_1                         b-2:p_888r_1
-	10:  -:8           e-:p_8r8r_tr_1    e-:p_888r_1                        e-:p_8r8r_tr_1                      b-2:p_888r_1
-	11:  b-:16 b-      b-:p_8ss8ss_1     e:8 f# g# b-:16 b-                 b-:p_8ss_1 e:8 g#:p_ss_1            f#:8 d# b- b-:p_ss_1
-	12:  g#-:p_ss_1    g#-:p_8ss8ss_1    b-:8 b- b- g#-:p_ss_1              g#-:p_8ss_1 b-:p_8ss_1              b-:p_888_1 g#-:p_ss_1
-	13:  e-:16 e-      e-:p_8ss8ss_1     e-,g#-:p_888_2 e-:16 e-            e-:p_8ss_1 e-,g#-:p_8ss_2           d#-,f#-:p_888_2 e-:p_ss_1
-	14:  e-:16 e-      e-:p_8ss8ss_1     e-:p_888ss_1                       e-:p_8ss8ss_1                       b-2:p_888_1 e-:p_ss_1
-	15:  e-2:p_ss_1    e-2:p_8ss8ss_1    e-2:p_888ss_1                      e-2:p_8ss8ss_1                      b-3:p_888_1 e-2:p_ss_1
+	//   26/2       27             28                              29                            30
+	0:   b+:16 b+   b+:p8ss8ss     e+2:8 f#+2 g#+2 b+:16 b+        b+:p8ss e+2:8 g#+2:pss        f#+2:8 d#+2 b+:p8ss
+	1:   b+:16 b+   b+:p8ss8ss     e+2:8 f#+2 g#+2 b+:16 b+        b+:p8ss e+2:8 g#+2:pss        f#+2:8 d#+2 b+:p8ss
+	2:   g#,b:pss   g#,b:p8ss8ss   g#,e+:8 g#,f#+ g#,g#+ g#,b:pss  g#,b:p8ss g#,e+:8 e+,g#+:pss  d#+,f#+:8 b,d#+ b g#,b:pss
+	3:   b-,b:pss   b-,b:p8ss8ss   e,e+:8 f#,f#+ g#,g#+ b-,b:pss   b-,b:p8ss b-,b:8 g#,g#+:pss   f#,f#+:8 d#,d#+ b-,b:p8ss
+	4:   e-,b-:pss  e-,b-:p8ss8ss  e-,b-:p888ss                    e-,b-:p8ss8ss                 b-2,f#-:p888 e-,b-:pss
+	5:   b-:pss     b-:p8ss8ss     b-:p888ss                       b-:p8ss8ss                    b-:p888ss
+	6:   g#-,e:pss  g#-,e:p8ss8ss  g#-,e:p888ss                    g#-,e:p8ss8ss                 b-2,d#:p888 g#-,e:pss
+	7:   e,g#:pss   e,g#:p8ss8ss   e,g#:p888ss                     e,g#:p8ss8ss                  b-,b:p888 e,g#:pss 
+	8:   -:8        e-:p8r8r       e-:p888r                        e-:p8r8r                      b-2:p888r
+	10:  -:8        e-:p8r8r_tr    e-:p888r                        e-:p8r8r_tr                   b-2:p888r
+	11:  b-:pss     b-:p8ss8ss     e:8 f# g# b-:pss                b-:p8ss e:8 g#:pss            f#:8 d# b-:p8ss
+	12:  g#-:pss    g#-:p8ss8ss    b-:8 b- b- g#-:pss              g#-:p8ss b-:p8ss              b-:p888 g#-:pss
+	13:  e-:pss     e-:p8ss8ss     e-,g#-:p888 e-:pss              e-:p8ss e-,g#-:p8ss           d#-,f#-:p888 e-:pss
+	14:  e-:pss     e-:p8ss8ss     e-:p888ss                       e-:p8ss8ss                    b-2:p888 e-:pss
+	15:  e-2:pss    e-2:p8ss8ss    e-2:p888ss                      e-2:p8ss8ss                   b-3:p888 e-2:pss
 	
 	// m. 31-34/1
-	//   31                32                                         33                                     34/1
-	0:   b+:p_8ss8ss_1     e+2:8 f#+2 g#+2         $ff e+2:16 g#+2    $leg b+2:4+16 $stac a+2:16 g#+2 f#+2   e+2:8 g#+2 e+2
-	1:   b+:p_8ss8ss_1     e+2:8 f#+2 g#+2         $ff e+:16 g#+      $leg b+:4+16  $stac a+:16 g#+ f#+      e+:8 g#+ e+
-	2:   g#,b:p_8ss8ss_2   g#,e+:8 g#,f#+ g#,g#+   $ff e+:16 g#+      $leg b+:4+16  $stac a+:16 g#+ f#+      e+:8 g#+ e+
-	3:   b-,b:p_8ss8ss_2   e,e+:8 f#,f#+ g#,g#+    $ff e:16 g#        $leg b:4+16   $stac a:16 g# f#         e:8 g# e
-	4:   e-,b-:p_8ss8ss_2  e-,b-:p_888_2           $ff e-,b-:p_ss_2   b-2,d#:p_8ss8ss_2                      e-,e:8 e-,b-:p_88_2
-	5:   b-:p_8ss8ss_1     b-:p_888_1              $ff b-:p_ss_1      b-:p_8ss8ss_1                          b-:p_888_1
-	6:   g#-,e:p_8ss8ss_2  g#-,e:p_888_2           $ff g#-,e:p_ss_2   b-2,d#:p_8ss8ss_2                      g#-,e:p_888_2
-	7:   e,g#:p_8ss8ss_2   e,g#:p_888_2            $ff e,g#:p_ss_2    b-,b:p_8ss8ss_2                        g#,e:p_888_2
-	8:   e-:p_8r8r_1       e-:p_888r_1             $trombone_dyn      b-2:p_8r8r_1                           e-:p_888_1
-	10:  e-:p_8r8r_tr_1    e-:p_888r_1             $ff                b-2:p_8r8r_1                           e-:p_888_1
-	11:  b-:p_8ss8ss_1     e:8 f# g#               $ff e:16 g#        $leg b:4+16   $stac a:16 g# f#         e:8 g# e
-	12:  g#-:p_8ss8ss_1    b-:8 b- b-              $ff e:p_ss_1       d#:p_8ss8ss_1                          e:p_888_1
-	13:  e-:p_8ss8ss_1     e-,g#-:p_888_2          $ff b-,g#-:p_ss_2  f#-,a-:p_8ss8ss_2                      g#-,b:p_888_2
-	14:  e-:p_8ss8ss_1     e-:p_888_1              $ff e-:p_ss_1      b-2:p_8ss8ss_1                         e-:p_888_1
-	15:  e-2:p_8ss8ss_1    e-2:p_888_1             $ff e-2:p_ss_1     b-3:p_8ss8ss_1                         e-2:p_888_1
+	//   31             32                                      33                                    34/1
+	0:   b+:p8ss8ss     e+2:8 f#+2 g#+2        $ff e+2:16 g#+2  $leg b+2:4+16 $stac a+2:16 g#+2 f#+2  e+2:8 g#+2 e+2
+	1:   b+:p8ss8ss     e+2:8 f#+2 g#+2        $ff e+:16 g#+    $leg b+:4+16  $stac a+:16 g#+ f#+     e+:8 g#+ e+
+	2:   g#,b:p8ss8ss   g#,e+:8 g#,f#+ g#,g#+  $ff e+:16 g#+    $leg b+:4+16  $stac a+:16 g#+ f#+     e+:8 g#+ e+
+	3:   b-,b:p8ss8ss   e,e+:8 f#,f#+ g#,g#+   $ff e:16 g#      $leg b:4+16   $stac a:16 g# f#        e:8 g# e
+	4:   e-,b-:p8ss8ss  e-,b-:p888             $ff e-,b-:pss    b-2,d#:p8ss8ss                        e-,e:8 e-,b-:p88
+	5:   b-:p8ss8ss     b-:p888                $ff b-:pss       b-:p8ss8ss                            b-:p888
+	6:   g#-,e:p8ss8ss  g#-,e:p888             $ff g#-,e:pss    b-2,d#:p8ss8ss                        g#-,e:p888
+	7:   e,g#:p8ss8ss   e,g#:p888              $ff e,g#:pss     b-,b:p8ss8ss                          g#,e:p888
+	8:   e-:p8r8r       e-:p888r               $trombone_dyn    b-2:p8r8r                             e-:p888
+	10:  e-:p8r8r_tr    e-:p888r               $ff              b-2:p8r8r                             e-:p888
+	11:  b-:p8ss8ss     e:8 f# g#              $ff e:16 g#      $leg b:4+16   $stac a:16 g# f#        e:8 g# e
+	12:  g#-:p8ss8ss    b-:p888                $ff e:pss        d#:p8ss8ss                            e:p888
+	13:  e-:p8ss8ss     e-,g#-:p888            $ff b-,g#-:pss   f#-,a-:p8ss8ss                        g#-,b:p888
+	14:  e-:p8ss8ss     e-:p888                $ff e-:pss       b-2:p8ss8ss                           e-:p888
+	15:  e-2:p8ss8ss    e-2:p888               $ff e-2:pss      b-3:p8ss8ss                           e-2:p888
 END
 
 // m. 34/2-41
@@ -233,41 +232,41 @@ END
 p:  $ff
 CALL m34_2_to_41
 FUNCTION m34_2_to_41
-	//   34/2           35                 36                                 37                              38
-	0:   g#+2:p_ss_1    g#+2:p_8ss8ss_1    g#+2:8 c#+3 g#+2 c#+3              g#+2 c#+3 g#+2 f#+2             e+2 d#+2 c#+2        g#+2:p_ss_1
-	1:   e+2:p_ss_1     e+2:p_8ss8ss_1     e+2:8 c#+2 e+2 c#+2                e+2 c#+2 e+2 d#+2               c#+2 c+2 c#+2        e+2:p_ss_1
-	2:   e+,g#+:p_ss_2  e+,g#+:p_8ss8ss_2  e+,g#+:8 c#+,c#+2 e+,g#+ c#+,c#+2  e+,g#+ c#+,c#+2 e+,g#+ d#+,f#+  c#+,e+ c+,d#+ c#+    e+,g#+:p_ss_2
-	3:   e+,g#+:p_ss_2  e+,g#+:p_8ss8ss_2  e+,g#+:8 c#+ e+,g#+ c#+            e+,g#+ c#+ e+,g#+ c+            c#+ c+,d#+ c#+       e+,g#+:p_ss_2
-	4:   c#-,c#:p_ss_2  c#-,c#:p_8ss8ss_2  c#-,c#:p_8r8r_2                    c#-,c#:8 - c#-,c# g#-2,g#-      c#-,c#:p_888ss_2
-	5:   g#:p_ss_1      g#:p_8ss8ss_1      g#:p_8r8r_1                        g#:8 - g# f#                    g# f# e              g#:p_ss_1
-	6:   e,g#:p_ss_2    e,g#:p_8ss8ss_2    e,g#:p_8r8r_2                      e,g#:8 - e,g# g#-,g#            g#-,g# g#-,f# g#-,e  e,g#:p_ss_2
-	7:   g#,e+:p_ss_2   g#,e+:p_8ss8ss_2   g#,e+:p_8r8r_2                     g#,e+:8 - g#,e+ g#,f#+          g#,e+:p_888ss_2
-	8:   -:8            c#-,c#:p_8r8r_2    c#-,c#:p_8r8r_2                    c#-,c#:8 - c#-,c# g#-2,g#-      c#-,c#:p_888r_2
-	p:   -:8            perc_all:p_8r8r_3  perc_all:p_8r8r_3                  perc_all:p_8r8r_3               perc_all:p_888r_3
-	10:  e-:p_ss_1      e-:p_8ss8ss_1      e-:p_8888_1                        e-:p_8888_1                     e-:p_888ss_1
-	11:  g#+:p_ss_1     g#+:p_8ss8ss_1     g#+:8 c#+2 g#+ c#+2                g#+ c#+2 g#+ f#+                e+ d#+ c#+           g#+:p_ss_1
-	12:  e+:p_ss_1      e+:p_8ss8ss_1      e+:8 c#+ e+ c#+                    e+ c#+ e+ d#+                   c#+ f# e             e+:p_ss_1
-	13:  e,g#:p_ss_2    e,g#:p_8ss8ss_2    e,g#:8 c#,c#+ e,g# c#,c#+          e,g# c#,c#+ e,g# d#,f#          c#,e a g#            e,g#:p_ss_2
-	14:  -:8            c#-:p_8r8r_1       c#-:p_8r8r_1                       c#-:8 - c#- g#-2                c#-:p_888r_1
-	15:  -:8            c#-2:p_8r8r_1      c#-2:p_8r8r_1                      c#-2:8 - c#-2 g#-3              c#-2:p_888r_1
+	//   34/2        35              36                                 37                              38
+	0:   g#+2:pss    g#+2:p8ss8ss    g#+2:8 c#+3 g#+2 c#+3              g#+2 c#+3 g#+2 f#+2             e+2 d#+2 c#+2        g#+2:pss
+	1:   e+2:pss     e+2:p8ss8ss     e+2:8 c#+2 e+2 c#+2                e+2 c#+2 e+2 d#+2               c#+2 c+2 c#+2        e+2:pss
+	2:   e+,g#+:pss  e+,g#+:p8ss8ss  e+,g#+:8 c#+,c#+2 e+,g#+ c#+,c#+2  e+,g#+ c#+,c#+2 e+,g#+ d#+,f#+  c#+,e+ c+,d#+ c#+    e+,g#+:pss
+	3:   e+,g#+:pss  e+,g#+:p8ss8ss  e+,g#+:8 c#+ e+,g#+ c#+            e+,g#+ c#+ e+,g#+ c+            c#+ c+,d#+ c#+       e+,g#+:pss
+	4:   c#-,c#:pss  c#-,c#:p8ss8ss  c#-,c#:p8r8r                       c#-,c#:8 - c#-,c# g#-2,g#-      c#-,c#:p888ss
+	5:   g#:pss      g#:p8ss8ss      g#:p8r8r                           g#:8 - g# f#                    g# f# e              g#:pss
+	6:   e,g#:pss    e,g#:p8ss8ss    e,g#:p8r8r                         e,g#:8 - e,g# g#-,g#            g#-,g# g#-,f# g#-,e  e,g#:pss
+	7:   g#,e+:pss   g#,e+:p8ss8ss   g#,e+:p8r8r                        g#,e+:8 - g#,e+ g#,f#+          g#,e+:p888ss
+	8:   -:8         c#-,c#:p8r8r    c#-,c#:p8r8r                       c#-,c#:8 - c#-,c# g#-2,g#-      c#-,c#:p888r
+	p:   -:8         perc_all:p8r8r  perc_all:p8r8r                     perc_all:p8r8r                  perc_all:p888r
+	10:  e-:pss      e-:p8ss8ss      e-:p8888                           e-:p8888                        e-:p888ss
+	11:  g#+:pss     g#+:p8ss8ss     g#+:8 c#+2 g#+ c#+2                g#+ c#+2 g#+ f#+                e+ d#+ c#+           g#+:pss
+	12:  e+:pss      e+:p8ss8ss      e+:8 c#+ e+ c#+                    e+ c#+ e+ d#+                   c#+ f# e             e+:pss
+	13:  e,g#:pss    e,g#:p8ss8ss    e,g#:8 c#,c#+ e,g# c#,c#+          e,g# c#,c#+ e,g# d#,f#          c#,e a g#            e,g#:pss
+	14:  -:8         c#-:p8r8r       c#-:p8r8r                          c#-:8 - c#- g#-2                c#-:p888r
+	15:  -:8         c#-2:p8r8r      c#-2:p8r8r                         c#-2:8 - c#-2 g#-3              c#-2:p888r
 	
-	//   39                 40                                 41
-	0:   g#+2:p_8ss8ss_1    g#+2:8 c#+3 g#+2 c#+3              g#+2 c#+3 b+2 a#+2
-	1:   e+2:p_8ss8ss_1     e+2:8 c#+2 e+2 c#+2                e+2 c#+2 d#+2 c#+2
-	2:   e+,g#+:p_8ss8ss_2  e+,g#+:8 c#+,c#+2 e+,g#+ c#+,c#+2  e+,g#+ c#+,c#+2 d#+,b+ c#+,a#+
-	3:   e+,g#+:p_8ss8ss_2  e+,g#+:8 c#+ e+,g#+ c#+            e+,g#+ c#+ d#+,f#+ c#+,e+
-	4:   c#-,c#:p_8ss8ss_2  c#-,c#:p_8r8r_2                    c#-,c#:8 - f#-2,f# f#-2,f#
-	5:   g#:p_8ss8ss_1      g#:p_8r8r_1                        g#:8 - f# f#
-	6:   e,g#:p_8ss8ss_2    e,g#:p_8r8r_2                      e,g#:8 - b-,f# e,f#
-	7:   g#,e+:p_8ss8ss_2   g#,e+:p_8r8r_2                     g#,e+:8 - b e
-	8:   c#-,c#:p_8r8r_2    c#-,c#:p_8r8r_2                    c#-,c#:8 - f#-2,f#- f#-2,f#-
-	p:   perc_all:p_8r8r_3  perc_all:p_8r8r_3                  perc_all:p_8r8r_3
-	10:  e-:p_8ss8ss_1      e-:p_8888_1                        e-:8 e- b-2 e-
-	11:  g#+:p_8ss8ss_1     g#+:8 c#+2 g#+ c#+2                g#+ c#+2 e+ a#+
-	12:  e+:p_8ss8ss_1      e+:8 c#+ e+ c#+                    e+ c#+ f#+ e+
-	13:  e,g#:p_8ss8ss_2    e,g#:8 c#,c#+ e,g# c#,c#+          e,g# c#,c#+ f# c#+
-	14:  c#-:p_8r8r_1       c#-:p_8r8r_1                       c#-:8 - f#- f#-2
-	15:  c#-2:p_8r8r_1      c#-2:p_8r8r_1                      c#-2:8 - f#-2 f#-3
+	//   39              40                                 41
+	0:   g#+2:p8ss8ss    g#+2:8 c#+3 g#+2 c#+3              g#+2 c#+3 b+2 a#+2
+	1:   e+2:p8ss8ss     e+2:8 c#+2 e+2 c#+2                e+2 c#+2 d#+2 c#+2
+	2:   e+,g#+:p8ss8ss  e+,g#+:8 c#+,c#+2 e+,g#+ c#+,c#+2  e+,g#+ c#+,c#+2 d#+,b+ c#+,a#+
+	3:   e+,g#+:p8ss8ss  e+,g#+:8 c#+ e+,g#+ c#+            e+,g#+ c#+ d#+,f#+ c#+,e+
+	4:   c#-,c#:p8ss8ss  c#-,c#:p8r8r                       c#-,c#:8 - f#-2,f# f#-2,f#
+	5:   g#:p8ss8ss      g#:p8r8r                           g#:8 - f# f#
+	6:   e,g#:p8ss8ss    e,g#:p8r8r                         e,g#:8 - b-,f# e,f#
+	7:   g#,e+:p8ss8ss   g#,e+:p8r8r                        g#,e+:8 - b e
+	8:   c#-,c#:p8r8r    c#-,c#:p8r8r                       c#-,c#:8 - f#-2,f#- f#-2,f#-
+	p:   perc_all:p8r8r  perc_all:p8r8r                     perc_all:p8r8r
+	10:  e-:p8ss8ss      e-:p8888                           e-:8 e- b-2 e-
+	11:  g#+:p8ss8ss     g#+:8 c#+2 g#+ c#+2                g#+ c#+2 e+ a#+
+	12:  e+:p8ss8ss      e+:8 c#+ e+ c#+                    e+ c#+ f#+ e+
+	13:  e,g#:p8ss8ss    e,g#:8 c#,c#+ e,g# c#,c#+          e,g# c#,c#+ f# c#+
+	14:  c#-:p8r8r       c#-:p8r8r                          c#-:8 - f#- f#-2
+	15:  c#-2:p8r8r      c#-2:p8r8r                         c#-2:8 - f#-2 f#-3
 END
 
 // m. 42/1
@@ -277,18 +276,18 @@ FUNCTION m42_1
 	1:   b+:8 a#+ b+
 	2:   d#+,b+:8 e+,a#+ d#+,b+
 	3:   b,d#+:8 a#,c#+ b
-	4:   b-2,b:p_888_2
+	4:   b-2,b:p888
 	5:   b:8 g f#
 	6:   b-,f#:8 e,g b-,f#
 	7:   b:8 e b
-	8:   b-2,b:p_888_2
-	p:   perc_all:p_888_3
-	10:  b-2:p_888_1
+	8:   b-2,b:p888
+	p:   perc_all:p888
+	10:  b-2:p888
 	11:  b+:8 a#+ b+
 	12:  d#+:8 e+ d#+
 	13:  f#:8 g f#
-	14:  b-2:p_888_1
-	15:  b-3:p_888_1
+	14:  b-2:p888
+	15:  b-3:p888
 END
 
 // m. 42/2 - 49
@@ -301,11 +300,11 @@ FUNCTION m50_to_58
 	0:   b+2:8
 	1:   b+:8
 	2:   d#+,b+:8
-	3:   b,d#+:8     -:4 $p b-,f#:p_ss_2
+	3:   b,d#+:8     -:4 $p b-,f#:pss
 	4:   b-2,b-:8
 	5:   b:8
-	6:   b-,f#:8     -:4 $p b-,f#:p_ss_2
-	7:   b:8         -:4 $p b:p_ss_1
+	6:   b-,f#:8     -:4 $p b-,f#:pss
+	7:   b:8         -:4 $p b:pss
 	8:   b-2,b-:8
 	p:   bd2,cc2,to:8
 	10:  b-2:8
@@ -319,20 +318,20 @@ FUNCTION m50_to_58
 	*
 	
 	//   51                                  52                                    53
-	3:   b-,f#:p_8ss_2 b-,f#:8 e,g#          f#,a:8 $p_marcato b-,f#:4 $p f#,a:8   e,g# $p_marcato g#-,e:4 $p e,g#:8
+	3:   b-,f#:p8ss b-,f#:8 e,g#             f#,a:8 $p_marcato b-,f#:4 $p f#,a:8   e,g# $p_marcato g#-,e:4 $p e,g#:8
 	4:   -:2                                 -:8 b-2 c#- d#-                       e- f#- g#- a-
-	6:   b-,f#:p_8ss_2 b-,f#:8 e,g#          f#,a:8 $p_marcato b-,f#:4 $p f#,a:8   e,g# $p_marcato f#-,g#-:4 $p e,g#:8
-	7:   b:8 -:4 b:p_ss_1                    b:8 -:4 b:p_ss_1                      b:8 -:4 b:p_ss_1
+	6:   b-,f#:p8ss b-,f#:8 e,g#             f#,a:8 $p_marcato b-,f#:4 $p f#,a:8   e,g# $p_marcato f#-,g#-:4 $p e,g#:8
+	7:   b:8 -:4 b:pss                       b:8 -:4 b:pss                         b:8 -:4 b:pss
 	11:  b+ a#+ c#+2 a#+   b+ a#+ c#+2 a#+   b+ a#+ c#+2 a#+   b+ a#+ c#+2 a#+     b+ a#+ c#+2 a#+   b+ a#+ c#+2 a#+
 	14:  -:2     $pp                         -:8 b-2 c#- d#-                       e- f#- g#- a-
 	*
 	
 	//   54                                  55                                  56
-	2:   -:4. b,f#+:p_ss_2                   b,f#+:p_8ss_2 b,f#+:8 e+,g#+        f#+,a+ $p_marcato b,f#+:4 $p f#+,a+:8
-	3:   d#,f#:p_888_2 b-,f#:p_ss_2          b-,f#:p_8ss_2 b-,f#:8 e,g#          f#,a $p_marcato b-,f#:4 $p f#,a:8
+	2:   -:4. b,f#+:pss                      b,f#+:p8ss b,f#+:8 e+,g#+           f#+,a+ $p_marcato b,f#+:4 $p f#+,a+:8
+	3:   d#,f#:p888 b-,f#:pss                b-,f#:p8ss b-,f#:8 e,g#             f#,a $p_marcato b-,f#:4 $p f#,a:8
 	4:   b- b-2 b- -                         - - - -                             - b-2 c#- d#-
-	5:   $pp -:4. b-,b:p_ss_2                b-,b:8 - - b-,b:p_ss_2              b-,b:8 - - b-,b:p_ss_2
-	6:   b-,f# b-2,b-:p_88_2 b-,f#:p_ss_2    b-,f#:p_8ss_2 b-,f#:8 e,g#          f#,a $p_marcato b-,f#:4 $p f#,a:8
+	5:   $pp -:4. b-,b:pss                   b-,b:8 - - b-,b:pss                 b-,b:8 - - b-,b:pss
+	6:   b-,f# b-2,b-:p88 b-,f#:pss          b-,f#:p8ss b-,f#:8 e,g#             f#,a $p_marcato b-,f#:4 $p f#,a:8
 	7:   b:8
 	11:  b+ a#+ c#+2 a#+   b+ a#+ c#+2 a#+   b+ a#+ c#+2 a#+   b+ a#+ c#+2 a#+   b+ a#+ c#+2 a#+   b+ a#+ c#+2 a#+
 	12:  $pp b:16 a# c#+ a#   b a# c#+ a#    b a# c#+ a#   b a# c#+ a#           b a# c#+ a#   b a# c#+ a#
@@ -343,9 +342,9 @@ FUNCTION m50_to_58
 	2:   e+,g#+ $p_marcato g#,e+:4 $p e+,g#+:8   d#+,f#+
 	3:   e,g# $p_marcato g#-,e:4 $p e,g#:8       d#,f#
 	4:   e- f#- g#- a-                           b- -:4 
-	5:   b-,b:8 - - b-,b:p_ss_2                  b-,b:8
+	5:   b-,b:8 - - b-,b:pss                     b-,b:8
 	6:   e,g# $p_marcato f#-,g#-:4 $p e,g#:8     d#,f#
-	11:  b+ a#+ c#+2 a#+   b+ a#+ c#+2 a#+       b+:8 b:p_ss_1 b:8
+	11:  b+ a#+ c#+2 a#+   b+ a#+ c#+2 a#+       b+:8 b:pss b:8
 	12:  b a# c#+ a#   b a# c#+ a#               b:8
 	14:  e- f#- g#- a-                           b-
 	CALL i_arco_14    // switch violoncello 14 back to arco mode
@@ -353,14 +352,14 @@ FUNCTION m50_to_58
 	*
 	
 	// 58/2
-	3:   b-:p_ss_1
-	4:   e-:p_ss_1
-	6:   g#-,b-:p_ss_2
-	11:  b-:p_ss_1
-	12:  g#-:p_ss_1
-	13:  e-:p_ss_1
-	14:  e-:p_ss_1
-	15:  e-2:p_ss_1
+	3:   b-:pss
+	4:   e-:pss
+	6:   g#-,b-:pss
+	11:  b-:pss
+	12:  g#-:pss
+	13:  e-:pss
+	14:  e-:pss
+	15:  e-2:pss
 	*
 END
 
@@ -389,81 +388,81 @@ CALL m75_to_80(start=75)
 FUNCTION m75_to_80
 	CALL  d_all_staccato
 	
-	//   75                       76                       77
-	0:   e+3:p_8ss88_1            g#+3:4 f#+3              e+3:8 d#+3 e+3 c#+3
-	1:   e+2:p_8ss88_1            g#+2:4 f#+2              e+2:8 d#+2 e+2 c#+2
+	//   75                    76                  77
+	0:   e+3:p8ss88            g#+3:4 f#+3         e+3:8 d#+3 e+3 c#+3
+	1:   e+2:p8ss88            g#+2:4 f#+2         e+2:8 d#+2 e+2 c#+2
 	2:   $leg b,e+:2
-	2                             c+ /2 m
-	2:                            g#+:4. f#+:8             c#+,e+ c+,d#+ c#+,e+ a,c#+
+	2                          c+ /2 m
+	2:                         g#+:4. f#+:8        c#+,e+ c+,d#+ c#+,e+ a,c#+
 	3:   $leg b,e+:2
-	3                             c+ /2 m
-	3:                            g#+:4. f#+:8             c#+,e+ c+,d#+ c#+,e+ a,c#+
-	4:   $leg b-:2                c                        c#:8 c c# a-
-	5:   $leg b-,b:2              g#                       a
-	6:   $leg e-,g#:2             e-,g#                    e-,e
-	7:   e,e+:p_8ss88_2           e,e+:2                   e,e+:p_8888_2
+	3                          c+ /2 m
+	3:                         g#+:4. f#+:8        c#+,e+ c+,d#+ c#+,e+ a,c#+
+	4:   $leg b-:2             c                   c#:8 c c# a-
+	5:   $leg b-,b:2           g#                  a
+	6:   $leg e-,g#:2          e-,g#               e-,e
+	7:   e,e+:p8ss88           e,e+:2              e,e+:p8888
 	8:   $leg e-,e:1.
 	p    to       /2   q=3, m, tr=/32
 	p    bd2,cc2  /4   q=6
-	10:  e-:p_2tr32_1             e-:p_2tr32_1             e-:p_2tr32_1
-	11:  e+2:p_8ss88_1
-	11                            g#+2  /4.  tr=/16
-	11:                           f#+2:p_ss_1              e+2:p_ss_1 d#+2:p_ss_1 e+2:p_ss_1 c#+2:p_ss_1
-	12:  e+:p_8ss88_1
-	12                            g#+  /4.  tr=/16
-	12:                           f#+:p_ss_1               e+:p_ss_1 d#+:p_ss_1 e+:p_ss_1 c#+:p_ss_1
-	13:  b-,b:p_2tr16_2           c,c+:p_2tr16_2
+	10:  e-:p2tr32             e-:p2tr32           e-:p2tr32
+	11:  e+2:p8ss88
+	11                         g#+2  /4.  tr=/16
+	11:                        f#+2:pss            e+2:pss d#+2:pss e+2:pss c#+2:pss
+	12:  e+:p8ss88
+	12                         g#+  /4.  tr=/16
+	12:                        f#+:pss             e+:pss d#+:pss e+:pss c#+:pss
+	13:  b-,b:p2tr16           c,c+:p2tr16
 	{ if ${start} == 75
-		13:                                            $leg c#,c#+:p_ss_2 c,c+:p_ss_2 c#,c#+:p_ss_2 a-,a:p_ss_2
+		13:                                 $leg   c#,c#+:pss c,c+:pss c#,c#+:pss a-,a:pss
 	}
 	{ elsif ${start} in 83;119;127
-		13:                                            c#,c#+:8 c,c+:8 c#,c#+:8 a-,a:8
+		13:                                        c#,c#+:8 c,c+:8 c#,c#+:8 a-,a:8
 	}
-	14:  e-:p_2tr16_1             e-:p_2tr16_1             e-:p_2tr16_1
-	15:  e-2:p_8888_1             e-2:p_8888_1             e-2:p_8888_1
+	14:  e-:p2tr16             e-:p2tr16           e-:p2tr16
+	15:  e-2:p8888             e-2:p8888           e-2:p8888
 	*
 	CALL  v_all_ff
 	CALL  d_all_staccato
 	
 	//   78                                    79                            80
-	0:   b+2:p_8r8r_1                          a+2:p_8r8r_1                  g#+2:p_8r8r_1
-	1:   b+:8 - g#+2 -                         f#+2:p_8r8r_1                 e+2:p_8r8r_1
-	2:   g#,e+:8 - e+,g#+ -                    f#+,a+:p_8r8r_2               e+,g#+:p_8r8r_2
-	3:   g#,b:8 - g#,e+ -                      a,f#+:p_8r8r_2                g#,e+:p_8r8r_2
-	4:   g#-,b-:8 - e-2,e- -                   d#-2,d#:p_8r8r_2              e-2,e-:p_8r8r_2
-	5:   b:p_8r8r_1                            a:p_8r8r_1                    b:p_8r8r_1
-	6:   e-,g#:8 - g#-,e -                     b-,f#:p_8r8r_2                g#-,e:p_8r8r_2
-	7:   e,e+:p_8r8r_2                         b-,b:p_8r8r_2                 e,b:p_8r8r_2
-	8:   e-,e:p_8r8r_2                         d#-,d#:p_8r8r_2               e-,e:p_8r8r_2
-	p:   perc_all:p_8r8r_3                     perc_all:p_8r8r_3             perc_all:p_8r8r_3
-	10:  e-:p_8r8r_1                           b-2:p_8r8r_1                  e-:p_8r8r_1
+	0:   b+2:p8r8r                             a+2:p8r8r                     g#+2:p8r8r
+	1:   b+:8 - g#+2 -                         f#+2:p8r8r                    e+2:p8r8r
+	2:   g#,e+:8 - e+,g#+ -                    f#+,a+:p8r8r                  e+,g#+:p8r8r
+	3:   g#,b:8 - g#,e+ -                      a,f#+:p8r8r                   g#,e+:p8r8r
+	4:   g#-,b-:8 - e-2,e- -                   d#-2,d#:p8r8r                 e-2,e-:p8r8r
+	5:   b:p8r8r                               a:p8r8r                       b:p8r8r
+	6:   e-,g#:8 - g#-,e -                     b-,f#:p8r8r                   g#-,e:p8r8r
+	7:   e,e+:p8r8r                            b-,b:p8r8r                    e,b:p8r8r
+	8:   e-,e:p8r8r                            d#-,d#:p8r8r                  e-,e:p8r8r
+	p:   perc_all:p8r8r                        perc_all:p8r8r                perc_all:p8r8r
+	10:  e-:p8r8r                              b-2:p8r8r                     e-:p8r8r
 	11:  b+:16 c#+2 b+ c#+2 b+ c#+2 d#+2 e+2   a+ b+ a+ b+ a+ b+ c#+2 d#+2   g#+ a+ g#+ a+ g#+ a+ b+ c#+2
 	12:  b:16 c#+ b c#+ b c#+ d#+ e+           a b a b a b c#+ d#+           g# a g# a g# a b c#+
-	13:  g#-,g#:p_8r8r_2                       f#,a:p_8r8r_2                 b-,g#:p_8r8r_2
-	14:  e-:p_8r8r_1                           d#-:p_8r8r_1                  e-:p_8r8r_1
-	15:  e-2:p_8r8r_1                          d#-2:p_8r8r_1                 e-2:p_8r8r_1
+	13:  g#-,g#:p8r8r                          f#,a:p8r8r                    b-,g#:p8r8r
+	14:  e-:p8r8r                              d#-:p8r8r                     e-:p8r8r
+	15:  e-2:p8r8r                             d#-2:p8r8r                    e-2:p8r8r
 END
 
 // m. 81-82
 CALL m81_to_82
 FUNCTION m81_to_82
 	//   81                                   82
-	0:   f#+2:p_8r8r_1                        f#+2:8 -:8. b+2:16 c#+3 d#+3
+	0:   f#+2:p8r8r                           f#+2:8 -:8. b+2:16 c#+3 d#+3
 	1:   f#+2:8 - e+2 -                       d#+2:8 -:8. b+:16 c#+2 d#+2 
 	2:   c#+,f#+:8 - c#+,e+ -                 d#+:8
-	3:   f#,e+:p_8r8r_2                       d#+:8
-	4:   a-2,a-:p_8r8r_2                      b-2,b-:8
-	5:   f#:p_8r8r_1                          b-,b:8
-	6:   e,f#:p_8r8r_2                        b-,f#:8
-	7:   e,e+:p_8r8r_2                        b-,b:8
-	8:   a-2,a-:p_8r8r_2                      b-2,b-:8
-	p:   perc_all:p_8r8r_3                    perc_all:8
-	10:  e-:p_8r8r_1                          b-2:8
+	3:   f#,e+:p8r8r                          d#+:8
+	4:   a-2,a-:p8r8r                         b-2,b-:8
+	5:   f#:p8r8r                             b-,b:8
+	6:   e,f#:p8r8r                           b-,f#:8
+	7:   e,e+:p8r8r                           b-,b:8
+	8:   a-2,a-:p8r8r                         b-2,b-:8
+	p:   perc_all:p8r8r                       perc_all:8
+	10:  e-:p8r8r                             b-2:8
 	11:  f#+:16 g#+ f#+ g#+ f#+ g#+ f#+ g#+   f#+ g#+ f#+ d#+ b b+ c#+2 d#+2
 	12:  f#:16 g# f# g# f# g# f# g#           f# g# f# d# b- b c#+ d#+
-	13:  c#,e:p_8r8r_2                        b-,d#:p_8r8r_2
-	14:  e-:p_8r8r_1                          b-2:8
-	15:  e-2:p_8r8r_1                         b-3:8
+	13:  c#,e:p8r8r                           b-,d#:p8r8r
+	14:  e-:p8r8r                             b-2:8
+	15:  e-2:p8r8r                            b-3:8
 	*
 END
 
@@ -482,7 +481,7 @@ FUNCTION m89
 	6:   e,f#:8 - b-,f# -
 	7:   e:8 - b -
 	8:   a-2,a-:8 - b-2,b- -
-	p:   perc_all:p_8r8r_3
+	p:   perc_all:p8r8r
 	10:  e-:8 - b-2 -
 	11:  f#+:16 g#+ f#+ g#+ f#+ a+ g#+ f#+
 	12:  f#:16 g# f# g# f# a g# f#
@@ -590,8 +589,8 @@ FUNCTION m103_to_104
 	{ else
 	    13:                          e-,g#-
 	}
-	14:  e-:8     - - -              e-:p_8r8r_1
-	15:  e-2:8    - - -              e-2:p_8r8r_1
+	14:  e-:8     - - -              e-:p8r8r
+	15:  e-2:8    - - -              e-2:p8r8r
 	*
 END
 
@@ -613,10 +612,10 @@ FUNCTION m106_to_108
 	4:   -:2                          d#                       e
 	6:   -:2                          g
 	11:  b c#+ b c#+ d#+ e+ f#+ g#+   a b a b c#+ d#+ e+ f#+   g# a g# a b c#+ d#+ e+
-	12:  b     - g#   -               a:p_8r8r_1               g#:p_8r8r_1
-	13:  g#-,e - b-,e -               b-,f#:p_8r8r_2           b-,e:p_8r8r_2
-	14:  e-:p_8r8r_1                  b-2:p_8r8r_1             e-:p_8r8r_1
-	15:  e-2:p_8r8r_1                 b-3:p_8r8r_1             e-2:p_8r8r_1
+	12:  b     - g#   -               a:p8r8r                  g#:p8r8r
+	13:  g#-,e - b-,e -               b-,f#:p8r8r              b-,e:p8r8r
+	14:  e-:p8r8r                     b-2:p8r8r                e-:p8r8r
+	15:  e-2:p8r8r                    b-3:p8r8r                e-2:p8r8r
 	{ if ${start} == 106
 	    3                                                      e   /1  m
 	    3:                                                     g#:2
@@ -636,10 +635,10 @@ END
 4:   a-,c#                     b-:8
 6:   -:2                       b-:8
 11:  f# g# f# g# f# g# f# g#   f# g# f# d# b- c c# d#
-12:  f#:p_8r8r_1               f#
-13:  e-,c#:p_8r8r_2            f#-,d#:8
-14:  a-2:p_8r8r_1              b-2
-15:  a-3:p_8r8r_1              b-3
+12:  f#:p8r8r                  f#
+13:  e-,c#:p8r8r               f#-,d#:8
+14:  a-2:p8r8r                 b-2
+15:  a-3:p8r8r                 b-3
 *
 
 // m. 111-112
@@ -683,20 +682,20 @@ CALL m89                    // 133
 // m. 134/1
 0:   e+2:8 b+2 e+2
 1:   e+2:8 b+ e+2
-2:   e+:p_888_1
+2:   e+:p888
 3:   g#,e+:8 g#,b g#,e+
-4:   e-,b-:p_888_2
-5:   b-,g#:p_888_2
-6:   g#-,e:p_888_2
-7:   e,b:p_888_2
-8:   e-:p_888_1
-p:   perc_all:p_888_3
-10:  e-:p_888_1
+4:   e-,b-:p888
+5:   b-,g#:p888
+6:   g#-,e:p888
+7:   e,b:p888
+8:   e-:p888
+p:   perc_all:p888
+10:  e-:p888
 11:  e+:8 b e+
 12:  e:8 b- e
-13:  g#-,e:p_888_2
-14:  e-:p_888_1
-15:  e-2:p_888_1
+13:  g#-,e:p888
+14:  e-:p888
+15:  e-2:p888
 
 // m. 134/2-166/1
 CALL v_all_ff
@@ -709,42 +708,42 @@ CALL m19_to_26_1(contrabass=1)  // 159-166/1
 
 // m. 166/2-171
 CALL  v_all_f       
-//   166/2          167                168                          169                           170                         171
-0:   b+2:p_ss_1     b+2:p_8ss8ss_1     e+3:8 f#+3 g#+3 b+2:p_ss_1   b+2:p_8ss_1 e+3 g#+3:p_ss_1   f#+3 d#+3 b+2 b+2:p_ss_1    b+2:p_8ss8ss_1
-1:   b+:p_ss_1      b+:p_8ss8ss_1      e+2:8 f#+2 g#+2 b+:p_ss_1    b+:p_8ss_1 e+2 g#+2:p_ss_1    f#+2 d#+2 b+ b+:p_ss_1      b+:p_8ss8ss_1
-2:   b:p_ss_1       b:p_8ss8ss_1       e+:8 f#+ g#+ b:p_ss_1        b:p_8ss_1 e+ g#+:p_ss_1       f#+ d#+ b b:p_ss_1          b:p_8ss8ss_1
-3:   b:p_ss_1       b:p_8ss8ss_1       e+:8 f#+ g#+ b:p_ss_1        b:p_8ss_1 e+ g#+:p_ss_1       f#+ d#+ b b:p_ss_1          b:p_8ss8ss_1
-4:   g#-,e:p_ss_2   g#-,e:p_8ss8ss_2   g#-,e:p_888ss_2              g#-,e:p_8ss8ss_2              b-2,f#:p_888_2 b-:p_ss_1    g#-,e:p_8ss8ss_2
-5:   -:8            b-,g#:p_r8r8_2     b-,g#:p_r8r8_2               b-,g#:p_r8r8_2                b-,g#:p_r8r8_2              b-,g#:p_r8r8_2
-6:   e,g#:p_ss_2    e,g#:p_8ss8ss_2    e,g#:p_888ss_2               e,g#:p_8ss8ss_2               b-,f#:p_888_2 e,g#:p_ss_2   e,g#:p_8ss8ss_2
-7:   -:8            e,b:p_r8r8_2       e,b:p_r8r8_2                 e,b:p_r8r8_2                  b-,b:p_r8r8_2               e,b:p_r8r8_2
-8:   -:8            e-,e:p_8r8r_2      e-,e:p_8r8r_2                e-,e:p_8r8r_2                 b-2,b-:p_8r8r_2             e-,e:p_8r8r_2
-p:   -:8            perc_all:perc167   perc_all:perc167             perc_all:perc167              perc_all:perc167            perc_all:perc167
-10:  e-:p_ss_1      e-:p_8ss8ss_1      e-:p_888ss_1                 e-:p_8ss8ss_1                 b-2:p_888_1 e-:p_ss_1       e-:p_8ss8ss_1
-11:  b:p_ss_1       b:p_8ss8ss_1       e+:8 f#+ g#+ b:p_ss_1        b:p_8ss8ss_1                  f#+ d#+ b b                 b:p_8ss8ss_1
-12:  -:8            b-,g#:p_2tr16_2    b-,g#:p_2tr16_2              b-,g#:p_2tr16_2               b-,f#:p_2tr16_2             b-,g#:p_2tr16_2
-13:  -:8            e-,e:p_2tr16_2     e-,e:p_2tr16_2               e-,e:p_2tr16_2                b-,d#:p_2tr16_2             e-,e:p_2tr16_2
-14:  -:8            e-:p_8r8r_1        e-:p_8r8r_1                  e-:p_8r8r_1                   b-2:p_8r8r_1                e-:p_8r8r_1
-15:  -:8            e-2:p_8r8r_1       e-2:p_8r8r_1                 e-2:p_8r8r_1                  b-3:p_8r8r_1                e-2:p_8r8r_1
+//   166/2       167                168                       169                     170                     171
+0:   b+2:pss     b+2:p8ss8ss        e+3:8 f#+3 g#+3 b+2:pss   b+2:p8ss e+3 g#+3:pss   f#+3 d#+3 b+2 b+2:pss   b+2:p8ss8ss
+1:   b+:pss      b+:p8ss8ss         e+2:8 f#+2 g#+2 b+:pss    b+:p8ss e+2 g#+2:pss    f#+2 d#+2 b+ b+:pss     b+:p8ss8ss
+2:   b:pss       b:p8ss8ss          e+:8 f#+ g#+ b:pss        b:p8ss e+ g#+:pss       f#+ d#+ b b:pss         b:p8ss8ss
+3:   b:pss       b:p8ss8ss          e+:8 f#+ g#+ b:pss        b:p8ss e+ g#+:pss       f#+ d#+ b b:pss         b:p8ss8ss
+4:   g#-,e:pss   g#-,e:p8ss8ss      g#-,e:p888ss              g#-,e:p8ss8ss           b-2,f#:p888 b-:pss      g#-,e:p8ss8ss
+5:   -:8         b-,g#:pr8r8        b-,g#:pr8r8               b-,g#:pr8r8             b-,g#:pr8r8             b-,g#:pr8r8
+6:   e,g#:pss    e,g#:p8ss8ss       e,g#:p888ss               e,g#:p8ss8ss            b-,f#:p888 e,g#:pss     e,g#:p8ss8ss
+7:   -:8         e,b:pr8r8          e,b:pr8r8                 e,b:pr8r8               b-,b:pr8r8              e,b:pr8r8
+8:   -:8         e-,e:p8r8r         e-,e:p8r8r                e-,e:p8r8r              b-2,b-:p8r8r            e-,e:p8r8r
+p:   -:8         perc_all:perc167   perc_all:perc167          perc_all:perc167        perc_all:perc167        perc_all:perc167
+10:  e-:pss      e-:p8ss8ss         e-:p888ss                 e-:p8ss8ss              b-2:p888 e-:pss         e-:p8ss8ss
+11:  b:pss       b:p8ss8ss          e+:8 f#+ g#+ b:pss        b:p8ss8ss               f#+ d#+ b b             b:p8ss8ss
+12:  -:8         b-,g#:p2tr16       b-,g#:p2tr16              b-,g#:p2tr16            b-,f#:p2tr16            b-,g#:p2tr16
+13:  -:8         e-,e:p2tr16        e-,e:p2tr16               e-,e:p2tr16             b-,d#:p2tr16            e-,e:p2tr16
+14:  -:8         e-:p8r8r           e-:p8r8r                  e-:p8r8r                b-2:p8r8r               e-:p8r8r
+15:  -:8         e-2:p8r8r          e-2:p8r8r                 e-2:p8r8r               b-3:p8r8r               e-2:p8r8r
 
 // m. 172-173
-//   172                          173
-0:   e+3 f#+3 g#+3 e+2:16 g#+2    $leg b+2:4+16  $stac a+2:16  g#+2   f#+2
-1:   e+2 f#+2 g#+2 e+:16 g#+      $leg b+:4+16   $stac a+:16   g#+    f#+
-2:   e+ f#+ g#+ e+:16 g#+         $leg b+:4+16   $stac a+:16   g#+    f#+
-3:   e+ f#+ g#+ e,e+:16 g#,g#+    $leg b,b+:4+16 $stac a,a+:16 g#,g#+ f#,f#+
-4:   g#-,e:p_888_2 g#-,e:p_ss_2   f#-,d#:p_8ss88_2
-5:   b-,g#:p_r8r8_2               b-,g#:p_r8r8_2
-6:   e,g#:p_888ss_2               b-,f#:p_8ss88_2
-7:   e,b:p_r8r8_2                 b-,b:p_r8r8_2
-8:   e-,e:p_8r8r_2                b-,b-2:p_8r8r_2
-p:   perc_all:perc167             perc_all:perc167
-10:  e-:p_888ss_1                 b-2:p_8ss88_1
-11:  e+ f#+ g#+ e+,g#+:p_ss_2     $leg b+:4+16   $stac a+:16   g#+    f#+
-12:  b-,g#:p_2tr16_2              d#,b:p_2tr16_2
-13:  e-,e:p_2tr16_2               b-,f#:p_2tr16_2
-14:  e-:p_8r8r_1                  b-2:p_8r8r_1
-15:  e-2:p_8r8r_1                 b-3:p_8r8r_1
+//   172                         173
+0:   e+3 f#+3 g#+3 e+2:16 g#+2   $leg b+2:4+16  $stac a+2:16  g#+2   f#+2
+1:   e+2 f#+2 g#+2 e+:16 g#+     $leg b+:4+16   $stac a+:16   g#+    f#+
+2:   e+ f#+ g#+ e+:16 g#+        $leg b+:4+16   $stac a+:16   g#+    f#+
+3:   e+ f#+ g#+ e,e+:16 g#,g#+   $leg b,b+:4+16 $stac a,a+:16 g#,g#+ f#,f#+
+4:   g#-,e:p888 g#-,e:pss        f#-,d#:p8ss88
+5:   b-,g#:pr8r8                 b-,g#:pr8r8
+6:   e,g#:p888ss                 b-,f#:p8ss88
+7:   e,b:pr8r8                   b-,b:pr8r8
+8:   e-,e:p8r8r                  b-,b-2:p8r8r
+p:   perc_all:perc167            perc_all:perc167
+10:  e-:p888ss                   b-2:p8ss88
+11:  e+ f#+ g#+ e+,g#+:pss       $leg b+:4+16   $stac a+:16   g#+    f#+
+12:  b-,g#:p2tr16                d#,b:p2tr16
+13:  e-,e:p2tr16                 b-,f#:p2tr16
+14:  e-:p8r8r                    b-2:p8r8r
+15:  e-2:p8r8r                   b-3:p8r8r
 
 // m. 174-177
 CALL m174_to_177(start=174)
@@ -756,9 +755,9 @@ FUNCTION m174_to_177
 	2:   e+,g#+:1                          $stac                                  f#+,a+:8 f#+,a+:4 f#+,a+:8+8   f#+,a+:8 f#+,a+:4
 	3:   g#,e+:1                           $stac                                  a,f#+:8  a,f#+:4  a,f#+:8+8    a,f#+:8  a,f#+:4
 	4:   e-:8.    e:16 e:4+8               $stac b-:8 g#- e-                      b-2 c- c#- d-                  d#- f#- b- b-2
-	5:   b-,g#:8. b-,g#:16 b-,g#:4+8       $stac b-,g#:p_888_2                    a:4 a                          a a
-	6:   e,g#:8. e,g#:16 e,g#:4+8          $stac e,g#:p_888_2                     f#,a:4 f#,a                    f#,a f#,a
-	7:   e,b:8. e,b:16 e,b:4+8             $stac e,b:p_888_2                      -:8 f#+:4 f#+:8+8              f#+:4 f#+:8
+	5:   b-,g#:8. b-,g#:16 b-,g#:4+8       $stac b-,g#:p888                       a:4 a                          a a
+	6:   e,g#:8. e,g#:16 e,g#:4+8          $stac e,g#:p888                        f#,a:4 f#,a                    f#,a f#,a
+	7:   e,b:8. e,b:16 e,b:4+8             $stac e,b:p888                         -:8 f#+:4 f#+:8+8              f#+:4 f#+:8
 	{ if ${start} in 174;198
 	    8:  e-,e:2                         $stac e:8
 	}
@@ -766,11 +765,11 @@ FUNCTION m174_to_177
 	    8:  e-,e:8. e:16 e:4+8
 	}
 	8:                                     $stac b-:8 g#- e-                      b-2,b- c-,c c#-,c# d-,d        d#-,d# f#-,f# b-2,b- b-2,b-
-	p:   perc_all:perc167                  perc_all:perc167                       to:8 perc_all:p_888_3          perc_all:p_8888_3
-	10:  e-:p_2tr32_1                      $stac e-:p_2tr32_1                     b-2:p_8888_1                   b-2:p_8888_1
-	11:  e+:16 f#+ g#+ a+ g#+ a+ b+ c#+2   b+ c#+2 d#+2 e+2 d#+2 e+2 f#+2 g#+2    $stac a+2:p_2tr16_1            a+2:p_2tr16_1
-	12:  e:16  f#  g#  a  g#  a  b  c#+    b  c#+  d#+  e+  d#+  e+  f#+  g#+     $stac a+:p_2tr16_1             a+:p_2tr16_1
-	13:  $stac e,g#:p_2tr16_2              e,g#:p_2tr16_2                         f#,f#+:p_2tr16_2               f#,f#+:p_2tr16_2
+	p:   perc_all:perc167                  perc_all:perc167                       to:8 perc_all:p888             perc_all:p8888
+	10:  e-:p2tr32                         $stac e-:p2tr32                        b-2:p8888                      b-2:p8888
+	11:  e+:16 f#+ g#+ a+ g#+ a+ b+ c#+2   b+ c#+2 d#+2 e+2 d#+2 e+2 f#+2 g#+2    $stac a+2:p2tr16               a+2:p2tr16
+	12:  e:16  f#  g#  a  g#  a  b  c#+    b  c#+  d#+  e+  d#+  e+  f#+  g#+     $stac a+:p2tr16                a+:p2tr16
+	13:  $stac e,g#:p2tr16                 e,g#:p2tr16                            f#,f#+:p2tr16                  f#,f#+:p2tr16
 	14:  e-:8.  e:16  e:4+8                $stac b-:8  g#-  e-                    b-2 c-  c#-  d-                d#-  f#-  b-  b-2
 	15:  e-2:8. e-:16 e-:4+8               $stac b-2:8 g#-2 e-2                   b-3 c-2 c#-2 d-2               d#-2 f#-2 b-2 b-3
 END
@@ -783,29 +782,29 @@ CALL m182_to_183(start=182)   // 182-183
 CALL m182_to_183(start=184)   // 184-185
 FUNCTION m182_to_183
 	CALL d_all_staccato
-	//   182                                             183
-	0:   g#+3:8   - d#+3     -                           e+3    - f#+3    -
-	1:   g#+2:8   - d#+2     -                           e+2    - f#+2    -
-	2:   e+,g#+:8 - c+,g#+   -                           c#+,e+ - d#+,b+  -
-	3:   g#,e+:8  - c#,d#+   -                           c#+,e+ - d#+,f#+ -
-	4:   e-,e:8   - g#-2,g#- -                           c#-,c# - b-2,b-  -
-	5:   g#:p_8r8r_1                                     g#:8   - b       - 
-	6:   e,g#:8   - f#,g#    -                           e,g#   - b-,f#   -
+	//   182                                       183
+	0:   g#+3:8   - d#+3     -                     e+3    - f#+3    -
+	1:   g#+2:8   - d#+2     -                     e+2    - f#+2    -
+	2:   e+,g#+:8 - c+,g#+   -                     c#+,e+ - d#+,b+  -
+	3:   g#,e+:8  - c#,d#+   -                     c#+,e+ - d#+,f#+ -
+	4:   e-,e:8   - g#-2,g#- -                     c#-,c# - b-2,b-  -
+	5:   g#:p8r8r                                  g#:8   - b       - 
+	6:   e,g#:8   - f#,g#    -                     e,g#   - b-,f#   -
 	{ if ${start} in 184;208
 	    7:  e+,g#:8
 	}
 	{ else
 	    7:  e+:8
 	}
-	7:            - g#       -                           e+     - b       - 
-	8:   e-,e:8   - g#-2,g#- -                           c#-,c# - b-2,b-  -
-	p:   perc_all:p_8r8r_3                               perc_all:p_8r8r_3
-	10:  e-:p_8r8r_1                                     e-:8   - b-2     -
-	11:  g#+2:p_ssss_1 $leg g#+2:16 $stac d#+2:p_sss_1   $leg d#+2 $stac e+2:p_sss_1 $leg e+2 $stac f#+2:p_sss_1
-	12:  g#+:p_ssss_1  $leg g#+:16  $stac d#+:p_sss_1    $leg d#+  $stac e+:p_sss_1  $leg e+  $stac f#+:p_sss_1
-	13:  e,e+:8 - g#,c+:p_4tr16_2                        e,c#+  - d#,b:p_4tr16_2
-	14:  e-:8   - g#-2 -                                 c#-    - b-2     -
-	15:  e-2:8  - g#-3 -                                 c#-2   - b-3     -
+	7:            - g#       -                     e+     - b       - 
+	8:   e-,e:8   - g#-2,g#- -                     c#-,c# - b-2,b-  -
+	p:   perc_all:p8r8r                            perc_all:p8r8r
+	10:  e-:p8r8r                                  e-:8   - b-2     -
+	11:  g#+2:pssss $leg g#+2:16 $stac d#+2:psss   $leg d#+2 $stac e+2:psss $leg e+2 $stac f#+2:psss
+	12:  g#+:pssss  $leg g#+:16  $stac d#+:psss    $leg d#+  $stac e+:psss  $leg e+  $stac f#+:psss
+	13:  e,e+:8 - g#,c+:p4tr16                     e,c#+  - d#,b:p4tr16
+	14:  e-:8   - g#-2 -                           c#-    - b-2     -
+	15:  e-2:8  - g#-3 -                           c#-2   - b-3     -
 END
 
 // m. 186-197
@@ -824,35 +823,35 @@ FUNCTION m186_to_197
 	7:   e,e+:2+8                       -:4+8    $sf $leg g#,e+:2+8                    -:4+8       $sf $leg b:2+8                         -:4+8
 	8:   e-,e:2+8                       -:4+8    $sf $leg e-,e:2+8                     -:4+8       $sf $leg c#-,c#:2+8                    -:4+8
 	p:   perc_all:perc186_to_187                 perc_all:perc186_to_187                           perc_all:perc186_to_187
-	10:  e-:p_2tr32_1   $stac $f e-:8   -:4+8    $sf $leg e-:p_2tr32_1  $stac $f e-:8  -:4+8       $sf $leg e-:p_2tr32_1  $stac $f e-:8   -:4+8
-	13:  e,c+:p_2tr16_2 $stac $f e,c+:8 -:4+8    $sf $leg e,b:p_2tr16_2 $stac $f e,b:8 -:4+8       $sf $leg f,b:p_2tr16_2 $stac $f f,b:8  -:4+8
-	14:  c:p_2tr16_1    $stac $f c:8    -:4+8    $sf $leg b-:p_2tr16_1  $stac $f b-:8  -:4+8       $sf $leg c#:p_2tr16_1  $stac $f c#:8   -:4+8
-	15:  e-2:8    $stac $f e-2:p_8888_1 -:4+8    $sf $leg e-2:8 $stac $f e-2:p_8888_1  -:4+8       $sf $leg c#-2:8 $stac $f c#-2:p_8888_1 -:4+8
+	10:  e-:p2tr32   $stac $f e-:8      -:4+8    $sf $leg e-:p2tr32  $stac $f e-:8     -:4+8       $sf $leg e-:p2tr32  $stac $f e-:8      -:4+8
+	13:  e,c+:p2tr16 $stac $f e,c+:8    -:4+8    $sf $leg e,b:p2tr16 $stac $f e,b:8    -:4+8       $sf $leg f,b:p2tr16 $stac $f f,b:8     -:4+8
+	14:  c:p2tr16    $stac $f c:8       -:4+8    $sf $leg b-:p2tr16  $stac $f b-:8     -:4+8       $sf $leg c#:p2tr16  $stac $f c#:8      -:4+8
+	15:  e-2:8    $stac $f e-2:p8888    -:4+8    $sf $leg e-2:8 $stac $f e-2:p8888     -:4+8       $sf $leg c#-2:8 $stac $f c#-2:p8888    -:4+8
 	CALL  d_all_legato
 	CALL  v_all_sf
-	//   192 - 193                                     194 - 195                              196 - 197
-	0:   a#+3:2+8 $stac $f g+3:16 g+3 e+3:8 g+3        b+3 a#+3 a+3 g#+3 f#+3 e+3 d#+3 c#+3   b+3 a#+3 a+3 g#+3 f#+3 e+3 d#+3 f#+3
-	1:   a#+2:2+8 $stac $f g+2:16 g+2 e+2:8 g+2        b+2 a#+2 a+2 g#+2 f#+2 e+2 d#+2 c#+2   b+2 a#+2 a+2 g#+2 f#+2 e+2 d#+2 f#+2
-	2:   g+,bb+:2+8       $f            -:4+8          $leg g#+,b+:2 e+,g#+                   $leg  f#+,a+  d#+,f#+
-	3:   a#,a#+:2+8 $stac $f g,g+:p_ss_2 e,e+:8 g,g+   $leg b,e+:2+2                          $leg  a,d#+
-	4:   c-,c:2+8         $f            -:4+8          $stac b-2,b:p_8888_2 b-2,b:p_8888_2    b-2,b:p_8888_2    b-2,b:p_8888_2
-	5:   g:2+8            $f            -:4+8          b-,b:2+2                               b-,a
-	6:   e-,e:2+8         $f            -:4+8          e,g#:2+2                               b-,f#
-	7:   e,e+:2+8         $f            -:4+8          g#,e+:2+2                              b-,b
-	8:   c-,c:2+8         $f            -:4+8          b-2,b-:2+2                             b-2,b-
-	p:   perc_all:perc186_to_187   $f                  perc_all:perc194   perc_all:perc194    perc_all:perc194   perc_all:perc194
-	10:  e-:p_2tr32_1   $stac $f e-:8   -:4+8          b-2:p_2tr32_1      b-2:p_2tr32_1       b-2:p_2tr32_1      b-2:p_2tr32_1
-	13:  g,e+:p_2tr16_2 $stac $f g,e+:8 -:4+8          g#,e+:p_2tr16_2    g#,e+:p_2tr16_2     d#,b:p_2tr16_2     d#,b:p_2tr16_2
-	14:  c:p_2tr16_1    $stac $f c:8    -:4+8          b-:p_2tr16_1       b-:p_2tr16_1        b-2:p_2tr16_1      b-2:p_2tr16_1
-	15:  c-2:8    $stac $f c-2:p_8888_1 -:4+8          b-3:p_8888_1       b-3:p_8888_1        b-3:p_8888_1       b-3:p_8888_1
+	//   192 - 193                                  194 - 195                              196 - 197
+	0:   a#+3:2+8 $stac $f g+3:16 g+3 e+3:8 g+3     b+3 a#+3 a+3 g#+3 f#+3 e+3 d#+3 c#+3   b+3 a#+3 a+3 g#+3 f#+3 e+3 d#+3 f#+3
+	1:   a#+2:2+8 $stac $f g+2:16 g+2 e+2:8 g+2     b+2 a#+2 a+2 g#+2 f#+2 e+2 d#+2 c#+2   b+2 a#+2 a+2 g#+2 f#+2 e+2 d#+2 f#+2
+	2:   g+,bb+:2+8       $f            -:4+8       $leg g#+,b+:2 e+,g#+                   $leg  f#+,a+  d#+,f#+
+	3:   a#,a#+:2+8 $stac $f g,g+:pss e,e+:8 g,g+   $leg b,e+:2+2                          $leg  a,d#+
+	4:   c-,c:2+8         $f            -:4+8       $stac b-2,b:p8888 b-2,b:p8888          b-2,b:p8888    b-2,b:p8888
+	5:   g:2+8            $f            -:4+8       b-,b:2+2                               b-,a
+	6:   e-,e:2+8         $f            -:4+8       e,g#:2+2                               b-,f#
+	7:   e,e+:2+8         $f            -:4+8       g#,e+:2+2                              b-,b
+	8:   c-,c:2+8         $f            -:4+8       b-2,b-:2+2                             b-2,b-
+	p:   perc_all:perc186_to_187   $f               perc_all:perc194   perc_all:perc194    perc_all:perc194   perc_all:perc194
+	10:  e-:p2tr32   $stac $f e-:8      -:4+8       b-2:p2tr32      b-2:p2tr32             b-2:p2tr32      b-2:p2tr32
+	13:  g,e+:p2tr16 $stac $f g,e+:8    -:4+8       g#,e+:p2tr16    g#,e+:p2tr16           d#,b:p2tr16     d#,b:p2tr16
+	14:  c:p2tr16    $stac $f c:8       -:4+8       b-:p2tr16       b-:p2tr16              b-2:p2tr16      b-2:p2tr16
+	15:  c-2:8    $stac $f c-2:p8888    -:4+8       b-3:p8888       b-3:p8888              b-3:p8888       b-3:p8888
 	
-	//   186           187                                           188
-	11:  g+2:p_2tr16_1 $f $stac g+2:16 g+2 e+2 e+2 c+2 c+2 e+2 e+2   $sf $leg g#+2:p_2tr16_1 $f $stac
-	12:  g+:p_2tr16_1  $f $stac g+:16 g+ e+ e+ c+ c+ e+ e+           $sf $leg g#+:p_2tr16_1  $f $stac
+	//   186           187                                        188
+	11:  g+2:p2tr16 $f $stac g+2:16 g+2 e+2 e+2 c+2 c+2 e+2 e+2   $sf $leg g#+2:p2tr16 $f $stac
+	12:  g+:p2tr16  $f $stac g+:16 g+ e+ e+ c+ c+ e+ e+           $sf $leg g#+:p2tr16  $f $stac
 	
-	//   189                                        190            191                                            192
-	11:  g#+2 g#+2 e+2 e+2 b+ b+ e+2 e+2 $sf $leg   g#+2:p_2tr16_1 $f $stac g#+2 g#+2 f+2 f+2 c#+2 c#+2 f+2 f+2   $sf a#+2:p_2tr16_1 $f
-	12:  g#+  g#+  e+  e+  b  b  e+  e+  $sf $leg   g#+:p_2tr16_1  $f $stac g#+  g#+  f+  f+  c#+  c#+  f+  f+    $sf a#+:p_2tr16_1  $f
+	//   189                                        190         191                                            192
+	11:  g#+2 g#+2 e+2 e+2 b+ b+ e+2 e+2 $sf $leg   g#+2:p2tr16 $f $stac g#+2 g#+2 f+2 f+2 c#+2 c#+2 f+2 f+2   $sf a#+2:p2tr16 $f
+	12:  g#+  g#+  e+  e+  b  b  e+  e+  $sf $leg   g#+:p2tr16  $f $stac g#+  g#+  f+  f+  c#+  c#+  f+  f+    $sf a#+:p2tr16  $f
 	
 	{ if ${start} == 186
 	    //   193                  194 - 195                              196 - 197
@@ -860,17 +859,17 @@ FUNCTION m186_to_197
 	    12:  a#+:8  g+  e+  g+    b+  a#+  a+  g#+  f#+  e+  d#+  c#+    b  a#  a  g#  f#  e  d#  f#
 	}
 	{ elsif ${start} == 210
-	    //   217                                            218
-	    11:  a#+2:p_ss_1 g+2:p_ss_1 e+2:p_ss_1 g+2:p_ss_1   b+2:p_ss_1 a#+2:p_ss_1 a+2:p_ss_1 g#+2:p_ss_1
-	    12:  a#+:p_ss_1  g+:p_ss_1  e+:p_ss_1  g+:p_ss_1    b+:p_ss_1  a#+:p_ss_1  a+:p_ss_1  g#+:p_ss_1
+	    //   217                                218
+	    11:  a#+2:pss g+2:pss e+2:pss g+2:pss   b+2:pss a#+2:pss a+2:pss g#+2:pss
+	    12:  a#+:pss  g+:pss  e+:pss  g+:pss    b+:pss  a#+:pss  a+:pss  g#+:pss
 	    
-	    //   219                                              220
-	    11:  f#+2:p_ss_1 e+2:p_ss_1 d#+2:p_ss_1 c#+2:p_ss_1   b+:p_ss_1 a#+:p_ss_1 a+:p_ss_1 g#+:p_ss_1
-	    12:  f#+:p_ss_1  e+:p_ss_1  d#+:p_ss_1  c#+:p_ss_1    b:p_ss_1  a#:p_ss_1  a:p_ss_1  g#:p_ss_1
+	    //   219                                  220
+	    11:  f#+2:pss e+2:pss d#+2:pss c#+2:pss   b+:pss a#+:pss a+:pss g#+:pss
+	    12:  f#+:pss  e+:pss  d#+:pss  c#+:pss    b:pss  a#:pss  a:pss  g#:pss
 	    
 	    //   221
-	    11:  f#+:p_ss_1 e+:p_ss_1 d#+:p_ss_1 f#+:p_ss_1
-	    12:  f#:p_ss_1  e:p_ss_1  d#:p_ss_1  f#:p_ss_1
+	    11:  f#+:pss e+:pss d#+:pss f#+:pss
+	    12:  f#:pss  e:pss  d#:pss  f#:pss
 	}
 END
 
@@ -883,23 +882,23 @@ CALL m186_to_197(start=210)   // 210-221
 
 // m. 222-225
 CALL d_all_legato
-//   222                                           223              224                              225
-0:   e+3:16 d#+3 e+3 d#+3 e+3:8 $stac b+2:p_ss_1   b+2:p_8ss8ss_1   e+3:8 f#+3 g#+3 $ff b+2:p_ss_1   b+2:p_8ss8ss_1
-1:   e+2:16 d#+2 e+2 d#+2 e+2:8 $stac b+:p_ss_1    b+:p_8ss8ss_1    e+3:8 f#+3 g#+3 $ff b+:p_ss_1    b+:p_8ss8ss_1
-2:   e+,g#+:4+8                 $stac b:p_ss_1     b:p_8ss8ss_1     e+:8  f#+  g#+  $ff b:p_ss_1     b:p_8ss8ss_1
-3:   g#,e+:4+8                  $stac b:p_ss_1     b:p_8ss8ss_1     e+:8  f#+  g#+  $ff b:p_ss_1     b:p_8ss8ss_1
-4:   e-:4+8                     $stac b-:p_ss_1    b-:p_8ss8ss_1    e:8   f#   g#   $ff b-:p_ss_1    b-:p_8ss8ss_1
+//   222                                        223           224                           225
+0:   e+3:16 d#+3 e+3 d#+3 e+3:8 $stac b+2:pss   b+2:p8ss8ss   e+3:8 f#+3 g#+3 $ff b+2:pss   b+2:p8ss8ss
+1:   e+2:16 d#+2 e+2 d#+2 e+2:8 $stac b+:pss    b+:p8ss8ss    e+3:8 f#+3 g#+3 $ff b+:pss    b+:p8ss8ss
+2:   e+,g#+:4+8                 $stac b:pss     b:p8ss8ss     e+:8  f#+  g#+  $ff b:pss     b:p8ss8ss
+3:   g#,e+:4+8                  $stac b:pss     b:p8ss8ss     e+:8  f#+  g#+  $ff b:pss     b:p8ss8ss
+4:   e-:4+8                     $stac b-:pss    b-:p8ss8ss    e:8   f#   g#   $ff b-:pss    b-:p8ss8ss
 5:   b-,g#:4+8                  -:8
-6:   g#-,e:4+8                  $stac b-:p_ss_1    b-:p_8ss8ss_1    e:8   f#   g#   $ff b-:p_ss_1    b-:p_8ss8ss_1
+6:   g#-,e:4+8                  $stac b-:pss    b-:p8ss8ss    e:8   f#   g#   $ff b-:pss    b-:p8ss8ss
 7:   e,b:4+8                    -:8
 8:   e-:4+8                     -:8
 p:   perc_all:4
-10:  e-:p_4tr32_1 e-:8
-11:  e+:16 d#+ e+ d#+ e+:8      -:8                -:2              -:4 -:8  $stac  $ff b:p_ss_1     b:p_8ss8ss_1
-12:  e:16  d#  e  d#  e:8       -:8                -:2              -:4 -:8  $stac  $ff b:p_ss_1     b:p_8ss8ss_1
-13:  e,g#:p_4tr16_2     e,g#:8  -:8                -:2              -:4 -:8  $stac  $ff b-:p_ss_1    b-:p_8ss8ss_1
-14:  e-:16  d#-  e-  d#-  e-:8  -:8                -:2              -:4 -:8  $stac  $ff b-:p_ss_1    b-:p_8ss8ss_1
-15:  e-2:8                                                                   $stac
+10:  e-:p4tr32 e-:8
+11:  e+:16 d#+ e+ d#+ e+:8      -:8             -:2           -:4 -:8  $stac  $ff b:pss     b:p8ss8ss
+12:  e:16  d#  e  d#  e:8       -:8             -:2           -:4 -:8  $stac  $ff b:pss     b:p8ss8ss
+13:  e,g#:p4tr16     e,g#:8     -:8             -:2           -:4 -:8  $stac  $ff b-:pss    b-:p8ss8ss
+14:  e-:16  d#-  e-  d#-  e-:8  -:8             -:2           -:4 -:8  $stac  $ff b-:pss    b-:p8ss8ss
+15:  e-2:8                                                             $stac
 
 // m. 226-229
 //   226              227               228              229
@@ -928,12 +927,12 @@ CALL v_all_sf
 7:   $leg b:2+2
 8:   $leg b-2,b-:2+2
 p:   perc_all:perc167                   $ff perc_all:perc167
-10:  $leg b-2:p_2tr32_1                 $ff b-2:p_2tr32_1
+10:  $leg b-2:p2tr32                    $ff b-2:p2tr32
 11:  b:16 $ff c+ c#+ d+ d#+ e+ f+ f#+   g+ g#+ a+ a#+ b+ c+2 c#+2 d#+2
 12:  b-:16 $ff c c#  d  d#  e  f  f#    g  g#  a  a#  b  c+  c#+  d#+
-13:  f#,a:p_2tr16_2                     $ff f#,a:p_2tr16_2
-14:  b-:p_2tr16_1                       $ff b-:p_2tr16_1
-15:  b-3:8 $ff b-3:p_888_1              b-3:p_8888_1
+13:  f#,a:p2tr16                        $ff f#,a:p2tr16
+14:  b-:p2tr16                          $ff b-:p2tr16
+15:  b-3:8 $ff b-3:p888                 b-3:p8888
 CALL v_all_ff
 
 // m. 232-235
@@ -962,10 +961,10 @@ CALL d_all_staccato
 
 // m. 236-243
 {
-	//   236                   237                  238                 239
-	0:   e+3:p_8ss88_1         e+3:8 b+2:p_ss88_1   b+2 g#+2:p_ss88_1   g#+2 e+2:p_ss88_1
-	1:   e+2:p_8ss88_1         e+2:8 b+:p_ss88_1    b+  g#+:p_ss88_1    g#+  e+:p_ss88_1
-	11:  e+2:8 e+2:p_ss4tr16   e+2:8 b+:p_ss4tr16   b+ g#+:p_ss4tr16    g#+  e+:p_ss4tr16
+	//   236                  237                 238               239
+	0:   e+3:p8ss88           e+3:8 b+2:pss88     b+2 g#+2:pss88    g#+2 e+2:pss88
+	1:   e+2:p8ss88           e+2:8 b+:pss88      b+  g#+:pss88     g#+  e+:pss88
+	11:  e+2:8 e+2:pss4tr16   e+2:8 b+:pss4tr16   b+ g#+:pss4tr16   g#+  e+:pss4tr16
 	
 	{ m //   236-244/1
 	    2:   $leg e+,g#+:*4+8
@@ -980,64 +979,64 @@ CALL d_all_staccato
 	    6:   -:8 e-,g#:4.
 	    7:   -:8 g#,e+:4.
 	    p:   perc_all:perc236
-	    10:  e-:p_2tr32_1
+	    10:  e-:p2tr32
 	}
 	{ q=4 // 236-239
-	    12:  g#,e+:p_2tr16_2
-	    13:  e,b:p_2tr16_2
-	    14:  e-:p_2tr16_1
-	    15:  e-2:p_8888_1
+	    12:  g#,e+:p2tr16
+	    13:  e,b:p2tr16
+	    14:  e-:p2tr16
+	    15:  e-2:p8888
 	}
 	{ q=4 // 240-243
-	    12:  b-,g#:p_2tr16_2
-	    13:  e-,e:p_2tr16_2
+	    12:  b-,g#:p2tr16
+	    13:  e-,e:p2tr16
 	}
 	
-	//   240                 241                242                 243
-	0:   e+2 e+3:p_ss88_1    e+3 b+2:p_ss88_1   b+2 g#+2:p_ss88_1   g#+2 e+2:p_ss88_1
-	1:   e+  e+2:p_ss88_1    e+2 b+:p_ss88_1    b+  g#+:p_ss88_1    g#+  e+:p_ss88_1
-	11:  e+  e+:p_ss4tr16    e+  b:p_ss4tr16    b   g#:p_ss4tr16    g#   e:p_ss4tr16
-	14:  e-:8 e:p_888_1      e   b-:p_888_1     b-  g#-:p_888_1     g#-  e-:p_888_1
-	15:  e-2:8 e-:p_888_1    e-  b-2:p_888_1    b-2 g#-2:p_888_1    g#-2 e-2:p_888_1
+	//   240               241              242              243
+	0:   e+2 e+3:pss88     e+3 b+2:pss88    b+2 g#+2:pss88   g#+2 e+2:pss88
+	1:   e+  e+2:pss88     e+2 b+:pss88     b+  g#+:pss88    g#+  e+:pss88
+	11:  e+  e+:pss4tr16   e+  b:pss4tr16   b   g#:pss4tr16  g#   e:pss4tr16
+	14:  e-:8 e:p888       e   b-:p888      b-  g#-:p888     g#-  e-:p888
+	15:  e-2:8 e-:p888     e-  b-2:p888     b-2 g#-2:p888    g#-2 e-2:p888
 }
 *
 
 // m. 244-248
 CALL d_all_staccato
 //   244                          245                   246                         247                           248
-0:   e+2:8 -:8+4                  -:2                   -:8 b+  e+2 b+              g#+2 e+2 b+2 g#+2             e+3:4 -:8 e+3:p_ss_1
-1:   e+:8  -:8+4                  -:2                   -:8 b   e+  b               g#+  e+  b+  g#+              e+2:4 -:8 e+2:p_ss_1
-2:   -:2                          -:2                   -:8 b   e+  b               g#+  e+  b+  g#+              e+:4  -:8 g#+,b+:p_ss_2
-3:   -:8 b-  e  b-                g#    e   b   g#      e+  b   e+  b               g#+  e+  b+  g#+              e+:4  -:8 b,g#+:p_ss_2
+0:   e+2:8 -:8+4                  -:2                   -:8 b+  e+2 b+              g#+2 e+2 b+2 g#+2             e+3:4 -:8 e+3:pss
+1:   e+:8  -:8+4                  -:2                   -:8 b   e+  b               g#+  e+  b+  g#+              e+2:4 -:8 e+2:pss
+2:   -:2                          -:2                   -:8 b   e+  b               g#+  e+  b+  g#+              e+:4  -:8 g#+,b+:pss
+3:   -:8 b-  e  b-                g#    e   b   g#      e+  b   e+  b               g#+  e+  b+  g#+              e+:4  -:8 b,g#+:pss
 4:   -:8 b-2 e- b-2               g#-   e-  b-  g#-     e   b-2 e-  b-2             g#-  e-  b-  g#-              e:4
 6:   -:8 b-  e  b-                g#    e   b   g#      e   b-  e   b-              g#   e   b   g#               e:4
 7:   -:8 b-  e  b-                g#    e   b   g#      e   b   e+  b               g#+  e+  b   g#               e:4
 8:   -:2                          -:2                   -:8 b-2 e-  b-2             g#-  e-  b-  g#-              e:4
 p:   perc_all:8 -:8+4
-10:  e-:8  -:8+4                  -:2                   -:8 b-2:p_888_1             b-2:p_8888_1                  e-:4  -:8 e-:p_ss_1
-11:  e:8     b-:16 b- e e b- b-   g# g# e e b b g# g#   e+:8 b:16  b  e+ e+ b  b    g#+ g#+ e+ e+ b+ b+ g#+ g#+   e+2:4 -:8 e+2:p_ss_1
-12:  b-,g#:8 b-:16 b- e e b- b-   g# g# e e b b g# g#   e+:8 b:16  b  e+ e+ b  b    g#+ g#+ e+ e+ b+ b+ g#+ g#+   e+2:4 -:8 b,g#+:p_ss_2
-13:  e-,e:8  b-:16 b- e e b- b-   g# g# e e b b g# g#   e+:8 b-:16 b- e  e  b- b-   g#  g#  e  e  b  b  g#  g#    e+:4  -:8 g#,e+:p_ss_2
-14:  e-:8  -:8+4                  -:2                   -:8 b-2 e-  b-2             g#-  e-  b-  g#-              e:4   -:8 e:p_ss_1
-15:  e-2:8 -:8+4                  -:2                   -:8 b-3 e-2 b-3             g#-2 e-2 b-2 g#-2             e-:4  -:8 e-:p_ss_1
+10:  e-:8  -:8+4                  -:2                   -:8 b-2:p888                b-2:p8888                     e-:4  -:8 e-:pss
+11:  e:8     b-:16 b- e e b- b-   g# g# e e b b g# g#   e+:8 b:16  b  e+ e+ b  b    g#+ g#+ e+ e+ b+ b+ g#+ g#+   e+2:4 -:8 e+2:pss
+12:  b-,g#:8 b-:16 b- e e b- b-   g# g# e e b b g# g#   e+:8 b:16  b  e+ e+ b  b    g#+ g#+ e+ e+ b+ b+ g#+ g#+   e+2:4 -:8 b,g#+:pss
+13:  e-,e:8  b-:16 b- e e b- b-   g# g# e e b b g# g#   e+:8 b-:16 b- e  e  b- b-   g#  g#  e  e  b  b  g#  g#    e+:4  -:8 g#,e+:pss
+14:  e-:8  -:8+4                  -:2                   -:8 b-2 e-  b-2             g#-  e-  b-  g#-              e:4   -:8 e:pss
+15:  e-2:8 -:8+4                  -:2                   -:8 b-3 e-2 b-3             g#-2 e-2 b-2 g#-2             e-:4  -:8 e-:pss
 *
 
 // m. 249-252
 //   249                 250                       251                       252
-0:   e+3:p_8888_1        e+3:4    -:8. e+3:16      e+3:4    -:8. e+2:16      $leg e+2:2
-1:   e+2:p_8888_1        e+2:4    -:8. e+2:16      e+2:4    -:8. e+:16       $leg e+:2
-2:   g#+,b+:p_8888_2     g#+,b+:4 -:8. e+,g#+:16   e+,g#+:4 -:8. g#,e+:16    $leg g#,e+:2
-3:   b,g#+:p_8888_2      b,g#+:4  -:8. g#+,e+:16   g#,e+:4  -:8. g#,e+:16    $leg g#,e+:2
+0:   e+3:p8888           e+3:4    -:8. e+3:16      e+3:4    -:8. e+2:16      $leg e+2:2
+1:   e+2:p8888           e+2:4    -:8. e+2:16      e+2:4    -:8. e+:16       $leg e+:2
+2:   g#+,b+:p8888        g#+,b+:4 -:8. e+,g#+:16   e+,g#+:4 -:8. g#,e+:16    $leg g#,e+:2
+3:   b,g#+:p8888         b,g#+:4  -:8. g#+,e+:16   g#,e+:4  -:8. g#,e+:16    $leg g#,e+:2
 4:   e:8 b- g#- b-       e-:4     -:8. e-2,e-:16   e-2,e-:4 -:8. e-2,e-:16   $leg e-2,e-:2
-5:   b-,b:p_8888_2       b-,b:4   -:8. b-,b:16     b-,b:4   -:8. b-:16       $leg b-:2
-6:   e,g#:p_8888_2       e,g#:4   -:8. e,g#:16     e,g#:4   -:8. g#-,e:16    $leg g#-,e:2
-7:   g#,e+:p_8888_2      g#,e+:4  -:8. g#,e+:16    g#,e+:4  -:8. e,b:16      $leg e,b:2
+5:   b-,b:p8888          b-,b:4   -:8. b-,b:16     b-,b:4   -:8. b-:16       $leg b-:2
+6:   e,g#:p8888          e,g#:4   -:8. e,g#:16     e,g#:4   -:8. g#-,e:16    $leg g#-,e:2
+7:   g#,e+:p8888         g#,e+:4  -:8. g#,e+:16    g#,e+:4  -:8. e,b:16      $leg e,b:2
 8:   e:8 b- g#- b-       e-:4     -:8. e-,e:16     e-,e:4   -:8. e-:16       $leg e-:2
 p:   perc_all:perc167    perc_all:4 -:4            perc_all:4 -:4            perc_all:2
-10:  e-:p_8888_1         e-:4     -:8. e-:16       e-:4     -:8. e-:16       $leg e-:p_2tr32_1
-11:  e+2:p_8888_1        e+2:4    -:8. e+2:16      e+2:4    -:8. g#-,e:16    $leg g#-,e:2
-12:  b,g#+:p_8888_2      b,g#+:4  -:8. b,g#+:16    b,g#+:4  -:8. b-:16       $leg b-:2
-13:  g#,e+:p_8888_2      g#,e+:4  -:8. e,b:16      e,b:4    -:8. g#-,e:16    $leg g#-,e:2
+10:  e-:p8888            e-:4     -:8. e-:16       e-:4     -:8. e-:16       $leg e-:p2tr32
+11:  e+2:p8888           e+2:4    -:8. e+2:16      e+2:4    -:8. g#-,e:16    $leg g#-,e:2
+12:  b,g#+:p8888         b,g#+:4  -:8. b,g#+:16    b,g#+:4  -:8. b-:16       $leg b-:2
+13:  g#,e+:p8888         g#,e+:4  -:8. e,b:16      e,b:4    -:8. g#-,e:16    $leg g#-,e:2
 14:  e:8  b-  g#-  b-    e-:4     -:8. e-:16       e-:4     -:8. e-:16       $leg e-:2
 15:  e-:8 b-2 g#-2 b-2   e-2:4    -:8. e-2:16      e-2:4    -:8. e-2:16      $leg e-2:2
 
@@ -1219,166 +1218,110 @@ END
 ////////////////////////////////////
 
 // like the first two measures
-PATTERN p_intro_1    // one single note
-	: 0:4. 0:16 0    0:4. 0:16 0
-END
-PATTERN p_intro_2    // chord with two notes
-	: 0,1:4. 0,1:16 0,1    0,1:4. 0,1:16 0,1
+PATTERN p_intro
+	: $ALL:4. $ALL:16 $ALL    $ALL:4. $ALL:16 $ALL
 END
 
 // 16th 16th
-PATTERN p_ss_1    // one single note
-	: 0:16 0
-END
-PATTERN p_ss_2    // chord with two notes
-	: 0,1:16 0,1
+PATTERN pss
+	: $ALL:16 $ALL
 END
 
 // 16th 16th 16th
-PATTERN p_sss_1    // one single note
-	: 0:16 0 0
+PATTERN psss
+	: $ALL:16 $ALL $ALL
 END
-
 
 // 16th 16th 16th 16th
-PATTERN p_ssss_1    // one single note
-	: 0:16 0 0 0
+PATTERN pssss
+	: $ALL:pss $ALL:pss
 END
 
-
-// 8th 8th
-PATTERN p_88_1    // one single note
-	: 0:8  0
-END
-PATTERN p_88_2    // chord with two notes
-	: 0,1:8  0,1
+PATTERN p88
+	: $ALL:8 $ALL
 END
 
 // 8th 16th 16th
-PATTERN p_8ss_1    // one single note
-	: 0:8  0:16 0
-END
-PATTERN p_8ss_2    // chord with two notes
-	: 0,1:8  0,1:16 0,1
+PATTERN p8ss
+	: $ALL:8  $ALL:16 $ALL
 END
 
 // 8th 16th 16th 8th 8th
-PATTERN p_8ss88_1    // one single note
-	: 0:p_8ss_1  0:p_88_1
-END
-PATTERN p_8ss88_2    // chord with two notes
-	: 0,1:p_8ss_2  0,1:p_88_2
+PATTERN p8ss88
+	: $ALL:p8ss $ALL:p88
 END
 
 // 8th 16th 16th 8th 16th 16th
-PATTERN p_8ss8ss_1    // one single note
-	: 0:p_8ss_1  0:p_8ss_1
-END
-PATTERN p_8ss8ss_2    // chord with two notes
-	: 0,1:p_8ss_2  0,1:p_8ss_2
+PATTERN p8ss8ss
+	: $ALL:p8ss $ALL:p8ss
 END
 
 // 8th 8th 8th 16th 16th
-PATTERN p_888ss_1    // one single note
-	: 0:8 0 0   0:16 0
-END
-PATTERN p_888ss_2    // chord with two notes
-	: 0,1:8 0,1 0,1   0,1:16 0,1
+PATTERN p888ss
+	: $ALL:p888 $ALL:pss
 END
 
 // 8th 8th 8th
-PATTERN p_888_1    // one single note
-	: 0:8 0 0
-END
-PATTERN p_888_2    // chord with two notes
-	: 0,1:8 0,1 0,1
-END
-PATTERN p_888_3    // chord with three notes
-	: 0,1,2:8 0,1,2 0,1,2
+PATTERN p888
+	: $ALL:8 $ALL $ALL
 END
 
 // 8th (8th rest) 8th (8th rest)
-PATTERN p_8r8r_1    // one single note
-	: 0:8 - 0 -
-END
-PATTERN p_8r8r_2    // chord with two notes
-	: 0,1:8 - 0,1 -
-END
-PATTERN p_8r8r_3    // chord with three notes
-	: 0,1,2:8 - 0,1,2 -
+PATTERN p8r8r
+	: $ALL:8 - $ALL -
 END
 
 // (8th rest) 8th (8th rest) 8th
-PATTERN p_r8r8_2    // chord with two notes
-	: -:8 0,1 - 0,1
+PATTERN pr8r8
+	: -:8 $ALL - $ALL
 END
-
 
 // 8th 8th 8th 8th
-PATTERN p_8888_1    // one single note
-	: 0:8 0 0 0
-END
-PATTERN p_8888_2    // chord with two notes
-	: 0,1:8 0,1 0,1 0,1
-END
-PATTERN p_8888_3    // chord with three notes
-	: 0,1,2:8 0,1,2 0,1,2 0,1,2
+PATTERN p8888
+	: $ALL:p88 $ALL:p88
 END
 
 // 8th 8th 8th (8th rest)
-PATTERN p_888r_1    // one single note
-	: 0:8 0 0 -
-END
-PATTERN p_888r_2    // chord with two notes
-	: 0,1:8 0,1 0,1 -
-END
-PATTERN p_888r_3    // chord with three notes
-	: 0,1,2:8 0,1,2 0,1,2 -
+PATTERN p888r
+	: $ALL:p888 -:8
 END
 
 // 16th 16th 8th 8th
-PATTERN p_ss88_1    // one single note
-	: 0:p_ss_1 0:p_88_1
+// TODO: ...
+PATTERN pss88
+	: $ALL:pss $ALL:p88
 END
 
 // 8th with 32th triller (8th rest) 8th with 32th triller (8th rest)
-PATTERN p_8r8r_tr_1    // one single note
+PATTERN p8r8r_tr
 	{ q=2
-		0  /8  tr=/32
-		-  /8
+		$ALL  /8  tr=/32
+		-     /8
 	}
 END
 
 // half note with 16th triller
-PATTERN p_2tr16_1    // one single note
-	0  /2  tr=/16
-END
-PATTERN p_2tr16_2    // chord with two notes
-	0,1  /2  tr=/16
+PATTERN p2tr16
+	$ALL  /2  tr=/16
 END
 
-// half note with 32th triller
-PATTERN p_2tr32_1    // one single note
-	0  /2  tr=/32
+PATTERN p2tr32
+	$ALL  /2  tr=/32
 END
 
 // quarter note with 16th triller
-PATTERN p_4tr16_1    // one single note
-	0  /4  tr=/16
-END
-PATTERN p_4tr16_2    // chord with two notes
-	0,1  /4  tr=/16
+PATTERN p4tr16
+	$ALL  /4  tr=/16
 END
 
 // quarter note with 32th triller
-PATTERN p_4tr32_1    // one single note
-	0  /4  tr=/32
+PATTERN p4tr32
+	$ALL  /4  tr=/32
 END
 
 // 16th 16t 4th with 16th triller
-PATTERN p_ss4tr16
-	: 0:16 0
-	0  /4  tr=/16
+PATTERN pss4tr16
+	: $ALL:pss $ALL:p4tr16
 END
 
 ////////////////////////////////////////////////////////////////////////////

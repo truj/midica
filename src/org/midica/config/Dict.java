@@ -95,6 +95,9 @@ public class Dict {
 	public static final String SYNTAX_PARAM_NAMED_CLOSE  = "PARAM_NAMED_CLOSE";
 	public static final String SYNTAX_PARAM_INDEX_OPEN   = "PARAM_INDEX_OPEN";
 	public static final String SYNTAX_PARAM_INDEX_CLOSE  = "PARAM_INDEX_CLOSE";
+	public static final String SYNTAX_MAGIC_VAR_ALL      = "MAGIC_VAR_ALL";
+	public static final String SYNTAX_MAGIC_VAR_NC       = "MAGIC_VAR_NC";
+	public static final String SYNTAX_MAGIC_VAR_REV      = "MAGIC_VAR_REV";
 	public static final String SYNTAX_GLOBAL             = "GLOBAL";
 	public static final String SYNTAX_P                  = "PERCUSSION_CHANNEL";
 	public static final String SYNTAX_END                = "END";
@@ -1565,6 +1568,7 @@ public class Dict {
 	public static final String ERROR_PATTERN_INVALID_INNER_OPT   = "error_pattern_invalid_inner_opt";
 	public static final String ERROR_PATTERN_INDEX_INVALID       = "error_pattern_index_invalid";
 	public static final String ERROR_PATTERN_INDEX_TOO_HIGH      = "error_pattern_index_too_high";
+	public static final String ERROR_PATTERN_INDEX_TOO_HIGH_2    = "error_pattern_index_too_high_2";
 	public static final String ERROR_PATTERN_RECURSION_DEPTH     = "error_pattern_recursion_depth";
 	public static final String ERROR_PATTERN_UNDEFINED           = "error_pattern_undefined";
 	public static final String ERROR_META_NUM_OF_ARGS            = "error_meta_num_of_arts";
@@ -2707,6 +2711,9 @@ public class Dict {
 		set( SYNTAX_PARAM_NAMED_CLOSE,  "closes a parameter name"                          );
 		set( SYNTAX_PARAM_INDEX_OPEN,   "opens a parameter index"                          );
 		set( SYNTAX_PARAM_INDEX_CLOSE,  "opens a parameter index"                          );
+		set( SYNTAX_MAGIC_VAR_ALL,      "Variable containing all indices with which a pattern is called" );
+		set( SYNTAX_MAGIC_VAR_NC,       "Variable showing with how many notes a pattern is called" );
+		set( SYNTAX_MAGIC_VAR_REV,      "Like MAGIC_VAR_ALL but in reverse order"          );
 		set( SYNTAX_GLOBAL,             "global command (all channels)"                    );
 		set( SYNTAX_P,                  "percussion channel"                               );
 		set( SYNTAX_END,                "end of a definition block"                        );
@@ -3239,6 +3246,7 @@ public class Dict {
 		set( ERROR_PATTERN_INVALID_INNER_OPT,     "invalid pattern option: "                                          );
 		set( ERROR_PATTERN_INDEX_INVALID,         "pattern index not a number: "                                      );
 		set( ERROR_PATTERN_INDEX_TOO_HIGH,        "pattern index too high: "                                          );
+		set( ERROR_PATTERN_INDEX_TOO_HIGH_2,      "unknown note or pattern index too high: "                          );
 		set( ERROR_PATTERN_RECURSION_DEPTH,       "Recursion depth in pattern too big."                               );
 		set( ERROR_PATTERN_UNDEFINED,             "Pattern not defined: "                                             );
 		set( ERROR_META_NUM_OF_ARGS,              "no arguments allowed in meta command"                              );
@@ -3983,6 +3991,9 @@ public class Dict {
 		setSyntax( SYNTAX_PARAM_NAMED_CLOSE,   "}"            );
 		setSyntax( SYNTAX_PARAM_INDEX_OPEN,    "["            );
 		setSyntax( SYNTAX_PARAM_INDEX_CLOSE,   "]"            );
+		setSyntax( SYNTAX_MAGIC_VAR_ALL,       "$ALL"         );
+		setSyntax( SYNTAX_MAGIC_VAR_NC,        "$NC"          );
+		setSyntax( SYNTAX_MAGIC_VAR_REV,       "$REV"         );
 		setSyntax( SYNTAX_GLOBAL,              "*"            );
 		setSyntax( SYNTAX_P,                   "p"            );
 		setSyntax( SYNTAX_END,                 "END"          );
@@ -4166,14 +4177,17 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_META_SK_INFO      );
 		
 		addSyntaxCategory(get(SYNTAX_CAT_VAR_AND_CONST));
-		addSyntaxForInfoView( SYNTAX_CONST             );
-		addSyntaxForInfoView( SYNTAX_VAR               );
-		addSyntaxForInfoView( SYNTAX_VAR_SYMBOL        );
-		addSyntaxForInfoView( SYNTAX_VAR_ASSIGNER      );
-		addSyntaxForInfoView( SYNTAX_PARAM_NAMED_OPEN  );
-		addSyntaxForInfoView( SYNTAX_PARAM_NAMED_CLOSE );
-		addSyntaxForInfoView( SYNTAX_PARAM_INDEX_OPEN  );
-		addSyntaxForInfoView( SYNTAX_PARAM_INDEX_CLOSE );
+		addSyntaxForInfoView( SYNTAX_CONST              );
+		addSyntaxForInfoView( SYNTAX_VAR                );
+		addSyntaxForInfoView( SYNTAX_VAR_SYMBOL         );
+		addSyntaxForInfoView( SYNTAX_VAR_ASSIGNER       );
+		addSyntaxForInfoView( SYNTAX_PARAM_NAMED_OPEN   );
+		addSyntaxForInfoView( SYNTAX_PARAM_NAMED_CLOSE  );
+		addSyntaxForInfoView( SYNTAX_PARAM_INDEX_OPEN   );
+		addSyntaxForInfoView( SYNTAX_PARAM_INDEX_CLOSE  );
+		addSyntaxForInfoView( SYNTAX_MAGIC_VAR_ALL      );
+		addSyntaxForInfoView( SYNTAX_MAGIC_VAR_NC       );
+		addSyntaxForInfoView( SYNTAX_MAGIC_VAR_REV      );
 		
 		addSyntaxCategory(get(SYNTAX_CAT_OPTION));
 		addSyntaxForInfoView( SYNTAX_OPT_SEPARATOR    );

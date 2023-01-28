@@ -13,11 +13,10 @@ In this directory you can find example songs written in MidicaPL.
 - [William Tell Ouverture - Finale](rossini_william_tell_overture_finale.midica) -- Finale of the
   ouverture of the opera **William Tell** written by **Gioachino Rossini**.
   Uses all 16 MIDI channels.
-  This song needs a rewrite as it was written when some important features were not yet available in
-  MidicaPL.
 - [The Four Seasons (Summer) - 3rd movement](vivaldi_4_seasons_summer_3.midica) -- Composed by
-  **Antonio Vivaldi**. Uses variables and the shift option a lot. This helps re-using code and making the
-  source file smaller.
+  **Antonio Vivaldi**. Uses variables and the shift option a lot.
+
+Files containing `lowlevel` in their names are older versions that were created at a time where compact syntax did not exist yet.
 
 ## Contributing
 
