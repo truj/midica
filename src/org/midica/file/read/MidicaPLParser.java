@@ -2272,18 +2272,38 @@ public class MidicaPLParser extends SequenceParser {
 		TreeSet<Integer> chord = new TreeSet<>();
 		String[] notes = chordSepPattern.split(chordValue, -1);
 		
+		boolean hasNotes      = false;
+		boolean hasPercussion = false;
 		for (String note : notes) {
 			
 			if ("".equals(note))
 				throw new ParseException(Dict.get(Dict.ERROR_CHORD_REDUNDANT_SEP));
 			
-			int noteVal = parseNote(note);
+			// get MIDI value for note or percussion
+			int noteVal;
+			try {
+				noteVal  = parseNote(note);
+				hasNotes = true;
+			}
+			catch (ParseException eNote) {
+				if (! eNote.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_NOTE)))
+					throw eNote;
+				
+				noteVal = Dict.getPercussion(note);
+				if (Dict.UNKNOWN_CODE == noteVal)
+					throw new ParseException(Dict.get(Dict.ERROR_UNKNOWN_CHORD_ELEMENT) + note);
+				hasPercussion = true;
+			}
 			if (chord.contains(noteVal)) {
 				throw new ParseException(Dict.get(Dict.ERROR_CHORD_CONTAINS_ALREADY) + note);
 			}
 			chord.add(noteVal);
 		}
 		chords.put(chordName, chord);
+		
+		// don't allow mixing notes and percussion in the same chord
+		if (hasNotes && hasPercussion)
+			throw new ParseException(Dict.get(Dict.ERROR_CHORD_WITH_NOTES_AND_PERC) + chordName);
 	}
 	
 	/**

@@ -24,3 +24,13 @@ CALL test q=3
 	0 c,e,g /4
 }
 CHORD ch3 bbb, c##, dbb
+
+
+CHORD perc = to, bd1, sd1
+p: perc:4
+{
+	9: perc:4
+	{
+		9: perc:4
+	}
+}

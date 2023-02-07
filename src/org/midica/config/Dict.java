@@ -1516,6 +1516,8 @@ public class Dict {
 	public static final String ERROR_GLOBALS_IN_INSTR_DEF        = "error_globals_in_instr_def";
 	public static final String ERROR_SINGLE_INSTR_IN_INSTR_DEF   = "error_single_instr_in_instr_def";
 	public static final String ERROR_UNKNOWN_CMD                 = "error_unknown_cmd";
+	public static final String ERROR_UNKNOWN_CHORD_ELEMENT       = "error_unknown_chord_element";
+	public static final String ERROR_CHORD_WITH_NOTES_AND_PERC   = "error_chord_with_notes_and_perc";
 	public static final String ERROR_CMD_END_WITHOUT_BEGIN       = "error_cmd_end_without_begin";
 	public static final String ERROR_CHANNEL_INVALID_OPT         = "error_channel_invalid_opt";
 	public static final String ERROR_BLOCK_INVALID_OPT           = "error_block_invalid_opt";
@@ -3197,6 +3199,8 @@ public class Dict {
 		set( ERROR_GLOBALS_IN_INSTR_DEF,          "global commands are not allowed inside an instrument definition"   );
 		set( ERROR_SINGLE_INSTR_IN_INSTR_DEF,     "instrument commands are not allowed inside an instrument definition block" );
 		set( ERROR_UNKNOWN_CMD,                   "unknown command: "                                                 );
+		set( ERROR_UNKNOWN_CHORD_ELEMENT,         "unknown note or percussion intrument in chord: "                   );
+		set( ERROR_CHORD_WITH_NOTES_AND_PERC,     "illegal mix of notes and percussion instruments in chord: "        );
 		set( ERROR_CMD_END_WITHOUT_BEGIN,         "there is no open block to be closed"                               );
 		set( ERROR_CHANNEL_INVALID_OPT,           "invalid channel option: "                                          );
 		set( ERROR_BLOCK_INVALID_OPT,             "invalid block option: "                                            );

@@ -76,8 +76,7 @@ END
 // define chord for percussion
 ///////////////////////////////////////
 
-// CHORD perc_all = to,bd2,cc2        // TODO: update midica to allow predefined chords with percussion shortcuts
-CHORD perc_all = 81,35,57
+CHORD perc_all = to, bd2, cc2
 
 /////////////////////////////////
 // start the actual sequence

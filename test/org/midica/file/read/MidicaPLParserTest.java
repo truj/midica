@@ -181,6 +181,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		parse(getWorkingFile("chords"));
 		assertEquals( 13920, instruments.get(0).getCurrentTicks() );
 		assertEquals(  2400, instruments.get(1).getCurrentTicks() );
+		assertEquals(  1440, instruments.get(9).getCurrentTicks() );
 		
 		parse(getWorkingFile("define"));
 		assertEquals( 3120, instruments.get(0).getCurrentTicks() );
@@ -1727,7 +1728,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-with-unknown-note")) );
 		assertEquals( 3, e.getLineNumber() );
 		assertEquals( "CHORD test c d e c+6", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_NOTE) + "c+6") );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_CHORD_ELEMENT) + "c+6") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-with-unknown-note-number")) );
 		assertEquals( 3, e.getLineNumber() );
@@ -1737,7 +1738,12 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-assigner-double")) );
 		assertEquals( 5, e.getLineNumber() );
 		assertEquals( "CHORD crd==c,d,e", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_NOTE) + "=c") );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_CHORD_ELEMENT) + "=c") );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-with-note-percussion-mix")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "CHORD test c d to", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_WITH_NOTES_AND_PERC) + "test") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("channel-cmd-missing-param")) );
 		assertEquals( 3, e.getLineNumber() );
