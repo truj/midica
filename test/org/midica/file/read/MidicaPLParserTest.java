@@ -1360,6 +1360,8 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "4479/9/99/bass_drum_1 (bd1) / 64", messages.get(i++).toString() );
 			assertEquals( "4959/9/99/bass_drum_1 (bd1) / 64", messages.get(i++).toString() );
 		}
+		
+		parse(getWorkingFile("bar-lines"));
 	}
 	
 	/**
@@ -2624,6 +2626,11 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 3, e.getLineNumber() );
 		assertEquals( ": 0 1 a", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INDEX_INVALID)), "a");
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("bar-line-too-early")) );
+		assertEquals( 9, e.getLineNumber() );
+		assertEquals( "0: | c   | c:16 c c c  c c c c  c c c c  c c c c:32 |", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BAR_LINE_INCORRECT)));
 	}
 	
 	/**

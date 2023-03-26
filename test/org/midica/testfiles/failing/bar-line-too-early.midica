@@ -1,0 +1,10 @@
+INCLUDE inc/instruments.midica
+
+* time 4/4
+
+0: | c:1 | c |
+0: | c   | c |
+0: | c   | c |
+0: | c   | c |
+0: | c   | c:16 c c c  c c c c  c c c c  c c c c:32 |
+

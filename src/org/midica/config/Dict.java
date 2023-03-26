@@ -100,6 +100,7 @@ public class Dict {
 	public static final String SYNTAX_MAGIC_VAR_REV      = "MAGIC_VAR_REV";
 	public static final String SYNTAX_GLOBAL             = "GLOBAL";
 	public static final String SYNTAX_P                  = "PERCUSSION_CHANNEL";
+	public static final String SYNTAX_BAR_LINE           = "BAR_LINE";
 	public static final String SYNTAX_END                = "END";
 	public static final String SYNTAX_BLOCK_OPEN         = "BLOCK_OPEN";
 	public static final String SYNTAX_BLOCK_CLOSE        = "BLOCK_CLOSE";
@@ -1648,6 +1649,12 @@ public class Dict {
 	public static final String ERROR_COND_WHITESPACE_IN_IN_ELEM  = "error_cond_whitespace_in_in_elem";
 	public static final String ERROR_COND_EMPTY_ELEM_IN_IN_LIST  = "error_cond_empty_elem_in_in_list";
 	public static final String ERROR_CALL_IF_MUST_BE_ALONE       = "error_call_if_must_be_alone";
+	public static final String ERROR_BAR_LINE_INCORRECT          = "error_bar_line_incorrect";
+	public static final String ERROR_BAR_LINE_TOO_EARLY          = "error_bar_line_too_early";
+	public static final String ERROR_BAR_LINE_TOO_LATE           = "error_bar_line_too_late";
+	public static final String ERROR_BAR_LINE_EXACT_NOTE_LEN     = "error_bar_line_exact_note_len";
+	public static final String ERROR_BAR_LINE_BETWEEN            = "error_bar_line_between";
+	public static final String ERROR_BAR_LINE_SMALL              = "error_bar_line_small";
 	
 	// NestableBlock
 	public static final String ERROR_BLOCK_ARG_ALREADY_SET      = "error_block_arg_already_set";
@@ -2718,6 +2725,7 @@ public class Dict {
 		set( SYNTAX_MAGIC_VAR_REV,      "Like MAGIC_VAR_ALL but in reverse order"          );
 		set( SYNTAX_GLOBAL,             "global command (all channels)"                    );
 		set( SYNTAX_P,                  "percussion channel"                               );
+		set( SYNTAX_BAR_LINE,           "bar line"                                         );
 		set( SYNTAX_END,                "end of a definition block"                        );
 		set( SYNTAX_BLOCK_OPEN,         "opens a nestable block"                           );
 		set( SYNTAX_BLOCK_CLOSE,        "closes a nestable block"                          );
@@ -3333,6 +3341,12 @@ public class Dict {
 		set( ERROR_COND_WHITESPACE_IN_IN_ELEM,    "Invalid whitespace in list element: "                              );
 		set( ERROR_COND_EMPTY_ELEM_IN_IN_LIST,    "Empty element in 'in' list: "                                      );
 		set( ERROR_CALL_IF_MUST_BE_ALONE,         "block option 'if' cannot be combined with another if"              );
+		set( ERROR_BAR_LINE_INCORRECT,            "Incorrect bar line!<br>"                                           );
+		set( ERROR_BAR_LINE_TOO_EARLY,            "bar line number <b>%d</b> is <b>%d</b> ticks after a measure border.<br>"  );
+		set( ERROR_BAR_LINE_TOO_LATE,             "bar line number <b>%d</b> is <b>%d</b> ticks before a measure border.<br>" );
+		set( ERROR_BAR_LINE_EXACT_NOTE_LEN,       "This equates exactly the following note length:<br><b>%s</b>"      );
+		set( ERROR_BAR_LINE_BETWEEN,              "This is between the following note lengths:<br>- <b>%s</b> (%d ticks)<br>- <b>%s</b> (%d ticks)<br>" );
+		set( ERROR_BAR_LINE_SMALL,                "For comparison:<br>The note length <b>%s</b> equates to %d ticks"  );
 		
 		// NestableBlock
 		set( ERROR_BLOCK_ARG_ALREADY_SET,         "Block argument has already been set before: "                      );
@@ -4000,6 +4014,7 @@ public class Dict {
 		setSyntax( SYNTAX_MAGIC_VAR_REV,       "$REV"         );
 		setSyntax( SYNTAX_GLOBAL,              "*"            );
 		setSyntax( SYNTAX_P,                   "p"            );
+		setSyntax( SYNTAX_BAR_LINE,            "|"            );
 		setSyntax( SYNTAX_END,                 "END"          );
 		setSyntax( SYNTAX_BLOCK_OPEN,          "{"            );
 		setSyntax( SYNTAX_BLOCK_CLOSE,         "}"            );
@@ -4165,6 +4180,7 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_COMMENT          );
 		addSyntaxForInfoView( SYNTAX_REST             );
 		addSyntaxForInfoView( SYNTAX_P                );
+		addSyntaxForInfoView( SYNTAX_BAR_LINE         );
 		
 		addSyntaxCategory(get(SYNTAX_CAT_META));
 		addSyntaxForInfoView( SYNTAX_META_COPYRIGHT    );

@@ -62,19 +62,19 @@ FUNCTION vocals
 END
 FUNCTION vocals_m1
 	//    Lon-             don          bridge         is
-	0:   (l=$[0]) a:4.  (l=$[1]) b:8   (l=$[2]) a:4   (l=$[3]) g
+	0: | (l=$[0]) a:4.  (l=$[1]) b:8   (l=$[2]) a:4   (l=$[3]) g |
 END
 FUNCTION vocals_m2
 	//    fal-            ling          down
-	0:   (l=$[0]) f#:4   (l=$[1]) g   (l=$[2]) a:2
+	0: | (l=$[0]) f#:4   (l=$[1]) g   (l=$[2]) a:2 |
 END
 FUNCTION vocals_m3
 	//    fal-           ling           down
-	0:   (l=$[0]) e:4   (l=$[1]) f#   (l=$[2]) g:2
+	0: | (l=$[0]) e:4   (l=$[1]) f#   (l=$[2]) g:2 |
 END
 FUNCTION vocals_m7_8
 	//    My fair Lady
-	0:   (l=My_) e:2   (l=fair_) a   (l=La) f#:4   (l=dy.\n) d:2.
+	0: | (l=My_) e:2   (l=fair_) a | (l=La) f#:4   (l=dy.\n) d:2. |
 END
 
 ///////////////////////////
@@ -82,12 +82,12 @@ END
 ///////////////////////////
 
 // define some guitar chords
-CHORD  amaj  a-, e, a,  c#+
-CHORD  dmaj  d,  a, d+, f#+
+CHORD  amaj  a-2, e-, a-, c#
+CHORD  dmaj  d-,  a-, d,  f#
 
 // define a picking pattern for both chords
 PATTERN picking_pattern
-	:  0:8 1 2 1 3 1 2 3
+	: | 0:8 1 2 1 3 1 2 3 |
 END
 
 FUNCTION guitar

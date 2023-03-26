@@ -43,6 +43,8 @@ public class Instrument implements Comparable<Instrument> {
 	private static final float DEFAULT_DURATION_RATIO = 0.95f; // 95 percent
 	/** Minimum remaining note length after applying the duration ratio */
 	private static final long MIN_NOTE_LENGTH = 1;
+	/** Default tolerance for bar line checks in ticks. */
+	private static final int DEFAULT_BAR_LINE_TOLERANCE = 0;
 	
 	// constants for foreign languages (e.g. alda)
 	private static final byte   DEFAULT_OCTAVE      = 4;
@@ -81,6 +83,8 @@ public class Instrument implements Comparable<Instrument> {
 	private String noteLength = DEFAULT_NOTE_LENGTH;
 	/** current note length for compact syntax WITHOUT block-tuplets */
 	private String naturalLength = noteLength;
+	/** current bar line tolerance */
+	private int barLineTolerance = DEFAULT_BAR_LINE_TOLERANCE;
 	
 	// fields for foreign languages (e.g. alda)
 	private byte octave = DEFAULT_OCTAVE;
@@ -391,5 +395,23 @@ public class Instrument implements Comparable<Instrument> {
 	 */
 	public void setNaturalLength(String naturalLength) {
 		this.naturalLength = naturalLength;
+	}
+	
+	/**
+	 * Returns the currently configured bar line tolerance.
+	 * 
+	 * @return bar line tolerance
+	 */
+	public int getBarLineTolerance() {
+		return barLineTolerance;
+	}
+	
+	/**
+	 * Sets the bar line tolerance.
+	 * 
+	 * @param barLineTolerance  bar line tolerance to be set.
+	 */
+	public void setBarLineTolerance(int barLineTolerance) {
+		this.barLineTolerance = barLineTolerance;
 	}
 }

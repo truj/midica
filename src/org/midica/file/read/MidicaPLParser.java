@@ -24,6 +24,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.regex.Matcher;
@@ -190,6 +191,7 @@ public class MidicaPLParser extends SequenceParser {
 	public static String OPT_ASSIGNER       = null;
 	public static String OPT_SEPARATOR      = null;
 	public static String P                  = null;
+	public static String BAR_LINE           = null;
 	public static String REST               = null;
 	public static String S                  = null;
 	public static String SHIFT              = null;
@@ -265,6 +267,7 @@ public class MidicaPLParser extends SequenceParser {
 	protected static HashMap<String, String>            variables             = null;
 	private   static Pattern                            varPattern            = null;
 	private   static Pattern                            callPattern           = null;
+	private   static Pattern                            barLinePattern        = null;
 	private   static Pattern                            condPattern           = null;
 	private   static Pattern                            condInPattern         = null;
 	private   static Pattern                            crlfSkPattern         = null;
@@ -279,6 +282,7 @@ public class MidicaPLParser extends SequenceParser {
 	private   static Pattern                            invalidNoteIdxPattern = null;
 	private   static boolean                            isSoftKaraoke         = false;
 	public    static boolean                            isPlayingTupletBlock  = false;
+	private   static TreeMap<Long, Long>                measureLengthHistory  = null;
 	
 	private static boolean isDefineParsRun     = false; // parsing run for define commands
 	private static boolean isConstParsRun      = false; // parsing run for constant definitions
@@ -413,6 +417,7 @@ public class MidicaPLParser extends SequenceParser {
 		OPT_ASSIGNER       = Dict.getSyntax( Dict.SYNTAX_OPT_ASSIGNER       );
 		OPT_SEPARATOR      = Dict.getSyntax( Dict.SYNTAX_OPT_SEPARATOR      );
 		P                  = Dict.getSyntax( Dict.SYNTAX_P                  );
+		BAR_LINE           = Dict.getSyntax( Dict.SYNTAX_BAR_LINE           );
 		REST               = Dict.getSyntax( Dict.SYNTAX_REST               );
 		PROG_BANK_SEP      = Dict.getSyntax( Dict.SYNTAX_PROG_BANK_SEP      );
 		Q                  = Dict.getSyntax( Dict.SYNTAX_Q                  );
@@ -635,6 +640,13 @@ public class MidicaPLParser extends SequenceParser {
 			+ "\\s*"                       // optional whitespace(s)
 			+ "(.+?)?"                     // optional options
 			+ "\\s*"                       // optional whitespace(s)
+			+ "$"
+		);
+		
+		barLinePattern = Pattern.compile(
+			"^"
+			+ Pattern.quote(BAR_LINE)   // |
+			+ "(\\d*)"                  // number (optional)
 			+ "$"
 		);
 		
@@ -2650,13 +2662,17 @@ public class MidicaPLParser extends SequenceParser {
 					
 					// compact pattern line?
 					if (COMPACT_CHANNEL.equals(patLineTokens[0])) {
-						// replace first token (: => :channel)
+						// replace first token (: ==> channel:)
 						patLineTokens[0] = channel + patLineTokens[0];
 						for (int j = 1; j < patLineTokens.length; j++) {
 							String compactElement = patLineTokens[j];
 							
 							// option: (name=value)?
 							if (compactOptPattern.matcher(compactElement).matches())
+								continue;
+							
+							// bar line?
+							if (compactElement.startsWith(BAR_LINE))
 								continue;
 							
 							// rest/note/chord
@@ -3251,6 +3267,9 @@ public class MidicaPLParser extends SequenceParser {
 					if (REST.equals(parts[0]) || compactOptPattern.matcher(compactElement).matches()) {
 						shiftedNotes.add(compactElement);
 					}
+					else if (compactElement.startsWith(BAR_LINE)) {
+						shiftedNotes.add(compactElement);
+					}
 					else {
 						// chord?
 						List<Integer> notes    = parseChord(parts[0]);
@@ -3569,6 +3588,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_OPT_ASSIGNER.equals(cmdId)       ) OPT_ASSIGNER       = cmdName;
 		else if ( Dict.SYNTAX_OPT_SEPARATOR.equals(cmdId)      ) OPT_SEPARATOR      = cmdName;
 		else if ( Dict.SYNTAX_P.equals(cmdId)                  ) P                  = cmdName;
+		else if ( Dict.SYNTAX_BAR_LINE.equals(cmdId)           ) BAR_LINE           = cmdName;
 		else if ( Dict.SYNTAX_REST.equals(cmdId)               ) REST               = cmdName;
 		else if ( Dict.SYNTAX_S.equals(cmdId)                  ) S                  = cmdName;
 		else if ( Dict.SYNTAX_SHIFT.equals(cmdId)              ) SHIFT              = cmdName;
@@ -4185,11 +4205,24 @@ public class MidicaPLParser extends SequenceParser {
 					int denominator = toInt(matcher.group(2));
 					
 					// set the time signature message
-					if (! isFake)
+					if (! isFake) {
 						SequenceCreator.addMessageTimeSignature(numerator, denominator, currentTicks);
+						
+						// prepare for bar line checks
+						long measureLength = numerator * parseDurationSummand(denominator + "");
+						measureLengthHistory.put(currentTicks, measureLength);
+					}
 				}
 				else {
 					throw new ParseException( Dict.get(Dict.ERROR_INVALID_TIME_SIG) + value);
+				}
+			}
+			
+			// set bar line tolerance
+			else if (cmd.equals(BAR_LINE)) {
+				int tolerance = toInt(value);
+				for (Instrument instr : instruments) {
+					instr.setBarLineTolerance(tolerance);
 				}
 			}
 			
@@ -4324,10 +4357,12 @@ public class MidicaPLParser extends SequenceParser {
 		Matcher matcher = compactChannelPattern.matcher(tokens[0]);
 		if (matcher.matches()) {
 			int channel = toChannel(matcher.group(1));
+			int barLineCounter = 0;
 			
 			// elements (either notes/chords/rests/patterns/options)
 			for (String compactElement : whitespace.split(tokens[1])) {
-				String[] chCmdTokens = null;
+				String[] chCmdTokens    = null;
+				Matcher  barLineMatcher = barLinePattern.matcher(compactElement);
 				
 				// option: (name=value)?
 				ArrayList<CommandOption> options = parseCompactOptions(compactElement, isFake);
@@ -4368,6 +4403,15 @@ public class MidicaPLParser extends SequenceParser {
 						REST + "",
 						LENGTH_ZERO + " " + String.join(OPT_SEPARATOR, restOptions),
 					};
+				}
+				
+				// bar line?
+				else if (barLineMatcher.matches()) {
+					if (! isFake) {
+						barLineCounter++;
+						checkBarLine(channel, barLineMatcher, barLineCounter);
+						continue;
+					}
 				}
 				
 				// pattern or note/chord/rest (and maybe length)
@@ -5421,6 +5465,77 @@ public class MidicaPLParser extends SequenceParser {
 	}
 	
 	/**
+	 * Checks if a bar line is correctly set. Otherwise, throws an exception.
+	 * 
+	 * @param channel         midi channel
+	 * @param barLineMatcher  the matcher matching the bar line (and maybe the tolerance value)
+	 * @param barLineCounter  the bar line number to be checked (1st, 2nd, ...) inside the compact command
+	 * @throws ParseException if the bar line check fails
+	 */
+	private void checkBarLine(int channel, Matcher barLineMatcher, int barLineCounter) throws ParseException {
+		
+		// get/set tolerance
+		Instrument instr = instruments.get(channel);
+		String toleranceStr = barLineMatcher.group(1);
+		int tolerance = instr.getBarLineTolerance();
+		if (!toleranceStr.isEmpty()) {
+			tolerance = Integer.parseInt(toleranceStr);
+			instr.setBarLineTolerance(tolerance);
+		}
+		
+		// get last time signature info
+		Entry<Long, Long> entry = measureLengthHistory.floorEntry(instr.getCurrentTicks());
+		long lastTimeSigTick = entry.getKey();
+		long measureLength   = entry.getValue();
+		
+		// count ticks since the last time signature
+		long totalTicks = instr.getCurrentTicks() - lastTimeSigTick;
+		
+		// check bar line
+		boolean isBarlineTooEarly = true;
+		long remainder = totalTicks % measureLength;
+		if (remainder > measureLength / 2) {
+			remainder = measureLength - remainder;
+			isBarlineTooEarly = false;
+		}
+		
+		// check failed?
+		if (remainder > tolerance) {
+			
+			// translate common note lengths to ticks
+			String[] durationStrings = new String[] {
+				LENGTH_32, LENGTH_16, LENGTH_8, LENGTH_4, LENGTH_2, LENGTH_1,
+				LENGTH_M2, LENGTH_M4, LENGTH_M8, LENGTH_M16, LENGTH_M32,
+			};
+			TreeMap<Integer, String> tickToSymbol = new TreeMap<>();
+			for (String duration : durationStrings) {
+				int ticks = parseDuration(duration);
+				tickToSymbol.put(ticks, duration);
+				ticks = parseDuration(duration + DOT);
+				tickToSymbol.put(ticks, duration + DOT);
+			}
+			
+			// construct error message
+			String message = Dict.get(Dict.ERROR_BAR_LINE_INCORRECT);
+			message += Dict.get(isBarlineTooEarly ? Dict.ERROR_BAR_LINE_TOO_EARLY : Dict.ERROR_BAR_LINE_TOO_LATE);
+			message = String.format(message, barLineCounter, remainder);
+			String exactSymbol = tickToSymbol.get((int) remainder);
+			Entry<Integer, String> floor   = tickToSymbol.floorEntry((int) remainder);
+			Entry<Integer, String> ceiling = tickToSymbol.ceilingEntry((int) remainder);
+			if (exactSymbol != null) {
+				message += String.format(Dict.get(Dict.ERROR_BAR_LINE_EXACT_NOTE_LEN), exactSymbol);
+			}
+			else if (null == floor) {
+				message += String.format(Dict.get(Dict.ERROR_BAR_LINE_SMALL), ceiling.getValue(), ceiling.getKey());
+			}
+			else {
+				message += String.format(Dict.get(Dict.ERROR_BAR_LINE_BETWEEN), floor.getValue(), floor.getKey(), ceiling.getValue(), ceiling.getKey());
+			}
+			throw new ParseException(message);
+		}
+	}
+	
+	/**
 	 * Initializes the parser for a new parsing run.
 	 * This is called at the beginning of parse().
 	 * 
@@ -5479,6 +5594,7 @@ public class MidicaPLParser extends SequenceParser {
 			soundbankParsed      = false;
 			isSoftKaraoke        = false;
 			isPlayingTupletBlock = false;
+			measureLengthHistory = new TreeMap<>();
 			constants            = new HashMap<>();
 			variables            = new HashMap<>();
 			varPattern           = null;
@@ -5488,6 +5604,7 @@ public class MidicaPLParser extends SequenceParser {
 			crlfSkPattern        = null;
 			refreshSyntax();
 			NestableBlock.reset();
+			measureLengthHistory.put(SequenceCreator.NOW, SequenceCreator.DEFAULT_RESOLUTION * 4L); // 4/4
 		}
 	}
 }

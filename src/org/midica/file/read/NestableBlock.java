@@ -404,6 +404,11 @@ public class NestableBlock {
 				+ MidicaPLParser.COMPACT_OPT_CLOSE;
 		}
 		
+		// bar line?
+		else if (compactElement.startsWith(MidicaPLParser.BAR_LINE)) {
+			return compactElement;
+		}
+		
 		return parts[0] + MidicaPLParser.COMPACT_NOTE_SEP + tupletizedLength;
 	}
 	
