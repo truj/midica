@@ -387,38 +387,29 @@ CALL m75_to_80(start=75)
 FUNCTION m75_to_80
 	CALL  d_all_staccato
 	
-	//    75               76             77
-	0:  | e+3:p8ss88    |  g#+3:4 f#+3  | e+3:8 d#+3 e+3 c#+3        |
-	1:  | e+2:p8ss88    |  g#+2:4 f#+2  | e+2:8 d#+2 e+2 c#+2        |
-	2:  | $leg b,e+:2   |
-	2                      c+ /2 m
-	2:                     g#+:4. f#+:8 | c#+,e+ c+,d#+ c#+,e+ a,c#+ |
-	3:  | $leg b,e+:2   |
-	3                      c+ /2 m
-	3:                     g#+:4. f#+:8 | c#+,e+ c+,d#+ c#+,e+ a,c#+ |
-	4:  | $leg b-:2     |  c            | c#:8 c c# a-               |
-	5:  | $leg b-,b:2   |  g#           | a                          |
-	6:  | $leg e-,g#:2  |  e-,g#        | e-,e                       |
-	7:  | e,e+:p8ss88   |  e,e+:2       | e,e+:p8888                 |
-	8:  | $leg e-,e:1.                                               |
-	p    to       /2   q=3, m, tr=/32
-	p    bd2,cc2  /4   q=6
-	10: | e-:p2tr32     |  e-:p2tr32    | e-:p2tr32                  |
-	11: | e+2:p8ss88    |
-	11                     g#+2  /4.  tr=/16
-	11:                    f#+2:pss     | e+2:pss d#+2:pss e+2:pss c#+2:pss |
-	12: | e+:p8ss88     |
-	12                     g#+  /4.  tr=/16
-	12:                    f#+:pss      | e+:pss d#+:pss e+:pss c#+:pss |
-	13: | b-,b:p2tr16   |  c,c+:p2tr16  |
+	//    75              76                         77
+	0:  | e+3:p8ss88   |  g#+3:4 f#+3              | e+3:8 d#+3 e+3 c#+3               |
+	1:  | e+2:p8ss88   |  g#+2:4 f#+2              | e+2:8 d#+2 e+2 c#+2               |
+	2:  | $leg b,e+:2  | (m) c+:2 g#+:4. f#+:8     | c#+,e+ c+,d#+ c#+,e+ a,c#+        |
+	3:  | $leg b,e+:2  | (m) c+:2 g#+:4. f#+:8     | c#+,e+ c+,d#+ c#+,e+ a,c#+        |
+	4:  | $leg b-:2    |  c                        | c#:8 c c# a-                      |
+	5:  | $leg b-,b:2  |  g#                       | a                                 |
+	6:  | $leg e-,g#:2 |  e-,g#                    | e-,e                              |
+	7:  | e,e+:p8ss88  |  e,e+:2                   | e,e+:p8888                        |
+	8:  | $leg e-,e:1.                                                                 |
+	p:  | (q=3,m,tr=/32) to:2 (q=6) bd2,cc2:4                                          |
+	10: | e-:p2tr32    |  e-:p2tr32                | e-:p2tr32                         |
+	11: | e+2:p8ss88   | (tr=/16) g#+2:4. f#+2:pss | e+2:pss d#+2:pss e+2:pss c#+2:pss |
+	12: | e+:p8ss88    | (tr=/16) g#+:4.  f#+:pss  | e+:pss d#+:pss e+:pss c#+:pss     |
+	13: | b-,b:p2tr16  |  c,c+:p2tr16              |
 	{ if ${start} == 75
-		13:                        $leg | c#,c#+:pss c,c+:pss c#,c#+:pss a-,a:pss |
+		13:                         $leg | c#,c#+:pss c,c+:pss c#,c#+:pss a-,a:pss |
 	}
 	{ elsif ${start} in 83;119;127
-		13:                             | c#,c#+:8 c,c+:8 c#,c#+:8 a-,a:8 |
+		13:                              | c#,c#+:8 c,c+:8 c#,c#+:8 a-,a:8         |
 	}
-	14: | e-:p2tr16     |  e-:p2tr16    | e-:p2tr16 |
-	15: | e-2:p8888     |  e-2:p8888    | e-2:p8888 |
+	14: | e-:p2tr16    |  e-:p2tr16                | e-:p2tr16                         |
+	15: | e-2:p8888    |  e-2:p8888                | e-2:p8888                         |
 	*
 	CALL  v_all_ff
 	CALL  d_all_staccato
@@ -501,8 +492,7 @@ END
 8:  | e-
 p:  | perc_all:8
 10: | e-
-11: | e+:8 - $leg $sf_accent
-11                  c#+  /4+/16  m
+11: | e+:8 - $leg $sf_accent (m) c#+:4+16
 12: | e:8
 13: | g#-,e
 14: | e-
@@ -517,28 +507,26 @@ CALL v_all_pp
 CALL d_all_staccato
 CALL m91_to_94(start=91)
 FUNCTION m91_to_94
-	//   91                                92                      93                           94
-	4: | -:2 $leg                        |
-	4                                      c#  /2+/2+/8  m
-	4:                                     -:2                   | g#-,c                      | 
-	6: | -:2 $leg                        | c+,e+:2               | b,d                        | c+:8
+	//   91                                92                  93                  94
+	4: | -:2 $leg                        | (m) c#:2+2+8 -:2  | g#-,c             |
+	6: | -:2 $leg                        | c+,e+:2           | b,d               | c+:8
 	{ if ${start} == 91
 	    11: | -:16 c+ c#+ c+ d#+ c#+ b a |
 	}
 	{ else
 	    11: | c#+ c+ c#+ c+ d#+ c#+ b a  |
 	}
-	11:                                  | a g# e c# c# c# c# c# | e d# c g#- g#- g#- g#- g#- |
+	11:                                  | a g# e (q=5) c#   | e d# c (q=5) g#-  |
 	{ if ${start} == 91
-	    11:                                                                                   | g#- c# e g# c#+ c#+ c#+ c#+ |
+	    11:                                                                      | g#- c# e g# (q=4) c#+       |
 	}
 	{ else
-	    11:                                                                                   | g#- c# e g# c#+ e+ d#+ c#+  |
+	    11:                                                                      | g#- c# e g# c#+ e+ d#+ c#+  |
 	}
-	12: | g#:8   - a     -               |   g#   - - e          | f#     - - d#              | e
-	13: | c#,e:8 - c#,f# -               |   c#,e - - g#-,c#     | g#-,c# - - g#-,d#          | g#-,c#
-	14: | c#:8   - f#-   -               |   c#-  - - c#-        | g#-    - - g#-2            | c#-
-	15: | c#-:8  - f#-2  -               |   c#-2 - - c#-2       | g#-2   - - g#-3            | c#-2
+	12: | g#:8   - a     -               |   g#   - - e      | f#     - - d#     | e
+	13: | c#,e:8 - c#,f# -               |   c#,e - - g#-,c# | g#-,c# - - g#-,d# | g#-,c#
+	14: | c#:8   - f#-   -               |   c#-  - - c#-    | g#-    - - g#-2   | c#-
+	15: | c#-:8  - f#-2  -               |   c#-2 - - c#-2   | g#-2   - - g#-3   | c#-2
 	*
 END
 
@@ -551,8 +539,7 @@ CALL m99(start=100)
 FUNCTION m99
 	2:  | $leg c+,d#+:4. c#+,e+:8       |
 	{ if ${start} == 99
-		3: | $leg
-		3  g#+  /1+/4  m
+		3: | $leg (m) g#+:1+4
 	}
 	11: | d#+:16 c+ g# g# g# g#+ e+ c#+ |
 	12: | d#:8    - - e                 |
@@ -595,7 +582,7 @@ END
 
 // m. 105
 3:  | g#,b:4   g,a#               |
-6     c+  *2+/2+/8  m
+6:  | (m) c+:*2+2+8
 11: | b g#+ f#+ e+ d#+ f#+ e+ c#+ |
 12: | g#     - a#    -            |
 13: | g#-,b- - g-,c# -            |
@@ -616,14 +603,12 @@ FUNCTION m106_to_108
 	14: | e-:p8r8r                   | b-2:p8r8r              | e-:p8r8r               |
 	15: | e-2:p8r8r                  | b-3:p8r8r              | e-2:p8r8r              |
 	{ if ${start} == 106
-	    3                                                       e   /1  m
-	    3:                                                      g#:2                   |
-	    6                                                       e   /1  m
+	    3:                                                      (m) e:1 g#:2           |
+	    6:                                                      (m) e:1
 	}
 	{ else
-	    3                                                       e   /2.  m
-	    3:                                                      g#:2                   |
-	    6                                                       e   /2.  m
+	    3:                                                      (m) e:2. g#:2          |
+	    6:                                                      (m) e:2.
 	}
 	*
 END
@@ -645,7 +630,7 @@ CALL m103_to_104(start=111)
 
 // m. 113
 3:  | g#,b:4   g,a#               |
-6     c+  *2+4  m
+6:  | (m) c+:*2+4
 11: | b g#+ f#+ e+ d#+ f#+ e+ d#+ |
 12: | g#     - a#    -            |
 13: | e-,g#- - g-,c# -            |
@@ -1293,28 +1278,27 @@ END
 // 8th with 32th triller (8th rest) 8th with 32th triller (8th rest)
 PATTERN p8r8r_tr
 	{ q=2
-		$ALL  /8  tr=/32
-		-     /8
+		: (tr=/32) $ALL:8 -
 	}
 END
 
 // half note with 16th triller
 PATTERN p2tr16
-	$ALL  /2  tr=/16
+	: (tr=/16) $ALL:2
 END
 
 PATTERN p2tr32
-	$ALL  /2  tr=/32
+	: (tr=/32) $ALL:2
 END
 
 // quarter note with 16th triller
 PATTERN p4tr16
-	$ALL  /4  tr=/16
+	: (tr=/16) $ALL:4
 END
 
 // quarter note with 32th triller
 PATTERN p4tr32
-	$ALL  /4  tr=/32
+	: (tr=/32) $ALL:4
 END
 
 // 16th 16t 4th with 16th triller
@@ -1327,26 +1311,21 @@ END
 ////////////////////////////////////////////////////////////////////////////
 
 PATTERN perc167  // 2=to, 0,1=bd2,cc2
-	2    /2  m,   tr=/32
-	0,1  /4  q=2
+	: | (m,tr=32) 2:2 (q=2) 0,1:4 |
 END
 
 PATTERN perc186_to_187
-	2  /2  m, tr=/32     // second measure
-	:  0,1:4 - $f           0,1,2:8 -:4+8
+	: | (m,tr=/32) 2:2 0,1:4 - $f | 0,1,2:8 -:4+8 |
 END
 
 PATTERN perc194
-	2  /2  m, tr=32
-	:  0,1:4 0,1
+	: | (m,tr=/32) 2:2  0,1:4 0,1 |
 END
 
 PATTERN perc232
-	2    /2  m, tr=/32
-	0,1  /8  q=4
+	: | (m,tr=/32) 2:2 (q=4) 0,1:8 |
 END
 
 PATTERN perc236
-	2    /2  m, tr=/32
-	: 0,1:4 -
+	: | (m,tr=/32) 2:2 0,1:4 - |
 END

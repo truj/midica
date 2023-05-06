@@ -1,0 +1,11 @@
+INCLUDE inc/instruments.midica
+
+1: c
+{
+	1: c
+	{
+		1: d e
+	}
+	1: f (q=2)
+}
+1: g

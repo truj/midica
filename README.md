@@ -36,7 +36,7 @@ You write your songs in plain text files using the text editor of your choice. M
 # Get started
 1. Install Java Runtume Environment (JRE) version 1.7 or higher.
 2. Go to the [latest release](https://github.com/truj/midica/releases/latest) and download the file `midica.jar`.
-3. Start Midica using the command: `java -jar midica.jar`
+3. Start Midica using the command: `java -jar midica.jar` (or just by double-click if your operating system supports that)
 4. Download one of the [example files](examples/) or create your own file and save it with the file extension `.midica`.
 5. In the Midica application, load this file by pressing the upper right button `select file`.
 6. Switch to the MidicaPL tab (it's the default tab) and choose this file.
@@ -173,10 +173,10 @@ This example uses nestable blocks and global commands:
 	    { q=3                  // inner block to be repeated 3 times
 	        
 	        // in channel 1: switch to mezzo piano (v=70) and play D3 as an 8th note
-	        1: (v=70)  d-:8
+	        1: | (v=70)  d-:4   // the pipe "|" checks for measure borders (optional)
 	        
 	        // in channel 0: switch to mezzo piano and play some notes and rests ("-" = rest)
-	        0: (v=70)  d:8 - d eb d eb
+	        0: | (v=70)  d:8 - d eb d eb |
 	        
 	        // synchronize: bring all channels to the same time
 	        *
@@ -192,10 +192,10 @@ This results in a MIDI sequence like this:
 
 Instead of the nested blocks we could have written this equivalent code:
 
-	0: (v=70)  d:8 - d eb d eb   d - d eb d eb   d - d eb d eb   d - d eb f eb
-	0:         d:8 - d eb d eb   d - d eb d eb   d - d eb d eb   d - d eb f eb
-	1: (v=70)  d-:4 -:/2         d-:4 -:/2       d-:4 -:/2       d-:4  f-  c-
-	1:         d-:4 -:/2         d-:4 -:/2       d-:4 -:/2       d-:4  f-  c-
+	0: (v=70) | d:8 - d eb d eb | d - d eb d eb | d - d eb d eb | d - d eb f eb |
+	0:        | d:8 - d eb d eb | d - d eb d eb | d - d eb d eb | d - d eb f eb |
+	1: (v=70) | d-:4 -:/2       | d-:4 -:/2     | d-:4 -:/2     | d-:4  f-  c-  |
+	1:        | d-:4 -:/2       | d-:4 -:/2     | d-:4 -:/2     | d-:4  f-  c-  |
 
 ## Example 3
 
@@ -221,14 +221,8 @@ This example uses a guitar picking pattern with several chords. It produces the 
 	END
 	
 	// play the chords using this pattern
-	0  cmaj   travis
-	0  cmaj7  travis
-	0  cadd9  travis
-	0  cmaj   travis
-	0  asus2  travis
-	0  asus4  travis
-	0  amin   travis
-	0  asus2  travis
+	0: | cmaj:travis  | cmaj7:travis | cadd9:travis | cmaj:travis  |
+	0: | asus2:travis | asus4:travis | amin:travis  | asus2:travis |
 
 This results in the following sequence:
 

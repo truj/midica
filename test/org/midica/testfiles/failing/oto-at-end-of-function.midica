@@ -1,0 +1,9 @@
+INCLUDE inc/instruments.midica
+
+0: (q=2) c
+
+CALL f
+
+FUNCTION f
+	1: (m) c (q=2) d (tr=/32) e (q=2)
+END

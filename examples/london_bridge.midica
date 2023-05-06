@@ -86,15 +86,12 @@ CHORD  amaj  a-2, e-, a-, c#
 CHORD  dmaj  d-,  a-, d,  f#
 
 // define a picking pattern for both chords
-PATTERN picking_pattern
+PATTERN pick
 	: | 0:8 1 2 1 3 1 2 3 |
 END
 
 FUNCTION guitar
 	// use the same pattern with both chords
-	1  dmaj  picking_pattern  q=2
-	1  amaj  picking_pattern
-	1  dmaj  picking_pattern  q=3
-	1  amaj  picking_pattern
-	1  dmaj  picking_pattern
+	1: | (q=2) dmaj:pick | amaj:pick |
+	1: | (q=3) dmaj:pick | amaj:pick | dmaj:pick |
 END

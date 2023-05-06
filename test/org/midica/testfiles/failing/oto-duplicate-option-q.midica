@@ -1,0 +1,4 @@
+INCLUDE inc/instruments.midica
+
+1: c (q=2)
+1: (q=3) d

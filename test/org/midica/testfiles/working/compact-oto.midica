@@ -1,0 +1,26 @@
+INCLUDE inc/instruments.midica
+
+// channel 0
+0: (q=4) c (m) d e f (tr=/32,q=2,m) g:8 a:4 (m) b (m) c+ -:8 d+
+
+// channel 1
+1: (q=2) c
+{ q=2
+	1: (q=2) d:4
+	{ m
+		1: (m) e (m) f
+	}
+	1: g:1
+}
+1: a
+
+// channel 2
+PATTERN pat
+	: (q=2) 0:4
+	{
+		: (m) 0 1
+	}
+	: (tr=32) 0,1:16
+END
+2: c (m,q=2) d,e:pat f:*2 g
+

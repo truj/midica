@@ -60,20 +60,14 @@ VAR $c = 0  // set current channel
 // measure 1-5
 CALL     c0m1_5
 FUNCTION c0m1_5
-	$c: | $forte  g:16 g- g- g- g- g- g- g- g- g- g- g- |
-	$c: |         f    g- g- g- g- g- g- g- g- g- g- g- |
-	$c: |         eb   g- g- g- g- g- g- g- g- g- g- g- |
-	$c: |         d    g- g- g- g- g- g- g- g-:8  -     |
+	$c: | $forte  g:16 (q=11) g- | f (q=11) g- | eb (q=11) g- | d (q=7) g- g-:8 - |
 	CALL  rest_measure
 END
 
 // m. 6-9
 CALL     c0m6_9
 FUNCTION c0m6_9
-	$c: |  d+:16 d d d d d d d d d d d |
-	$c: |  c+    d d d d d d d d d d d |
-	$c: |  bb    d d d d d d d d d d d |
-	$c: |  a     d d d d d d d d:8 -   |
+	$c: | d+:16 (q=11) d | c+ (q=11) d | bb (q=11) d | a (q=7) d d:8 - |
 END
 
 // m. 10
@@ -85,11 +79,9 @@ END
 // m. 11-19
 CALL     c0m11_18   // m. 11-18
 FUNCTION c0m11_18
-	$c:    |  g-:16 g-  g- g-  g-  g- g- g- g- g- g- g-  |    // m. 11
-	$c:    |  g-    g+  f+ eb+ d+  c+ bb a  g  f  eb d   |    // m. 12
-	$c:    |  c     c   c  c   c   c  c  c  c  c  c  c   |    // m. 13
-	$c:    |  c     bb+ g+ f+  eb+ d+ c+ bb a  g  f  eb  |    // m. 14
-	$c:    |  eb    eb  eb eb  eb  eb eb eb eb eb eb eb  |    // m. 15
+	$c:  | (q=12) g-:16 | g- g+  f+ eb+ d+  c+ bb a  g  f  eb d  |  // m. 11-12
+	$c:  | (q=12) c     | c  bb+ g+ f+  eb+ d+ c+ bb a  g  f  eb |  // m. 13-14
+	$c:  | (q=12) eb    |                                           // m. 15
 	CALL  c0m16    // m. 16
 	CALL  c0m17    // m. 17
 	CALL  c0m16    // m. 18
@@ -98,7 +90,7 @@ FUNCTION c0m16
 	$c:  | g:16 d+2 c+2 bb+ g+ f#+ e+ d+ c+ bb a g |
 END
 FUNCTION c0m17
-	$c  g  /16  q=12
+	$c: | (q=12) g:16 |
 END
 CALL  c0m17      // m. 19
 
@@ -229,40 +221,39 @@ FUNCTION c0m67_69
 END
 
 // m. 70-73
-CONST    $c_x_11  =   c c c c c c c c c c c
 CALL     c0m70_73(c+)
-FUNCTION c0m70_73     // m. 70          m. 71         m. 72         m. 73
-	$c: | (length=/16)  $[0]  $c_x_11 | bb  $c_x_11 | ab  $c_x_11 | g c c c c c c c c:8 - |
+FUNCTION c0m70_73     // m. 70           m. 71          m. 72          m. 73
+	$c: | (length=/16)  $[0]  (q=11) c | bb  (q=11) c | ab  (q=11) c | g (q=7) c c:8 - |
 END
 
 // m. 74
-$c  g+   /2.  m
+$c:  (m) g+:2.
 { q=6
 	$c:  eb+:16  d+
 }
 
 // m. 75
-$c  g+   /2.  m
+$c:  (m) g+:2.
 { q=6
-	$c:  d+ b
+	$c:  d+:16 b
 }
 
 // m. 76
-$c  g+   /2.  m
+$c:  (m) g+:2.
 { q=6
-	$c:  eb+  c+
+	$c:  eb+:16  c+
 }
 
 // m. 77
-$c  f+   /2.  m
+$c:  (m) f+:2.
 { q=6
-	$c:  d+  bb
+	$c:  d+:16  bb
 }
 
 // m. 78
-$c  g+   /2.  m
+$c:  (m) g+:2.
 { q=6
-	$c:  eb+  bb
+	$c:  eb+:16  bb
 }
 
 // m. 79-85
@@ -278,35 +269,35 @@ $c: | g+ bb+ bb+ c+2 c+2 d+2 d+2 eb+2 eb+2 f+2 f+2 g+2 | // m. 83
 { q=3
 	$c:   g+2 d+2 b+ g+                                  // m. 84
 }
-$c: | g+2   $c_x_11                                    | // m. 85
+$c: | g+2   (q=11) c                                   | // m. 85
 
 // m. 86-96
 CALL     c0m86_96
 FUNCTION c0m86_96
 	$c: | (length=/16)
 	{ q=3
-		$c:  ab c c c                                // m. 86
+		$c:  ab c c c         // m. 86
 	}
-	$c: | b- b- b- b-   b- b- b- b-    b- b- b- b- | // m. 87
+	$c: | (q=12) b-         | // m. 87
 	
 	{ q=3
-		$c:   g bb- bb- bb-                          // m. 88
+		$c:   g bb- bb- bb-   // m. 88
 	}
-	$c: | a- a- a- a-   a- a- a- a-   a- a- a- a-  | // m. 89
+	$c: | (q=12)  a-        | // m. 89
 	{ q=3
-		$c:   f ab- ab- ab-                          // m. 90
+		$c:   f ab- ab- ab-   // m. 90
 	}
-	$c: | g-   g g g   g g g g   g g g g           | // m. 91
+	$c: | g-  (q=11) g      | // m. 91
 	{ q=3
-		$c:   eb+ g g g                              // m. 92
+		$c:   eb+ g g g       // m. 92
 	}
-	$c: | f# f# f# f#   f# f# f# f#   f# f# f# f#  | // m. 93
+	$c: | (q=12) f#         | // m. 93
 	{ q=3
-		$c:   d+ f f f                               // m. 94
+		$c:   d+ f f f        // m. 94
 	}
-	$c: | e e e e   e e e e   e e e e              | // m. 95
+	$c: | (q=12) e          | // m. 95
 	{ q=3
-		$c:   c+ eb eb eb                            // m. 96
+		$c:   c+ eb eb eb     // m. 96
 	}
 END
 
@@ -317,15 +308,14 @@ $c: | eb+ d d d   f#+ d d d   g+ d d d  | a+ d d d   bb+ d d d   c+2 d d d | // 
 // m. 101-107
 CALL     c0m101_107(d+2)
 FUNCTION c0m101_107
-	$c: | (length=/16) $[0] d+  c+  bb    a   g   f  e    d  c  bb- a- | g- g- g- g-   g- g- g- g-   g- g- g- g- | // m. 101/2-102
-	$c: |              g-   g+  f+  eb+   d+  c+  bb a    g  f  eb  d  | c  $c_x_11                              | // m. 103-104
-	$c: |              c    bb+ g+  f+    eb+ d+  c+ bb   a  g  f   eb | eb eb eb eb   eb eb eb eb   eb eb eb eb | // m. 105-106
-	$c: |              g    d+2 c+2 bb+   g+  f#+ e+ d+   c+ bb a   g  |                                           // m. 107
+	$c: | (length=/16) $[0] d+  c+  bb    a   g   f  e    d  c  bb- a- | (q=12) g-  | // m. 101/2-102
+	$c: |              g-   g+  f+  eb+   d+  c+  bb a    g  f  eb  d  | (q=12) c   | // m. 103-104
+	$c: |              c    bb+ g+  f+    eb+ d+  c+ bb   a  g  f   eb | (q=12) eb  | // m. 105-106
+	$c: |              g    d+2 c+2 bb+   g+  f#+ e+ d+   c+ bb a   g  |              // m. 107
 END
 
 // m. 108
-CONST   $g_16th_x_12  =  $c: | (length=/16)  g g g g   g g g g   g g g g |
-$g_16th_x_12
+$c: | (q=12) g:16 |
 
 // m. 109-112
 CONST   $c0m109part  =  g g- g
@@ -351,27 +341,27 @@ END
 // m. 120-124
 CALL     c0m120_122
 FUNCTION c0m120_122
-	$c  d  /16  q=12     // m. 120
+	$c:  (q=12) d:16     // m. 120
 	CALL  c0m121         // m. 121
-	$c  g  /16  q=12     // m. 122
+	$c:  (q=12) g:16     // m. 122
 END
 FUNCTION c0m121
 	{ q=3
 		$c:  g:16 d bb- g-
 	}
 END
-$c  f#  /16  q=12            // m. 123
-CALL  c0m121                 // m. 124
+$c:  (q=12) f#:16        // m. 123
+CALL  c0m121             // m. 124
 
 // m. 125-130
 CALL     c0m125_130
 FUNCTION c0m125_130
-	$c  g  /16  q=12                                     // m. 125
-	$c  f  /16  q=12                                     // m. 126    // (*) See footnote a few lines below.
-	$c: |  g g g g       bb  bb  bb  bb    d+ d+ d+ d+ | // m. 127
-	$c: |  g+ g+ g+ g+   bb+ bb+ bb+ bb+   g+ g+ g+ g+ | // m. 128
-	$c: |  d+ d+ d+ d+   bb  bb  bb  bb    g  g  g  g  | // m. 129
-	$c: |  g-:2.                                       | // m. 130
+	$c: | (q=12) g:16                                 | // m. 125
+	$c: | (q=12) f:16                                 | // m. 126    // (*) See footnote a few lines below.
+	$c: | g g g g       bb  bb  bb  bb    d+ d+ d+ d+ | // m. 127
+	$c: | g+ g+ g+ g+   bb+ bb+ bb+ bb+   g+ g+ g+ g+ | // m. 128
+	$c: | d+ d+ d+ d+   bb  bb  bb  bb    g  g  g  g  | // m. 129
+	$c: | g-:2.                                       | // m. 130
 END
 
 // (*) In the original version, measure 123 and 126 are identical for lead violin and violin 1: f# in both measures.
@@ -412,8 +402,8 @@ CALL  c0m70_73(c+)
 CALL  rest_measure  q=11
 
 // m. 85-96
-$c  c  /16  q=12                 // m. 85
-CALL  c0m86_96                   // m. 86-96
+$c:  (q=12) c:16             // m. 85
+CALL  c0m86_96               // m. 86-96
 
 // m. 97-100
 CALL     c1m97_100
@@ -424,21 +414,21 @@ END
 
 // m. 101-108
 CALL  c0m101_107(-)
-$g_16th_x_12                     // m. 108
+$c: | (q=12) g:16 |          // m. 108
 
 // m. 109-112
 CALL     c1m109_112
 FUNCTION c1m109_112
-	$c: | g:4  $piano     // m. 109/1
-	$c    g-  /4  q=11    // m. 109/2-112
+	$c: |  g:4  $piano       // m. 109/1
+	$c:    (q=11) g-:4  |    // m. 109/2-112
 END
 
 // m. 113-130
-CALL  c0m113_115(g-)  // m. 113-115
-CALL  c1m97_100       // m. 116-119
+CALL  c0m113_115(g-)   // m. 113-115
+CALL  c1m97_100        // m. 116-119
 CALL  c0m120_122
-$c  f#  /16  q=12     // m. 123
-CALL  c0m121          // m. 124
+$c:  | (q=12) f#:16 |  // m. 123
+CALL  c0m121           // m. 124
 CALL  c0m125_130
 
 ////////////////////////////////////
@@ -528,7 +518,7 @@ $c: | c+ c d eb   f g a b   c+:8 -        |            // m. 64
 CALL  c0m67_69
 CALL  c0m70_73(c+)
 CALL  rest_measure  q=11
-$c  c  /16  q=12         // m. 85
+$c:  (q=12) c:16         // m. 85
 CALL  c0m86_96
 CALL  c1m97_100
 CALL  rest_measure       // m. 101
@@ -541,28 +531,15 @@ CALL  c1m109_112
 CALL  c0m113_115(g-)
 CALL  c1m97_100      // m. 116-119
 CALL  c0m120_122
-$c  a-  /16  q=12    // m. 123
+$c:  (q=12) a-:16    // m. 123
 CALL  c0m121         // m. 124
-$c  a-  /16  q=24    // m. 125-126
+$c:  (q=24) a-:16    // m. 125-126
 
-// m. 127
-$c:   bb-:16
-$c  d    /16  q=3
-$c  g    /16  q=4
-$c  bb   /16  q=4
-
-// m. 128
-$c  d+   /16  q=4
-$c  g+   /16  q=4
-$c  bb+  /16  q=4
-
-// m. 129
-$c  g+  /16  q=4
-$c  d+  /16  q=4
-$c  bb  /16  q=4
-
-// m. 130
-$c: | g-:/2. |
+// m. 127-130
+$c: | bb-:16 d d d  g g g g      bb  bb  bb  bb  |  // m. 127
+$c: | d+ d+ d+ d+   g+ g+ g+ g+  bb+ bb+ bb+ bb+ |  // m. 128
+$c: | g+ g+ g+ g+   d+ d+ d+ d+  bb  bb  bb  bb  |  // m. 129
+$c: | g-:/2.                                     |  // m. 130
 
 ////////////////////////////////////
 // channel 3: Viola
@@ -576,10 +553,8 @@ CALL  c0m6_9
 CALL  rest_measure
 
 // m. 11-20
-$c  g-  /16  q=24  // m. 11-12
-$c  c   /16  q=24  // m. 13-14
-$c  eb  /16  q=24  // m. 15-16
-$c  g   /16  q=36  // m. 17-19
+//            11-12      13-14       15-16      17-19
+$c:  | (q=24) g-:16 | (q=24) c | (q=24) eb | (q=36) g |
 CALL  c2m20
 
 // m. 21-31
@@ -595,7 +570,7 @@ CALL  c3m21(d)     // m. 25
 CALL  c3m21(d)     // m. 26
 $c3m23             // m. 27
 CALL  c3m21(f#)    // m. 28
-$c  d  /8  q=18    // m. 29-31
+$c: (q=18) d:8     // m. 29-31
 
 // m. 32-38
 { q=6
@@ -635,35 +610,21 @@ $c: |        b-:4  -:8 d   b-:16 a-  g-  f-  |                                //
 }
 
 // m. 67-73
-$c  g-   /8   q=6   // m. 67
-$c  ab-  /8   q=4   // m. 68/1
-$c  ab   /8   q=2   // m. 68/2
-$c  d    /8   q=6   // m. 69
-$c  eb   /16        // m. 70/1
-$c  c    /16  q=11  // m. 70/2
-$c  bb   /16        // m. 71/1
-$c  c    /16  q=11  // m. 71/2
-$c  ab   /16        // m. 72/1
-$c  c    /16  q=11  // m. 72/2
-$c  g    /16        // m. 73/1
-$c  c    /16  q=7   // m. 73/2
-$c  c    /8         // m. 73/3
-$c  -    /8         // m. 73/4
+$c: | (q=6) g-:8  | (q=4) ab- ab ab | (q=6) d         | eb:16 (q=11) c |  // m. 67-70
+$c: | bb (q=11) c | ab (q=11) c     | g (q=7) c c:8 - |                   // m. 71-73
 
 // m. 74-84
 CALL  rest_measure  q=11
 
 // m. 85-101
-$c  c  /16  q=12    // m. 85
+$c: (q=12) c:16     // m. 85
 CALL  c0m86_96
 CALL  c1m97_100
 CALL  rest_measure  // m. 101
 
 // m. 102-108
-$c  g-  /16  q=24  // m. 102-103
-$c  c   /16  q=24  // m. 104-105
-$c  eb  /16  q=24  // m. 106-107
-$c  g   /16  q=12  // m. 108
+//      102-103       104-105     106-107       108
+$c: | (q=24) g-:16 | (q=24) c | (q=24) eb | (q=12) g |
 
 // m. 109-119
 CALL     c3m109_119
@@ -681,32 +642,12 @@ END
 $c: | d:4 -:16 d+ c+ bb a g f# e |
 
 // m. 121-126
-$c  d    /16  q=12  // m. 121
-$c  eb   /16  q=12  // m. 122
-$c  d    /16  q=12  // m. 123
-$c  bb-  /16  q=4   // m. 124/1
-$c  d    /16  q=8   // m. 124/2
-$c  eb   /16  q=12  // m. 125
-$c  d    /16  q=12  // m. 126
+//       121        122         123           124                125        126
+$c: | (q=12) d | (q=12) eb | (q=12) d | (q=4) bb- (q=8) d | (q=12) eb | (q=12) d |
 
-// m. 127
-$c  d    /16
-$c  bb-  /16  q=3
-$c  d    /16  q=4
-$c  g    /16  q=4
-
-// m. 128
-$c  bb  /16  q=4
-$c  d+  /16  q=4
-$c  d   /16  q=4
-
-// m. 129
-$c  bb-  /16  q=4
-$c  g-   /16  q=4
-$c  d    /16  q=4
-
-// m. 130
-$c: | g-:2. |
+// m. 127-130
+$c:  | d (q=3) bb-  (q=4) d   (q=4) g | (q=4) bb  (q=4) d+  (q=4) d |  // m. 127-128
+$c:  |   (q=4) bb-  (q=4) g-  (q=4) d | g-:2.                       |  // m. 129-130
 
 ////////////////////////////////////
 // channel 4: Violoncello
@@ -722,10 +663,8 @@ CALL  rest_measure
 // m. 11-19
 CALL     c4m11_19
 FUNCTION c4m11_19
-	$c  g-2  /8  q=12  // m. 11-12
-	$c  c-   /8  q=12  // m. 13-14
-	$c  eb-  /8  q=12  // m. 15-16
-	$c  g-   /8  q=18  // m. 17-19
+	//        11-12       13-14        15-16       17-19
+	$c: | (q=12) g-2:8 | (q=12) c- | (q=12) eb- | (q=18) g- |
 END
 
 // m. 20
@@ -745,7 +684,7 @@ FUNCTION c4m21_31
 			$c:   d- a-     // m. 24 == 28
 		}
 	}
-	$c  g-2  /8  q=18               // m. 29-31
+	$c: | (q=18) g-2:8 |    // m. 29-31
 END
 
 // m. 32-54
@@ -795,13 +734,10 @@ CONST  $c4m56  =  $c: | g-2:16 g- f- eb-   d- c- bb-2 a-2   g-2:8 - |
 // m. 65-69
 CALL     c4m65_69
 FUNCTION c4m65_69
-	{ q=2             // m. 65-66
-		$c: | -:16 c bb- ab-   g- f- eb- d-   c-:8 - |
+	{ q=2
+		$c: | -:16 c bb- ab-   g- f- eb- d-   c-:8 - |  // m. 65-66
 	}
-	$c  eb-  /8  q=6  // m. 67
-	$c  f-   /8  q=6  // m. 68
-	$c  g-   /8  q=4  // m. 69/1
-	$c  g-2  /8  q=2  // m. 69/2
+	$c: | (q=6) eb- | (q=6) f- | (q=4) g- (q=2) g-2 |  // m. 67-69
 END
 
 // m. 70-73
@@ -822,12 +758,12 @@ FUNCTION c4m74_75
 END
 
 // m. 85-96
-$c  c-  /16  q=12         // m. 85
+$c:  (q=12) c-:16        // m. 85
 CALL  c0m86_96  s=-12
 
 // m. 97-101
 *  4,14       // synchronize with helper channel 14
-14  d-  /4    // put second voice to helper channel
+14:  d-:4     // put second voice to helper channel
 CALL     c4m97_101
 FUNCTION c4m97_101
 	//    m. 97      m. 98-101
@@ -837,10 +773,8 @@ END
 // m. 102-108
 CALL     c4m102_108
 FUNCTION c4m102_108
-	$c  g-2  /8  q=12  // m. 102-103
-	$c  c-   /8  q=12  // m. 104-105
-	$c  eb-  /8  q=12  // m. 106-107
-	$c  g-   /8  q=6   // m. 108
+	//      102-103       104-105      106-107      108
+	$c: | (q=12) g-2:8 | (q=12) c- | (q=12) eb- | (q=6) g- |
 END
 
 // m. 109-119
@@ -855,13 +789,8 @@ END
 // m. 121-126
 CALL     c4m121_126
 FUNCTION c4m121_126
-	$c  bb-2  /16  q=12  // m. 121
-	$c  c-    /16  q=12  // m. 122
-	$c  d-    /16  q=12  // m. 123
-	$c  bb-2  /16  q=4   // m. 124/1
-	$c  d-    /16  q=8   // m. 124/2
-	$c  eb-   /16  q=12  // m. 125
-	$c  d-    /16  q=12  // m. 126
+	$c: | (q=12) bb-2:16      | (q=12) c-  | (q=12) d- |  // m. 121-123
+	$c: | (q=4) bb-2 (q=8) d- | (q=12) eb- | (q=12) d- |  // m. 124-126
 END
 
 // m. 127-130
@@ -898,7 +827,7 @@ CALL  rest_measure      // m. 25
 CALL  c5m21  q=3        // m. 26-28
 
 // m. 29-38
-$c  g-3  /8     q=18                                          // m. 29-31
+$c: | (q=18) g-3:8                                            // m. 29-31
 $c: | g-3:8 -:8+2 | c-2:8 -:8+2 | a-3:8 -:8+2 | d-2:8 -:8+2 | // m. 32-35
 { q=2
 	$c:   a-3:8 -:8+2                                         // m. 36 == 37
@@ -989,24 +918,18 @@ CALL  c0m6_9
 CALL  rest_measure
 
 // m. 11-20
-$c  g-,d     /4  q=6  // m. 11-12
-$c  g-,eb    /4  q=6  // m. 13-14
-$c  g-,c,g   /4  q=6  // m. 14-16
-$c  bb-,d    /4  q=3  // m. 17
-$c  bb-,d,g  /4  q=3  // m. 18
-$c  d,g,bb   /4  q=3  // m. 19
+$c: | (q=6) g-,d:4 | (q=6) g-,eb   | (q=6) g-,c,g |  // m. 11-16
+$c: | (q=3) bb-,d  | (q=3) bb-,d,g | (q=3) d,g,bb |  // m. 17-19
 CALL  c2m20
 
 // m. 21-31
-{ q=2
-	$c  f#,a,d+  /4  q=6  // m. 21-22 == 25-26
-	$c  d,g,bb   /4  q=3  // m. 23 == 27
-	$c  d,f#,a   /4  q=3  // m. 24 == 28
+{ q=2  // 21-22 == 25-26      23 == 27       24 == 28
+	$c: | (q=6) f#,a,d+:4 | (q=3) d,g,bb | (q=3) d,f#,a |
 }
-$c  bb-,d,g  /2.  q=3         // m. 29-31
+$c: | (q=3) bb-,d,g:2. |    // m. 29-31
 
 // m. 32-37
-$c: | d,g,b:2. | eb,g,c+ | e,a,c#+ | f,a,d+ | e,a,d+ | e,a,c#+ |
+$c: | d,g,b | eb,g,c+ | e,a,c#+ | f,a,d+ | e,a,d+ | e,a,c#+ |
 
 // m. 38-52
 { q=2
@@ -1017,14 +940,14 @@ CALL  rest_measure  q=11       // m. 42-52
 
 // m. 53-54
 { q=2
-	$c  a-  /2.  m                // 1st voice
+	$c: (m) a-:2.                 // 1st voice
 	{ q=3                         // 2nd voice
 		$c:  f-:8  c-
 	}
 }
 
 // m. 55
-$c  f,a  2+8  m        // 1st voice
+$c: | (m) f,a:2+8      // 1st voice
 $c: | -:2  d+:8 - |    // 2nd voice
 
 // m. 56-66
@@ -1042,11 +965,11 @@ CHORD   crd6m70 = eb,g,c+
 CALL    c0m70_73(crd6m70)
 
 // m. 74-79
-$c    g,c+,eb+    /4  q=3  // m. 74
+$c: | (q=3) g,c+,eb+:4   | // m. 74
 $c: | g,b,d+:4 -:2       | // m. 75
-$c    g,c+,eb+    /4  q=3  // m. 76
+$c: | (q=3) g,c+,eb+:4   | // m. 76
 $c: | bb,d+,f+:4 -:2     | // m. 77
-$c    bb,eb+,g+   /4  q=3  // m. 78
+$c: | (q=3) bb,eb+,g+:4  | // m. 78
 $c: | bb,eb+,bb+:4 -:2   | // m. 79
 
 // m. 80-96
@@ -1087,7 +1010,7 @@ CALL  c4m55_64
 CALL  c4m65_69
 CALL  c0m70_73(c)  s=-12
 CALL  c4m74_84
-$c  c-  /16  q=12               // m. 85
+$c: | (q=12) c-:16             // m. 85
 CALL  c0m86_96  s=-12
 CALL  c4m97_101
 CALL  c4m102_108

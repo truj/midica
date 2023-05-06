@@ -12,6 +12,7 @@ import java.util.HashMap;
 
 import org.midica.config.Dict;
 import org.midica.file.read.MidicaPLParser;
+import org.midica.file.read.ParseException;
 import org.midica.file.write.MidicaPLExporter;
 
 /**
@@ -85,6 +86,12 @@ public class Instrument implements Comparable<Instrument> {
 	private String naturalLength = noteLength;
 	/** current bar line tolerance */
 	private int barLineTolerance = DEFAULT_BAR_LINE_TOLERANCE;
+	/** one-time option for compact syntax: quantity */
+	private Integer otoQuantity = null;
+	/** one-time option for compact syntax: tremolo */
+	private String  otoTremolo  = null;
+	/** one-time option for compact syntax: multiple */
+	private boolean otoMultiple = false;
 	
 	// fields for foreign languages (e.g. alda)
 	private byte octave = DEFAULT_OCTAVE;
@@ -413,5 +420,81 @@ public class Instrument implements Comparable<Instrument> {
 	 */
 	public void setBarLineTolerance(int barLineTolerance) {
 		this.barLineTolerance = barLineTolerance;
+	}
+	
+	/**
+	 * Returns the one-time quantity for compact syntax.
+	 * The default is **1**.
+	 * 
+	 * @return one-time quantity
+	 */
+	public int getOtoQuantity() {
+		if (null == otoQuantity)
+			return 1;
+		return otoQuantity;
+	}
+	
+	/**
+	 * Sets the one-time quantity for compact syntax.
+	 * 
+	 * @param quantity  number to set
+	 * @throws ParseException if the option is already set
+	 */
+	public void setOtoQuantity(int quantity) throws ParseException {
+		if (otoQuantity != null)
+			throw new ParseException(Dict.get(Dict.ERROR_OTO_DUPLICATE_QUANTITY));
+		otoQuantity = quantity;
+	}
+	
+	/**
+	 * Returns the one-time tremolo value for compact syntax, if set.
+	 * Otherwise, returns null.
+	 * 
+	 * @param tremolo  one-time tremolo value or null
+	 */
+	public String getOtoTremolo() {
+		return otoTremolo;
+	}
+	
+	/**
+	 * Sets or resets the one-time tremolo value for compact syntax.
+	 * 
+	 * @param tremolo  tremolo value to set, or null to reset
+	 * @throws ParseException if the option is already set
+	 */
+	public void setOtoTremolo(String tremolo) throws ParseException {
+		if (otoTremolo != null)
+			throw new ParseException(Dict.get(Dict.ERROR_OTO_DUPLICATE_TREMOLO));
+		otoTremolo = tremolo;
+	}
+	
+	/**
+	 * Determins if a one-time multiple option is set for compact syntax.
+	 * 
+	 * @return true or false
+	 */
+	public boolean isOtoMultiple() {
+		return otoMultiple;
+	}
+	
+	/**
+	 * Sets or resets the one-time multiple option for compact syntax.
+	 * 
+	 * @param multiple  true to set the multiple option, false to reset it.
+	 * @throws ParseException if the option is already set
+	 */
+	public void setOtoMultiple(boolean multiple) throws ParseException {
+		if (otoMultiple)
+			throw new ParseException(Dict.get(Dict.ERROR_OTO_DUPLICATE_MULTIPLE));
+		otoMultiple = multiple;
+	}
+	
+	/**
+	 * Resets all one-time option for compact syntax.
+	 */
+	public void resetOto() {
+		otoQuantity = null;
+		otoTremolo  = null;
+		otoMultiple = false;
 	}
 }

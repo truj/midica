@@ -1622,6 +1622,7 @@ public class Dict {
 	public static final String ERROR_CANT_PARSE_OPTIONS          = "error_cant_parse_options";
 	public static final String ERROR_OPTION_NEEDS_VAL            = "error_option_needs_val";
 	public static final String ERROR_OPTION_VAL_NOT_ALLOWED      = "error_option_val_not_allowed";
+	public static final String ERROR_DUPLICATE_OPTION            = "error_duplicate_option";
 	public static final String ERROR_VEL_NOT_MORE_THAN_127       = "error_vel_not_more_than_127";
 	public static final String ERROR_VEL_NOT_LESS_THAN_1         = "error_vel_not_less_than_1";
 	public static final String ERROR_TUPLET_INVALID              = "error_tuplet_invalid";
@@ -1648,13 +1649,20 @@ public class Dict {
 	public static final String ERROR_COND_UNDEF_IN_CENTER        = "error_cond_undef_in_center";
 	public static final String ERROR_COND_WHITESPACE_IN_IN_ELEM  = "error_cond_whitespace_in_in_elem";
 	public static final String ERROR_COND_EMPTY_ELEM_IN_IN_LIST  = "error_cond_empty_elem_in_in_list";
-	public static final String ERROR_CALL_IF_MUST_BE_ALONE       = "error_call_if_must_be_alone";
 	public static final String ERROR_BAR_LINE_INCORRECT          = "error_bar_line_incorrect";
 	public static final String ERROR_BAR_LINE_TOO_EARLY          = "error_bar_line_too_early";
 	public static final String ERROR_BAR_LINE_TOO_LATE           = "error_bar_line_too_late";
 	public static final String ERROR_BAR_LINE_EXACT_NOTE_LEN     = "error_bar_line_exact_note_len";
 	public static final String ERROR_BAR_LINE_BETWEEN            = "error_bar_line_between";
 	public static final String ERROR_BAR_LINE_SMALL              = "error_bar_line_small";
+	public static final String ERROR_OTO_BEFORE_BLOCK            = "error_oto_before_block";
+	public static final String ERROR_OTO_AT_END_OF_BLOCK         = "error_oto_at_end_of_block";
+	public static final String ERROR_OTO_BEFORE_FUNCTION         = "error_oto_before_function";
+	public static final String ERROR_OTO_AT_END_OF_FUNCTION      = "error_oto_at_end_of_function";
+	public static final String ERROR_OTO_TREMOLO_PATTERN_CALL    = "error_oto_tremolo_pattern_call";
+	public static final String ERROR_OTO_DUPLICATE_QUANTITY      = "error_oto_duplicate_quantity";
+	public static final String ERROR_OTO_DUPLICATE_MULTIPLE      = "error_oto_duplicate_multiple";
+	public static final String ERROR_OTO_DUPLICATE_TREMOLO       = "error_oto_duplicate_tremolo";
 	
 	// NestableBlock
 	public static final String ERROR_BLOCK_ARG_ALREADY_SET      = "error_block_arg_already_set";
@@ -3254,7 +3262,7 @@ public class Dict {
 		set( ERROR_PATTERN_NOT_ALLOWED_HERE,      "a pattern definition is not allowed inside a block<br>maybe you forgot to close the block." );
 		set( ERROR_PATTERN_ALREADY_DEFINED,       "pattern name has been already defined: "                           );
 		set( ERROR_PATTERN_NUM_OF_ARGS,           "wrong number of arguments in pattern command"                      );
-		set( ERROR_PATTERN_INVALID_OUTER_OPT,     "in a channel commands with a pattern this option is not allowed: " );
+		set( ERROR_PATTERN_INVALID_OUTER_OPT,     "in a channel command with a pattern this option is not allowed: "  );
 		set( ERROR_PATTERN_INVALID_INNER_OPT,     "invalid pattern option: "                                          );
 		set( ERROR_PATTERN_INDEX_INVALID,         "pattern index not a number: "                                      );
 		set( ERROR_PATTERN_INDEX_TOO_HIGH,        "pattern index too high: "                                          );
@@ -3314,6 +3322,7 @@ public class Dict {
 		set( ERROR_CANT_PARSE_OPTIONS,            "cannot parse options: "                                            );
 		set( ERROR_OPTION_NEEDS_VAL,              "option needs value: "                                              );
 		set( ERROR_OPTION_VAL_NOT_ALLOWED,        "no value allowed for option: "                                     );
+		set( ERROR_DUPLICATE_OPTION,              "duplicate option: "                                                );
 		set( ERROR_VEL_NOT_MORE_THAN_127,         "velocity cannot be set to more than 127"                           );
 		set( ERROR_VEL_NOT_LESS_THAN_1,           "velocity must be more than 0"                                      );
 		set( ERROR_TUPLET_INVALID,                "Invalid tuplet definition: "                                       );
@@ -3340,13 +3349,20 @@ public class Dict {
 		set( ERROR_COND_UNDEF_IN_CENTER,          "'!' must be at the beginning of the condition. : "                 );
 		set( ERROR_COND_WHITESPACE_IN_IN_ELEM,    "Invalid whitespace in list element: "                              );
 		set( ERROR_COND_EMPTY_ELEM_IN_IN_LIST,    "Empty element in 'in' list: "                                      );
-		set( ERROR_CALL_IF_MUST_BE_ALONE,         "block option 'if' cannot be combined with another if"              );
 		set( ERROR_BAR_LINE_INCORRECT,            "Incorrect bar line!<br>"                                           );
 		set( ERROR_BAR_LINE_TOO_EARLY,            "bar line number <b>%d</b> is <b>%d</b> ticks after a measure border.<br>"  );
 		set( ERROR_BAR_LINE_TOO_LATE,             "bar line number <b>%d</b> is <b>%d</b> ticks before a measure border.<br>" );
 		set( ERROR_BAR_LINE_EXACT_NOTE_LEN,       "This equates exactly the following note length:<br><b>%s</b>"      );
 		set( ERROR_BAR_LINE_BETWEEN,              "This is between the following note lengths:<br>- <b>%s</b> (%d ticks)<br>- <b>%s</b> (%d ticks)<br>" );
 		set( ERROR_BAR_LINE_SMALL,                "For comparison:<br>The note length <b>%s</b> equates to %d ticks"  );
+		set( ERROR_OTO_BEFORE_BLOCK,              "Illegal open One-time option '%s' before a nestable block found (channel %d)"        );
+		set( ERROR_OTO_AT_END_OF_BLOCK,           "Illegal open One-time option '%s' at the end of a nestable block found (channel %d)" );
+		set( ERROR_OTO_BEFORE_FUNCTION,           "Illegal open One-time option '%s' before a function call found (channel %d)"         );
+		set( ERROR_OTO_AT_END_OF_FUNCTION,        "Illegal open One-time option '%s' at the end of a function found (channel %d)"       );
+		set( ERROR_OTO_TREMOLO_PATTERN_CALL,      "Open tremolo option is illegal for pattern usage"                  );
+		set( ERROR_OTO_DUPLICATE_QUANTITY,        "Unconsumed one-type option 'quantity' cannot be set again."        );
+		set( ERROR_OTO_DUPLICATE_MULTIPLE,        "Unconsumed one-type option 'multiple' cannot be set again."        );
+		set( ERROR_OTO_DUPLICATE_TREMOLO,         "Unconsumed one-type option 'tremolo' cannot be set again."         );
 		
 		// NestableBlock
 		set( ERROR_BLOCK_ARG_ALREADY_SET,         "Block argument has already been set before: "                      );

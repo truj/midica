@@ -182,6 +182,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 13920, instruments.get(0).getCurrentTicks() );
 		assertEquals(  2400, instruments.get(1).getCurrentTicks() );
 		assertEquals(  1440, instruments.get(9).getCurrentTicks() );
+		assertEquals(  1920, instruments.get(2).getCurrentTicks() );
 		
 		parse(getWorkingFile("define"));
 		assertEquals( 3120, instruments.get(0).getCurrentTicks() );
@@ -1361,6 +1362,108 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "4959/9/99/bass_drum_1 (bd1) / 64", messages.get(i++).toString() );
 		}
 		
+		parse(getWorkingFile("compact-oto"));
+		// channel 0
+		messages = getMessagesByStatus("90");
+		{
+			int i = 0;
+			
+			// (q=4) c
+			assertEquals( "0/0/90/c / 64",    messages.get(i++).toString() );
+			assertEquals( "480/0/90/c / 64",  messages.get(i++).toString() );
+			assertEquals( "960/0/90/c / 64",  messages.get(i++).toString() );
+			assertEquals( "1440/0/90/c / 64", messages.get(i++).toString() );
+			// (m) d e
+			assertEquals( "1920/0/90/d / 64", messages.get(i++).toString() );
+			assertEquals( "1920/0/90/e / 64", messages.get(i++).toString() );
+			// f
+			assertEquals( "2400/0/90/f / 64", messages.get(i++).toString() );
+			// (tr=/32,q=2,m) g:8 a:4 ==> same as (m) a:4 (q=8) g:32
+			assertEquals( "2880/0/90/g / 64", messages.get(i++).toString() );
+			assertEquals( "2880/0/90/a / 64", messages.get(i++).toString() ); // a:4
+			assertEquals( "2940/0/90/g / 64", messages.get(i++).toString() );
+			assertEquals( "3000/0/90/g / 64", messages.get(i++).toString() );
+			assertEquals( "3060/0/90/g / 64", messages.get(i++).toString() );
+			assertEquals( "3120/0/90/g / 64", messages.get(i++).toString() );
+			assertEquals( "3180/0/90/g / 64", messages.get(i++).toString() );
+			assertEquals( "3240/0/90/g / 64", messages.get(i++).toString() );
+			assertEquals( "3300/0/90/g / 64", messages.get(i++).toString() );
+			// (m) b (m) c+ -:8 d+
+			assertEquals( "3360/0/90/b / 64", messages.get(i++).toString() );
+			assertEquals( "3360/0/90/c+ / 64", messages.get(i++).toString() );
+			assertEquals( "3600/0/90/d+ / 64", messages.get(i++).toString() );
+		}
+		// channel 1
+		messages = getMessagesByStatus("91");
+		{
+			int i = 0;
+			
+			// (q=2) c
+			assertEquals( "0/1/91/c / 64",    messages.get(i++).toString() );
+			assertEquals( "480/1/91/c / 64",  messages.get(i++).toString() );
+			// { q=2 (first run)
+				// (q=2) d:4
+				assertEquals( "960/1/91/d / 64",  messages.get(i++).toString() );
+				assertEquals( "1440/1/91/d / 64", messages.get(i++).toString() );
+				// { m
+					// (m) e (m) f
+					assertEquals( "1920/1/91/e / 64", messages.get(i++).toString() );
+					assertEquals( "1920/1/91/f / 64", messages.get(i++).toString() );
+				// }
+				// g:1
+				assertEquals( "1920/1/91/g / 64", messages.get(i++).toString() );
+			// }
+			// { q=2 (second run)
+				// (q=2) d:4
+				assertEquals( "3840/1/91/d / 64",  messages.get(i++).toString() );
+				assertEquals( "4320/1/91/d / 64", messages.get(i++).toString() );
+				// { m
+					// e (m) f
+					assertEquals( "4800/1/91/e / 64", messages.get(i++).toString() );
+					assertEquals( "4800/1/91/f / 64", messages.get(i++).toString() );
+				// }
+				// g:1
+				assertEquals( "4800/1/91/g / 64", messages.get(i++).toString() );
+			// }
+			// a
+			assertEquals( "6720/1/91/a / 64", messages.get(i++).toString() );
+		}
+		// channel 2
+		messages = getMessagesByStatus("92");
+		{
+			int i = 0;
+			
+			// c
+			assertEquals( "0/2/92/c / 64", messages.get(i++).toString() );
+			// (m,q=2) d,e:pat (first run) f:*2
+				// : (q=2) 0:4
+				assertEquals( "480/2/92/d / 64",  messages.get(i++).toString() );
+				assertEquals( "480/2/92/f / 64",  messages.get(i++).toString() );
+				assertEquals( "960/2/92/d / 64",  messages.get(i++).toString() );
+				// : (m) 0 1
+				assertEquals( "1440/2/92/d / 64",  messages.get(i++).toString() );
+				assertEquals( "1440/2/92/e / 64",  messages.get(i++).toString() );
+				// : (tr=32) 0,1:16
+				assertEquals( "1920/2/92/d / 64",  messages.get(i++).toString() );
+				assertEquals( "1920/2/92/e / 64",  messages.get(i++).toString() );
+				assertEquals( "1980/2/92/d / 64",  messages.get(i++).toString() );
+				assertEquals( "1980/2/92/e / 64",  messages.get(i++).toString() );
+			// (m,q=2) d,e:pat (second run)
+				// : (q=2) 0:4
+				assertEquals( "2040/2/92/d / 64",  messages.get(i++).toString() );
+				assertEquals( "2520/2/92/d / 64",  messages.get(i++).toString() );
+				// : (m) 0 1
+				assertEquals( "3000/2/92/d / 64",  messages.get(i++).toString() );
+				assertEquals( "3000/2/92/e / 64",  messages.get(i++).toString() );
+				// : (tr=32) 0,1:16
+				assertEquals( "3480/2/92/d / 64",  messages.get(i++).toString() );
+				assertEquals( "3480/2/92/e / 64",  messages.get(i++).toString() );
+				assertEquals( "3540/2/92/d / 64",  messages.get(i++).toString() );
+				assertEquals( "3540/2/92/e / 64",  messages.get(i++).toString() );
+			// [f:*2] (already over), g
+			assertEquals( "4320/2/92/g / 64",  messages.get(i++).toString() );
+		}
+		
 		parse(getWorkingFile("bar-lines"));
 	}
 	
@@ -1805,8 +1908,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-if-not-alone")) );
 		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "{ if=$x, if $x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_IF_MUST_BE_ALONE)) );
+		assertEquals( "{ if=$x, elsif $x", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_IF_MUST_BE_ALONE))
+			|| e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-if-not-alone-2")) );
 		assertEquals( 7, e.getLineNumber() );
@@ -1820,8 +1924,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-elsif-not-alone")) );
 		assertEquals( 8, e.getLineNumber() );
-		assertEquals( "{ elsif=$x, elsif $x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE)) );
+		assertEquals( "{ elsif=$x, if $x", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_IF_MUST_BE_ALONE))
+			|| e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-elsif-not-alone-2")) );
 		assertEquals( 10, e.getLineNumber() );
@@ -1835,8 +1940,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-else-not-alone")) );
 		assertEquals( 8, e.getLineNumber() );
-		assertEquals( "{ else, else", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSE_MUST_BE_ALONE)) );
+		assertEquals( "{ else, elsif=$x", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE))
+			|| e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSE_MUST_BE_ALONE)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-else-not-alone-2")) );
 		assertEquals( 10, e.getLineNumber() );
@@ -1891,7 +1997,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-if-not-alone")) );
 		assertEquals( 5, e.getLineNumber() );
 		assertEquals( "CALL test if=$x, if $x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_IF_MUST_BE_ALONE)) );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_DUPLICATE_OPTION) + "if") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("cond-too-many-operators")) );
 		assertEquals( 5, e.getLineNumber() );
@@ -2631,6 +2737,71 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 9, e.getLineNumber() );
 		assertEquals( "0: | c   | c:16 c c c  c c c c  c c c c  c c c c:32 |", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BAR_LINE_INCORRECT)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-before-block")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "{", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_OTO_BEFORE_BLOCK), "quantity", 1)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-before-block-2")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertEquals( "{", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_OTO_BEFORE_BLOCK), "multiple", 1)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-at-end-of-block")) );
+		assertEquals( 8, e.getLineNumber() );
+		assertEquals( "}", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_OTO_AT_END_OF_BLOCK), "multiple", 1)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-at-end-of-block-2")) );
+		assertEquals( 10, e.getLineNumber() );
+		assertEquals( "}", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_OTO_AT_END_OF_BLOCK), "quantity", 1)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-before-function-call")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "CALL f", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_OTO_BEFORE_FUNCTION), "quantity", 1)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-before-function-call-2")) );
+		assertEquals( 7, e.getLineNumber() );
+		assertEquals( "CALL f", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_OTO_BEFORE_FUNCTION), "quantity", 1)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-before-function-call-3")) );
+		assertEquals( 10, e.getLineNumber() );
+		assertEquals( "CALL f", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_OTO_BEFORE_FUNCTION), "quantity", 1)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-at-end-of-function")) );
+		assertEquals( 9, e.getLineNumber() );
+		assertEquals( "END", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_OTO_AT_END_OF_FUNCTION), "quantity", 1)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-tremolo-with-pattern")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "1: c (tr=/32) d:pat", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OTO_TREMOLO_PATTERN_CALL)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-duplicate-option")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "1: c (m,q=2,m) d", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_DUPLICATE_OPTION) + "multiple"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-duplicate-option-m")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "1: c (m,q=2) (m) d", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OTO_DUPLICATE_MULTIPLE)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-duplicate-option-q")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "1: (q=3) d", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OTO_DUPLICATE_QUANTITY)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-duplicate-option-tr")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertEquals( "1: (tr=/16) d", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OTO_DUPLICATE_TREMOLO)));
 	}
 	
 	/**

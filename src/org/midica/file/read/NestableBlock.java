@@ -24,13 +24,15 @@ public class NestableBlock {
 	private static Pattern plus        = null;
 	private static Pattern whitespaces = Pattern.compile("\\s+");
 	
-	private MidicaPLParser    parser    = null;
-	private boolean           multiple  = false;
-	private int               quantity  = 1;
-	private String            tuplet    = null;
-	private int               shift     = 0;
-	private ArrayList<Object> elements  = null;
-	private String            condition = null;
+	private MidicaPLParser    parser      = null;
+	private boolean           multiple    = false;
+	private int               quantity    = 1;
+	private String            tuplet      = null;
+	private int               shift       = 0;
+	private ArrayList<Object> elements    = null;
+	private String            condition   = null;
+	private String            openingLine = null;
+	private String            closingLine = null;
 	
 	private boolean condChainOpened = false;
 	private boolean condChainHit    = false;
@@ -46,11 +48,13 @@ public class NestableBlock {
 	/**
 	 * Creates a new nestable block.
 	 * 
-	 * @param parser    The parser object that was responsible to create the block.
+	 * @param parser       The parser object that was responsible to create the block.
+	 * @param openingLine  content of the line that opens the block
 	 */
-	public NestableBlock(MidicaPLParser parser) {
-		this.parser   = parser;
-		this.elements = new ArrayList<Object>();
+	public NestableBlock(MidicaPLParser parser, String openingLine) {
+		this.parser      = parser;
+		this.openingLine = openingLine;
+		this.elements    = new ArrayList<Object>();
 	}
 	
 	/**
@@ -58,6 +62,15 @@ public class NestableBlock {
 	 */
 	public static void reset() {
 		plus = null;
+	}
+	
+	/**
+	 * Sets the content of the block closing line.
+	 * 
+	 * @param closingLine  line content
+	 */
+	public void setClosingLine(String closingLine) {
+		this.closingLine = closingLine;
 	}
 	
 	/**
@@ -476,6 +489,9 @@ public class NestableBlock {
 		traceElem.setNestableBlock(lineNumberOpen, lineNumberClose);
 		callStack.push(traceElem);
 		
+		// check open one-time option
+		parser.assertNoOpenOTO(Dict.ERROR_OTO_BEFORE_BLOCK, openingLine, lineNumberOpen);
+		
 		// remember current tickstamps if needed
 		ArrayList<Long> tickstamps = null;
 		if (multiple) {
@@ -613,6 +629,9 @@ public class NestableBlock {
 		
 		// remove call stack element
 		callStack.pop();
+		
+		// check open one-time option
+		parser.assertNoOpenOTO(Dict.ERROR_OTO_AT_END_OF_BLOCK, closingLine, lineNumberClose);
 	}
 	
 	/**

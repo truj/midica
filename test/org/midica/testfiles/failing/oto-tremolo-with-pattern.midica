@@ -1,0 +1,7 @@
+INCLUDE inc/instruments.midica
+
+1: c (tr=/32) d:pat
+
+PATTERN pat
+	// do nothing
+END

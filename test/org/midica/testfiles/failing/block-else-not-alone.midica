@@ -5,6 +5,6 @@ VAR $x = 1
 { if=$x
 	0  c  /4
 }
-{ else, else
+{ else, elsif=$x
 	0  c  /4
 }

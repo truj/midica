@@ -2,7 +2,7 @@
 // "Old MacDonald had a farm".
 // 
 // This file assumes standard program configuration:
-// - Note System:       International: c, d, e, ... (lower case)
+// - Note System:       International: c, d, e, ... (lower case
 // - Half Tone Symbols: # / b (c#, cb, d#, db, ...)
 // - Octave Naming:     +n/-n
 // - Syntax:            Mixed Case Syntax
@@ -84,10 +84,10 @@ CONST $tr_short = /8
 FUNCTION guitar
 	CALL guitar_line q=2
 	
-	//   moo moo here and a   moo moo there   here a    moo        there a     moo
+	//   moo moo here and a   moo moo there   here   a    moo      there  a    moo
 	1: | gmaj:1             | gmaj          | gmaj:8 gmaj gmaj:4   gmaj:8 gmaj gmaj:4 |
 	
-	//   ev-   ery- where  a  moo    moo
+	//   ev-   ery- where  a   moo    moo
 	1: | gmaj:8 gmaj gmaj gmaj gmaj:4 gmaj:4 |
 	
 	CALL guitar_line
@@ -100,25 +100,8 @@ END
 // I don't want to do that, so I must use lowlevel syntax here.
 // Compact syntax is only used for the (optional) bar lines.
 FUNCTION guitar_line
-	1: |
-	1  gmaj  /4  tr=$tr_long
-	1  gmaj  /2  tr=$tr_short
-	1  gmaj  /4  tr=$tr_long
-	1: |
-	
-	1  cmaj  /4  tr=$tr_short
-	1  cmaj  /4  tr=$tr_long
-	1  gmaj  /2  tr=$tr_long
-	1: |
-	
-	1  gmaj  /4
-	1  gmaj  /4  tr=$tr_short
-	1  dmaj  /4
-	1  dmaj  /4  tr=$tr_short
-	1: |
-	
-	1  gmaj  /4  tr=$tr_long
-	1  gmaj  /2  tr=$tr_short
-	1  gmaj  /4  tr=$tr_long
-	1: |
+	1: | (tr=$tr_long) gmaj:4 (tr=$tr_short) gmaj:2 (tr=$tr_long) gmaj:4 |
+	1: | (tr=$tr_short) cmaj (tr=$tr_long) cmaj (tr=$tr_long) gmaj:2     |
+	1: | gmaj:4 (tr=$tr_short) gmaj:4 dmaj:4 (tr=$tr_short) dmaj:4       |
+	1: | (tr=$tr_long) gmaj:4 (tr=$tr_short) gmaj:2 (tr=$tr_long) gmaj:4 |
 END

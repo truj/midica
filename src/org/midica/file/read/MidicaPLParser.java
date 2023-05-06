@@ -77,6 +77,9 @@ public class MidicaPLParser extends SequenceParser {
 	private static final HashSet<String> compactOptionsWithoutRest = new HashSet<>(
 		Arrays.asList(new String[] {
 			OPT_LENGTH,
+			OPT_QUANTITY,
+			OPT_TREMOLO,
+			OPT_MULTIPLE,
 		})
 	);
 	
@@ -2136,7 +2139,7 @@ public class MidicaPLParser extends SequenceParser {
 		// parse open and close
 		NestableBlock block;
 		if (BLOCK_OPEN.equals(cmd)) {
-			block = new NestableBlock(this);
+			block = new NestableBlock(this, currentLineContent);
 			
 			// nested?
 			if (nestableBlkDepth > 1) {
@@ -2150,6 +2153,7 @@ public class MidicaPLParser extends SequenceParser {
 		else {
 			// BLOCK_CLOSE
 			block = nestableBlkStack.pop();
+			block.setClosingLine(currentLineContent);
 		}
 		
 		// apply options
@@ -2331,6 +2335,10 @@ public class MidicaPLParser extends SequenceParser {
 		if (tokens.length < 2)
 			throw new ParseException(Dict.get(Dict.ERROR_CALL_NUM_OF_ARGS));
 		
+		// check for open one-time options
+		if (!isFake)
+			assertNoOpenOTO(Dict.ERROR_OTO_BEFORE_FUNCTION);
+		
 		// parse call
 		String functionName = null;
 		String paramString  = null;
@@ -2363,9 +2371,6 @@ public class MidicaPLParser extends SequenceParser {
 				else if (OPT_MULTIPLE.equals(optName))
 					multiple = true;
 				else if (OPT_IF.equals(optName)) {
-					if (condIf != null) {
-						throw new ParseException(Dict.get(Dict.ERROR_CALL_IF_MUST_BE_ALONE) + optName);
-					}
 					condIf = opt.getCondition();
 					
 					// only check?
@@ -2460,6 +2465,12 @@ public class MidicaPLParser extends SequenceParser {
 		// restore tickstamps, if needed
 		if (multiple) {
 			restoreTickstamps(tickstamps);
+		}
+		
+		// check for open one-time options
+		if (!isFake) {
+			int line = functionToLineOffset.get(functionName) + functionLineStack.peek() + 1;
+			assertNoOpenOTO(Dict.ERROR_OTO_AT_END_OF_FUNCTION, END, line);
 		}
 		
 		// remove params from call stack
@@ -4363,6 +4374,7 @@ public class MidicaPLParser extends SequenceParser {
 			for (String compactElement : whitespace.split(tokens[1])) {
 				String[] chCmdTokens    = null;
 				Matcher  barLineMatcher = barLinePattern.matcher(compactElement);
+				boolean  mustApplyOto   = false;
 				
 				// option: (name=value)?
 				ArrayList<CommandOption> options = parseCompactOptions(compactElement, isFake);
@@ -4388,9 +4400,19 @@ public class MidicaPLParser extends SequenceParser {
 					
 					// handle non-rest options
 					for (CommandOption opt : nonRestOptions) {
-						if (OPT_LENGTH.equals(opt.getName())) {
-							if (!isFake)
+						if (!isFake) {
+							if (OPT_LENGTH.equals(opt.getName())) {
 								adjustCompactNoteLength(channel, opt.getLength(), false);
+							}
+							else if (OPT_QUANTITY.equals(opt.getName())) {
+								instruments.get(channel).setOtoQuantity(opt.getQuantity());
+							}
+							else if (OPT_TREMOLO.equals(opt.getName())) {
+								instruments.get(channel).setOtoTremolo(opt.getRawValue());
+							}
+							else if (OPT_MULTIPLE.equals(opt.getName())) {
+								instruments.get(channel).setOtoMultiple(true);
+							}
 						}
 					}
 					
@@ -4416,6 +4438,7 @@ public class MidicaPLParser extends SequenceParser {
 				
 				// pattern or note/chord/rest (and maybe length)
 				else {
+					mustApplyOto = true;
 					
 					// note length available?
 					String[] parts = compactElement.split(Pattern.quote(COMPACT_NOTE_SEP), 2);
@@ -4428,6 +4451,11 @@ public class MidicaPLParser extends SequenceParser {
 							String patternName  = patCallMatcher.group(1);
 							String optionString = patCallMatcher.group(4);
 							if (patterns.containsKey(patternName)) {
+								
+								// tremolo is not allowed in pattern calls
+								if (!isFake && instruments.get(channel).getOtoTremolo() != null) {
+									throw new ParseException(Dict.get(Dict.ERROR_OTO_TREMOLO_PATTERN_CALL));
+								}
 								
 								// create pattern command
 								isPattern   = true;
@@ -4468,8 +4496,29 @@ public class MidicaPLParser extends SequenceParser {
 					}
 				}
 				
-				if (!isFake)
-					parseTokens(chCmdTokens);
+				// play note/chord/rest
+				if (!isFake) {
+					
+					// get and reset one-time options
+					int     quantity   = 1;
+					String  tremolo    = null;
+					boolean isMultiple = false;
+					if (mustApplyOto) {
+						quantity   = instruments.get(channel).getOtoQuantity();
+						tremolo    = instruments.get(channel).getOtoTremolo();
+						isMultiple = instruments.get(channel).isOtoMultiple();
+						instruments.get(channel).resetOto();
+					}
+					
+					// play compact element (with one-time options, if needed)
+					long startTicks = instruments.get(channel).getCurrentTicks();
+					if (tremolo != null)
+						chCmdTokens[2] += " " + TR + OPT_ASSIGNER + tremolo;
+					for (int i = 0; i < quantity; i++)
+						parseTokens(chCmdTokens);
+					if (isMultiple)
+						instruments.get(channel).setCurrentTicks(startTicks);
+				}
 			}
 		}
 		else {
@@ -4831,6 +4880,18 @@ public class MidicaPLParser extends SequenceParser {
 				options.add(opt);
 		}
 		
+		// check for duplicate options
+		HashSet<String> optNames = new HashSet<>();
+		for (CommandOption opt : options) {
+			String optName = opt.getName();
+			if (optNames.contains(optName)) {
+				if (OPT_SHIFT.equals(optName)) // duplicate shift is allowed
+					continue;
+				throw new ParseException(Dict.get(Dict.ERROR_DUPLICATE_OPTION) + optName);
+			}
+			optNames.add(optName);
+		}
+		
 		return options;
 	}
 	
@@ -5126,7 +5187,7 @@ public class MidicaPLParser extends SequenceParser {
 			else {
 				// add MULTIPLE to the options string
 				// so that the next note of the same chord starts at the same time
-				subTokens[2] = addMultiple(tokens[2]);
+				subTokens[2] = addMultipleIfNotYetDone(tokens[2]);
 			}
 			parseTokens(subTokens);
 			i++;
@@ -5136,14 +5197,15 @@ public class MidicaPLParser extends SequenceParser {
 	}
 	
 	/**
-	 * Adds the option MULTIPLE to an option string.
+	 * Adds the option MULTIPLE to an option string, if it has not yet been added.
 	 * This is used if a note of a predefined chord is produced - so that the next note
 	 * of the same chord starts at the same tick.
 	 * 
 	 * @param original token containing the velocity and the option string: token[2]
 	 * @return same token but with the MULTIPLE option
+	 * @throws ParseException if the original options cannot be parsed
 	 */
-	private String addMultiple(String original) {
+	private String addMultipleIfNotYetDone(String original) throws ParseException {
 		
 		String[] subTokens = original.split("\\s+", 2);
 		String optStr;
@@ -5154,6 +5216,14 @@ public class MidicaPLParser extends SequenceParser {
 			return subTokens[0] + " " + MULTIPLE;
 		}
 		
+		// Options already available.
+		// Multiple option already set? ==> don't add it again
+		ArrayList<CommandOption> options = parseOptions(optStr, true);
+		for (CommandOption option : options) {
+			if (OPT_MULTIPLE.equals(option.getName()))
+				return original;
+		}
+		
 		// cut away trailing whitespaces
 		String cleanedOptString = optStr.replaceFirst("\\s+$", "");
 		
@@ -5161,6 +5231,56 @@ public class MidicaPLParser extends SequenceParser {
 		subTokens[1] = cleanedOptString + OPT_SEPARATOR + MULTIPLE;
 		
 		return subTokens[0] + " " + subTokens[1];
+	}
+	
+	/**
+	 * Checks if any channel has an open one-time option for compact syntax.
+	 * In this case, an exception is thrown.
+	 * 
+	 * @param dictKey      dictionary key for the error message
+	 * @param lineContent  content of the opening or closing line of the block
+	 * @param lineNumber   line number causing the problem (opening or closing of the block)
+	 * @throws ParseException if an open one-time option is found.
+	 */
+	public void assertNoOpenOTO(String dictKey, String lineContent, int lineNumber)
+			throws ParseException {
+		
+		try {
+			assertNoOpenOTO(dictKey);
+		}
+		catch (ParseException e) {
+			e.setLineContentIfNotYetDone(lineContent);
+			e.setLineNumber(lineNumber);
+			throw e;
+		}
+	}
+	
+	/**
+	 * Checks if any channel has an open one-time option for compact syntax.
+	 * In this case, an exception is thrown.
+	 * 
+	 * @param dictKey  dictionary key for the error message
+	 * @throws ParseException if an open one-time option is found.
+	 */
+	private void assertNoOpenOTO(String dictKey) throws ParseException {
+		
+		String msgTemplate = Dict.get(dictKey);
+		for (Instrument instr : instruments) {
+			int     quantity = instr.getOtoQuantity();
+			String  tremolo  = instr.getOtoTremolo();
+			boolean multiple = instr.isOtoMultiple();
+			
+			String message = null;
+			if (quantity != 1)
+				message = String.format(msgTemplate, QUANTITY, instr.channel);
+			else if (tremolo != null)
+				message = String.format(msgTemplate, TREMOLO, instr.channel);
+			else if (multiple)
+				message = String.format(msgTemplate, MULTIPLE, instr.channel);
+			
+			if (message != null)
+				throw new ParseException(message);
+		}
 	}
 
 	/**

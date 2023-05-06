@@ -1,0 +1,11 @@
+INCLUDE inc/instruments.midica
+
+1: c
+{
+	1: c (q=2)
+	CALL f
+}
+
+FUNCTION f
+	// do nothing
+END
