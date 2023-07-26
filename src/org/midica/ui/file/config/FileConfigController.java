@@ -322,6 +322,10 @@ public abstract class FileConfigController implements WindowListener, DocumentLi
 				valStr = item;
 			}
 		}
+		else if (widget instanceof JTextArea) {
+			JTextArea area = (JTextArea) widget;
+			valStr = area.getText();
+		}
 		
 		// check and apply value
 		Class<?> type = configClasses.get(id);

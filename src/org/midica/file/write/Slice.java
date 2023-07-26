@@ -221,10 +221,16 @@ public class Slice {
 			// Add the rest as an inline block
 			
 			// get the tick where the block must start
-			long blockStartTick = timelines.get(channel).floorKey(tick);
+			Long blockStartTick = timelines.get(channel).floorKey(tick);
+			if (null == blockStartTick) {
+				blockStartTick = beginTick;
+				timelines.get(channel).put(blockStartTick, new TreeMap<>());
+			}
 			
 			// Get the events from the block's start tick
 			TreeMap<Byte, TreeMap<String, TreeMap<Byte, String>>> events = timelines.get(channel).get(blockStartTick);
+			if (null == events)
+				events = new TreeMap<>();
 			
 			// create inline block, if not yet done, and add it to the notes timeline
 			TreeMap<Long, String> inlineBlock = inlineBlockTimelines.get(channel).get(blockStartTick);

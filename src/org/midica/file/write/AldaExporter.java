@@ -27,37 +27,44 @@ public class AldaExporter extends Decompiler {
 	public static ArrayList<String> noteNames       = new ArrayList<>();
 	public static ArrayList<Byte>   noteOctaves     = new ArrayList<>();
 	
-	private int                 currentSliceNumber = 0;
-	private Instrument          currentInstrument  = null;
-	private TreeSet<Instrument> usedInSlice        = null;
-	private String              currentKeySig      = null;
+	private int                    currentSliceNumber    = 0;
+	private Instrument             currentSrcInstr       = null;
+	private Instrument             currentTgtInstr       = null;
+	private int                    elementsInCurrentLine = 0;
+	private Long                   lineBeginTickSrc      = null;
+	private Long                   lineBeginTickTgt      = null;
+	private boolean                isLineOpen            = false;
+	private TreeSet<Instrument>    usedInSlice           = null;
+	private String                 currentKeySig         = null;
+	private boolean                prependSpace          = true;
+	private TreeMap<String, Long>  targetLengths         = null;
+	private TreeMap<Integer, Long> targetTicksBySlice    = null;
+	private boolean                forceInstrChange      = false;
 	
 	private static Pattern tripletPattern = Pattern.compile("(\\d+)$");
 	
 	/**
-	 * Creates a new MidicaPL exporter.
+	 * Creates a new ALDA exporter.
 	 */
 	public AldaExporter() {
 		format = ALDA;
 	}
 	
-	/**
-	 * Initializes MidicaPL specific data structures.
-	 */
+	@Override
 	public void init() {
-		currentSliceNumber = 0;
-		currentKeySig      = "0/0";
+		currentSliceNumber    = 0;
+		currentKeySig         = "0/0";
+		prependSpace          = true;
+		targetLengths         = new TreeMap<>();
+		targetTicksBySlice    = new TreeMap<>();
+		forceInstrChange      = false;
+		elementsInCurrentLine = 0;
 		initInstrumentNames();
 		initNoteNames();
 	}
 	
-	/**
-	 * Creates the MidicaPL string to be written into the export file.
-	 * 
-	 * @return MidicaPL string to be written into the export file
-	 */
+	@Override
 	public String createOutput() {
-		StringBuilder output = new StringBuilder();
 		
 		// SLICE:
 		for (Slice slice : slices) {
@@ -65,18 +72,22 @@ public class AldaExporter extends Decompiler {
 			usedInSlice = new TreeSet<>();
 			
 			// if necessary: add rest from current tick to the slice's begin tick
-			output.append( createRestBeforeSlice(slice) );
+			createRestBeforeSlice(slice);
 			if (currentSliceNumber > 0) {
-				output.append( createMarker() );
+				createMarker();
 			}
 			
 			// global attributes
-			output.append( createGlobalAttributes(slice) );
+			createGlobalAttributes(slice);
 			
 			// channel commands and instrument changes
 			for (byte channel = 0; channel < 16; channel++) {
-				output.append( createCommandsFromTimeline(slice, channel) );
+				createCommandsFromTimeline(slice, channel);
 			}
+			
+			// slice is completely empty? - add empty line
+			if (usedInSlice.isEmpty())
+				output.append(NEW_LINE);
 			
 			currentSliceNumber++;
 		}
@@ -97,6 +108,8 @@ public class AldaExporter extends Decompiler {
 	/**
 	 * Creates notes and instrument changes from a slice's timeline.
 	 * 
+	 * Creates nothing, if the slice's timeline doesn't contain anything in the given channel.
+	 * 
 	 * Steps:
 	 * 
 	 * - Adds the following missing properties and elements to the notes of the timeline:
@@ -112,16 +125,19 @@ public class AldaExporter extends Decompiler {
 	 * 
 	 * @param slice    the sequence slice
 	 * @param channel  MIDI channel
-	 * @return the created commands (or an empty string, if the slice's timeline doesn't contain anything in the given channel)
 	 */
-	private String createCommandsFromTimeline(Slice slice, byte channel) {
-		StringBuilder lines = new StringBuilder();
+	private void createCommandsFromTimeline(Slice slice, byte channel) {
 		TreeMap<Long, TreeMap<Byte, TreeMap<String, TreeMap<Byte, String>>>> timeline = slice.getTimeline(channel);
 		
-		// add one empty line between channels
-		if (! timeline.isEmpty()) {
-			lines.append(NEW_LINE);
-		}
+		// close previous line, if needed
+		createLineCloseIfPossible();
+		
+		// nothing to do?
+		if (timeline.isEmpty())
+			return;
+		else
+			// add one empty line between channels
+			output.append(NEW_LINE);
 		
 		// TICK:
 		for (Entry<Long, TreeMap<Byte, TreeMap<String, TreeMap<Byte, String>>>> timelineSet : timeline.entrySet()) {
@@ -130,7 +146,7 @@ public class AldaExporter extends Decompiler {
 			
 			// instrument change
 			if (events.containsKey(ET_INSTR)) {
-				lines.append( createInstrumentChange(channel, tick) );
+				createInstrumentChange(channel, tick);
 			}
 			
 			// notes/chords
@@ -174,11 +190,9 @@ public class AldaExporter extends Decompiler {
 				}
 				
 				// write ALDA
-				lines.append( createChordNotes(slice, channel, tick, events.get(ET_NOTES)) );
+				createChordNotes(slice, channel, tick, events.get(ET_NOTES));
 			}
 		}
-		
-		return lines.toString();
 	}
 	
 	/**
@@ -188,12 +202,12 @@ public class AldaExporter extends Decompiler {
 	 * 
 	 * @param channel  MIDI channel
 	 * @param tick     MIDI tick
-	 * @return the created lines.
 	 */
-	private String createInstrumentChange(byte channel, long tick) {
+	private void createInstrumentChange(byte channel, long tick) {
 		
 		// prepare
-		StringBuilder content = new StringBuilder(NEW_LINE);
+		createLineCloseIfPossible();
+		resetTickCommentLineLength();
 		
 		// get program number
 		byte program = 0; // default = piano
@@ -207,25 +221,82 @@ public class AldaExporter extends Decompiler {
 		String alias     = instrName + "-ch" + channel;
 		
 		// alias has been used before?
-		if (instrumentsByName.containsKey(alias)) {
-			currentInstrument = instrumentsByName.get(alias);
-			content.append(alias);
+		if (srcInstrByName.containsKey(alias)) {
+			currentSrcInstr = srcInstrByName.get(alias);
+			currentTgtInstr = tgtInstrByName.get(alias);
+			output.append(alias);
 		}
 		else {
 			// create new alias
-			content.append(instrName + " \"" + alias + "\"");
+			output.append(instrName + " \"" + alias + "\"");
 			
 			// create new channel
-			currentInstrument = new Instrument(channel, program, instrName, false);
-			currentInstrument.setDurationRatio(0.9f); // alda-default: 90%
-			instrumentsByName.put(alias, currentInstrument);
+			currentSrcInstr = new Instrument(channel, program, instrName, false);
+			currentTgtInstr = new Instrument(channel, program, instrName, false);
+			currentSrcInstr.setDurationRatio(0.9f); // alda-default: 90%
+			srcInstrByName.put(alias, currentSrcInstr);
+			tgtInstrByName.put(alias, currentTgtInstr);
 		}
-		content.append(":" + NEW_LINE + "\t");
+		output.append(":");
+		output.append(NEW_LINE);
 		
 		// synchronize data structures
-		instrumentsByChannel.set(channel, currentInstrument);
+		srcInstrByChannel.set(channel, currentSrcInstr);
+		tgtInstrByChannel.set(channel, currentTgtInstr);
+		forceInstrChange = false;
 		
-		return content.toString();
+		// open line
+		createLineOpenIfClosed();
+	}
+	
+	/**
+	 * Closes the currently open line.
+	 */
+	private void createLineClose() {
+		
+		isLineOpen = false;
+		
+		elementsInCurrentLine = 0;
+		if (MUST_ADD_TICK_COMMENTS) {
+			long currentSrcTicks = currentSrcInstr.getCurrentTicks();
+			long currentTgtTicks = currentTgtInstr.getCurrentTicks();
+			createTickLineComment(lineBeginTickSrc, currentSrcTicks, lineBeginTickTgt, currentTgtTicks);
+		}
+		output.append(NEW_LINE);
+	}
+	
+	/**
+	 * Closes the currently open line, if there is any.
+	 */
+	private void createLineCloseIfPossible() {
+		if (isLineOpen)
+			createLineClose();
+	}
+	
+	/**
+	 * Closes the current line, if it has enough elements.
+	 */
+	private void createLineCloseIfLineIsFull() {
+		if (elementsInCurrentLine >= ELEMENTS_PER_LINE) {
+			createLineClose();
+		}
+	}
+	
+	/**
+	 * Opens a new line, if not yet done.
+	 * (Creates an indention, remembers line begin ticks and so on.)
+	 */
+	private void createLineOpenIfClosed() {
+		if (!isLineOpen) {
+			isLineOpen = true;
+			output.append(BLOCK_INDENT);
+			
+			lineBeginTickSrc = currentSrcInstr.getCurrentTicks();
+			lineBeginTickTgt = currentTgtInstr.getCurrentTicks();
+			
+			prependSpace = false;
+			createBarlineIfNeeded();
+		}
 	}
 	
 	/**
@@ -237,29 +308,25 @@ public class AldaExporter extends Decompiler {
 	 * - key signature
 	 * 
 	 * @param slice  the sequence slice
-	 * @return the created string (or an empty string, if the slice doesn't contain any global attributes)
 	 */
-	private String createGlobalAttributes(Slice slice) {
-		StringBuilder result = new StringBuilder("");
+	private void createGlobalAttributes(Slice slice) {
+		
+		long tgtTick = 0;
+		if (slice.getBeginTick() > 0) {
+			output.append(NEW_LINE);
+			tgtTick = currentTgtInstr.getCurrentTicks();
+		}
 		
 		if (MUST_ADD_TICK_COMMENTS) {
-			result.append(NEW_LINE);
-			result.append(
-				  "# SLICE " + currentSliceNumber + " ("
-				+ createTickDescription(slice.getBeginTick(), false)
-				+ ")"
-			);
+			output.append("# SLICE " + currentSliceNumber + " (");
+			createTickDescription(slice.getBeginTick(), tgtTick, false);
+			output.append(")");
+			output.append(NEW_LINE);
 		}
-		result.append(NEW_LINE + NEW_LINE);
 		
 		// create global commands
 		TreeMap<String, String> globalCmds = slice.getGlobalCommands();
-		if (0 == globalCmds.size()) {
-			if (slice.getBeginTick() > 0) {
-				// nothing more to do
-			}
-		}
-		else {
+		if (globalCmds.size() > 0) {
 			for (String cmdId : globalCmds.keySet()) {
 				String value = globalCmds.get(cmdId);
 				
@@ -279,12 +346,11 @@ public class AldaExporter extends Decompiler {
 				}
 				
 				// append command
-				result.append("(" + globalCmd + "! " + value + ")");
+				output.append("(" + globalCmd + "! " + value + ")");
+				output.append(NEW_LINE);
 			}
-			result.append(NEW_LINE);
 		}
-		
-		return result.toString();
+		forceInstrChange = true;
 	}
 	
 	/**
@@ -303,51 +369,43 @@ public class AldaExporter extends Decompiler {
 	 * @param channel  MIDI channel
 	 * @param tick     MIDI tick
 	 * @param events   All notes/chords with the same note-ON tick in the same channel (comes from the slice's timeline)
-	 * @return the created note lines.
 	 */
-	private String createChordNotes(Slice slice, byte channel, long tick, TreeMap<String, TreeMap<Byte, String>> events) {
-		StringBuilder content = new StringBuilder("");
-		boolean needSpace = true;
+	private void createChordNotes(Slice slice, byte channel, long tick, TreeMap<String, TreeMap<Byte, String>> events) {
 		
 		// first usage in the current slice?
-		Instrument instr = instrumentsByChannel.get(channel);
-		if (!usedInSlice.contains(instr)) {
+		if (!usedInSlice.contains(srcInstrByChannel.get(channel))) {
 			
 			// switch instrument, if necessary
-			if (currentInstrument != instr) {
-				content.append( createInstrumentChange(channel, tick) );
-				instr = currentInstrument;
-				needSpace = false;
+			if (forceInstrChange || currentSrcInstr != srcInstrByChannel.get(channel)) {
+				createInstrumentChange(channel, tick);
 			}
 			
-			usedInSlice.add(instr);
+			usedInSlice.add(currentSrcInstr);
 		}
+		
+		// open a new line, if needed
+		createLineOpenIfClosed();
 		
 		// jump to marker, if necessary
 		Slice currentSlice   = slices.get(currentSliceNumber);
 		long  sliceBeginTick = currentSlice.getBeginTick();
-		if (instr.getCurrentTicks() < sliceBeginTick) {
-			if (needSpace) {
-				content.append(" ");
-				needSpace = false;
-			}
-			content.append("@slice-" + currentSliceNumber);
-			needSpace = true;
-			instr.setCurrentTicks(sliceBeginTick);
+		if (currentSrcInstr.getCurrentTicks() < sliceBeginTick) {
+			if (prependSpace)
+				output.append(" ");
+			output.append("@slice-" + currentSliceNumber);
+			prependSpace = true;
+			currentSrcInstr.setCurrentTicks(sliceBeginTick);
+			currentTgtInstr.setCurrentTicks(targetTicksBySlice.get(currentSliceNumber));
 		}
 		
 		// add rest, if necessary
-		long currentTicks = instr.getCurrentTicks();
+		long currentTicks = currentSrcInstr.getCurrentTicks();
 		if (tick > currentTicks) {
 			long restTicks = tick - currentTicks;
-			content.append( createRest(channel, restTicks, tick, null) );
-			needSpace = true;
-			instr.setCurrentTicks(tick);
-		}
-		
-		// add space, if needed
-		if (needSpace) {
-			content.append(" ");
+			createRest(channel, restTicks, null);
+			
+			// open the line again if it has been closed by the rest
+			createLineOpenIfClosed();
 		}
 		
 		// get the note length END tick of the shortest note
@@ -368,40 +426,51 @@ public class AldaExporter extends Decompiler {
 			restEndTick = nextOnTick;
 		}
 		if (chordEndTick > sliceEndTick) {
-			if (restEndTick != null && restEndTick > sliceEndTick) {
+			if (null == restEndTick || restEndTick > sliceEndTick) {
 				restEndTick = sliceEndTick;
 			}
 		}
 		
 		// collect the notes
 		ArrayList<String> notes = new ArrayList<>();
+		String lengthStr = null;
 		for (Entry<String, TreeMap<Byte, String>> noteSet : events.entrySet()) {
 			String name = noteSet.getKey();
 			TreeMap<Byte, String> properties = events.get(name);
-			notes.add( createNote(channel, properties) );
+			notes.add(createNote(channel, properties));
+			lengthStr = properties.get(NP_LENGTH);
 		}
-		content.append(String.join("/", notes));
+		
+		// create the notes (without rest)
+		{
+			// increment ticks, if necessary
+			boolean mustCount = false;
+			if (null == restEndTick) {
+				mustCount = true;
+				currentSrcInstr.setCurrentTicks(chordEndTick);
+				incrementTargetTicks(lengthStr);
+			}
+			
+			createElement(String.join("/", notes), mustCount);
+		}
 		
 		// create rest inside the chord
 		if (restEndTick != null) {
-			String rest = createRest(channel, restEndTick - tick, tick, null)
-				.replaceFirst(" ", ""); // don't need the leading space here
-			
-			// rest created? - doesn't work if we don't have enough rest ticks
-			if (! "".equals(rest)) {
-				content.append("/" + rest);
+			long restTicks = restEndTick - tick;
+			ArrayList<Long> lengthElements = getLengthsForSum(restTicks, true);
+			if (lengthElements.size() > 0) {
+				output.append("/");
+				prependSpace = false; // no leading space here
+				createRest(channel, restTicks, null);
 			}
-			chordEndTick = restEndTick;
 		}
 		
-		// increment ticks, if necessary
-		instr.setCurrentTicks(chordEndTick);
-		
-		return content.toString();
+		// create line change
+		createLineCloseIfLineIsFull();
 	}
 	
 	/**
-	 * Prints a single note.
+	 * Creates a single note.
 	 * 
 	 * The note may be a part of a chord or a single note.
 	 * 
@@ -419,8 +488,6 @@ public class AldaExporter extends Decompiler {
 	private String createNote(byte channel, TreeMap<Byte, String> properties) {
 		StringBuilder content = new StringBuilder("");
 		
-		Instrument instr = instrumentsByChannel.get(channel);
-		
 		// TODO: add the following attributes:
 		// pan       == panning
 		// track-vol == track-volume
@@ -430,9 +497,9 @@ public class AldaExporter extends Decompiler {
 		{
 			// quantization
 			float duration           = Float.parseFloat(properties.get(NP_DURATION)) / 100;
-			float oldDuration        = instr.getDurationRatio();
-			int   durationPercent    = (int) ((duration    * 1000 + 0.5f) / 10);
-			int   oldDurationPercent = (int) ((oldDuration * 1000 + 0.5f) / 10);
+			float oldDuration        = currentSrcInstr.getDurationRatio();
+			int   durationPercent    = (int) ((duration    * 1000 + 5f) / 10);
+			int   oldDurationPercent = (int) ((oldDuration * 1000 + 5f) / 10);
 			if (durationPercent != oldDurationPercent) {
 				// don't allow 0%
 				String durationPercentStr = durationPercent + "";
@@ -441,15 +508,15 @@ public class AldaExporter extends Decompiler {
 					duration = 0.01f;
 				}
 				attributes.add("(quant " + durationPercentStr + ")");
-				instr.setDurationRatio(duration);
+				currentSrcInstr.setDurationRatio(duration);
 				incrementStats(STAT_NOTE_DURATIONS, channel);
 			}
 			
 			// velocity
 			int velocity    = Integer.parseInt(properties.get(NP_VELOCITY));
-			int oldVelocity = instr.getVelocity();
+			int oldVelocity = currentSrcInstr.getVelocity();
 			if (velocity != oldVelocity) {
-				instr.setVelocity(velocity);
+				currentSrcInstr.setVelocity(velocity);
 				velocity = (velocity * 1000 + 5) / 1270;
 				attributes.add("(vol " + velocity + ")");
 				incrementStats(STAT_NOTE_VELOCITIES, channel);
@@ -464,15 +531,15 @@ public class AldaExporter extends Decompiler {
 		
 		// switch octave, if needed
 		int  noteNum   = Integer.parseInt(properties.get(NP_NOTE_NUM));
-		byte oldOctave = instr.getOctave();
+		byte oldOctave = currentSrcInstr.getOctave();
 		byte newOctave = noteOctaves.get(noteNum);
-		if (instr.getOctave() != newOctave) {
+		if (currentSrcInstr.getOctave() != newOctave) {
 			String changer = newOctave < oldOctave ? "<" : ">";
 			int    diff    = Math.abs(newOctave - oldOctave);
 			for (int i = 0; i < diff; i++) {
 				content.append(changer);
 			}
-			instr.setOctave(newOctave);
+			currentSrcInstr.setOctave(newOctave);
 		}
 		
 		// note name
@@ -480,33 +547,29 @@ public class AldaExporter extends Decompiler {
 		content.append(noteName);
 		
 		// switch note length, if needed
-		String oldLength = instr.getNoteLength();
+		String oldLength = currentSrcInstr.getNoteLength();
 		String newLength = properties.get(NP_LENGTH);
 		if (! oldLength.equals(newLength)) {
 			content.append(newLength);
-			instr.setNoteLength(newLength);
+			currentSrcInstr.setNoteLength(newLength);
 		}
 		
 		return content.toString();
 	}
 	
-	/**
-	 * Creates a channel command with a rest.
-	 * 
-	 * @param channel    MIDI channel
-	 * @param ticks      tick length of the rest to create
-	 * @param beginTick  used for the tick comment (negative value: don't include a tick comment)
-	 * @param syllable   a lyrics syllable or (in most cases): **null**
-	 * @return the channel command containing the rest.
-	 */
-	protected String createRest(byte channel, long ticks, long beginTick, String syllable) {
-		StringBuilder content = new StringBuilder("");
+	@Override
+	protected void createRest(byte channel, long ticks, String syllable) {
+		long beginTick = srcInstrByChannel.get(channel).getCurrentTicks();
+		
+		StringBuilder content = new StringBuilder();
 		
 		// switch instrument, if necessary
-		if (currentInstrument != instrumentsByChannel.get(channel))
-			content.append( createInstrumentChange(channel, beginTick + ticks - 1) );
-		else
-			content.append(" ");
+		if (currentSrcInstr != srcInstrByChannel.get(channel)) {
+			createInstrumentChange(channel, beginTick + ticks - 1);
+		}
+		
+		// open a new line, if needed
+		createLineOpenIfClosed();
 		
 		// split length into elements
 		ArrayList<Long> lengthElements = getLengthsForSum(ticks, true);
@@ -533,55 +596,117 @@ public class AldaExporter extends Decompiler {
 		if (lengthSummands.size() > 0) {
 			String length = String.join("~", lengthSummands);
 			content.append("r" + length);
-			currentInstrument.setNoteLength(length);
+			currentSrcInstr.setNoteLength(length);
 			incrementStats(STAT_RESTS, channel);
+			currentSrcInstr.setCurrentTicks(beginTick + ticks);
+			incrementTargetTicks(length);
+			createElement(content.toString(), true);
+			createLineCloseIfLineIsFull();
 		}
 		else {
-			addWarningRestSkipped(beginTick, ticks, channel);
+			long warnTick = beginTick;
+			if (warnTick < 0)
+				warnTick = currentSrcInstr.getCurrentTicks();
+			addWarningRestSkipped(warnTick, ticks, channel);
 			incrementStats(STAT_REST_SKIPPED, channel);
 		}
+	}
+	
+	/**
+	 * Creates an element (note, chord or rest) to the current line, and maybe a bar line, if needed.
+	 * 
+	 * The bar line creation part is skipped if mustCount is **false**.
+	 * 
+	 * @param element    the element to be added
+	 * @param mustCount  **true** to increment the number of elements, otherwise **false**
+	 */
+	private void createElement(String element, boolean mustCount) {
 		
-		return content.toString();
+		if (prependSpace)
+			output.append(" ");
+		else
+			prependSpace = true;
+		
+		output.append(element);
+		
+		// increment line and create bar line if necessary
+		if (mustCount) {
+			elementsInCurrentLine++;
+			createBarlineIfNeeded();
+		}
 	}
 	
 	/**
 	 * Creates a marker in the current instrument to mark the end of a slice.
-	 * 
-	 * @return the created marker
 	 */
-	protected String createMarker() {
-		StringBuilder content = new StringBuilder("");
+	private void createMarker() {
 		
 		// switch instrument if necessary
-		long maxTick       = Instrument.getMaxCurrentTicks(instrumentsByChannel);
-		long curInstrTicks = currentInstrument.getCurrentTicks();
-		if (maxTick > curInstrTicks) {
+		long maxTick       = Instrument.getMaxCurrentTicks(srcInstrByChannel);
+		long curInstrTicks = currentSrcInstr.getCurrentTicks();
+		if (forceInstrChange || maxTick > curInstrTicks) {
 			Instrument furthestInstr = getFurthestInstrument();
 			byte channel = (byte) furthestInstr.channel;
-			content.append( createInstrumentChange(channel, maxTick - 1) );
-		}
-		else {
-			content.append(" ");
+			createInstrumentChange(channel, maxTick - 1);
 		}
 		
+		// prepare line
+		createLineOpenIfClosed();
+		
 		// create the marker
-		content.append("%slice-" + currentSliceNumber + NEW_LINE);
-		return content.toString();
+		if (prependSpace)
+			output.append(" ");
+		else
+			prependSpace = true;
+		output.append("%slice-" + currentSliceNumber);
+		
+		// remember target ticks of the slice
+		targetTicksBySlice.put(currentSliceNumber, currentTgtInstr.getCurrentTicks());
+		
+		// close the line
+		createLineClose();
 	}
 	
 	/**
-	 * Calculates which tick length corresponds to which note or rest length.
-	 * That depends on the resolution of the current MIDI sequence.
+	 * Returns a barline for the given channel, if needed.
 	 * 
-	 * The created rest lengths will contain a view more very short lengths.
-	 * This is needed because rests should be less tolerant than notes.
-	 * 
-	 * This enables us to use more common lengths for notes but let the
-	 * exported sequence be still as close as possible to the original one.
-	 * 
-	 * @param rest    **true** to initialize REST lengths, **false** for NOTE lengths
-	 * @return Mapping between tick length and note length for the syntax.
+	 * @param channel  MIDI channel
 	 */
+	private void createBarlineIfNeeded() {
+		
+		// barlines not configured?
+		if (!USE_BARLINES) {
+			return;
+		}
+		
+		// get current ticks
+		long currentSrcTicks = currentSrcInstr.getCurrentTicks();
+		
+		// get measure length and ticks since last time signature
+		Entry<Long, Long> entry = measureLengthHistory.floorEntry(currentSrcInstr.getCurrentTicks());
+		long lastTimeSigTick = entry.getKey();
+		long measureLength   = entry.getValue();
+		long totalTicks      = currentSrcTicks - lastTimeSigTick;
+		
+		// get delta
+		long srcDelta  = totalTicks % measureLength;
+		long srcDelta2 = measureLength - srcDelta;
+		if (srcDelta2 < srcDelta)
+			srcDelta = srcDelta2;
+		
+		// no bar line at all?
+		if (srcDelta > MAX_BARLINE_TOL)
+			return;
+		
+		// create bar line
+		if (prependSpace)
+			output.append(" ");
+		else
+			prependSpace = true;
+		output.append("|");
+	}
+	
+	@Override
 	public TreeMap<Long, String> initLengths(boolean rest) {
 		
 		boolean useDots     = rest ? USE_DOTTED_RESTS     : USE_DOTTED_NOTES;
@@ -591,65 +716,91 @@ public class AldaExporter extends Decompiler {
 		
 		// use very small lengths only for rests
 		if (rest) {
+			
 			// 1/128
-			long length128 = calculateTicks(1, 32);
-			lengthToSymbol.put(length128, 128 + "");
+			initLength(lengthToSymbol, 128, 1, 32, false, false);
 			
 			// 1/64
-			long length64 = calculateTicks(1, 16);
-			lengthToSymbol.put(length64, 64 + "");
+			initLength(lengthToSymbol, 64, 1, 16, false, false);
 		}
 		
 		// 32th
-		long length32t = calculateTicks( 2, 8 * 3 ); // inside a triplet
-		long length32  = calculateTicks( 1, 8     ); // normal length
-		long length32d = calculateTicks( 3, 8 * 2 ); // dotted length
-		long base      = 32;
-		if (useTriplets) lengthToSymbol.put( length32t, getTriplet(base) ); // triplet
-		                 lengthToSymbol.put( length32,  base + ""        ); // normal
-		if (useDots)     lengthToSymbol.put( length32d, base + "."       ); // dotted
+		initLength(lengthToSymbol, 32, 1, 8, useTriplets, useDots);
 		
 		// 16th
-		base = 16;
-		long length16t = calculateTicks( 2, 4 * 3 );
-		long length16  = calculateTicks( 1, 4     );
-		long length16d = calculateTicks( 3, 4 * 2 );
-		if (useTriplets) lengthToSymbol.put( length16t, getTriplet(base) );
-		                 lengthToSymbol.put( length16,  base + ""        );
-		if (useDots)     lengthToSymbol.put( length16d, base + "."       );
+		initLength(lengthToSymbol, 16, 1, 4, useTriplets, useDots);
 		
 		// 8th
-		base = 8;
-		long length8t = calculateTicks( 2, 2 * 3 );
-		long length8  = calculateTicks( 1, 2     );
-		long length8d = calculateTicks( 3, 2 * 2 );
-		if (useTriplets) lengthToSymbol.put( length8t, getTriplet(base) );
-		                 lengthToSymbol.put( length8,  base + ""        );
-		if (useDots)     lengthToSymbol.put( length8d, base + "."       );
+		initLength(lengthToSymbol, 8, 1, 2, useTriplets, useDots);
 		
 		// quarter
-		base = 4;
-		long length4t = calculateTicks( 2, 3 );
-		long length4  = calculateTicks( 1, 1 );
-		long length4d = calculateTicks( 3, 2 );
-		if (useTriplets) lengthToSymbol.put( length4t, getTriplet(base) );
-		                 lengthToSymbol.put( length4,  base + ""        );
-		if (useDots)     lengthToSymbol.put( length4d, base + "."       );
+		initLength(lengthToSymbol, 4, 1, 1, useTriplets, useDots);
 		
 		// half
-		base = 2;
-		long length2t = calculateTicks( 2 * 2, 3 );
-		long length2  = calculateTicks( 2,     1 );
-		long length2d = calculateTicks( 2 * 3, 2 );
-		if (useTriplets) lengthToSymbol.put( length2t, getTriplet(base) );
-		                 lengthToSymbol.put( length2,  base + ""        );
-		if (useDots)     lengthToSymbol.put( length2d, base + "."       );
+		initLength(lengthToSymbol, 2, 2, 1, useTriplets, useDots);
 		
 		// full
-		long length1  = calculateTicks(4, 1);
-		lengthToSymbol.put(length1, "1");
+		initLength(lengthToSymbol, 1, 4, 1, false, false);
 		
 		return lengthToSymbol;
+	}
+	
+	/**
+	 * Initializes the following note lengths for a single base length:
+	 * 
+	 * - the unmodified base length
+	 * - the tripletted note length (if requested)
+	 * - the dotted note length (if requested)
+	 * 
+	 * @param lengthToSymbol  the data structure to write the results into
+	 * @param aldaLength      the base length that can be used directly in ALDA syntax
+	 * @param factor          the factor with which to multiply a quarter note in order to get the base note
+	 * @param divisor         the divisor with which a quarter note must be divided in order to get the base note
+	 * @param useTriplets     **true** in order to initialize a tripletted length
+	 * @param useDots         **true** in order to initialize a dotted length
+	 */
+	private void initLength(TreeMap<Long, String> lengthToSymbol, long aldaLength, int factor, int divisor, boolean useTriplets, boolean useDots) {
+		String aldaStr;
+		
+		// triplet
+		if (useTriplets) {
+			aldaStr = getTriplet(aldaLength);
+			lengthToSymbol.put(calculateTicks(factor, divisor, LM_TRIPLET, false), aldaStr);
+			targetLengths.put(aldaStr, calculateTicks(factor, divisor, LM_TRIPLET, true));
+		}
+		
+		// normal length
+		aldaStr = aldaLength + "";
+		lengthToSymbol.put(calculateTicks(factor, divisor, LM_NONE, false), aldaStr);
+		targetLengths.put(aldaStr, calculateTicks(factor, divisor, LM_NONE, true));
+		
+        // dotted length
+		if (useDots) {
+			aldaStr = aldaLength + ".";
+			lengthToSymbol.put(calculateTicks(factor, divisor, LM_DOT, false), aldaStr);
+			targetLengths.put(aldaStr, calculateTicks(factor, divisor, LM_DOT, true));
+		}
+	}
+	
+	/**
+	 * Increments the target channel by the amount of ticks of the given length value.
+	 * 
+	 * @param length  note length in ALDA syntax
+	 */
+	private void incrementTargetTicks(String length) {
+		
+		// translate length string into target ticks
+		long ticks = 0;
+		String[] lengthElements = length.split("~");
+		for (String lengthStr : lengthElements) {
+			if (null == targetLengths.get(lengthStr))
+				System.err.println("Length string not found: '" + lengthStr + "' - This should not happen. Please report.");
+			ticks += targetLengths.get(lengthStr);
+		}
+		
+		// increment target ticks
+		long currentTicks = currentTgtInstr.getCurrentTicks();
+		currentTgtInstr.setCurrentTicks(currentTicks + ticks);
 	}
 	
 	/**

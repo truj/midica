@@ -116,8 +116,8 @@ public class DecompileConfigController extends FileConfigController {
 		initWidgetConfig( Config.DC_MUST_ADD_STATISTICS,      view.cbxAddStatistics,          Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_MUST_ADD_STRATEGY_STAT,   view.cbxAddStrategyStat,        Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_LENGTH_STRATEGY,          view.cbxLengthStrategy,         Integer.class, fromConfig );
-		initWidgetConfig( Config.DC_MIN_TARGET_TICKS_ON,      view.cbxMinTargetTicksOn,       Integer.class, fromConfig );
-		initWidgetConfig( Config.DC_MAX_TARGET_TICKS_ON,      view.cbxMaxTargetTicksOn,       Integer.class, fromConfig );
+		initWidgetConfig( Config.DC_MIN_TICKS_ON_AT_480,      view.cbxMinTicksOnAt480,        Integer.class, fromConfig );
+		initWidgetConfig( Config.DC_MAX_TICKS_ON_AT_480,      view.cbxMaxTicksOnAt480,        Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_MIN_DURATION_TO_KEEP,     view.fldMinDurToKeep,           Float.class,   fromConfig );
 		initWidgetConfig( Config.DC_MAX_DURATION_TO_KEEP,     view.fldMaxDurToKeep,           Float.class,   fromConfig );
 		initWidgetConfig( Config.DC_LENGTH_TICK_TOLERANCE,    view.fldLengthTickTolerance,    Integer.class, fromConfig );
@@ -135,6 +135,10 @@ public class DecompileConfigController extends FileConfigController {
 		initWidgetConfig( Config.DC_ORPHANED_SYLLABLES,       view.cbxOrphanedSyllables,      Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_KARAOKE_ONE_CHANNEL,      view.cbxKarOneChannel,          Boolean.class, fromConfig );
 		initWidgetConfig( Config.DC_CTRL_CHANGE_MODE,         view.cbxCtrlChangeMode,         Integer.class, fromConfig );
+		initWidgetConfig( Config.DC_SYNTAX_TYPE,              view.cbxSyntaxType,             Integer.class, fromConfig );
+		initWidgetConfig( Config.DC_ELEMENTS_PER_LINE,        view.fldElementsPerLine,        Integer.class, fromConfig );
+		initWidgetConfig( Config.DC_USE_BARLINES,             view.cbxUseBarlines,            Boolean.class, fromConfig );
+		initWidgetConfig( Config.DC_MAX_BARLINE_TOL,          view.fldBarlineTol,             Integer.class, fromConfig );
 		initWidgetConfig( Config.DC_EXTRA_GLOBALS_STR,        view.areaGlobalsStr,            String.class,  fromConfig );
 	}
 	
@@ -436,7 +440,13 @@ public class DecompileConfigController extends FileConfigController {
 			
 			return model;
 		}
-		else if (Config.DC_MAX_TARGET_TICKS_ON.equals(id) || Config.DC_MIN_TARGET_TICKS_ON.equals(id)) {
+		else if (Config.DC_SYNTAX_TYPE.equals(id)) {
+			model.addElement(new NamedInteger(Dict.get(Dict.DC_SYNTAX_COMPACT),  MidicaPLExporter.SYNTAX_COMPACT,  true));
+			model.addElement(new NamedInteger(Dict.get(Dict.DC_SYNTAX_LOWLEVEL), MidicaPLExporter.SYNTAX_LOWLEVEL, true));
+			
+			return model;
+		}
+		else if (Config.DC_MAX_TICKS_ON_AT_480.equals(id) || Config.DC_MIN_TICKS_ON_AT_480.equals(id)) {
 			String noteLengths[] = {
 				Dict.SYNTAX_32, Dict.SYNTAX_16, Dict.SYNTAX_8,  Dict.SYNTAX_4,   Dict.SYNTAX_2, Dict.SYNTAX_1,
 				Dict.SYNTAX_M2, Dict.SYNTAX_M4, Dict.SYNTAX_M8, Dict.SYNTAX_M16, Dict.SYNTAX_M32,

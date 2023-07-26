@@ -197,8 +197,8 @@ public class Config {
 	public static final String DC_MUST_ADD_STATISTICS      = "dc_must_add_statistics";
 	public static final String DC_MUST_ADD_STRATEGY_STAT   = "dc_must_add_strategy_stat";
 	public static final String DC_LENGTH_STRATEGY          = "dc_length_strategy";
-	public static final String DC_MIN_TARGET_TICKS_ON      = "dc_min_target_ticks_on";
-	public static final String DC_MAX_TARGET_TICKS_ON      = "dc_max_target_ticks_on";
+	public static final String DC_MIN_TICKS_ON_AT_480      = "dc_min_ticks_on_at_480";
+	public static final String DC_MAX_TICKS_ON_AT_480      = "dc_max_ticks_on_at_480";
 	public static final String DC_MIN_DURATION_TO_KEEP     = "dc_min_duration_to_keep";
 	public static final String DC_MAX_DURATION_TO_KEEP     = "dc_max_duration_to_keep";
 	public static final String DC_LENGTH_TICK_TOLERANCE    = "dc_length_tick_tolerance";
@@ -216,6 +216,10 @@ public class Config {
 	public static final String DC_ORPHANED_SYLLABLES       = "dc_orphaned_syllables";
 	public static final String DC_KARAOKE_ONE_CHANNEL      = "dc_karaoke_one_channel";
 	public static final String DC_CTRL_CHANGE_MODE         = "dc_ctrl_change_mode";
+	public static final String DC_SYNTAX_TYPE              = "dc_syntax_type";
+	public static final String DC_ELEMENTS_PER_LINE        = "dc_elements_per_line";
+	public static final String DC_USE_BARLINES             = "dc_use_barlines";
+	public static final String DC_MAX_BARLINE_TOL          = "dc_max_barline_tol";
 	public static final String DC_EXTRA_GLOBALS_STR        = "dc_extra_globals_str";
 	
 	// audio options
@@ -356,8 +360,8 @@ public class Config {
 		dcDefaults.put( DC_MUST_ADD_STATISTICS,      "" + Decompiler.DEFAULT_MUST_ADD_STATISTICS      );
 		dcDefaults.put( DC_MUST_ADD_STRATEGY_STAT,   "" + Decompiler.DEFAULT_MUST_ADD_STRATEGY_STAT   );
 		dcDefaults.put( DC_LENGTH_STRATEGY,          "" + Decompiler.DEFAULT_LENGTH_STRATEGY          );
-		dcDefaults.put( DC_MIN_TARGET_TICKS_ON,      "" + Decompiler.DEFAULT_MIN_TARGET_TICKS_ON      );
-		dcDefaults.put( DC_MAX_TARGET_TICKS_ON,      "" + Decompiler.DEFAULT_MAX_TARGET_TICKS_ON      );
+		dcDefaults.put( DC_MIN_TICKS_ON_AT_480,      "" + Decompiler.DEFAULT_MIN_TICKS_ON_AT_480      );
+		dcDefaults.put( DC_MAX_TICKS_ON_AT_480,      "" + Decompiler.DEFAULT_MAX_TICKS_ON_AT_480      );
 		dcDefaults.put( DC_MIN_DURATION_TO_KEEP,     "" + Decompiler.DEFAULT_MIN_DURATION_TO_KEEP     );
 		dcDefaults.put( DC_MAX_DURATION_TO_KEEP,     "" + Decompiler.DEFAULT_MAX_DURATION_TO_KEEP     );
 		dcDefaults.put( DC_LENGTH_TICK_TOLERANCE,    "" + Decompiler.DEFAULT_LENGTH_TICK_TOLERANCE    );
@@ -375,6 +379,10 @@ public class Config {
 		dcDefaults.put( DC_ORPHANED_SYLLABLES,       "" + Decompiler.DEFAULT_ORPHANED_SYLLABLES       );
 		dcDefaults.put( DC_KARAOKE_ONE_CHANNEL,      "" + Decompiler.DEFAULT_KARAOKE_ONE_CHANNEL      );
 		dcDefaults.put( DC_CTRL_CHANGE_MODE,         "" + Decompiler.DEFAULT_CTRL_CHANGE_MODE         );
+		dcDefaults.put( DC_SYNTAX_TYPE,              "" + Decompiler.DEFAULT_SYNTAX_TYPE              );
+		dcDefaults.put( DC_ELEMENTS_PER_LINE,        "" + Decompiler.DEFAULT_ELEMENTS_PER_LINE        );
+		dcDefaults.put( DC_USE_BARLINES,             "" + Decompiler.DEFAULT_USE_KARAOKE              );
+		dcDefaults.put( DC_MAX_BARLINE_TOL,          "" + Decompiler.DEFAULT_MAX_BARLINE_TOL          );
 		dcDefaults.put( DC_EXTRA_GLOBALS_STR,             Decompiler.DEFAULT_EXTRA_GLOBALS_STR        );
 		
 		return dcDefaults;
@@ -813,14 +821,18 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_SLICES,           KeyEvent.VK_NUMPAD7,  0                          );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_SLICES,           KeyEvent.VK_7,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_SLICES,           KeyEvent.VK_NUMPAD7,  InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_SYNTAX,           KeyEvent.VK_8,        0                          );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_SYNTAX,           KeyEvent.VK_NUMPAD8,  0                          );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_SYNTAX,           KeyEvent.VK_8,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_TAB_SYNTAX,           KeyEvent.VK_NUMPAD8,  InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_ADD_TICK_COMMENTS,    KeyEvent.VK_T,        0                          );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_ADD_CONFIG,           KeyEvent.VK_C,        0                          );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_ADD_SCORE,            KeyEvent.VK_Q,        0                          );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_ADD_STATISTICS,       KeyEvent.VK_S,        0                          );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_ADD_STRATEGY_STAT,    KeyEvent.VK_R,        0                          );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_NOTE_LENGTH_STRATEGY, KeyEvent.VK_P,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_DC_CONF_MIN_TARGET_TICKS_ON,  KeyEvent.VK_L,        InputEvent.CTRL_DOWN_MASK  );
-		addDefaultKeyBinding( Dict.KEY_DC_CONF_MAX_TARGET_TICKS_ON,  KeyEvent.VK_L,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_MIN_TICKS_ON_AT_480,  KeyEvent.VK_L,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_MAX_TICKS_ON_AT_480,  KeyEvent.VK_L,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_MIN_DUR_TO_KEEP,      KeyEvent.VK_K,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_MAX_DUR_TO_KEEP,      KeyEvent.VK_K,        InputEvent.CTRL_DOWN_MASK | InputEvent.SHIFT_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_TOL_TICK_LEN,         KeyEvent.VK_N,        InputEvent.CTRL_DOWN_MASK  );
@@ -838,6 +850,10 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_KAR_ORPHANED,         KeyEvent.VK_O,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_KAR_ONE_CH,           KeyEvent.VK_A,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_CTRL_CHANGE_MODE,     KeyEvent.VK_M,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_SYNTAX_TYPE,          KeyEvent.VK_T,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_ELEMENTS_PER_LINE,    KeyEvent.VK_E,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_USE_BARLINES,         KeyEvent.VK_B,        InputEvent.CTRL_DOWN_MASK  );
+		addDefaultKeyBinding( Dict.KEY_DC_CONF_FLD_BARLINE_TOL,      KeyEvent.VK_M,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_FLD_GLOB_SINGLE,      KeyEvent.VK_O,        InputEvent.CTRL_DOWN_MASK  );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_BTN_GLOB_SINGLE,      KeyEvent.VK_O,        InputEvent.ALT_DOWN_MASK   );
 		addDefaultKeyBinding( Dict.KEY_DC_CONF_FLD_GLOB_EACH,        KeyEvent.VK_D,        InputEvent.CTRL_DOWN_MASK  );

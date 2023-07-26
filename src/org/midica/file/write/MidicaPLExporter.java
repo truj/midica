@@ -9,13 +9,17 @@ package org.midica.file.write;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Set;
 import java.util.TreeMap;
 
 import org.midica.config.Dict;
 import org.midica.file.Instrument;
 import org.midica.file.read.MidicaPLParser;
+import org.midica.file.read.ParseException;
 import org.midica.midi.KaraokeAnalyzer;
 import org.midica.midi.SequenceAnalyzer;
 
@@ -26,10 +30,18 @@ import org.midica.midi.SequenceAnalyzer;
  */
 public class MidicaPLExporter extends Decompiler {
 	
-	// string formats for channel commands
+	// string formats for lowlevel commands
 	private String FORMAT_CH_CMD_CHANNEL = "%-2s";   // channel:          2 left-aligned characters, filled with spaces
 	private String FORMAT_CH_CMD_CRD     = "%-10s";  // chord/note/rest: 10 left-aligned characters, filled with spaces
 	private String FORMAT_CH_CMD_LENGTH  = "%1$10s"; // length:          10 right-aligned characters, filled with spaces
+	
+	private boolean       isCompactSyntax       = true;
+	private boolean       isLowlevelSyntax      = false;
+	private int           elementsInCurrentLine = 0;
+	private HashSet<Byte> usedInSlice           = null;
+	private Long          lineBeginTickSrc      = null;
+	private Long          lineBeginTickTgt      = null;
+	private boolean       isInBlock             = false;
 	
 	/**
 	 * Creates a new MidicaPL exporter.
@@ -38,49 +50,53 @@ public class MidicaPLExporter extends Decompiler {
 		format = MIDICA;
 	}
 	
-	/**
-	 * Initializes MidicaPL specific data structures.
-	 */
+	@Override
 	public void init() {
+		isCompactSyntax       = SYNTAX_COMPACT  == SYNTAX_TYPE;
+		isLowlevelSyntax      = SYNTAX_LOWLEVEL == SYNTAX_TYPE;
+		elementsInCurrentLine = 0;
+		isInBlock             = false;
 	}
 	
-	/**
-	 * Creates the MidicaPL string to be written into the export file.
-	 * 
-	 * @return MidicaPL string to be written into the export file
-	 */
+	@Override
 	public String createOutput() {
-		StringBuilder output = new StringBuilder();
+		
+		// in MPL we calculate measure lengths based on the TARGET sequence
+		// so we need to overwrite the structure from the parent class
+		measureLengthHistory.clear();
+		measureLengthHistory.put(0L, 4L * sourceResolution); // MIDI default is 4/4
 		
 		// META block
-		output.append( createMetaBlock() );
+		createMetaBlock();
 		
 		// initial INSTRUMENTS block (tick 0)
-		output.append( createInitialInstrumentsBlock() );
+		createInitialInstrumentsBlock();
 		
 		// add chord definitions
-		output.append( createChordDefinitions() );
+		createChordDefinitions();
 		
 		// SLICE:
 		for (Slice slice : slices) {
+			usedInSlice = new HashSet<>();
 			
 			// if necessary: add rest from current tick to the slice's begin tick
-			output.append( createRestBeforeSlice(slice) );
+			createRestBeforeSlice(slice);
 			
 			// global commands
-			output.append( createGlobalCommands(slice) );
+			createGlobalCommands(slice);
 			
 			// channel commands and instrument changes
 			for (byte channel = 0; channel < 16; channel++) {
+				resetTickCommentLineLength();
 				
 				// Add nestable block at the slice begin, if needed.
 				// This may contain orphaned syllables and/or (in the future) control changes.
 				if (slice.hasSliceBeginBlock(channel)) {
-					output.append( createSliceBeginBlock(slice, channel) );
+					createSliceBeginBlock(slice, channel);
 				}
 				
 				// normal commands
-				output.append( createCommandsFromTimeline(slice, channel) );
+				createCommandsFromTimeline(slice, channel);
 			}
 		}
 		
@@ -99,6 +115,8 @@ public class MidicaPLExporter extends Decompiler {
 	/**
 	 * Creates channel commands and instrument changes from a slice's timeline.
 	 * 
+	 * Creates nothing, if the slice's timeline doesn't contain anything in the given channel.
+	 * 
 	 * Steps:
 	 * 
 	 * - Adds the following missing properties and elements to the notes and chords of the timeline:
@@ -111,10 +129,8 @@ public class MidicaPLExporter extends Decompiler {
 	 * 
 	 * @param slice    the sequence slice
 	 * @param channel  MIDI channel
-	 * @return the created commands (or an empty string, if the slice's timeline doesn't contain anything in the given channel)
 	 */
-	private String createCommandsFromTimeline(Slice slice, byte channel) {
-		StringBuilder lines = new StringBuilder();
+	private void createCommandsFromTimeline(Slice slice, byte channel) {
 		TreeMap<Long, TreeMap<Byte, TreeMap<String, TreeMap<Byte, String>>>> timeline = slice.getTimeline(channel);
 		
 		// TICK:
@@ -124,12 +140,12 @@ public class MidicaPLExporter extends Decompiler {
 			
 			// instrument change
 			if (events.containsKey(ET_INSTR)) {
-				lines.append( createInstrumentChange(channel, tick) );
+				createInstrumentChange(channel, tick);
 			}
 			
 			// inline block
 			if (events.containsKey(ET_INLINE_BLK)) {
-				lines.append( createInlineBlock(channel, tick, slice) );
+				createInlineBlock(channel, tick, slice);
 			}
 			
 			// notes/chords
@@ -167,25 +183,23 @@ public class MidicaPLExporter extends Decompiler {
 				}
 				
 				// write MidicaPL
-				lines.append( createNoteLines(slice, channel, tick, events.get(ET_NOTES)) );
+				createNotesAtTick(slice, channel, tick, events.get(ET_NOTES));
 			}
 		}
 		
 		// add one empty line between channels
 		if (! timeline.isEmpty()) {
-			lines.append(NEW_LINE);
+			if (isCompactSyntax)
+				createCompactLineCloseIfPossible(channel);
+			output.append(NEW_LINE);
 		}
-		
-		return lines.toString();
 	}
 	
 	/**
 	 * Creates the META block, if the sequence contains any META information.
-	 * 
-	 * @return the META block, or an empty string if the sequence doesn't contain any meta information.
+	 * Creates nothing, if the sequence doesn't contain any meta information.
 	 */
-	private String createMetaBlock() {
-		StringBuilder     block = new StringBuilder("");
+	private void createMetaBlock() {
 		ArrayList<String> lines = new ArrayList<>();
 		
 		// get data structures
@@ -221,7 +235,7 @@ public class MidicaPLExporter extends Decompiler {
 			// LINE of this field
 			for (String singleLine : multiLines) {
 				if (! "".equals(singleLine))
-					lines.add("\t" + String.format("%-12s", mplIds[i]) + " " + singleLine + NEW_LINE);
+					lines.add(BLOCK_INDENT + String.format("%-12s", mplIds[i]) + " " + singleLine + NEW_LINE);
 			}
 		}
 		
@@ -234,16 +248,14 @@ public class MidicaPLExporter extends Decompiler {
 		
 		// no meta data found?
 		if (lines.isEmpty())
-			return "";
+			return;
 		
 		// add block
-		block.append(MidicaPLParser.META + NEW_LINE);
+		output.append(MidicaPLParser.META + NEW_LINE);
 		for (String line : lines) {
-			block.append(line);
+			output.append(line);
 		}
-		block.append(MidicaPLParser.END + NEW_LINE + NEW_LINE);
-		
-		return block.toString();
+		output.append(MidicaPLParser.END + NEW_LINE + NEW_LINE);
 	}
 	
 	/**
@@ -257,7 +269,7 @@ public class MidicaPLExporter extends Decompiler {
 		StringBuilder block = new StringBuilder("");
 		
 		// open the block
-		block.append("\t" + MidicaPLParser.META_SOFT_KARAOKE + NEW_LINE);
+		block.append(BLOCK_INDENT + MidicaPLParser.META_SOFT_KARAOKE + NEW_LINE);
 		
 		// read single-line fields
 		String[] fields = {"sk_version", "sk_language", "sk_title", "sk_author", "sk_copyright"};
@@ -296,32 +308,26 @@ public class MidicaPLExporter extends Decompiler {
 		}
 		
 		// close the block
-		block.append("\t" + MidicaPLParser.END + NEW_LINE);
+		block.append(BLOCK_INDENT + MidicaPLParser.END + NEW_LINE);
 		
 		return block.toString();
 	}
 	
 	/**
 	 * Creates the initial INSTRUMENTS block.
-	 * 
-	 * @return the created block.
 	 */
-	private String createInitialInstrumentsBlock() {
+	private void createInitialInstrumentsBlock() {
 		
 		// open block
-		StringBuilder block = new StringBuilder("");
-		block.append(MidicaPLParser.INSTRUMENTS + NEW_LINE);
+		output.append(MidicaPLParser.INSTRUMENTS + NEW_LINE);
 		
 		// add instruments
 		for (byte channel = 0; channel < 16; channel++) {
-			String instrLine = createInstrLine(0, channel);
-			block.append(instrLine);
+			createInstrLine(0, channel);
 		}
 		
 		// close block
-		block.append(MidicaPLParser.END + NEW_LINE + NEW_LINE);
-		
-		return block.toString();
+		output.append(MidicaPLParser.END + NEW_LINE + NEW_LINE);
 	}
 	
 	/**
@@ -329,23 +335,24 @@ public class MidicaPLExporter extends Decompiler {
 	 * 
 	 * @param channel  MIDI channel
 	 * @param tick     MIDI tick
-	 * @return the created lines.
 	 */
-	private String createInstrumentChange(byte channel, long tick) {
+	private void createInstrumentChange(byte channel, long tick) {
 		
-		// prepare
-		StringBuilder lines = new StringBuilder("");
+		// add rest if needed
+		long restBeginTick = srcInstrByChannel.get(channel).getCurrentTicks();
+		long restTicks     = tick - restBeginTick;
+		if (restTicks > 0) {
+			createRest(channel, restTicks, null);
+		}
+		
+		// close compact line, if necessary
+		createCompactLineCloseIfPossible(channel);
 		
 		// add instruments
 		Set<Long> changeTicks = instrumentHistory.get(channel).keySet();
 		if (changeTicks.contains(tick)) {
-			String instrLine = createInstrLine(tick, channel);
-			if (! "".equals(instrLine)) {
-				lines.append(instrLine);
-			}
+			createInstrLine(tick, channel);
 		}
-		
-		return lines.toString();
 	}
 	
 	/**
@@ -353,7 +360,7 @@ public class MidicaPLExporter extends Decompiler {
 	 * 
 	 * If tick is 0, a line inside a block is created. Otherwise it's an instrument change line.
 	 * 
-	 * Returns an empty string, if no instruments must be defined or changed in the given channel and tick.
+	 * Creates nothing, if no instruments must be defined or changed in the given channel and tick.
 	 * 
 	 * At the beginning this method is called for each channel (0-15).
 	 * This considers:
@@ -367,13 +374,12 @@ public class MidicaPLExporter extends Decompiler {
 	 * 
 	 * @param tick     The tickstamp of the program change event; or **0** during initialization.
 	 * @param channel  The channel number.
-	 * @return the instrument line or an empty string.
 	 */
-	private String createInstrLine(long tick, byte channel) {
+	private void createInstrLine(long tick, byte channel) {
 		
 		// channel used?
 		if (0 == noteHistory.get(channel).size()) {
-			return "";
+			return;
 		}
 		
 		// get the channel's history
@@ -381,7 +387,7 @@ public class MidicaPLExporter extends Decompiler {
 		Byte[]  instrConfig;
 		boolean isAutoChannel = false;
 		
-		String cmd = "\t";
+		String cmd = BLOCK_INDENT;
 		if (0 == tick) {
 			// initialization - either a program change at tick 0 or the default at a negative tick
 			Entry<Long, Byte[]> initialInstr   = chInstrHist.floorEntry(tick);
@@ -398,7 +404,7 @@ public class MidicaPLExporter extends Decompiler {
 			
 			// no program change at this tick?
 			if (null == instrConfig) {
-				return "";
+				return;
 			}
 		}
 		
@@ -432,7 +438,7 @@ public class MidicaPLExporter extends Decompiler {
 		
 		// instruments block
 		if (0 == tick) {
-			return (
+			output.append(
 				  cmd
 				+ String.format("%-4s", channelStr)
 				+ " "
@@ -441,26 +447,24 @@ public class MidicaPLExporter extends Decompiler {
 				+ commentStr
 				+ NEW_LINE
 			);
+			return;
 		}
 		
 		// single instrument change
-		return appendTickComment(cmd + "  " + channelStr + "  " + programStr, tick) + NEW_LINE;
+		output.append(cmd + "  " + channelStr + "  " + programStr);
+		createTickComment(tick, tgtInstrByChannel.get(channel).getCurrentTicks());
+		output.append(NEW_LINE);
 	}
 	
 	/**
 	 * Creates the CHORD definitions.
-	 * 
-	 * @return the CHORD commands.
 	 */
-	private String createChordDefinitions() {
+	private void createChordDefinitions() {
 		
 		// no chords available?
 		if (chords.isEmpty()) {
-			return "";
+			return;
 		}
-		
-		// initialize
-		StringBuilder chordBlock = new StringBuilder("");
 		
 		// get base notes in the right order, beginning with A
 		ArrayList<String> orderedNotes = new ArrayList<>();
@@ -484,7 +488,7 @@ public class MidicaPLExporter extends Decompiler {
 			// chords
 			for (String notesStr : noteChords) {
 				String chordName = chords.get(notesStr);
-				chordBlock.append(MidicaPLParser.CHORD + " " + String.format("%-12s", chordName)  + " ");
+				output.append(MidicaPLParser.CHORD + " " + String.format("%-12s", chordName)  + " ");
 				
 				// notes
 				String[]          noteNumbers = notesStr.split("\\,");
@@ -493,39 +497,41 @@ public class MidicaPLExporter extends Decompiler {
 					String noteName = Dict.getNote(Integer.parseInt(noteNumber));
 					noteNames.add(noteName);
 				}
-				chordBlock.append( String.join(MidicaPLParser.CHORD_SEPARATOR, noteNames) );
-				chordBlock.append(NEW_LINE);
+				output.append( String.join(MidicaPLParser.CHORD_SEPARATOR, noteNames) );
+				output.append(NEW_LINE);
 			}
 		}
-		chordBlock.append(NEW_LINE);
-		
-		return chordBlock.toString();
+		output.append(NEW_LINE);
 	}
 	
 	/**
-	 * Creates a string with global commands for the given slice.
+	 * Creates the global commands for the given slice.
 	 * 
 	 * @param slice  the sequence slice
-	 * @return the created string (or an empty string, if the slice doesn't contain any global commands)
 	 */
-	private String createGlobalCommands(Slice slice) {
-		StringBuilder result = new StringBuilder("");
+	private void createGlobalCommands(Slice slice) {
 		
 		// synchronize: set all channels to the highest tick
-		long maxTick = Instrument.getMaxCurrentTicks(instrumentsByChannel);
-		for (Instrument instr : instrumentsByChannel) {
-			instr.setCurrentTicks(maxTick);
+		// and: close compact line, if necessary
+		long maxSrcTick = Instrument.getMaxCurrentTicks(srcInstrByChannel);
+		long maxTgtTick = Instrument.getMaxCurrentTicks(tgtInstrByChannel);
+		for (byte channel = 0; channel < srcInstrByChannel.size(); channel++) {
+			createCompactLineCloseIfPossible(channel);
+			srcInstrByChannel.get(channel).setCurrentTicks(maxSrcTick);
+			tgtInstrByChannel.get(channel).setCurrentTicks(maxTgtTick);
 		}
 		
 		// tick comment
-		if (MUST_ADD_TICK_COMMENTS)
-			result.append( createTickDescription(slice.getBeginTick(), true) + NEW_LINE );
+		if (MUST_ADD_TICK_COMMENTS) {
+			createTickDescription(slice.getBeginTick(), maxTgtTick, true);
+			output.append(NEW_LINE);
+		}
 		
 		// create global commands
 		TreeMap<String, String> globalCmds = slice.getGlobalCommands();
 		if (0 == globalCmds.size()) {
 			if (slice.getBeginTick() > 0) {
-				result.append(MidicaPLParser.GLOBAL + NEW_LINE + NEW_LINE);
+				output.append(MidicaPLParser.GLOBAL + NEW_LINE + NEW_LINE);
 			}
 		}
 		else {
@@ -540,16 +546,26 @@ public class MidicaPLExporter extends Decompiler {
 					globalCmd = MidicaPLParser.KEY_SIG;
 				
 				// append command
-				result.append(
+				output.append(
 					  MidicaPLParser.GLOBAL + " "
 					+ String.format("%-7s", globalCmd) + " "
 					+ value + NEW_LINE
 				);
+				
+				// update measure length, if needed
+				if ("time".equals(cmdId)) {
+					Pattern pattern = Pattern.compile("^(\\d+)" + Pattern.quote(MidicaPLParser.TIME_SIG_SLASH) + "(\\d+)$");
+					Matcher matcher = pattern.matcher(value);
+					if (matcher.matches()) {
+						int numerator      = Integer.parseInt(matcher.group(1));
+						int denominator    = Integer.parseInt(matcher.group(2));
+						long measureLength = numerator * 4 * targetResolution / denominator;
+						measureLengthHistory.put(maxTgtTick, measureLength);
+					}
+				}
 			}
-			result.append(NEW_LINE);
+			output.append(NEW_LINE);
 		}
-		
-		return result.toString();
 	}
 	
 	/**
@@ -564,18 +580,23 @@ public class MidicaPLExporter extends Decompiler {
 	 * 
 	 * @param slice      the sequence slice
 	 * @param channel    MIDI channel
-	 * @return the created block.
 	 */
-	private String createSliceBeginBlock(Slice slice, byte channel) {
-		StringBuilder lines = new StringBuilder();
+	private void createSliceBeginBlock(Slice slice, byte channel) {
 		TreeMap<Long, String> timeline = slice.getSliceBeginBlockTimeline(channel);
 		
+		// remember current ticks
+		long beginSrcTicks = srcInstrByChannel.get(channel).getCurrentTicks();
+		long beginTgtTicks = tgtInstrByChannel.get(channel).getCurrentTicks();
+		
 		// open the block
-		lines.append(MidicaPLParser.BLOCK_OPEN + " " + MidicaPLParser.M);
-		lines.append(NEW_LINE);
+		createCompactLineCloseIfPossible(channel);
+		resetTickCommentLineLength();
+		output.append(MidicaPLParser.BLOCK_OPEN + " " + MidicaPLParser.M);
+		output.append(NEW_LINE);
+		isInBlock = true;
 		
 		// get channel and tickstamp
-		long currentTicks = instrumentsByChannel.get(channel).getCurrentTicks();
+		long currentTicks = beginSrcTicks;
 		
 		// TICK:
 		for (Entry<Long, String> entry : timeline.entrySet()) {
@@ -585,7 +606,9 @@ public class MidicaPLExporter extends Decompiler {
 			// need a normal rest before the syllable?
 			if (restTick > currentTicks) {
 				long missingTicks = restTick - currentTicks;
-				lines.append( "\t" + createRest(channel, missingTicks, currentTicks, null) );
+				if (isLowlevelSyntax)
+					output.append(BLOCK_INDENT);
+				createRest(channel, missingTicks, null);
 				currentTicks = restTick;
 			}
 			
@@ -599,15 +622,22 @@ public class MidicaPLExporter extends Decompiler {
 			long restTicks = nextTick - currentTicks;
 			
 			// add the rest with the syllable
-			lines.append( "\t" + createRest(channel, restTicks, currentTicks, syllable) );
+			if (isLowlevelSyntax)
+				output.append(BLOCK_INDENT);
+			createRest(channel, restTicks, syllable);
 			currentTicks = nextTick;
 		}
 		
 		// close the block
-		lines.append(MidicaPLParser.BLOCK_CLOSE);
-		lines.append(NEW_LINE);
+		isInBlock = false;
+		createCompactLineCloseIfPossible(channel);
+		resetTickCommentLineLength();
+		output.append(MidicaPLParser.BLOCK_CLOSE);
+		output.append(NEW_LINE);
 		
-		return lines.toString();
+		// restore current ticks
+		srcInstrByChannel.get(channel).setCurrentTicks(beginSrcTicks);
+		tgtInstrByChannel.get(channel).setCurrentTicks(beginTgtTicks);
 	}
 	
 	/**
@@ -618,25 +648,31 @@ public class MidicaPLExporter extends Decompiler {
 	 * @param channel  MIDI channel
 	 * @param tick     MIDI tick
 	 * @param slice    the sequence slice
-	 * @return the created block.
 	 */
-	private String createInlineBlock(byte channel, long tick, Slice slice) {
-		StringBuilder lines = new StringBuilder("");
+	private void createInlineBlock(byte channel, long tick, Slice slice) {
 		
 		// add rest, if necessary
-		Instrument instr  = instrumentsByChannel.get(channel);
+		Instrument instr  = srcInstrByChannel.get(channel);
 		long currentTicks = instr.getCurrentTicks();
 		long missingTicks = tick - currentTicks;
 		if (missingTicks > 0) {
-			lines.append( createRest(channel, missingTicks, currentTicks, null) );
+			createRest(channel, missingTicks, null);
 			instr.setCurrentTicks(tick);
 			currentTicks = tick;
 		}
 		
+		// remember current ticks
+		long beginSrcTicks = srcInstrByChannel.get(channel).getCurrentTicks();
+		long beginTgtTicks = tgtInstrByChannel.get(channel).getCurrentTicks();
+		
 		// open the block
+		createCompactLineCloseIfPossible(channel);
+		resetTickCommentLineLength();
 		String lineOpen = MidicaPLParser.BLOCK_OPEN + " " + MidicaPLParser.M;
-		lines.append(appendTickComment(lineOpen, tick));
-		lines.append(NEW_LINE);
+		output.append(lineOpen);
+		createTickComment(tick, beginTgtTicks);
+		output.append(NEW_LINE);
+		isInBlock = true;
 		
 		// add the inline block
 		TreeMap<Long, String> content = slice.getInlineBlockTimeline(channel, tick);
@@ -647,7 +683,9 @@ public class MidicaPLExporter extends Decompiler {
 			// add rest before event
 			missingTicks = eventTick - currentTicks;
 			if (missingTicks > 0) {
-				lines.append("\t" + createRest(channel, missingTicks, currentTicks, null));
+				if (isLowlevelSyntax)
+					output.append(BLOCK_INDENT);
+				createRest(channel, missingTicks, null);
 				currentTicks = eventTick;
 			}
 			
@@ -667,19 +705,26 @@ public class MidicaPLExporter extends Decompiler {
 			}
 			
 			// add rest with syllable
-			lines.append("\t" + createRest(channel, restTicks, currentTicks, syllable));
+			if (isLowlevelSyntax)
+				output.append(BLOCK_INDENT);
+			createRest(channel, restTicks, syllable);
 			currentTicks += restTicks;
 		}
 		
 		// close the block
-		lines.append(MidicaPLParser.BLOCK_CLOSE);
-		lines.append(NEW_LINE);
+		isInBlock = false;
+		createCompactLineCloseIfPossible(channel);
+		resetTickCommentLineLength();
+		output.append(MidicaPLParser.BLOCK_CLOSE);
+		output.append(NEW_LINE);
 		
-		return lines.toString();
+		// restore current ticks
+		srcInstrByChannel.get(channel).setCurrentTicks(beginSrcTicks);
+		tgtInstrByChannel.get(channel).setCurrentTicks(beginTgtTicks);
 	}
 	
 	/**
-	 * Creates lines for all notes or chords that are played in a certain
+	 * Creates commands for all notes or chords that are played in a certain
 	 * channel and begin at a certain tick.
 	 * 
 	 * Steps:
@@ -709,26 +754,33 @@ public class MidicaPLExporter extends Decompiler {
 	 * @param channel  MIDI channel
 	 * @param tick     MIDI tick
 	 * @param events   All notes/chords with the same note-ON tick in the same channel (comes from the slice's timeline)
-	 * @return the created note lines.
 	 */
 	// TODO: change docu about the strategy
-	private String createNoteLines(Slice slice, byte channel, long tick, TreeMap<String, TreeMap<Byte, String>> events) {
-		StringBuilder lines = new StringBuilder("");
+	private void createNotesAtTick(Slice slice, byte channel, long tick, TreeMap<String, TreeMap<Byte, String>> events) {
+		
+		// close and/or open compact line, if necessary
+		createCompactLineChangeIfNeeded(channel);
 		
 		// add rest, if necessary
-		Instrument instr  = instrumentsByChannel.get(channel);
+		Instrument instr  = srcInstrByChannel.get(channel);
 		long currentTicks = instr.getCurrentTicks();
 		if (tick > currentTicks) {
 			long restTicks = tick - currentTicks;
-			lines.append( createRest(channel, restTicks, tick, null) );
-			instr.setCurrentTicks(tick);
+			createRest(channel, restTicks, null);
+			createCompactLineChangeIfNeeded(channel);
 		}
 		
 		// get the LAST note/chord to be printed.
-		Long   nextOnTick            = noteHistory.get(channel).ceilingKey(tick + 1);
-		long   sliceEndTick          = slice.getEndTick();
-		String lastNoteOrCrdName     = null;
-		long   highestFittingEndTick = -1;
+		Long nextOnTick    = noteHistory.get(channel).ceilingKey(tick + 1);
+		Long nextInstrTick = instrumentHistory.get(channel).ceilingKey(tick + 1);
+		Long nextOnOrInstrTick = null == nextOnTick ? nextInstrTick : nextOnTick;
+		if (nextOnOrInstrTick != null && nextInstrTick != null) {
+			nextOnOrInstrTick = nextOnTick < nextInstrTick ? nextOnTick : nextInstrTick;
+		}
+		long    sliceEndTick          = slice.getEndTick();
+		String  lastNoteOrCrdName     = null;
+		long    highestFittingEndTick = -1;
+		boolean isCandidate           = false;
 		for (Entry<String, TreeMap<Byte, String>> noteSet : events.entrySet()) {
 			String name = noteSet.getKey();
 			TreeMap<Byte, String> note = noteSet.getValue();
@@ -736,30 +788,29 @@ public class MidicaPLExporter extends Decompiler {
 			long endTick = Long.parseLong(note.get(NP_END_TICK));
 			
 			// next note-ON exists?
-			if (nextOnTick != null) {
+			if (nextOnOrInstrTick != null) {
 				
 				// next note-ON is in the same slice?
-				if (nextOnTick <= sliceEndTick) {
+				if (nextOnOrInstrTick <= sliceEndTick) {
 					
 					// note/chord fits before next note-ON?
-					if (nextOnTick >= endTick) {
-						
-						// no better candidate found yet?
-						if (endTick > highestFittingEndTick) {
-							highestFittingEndTick = endTick;
-							lastNoteOrCrdName     = name;
-						}
+					if (nextOnOrInstrTick >= endTick) {
+						isCandidate = true;
 					}
+				}
+				else if (endTick <= sliceEndTick) {
+					isCandidate = true;
 				}
 			}
 			// no next note-ON but note/chord fits into the slice?
 			else if (endTick <= sliceEndTick) {
-				
-				// no better candidate found yet?
-				if (endTick > highestFittingEndTick) {
-					highestFittingEndTick = endTick;
-					lastNoteOrCrdName     = name;
-				}
+				isCandidate = true;
+			}
+			
+			// is this the best candidate?
+			if (isCandidate && endTick > highestFittingEndTick) {
+				highestFittingEndTick = endTick;
+				lastNoteOrCrdName     = name;
 			}
 		}
 		
@@ -788,37 +839,35 @@ public class MidicaPLExporter extends Decompiler {
 			if (-1 == highestFittingEndTick || i < noteOrCrdNames.size()) {
 				note.put(NP_MULTIPLE, null);
 			}
-			lines.append( createSingleNoteLine(channel, name, note, tick) );
+			createSingleNoteOrChord(channel, name, note, tick);
 		}
 		
-		// increment ticks, if necessary
-		if (highestFittingEndTick > 0) {
-			instr.setCurrentTicks(highestFittingEndTick);
-		}
-		
-		return lines.toString();
+		// bar line
+		createBarlineIfNeeded(channel);
 	}
 	
 	/**
-	 * Prints a single channel command for a note or chord.
+	 * Creates a single channel command for a note or chord.
+	 * (Lowlevel command or compact element plus options.)
 	 * 
 	 * @param channel    MIDI channel
 	 * @param noteName   note or chord name
 	 * @param noteOrCrd  note properties (from the slice's timeline)
 	 * @param tick       MIDI tickstamp.
-	 * @return the created line.
 	 */
-	private String createSingleNoteLine(byte channel, String noteName, TreeMap<Byte, String> noteOrCrd, long tick) {
-		StringBuilder line = new StringBuilder("");
+	private void createSingleNoteOrChord(byte channel, String noteName, TreeMap<Byte, String> noteOrCrd, long tick) {
 		
-		Instrument instr = instrumentsByChannel.get(channel);
+		Instrument instr     = srcInstrByChannel.get(channel);
+		long targetBeginTick = tgtInstrByChannel.get(channel).getCurrentTicks();
 		
-		// main part of the command
-		line.append(
-			  String.format(FORMAT_CH_CMD_CHANNEL, channel)  + " "
-			+ String.format(FORMAT_CH_CMD_CRD,     noteName) + " "
-			+ String.format(FORMAT_CH_CMD_LENGTH,  noteOrCrd.get(NP_LENGTH))
-		);
+		// lowlevel: main part of the command
+		if (isLowlevelSyntax) {
+			output.append(
+				  String.format(FORMAT_CH_CMD_CHANNEL, channel)  + " "
+				+ String.format(FORMAT_CH_CMD_CRD,     noteName) + " "
+				+ String.format(FORMAT_CH_CMD_LENGTH,  noteOrCrd.get(NP_LENGTH))
+			);
+		}
 		
 		// get options that must be appended
 		ArrayList<String> options = new ArrayList<>();
@@ -832,8 +881,8 @@ public class MidicaPLExporter extends Decompiler {
 			// duration
 			float duration           = Float.parseFloat( noteOrCrd.get(NP_DURATION) ) / 100;
 			float oldDuration        = instr.getDurationRatio();
-			int   durationPercent    = (int) ((duration    * 1000 + 0.5f) / 10);
-			int   oldDurationPercent = (int) ((oldDuration * 1000 + 0.5f) / 10);
+			int   durationPercent    = (int) ((duration    * 1000 + 5f) / 10);
+			int   oldDurationPercent = (int) ((oldDuration * 1000 + 5f) / 10);
 			if (durationPercent != oldDurationPercent) {
 				// don't allow 0%
 				String durationPercentStr = durationPercent + "";
@@ -863,27 +912,177 @@ public class MidicaPLExporter extends Decompiler {
 			}
 		}
 		
-		// append options
+		// options
 		if (options.size() > 0) {
-			String optionsStr = String.join(MidicaPLParser.OPT_SEPARATOR + " ", options);
-			line.append(" " + optionsStr);
+			if (isLowlevelSyntax) {
+				String optionsStr = String.join(MidicaPLParser.OPT_SEPARATOR + " ", options);
+				output.append(" " + optionsStr);
+			}
+			else {
+				String optionsStr = String.join(MidicaPLParser.OPT_SEPARATOR, options);
+				output.append(" " + MidicaPLParser.COMPACT_OPT_OPEN);
+				output.append(optionsStr);
+				output.append(MidicaPLParser.COMPACT_OPT_CLOSE);
+			}
+		}
+		
+		// increment current ticks
+		if (!noteOrCrd.containsKey(NP_MULTIPLE)) {
+			long srcEndTick = Long.parseLong(noteOrCrd.get(NP_END_TICK));
+			srcInstrByChannel.get(channel).setCurrentTicks(srcEndTick);
+			incrementTargetTicks(channel, noteOrCrd.get(NP_LENGTH));
+		}
+		
+		// add compact element
+		if (isCompactSyntax) {
+			createCompactElement(noteName, channel, noteOrCrd.get(NP_LENGTH));
+			return;
 		}
 		
 		// finish the line
-		return appendTickComment(line.toString(), tick) + NEW_LINE;
+		createTickComment(tick, targetBeginTick);
+		output.append(NEW_LINE);
 	}
 	
 	/**
-	 * Creates a channel command with a rest.
+	 * In compact syntax: returns the opening, closing or switching of a line for
+	 * the given channel, if necessary.
+	 * Returns an empty string if none is needed or in lowlevel mode.
 	 * 
-	 * @param channel    MIDI channel
-	 * @param ticks      tick length of the rest to create
-	 * @param beginTick  used for the tick comment (negative value: don't include a tick comment)
-	 * @param syllable   a lyrics syllable or (in most cases): **null**
-	 * @return the channel command containing the rest.
+	 * @param channel  MIDI channel
 	 */
-	protected String createRest(byte channel, long ticks, long beginTick, String syllable) {
-		StringBuilder line = new StringBuilder("");
+	private void createCompactLineChangeIfNeeded(byte channel) {
+		
+		if (isLowlevelSyntax)
+			return;
+		
+		// close line, if needed
+		if (usedInSlice.contains(channel)) {
+			if (elementsInCurrentLine >= ELEMENTS_PER_LINE) {
+				createCompactLineClose(channel);
+			}
+		}
+		
+		// open line, if needed
+		if (!usedInSlice.contains(channel)) {
+			String channelStr = 9 == channel ? MidicaPLParser.P : channel + "";
+			usedInSlice.add(channel);
+			if (isInBlock)
+				output.append(BLOCK_INDENT);
+			output.append(channelStr + MidicaPLParser.COMPACT_CHANNEL);
+			lineBeginTickSrc = srcInstrByChannel.get(channel).getCurrentTicks();
+			lineBeginTickTgt = tgtInstrByChannel.get(channel).getCurrentTicks();
+			createBarlineIfNeeded(channel);
+		}
+	}
+	
+	/**
+	 * Closes a compact line, if one is open and compact syntax is used.
+	 * 
+	 * @param channel  MIDI channel
+	 */
+	private void createCompactLineCloseIfPossible(byte channel) {
+		
+		if (isCompactSyntax && usedInSlice.contains(channel)) {
+			createCompactLineClose(channel);
+		}
+	}
+	
+	/**
+	 * Closes a compact, if compact syntax is used.
+	 * 
+	 * @param channel  MIDI channel
+	 */
+	private void createCompactLineClose(byte channel) {
+		
+		if (isLowlevelSyntax)
+			return;
+		
+		usedInSlice.remove(channel);
+		elementsInCurrentLine = 0;
+		if (MUST_ADD_TICK_COMMENTS) {
+			long currentSrcTicks = srcInstrByChannel.get(channel).getCurrentTicks();
+			long currentTgtTicks = tgtInstrByChannel.get(channel).getCurrentTicks();
+			createTickLineComment(lineBeginTickSrc, currentSrcTicks, lineBeginTickTgt, currentTgtTicks);
+		}
+		output.append(NEW_LINE);
+	}
+	
+	/**
+	 * Creates a barline for the given channel, if needed.
+	 * 
+	 * @param channel  MIDI channel
+	 */
+	private void createBarlineIfNeeded(byte channel) {
+		
+		// barlines not supported?
+		if (isLowlevelSyntax || !USE_BARLINES) {
+			return;
+		}
+		
+		// get current tolerance and ticks
+		Instrument tgtInstr  = tgtInstrByChannel.get(channel);
+		int  currentTgtTol   = tgtInstr.getBarLineTolerance();
+		long currentTgtTicks = tgtInstr.getCurrentTicks();
+		
+		// get measure length and ticks since last time signature
+		Entry<Long, Long> entry = measureLengthHistory.floorEntry(tgtInstr.getCurrentTicks());
+		long lastTimeSigTick = entry.getKey();
+		long measureLength   = entry.getValue();
+		long totalTicks      = currentTgtTicks - lastTimeSigTick;
+		
+		// get delta
+		long srcDelta  = totalTicks % measureLength;
+		long srcDelta2 = measureLength - srcDelta;
+		if (srcDelta2 < srcDelta)
+			srcDelta = srcDelta2;
+		long tgtDelta = (srcDelta * targetResolution * 10 + sourceResolution * 5) / (sourceResolution * 10);
+		
+		// no bar line at all?
+		if (tgtDelta > MAX_BARLINE_TOL) {
+			return;
+		}
+		
+		// create bar line
+		String barline = " " + MidicaPLParser.BAR_LINE;
+		
+		// need to increase tolerance?
+		if (tgtDelta > currentTgtTol) {
+			barline += tgtDelta;
+			tgtInstr.setBarLineTolerance((int) tgtDelta);
+		}
+		
+		output.append(barline);
+	}
+	
+	/**
+	 * Creates a single compact element.
+	 * 
+	 * @param noteName  note, chord or rest
+	 * @param channel   MIDI channel
+	 * @param length    note length
+	 */
+	private void createCompactElement(String noteName, byte channel, String length) {
+		
+		output.append(" " + noteName);
+		
+		// switch note length, if needed
+		Instrument instr = srcInstrByChannel.get(channel);
+		String oldLength = instr.getNoteLength();
+		if (! oldLength.equals(length)) {
+			output.append(MidicaPLParser.COMPACT_NOTE_SEP + length);
+			instr.setNoteLength(length);
+		}
+		elementsInCurrentLine++;
+	}
+	
+	@Override
+	protected void createRest(byte channel, long ticks, String syllable) {
+		long srcBeginTick = srcInstrByChannel.get(channel).getCurrentTicks();
+		long tgtBeginTick = tgtInstrByChannel.get(channel).getCurrentTicks();
+		
+		// compact line opening needed, if called from createRestBeforeSlice()
+		createCompactLineChangeIfNeeded(channel);
 		
 		// split length into elements
 		ArrayList<Long> lengthElements = getLengthsForSum(ticks, true);
@@ -899,6 +1098,21 @@ public class MidicaPLExporter extends Decompiler {
 			}
 		}
 		
+		// prepare lyrics
+		String optionsStr = "";
+		if (syllable != null) {
+			syllable = escapeSyllable(syllable);
+			if (isLowlevelSyntax) {
+				optionsStr = " " + MidicaPLParser.L + MidicaPLParser.OPT_ASSIGNER + syllable;
+			}
+			else {
+				optionsStr = " " + MidicaPLParser.COMPACT_OPT_OPEN
+					+ MidicaPLParser.L + MidicaPLParser.OPT_ASSIGNER + syllable
+					+ MidicaPLParser.COMPACT_OPT_CLOSE;
+				output.append(optionsStr);
+			}
+		}
+		
 		// zero-length?
 		if (0 == ticks && 0 == lengthSummands.size()) {
 			lengthSummands.add(MidicaPLParser.LENGTH_ZERO);
@@ -907,34 +1121,62 @@ public class MidicaPLExporter extends Decompiler {
 		// add line
 		if (lengthSummands.size() > 0) {
 			String length = String.join(MidicaPLParser.LENGTH_PLUS, lengthSummands);
-			line.append(
-				  String.format(FORMAT_CH_CMD_CHANNEL, channel) + " "
-				+ String.format(FORMAT_CH_CMD_CRD, MidicaPLParser.REST) + " "
-				+ String.format(FORMAT_CH_CMD_LENGTH, length)
-			);
+			if (isLowlevelSyntax) {
+				output.append(
+					  String.format(FORMAT_CH_CMD_CHANNEL, channel) + " "
+					+ String.format(FORMAT_CH_CMD_CRD, MidicaPLParser.REST) + " "
+					+ String.format(FORMAT_CH_CMD_LENGTH, length)
+				);
+			}
+			else {
+				createCompactElement(MidicaPLParser.REST, channel, length);
+			}
 			
+			srcInstrByChannel.get(channel).setCurrentTicks(srcBeginTick + ticks);
+			incrementTargetTicks(channel, length);
 			incrementStats(STAT_RESTS, channel);
 		}
 		else {
-			addWarningRestSkipped(beginTick, ticks, channel);
+			addWarningRestSkipped(srcBeginTick, ticks, channel);
 			incrementStats(STAT_REST_SKIPPED, channel);
-			if (MUST_ADD_TICK_COMMENTS)
-				line.append(getCommentSymbol() + " " + Dict.get(Dict.WARNING_REST_SKIPPED));
+			if (MUST_ADD_TICK_COMMENTS && isLowlevelSyntax)
+				output.append(getCommentSymbol() + " " + Dict.get(Dict.WARNING_REST_SKIPPED));
 			else
-				return ""; // no line needed
+				return; // no output needed
 		}
 		
-		// add lyrics option, if needed
-		if (syllable != null) {
-			syllable = escapeSyllable(syllable);
-			line.append(" " + MidicaPLParser.L + MidicaPLParser.OPT_ASSIGNER + syllable);
+		if (isCompactSyntax) {
+			createBarlineIfNeeded(channel);
+			return;
 		}
+		else {
+			// add lyrics option, if needed
+			output.append(optionsStr);
+			
+			// finish the line
+			createTickComment(srcBeginTick, tgtBeginTick);
+			output.append(NEW_LINE);
+		}
+	}
+	
+	/**
+	 * Increments the target channel by the amount of ticks of the given length value.
+	 * 
+	 * @param channel  MIDI channel
+	 * @param length   note length in MPL syntax
+	 */
+	private void incrementTargetTicks(byte channel, String length) {
 		
-		// finish the line
-		if (beginTick < 0)
-			return line.toString() + NEW_LINE;
-		else
-			return appendTickComment(line.toString(), beginTick) + NEW_LINE;
+		// get current ticks
+		try {
+			Instrument targetInstr = tgtInstrByChannel.get(channel);
+			long currentTicks = targetInstr.getCurrentTicks();
+			long lengthTicks  = MidicaPLParser.parseDuration(length);
+			targetInstr.setCurrentTicks(currentTicks + lengthTicks);
+		}
+		catch (ParseException e) {
+			System.err.println("Unable to calculate target note length. This should not happen. Please report.");
+		}
 	}
 	
 	/**
@@ -957,19 +1199,7 @@ public class MidicaPLExporter extends Decompiler {
 		return syllable.replaceAll(" ", "_").replaceAll(",",  "\\\\c");
 	}
 	
-	/**
-	 * Calculates which tick length corresponds to which note or rest length.
-	 * That depends on the resolution of the current MIDI sequence.
-	 * 
-	 * The created rest lengths will contain a view more very short lengths.
-	 * This is needed because rests should be less tolerant than notes.
-	 * 
-	 * This enables us to use more common lengths for notes but let the
-	 * exported sequence be still as close as possible to the original one.
-	 * 
-	 * @param rest    **true** to initialize REST lengths, **false** for NOTE lengths
-	 * @return Mapping between tick length and note length for the syntax.
-	 */
+	@Override
 	public TreeMap<Long, String> initLengths(boolean rest) {
 		
 		boolean useDots     = rest ? USE_DOTTED_RESTS     : USE_DOTTED_NOTES;
@@ -988,86 +1218,94 @@ public class MidicaPLExporter extends Decompiler {
 		String m8      = MidicaPLParser.LENGTH_M8;
 		String m16     = MidicaPLParser.LENGTH_M16;
 		String m32     = MidicaPLParser.LENGTH_M32;
+		if (isCompactSyntax) {
+			d1  = "1";
+			d2  = "2";
+			d4  = "4";
+			d8  = "8";
+			d16 = "16";
+			d32 = "32";
+		}
 		
 		TreeMap<Long, String> lengthToSymbol = new TreeMap<>();
 		
 		// use very small lengths only for rests
 		if (rest) {
 			// 1/128
-			long length128 = calculateTicks(1, 32);
+			long length128 = calculateTicks(1, 32, LM_NONE, false);
 			lengthToSymbol.put(length128, 128 + "");
 			
 			// 1/64
-			long length64 = calculateTicks(1, 16);
+			long length64 = calculateTicks(1, 16, LM_NONE, false);
 			lengthToSymbol.put(length64, 64 + "");
 		}
 		
 		// 32th
-		long length32t = calculateTicks( 2, 8 * 3 ); // inside a triplet
-		long length32  = calculateTicks( 1, 8     ); // normal length
-		long length32d = calculateTicks( 3, 8 * 2 ); // dotted length
-		if (useTriplets) lengthToSymbol.put( length32t, d32 + triplet ); // triplet
-		                 lengthToSymbol.put( length32,  d32           ); // normal
-		if (useDots)     lengthToSymbol.put( length32d, d32 + dot     ); // dotted
+		long length32t = calculateTicks(1, 8, LM_TRIPLET, false);
+		long length32  = calculateTicks(1, 8, LM_NONE, false);
+		long length32d = calculateTicks(1, 8, LM_DOT, false);
+		if (useTriplets) lengthToSymbol.put( length32t, d32 + triplet );
+		                 lengthToSymbol.put( length32,  d32           );
+		if (useDots)     lengthToSymbol.put( length32d, d32 + dot     );
 		
 		// 16th
-		long length16t = calculateTicks( 2, 4 * 3 );
-		long length16  = calculateTicks( 1, 4     );
-		long length16d = calculateTicks( 3, 4 * 2 );
+		long length16t = calculateTicks(1, 4, LM_TRIPLET, false);
+		long length16  = calculateTicks(1, 4, LM_NONE, false);
+		long length16d = calculateTicks(1, 4, LM_DOT, false);
 		if (useTriplets) lengthToSymbol.put( length16t, d16 + triplet );
 		                 lengthToSymbol.put( length16,  d16           );
 		if (useDots)     lengthToSymbol.put( length16d, d16 + dot     );
 		
 		// 8th
-		long length8t = calculateTicks( 2, 2 * 3 );
-		long length8  = calculateTicks( 1, 2     );
-		long length8d = calculateTicks( 3, 2 * 2 );
+		long length8t = calculateTicks(1, 2, LM_TRIPLET, false);
+		long length8  = calculateTicks(1, 2, LM_NONE, false);
+		long length8d = calculateTicks(1, 2, LM_DOT, false);
 		if (useTriplets) lengthToSymbol.put( length8t, d8 + triplet );
 		                 lengthToSymbol.put( length8,  d8           );
 		if (useDots)     lengthToSymbol.put( length8d, d8 + dot     );
 		
 		// quarter
-		long length4t = calculateTicks( 2, 3 );
-		long length4  = calculateTicks( 1, 1 );
-		long length4d = calculateTicks( 3, 2 );
+		long length4t = calculateTicks(1, 1, LM_TRIPLET, false);
+		long length4  = calculateTicks(1, 1, LM_NONE, false);
+		long length4d = calculateTicks(1, 1, LM_DOT, false);
 		if (useTriplets) lengthToSymbol.put( length4t, d4 + triplet );
 		                 lengthToSymbol.put( length4,  d4           );
 		if (useDots)     lengthToSymbol.put( length4d, d4 + dot     );
 		
 		// half
-		long length2t = calculateTicks( 2 * 2, 3 );
-		long length2  = calculateTicks( 2,     1 );
-		long length2d = calculateTicks( 2 * 3, 2 );
+		long length2t = calculateTicks(2, 1, LM_TRIPLET, false);
+		long length2  = calculateTicks(2, 1, LM_NONE, false);
+		long length2d = calculateTicks(2, 1, LM_DOT, false);
 		if (useTriplets) lengthToSymbol.put( length2t, d2 + triplet );
 		                 lengthToSymbol.put( length2,  d2           );
 		if (useDots)     lengthToSymbol.put( length2d, d2 + dot     );
 		
 		// full
-		long length1t = calculateTicks( 4 * 2, 3 );
-		long length1  = calculateTicks( 4,     1 );
+		long length1t = calculateTicks(4, 1, LM_TRIPLET, false);
+		long length1  = calculateTicks(4, 1, LM_NONE, false);
 		if (useTriplets) lengthToSymbol.put( length1t, d1 + triplet );
 		                 lengthToSymbol.put( length1,  d1           );
 		
 		// allow longer lengths only for rests
 		if (rest) {
 			// 2 full notes
-			long length_m2 = calculateTicks(8, 1);
+			long length_m2 = calculateTicks(8, 1, LM_NONE, false);
 			lengthToSymbol.put(length_m2,  m2);
 			
 			// 4 full notes
-			long length_m4 = calculateTicks(16, 1);
+			long length_m4 = calculateTicks(16, 1, LM_NONE, false);
 			lengthToSymbol.put(length_m4, m4);
 			
 			// 8 full notes
-			long length_m8 = calculateTicks(32, 1);
+			long length_m8 = calculateTicks(32, 1, LM_NONE, false);
 			lengthToSymbol.put(length_m8, m8);
 			
 			// 16 full notes
-			long length_m16 = calculateTicks(64, 1);
+			long length_m16 = calculateTicks(64, 1, LM_NONE, false);
 			lengthToSymbol.put(length_m16, m16);
 			
 			// 32 full notes
-			long length_m32 = calculateTicks(128, 1);
+			long length_m32 = calculateTicks(128, 1, LM_NONE, false);
 			lengthToSymbol.put(length_m32, m32);
 		}
 		
@@ -1075,17 +1313,29 @@ public class MidicaPLExporter extends Decompiler {
 	}
 	
 	/**
-	 * Appends a tick comment to the given line, if tick comments are configured.
-	 * Otherwise the given line is returned unchanged.
+	 * Creates a tick comment, if tick comments are configured.
 	 * 
-	 * @param line    the line to be completed by a comment
-	 * @param tick    MIDI tick
-	 * @return the changed or unchanged line
+	 * @param srcTick    MIDI tick in source resolution
+	 * @param tgtTick    MIDI tick in target resolution
 	 */
-	private String appendTickComment(String line, long tick) {
-		if (MUST_ADD_TICK_COMMENTS) {
-			line = String.format("%-45s", line) + " " + createTickDescription(tick, true);
+	private void createTickComment(long srcTick, long tgtTick) {
+		
+		if (!MUST_ADD_TICK_COMMENTS)
+			return;
+		
+		// create spaces
+		if (isLowlevelSyntax) {
+			int lastLineLength = output.length() - output.lastIndexOf(NEW_LINE);
+			int spaces         = 44 - lastLineLength;
+			output.append(" "); // minimum 1 space
+			for (int i = 0; i < spaces; i++)
+				output.append(" ");
 		}
-		return line;
+		else {
+			createSpacesBeforeComment();
+		}
+		
+		// create the comment
+		createTickDescription(srcTick, tgtTick, true);
 	}
 }

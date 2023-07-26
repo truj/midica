@@ -67,6 +67,11 @@ public abstract class Decompiler extends Exporter {
 	protected static final byte ET_NOTES      = 2; // notes or chords (or an inline rest with a syllable)
 	protected static final byte ET_INLINE_BLK = 3; // start ticks of inline blocks
 	
+	// length modifiers
+	protected static final byte LM_NONE    = 1;
+	protected static final byte LM_TRIPLET = 2;
+	protected static final byte LM_DOT     = 3;
+	
 	// note properties
 	protected static final byte NP_VELOCITY = 1; // velocity option
 	protected static final byte NP_OFF_TICK = 2; // note-off tick
@@ -95,7 +100,8 @@ public abstract class Decompiler extends Exporter {
 	private static final byte STAT_STRATEGY_DURATION = 42;
 	private static final byte STAT_STRATEGY_PRESS    = 43;
 	
-	protected static final String NEW_LINE = System.getProperty("line.separator");
+	protected static final String NEW_LINE     = System.getProperty("line.separator");
+	protected static final String BLOCK_INDENT = "\t";
 	
 	// decompile constants
 	public static final byte INLINE_BLOCK                 = 1;
@@ -105,6 +111,8 @@ public abstract class Decompiler extends Exporter {
 	public static final byte STRATEGY_NEXT_PRESS          = 3;
 	public static final byte STRATEGY_DURATION_PRESS      = 4;
 	public static final byte STRATEGY_PRESS               = 5;
+	public static final byte SYNTAX_LOWLEVEL              = 1;
+	public static final byte SYNTAX_COMPACT               = 2;
 	
 	// decompile configuration defaults
 	public static final boolean DEFAULT_MUST_ADD_TICK_COMMENTS   = true;
@@ -113,8 +121,8 @@ public abstract class Decompiler extends Exporter {
 	public static final boolean DEFAULT_MUST_ADD_STATISTICS      = true;
 	public static final boolean DEFAULT_MUST_ADD_STRATEGY_STAT   = true;
 	public static final byte    DEFAULT_LENGTH_STRATEGY          = STRATEGY_NEXT_DURATION_PRESS;
-	public static final long    DEFAULT_MIN_TARGET_TICKS_ON      = 60;    // /32 (32th note)
-	public static final long    DEFAULT_MAX_TARGET_TICKS_ON      = 3840;  // *2 (2 full notes)
+	public static final long    DEFAULT_MIN_TICKS_ON_AT_480      = 60;    // /32 (32th note)
+	public static final long    DEFAULT_MAX_TICKS_ON_AT_480      = 3840;  // *2 (2 full notes)
 	public static final float   DEFAULT_MIN_DURATION_TO_KEEP     = 0.2f;  // 20%
 	public static final float   DEFAULT_MAX_DURATION_TO_KEEP     = 1.1f;  // 110%
 	public static final long    DEFAULT_LENGTH_TICK_TOLERANCE    = 5;
@@ -132,6 +140,10 @@ public abstract class Decompiler extends Exporter {
 	public static final byte    DEFAULT_ORPHANED_SYLLABLES       = INLINE_BLOCK;
 	public static final boolean DEFAULT_KARAOKE_ONE_CHANNEL      = false;
 	public static final byte    DEFAULT_CTRL_CHANGE_MODE         = INLINE_BLOCK;
+	public static final byte    DEFAULT_SYNTAX_TYPE              = SYNTAX_COMPACT;
+	public static final int     DEFAULT_ELEMENTS_PER_LINE        = 10;
+	public static final boolean DEFAULT_USE_BARLINES             = true;
+	public static final int     DEFAULT_MAX_BARLINE_TOL          = 0;
 	public static final String  DEFAULT_EXTRA_GLOBALS_STR        = "";
 	
 	/* *****************
@@ -147,8 +159,8 @@ public abstract class Decompiler extends Exporter {
 	protected static boolean       MUST_ADD_STATISTICS      = DEFAULT_MUST_ADD_STATISTICS;
 	protected static boolean       MUST_ADD_STRATEGY_STAT   = DEFAULT_MUST_ADD_STRATEGY_STAT;
 	protected static byte          LENGTH_STRATEGY          = DEFAULT_LENGTH_STRATEGY;
-	protected static long          MAX_TARGET_TICKS_ON      = DEFAULT_MAX_TARGET_TICKS_ON;
-	protected static long          MIN_TARGET_TICKS_ON      = DEFAULT_MIN_TARGET_TICKS_ON;
+	protected static long          MAX_TICKS_ON_AT_480      = DEFAULT_MAX_TICKS_ON_AT_480;
+	protected static long          MIN_TICKS_ON_AT_480      = DEFAULT_MIN_TICKS_ON_AT_480;
 	protected static long          MIN_SOURCE_TICKS_ON      = 0L;
 	protected static long          MAX_SOURCE_TICKS_ON      = 0L;
 	protected static float         MIN_DURATION_TO_KEEP     = DEFAULT_MIN_DURATION_TO_KEEP;
@@ -168,6 +180,10 @@ public abstract class Decompiler extends Exporter {
 	protected static byte          ORPHANED_SYLLABLES       = DEFAULT_ORPHANED_SYLLABLES;
 	protected static boolean       KARAOKE_ONE_CHANNEL      = DEFAULT_KARAOKE_ONE_CHANNEL;
 	protected static byte          CTRL_CHANGE_MODE         = DEFAULT_CTRL_CHANGE_MODE;
+	protected static byte          SYNTAX_TYPE              = DEFAULT_SYNTAX_TYPE;
+	protected static int           ELEMENTS_PER_LINE        = DEFAULT_ELEMENTS_PER_LINE;
+	protected static boolean       USE_BARLINES             = DEFAULT_USE_BARLINES;
+	protected static int           MAX_BARLINE_TOL          = DEFAULT_MAX_BARLINE_TOL;
 	protected static TreeSet<Long> EXTRA_GLOBALS            = null;
 	
 	protected static int          sourceResolution = 0;
@@ -176,8 +192,10 @@ public abstract class Decompiler extends Exporter {
 	protected static boolean      isSoftKaraoke    = false;
 	
 	/** stores the current state of each channel */
-	protected static ArrayList<Instrument>       instrumentsByChannel = null;
-	protected static TreeMap<String, Instrument> instrumentsByName    = null;
+	protected static ArrayList<Instrument>       srcInstrByChannel = null;
+	protected static ArrayList<Instrument>       tgtInstrByChannel = null;
+	protected static TreeMap<String, Instrument> srcInstrByName    = null;
+	protected static TreeMap<String, Instrument> tgtInstrByName    = null;
 	
 	protected static TreeMap<Long, String> noteLength = null;
 	protected static TreeMap<Long, String> restLength = null;
@@ -190,6 +208,12 @@ public abstract class Decompiler extends Exporter {
 	
 	/** lowest note  --  comma-separated note bytes (This structure is only needed for the sorting: lowest note first, then chord name) */
 	protected static TreeMap<String, ArrayList<String>> chordsByBaseNote = null;
+	
+	/** tick  --  measure length */
+	protected static TreeMap<Long, Long> measureLengthHistory = null;
+	
+	private   static int compactLineMinLength = 1;
+	protected static StringBuilder output = null;
 	
 	/* ******************
 	 * instance fields
@@ -241,17 +265,21 @@ public abstract class Decompiler extends Exporter {
 	/**
 	 * Creates a rest.
 	 * 
-	 * @param channel    MIDI channel
-	 * @param ticks      tick length of the rest to create
-	 * @param beginTick  used for the tick comment (negative value: don't include a tick comment)
-	 * @param syllable   a lyrics syllable or (in most cases): **null**
-	 * @return the channel command containing the rest.
+	 * @param channel   MIDI channel
+	 * @param ticks     tick length of the rest to create
+	 * @param syllable  a lyrics syllable or (in most cases): **null**
 	 */
-	protected abstract String createRest(byte channel, long ticks, long beginTick, String syllable);
+	protected abstract void createRest(byte channel, long ticks, String syllable);
 	
 	/**
 	 * Calculates which tick length corresponds to which note or rest length.
 	 * That depends on the resolution of the current MIDI sequence.
+	 * 
+	 * The created rest lengths should contain a few more very short lengths.
+	 * This is needed because rests should be less tolerant than notes.
+	 * 
+	 * This enables us to use more common lengths for notes but let the
+	 * exported sequence be still as close as possible to the original one.
 	 * 
 	 * @param rest    **true** to initialize REST lengths, **false** for NOTE lengths
 	 * @return Mapping between tick length and note length for the syntax.
@@ -267,6 +295,15 @@ public abstract class Decompiler extends Exporter {
 	 * @throws ExportException if the file can not be exported correctly.
 	 */
 	public ExportResult export(File file) throws ExportException {
+		
+		// get resolutions
+		sourceResolution = MidiDevices.getSequence().getResolution();
+		targetResolution = SequenceCreator.DEFAULT_RESOLUTION;
+		if (ALDA == format)
+			targetResolution = 128;
+		
+		// refresh decompile config
+		refreshConfig();
 		
 		// initialize format specific structures, if necessary
 		init();
@@ -310,15 +347,11 @@ public abstract class Decompiler extends Exporter {
 			lyricsSyllables   = KaraokeAnalyzer.getLyricsFlat();
 			
 			// init data structures
-			chords           = new TreeMap<>();
-			chordCount       = new TreeMap<>();
-			chordsByBaseNote = new TreeMap<>();
-			
-			// get resolution
-			sourceResolution = MidiDevices.getSequence().getResolution();
-			
-			// refresh decompile config
-			refreshConfig();
+			chords               = new TreeMap<>();
+			chordCount           = new TreeMap<>();
+			chordsByBaseNote     = new TreeMap<>();
+			measureLengthHistory = new TreeMap<>();
+			measureLengthHistory.put(0L, 4L * sourceResolution); // MIDI default is 4/4
 			
 			// initialize statistics
 			initStatistics();
@@ -350,8 +383,9 @@ public abstract class Decompiler extends Exporter {
 			addNotesToSlices();
 			addLyricsToSlices();
 			
-			// create MidicaPL string from the data structures and write it into the file
-			writer.write( createOutput() );
+			// create source code string from the data structures and write it into the file
+			output = new StringBuilder();
+			writer.write(createOutput());
 			writer.close();
 		}
 		catch (FileNotFoundException e) {
@@ -379,8 +413,8 @@ public abstract class Decompiler extends Exporter {
 		MUST_ADD_STATISTICS      = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_STATISTICS)      );
 		MUST_ADD_STRATEGY_STAT   = Boolean.parseBoolean( sessionConfig.get(Config.DC_MUST_ADD_STRATEGY_STAT)   );
 		LENGTH_STRATEGY          = Byte.parseByte(       sessionConfig.get(Config.DC_LENGTH_STRATEGY)          );
-		MIN_TARGET_TICKS_ON      = Long.parseLong(       sessionConfig.get(Config.DC_MIN_TARGET_TICKS_ON)      );
-		MAX_TARGET_TICKS_ON      = Long.parseLong(       sessionConfig.get(Config.DC_MAX_TARGET_TICKS_ON)      );
+		MIN_TICKS_ON_AT_480      = Long.parseLong(       sessionConfig.get(Config.DC_MIN_TICKS_ON_AT_480)      );
+		MAX_TICKS_ON_AT_480      = Long.parseLong(       sessionConfig.get(Config.DC_MAX_TICKS_ON_AT_480)      );
 		MIN_DURATION_TO_KEEP     = Float.parseFloat(     sessionConfig.get(Config.DC_MIN_DURATION_TO_KEEP)     );
 		MAX_DURATION_TO_KEEP     = Float.parseFloat(     sessionConfig.get(Config.DC_MAX_DURATION_TO_KEEP)     );
 		LENGTH_TICK_TOLERANCE    = Long.parseLong(       sessionConfig.get(Config.DC_LENGTH_TICK_TOLERANCE)    );
@@ -398,11 +432,15 @@ public abstract class Decompiler extends Exporter {
 		ORPHANED_SYLLABLES       = Byte.parseByte(       sessionConfig.get(Config.DC_ORPHANED_SYLLABLES)       );
 		KARAOKE_ONE_CHANNEL      = Boolean.parseBoolean( sessionConfig.get(Config.DC_KARAOKE_ONE_CHANNEL)      );
 		CTRL_CHANGE_MODE         = Byte.parseByte(       sessionConfig.get(Config.DC_CTRL_CHANGE_MODE)         );
+		SYNTAX_TYPE              = Byte.parseByte(       sessionConfig.get(Config.DC_SYNTAX_TYPE)              );
+		ELEMENTS_PER_LINE        = Integer.parseInt(     sessionConfig.get(Config.DC_ELEMENTS_PER_LINE)        );
+		USE_BARLINES             = Boolean.parseBoolean( sessionConfig.get(Config.DC_USE_BARLINES)             );
+		MAX_BARLINE_TOL          = Integer.parseInt(     sessionConfig.get(Config.DC_MAX_BARLINE_TOL)          );
 		EXTRA_GLOBALS            = DecompileConfigController.getExtraGlobalTicks();
 		
 		// apply indirect configuration
-		MIN_SOURCE_TICKS_ON = (MIN_TARGET_TICKS_ON * sourceResolution * 10 + 5) / (targetResolution * 10);
-		MAX_SOURCE_TICKS_ON = (MAX_TARGET_TICKS_ON * sourceResolution * 10 + 5) / (targetResolution * 10);
+		MIN_SOURCE_TICKS_ON = (MIN_TICKS_ON_AT_480 * sourceResolution * 10 + 480 * 5) / (480 * 10);
+		MAX_SOURCE_TICKS_ON = (MAX_TICKS_ON_AT_480 * sourceResolution * 10 + 480 * 5) / (480 * 10);
 	}
 	
 	/**
@@ -449,8 +487,10 @@ public abstract class Decompiler extends Exporter {
 	 * their configurations can be tracked.
 	 */
 	private void initInstruments() {
-		instrumentsByName    = new TreeMap<>();
-		instrumentsByChannel = new ArrayList<>();
+		srcInstrByName    = new TreeMap<>();
+		tgtInstrByName    = new TreeMap<>();
+		srcInstrByChannel = new ArrayList<>();
+		tgtInstrByChannel = new ArrayList<>();
 		
 		// make a deep copy (clone) of the instrument history
 		TreeMap<Byte, TreeMap<Long, Byte[]>> originalInstrumentHistory = instrumentHistory;
@@ -537,8 +577,10 @@ public abstract class Decompiler extends Exporter {
 				Byte[] channelConfig = entry.getValue();
 				instrNumber = channelConfig[2];
 			}
-			Instrument instr = new Instrument(channel, instrNumber, null, isAutomatic);
-			instrumentsByChannel.add(instr);
+			Instrument srcInstr = new Instrument(channel, instrNumber, null, isAutomatic);
+			Instrument tgtInstr = new Instrument(channel, instrNumber, null, isAutomatic);
+			srcInstrByChannel.add(srcInstr);
+			tgtInstrByChannel.add(tgtInstr);
 		}
 	}
 	
@@ -583,7 +625,7 @@ public abstract class Decompiler extends Exporter {
 		for (byte channel = 0; channel < 16; channel++) {
 			
 			// no notes?
-			if (instrumentsByChannel.get(channel).autoChannel)
+			if (srcInstrByChannel.get(channel).autoChannel)
 				continue;
 			
 			channelMatches.put(channel, 0);
@@ -804,7 +846,14 @@ public abstract class Decompiler extends Exporter {
 						int denominator = (int) Math.pow(2, exp);
 						cmdId           = "time";
 						value           = numerator + MidicaPLParser.TIME_SIG_SLASH + denominator;
-						if (ALDA == format) // not supported?
+						
+						// prepare bar line calculation
+						int resolution = SequenceCreator.getResolution();
+						long measureLength = numerator * 4 * resolution / denominator;
+						measureLengthHistory.put(tick, measureLength);
+						
+						// time signature symbol not supported?
+						if (ALDA == format)
 							continue;
 					}
 					else if (MidiListener.META_INSTRUMENT_NAME == type) {
@@ -1333,18 +1382,38 @@ public abstract class Decompiler extends Exporter {
 	}
 	
 	/**
+	 * Resets the minimum length of a line (only used for line tick comments).
+	 * Should be called before a new channel starts.
+	 */
+	protected void resetTickCommentLineLength() {
+		compactLineMinLength = 1;
+	}
+	
+	/**
 	 * Calculates the tick length of a note, based on the current MIDI
-	 * sequence's resolution and in relation to a quarter note.
+	 * sequence's **source** or **target** resolution and in relation to a
+	 * quarter note.
 	 * The given factor and divisor influences the resulting note length.
 	 * If factor and divisor are the same, the resulting length is exactly
 	 * one quarter note.
 	 * 
-	 * @param factor     the factor to multiply the quarter note with
-	 * @param divisor    the divisor to divide the quarter note with
-	 * @return mathematically rounded result of resolution * factor / divisor
+	 * @param factor       the factor to multiply the quarter note with
+	 * @param divisor      the divisor to divide the quarter note with
+	 * @param modifier     LM_TRIPLET for a tripletted note, LM_DOT for a dotted note
+	 * @param forTarget    **true** to use target resolution, **false** for source resolution
+	 * @return mathematically rounded result of: resolution * factor / divisor (modified by the modifier)
 	 */
-	protected int calculateTicks(int factor, int divisor) {
-		return (sourceResolution * factor * 10 + 5) / (divisor * 10);
+	protected long calculateTicks(int factor, int divisor, int modifier, boolean forTarget) {
+		long resolution = forTarget ? targetResolution : sourceResolution;
+		if (LM_TRIPLET == modifier) {
+			factor  *= 2;
+			divisor *= 3;
+		}
+		else if (LM_DOT == modifier) {
+			factor  *= 3;
+			divisor *= 2;
+		}
+		return (resolution * factor * 10 + divisor * 5) / (divisor * 10);
 	}
 	
 	/**
@@ -1410,7 +1479,7 @@ public abstract class Decompiler extends Exporter {
 		// TODO: because than instruments.get(channel).getDurationRatio() will already be outdated.
 		
 		// DURATION strategy: calculate note length according to the current duration ratio
-		float oldDuration    = instrumentsByChannel.get(channel).getDurationRatio();
+		float oldDuration    = srcInstrByChannel.get(channel).getDurationRatio();
 		long  noteTicksByDur = (long) ((pressTicks / (double) oldDuration)) - LENGTH_TICK_TOLERANCE;
 		noteTicksByDur       = getNoteLengthByPressTicks(noteTicksByDur);
 		float durationByDur  = calculateDuration(noteTicksByDur, pressTicks);
@@ -1543,26 +1612,22 @@ public abstract class Decompiler extends Exporter {
 	 * - adding the rest in this channel
 	 * 
 	 * @param slice  the sequence slice
-	 * @return the created rest, or an empty string if no rest is created.
 	 */
-	protected String createRestBeforeSlice(Slice slice) {
-		StringBuilder restStr = new StringBuilder("");
+	protected void createRestBeforeSlice(Slice slice) {
 		
 		// choose a channel
 		Instrument chosenInstr = getFurthestInstrument();
 		
 		// no notes? - default to the percussion channel
 		if (null == chosenInstr)
-			chosenInstr = instrumentsByChannel.get(9);
+			chosenInstr = srcInstrByChannel.get(9);
 		
 		// get missing ticks
 		long missingTicks = slice.getBeginTick() - chosenInstr.getCurrentTicks();
 		if (missingTicks > 0) {
 			byte channel = (byte) chosenInstr.channel;
-			restStr.append( createRest(channel, missingTicks, -1, null) );
+			createRest(channel, missingTicks, null);
 		}
-		
-		return restStr.toString();
 	}
 	
 	/**
@@ -1574,9 +1639,9 @@ public abstract class Decompiler extends Exporter {
 	 * @return the most advanced instrument, or **null**
 	 */
 	protected Instrument getFurthestInstrument() {
-		long maxTick = Instrument.getMaxCurrentTicks(instrumentsByChannel);
+		long maxTick = Instrument.getMaxCurrentTicks(srcInstrByChannel);
 		Instrument chosenInstr = null;
-		for (Instrument instr : instrumentsByChannel) {
+		for (Instrument instr : srcInstrByChannel) {
 			
 			// ignore automatic channels
 			if (instr.autoChannel)
@@ -1935,20 +2000,66 @@ public abstract class Decompiler extends Exporter {
 	 * Creates a tick description that can be used in tick comments.
 	 * The description contains the given tick in source and target resolution.
 	 * 
-	 * @param tick                 MIDI tickstamp (in source resolution).
+	 * @param srcTick              MIDI tickstamp in source resolution
+	 * @param tgtTick              MIDI tickstamp in target resolution
 	 * @param withCommentSymbol    prefixes a comment symbol, if **true**
-	 * @return the comment string.
 	 */
-	protected String createTickDescription(long tick, boolean withCommentSymbol) {
+	protected void createTickDescription(long srcTick, long tgtTick, boolean withCommentSymbol) {
 		
-		// convert source tick to target tick
-		long   targetTick  = (tick * targetResolution * 10 + 5) / (sourceResolution * 10);
-		String description = Dict.get(Dict.EXPORTER_TICK) + " " + tick + " ==> ~" + targetTick;
+		if (withCommentSymbol) {
+			output.append(getCommentSymbol());
+			output.append(" ");
+		}
 		
-		if (withCommentSymbol)
-			return getCommentSymbol() + " " + description;
-		else
-			return description;
+		String description = String.format(
+			Dict.get(Dict.EXPORTER_TICK), srcTick, tgtTick
+		);
+		
+		// TODO: delete (used for debugging)
+		// description += " diff: " + (srcTick - ((tgtTick * sourceResolution * 10 + targetResolution * 5) / (targetResolution * 10)));
+		
+		output.append(description);
+	}
+	
+	/**
+	 * Creates a tick comment for a line that can have several notes/chords/rests.
+	 * (E.g. compact syntax or alda)
+	 * 
+	 * @param srcBeginTick  MIDI tickstamp of the begin tick (in source resolution).
+	 * @param srcEndTick    MIDI tickstamp of the end tick (in source resolution).
+	 * @param tgtBeginTick  MIDI tickstamp of the begin tick (in target resolution).
+	 * @param tgtEndTick    MIDI tickstamp of the end tick (in target resolution).
+	 */
+	protected void createTickLineComment(long srcBeginTick, long srcEndTick, long tgtBeginTick, long tgtEndTick) {
+		
+		createSpacesBeforeComment();
+		
+		output.append(getCommentSymbol());
+		output.append(" ");
+		String comment = String.format(
+			Dict.get(Dict.EXPORTER_TICK_RANGE),
+			srcBeginTick, srcEndTick,
+			tgtBeginTick, tgtEndTick
+		);
+		output.append(comment);
+	}
+	
+	/**
+	 * Creates as many spaces as needed so that a comment can be created.
+	 */
+	protected void createSpacesBeforeComment() {
+		
+		// check how many spaces are needed
+		int outputLineLength = output.length() - output.lastIndexOf(NEW_LINE) -1;
+		int spaces = compactLineMinLength - outputLineLength;
+		if (spaces <= 0) {
+			compactLineMinLength += (-spaces + 1); // increment
+			spaces = 1;
+		}
+		
+		// add the spaces
+		for (int i = 0; i < spaces; i++)
+			output.append(" ");
 	}
 	
 	/**

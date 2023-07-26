@@ -726,14 +726,15 @@ public class Dict {
 	public static final String KEY_DC_CONF_TAB_KARAOKE          = "key_dc_conf_tab_karaoke";
 	public static final String KEY_DC_CONF_TAB_CTRL_CHANGE      = "key_dc_conf_tab_ctrl_change";
 	public static final String KEY_DC_CONF_TAB_SLICES           = "key_dc_conf_tab_slices";
+	public static final String KEY_DC_CONF_TAB_SYNTAX           = "key_dc_conf_tab_syntax";
 	public static final String KEY_DC_CONF_ADD_TICK_COMMENTS    = "key_dc_conf_add_tick_comments";
 	public static final String KEY_DC_CONF_ADD_CONFIG           = "key_dc_conf_config";
 	public static final String KEY_DC_CONF_ADD_SCORE            = "key_dc_conf_add_score";
 	public static final String KEY_DC_CONF_ADD_STATISTICS       = "key_dc_conf_add_statistics";
 	public static final String KEY_DC_CONF_ADD_STRATEGY_STAT    = "key_dc_conf_add_strategy_stat";
 	public static final String KEY_DC_CONF_NOTE_LENGTH_STRATEGY = "key_dc_conf_note_length_strategy";
-	public static final String KEY_DC_CONF_MIN_TARGET_TICKS_ON  = "key_dc_conf_min_target_ticks_on";
-	public static final String KEY_DC_CONF_MAX_TARGET_TICKS_ON  = "key_dc_conf_max_target_ticks_on";
+	public static final String KEY_DC_CONF_MIN_TICKS_ON_AT_480  = "key_dc_conf_min_ticks_on_at_480";
+	public static final String KEY_DC_CONF_MAX_TICKS_ON_AT_480  = "key_dc_conf_max_ticks_on_at_480";
 	public static final String KEY_DC_CONF_MIN_DUR_TO_KEEP      = "key_dc_conf_min_dur_to_keep";
 	public static final String KEY_DC_CONF_MAX_DUR_TO_KEEP      = "key_dc_conf_max_dur_to_keep";
 	public static final String KEY_DC_CONF_TOL_TICK_LEN         = "key_dc_conf_tol_tick_len";
@@ -751,6 +752,10 @@ public class Dict {
 	public static final String KEY_DC_CONF_KAR_ORPHANED         = "key_dc_conf_kar_orphaned";
 	public static final String KEY_DC_CONF_KAR_ONE_CH           = "key_dc_conf_kar_one_ch";
 	public static final String KEY_DC_CONF_CTRL_CHANGE_MODE     = "key_dc_conf_ctrl_change_mode";
+	public static final String KEY_DC_CONF_SYNTAX_TYPE          = "key_dc_conf_syntax_type";
+	public static final String KEY_DC_CONF_ELEMENTS_PER_LINE    = "key_dc_conf_elements_per_line";
+	public static final String KEY_DC_CONF_USE_BARLINES         = "key_dc_conf_use_barlines";
+	public static final String KEY_DC_CONF_FLD_BARLINE_TOL      = "key_dc_conf_fld_barline_tol";
 	public static final String KEY_DC_CONF_FLD_GLOB_SINGLE      = "key_dc_conf_fld_glob_single";
 	public static final String KEY_DC_CONF_BTN_GLOB_SINGLE      = "key_dc_conf_btn_glob_single";
 	public static final String KEY_DC_CONF_FLD_GLOB_EACH        = "key_dc_conf_fld_glob_each";
@@ -840,6 +845,7 @@ public class Dict {
 	public static final String DC_TAB_KARAOKE               = "dc_tab_karaoke";
 	public static final String DC_TAB_CTRL_CHANGE           = "dc_tab_ctrl_change";
 	public static final String DC_TAB_SLICE                 = "dc_tab_slice";
+	public static final String DC_TAB_LINE                  = "dc_tab_line";
 	public static final String DC_TABINFO_DEBUG             = "dc_tabinfo_debug";
 	public static final String DC_TABINFO_NOTE_LENGTH       = "dc_tabinfo_note_length";
 	public static final String DC_TABINFO_CHORDS            = "dc_tabinfo_chords";
@@ -847,14 +853,15 @@ public class Dict {
 	public static final String DC_TABINFO_KARAOKE           = "dc_tabinfo_karaoke";
 	public static final String DC_TABINFO_CTRL_CHANGE       = "dc_tabinfo_ctrl_change";
 	public static final String DC_TABINFO_SLICE             = "dc_tabinfo_slice";
+	public static final String DC_TABINFO_SYNTAX            = "dc_tabinfo_syntax";
 	public static final String DC_ADD_TICK_COMMENT          = "dc_add_tick_comment";
 	public static final String DC_ADD_CONFIG                = "dc_add_config";
 	public static final String DC_ADD_SCORE                 = "dc_add_score";
 	public static final String DC_ADD_STATISTICS            = "dc_add_statistics";
 	public static final String DC_ADD_STRATEGY_STAT         = "dc_add_strategy_stat";
 	public static final String NOTE_LENGTH_STRATEGY         = "note_length_strategy";
-	public static final String MIN_TARGET_TICKS_NEXT_ON     = "min_target_ticks_next_on";
-	public static final String MAX_TARGET_TICKS_NEXT_ON     = "max_target_ticks_next_on";
+	public static final String MIN_TICKS_NEXT_ON_AT_480     = "min_ticks_next_on_at_480";
+	public static final String MAX_TICKS_NEXT_ON_AT_480     = "max_ticks_next_on_at_480";
 	public static final String MIN_DURATION_TO_KEEP         = "min_duration_to_keep";
 	public static final String MIN_DURATION_TO_KEEP_D       = "min_duration_to_keep_d";
 	public static final String MAX_DURATION_TO_KEEP         = "max_duration_to_keep";
@@ -883,6 +890,14 @@ public class Dict {
 	public static final String ORPHANED_SYLLABLES_D         = "orphaned_syllables_d";
 	public static final String CTRL_CHANGE_MODE             = "ctrl_change_mode";
 	public static final String CTRL_CHANGE_MODE_D           = "ctrl_change_mode_d";
+	public static final String SYNTAX_TYPE                  = "syntax_type";
+	public static final String SYNTAX_TYPE_D                = "syntax_type_d";
+	public static final String ELEMENTS_PER_LINE            = "elements_per_line";
+	public static final String ELEMENTS_PER_LINE_D          = "elements_per_line_d";
+	public static final String USE_BARLINES                 = "use_barlines";
+	public static final String USE_BARLINES_D               = "use_barlines_d";
+	public static final String MAX_BARLINE_TOL              = "max_barline_tol";
+	public static final String MAX_BARLINE_TOL_D            = "max_barline_tol_d";
 	public static final String DC_INLINE_BLOCK              = "dc_inline_block";
 	public static final String DC_SLICE_BEGIN_BLOCK         = "dc_slice_begin_block";
 	public static final String DC_STRAT_NEXT_DURATION_PRESS = "dc_strat_next_duration_press";
@@ -890,6 +905,8 @@ public class Dict {
 	public static final String DC_STRAT_NEXT_PRESS          = "dc_strat_next_press";
 	public static final String DC_STRAT_DURATION_PRESS      = "dc_strat_duration_press";
 	public static final String DC_STRAT_PRESS               = "dc_strat_press";
+	public static final String DC_SYNTAX_COMPACT            = "dc_syntax_compact";
+	public static final String DC_SYNTAX_LOWLEVEL           = "dc_syntax_lowlevel";
 	public static final String KAR_ONE_CHANNEL              = "kar_one_channel";
 	public static final String KAR_ONE_CHANNEL_D            = "kar_one_channel_d";
 	public static final String ADD_GLOBAL_AT_TICK           = "add_global_at_tick";
@@ -1695,6 +1712,7 @@ public class Dict {
 	public static final String ERROR_FILE_NOT_WRITABLE          = "error_file_not_writable";
 	public static final String OVERWRITE_FILE                   = "overwrite_file";
 	public static final String EXPORTER_TICK                    = "exporter_tick";
+	public static final String EXPORTER_TICK_RANGE              = "exporter_tick_range";
 	public static final String CONFIRM_DIALOG_YES               = "confirm_dialog_yes";
 	public static final String CONFIRM_DIALOG_NO                = "confirm_dialog_no";
 	
@@ -2234,14 +2252,15 @@ public class Dict {
 		set( KEY_DC_CONF_TAB_KARAOKE,          "Select the Karaoke tab in the decompile config window"                       );
 		set( KEY_DC_CONF_TAB_CTRL_CHANGE,      "Select the Control Change tab in the decompile config window"                );
 		set( KEY_DC_CONF_TAB_SLICES,           "Select the Extra Slices tab in the decompile config window"                  );
+		set( KEY_DC_CONF_TAB_SYNTAX,           "Select the Syntax tab in the decompile config window"                        );
 		set( KEY_DC_CONF_ADD_TICK_COMMENTS,    "Toggle Checkbox: Add Tick Comments"                                          );
 		set( KEY_DC_CONF_ADD_CONFIG,           "Toggle Checkbox: Add Configuration"                                          );
 		set( KEY_DC_CONF_ADD_SCORE,            "Toggle Checkbox: Add Quality Score"                                          );
 		set( KEY_DC_CONF_ADD_STATISTICS,       "Toggle Checkbox: Add Quality Statistics"                                     );
 		set( KEY_DC_CONF_ADD_STRATEGY_STAT,    "Toggle Checkbox: Add Stragegy Statistics"                                    );
 		set( KEY_DC_CONF_NOTE_LENGTH_STRATEGY, "Open Selection: Note Length Strategy"                                        );
-		set( KEY_DC_CONF_MIN_TARGET_TICKS_ON,  "Focus the text field for the Min target ticks"                               );
-		set( KEY_DC_CONF_MAX_TARGET_TICKS_ON,  "Focus the text field for the Max target ticks"                               );
+		set( KEY_DC_CONF_MIN_TICKS_ON_AT_480,  "Open Selection: Minimum note length for the 'Next ON' strategy"              );
+		set( KEY_DC_CONF_MAX_TICKS_ON_AT_480,  "Open Selection: Maximum note length for the 'Next ON' strategy"              );
 		set( KEY_DC_CONF_MIN_DUR_TO_KEEP,      "Focus the text field for the Min Duration to keep"                           );
 		set( KEY_DC_CONF_MAX_DUR_TO_KEEP,      "Focus the text field for the Max Duration to keep"                           );
 		set( KEY_DC_CONF_TOL_TICK_LEN,         "Focus the text field for the Note Length Tick Tolerance"                     );
@@ -2259,6 +2278,10 @@ public class Dict {
 		set( KEY_DC_CONF_KAR_ORPHANED,         "Open Orphaned Syllables Selection"                                           );
 		set( KEY_DC_CONF_KAR_ONE_CH,           "Toggle Checkbox: All Lyrics in One Channel"                                  );
 		set( KEY_DC_CONF_CTRL_CHANGE_MODE,     "Open Control Change Mode Selection"                                          );
+		set( KEY_DC_CONF_SYNTAX_TYPE,          "Open Syntax Type Selection (Compact or Lowlevel)"                            );
+		set( KEY_DC_CONF_ELEMENTS_PER_LINE,    "Focus text field: Elements per Line"                                         );
+		set( KEY_DC_CONF_USE_BARLINES,         "Toggle Checkbox: Use Barlines"                                               );
+		set( KEY_DC_CONF_FLD_BARLINE_TOL,      "Focus text field: Max Barline tolerance"                                     );
 		set( KEY_DC_CONF_FLD_GLOB_SINGLE,      "Focus text field: Add one split at tick..."                                  );
 		set( KEY_DC_CONF_BTN_GLOB_SINGLE,      "Press Button: Add Single Tick"                                               );
 		set( KEY_DC_CONF_FLD_GLOB_EACH,        "Focus text field: Add many splits (distance)"                                );
@@ -2388,6 +2411,7 @@ public class Dict {
 		set( DC_TAB_KARAOKE,               "Karaoke Settings"                                 );
 		set( DC_TAB_CTRL_CHANGE,           "Control Change"                                   );
 		set( DC_TAB_SLICE,                 "Extra Slices"                                     );
+		set( DC_TAB_LINE,                  "Line Settings"                                    );
 		set( DC_TABINFO_DEBUG,             "<html>Settings to control additional debugging information that's added as code comments in the target file."
 		                                 + "<br>The resulting MIDI sequence is not affected by these settings." );
 		set( DC_TABINFO_NOTE_LENGTH,       "<html>Settings to control how a note length is calculated. Therefore the following strategies can be used:"
@@ -2400,7 +2424,7 @@ public class Dict {
 		set( DC_TABINFO_CHORDS,            "<html>Settings to control chords."
 		                                 + "<br>Pre-defined chords are only used for MidicaPL, otherwise ignored."
 		                                 + "<br>The other settings control how different the properties of two notes can be to be still regarded as a part of the same chord." );
-		set( DC_TABINFO_NOTE_REST,         "<html>Settings to control which note or rest lengths to use" );
+		set( DC_TABINFO_NOTE_REST,         "<html>Settings to control notes / chords / rests. Mainly settings to control which note or rest lengths to use." );
 		set( DC_TABINFO_KARAOKE,           "<html>Karaoke-related settings. Only used by the MidicaPL decompiler. Otherwise ignored."
 		                                 + "<br><br>A syllable is <b>normal</b>, if there's a Note-ON beginning in the same tick. Otherwise it is <b>orphaned</b>."
 		                                 + "<br>Normal syllables are implemented as an option to a note or chord."
@@ -2417,14 +2441,15 @@ public class Dict {
 		set( DC_TABINFO_SLICE,             "<html>Settings to add extra slices."
 		                                 + "<br>By default the sequence is split into slices in each tick that contains certain META messages."
 		                                 + "<br>Here you can add extra splitting for certain ticks." );
+		set( DC_TABINFO_SYNTAX,            "<html>Settings controlling the form of lines with several notes / chords / rests. Mainly used for MidicaPL's Compact Syntax and ALDA." );
 		set( DC_ADD_TICK_COMMENT,          "Add Tick Comments"                                );
 		set( DC_ADD_CONFIG,                "Add Configuration"                                );
 		set( DC_ADD_SCORE,                 "Add Quality Score"                                );
 		set( DC_ADD_STATISTICS,            "Add Quality Statistics"                           );
 		set( DC_ADD_STRATEGY_STAT,         "Add Strategy Statistics"                          );
 		set( NOTE_LENGTH_STRATEGY,         "Priority of strategies"                           );
-		set( MIN_TARGET_TICKS_NEXT_ON,     "<html>Minimum note length for<br>the 'Next ON' strategy" );
-		set( MAX_TARGET_TICKS_NEXT_ON,     "<html>Maximum note length for<br>the 'Next ON' strategy" );
+		set( MIN_TICKS_NEXT_ON_AT_480,     "<html>Minimum note length for<br>the 'Next ON' strategy" );
+		set( MAX_TICKS_NEXT_ON_AT_480,     "<html>Maximum note length for<br>the 'Next ON' strategy" );
 		set( MIN_DURATION_TO_KEEP,         "Minimum Duration to keep" );
 		set( MIN_DURATION_TO_KEEP_D,       "<html>Minimum Duration for using the duration strategy."
 		                                 + "<br>1.0 = 100%; &nbsp; 0.1 = 10%; &nbsp; 0.01 = 1%" );
@@ -2460,6 +2485,14 @@ public class Dict {
 		set( ORPHANED_SYLLABLES_D,         "How to treat syllables that appear in a tick without any Note-ON"          );
 		set( CTRL_CHANGE_MODE,             "Control Change Mode"                                                       );
 		set( CTRL_CHANGE_MODE_D,           "Where to put control changes"                                              );
+		set( SYNTAX_TYPE,                  "Syntax Type"                                                               );
+		set( SYNTAX_TYPE_D,                "<html>The type of syntax to use.<br>(Ignored for other languages than MidicaPL)" );
+		set( ELEMENTS_PER_LINE,            "Elements per line"                                                         );
+		set( ELEMENTS_PER_LINE_D,          "<html>Notes / Chords / Rests per line<br>(Ignored in MidicaPL Lowlevel Syntax)" );
+		set( USE_BARLINES,                 "Bar Lines"                                                                 );
+		set( USE_BARLINES_D,               "<html>Adds bar lines, if possible<br>(Ignored in MidicaPL Lowlevel Syntax)" );
+		set( MAX_BARLINE_TOL,              "Max Barline Tolerance"                                                     );
+		set( MAX_BARLINE_TOL_D,            "<html>Maximum barline tolerance<br>(Ignored with lowlevel syntax or when bar lines are not used)<br>MidicaPL: ticks in target resolution<br>ALDA: ticks in source resolution" );
 		set( DC_INLINE_BLOCK,              "Inline Block"                                                              );
 		set( DC_SLICE_BEGIN_BLOCK,         "Slice Begin Block"                                                         );
 		set( DC_STRAT_NEXT_DURATION_PRESS, "<html><b>1.</b> Next ON, &nbsp;&nbsp;<b>2.</b> Duration,&nbsp;&nbsp;<b>3.</b> Press length" );
@@ -2467,6 +2500,8 @@ public class Dict {
 		set( DC_STRAT_NEXT_PRESS,          "<html><b>1.</b> Next ON, &nbsp;&nbsp;<b>2.</b> Press length"               );
 		set( DC_STRAT_DURATION_PRESS,      "<html><b>1.</b> Duration,&nbsp;&nbsp;<b>2.</b> Press length"               );
 		set( DC_STRAT_PRESS,               "Press length only"                                                         );
+		set( DC_SYNTAX_COMPACT,            "Compact Syntax"                                                            );
+		set( DC_SYNTAX_LOWLEVEL,           "Lowlevel Syntax"                                                           );
 		set( KAR_ONE_CHANNEL,              "All Lyrics in one channel"                                                 );
 		set( KAR_ONE_CHANNEL_D,            "If checked, all lyrics are assigned to the same channel"                   );
 		set( ADD_GLOBAL_AT_TICK,           "Add one split at tick:"                                                    );
@@ -3394,7 +3429,8 @@ public class Dict {
 		set( ERROR_EXPORT,                        "Export Error in the file "                                         );
 		set( ERROR_FILE_NOT_WRITABLE,             "File not writable"                                                 );
 		set( OVERWRITE_FILE,                      "Overwrite the file?"                                               );
-		set( EXPORTER_TICK,                       "Tick"                                                              );
+		set( EXPORTER_TICK,                       "Source tick: %d; Target tick: %d"                                  );
+		set( EXPORTER_TICK_RANGE,                 "Source ticks: %d - %d; Target ticks: %d - %d"                      );
 		set( CONFIRM_DIALOG_YES,                  "Yes"                                                               );
 		set( CONFIRM_DIALOG_NO,                   "No"                                                                );
 		

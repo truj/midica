@@ -1649,7 +1649,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * @return   The duration of the note in ticks.
 	 * @throws ParseException  If the duration string cannot be parsed.
 	 */
-	protected int parseDuration(String s) throws ParseException {
+	public static int parseDuration(String s) throws ParseException {
 		
 		if (LENGTH_ZERO.equals(s)) {
 			return 0;
@@ -1674,7 +1674,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * @return   The duration of the summand in ticks.
 	 * @throws ParseException  If the duration summand cannot be parsed.
 	 */
-	private int parseDurationSummand(String s) throws ParseException {
+	private static int parseDurationSummand(String s) throws ParseException {
 		Pattern pattern = Pattern.compile(
 			  "^(\\d+|.+?)"                // basic divisor (basic note length)
 			+ "(("                         // open capturing group for modifiers
@@ -1775,7 +1775,7 @@ public class MidicaPLParser extends SequenceParser {
 				divisor *= 3;
 			}
 			
-			int resolution = SequenceCreator.getResolution();
+			int resolution = SequenceCreator.DEFAULT_RESOLUTION;
 			
 			// Theoretically: duration = resolution * factor / divisor
 			// But integer divisions are always rounded down and we want to round mathematically
@@ -5490,7 +5490,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * @return               The parsed value.
 	 * @throws ParseException    If the string cannot be parsed.
 	 */
-	private int toInt(String s, boolean greaterZero) throws ParseException {
+	private static int toInt(String s, boolean greaterZero) throws ParseException {
 		int i;
 		if (greaterZero) {
 			i = toInt(s);
@@ -5510,7 +5510,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * @return               The parsed value.
 	 * @throws ParseException    If the string cannot be parsed.
 	 */
-	private int toInt(String s) throws ParseException {
+	private static int toInt(String s) throws ParseException {
 		try {
 			int i = Integer.parseInt(s);
 			if (i < 0) {

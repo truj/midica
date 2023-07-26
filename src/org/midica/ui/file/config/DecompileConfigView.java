@@ -60,8 +60,8 @@ public class DecompileConfigView extends FileConfigView {
 	JCheckBox               cbxAddStatistics;
 	JCheckBox               cbxAddStrategyStat;
 	JComboBox<NamedInteger> cbxLengthStrategy;
-	JComboBox<NamedInteger> cbxMinTargetTicksOn;
-	JComboBox<NamedInteger> cbxMaxTargetTicksOn;
+	JComboBox<NamedInteger> cbxMinTicksOnAt480;
+	JComboBox<NamedInteger> cbxMaxTicksOnAt480;
 	JTextField              fldMinDurToKeep;
 	JTextField              fldMaxDurToKeep;
 	JTextField              fldLengthTickTolerance;
@@ -79,6 +79,10 @@ public class DecompileConfigView extends FileConfigView {
 	JComboBox<NamedInteger> cbxOrphanedSyllables;
 	JCheckBox               cbxKarOneChannel;
 	JComboBox<NamedInteger> cbxCtrlChangeMode;
+	JComboBox<NamedInteger> cbxSyntaxType;
+	JTextField              fldElementsPerLine;
+	JCheckBox               cbxUseBarlines;
+	JTextField              fldBarlineTol;
 	JTextField              fldAddGlobalAtTick;
 	MidicaButton            btnAddGlobalAtTick;
 	JTextField              fldAddGlobalsEachTick;
@@ -120,8 +124,8 @@ public class DecompileConfigView extends FileConfigView {
 		cbxAddStatistics          = new JCheckBox(Dict.get(Dict.DC_ADD_STATISTICS));
 		cbxAddStrategyStat        = new JCheckBox(Dict.get(Dict.DC_ADD_STRATEGY_STAT));
 		cbxLengthStrategy         = new JComboBox<>();
-		cbxMinTargetTicksOn       = new JComboBox<>();
-		cbxMaxTargetTicksOn       = new JComboBox<>();
+		cbxMinTicksOnAt480        = new JComboBox<>();
+		cbxMaxTicksOnAt480        = new JComboBox<>();
 		fldMinDurToKeep           = new JTextField();
 		fldMaxDurToKeep           = new JTextField();
 		fldLengthTickTolerance    = new JTextField();
@@ -139,6 +143,10 @@ public class DecompileConfigView extends FileConfigView {
 		cbxOrphanedSyllables      = new JComboBox<>();
 		cbxKarOneChannel          = new JCheckBox();
 		cbxCtrlChangeMode         = new JComboBox<>();
+		cbxSyntaxType             = new JComboBox<>();
+		fldElementsPerLine        = new JTextField();
+		cbxUseBarlines            = new JCheckBox(Dict.get(Dict.USE_BARLINES));
+		fldBarlineTol             = new JTextField();
 		fldAddGlobalAtTick        = new JTextField();
 		btnAddGlobalAtTick        = new MidicaButton(Dict.get(Dict.BTN_ADD_TICK));
 		fldAddGlobalsEachTick     = new JTextField();
@@ -148,10 +156,11 @@ public class DecompileConfigView extends FileConfigView {
 		areaGlobalsStr            = new JTextArea();
 		btnAllTicks               = new MidicaButton(Dict.get(Dict.BTN_UPDATE_TICKS));
 		cbxLengthStrategy.setModel(DecompileConfigController.getComboboxModel(Config.DC_LENGTH_STRATEGY));
-		cbxMinTargetTicksOn.setModel(DecompileConfigController.getComboboxModel(Config.DC_MIN_TARGET_TICKS_ON));
-		cbxMaxTargetTicksOn.setModel(DecompileConfigController.getComboboxModel(Config.DC_MAX_TARGET_TICKS_ON));
+		cbxMinTicksOnAt480.setModel(DecompileConfigController.getComboboxModel(Config.DC_MIN_TICKS_ON_AT_480));
+		cbxMaxTicksOnAt480.setModel(DecompileConfigController.getComboboxModel(Config.DC_MAX_TICKS_ON_AT_480));
 		cbxOrphanedSyllables.setModel(DecompileConfigController.getComboboxModel(Config.DC_ORPHANED_SYLLABLES));
 		cbxCtrlChangeMode.setModel(DecompileConfigController.getComboboxModel(Config.DC_CTRL_CHANGE_MODE));
+		cbxSyntaxType.setModel(DecompileConfigController.getComboboxModel(Config.DC_SYNTAX_TYPE));
 		
 		// create controller
 		return DecompileConfigController.getInstance(this, icon);
@@ -182,6 +191,7 @@ public class DecompileConfigView extends FileConfigView {
 		tabs.add( Dict.get(Dict.DC_TAB_KARAOKE),     createKaraokeArea(Dict.DC_TAB_KARAOKE)        );
 		tabs.add( Dict.get(Dict.DC_TAB_CTRL_CHANGE), createCtrlChangeArea(Dict.DC_TAB_CTRL_CHANGE) );
 		tabs.add( Dict.get(Dict.DC_TAB_SLICE),       createSliceArea(Dict.DC_TAB_SLICE)            );
+		tabs.add( Dict.get(Dict.DC_TAB_LINE),        createLineArea(Dict.DC_TAB_LINE)          );
 		content.add(tabs, constraints);
 		
 		// separator
@@ -284,34 +294,34 @@ public class DecompileConfigView extends FileConfigView {
 		constrFull.gridy = constrRight.gridy;
 		area.add(Laf.createSeparator(), constrFull);
 		
-		// min note length (min target ticks) for next note on
+		// min note length (min ticks at 480) for next note on
 		// label
 		constrLeft.gridy++;
-		JLabel lblMinTargetOn = new JLabel( Dict.get(Dict.MIN_TARGET_TICKS_NEXT_ON) );
-		Laf.makeBold(lblMinTargetOn);
-		area.add(lblMinTargetOn, constrLeft);
+		JLabel lblMinTicksOn = new JLabel( Dict.get(Dict.MIN_TICKS_NEXT_ON_AT_480) );
+		Laf.makeBold(lblMinTicksOn);
+		area.add(lblMinTicksOn, constrLeft);
 		
 		// combobox
 		constrCenter.gridy++;
 		constrCenter.gridwidth = 2;
 		constrRight.gridy++;
-		cbxMinTargetTicksOn.addActionListener(controller);
-		area.add(cbxMinTargetTicksOn, constrCenter);
+		cbxMinTicksOnAt480.addActionListener(controller);
+		area.add(cbxMinTicksOnAt480, constrCenter);
 		constrCenter.gridwidth = 1;
 		
-		// max note length (max target ticks) for next note on
+		// max note length (max ticks at 480) for next note on
 		// label
 		constrLeft.gridy++;
-		JLabel lblMaxTargetOn = new JLabel( Dict.get(Dict.MAX_TARGET_TICKS_NEXT_ON) );
-		Laf.makeBold(lblMaxTargetOn);
-		area.add(lblMaxTargetOn, constrLeft);
+		JLabel lblMaxTicksOn = new JLabel( Dict.get(Dict.MAX_TICKS_NEXT_ON_AT_480) );
+		Laf.makeBold(lblMaxTicksOn);
+		area.add(lblMaxTicksOn, constrLeft);
 		
 		// combobox
 		constrCenter.gridy++;
 		constrCenter.gridwidth = 2;
 		constrRight.gridy++;
-		cbxMaxTargetTicksOn.addActionListener(controller);
-		area.add(cbxMaxTargetTicksOn, constrCenter);
+		cbxMaxTicksOnAt480.addActionListener(controller);
+		area.add(cbxMaxTicksOnAt480, constrCenter);
 		
 		// separator
 		constrLeft.gridy++;
@@ -521,16 +531,22 @@ public class DecompileConfigView extends FileConfigView {
 		
 		// dotted rests
 		constrLeft.gridy++;
+		constrCenter.gridy++;
+		constrRight.gridy++;
 		cbxUseDottedRest.addActionListener(controller);
 		area.add(cbxUseDottedRest, constrLeft);
 		
 		// tripletted notes
 		constrLeft.gridy++;
+		constrCenter.gridy++;
+		constrRight.gridy++;
 		cbxUseTriplettedNote.addActionListener(controller);
 		area.add(cbxUseTriplettedNote, constrLeft);
 		
 		// tripletted rests
 		constrLeft.gridy++;
+		constrCenter.gridy++;
+		constrRight.gridy++;
 		cbxUseTriplettedRest.addActionListener(controller);
 		area.add(cbxUseTriplettedRest, constrLeft);
 		
@@ -795,6 +811,98 @@ public class DecompileConfigView extends FileConfigView {
 		return wrapTabContent(area);
 	}
 	
+	/**
+	 * Creates the area for line settings (compact or alda).
+	 * 
+	 * @param tabKey  language key for the tab name
+	 * @return the created area
+	 */
+	private Container createLineArea(String tabKey) {
+		
+		// layout
+		JPanel area = new JPanel();
+		area.setLayout(new GridBagLayout());
+		GridBagConstraints[] constaints = createConstraintsForArea();
+		GridBagConstraints constrFull   = constaints[0];
+		GridBagConstraints constrLeft   = constaints[1];
+		GridBagConstraints constrCenter = constaints[2];
+		GridBagConstraints constrRight  = constaints[3];
+		
+		// tab info box
+		area.add(createTabInfo(tabKey, Dict.DC_TABINFO_SYNTAX), constrFull);
+		
+		// lowlevel or compact
+		// label
+		JLabel lblSyntaxType = new JLabel( Dict.get(Dict.SYNTAX_TYPE) );
+		Laf.makeBold(lblSyntaxType);
+		area.add(lblSyntaxType, constrLeft);
+		
+		// combobox
+		cbxSyntaxType.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
+		cbxSyntaxType.addActionListener(controller);
+		area.add(cbxSyntaxType, constrCenter);
+		
+		// description
+		JLabel descSyntaxType = new JLabel( Dict.get(Dict.SYNTAX_TYPE_D) );
+		area.add(descSyntaxType, constrRight);
+		
+		// barline tolerance
+		// label
+		constrLeft.gridy++;
+		JLabel lblElems = new JLabel( Dict.get(Dict.ELEMENTS_PER_LINE) );
+		Laf.makeBold(lblElems);
+		area.add(lblElems, constrLeft);
+		
+		// field
+		constrCenter.gridy++;
+		fldElementsPerLine.getDocument().addDocumentListener(controller);
+		fldElementsPerLine.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
+		area.add(fldElementsPerLine, constrCenter);
+		
+		// description
+		constrRight.gridy++;
+		JLabel descElems = new JLabel( Dict.get(Dict.ELEMENTS_PER_LINE_D) );
+		area.add(descElems, constrRight);
+		
+		// use bar lines
+		// label
+		constrLeft.gridy++;
+		JLabel lblUseBarlines = new JLabel( Dict.get(Dict.USE_BARLINES) );
+		Laf.makeBold(lblUseBarlines);
+		area.add(lblUseBarlines, constrLeft);
+		
+		// field
+		constrCenter.gridy++;
+		cbxUseBarlines.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
+		cbxUseBarlines.addActionListener(controller);
+		area.add(cbxUseBarlines, constrCenter);
+		
+		// description
+		constrRight.gridy++;
+		JLabel descUseBarlines = new JLabel( Dict.get(Dict.USE_BARLINES_D) );
+		area.add(descUseBarlines, constrRight);
+		
+		// barline tolerance
+		// label
+		constrLeft.gridy++;
+		JLabel lblBarlineTol = new JLabel( Dict.get(Dict.MAX_BARLINE_TOL) );
+		Laf.makeBold(lblBarlineTol);
+		area.add(lblBarlineTol, constrLeft);
+		
+		// field
+		constrCenter.gridy++;
+		fldBarlineTol.getDocument().addDocumentListener(controller);
+		fldBarlineTol.setPreferredSize(new Dimension(TEXT_FIELD_WIDTH, TEXT_FIELD_HEIGHT));
+		area.add(fldBarlineTol, constrCenter);
+		
+		// description
+		constrRight.gridy++;
+		JLabel descBarlineTol = new JLabel( Dict.get(Dict.MAX_BARLINE_TOL_D) );
+		area.add(descBarlineTol, constrRight);
+		
+		return wrapTabContent(area);
+	}
+	
 	@Override
 	protected void addSpecificKeyBindings() {
 		
@@ -806,6 +914,7 @@ public class DecompileConfigView extends FileConfigView {
 		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_CONF_TAB_KARAOKE,     4 );
 		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_CONF_TAB_CTRL_CHANGE, 5 );
 		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_CONF_TAB_SLICES,      6 );
+		keyBindingManager.addBindingsForTabLevel1( tabs, Dict.KEY_DC_CONF_TAB_SYNTAX,      7 );
 		
 		// debug tab
 		keyBindingManager.addBindingsForTabLevel3( cbxAddTickComments, Dict.KEY_DC_CONF_ADD_TICK_COMMENTS );
@@ -816,8 +925,8 @@ public class DecompileConfigView extends FileConfigView {
 		
 		// note length tab
 		keyBindingManager.addBindingsForTabLevel3( cbxLengthStrategy,         Dict.KEY_DC_CONF_NOTE_LENGTH_STRATEGY );
-		keyBindingManager.addBindingsForTabLevel3( cbxMinTargetTicksOn,       Dict.KEY_DC_CONF_MIN_TARGET_TICKS_ON  );
-		keyBindingManager.addBindingsForTabLevel3( cbxMaxTargetTicksOn,       Dict.KEY_DC_CONF_MAX_TARGET_TICKS_ON  );
+		keyBindingManager.addBindingsForTabLevel3( cbxMinTicksOnAt480,        Dict.KEY_DC_CONF_MIN_TICKS_ON_AT_480  );
+		keyBindingManager.addBindingsForTabLevel3( cbxMaxTicksOnAt480,        Dict.KEY_DC_CONF_MAX_TICKS_ON_AT_480  );
 		keyBindingManager.addBindingsForTabLevel3( fldMinDurToKeep,           Dict.KEY_DC_CONF_MIN_DUR_TO_KEEP      );
 		keyBindingManager.addBindingsForTabLevel3( fldMaxDurToKeep,           Dict.KEY_DC_CONF_MAX_DUR_TO_KEEP      );
 		keyBindingManager.addBindingsForTabLevel3( fldLengthTickTolerance,    Dict.KEY_DC_CONF_TOL_TICK_LEN         );
@@ -830,10 +939,10 @@ public class DecompileConfigView extends FileConfigView {
 		keyBindingManager.addBindingsForTabLevel3( fldChordVelocityTolerance, Dict.KEY_DC_CONF_CRD_VELOCITY   );
 		
 		// notes/rests tab
-		keyBindingManager.addBindingsForTabLevel3( cbxUseDottedNote,     Dict.KEY_DC_CONF_USE_DOT_NOTES  );
-		keyBindingManager.addBindingsForTabLevel3( cbxUseDottedRest,     Dict.KEY_DC_CONF_USE_DOT_RESTS  );
-		keyBindingManager.addBindingsForTabLevel3( cbxUseTriplettedNote, Dict.KEY_DC_CONF_USE_TRIP_NOTES );
-		keyBindingManager.addBindingsForTabLevel3( cbxUseTriplettedRest, Dict.KEY_DC_CONF_USE_TRIP_RESTS );
+		keyBindingManager.addBindingsForTabLevel3( cbxUseDottedNote,     Dict.KEY_DC_CONF_USE_DOT_NOTES     );
+		keyBindingManager.addBindingsForTabLevel3( cbxUseDottedRest,     Dict.KEY_DC_CONF_USE_DOT_RESTS     );
+		keyBindingManager.addBindingsForTabLevel3( cbxUseTriplettedNote, Dict.KEY_DC_CONF_USE_TRIP_NOTES    );
+		keyBindingManager.addBindingsForTabLevel3( cbxUseTriplettedRest, Dict.KEY_DC_CONF_USE_TRIP_RESTS    );
 		
 		// karaoke tab
 		keyBindingManager.addBindingsForTabLevel3( cbxUseKaraoke,           Dict.KEY_DC_CONF_USE_KARAOKE  );
@@ -853,5 +962,11 @@ public class DecompileConfigView extends FileConfigView {
 		keyBindingManager.addBindingsForTabLevel3( btnAddGlobalTicks,      Dict.KEY_DC_CONF_BTN_GLOB_RANGE  );
 		keyBindingManager.addBindingsForTabLevel3( areaGlobalsStr,         Dict.KEY_DC_CONF_AREA_GLOB_ALL   );
 		keyBindingManager.addBindingsForTabLevel3( btnAllTicks,            Dict.KEY_DC_CONF_BTN_GLOB_ALL    );
+		
+		// syntax tab
+		keyBindingManager.addBindingsForTabLevel3( cbxSyntaxType,      Dict.KEY_DC_CONF_SYNTAX_TYPE       );
+		keyBindingManager.addBindingsForTabLevel3( fldElementsPerLine, Dict.KEY_DC_CONF_ELEMENTS_PER_LINE );
+		keyBindingManager.addBindingsForTabLevel3( cbxUseBarlines,     Dict.KEY_DC_CONF_USE_BARLINES      );
+		keyBindingManager.addBindingsForTabLevel3( fldBarlineTol,      Dict.KEY_DC_CONF_FLD_BARLINE_TOL   );
 	}
 }
