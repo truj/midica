@@ -27,6 +27,8 @@ import org.midica.config.Dict;
  */
 public class Foreign {
 	
+	private static String lastStdOut = null;
+	
 	/**
 	 * Creates a temporary directory.
 	 * 
@@ -193,6 +195,7 @@ public class Foreign {
 	 */
 	public static void execute(List<String> cmd, String programName, boolean acceptAllExitCodes) throws ForeignException {
 		ProcessBuilder pb = new ProcessBuilder(cmd);
+		lastStdOut = null;
 		try {
 			Process process = pb.start();
 			
@@ -208,6 +211,7 @@ public class Foreign {
 			while ((line = outReader.readLine()) != null) {
 				stdOut += line + "<br>";
 			}
+			lastStdOut = stdOut;
 			
 			try {
 				int exitCode = process.waitFor();
@@ -259,5 +263,14 @@ public class Foreign {
 			}
 			throw new ForeignException(msg);
 		}
+	}
+	
+	/**
+	 * Returns whatever the last executed program wrote to STDOUT.
+	 * 
+	 * @return the last STDOUT string
+	 */
+	public static String getLastOutput() {
+		return lastStdOut;
 	}
 }

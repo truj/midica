@@ -1012,7 +1012,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		}
 		
 		parse(getWorkingFile("soundbank-url"));
-		assertEquals("http://midica.org/assets/sound/soundbank-emg.sf2", SoundbankParser.getFullPath());
+		assertEquals("https://midica.org/assets/sound/soundbank-emg.sf2", SoundbankParser.getFullPath());
 		assertEquals(Dict.get(Dict.SOUND_FROM_URL) + "soundbank-emg.sf2", SoundbankParser.getShortName());
 		assertEquals(SoundbankParser.SOUND_FORMAT_SF2, SoundbankParser.getSoundFormat());
 		assertEquals(SoundbankParser.FROM_URL, SoundbankParser.getSource());
@@ -2285,13 +2285,13 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundbank-url-invalid")) );
 		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "SOUNDBANK http:/ /midica.org/assets/sound/invalid.sf2", e.getLineContent() );
+		assertEquals( "SOUNDBANK https:/ /midica.org/assets/sound/invalid.sf2", e.getLineContent() );
 		assertTrue( e.getMessage().contains(Dict.get(Dict.INVALID_RIFF)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundbank-url-404")) );
 		assertEquals( 3, e.getLineNumber() );
 		assertTrue( e.getMessage().contains(Dict.get(Dict.DOWNLOAD_PROBLEM)) );
-		assertEquals( "SOUNDBANK http:/ /midica.org/assets/sound/404.sf2", e.getLineContent() );
+		assertEquals( "SOUNDBANK https:/ /midica.org/assets/sound/404.sf2", e.getLineContent() );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("define-not-enough-args")) );
 		assertEquals( 3, e.getLineNumber() );

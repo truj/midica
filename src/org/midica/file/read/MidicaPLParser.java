@@ -680,7 +680,7 @@ public class MidicaPLParser extends SequenceParser {
 		condInPattern = Pattern.compile("\\s*" + Pattern.quote(COND_IN_SEP) + "\\s*");
 		
 		// find forbidden \r or \n in a soft karaoke field or syllable
-		crlfSkPattern = Pattern.compile(Pattern.quote(LYRICS_CR) + "|" + Pattern.quote(LYRICS_LF));
+		crlfSkPattern = Pattern.compile("^.+(" + Pattern.quote(LYRICS_CR) + "|" + Pattern.quote(LYRICS_LF) + ")");
 		
 		// find sharp(s) or flat(s) in a note name
 		sharpPattern = Pattern.compile("^.+" + Pattern.quote(Config.getConfiguredSharpOrFlat(true)) + ".*");
@@ -3113,9 +3113,11 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void applySyllable(String syllable, long tick) throws ParseException {
 		syllable = syllable.replaceAll( Pattern.quote(LYRICS_SPACE), " "  );
-		syllable = syllable.replaceAll( Pattern.quote(LYRICS_CR),    "\r" );
-		syllable = syllable.replaceAll( Pattern.quote(LYRICS_LF),    "\n" );
 		syllable = syllable.replaceAll( Pattern.quote(LYRICS_COMMA), ","  );
+		if (!isSoftKaraoke) {
+			syllable = syllable.replaceAll( Pattern.quote(LYRICS_CR), "\r" );
+			syllable = syllable.replaceAll( Pattern.quote(LYRICS_LF), "\n" );
+		}
 		
 		try {
 			if (isSoftKaraoke)

@@ -64,7 +64,7 @@ public class MidicaPLExporter extends Decompiler {
 		// in MPL we calculate measure lengths based on the TARGET sequence
 		// so we need to overwrite the structure from the parent class
 		measureLengthHistory.clear();
-		measureLengthHistory.put(0L, 4L * sourceResolution); // MIDI default is 4/4
+		measureLengthHistory.put(0L, 4L * targetResolution); // MIDI default is 4/4
 		
 		// META block
 		createMetaBlock();
@@ -1032,11 +1032,10 @@ public class MidicaPLExporter extends Decompiler {
 		long totalTicks      = currentTgtTicks - lastTimeSigTick;
 		
 		// get delta
-		long srcDelta  = totalTicks % measureLength;
-		long srcDelta2 = measureLength - srcDelta;
-		if (srcDelta2 < srcDelta)
-			srcDelta = srcDelta2;
-		long tgtDelta = (srcDelta * targetResolution * 10 + sourceResolution * 5) / (sourceResolution * 10);
+		long tgtDelta  = totalTicks % measureLength;
+		long tgtDelta2 = measureLength - tgtDelta;
+		if (tgtDelta2 < tgtDelta)
+			tgtDelta = tgtDelta2;
 		
 		// no bar line at all?
 		if (tgtDelta > MAX_BARLINE_TOL) {
@@ -1196,7 +1195,12 @@ public class MidicaPLExporter extends Decompiler {
 		}
 		
 		// escape space and comma
-		return syllable.replaceAll(" ", "_").replaceAll(",",  "\\\\c");
+		syllable = syllable.replaceAll(" ", "_").replaceAll(",",  "\\\\c");
+		
+		// escape comment symbols
+		syllable = syllable.replaceAll(MidicaPLParser.COMMENT, "/\\\\/");
+		
+		return syllable;
 	}
 	
 	@Override

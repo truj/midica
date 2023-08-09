@@ -33,10 +33,10 @@ public class Midica {
 	 * After switching to a new major version, this has to be set to "-1" manually, so that
 	 * precommit.pl starts with "0" again.
 	 */
-	private static final int VERSION_MINOR = 5;
+	private static final int VERSION_MINOR = 6;
 	
 	/** UNIX timestamp of the last commit */
-	public static final int COMMIT_TIME = 1690393042;
+	public static final int COMMIT_TIME = 1691601094;
 	
 	/** Branch name. Automatically changed by precommit.pl */
 	public static final String BRANCH = "master";
@@ -51,7 +51,7 @@ public class Midica {
 	public static final String SOURCE_URL = "https://github.com/truj/midica";
 	
 	/** Website URL */
-	public static final String URL = "http://midica.org/";
+	public static final String URL = "https://midica.org/";
 	
 	/** Controller of the main window */
 	public static UiController uiController;

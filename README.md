@@ -98,7 +98,7 @@ If you prefer to write your music in ALDA or ABC, you need to:
 
 # Screenshots
 
-You can find a lot of screenshots here: http://www.midica.org/screenshots.html
+You can find a lot of screenshots here: https://www.midica.org/screenshots.html
 
 I will not repeat them all in this Readme. But at least here are three screenshots.
 The first one shows the main window.
@@ -115,20 +115,20 @@ Midica has its own Music Programming Language: MidicaPL. But alternatively you c
 
 For learning, each language has its own resources:
 
-- [MidicaPL tutorial](http://www.midica.org/tutorial.html)
+- [MidicaPL tutorial](https://www.midica.org/tutorial.html)
 - [ALDA documentation](https://github.com/alda-lang/alda/blob/master/doc/index.md)
 - [ABC tutorials](https://abcnotation.com/learn)
 
 Here we focus on MidicaPL. For a quick reference, here are the links to the main
 chapters of the MidicaPL tutorial:
 
-- [Preparation](http://www.midica.org/tutorial.html)
-- [Chapter 1: Basics](http://www.midica.org/tutorial-1.html)
-- [Chapter 2: Improving](http://www.midica.org/tutorial-2.html)
-- [Chapter 3: Functions](http://www.midica.org/tutorial-3.html)
-- [Chapter 4: Blocks](http://www.midica.org/tutorial-4.html)
-- [Chapter 5: Tweaking](http://www.midica.org/tutorial-5.html)
-- [Chapter 6: Patterns](http://www.midica.org/tutorial-6.html)
+- [Preparation](https://www.midica.org/tutorial.html)
+- [Chapter 1: Basics](https://www.midica.org/tutorial-1.html)
+- [Chapter 2: Improving](https://www.midica.org/tutorial-2.html)
+- [Chapter 3: Functions](https://www.midica.org/tutorial-3.html)
+- [Chapter 4: Blocks](https://www.midica.org/tutorial-4.html)
+- [Chapter 5: Tweaking](https://www.midica.org/tutorial-5.html)
+- [Chapter 6: Patterns](https://www.midica.org/tutorial-6.html)
 
 Examples of complete songs can be found in the [examples directory](examples/).
 In this Readme we just show some short examples to get an impression of the language.

@@ -1029,7 +1029,19 @@ public abstract class Decompiler extends Exporter {
 				for (Entry<Byte, Byte> tickEntry: tickStructClone.entrySet()) {
 					byte note     = tickEntry.getKey();
 					byte velocity = tickEntry.getValue();
-					long offTick  = channelOnOffClone.get(note).ceilingKey(tick + 1);
+					Long offTick  = channelOnOffClone.get(note).ceilingKey(tick + 1);
+					
+					// In rare cases the following sequence is possible for a given note:
+					// - note-ON
+					// - note-ON and note-OFF in the same tick
+					// - end of sequence
+					// This results in channelOnOffClone.get(note) ending with two
+					// false values in a row.
+					// Then offTick is null.
+					// Probably this also happens if a note-ON has no note-OFF at all...
+					// In these cases: ignore the note completely.
+					if (null == offTick)
+						continue NOTE;
 					
 					String chordId = offTick + "/" + velocity;
 					
@@ -1152,19 +1164,20 @@ public abstract class Decompiler extends Exporter {
 					// create notes structure for this tick
 					TreeMap<String, TreeMap<Byte, String>> notesStruct = new TreeMap<>();
 					
-					// NOTE:
+					NOTE:
 					for (Entry<Byte, Byte> noteSet : tickStruct.entrySet()) {
 						byte note     = noteSet.getKey();
 						byte velocity = noteSet.getValue();
 						Long offTick  = sliceOnOff.get(channel).get(note).ceilingKey(tick + 1);
 						
-						// TODO: test this
 						// handle the case that there is no offTick at all
 						// can happen if the MIDI is corrupt or uses all-notes-off / all-sounds-off
 						// instead of note-off or note-on with velocity=0
 						if (null == offTick) {
 							exportResult.addWarning(null, tick, channel, Dict.get(Dict.WARNING_OFF_NOT_FOUND));
-							exportResult.setDetailsOfLastWarning(Dict.get(Dict.ERROR_NOTE) + ": " + note);
+							String noteName = Dict.getNoteOrPercussionName(note, 9 == channel);
+							exportResult.setDetailsOfLastWarning(Dict.get(Dict.ERROR_NOTE) + ": " + noteName + " (" + note + ")");
+							continue NOTE;
 						}
 						
 						// create structure for this note

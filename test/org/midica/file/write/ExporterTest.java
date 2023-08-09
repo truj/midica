@@ -10,16 +10,17 @@ package org.midica.file.write;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map.Entry;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.midica.TestUtil;
 import org.midica.file.Foreign;
 import org.midica.file.ForeignException;
+import org.midica.file.read.AldaImporter;
+import org.midica.file.read.MidiParser;
 import org.midica.file.read.MidicaPLParser;
 import org.midica.file.read.ParseException;
+import org.midica.file.read.SequenceParser;
 import org.midica.file.write.MidicaPLExporter;
 
 /**
@@ -41,13 +42,15 @@ public class ExporterTest {
 	}
 	
 	/**
-	 * Tests MidicaPL files, if they can be parsed and then exported without exception.
+	 * Tests MidicaPL files, if they can be imported, exported, and then imported again
+	 * without exception.
 	 * 
 	 * The directories to be tested are:
 	 * 
 	 * - the example files
 	 * - the working unit test files for the {@link MidicaPLParser}
 	 * - the MidicaPL test files for the decompiler
+	 * - real-world midi files that are not committed because of copyright
 	 * 
 	 * The exporters to be tested with each file are:
 	 * 
@@ -58,44 +61,118 @@ public class ExporterTest {
 	 * @throws ParseException if something went wrong.
 	 */
 	@Test
-	void testParseDecompileMplDirectories() throws ParseException, ForeignException, ExportException {
-		MidicaPLParser parser = new MidicaPLParser(true);
+	void testImportExportReimportDirectories() throws ParseException, ForeignException, ExportException {
 		
 		// get directories to be searched
 		ArrayList<String> directories = new ArrayList<>();
 		directories.add(System.getProperty("user.dir")  + File.separator + "examples");
 		directories.add(TestUtil.getTestfileDirectory() + File.separator + "working");
 		directories.add(TestUtil.getTestfileDirectory() + File.separator + "exporter");
+		directories.add(TestUtil.getTestfileDirectory() + File.separator + "midi-real-world");
 		
-		// get exporters
-		HashMap<String, Exporter> exporters = new HashMap<>();
-		exporters.put("mid",  new MidiExporter());
-		exporters.put("mpl",  new MidicaPLExporter());
-		exporters.put("alda", new AldaExporter());
+		// types of export formats to test
+		String[] targetTypes = new String[] {"mpl", "mid", "alda"};
 		
 		for (String dirStr : directories) {
 			File dir = new File(dirStr);
 			
 			for (File file : dir.listFiles()) {
+				SequenceParser importer;
 				
-				// parse
+				// choose importer
+				String sourceType;
 				if (!file.isFile())
 					continue;
-				if (!file.getName().endsWith(".midica") && !file.getName().endsWith(".midicapl") && !file.getName().endsWith(".mpl"))
+				if (file.getName().endsWith(".midica") || file.getName().endsWith(".midicapl") || file.getName().endsWith(".mpl"))
+					sourceType = "mpl";
+				else if (file.getName().endsWith(".alda"))
+					sourceType = "alda";
+				else if (file.getName().endsWith(".mid") || file.getName().endsWith(".midi") || file.getName().endsWith(".kar"))
+					sourceType = "mid";
+				else
 					continue;
-				parser.parse(file);
+				importer = getImporter(sourceType);
 				
-				// export
-				for (Entry<String, Exporter> entry : exporters.entrySet()) {
-					String   extension = entry.getKey();
-					Exporter exporter  = entry.getValue();
+				// import source file
+				try {
+					importer.parse(file);
+				}
+				catch (Exception e) {
+					System.err.println("failed to parse source file: " + file.getAbsolutePath());
+					throw e;
+				}
+				
+				// export and import again
+				for (String targetType : targetTypes) {
+					
+					// export to target format
+					String   extension  = targetType;
+					Exporter exporter   = getExporter(targetType);
 					File decompiledFile = Foreign.createTempFile(extension, null);
-					exporter.export(decompiledFile);
+					try {
+						exporter.export(decompiledFile);
+					}
+					catch (Exception e) {
+						System.err.println("failed to export file."
+							+ " Source: " + file.getAbsolutePath()
+							+ " Target: " + decompiledFile.getAbsolutePath());
+						throw e;
+					}
+					
+					// re-import
+					importer = getImporter(targetType);
+					try {
+						importer.parse(decompiledFile);
+					}
+					catch (Exception e) {
+						System.err.println("failed to re-import exported file."
+							+ " Source: " + file.getAbsolutePath()
+							+ " Target: " + decompiledFile.getAbsolutePath());
+						throw e;
+					}
 					
 					// clean up
 					Foreign.deleteTempFile(decompiledFile);
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Creates and returns an exporter for the given file type.
+	 * 
+	 * @param type    mpl, mid or alda (for MidicaPL, MIDI or ALDA)
+	 * @return the exporter.
+	 * @throws IllegalArgumentException if an unknown file type is given.
+	 */
+	private Exporter getExporter(String type) throws IllegalArgumentException {
+		
+		if ("mid".equals(type))
+			return new MidiExporter();
+		if ("mpl".equals(type))
+			return new MidicaPLExporter();
+		if ("alda".equals(type))
+			return new AldaExporter();
+		
+		throw new IllegalArgumentException("unknown exporter type: " + type);
+	}
+	
+	/**
+	 * Creates and returns an importer for the given file type.
+	 * 
+	 * @param type    mpl, mid or alda (for MidicaPL, MIDI or ALDA)
+	 * @return the importer.
+	 * @throws IllegalArgumentException if an unknown file type is given.
+	 */
+	private SequenceParser getImporter(String type) throws IllegalArgumentException {
+		
+		if ("mid".equals(type))
+			return new MidiParser();
+		if ("mpl".equals(type))
+			return new MidicaPLParser(true);
+		if ("alda".equals(type))
+			return new AldaImporter();
+		
+		throw new IllegalArgumentException("unknown importer type: " + type);
 	}
 }

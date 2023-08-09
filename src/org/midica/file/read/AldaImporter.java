@@ -26,7 +26,8 @@ import org.midica.midi.SequenceCreator;
  * 
  * The process contains the following steps:
  * 
- * - Start the ALDA server, if not yet done
+ * - Checks which ALDA version is used
+ * - If ALDA 1 is used, starts the ALDA server, if not yet done
  * - Convert ALDA to a MIDI tempfile, using the alda executable
  * - Parse the MIDI file using the parent class
  * - Delete the MIDI file
@@ -60,9 +61,26 @@ public class AldaImporter extends MidiParser {
 		try {
 			String execPath = Config.get(Config.EXEC_PATH_IMP_ALDA);
 			
+			// get alda version
+			int version = -1;
+			String[] aldaVersion = {execPath, "version"};
+			Foreign.execute(aldaVersion, execPath, true);
+			String versionStr = Foreign.getLastOutput();
+			if (versionStr != null) {
+				versionStr = versionStr.toLowerCase();
+				if (versionStr.startsWith("alda 2")) {
+					version = 2;
+				}
+				else if (versionStr.startsWith("client version: 1")) {
+					version = 1;
+				}
+			}
+			
 			// alda up
-			String[] aldaUp = {execPath, "up"};
-			Foreign.execute(aldaUp, programName, true);
+			if (1 == version) {
+				String[] aldaUp = {execPath, "up"};
+				Foreign.execute(aldaUp, programName, true);
+			}
 			
 			// get a temp file path
 			File tempfile = Foreign.createTempMidiFile();
@@ -72,7 +90,10 @@ public class AldaImporter extends MidiParser {
 			String[] aldaConvert = {execPath, "export", "-f", file.getAbsolutePath(), "-o", tempfile.getAbsolutePath()};
 			Foreign.execute(aldaConvert, programName, false);
 			
-			// due to an ALDA bug sometimes the exit code is successul even if no MIDI file was created
+			// Due to a bug in alda 1, sometimes the exit code was successul even if
+			// no MIDI file was created.
+			// I don't know if that bug still exists in alda 2 but this workaround doesn't
+			// hurt either.
 			if (!tempfile.exists()) {
 				throw new ParseException(Dict.get(Dict.ERROR_ALDA_NO_MIDI_FILE));
 			}

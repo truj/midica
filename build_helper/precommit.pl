@@ -255,7 +255,7 @@ if ($must_create_javadoc && $javadoc_path) {
 	        . " -notimestamp"
 	        . " -windowtitle 'Midica $version - Javadoc'"
 	        . " -doctitle 'Midica - the MIDI Processing and Programming Tool'"
-	        . " -header '<a href=\"http://www.midica.org/\" target=\"_top\"><b>Midica</b></a><br>$version'"
+	        . " -header '<a href=\"https://www.midica.org/\" target=\"_top\"><b>Midica</b></a><br>$version'"
 	;
 	my $status = system $cmd;
 	if ($status) {

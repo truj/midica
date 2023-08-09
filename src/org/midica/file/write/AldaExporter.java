@@ -1078,45 +1078,45 @@ public class AldaExporter extends Decompiler {
 		
 		if (isMajor) {
 			tonalityStr = "major";
-			if      (0  == sharpsOrFlats) noteStr = "c";        // C maj
-			else if (1  == sharpsOrFlats) noteStr = "g";        // G maj
-			else if (2  == sharpsOrFlats) noteStr = "d";        // D maj
-			else if (3  == sharpsOrFlats) noteStr = "a";        // A maj
-			else if (4  == sharpsOrFlats) noteStr = "e";        // E maj
-			else if (5  == sharpsOrFlats) noteStr = "b";        // B maj
-			else if (6  == sharpsOrFlats) noteStr = "f :sharp"; // F# maj
-			else if (7  == sharpsOrFlats) noteStr = "c :sharp"; // C# maj
-			else if (-1 == sharpsOrFlats) noteStr = "f";        // F maj
-			else if (-2 == sharpsOrFlats) noteStr = "b :flat";  // Bb maj
-			else if (-3 == sharpsOrFlats) noteStr = "e :flat";  // Eb maj
-			else if (-4 == sharpsOrFlats) noteStr = "a :flat";  // Ab maj
-			else if (-5 == sharpsOrFlats) noteStr = "d :flat";  // Db maj
-			else if (-6 == sharpsOrFlats) noteStr = "g :flat";  // Gb maj
-			else if (-7 == sharpsOrFlats) noteStr = "c :flat";  // Cb maj
+			if      (0  == sharpsOrFlats) noteStr = "c";       // C maj
+			else if (1  == sharpsOrFlats) noteStr = "g";       // G maj
+			else if (2  == sharpsOrFlats) noteStr = "d";       // D maj
+			else if (3  == sharpsOrFlats) noteStr = "a";       // A maj
+			else if (4  == sharpsOrFlats) noteStr = "e";       // E maj
+			else if (5  == sharpsOrFlats) noteStr = "b";       // B maj
+			else if (6  == sharpsOrFlats) noteStr = "f sharp"; // F# maj
+			else if (7  == sharpsOrFlats) noteStr = "c sharp"; // C# maj
+			else if (-1 == sharpsOrFlats) noteStr = "f";       // F maj
+			else if (-2 == sharpsOrFlats) noteStr = "b flat";  // Bb maj
+			else if (-3 == sharpsOrFlats) noteStr = "e flat";  // Eb maj
+			else if (-4 == sharpsOrFlats) noteStr = "a flat";  // Ab maj
+			else if (-5 == sharpsOrFlats) noteStr = "d flat";  // Db maj
+			else if (-6 == sharpsOrFlats) noteStr = "g flat";  // Gb maj
+			else if (-7 == sharpsOrFlats) noteStr = "c flat";  // Cb maj
 		}
 		else if (isMinor) {
 			tonalityStr = "minor";
-			if      (0  == sharpsOrFlats) noteStr = "a";        // A min
-			else if (1  == sharpsOrFlats) noteStr = "e";        // E min
-			else if (2  == sharpsOrFlats) noteStr = "b";        // B min
-			else if (3  == sharpsOrFlats) noteStr = "f :sharp"; // F# min
-			else if (4  == sharpsOrFlats) noteStr = "c :sharp"; // C# min
-			else if (5  == sharpsOrFlats) noteStr = "g :sharp"; // G# min
-			else if (6  == sharpsOrFlats) noteStr = "d :sharp"; // D# min
-			else if (7  == sharpsOrFlats) noteStr = "a :sharp"; // A# min
-			else if (-1 == sharpsOrFlats) noteStr = "d";        // D min
-			else if (-2 == sharpsOrFlats) noteStr = "g";        // G min
-			else if (-3 == sharpsOrFlats) noteStr = "c";        // C min
-			else if (-4 == sharpsOrFlats) noteStr = "f";        // F min
-			else if (-5 == sharpsOrFlats) noteStr = "b :flat";  // Bb min
-			else if (-6 == sharpsOrFlats) noteStr = "e :flat";  // Eb min
-			else if (-7 == sharpsOrFlats) noteStr = "a :flat";  // Ab min
+			if      (0  == sharpsOrFlats) noteStr = "a";       // A min
+			else if (1  == sharpsOrFlats) noteStr = "e";       // E min
+			else if (2  == sharpsOrFlats) noteStr = "b";       // B min
+			else if (3  == sharpsOrFlats) noteStr = "f sharp"; // F# min
+			else if (4  == sharpsOrFlats) noteStr = "c sharp"; // C# min
+			else if (5  == sharpsOrFlats) noteStr = "g sharp"; // G# min
+			else if (6  == sharpsOrFlats) noteStr = "d sharp"; // D# min
+			else if (7  == sharpsOrFlats) noteStr = "a sharp"; // A# min
+			else if (-1 == sharpsOrFlats) noteStr = "d";       // D min
+			else if (-2 == sharpsOrFlats) noteStr = "g";       // G min
+			else if (-3 == sharpsOrFlats) noteStr = "c";       // C min
+			else if (-4 == sharpsOrFlats) noteStr = "f";       // F min
+			else if (-5 == sharpsOrFlats) noteStr = "b flat";  // Bb min
+			else if (-6 == sharpsOrFlats) noteStr = "e flat";  // Eb min
+			else if (-7 == sharpsOrFlats) noteStr = "a flat";  // Ab min
 		}
 		
 		// invalid?
 		if (null == noteStr || null == tonalityStr)
 			return null;
 		
-		return "[:" + noteStr + " :" + tonalityStr + "]";
+		return "'(" + noteStr + " " + tonalityStr + ")";
 	}
 }
