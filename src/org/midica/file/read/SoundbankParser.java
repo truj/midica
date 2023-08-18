@@ -306,14 +306,21 @@ public class SoundbankParser implements IParser {
 	}
 	
 	/**
-	 * Returns the path of the URL cache directory.
+	 * Returns the URL cache directory.
+	 * 
+	 * If the directory doesn't exist yet, it will be created.
 	 * 
 	 * @return cache directory
 	 * @throws IOException
 	 */
-	public static String getUrlCacheDir() {
-		String homeDir = System.getProperty("user.home");
-		return homeDir + File.separator + ".midica.d" + File.separator + "sound_cache";
+	public static File getUrlCacheDir() {
+		
+		String cacheDirStr = System.getProperty("user.home")
+			+ File.separator + ".midica.d" + File.separator + "sound_cache";
+		File cacheDir = new File(cacheDirStr);
+		cacheDir.mkdirs();
+		
+		return cacheDir;
 	}
 	
 	/**
@@ -335,8 +342,7 @@ public class SoundbankParser implements IParser {
 		}
 		
 		// create cache directory, if not yet done
-		File cacheDir = new File(getUrlCacheDir());
-		cacheDir.mkdirs();
+		File cacheDir = getUrlCacheDir();
 		if (!cacheDir.exists())
 			throw new ParseException(Dict.get(Dict.COULDNT_CREATE_CACHE_DIR) + cacheDir);
 		

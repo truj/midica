@@ -279,8 +279,8 @@ public class SoundUrlHelper {
 			public void actionPerformed(ActionEvent event) {
 				try {
 					if (allUrls) {
-						String cacheDir = SoundbankParser.getUrlCacheDir();
-						for (File file : new File(cacheDir).listFiles()) {
+						File cacheDir = SoundbankParser.getUrlCacheDir();
+						for (File file : cacheDir.listFiles()) {
 							String name = file.getName();
 							if (name.matches(cacheFileRegex)) {
 								file.delete();
@@ -385,10 +385,10 @@ public class SoundUrlHelper {
 			btnDownload.setText(textBtn);
 			
 			// whole cache
-			String cacheDir  = SoundbankParser.getUrlCacheDir();
+			File   cacheDir  = SoundbankParser.getUrlCacheDir();
 			int    fileCount = 0;
 			double byteCount = 0;
-			for (File file : new File(cacheDir).listFiles()) {
+			for (File file : cacheDir.listFiles()) {
 				String name = file.getName();
 				if (name.matches(cacheFileRegex)) {
 					fileCount++;
@@ -423,9 +423,9 @@ public class SoundUrlHelper {
 	 * @throws NoSuchAlgorithmException
 	 */
 	private static File getCachedUrl() throws NoSuchAlgorithmException {
-		String cacheDir  = SoundbankParser.getUrlCacheDir();
+		File   cacheDir  = SoundbankParser.getUrlCacheDir();
 		String hash      = SoundbankParser.getUrlHash(url);
-		File   cachedUrl = new File(cacheDir + File.separator + hash);
+		File   cachedUrl = new File(cacheDir.getAbsoluteFile() + File.separator + hash);
 		return cachedUrl;
 	}
 }

@@ -13,6 +13,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowListener;
+import java.lang.reflect.Method;
 
 import javax.swing.Box;
 import javax.swing.ImageIcon;
@@ -116,6 +117,22 @@ public class UiView extends JFrame {
 		
 		// set app icon
 		setIconImage(appIcon.getImage());
+		
+		// Set the same icon in the panel (MacOS).
+		// This works only for Java 9 or higher.
+		try {
+			Class<?> taskbarClass = Class.forName("java.awt.Taskbar");
+			Method mIsSupported   = taskbarClass.getDeclaredMethod("isTaskbarSupported");
+			Method mGetTaskbar    = taskbarClass.getDeclaredMethod("getTaskbar");
+			Method mSetIconImage  = taskbarClass.getMethod("setIconImage", new Class[]{java.awt.Image.class});
+			boolean isSupported = (boolean) mIsSupported.invoke(null, new Object[] {});
+			if (isSupported) {
+				Object taskbar = mGetTaskbar.invoke(taskbarClass);
+				mSetIconImage.invoke(taskbar, appIcon.getImage());
+			}
+		}
+		catch (Exception e) {
+		}
 		
 		pack();
 		setVisible(true);
