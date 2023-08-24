@@ -207,6 +207,8 @@ public class MidicaPLExporter extends Decompiler {
 		HashMap<String, String> metaInfo     = (HashMap<String, String>) sequenceInfo.get("meta_info");
 		HashMap<String, Object> karaokeInfo  = KaraokeAnalyzer.getKaraokeInfo();
 		String copyright = (String) metaInfo.get("copyright");
+		if (copyright != null)
+			copyright = copyright.replace("\n", "\\n").replace("\r", "\\r"); // TODO: support multiple lines in MidicaPL
 		String[] fields = {"copyright", "title", "composer", "lyricist", "artist"};
 		String[] values = new String[5];
 		String[] mplIds = {
@@ -286,8 +288,14 @@ public class MidicaPLExporter extends Decompiler {
 			
 			// read value
 			String value = (String) karaokeInfo.get(fields[i]);
-			if (null == value)
+			if (null == value) {
 				continue;
+			}
+			else {
+				// Escaping \r and \n not allowed in soft karaoke.
+				// But newlines must be thrown out anyway.
+				value = value.replace("\n", " ").replace("\r", " ");
+			}
 			
 			// append the line
 			block.append("\t\t" + String.format("%-12s", mplIds[i]) + " " + value + NEW_LINE);
