@@ -16,6 +16,9 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.midica.file.write.MidicaPLExporter;
+import org.midica.ui.widget.FlowLabel;
+
 /**
  * This class provides methods to deal with Lyrics events, especially according to RP-026.
  * 
@@ -210,6 +213,54 @@ public final class LyricUtil {
 		text = encodeHashes(text);
 		text = tagPattern.matcher(text).replaceAll("");
 		text = decodeHashes(text);
+		
+		return text;
+	}
+	
+	/**
+	 * Unifies different kinds of newlines in the given text.
+	 * Transforms them all to \n.
+	 * 
+	 * - CRLF ==> LF
+	 * - LF ==> LF
+	 * - CR ==> LF
+	 * 
+	 * This is needed by the {@link FlowLabel} in order to display text from MIDI files.
+	 * It's also needed by the {@link MidicaPLExporter} to correctly interpret Meta messages.
+	 * 
+	 * @param text  the original text
+	 * @return the unified text
+	 */
+	public final String unifyNewlinesToLf(String text) {
+		
+		if (null == text)
+			return text;
+		
+		try {
+			MessageDigest md = MessageDigest.getInstance("MD5");
+			
+			// create placeholders
+			String cr   = new BigInteger(1, md.digest("\r".getBytes("ISO-8859-1"))).toString(16);
+			String lf   = new BigInteger(1, md.digest("\n".getBytes("ISO-8859-1"))).toString(16);
+			String crlf = new BigInteger(1, md.digest("\r\n".getBytes("ISO-8859-1"))).toString(16);
+			
+			// replace every possible cr-lf combination
+			text = text
+				.replace("\r\n", crlf)
+				.replace("\n",   lf)
+				.replace("\r",   cr);
+			
+			// convert \r\n to \n
+			text = text
+				.replace(crlf, lf)
+				.replace(cr, lf);
+			
+			// convert remaining placeholder back to \n
+			return text.replace(lf, "\n");
+		}
+		catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
 		
 		return text;
 	}

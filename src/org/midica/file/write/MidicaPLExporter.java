@@ -21,6 +21,7 @@ import org.midica.file.Instrument;
 import org.midica.file.read.MidicaPLParser;
 import org.midica.file.read.ParseException;
 import org.midica.midi.KaraokeAnalyzer;
+import org.midica.midi.LyricUtil;
 import org.midica.midi.SequenceAnalyzer;
 
 /**
@@ -207,8 +208,7 @@ public class MidicaPLExporter extends Decompiler {
 		HashMap<String, String> metaInfo     = (HashMap<String, String>) sequenceInfo.get("meta_info");
 		HashMap<String, Object> karaokeInfo  = KaraokeAnalyzer.getKaraokeInfo();
 		String copyright = (String) metaInfo.get("copyright");
-		if (copyright != null)
-			copyright = copyright.replace("\n", "\\n").replace("\r", "\\r"); // TODO: support multiple lines in MidicaPL
+		copyright = LyricUtil.getInstance().unifyNewlinesToLf(copyright);
 		String[] fields = {"copyright", "title", "composer", "lyricist", "artist"};
 		String[] values = new String[5];
 		String[] mplIds = {
@@ -288,14 +288,14 @@ public class MidicaPLExporter extends Decompiler {
 			
 			// read value
 			String value = (String) karaokeInfo.get(fields[i]);
-			if (null == value) {
+			if (null == value)
 				continue;
-			}
-			else {
-				// Escaping \r and \n not allowed in soft karaoke.
-				// But newlines must be thrown out anyway.
-				value = value.replace("\n", " ").replace("\r", " ");
-			}
+			
+			// Escaping \r and \n not allowed in soft karaoke.
+			// But newlines must be thrown out anyway.
+			// So we replace them with a space.
+			value = LyricUtil.getInstance().unifyNewlinesToLf(value);
+			value = value.replace("\n", " ");
 			
 			// append the line
 			block.append("\t\t" + String.format("%-12s", mplIds[i]) + " " + value + NEW_LINE);
@@ -306,12 +306,19 @@ public class MidicaPLExporter extends Decompiler {
 		if (infos != null) {
 			for (String info : infos) {
 				
-				// append info line
-				if (! "".equals(info))
-					block.append(
-						  "\t\t" + String.format("%-12s", MidicaPLParser.META_SK_INFO) + " "
-						+ info + NEW_LINE
-					);
+				// handle illegal newlines inside a single info message (@I...)
+				info = LyricUtil.getInstance().unifyNewlinesToLf(info);
+				String[] infoLineParts = info.split("\n");
+				
+				for (String infoPart : infoLineParts) {
+					
+					// append info line
+					if (! "".equals(infoPart))
+						block.append(
+							  "\t\t" + String.format("%-12s", MidicaPLParser.META_SK_INFO) + " "
+							+ infoPart + NEW_LINE
+						);
+				}
 			}
 		}
 		
@@ -1196,17 +1203,17 @@ public class MidicaPLExporter extends Decompiler {
 		
 		// escape \r and \n
 		if (isSoftKaraoke) {
-			syllable = syllable.replaceAll("\n", "_").replaceAll("\r", "_");
+			syllable = syllable.replace("\n", "_").replace("\r", "_");
 		}
 		else {
-			syllable = syllable.replaceAll("\n", "\\\\n").replaceAll("\r", "\\\\r");
+			syllable = syllable.replace("\n", "\\\\n").replace("\r", "\\\\r");
 		}
 		
 		// escape space and comma
-		syllable = syllable.replaceAll(" ", "_").replaceAll(",",  "\\\\c");
+		syllable = syllable.replace(" ", "_").replace(",",  "\\\\c");
 		
 		// escape comment symbols
-		syllable = syllable.replaceAll(MidicaPLParser.COMMENT, "/\\\\/");
+		syllable = syllable.replace(MidicaPLParser.COMMENT, "/\\\\/");
 		
 		return syllable;
 	}

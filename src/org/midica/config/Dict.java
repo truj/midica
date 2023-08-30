@@ -1701,6 +1701,7 @@ public class Dict {
 	
 	// AldaImporter
 	public static final String ERROR_ALDA_NO_MIDI_FILE           = "error_alda_no_midi_file";
+	public static final String ERROR_ALDA_MIDI_FILE_EMPTY        = "error_alda_midi_file_empty";
 	
 	// LilypondImporter
 	public static final String ERROR_LILYPOND_NO_MIDI_FILE       = "error_lilypond_no_midi_file";
@@ -3419,6 +3420,7 @@ public class Dict {
 		
 		// AldaImporter
 		set( ERROR_ALDA_NO_MIDI_FILE,             "<html>ALDA failed to create a MIDI file.<br>In most cases that means:<br>Too many Instruments." );
+		set( ERROR_ALDA_MIDI_FILE_EMPTY,          "ALDA created an empty MIDI file."                                  );
 		
 		// LilypondImporter
 		set( ERROR_LILYPOND_NO_MIDI_FILE,         "<html>LilyPond didn't create any MIDI file.<br>Did you forget to include a \\midi block?" );

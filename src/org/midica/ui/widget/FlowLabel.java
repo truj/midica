@@ -17,6 +17,7 @@ import javax.swing.UIManager;
 import javax.swing.border.Border;
 
 import org.midica.config.Laf;
+import org.midica.midi.LyricUtil;
 
 /**
  * This class provides a replacement for a {@link JLabel} that enables smoother
@@ -52,10 +53,10 @@ public class FlowLabel extends JScrollPane {
 	public FlowLabel(String content, int charsPerLine, int prefWidth) {
 		
 		// Create the label inside the scroll pane.
-		this.text           = content;
+		this.text           = LyricUtil.getInstance().unifyNewlinesToLf(content);
 		this.charsPerLine   = charsPerLine;
 		this.preferredWidth = prefWidth;
-		this.label          = new JTextArea(content);
+		this.label          = new JTextArea(text);
 		
 		// background color for nimbus
 		if (Laf.isNimbus) {

@@ -618,10 +618,10 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 	private void showErrorMessage(String message) {
 		
 		if (Cli.isCliMode) {
-			message = message.replaceAll( "<br>",     "\n" );
-			message = message.replaceAll( "</?b>",    ""   );
-			message = message.replaceAll( "</?html>", ""   );
-			message = message.replaceAll( "&nbsp;",   " "  );
+			message = message.replace("<br>", "\n");
+			message = message.replaceAll("</?b>", "");
+			message = message.replaceAll("</?html>", "");
+			message = message.replace("&nbsp;", " ");
 			System.err.println(message);
 			return;
 		}

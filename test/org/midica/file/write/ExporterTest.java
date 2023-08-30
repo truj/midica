@@ -10,6 +10,7 @@ package org.midica.file.write;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,27 @@ import org.midica.file.write.MidicaPLExporter;
  * @author Jan Trukenmüller
  */
 public class ExporterTest {
+	
+	// The following variables control which file types are tested in which part
+	// of the testing run.
+	// In manual testing runs, some formats may be commented out in order to save time.
+	// (Especially ALDA imports can take quite some time to be processed.)
+	// In automatic runs via commit hook, all types should be tested.
+	private static final String[] importTypes = new String[] {
+		"mpl",
+		"mid",
+		"alda"
+	};
+	private static final String[] exportTypes = new String[] {
+		"mpl",
+		"mid",
+		"alda"
+	};
+	private static final String[] reImportTypes = new String[] {
+		"mpl",
+		"mid",
+		"alda"
+	};
 	
 	/**
 	 * Initializes midica in test mode.
@@ -70,9 +92,6 @@ public class ExporterTest {
 		directories.add(TestUtil.getTestfileDirectory() + File.separator + "exporter");
 		directories.add(TestUtil.getTestfileDirectory() + File.separator + "midi-real-world");
 		
-		// types of export formats to test
-		String[] targetTypes = new String[] {"mpl", "mid", "alda"};
-		
 		for (String dirStr : directories) {
 			File dir = new File(dirStr);
 			
@@ -93,21 +112,24 @@ public class ExporterTest {
 					continue;
 				importer = getImporter(sourceType);
 				
-				// import source file
-				try {
-					importer.parse(file);
-				}
-				catch (Exception e) {
-					System.err.println("failed to parse source file: " + file.getAbsolutePath());
-					throw e;
-				}
+				// skip import?
+				if (!Arrays.asList(importTypes).contains(sourceType))
+					continue;
 				
-				// export and import again
-				for (String targetType : targetTypes) {
+				for (String exportType : exportTypes) {
+					
+					// import source file
+					try {
+						importer.parse(file);
+					}
+					catch (Exception e) {
+						System.err.println("failed to import source file: " + file.getAbsolutePath());
+						throw e;
+					}
 					
 					// export to target format
-					String   extension  = targetType;
-					Exporter exporter   = getExporter(targetType);
+					String   extension  = exportType;
+					Exporter exporter   = getExporter(exportType);
 					File decompiledFile = Foreign.createTempFile(extension, null);
 					try {
 						exporter.export(decompiledFile);
@@ -119,10 +141,16 @@ public class ExporterTest {
 						throw e;
 					}
 					
+					// skip re-import?
+					if (!Arrays.asList(reImportTypes).contains(exportType)) {
+						Foreign.deleteTempFile(decompiledFile);
+						continue;
+					}
+					
 					// re-import
-					importer = getImporter(targetType);
+					SequenceParser reImporter = getImporter(exportType);
 					try {
-						importer.parse(decompiledFile);
+						reImporter.parse(decompiledFile);
 					}
 					catch (Exception e) {
 						System.err.println("failed to re-import exported file."

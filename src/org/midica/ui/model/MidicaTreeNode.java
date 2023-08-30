@@ -246,9 +246,9 @@ public class MidicaTreeNode extends DefaultMutableTreeNode {
 		if (toolTipAttachment != null) {
 			return "<html>"
 				+ toString()
-				.replaceAll("&", "&amp;")
-				.replaceAll("<", "&lt;")
-				.replaceAll(">", "&gt;")
+				.replace("&", "&amp;")
+				.replace("<", "&lt;")
+				.replace(">", "&gt;")
 				+ toolTipAttachment;
 		}
 		

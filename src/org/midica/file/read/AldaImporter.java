@@ -36,6 +36,12 @@ import org.midica.midi.SequenceCreator;
  */
 public class AldaImporter extends MidiParser {
 	
+	// how often shall we sleep to wait for ALDA to create the MIDI file?
+	private static final int MAX_SLEEP_COUNT = 100;
+	
+	// how long shall we sleep each time (in milliseconds)
+	private static final int SLEEP_TIME = 200;
+	
 	// foreign program description for error messages
 	private static String programName = Dict.get(Dict.FOREIGN_PROG_ALDA);
 	
@@ -98,6 +104,21 @@ public class AldaImporter extends MidiParser {
 				throw new ParseException(Dict.get(Dict.ERROR_ALDA_NO_MIDI_FILE));
 			}
 			
+			// sometimes alda 2 needs a little more time to fill the MIDI file
+			if (0L == tempfile.length()) {
+				for (int i = 0; i < MAX_SLEEP_COUNT; i++) {
+					Thread.sleep(SLEEP_TIME);
+					
+					// file not empty any more?
+					if (tempfile.length() > 0L)
+						break;
+				}
+				
+				// file still empty?
+				if (0L == tempfile.length())
+					throw new ParseException(Dict.get(Dict.ERROR_ALDA_MIDI_FILE_EMPTY));
+			}
+			
 			// get MIDI from tempfile
 			Sequence sequence = MidiSystem.getSequence(tempfile);
 			
@@ -108,7 +129,7 @@ public class AldaImporter extends MidiParser {
 			createSequence(sequence);
 			postprocessSequence(sequence, chosenCharset); // analyze the original sequence
 		}
-		catch (ForeignException | InvalidMidiDataException | IOException e) {
+		catch (ForeignException | InvalidMidiDataException | IOException | InterruptedException e) {
 			throw new ParseException(e.getMessage());
 		}
 	}

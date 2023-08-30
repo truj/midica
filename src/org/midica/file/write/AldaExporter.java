@@ -372,6 +372,11 @@ public class AldaExporter extends Decompiler {
 	 */
 	private void createChordNotes(Slice slice, byte channel, long tick, TreeMap<String, TreeMap<Byte, String>> events) {
 		
+		// don't know how the events can be empty here, but in some cases they can...
+		// TODO: fix this in the decompiler
+		if (events.isEmpty())
+			return;
+		
 		// first usage in the current slice?
 		if (!usedInSlice.contains(srcInstrByChannel.get(channel))) {
 			

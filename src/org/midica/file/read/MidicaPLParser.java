@@ -3112,11 +3112,11 @@ public class MidicaPLParser extends SequenceParser {
 	 * @throws ParseException if a MIDI problem occurs.
 	 */
 	private void applySyllable(String syllable, long tick) throws ParseException {
-		syllable = syllable.replaceAll( Pattern.quote(LYRICS_SPACE), " "  );
-		syllable = syllable.replaceAll( Pattern.quote(LYRICS_COMMA), ","  );
+		syllable = syllable.replace(LYRICS_SPACE, " ");
+		syllable = syllable.replace(LYRICS_COMMA, ",");
 		if (!isSoftKaraoke) {
-			syllable = syllable.replaceAll( Pattern.quote(LYRICS_CR), "\r" );
-			syllable = syllable.replaceAll( Pattern.quote(LYRICS_LF), "\n" );
+			syllable = syllable.replace(LYRICS_CR, "\r");
+			syllable = syllable.replace(LYRICS_LF, "\n");
 		}
 		
 		try {
