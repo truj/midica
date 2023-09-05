@@ -10,13 +10,16 @@ package org.midica.config;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.Set;
 
 import javax.swing.AbstractButton;
 import javax.swing.BorderFactory;
+import javax.swing.InputMap;
 import javax.swing.JComponent;
 import javax.swing.JSeparator;
+import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
@@ -26,6 +29,7 @@ import javax.swing.border.TitledBorder;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.SeparatorUI;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
+import javax.swing.text.DefaultEditorKit;
 
 import org.midica.ui.painter.BackgroundPainter;
 import org.midica.ui.painter.BorderPainter;
@@ -111,6 +115,8 @@ public class Laf {
 	private static final Color COLOR_BLACK           = new Color(   0,   0,   0 );
 	private static final Color COLOR_INACTIVE        = new Color( 228, 228, 228 );
 	public  static final Color COLOR_HINT            = COLOR_BORDER;
+	public  static final Color COLOR_SELECTED_FG     = COLOR_BORDER_LIGHT;
+	public  static final Color COLOR_SELECTED_BG     = COLOR_BLACK;
 	
 	// button colors
 	private static final Color COLOR_BUTTON_PRIMARY    = COLOR_SECONDARY;
@@ -258,6 +264,25 @@ public class Laf {
 			String fontName = labelFont.getFontName();
 			int    fontSize = labelFont.getSize();
 			BOLD_LABEL_FONT = new Font(fontName, Font.BOLD, fontSize);
+		}
+		
+		// Mac OS: change key bindings for text widgets (Ctrl ==> Cmd)
+		if (System.getProperty("os.name").toLowerCase().startsWith("mac")) {
+			for (String widgetDesc : new String[] {"TextField.focusInputMap", "TextArea.focusInputMap"}) {
+				InputMap im = (InputMap) UIManager.get(widgetDesc);
+				
+				// remove ctrl-based key bindings
+				im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.CTRL_DOWN_MASK));
+				im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_DOWN_MASK));
+				im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_X, KeyEvent.CTRL_DOWN_MASK));
+				im.remove(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_DOWN_MASK));
+				
+				// add cmd-based key bindings
+				im.put(KeyStroke.getKeyStroke(KeyEvent.VK_C, KeyEvent.META_DOWN_MASK), DefaultEditorKit.copyAction);
+				im.put(KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.META_DOWN_MASK), DefaultEditorKit.pasteAction);
+				im.put(KeyStroke.getKeyStroke(KeyEvent.VK_X, KeyEvent.META_DOWN_MASK), DefaultEditorKit.cutAction);
+				im.put(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.META_DOWN_MASK), DefaultEditorKit.selectAllAction);
+			}
 		}
 	}
 	
@@ -462,8 +487,10 @@ public class Laf {
 		custom.put( "Table[Enabled+Selected].textBackground", COLOR_SECONDARY_LIGHT       );
 		custom.put( "List[Selected].textBackground",          COLOR_SECONDARY_LIGHT       );
 		custom.put( "List[Selected].textForeground",          COLOR_BLACK                 );
-		custom.put( "TextArea[Selected].textBackground",      COLOR_PRIMARY_DARK          );
-		custom.put( "TextArea[Selected].textForeground",      COLOR_SECONDARY_LIGHT       );
+		custom.put( "TextArea[Selected].textBackground",      COLOR_SELECTED_FG           );
+		custom.put( "TextArea[Selected].textForeground",      COLOR_SELECTED_BG           );
+		custom.put( "TextField[Selected].textBackground",     COLOR_SELECTED_FG           );
+		custom.put( "TextField[Selected].textForeground",     COLOR_SELECTED_BG           );
 		custom.put( "Tree.selectionForeground",               COLOR_MSG_TREE_SELECTED_TXT );
 		
 		// trees

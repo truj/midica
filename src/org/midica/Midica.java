@@ -39,7 +39,7 @@ public class Midica {
 	public static final int COMMIT_TIME = 1693413781;
 	
 	/** Branch name. Automatically changed by precommit.pl */
-	public static final String BRANCH = "master";
+	public static final String BRANCH = "keyboard";
 	
 	/** Full version string. */
 	public static final String VERSION = VERSION_MAJOR + "." + VERSION_MIDDLE + "." + VERSION_MINOR + ("master".equals(BRANCH) ? "" : "-" + BRANCH);
