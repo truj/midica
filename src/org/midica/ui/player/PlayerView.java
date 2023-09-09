@@ -1074,6 +1074,10 @@ public class PlayerView extends JDialog {
 		Dimension dim = new Dimension(NOTE_HISTORY_WIDTH, NOTE_HISTORY_HEIGHT);
 		pane.setPreferredSize(dim);
 		
+		// Fix ugly look on Windows screen resolution 1920x1080 and 150% scaling.
+		// Still ugly with this fix, but at least usable for the lower channels.
+		pane.setMinimumSize(dim);
+		
 		return pane;
 	}
 	
