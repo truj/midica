@@ -1018,13 +1018,27 @@ public class KeyBindingManager {
 		// special case: channel combobox in the soundcheck window?
 		if (Dict.TT_KEY_CBX_CHANNEL_SELECT.equals(id)) {
 			tt.append("<br><br>");
+			tt.append("<table><tr><td valign='top'>");
+			tt.append("<ul>");
 			for (int channel : bindingsToCbxChannel.keySet()) {
-				tt.append("&nbsp;&nbsp;&nbsp;- " + Dict.get(Dict.TT_KEY_CBX_SELECT_CHANNEL_N) + channel + ":<br>");
-				for (KeyBinding binding : bindingsToCbxChannel.get(channel)) {
-					tt.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;- " + binding.getDescription() + "<br>");
+				tt.append("<li>");
+					tt.append(Dict.get(Dict.TT_KEY_CBX_SELECT_CHANNEL_N) + channel);
+					tt.append("<ul>");
+						for (KeyBinding binding : bindingsToCbxChannel.get(channel)) {
+							tt.append("<li>" + binding.getDescription() + "</li>");
+						}
+					tt.append("</ul>");
+				tt.append("</li>");
+				
+				// switch column after every 4 channels
+				if (3 == channel || 7 == channel || 11 == channel) {
+					tt.append("</ul>");
+					tt.append("</td><td valign='top'>");
+					tt.append("<ul>");
 				}
-				tt.append("</ul></li>");
 			}
+			tt.append("</ul>");
+			tt.append("</td></tr></table>");
 		}
 		else {
 			// regular case: add one line for each key binding

@@ -776,6 +776,10 @@ public class UiView extends JFrame {
 		keyBindingManager.addBindingsForComboboxOpen( this.cbxPercussion, Dict.KEY_MAIN_CBX_PERCUSSION );
 		keyBindingManager.addBindingsForComboboxOpen( this.cbxInstrument, Dict.KEY_MAIN_CBX_INSTRUMENT );
 		
+		// add key bindings to toggle checkboxes
+		keyBindingManager.addBindingsForCheckbox( this.cbxRememberImport, Dict.KEY_MAIN_CBX_REMEMBER_IMPORT );
+		keyBindingManager.addBindingsForCheckbox( this.cbxRememberSound,  Dict.KEY_MAIN_CBX_REMEMBER_SOUND  );
+		
 		// postprocess key bindings
 		keyBindingManager.postprocess();
 	}

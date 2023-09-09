@@ -514,6 +514,8 @@ public class Dict {
 	public static final String KEY_MAIN_CBX_SYNTAX              = "key_main_cbx_syntax";
 	public static final String KEY_MAIN_CBX_PERCUSSION          = "key_main_cbx_percussion";
 	public static final String KEY_MAIN_CBX_INSTRUMENT          = "key_main_cbx_instrument";
+	public static final String KEY_MAIN_CBX_REMEMBER_IMPORT     = "key_main_cbx_remember_import";
+	public static final String KEY_MAIN_CBX_REMEMBER_SOUND      = "key_main_cbx_remember_sound";
 	public static final String KEY_PLAYER_CLOSE                 = "key_player_close";
 	public static final String KEY_PLAYER_PLAY                  = "key_player_play";
 	public static final String KEY_PLAYER_REPARSE               = "key_player_reparse";
@@ -2041,6 +2043,8 @@ public class Dict {
 		set( KEY_MAIN_CBX_SYNTAX,              "Open Syntax Selection"                                                       );
 		set( KEY_MAIN_CBX_PERCUSSION,          "Open Percussion ID Selection"                                                );
 		set( KEY_MAIN_CBX_INSTRUMENT,          "Open Instrument ID Selection"                                                );
+		set( KEY_MAIN_CBX_REMEMBER_IMPORT,     "Toggle \"Remember\" checkbox in the \"Import\" area"                         );
+		set( KEY_MAIN_CBX_REMEMBER_SOUND,      "Toggle \"Remember\" checkbox in the \"Soundbank\" area"                      );
 		set( KEY_PLAYER_CLOSE,                 "Close the player"                                                            );
 		set( KEY_PLAYER_PLAY,                  "Click the Play/Pause button"                                                 );
 		set( KEY_PLAYER_REPARSE,               "Reparse the current sequence"                                                );

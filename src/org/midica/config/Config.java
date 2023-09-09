@@ -442,6 +442,8 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_SYNTAX,              KeyEvent.VK_S,        alt                );
 		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_PERCUSSION,          KeyEvent.VK_P,        alt                );
 		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_INSTRUMENT,          KeyEvent.VK_I,        alt                );
+		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_REMEMBER_IMPORT,     KeyEvent.VK_R,        ctrl               );
+		addDefaultKeyBinding( Dict.KEY_MAIN_CBX_REMEMBER_SOUND,      KeyEvent.VK_R,        alt                );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_CLOSE,                 KeyEvent.VK_ESCAPE,   alt                );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_PLAY,                  KeyEvent.VK_SPACE,    0                  );
 		addDefaultKeyBinding( Dict.KEY_PLAYER_PLAY,                  KeyEvent.VK_P,        0                  );
