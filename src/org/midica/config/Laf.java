@@ -21,6 +21,7 @@ import javax.swing.JComponent;
 import javax.swing.JSeparator;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -284,6 +285,9 @@ public class Laf {
 				im.put(KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.META_DOWN_MASK), DefaultEditorKit.selectAllAction);
 			}
 		}
+		
+		// make tooltips appear longer
+		ToolTipManager.sharedInstance().setDismissDelay(30000);
 	}
 	
 	/**
