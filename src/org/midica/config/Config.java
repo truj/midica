@@ -697,6 +697,11 @@ public class Config {
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_BANKS_TOT_MIN,      KeyEvent.VK_MINUS,    ctrl               );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_BANKS_TOT_MIN,      KeyEvent.VK_SUBTRACT, ctrl               );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_BANKS_TOT_TREE,     KeyEvent.VK_T,        ctrl               );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_BANKS_CH_PL,        KeyEvent.VK_PLUS,     ctrl | shift       );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_BANKS_CH_PL,        KeyEvent.VK_ADD,      ctrl | shift       );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_BANKS_CH_MIN,       KeyEvent.VK_MINUS,    ctrl | shift       );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_BANKS_CH_MIN,       KeyEvent.VK_SUBTRACT, ctrl | shift       );
+		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_BANKS_CH_TREE,      KeyEvent.VK_T,        alt                );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_BANKS_CH_PL,        KeyEvent.VK_PLUS,     alt                );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_BANKS_CH_PL,        KeyEvent.VK_ADD,      alt                );
 		addDefaultKeyBinding( Dict.KEY_INFO_MIDI_BANKS_CH_MIN,       KeyEvent.VK_MINUS,    alt                );

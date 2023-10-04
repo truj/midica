@@ -16,9 +16,11 @@ import javax.sound.midi.MidiEvent;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.Sequence;
+import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Track;
 
 import org.midica.config.Config;
+import org.midica.config.Dict;
 import org.midica.file.CharsetUtils;
 import org.midica.midi.MidiDevices;
 import org.midica.midi.MidiListener;
@@ -135,6 +137,22 @@ public class MidiExporter extends Exporter {
 			for (int i=0; i < oldTrack.size(); i++) {
 				MidiEvent   event = oldTrack.get(i);
 				MidiMessage msg   = event.getMessage();
+				
+				// illegal short message? - warn and ignore
+				if (msg instanceof ShortMessage) {
+					int data1 = ((ShortMessage) msg).getData1();
+					int data2 = ((ShortMessage) msg).getData2();
+					if (data1 > 0x7F || data2 > 0x7F) {
+						int channel  = ((ShortMessage) msg).getChannel();
+						byte[] bytes = ((ShortMessage) msg).getMessage();
+						String msgStr = "";
+						for (byte b : bytes)
+							msgStr += String.format(" %02X", b);
+						exportResult.addWarning(trackNum, event.getTick(), (byte) channel, Dict.get(Dict.WARNING_ILLEGAL_SHORT_MESSAGE));
+						exportResult.setDetailsOfLastWarning(msgStr);
+						continue EVENT;
+					}
+				}
 				
 				// manipulate some meta messages
 				if (msg instanceof MetaMessage) {

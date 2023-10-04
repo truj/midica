@@ -80,6 +80,8 @@ public class ExportResultTableSorter<M> extends MidicaSorter<M> {
 				String warning = (String) tableModel.getValueAt(row, 3);
 				if (showShortMsg && warning.equals(Dict.get(Dict.WARNING_IGNORED_SHORT_MESSAGE)))
 					return true;
+				if (showShortMsg && warning.equals(Dict.get(Dict.WARNING_ILLEGAL_SHORT_MESSAGE)))
+					return true;
 				if (showMetaMsg && warning.equals(Dict.get(Dict.WARNING_IGNORED_META_MESSAGE)))
 					return true;
 				if (showSysexMsg && warning.equals(Dict.get(Dict.WARNING_IGNORED_SYSEX_MESSAGE)))
@@ -91,6 +93,7 @@ public class ExportResultTableSorter<M> extends MidicaSorter<M> {
 				if (showCrdGrpFailed && warning.equals(Dict.get(Dict.WARNING_CHORD_GROUPING_FAILED)))
 					return true;
 				if (showOther && ! warning.equals(Dict.get(Dict.WARNING_IGNORED_SHORT_MESSAGE))
+					&& ! warning.equals(Dict.get(Dict.WARNING_ILLEGAL_SHORT_MESSAGE))
 					&& ! warning.equals(Dict.get(Dict.WARNING_IGNORED_META_MESSAGE))
 					&& ! warning.equals(Dict.get(Dict.WARNING_IGNORED_SYSEX_MESSAGE))
 					&& ! warning.equals(Dict.get(Dict.WARNING_REST_SKIPPED))

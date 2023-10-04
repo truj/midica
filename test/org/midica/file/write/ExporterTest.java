@@ -22,7 +22,6 @@ import org.midica.file.read.MidiParser;
 import org.midica.file.read.MidicaPLParser;
 import org.midica.file.read.ParseException;
 import org.midica.file.read.SequenceParser;
-import org.midica.file.write.MidicaPLExporter;
 
 /**
  * This is the test class for file exporters.

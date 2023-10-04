@@ -1766,6 +1766,9 @@ public class Dict {
 	public static final String ERROR_CHANNEL                    = "error_channel";
 	public static final String ERROR_NOTE                       = "error_note";
 	
+	// MidiExporter
+	public static final String WARNING_ILLEGAL_SHORT_MESSAGE    = "warning_illegal_short_message";
+	
 	// MidicaPLExporter
 	public static final String WARNING_IGNORED_SHORT_MESSAGE    = "warning_ignored_short_message";
 	public static final String WARNING_IGNORED_META_MESSAGE     = "warning_ignored_meta_message";
@@ -3486,6 +3489,9 @@ public class Dict {
 		set( ERROR_TICK,                          "Tick"                                                              );
 		set( ERROR_CHANNEL,                       "Channel"                                                           );
 		set( ERROR_NOTE,                          "Note"                                                              );
+		
+		// MidiExporter
+		set( WARNING_ILLEGAL_SHORT_MESSAGE,       "Ignoring Short Message due to illegal data."                       );
 		
 		// MidicaPLExporter
 		set( WARNING_IGNORED_SHORT_MESSAGE,       "Ignored Short Message"                                             );
