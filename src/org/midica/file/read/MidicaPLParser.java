@@ -281,7 +281,6 @@ public class MidicaPLParser extends SequenceParser {
 	private   static Pattern                            varAssignPattern      = null;
 	private   static Pattern                            chordSepPattern       = null;
 	private   static Pattern                            compactChannelPattern = null;
-	private   static Pattern                            compactOptPattern     = null;
 	private   static Pattern                            invalidNoteIdxPattern = null;
 	private   static boolean                            isSoftKaraoke         = false;
 	public    static boolean                            isPlayingTupletBlock  = false;
@@ -701,9 +700,6 @@ public class MidicaPLParser extends SequenceParser {
 		// compact syntax
 		compactChannelPattern = Pattern.compile(
 			"^(\\d{1,2}|" + Pattern.quote(P) + ")" + Pattern.quote(COMPACT_CHANNEL) + "$"
-		);
-		compactOptPattern = Pattern.compile(
-			"^" + Pattern.quote(COMPACT_OPT_OPEN) + "(.+)" + Pattern.quote(COMPACT_OPT_CLOSE) + "$"
 		);
 		
 		// invalid note index inside of a block inside a pattern
@@ -2679,7 +2675,7 @@ public class MidicaPLParser extends SequenceParser {
 							String compactElement = patLineTokens[j];
 							
 							// option: (name=value)?
-							if (compactOptPattern.matcher(compactElement).matches())
+							if (hasCompactOptions(compactElement))
 								continue;
 							
 							// bar line?
@@ -3277,7 +3273,7 @@ public class MidicaPLParser extends SequenceParser {
 					String[] parts = compactElement.split(Pattern.quote(COMPACT_NOTE_SEP), 2);
 					
 					// rest or option? - leave unchanged
-					if (REST.equals(parts[0]) || compactOptPattern.matcher(compactElement).matches()) {
+					if (REST.equals(parts[0]) || hasCompactOptions(compactElement)) {
 						shiftedNotes.add(compactElement);
 					}
 					else if (compactElement.startsWith(BAR_LINE)) {
@@ -4815,14 +4811,24 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	public ArrayList<CommandOption> parseCompactOptions(String compactElement, boolean isFake) throws ParseException {
 		
-		Matcher optMatcher = compactOptPattern.matcher(compactElement);
-		if (optMatcher.matches()) {
+		if (hasCompactOptions(compactElement)) {
 			String optStr = compactElement.replaceFirst("^" + Pattern.quote(COMPACT_OPT_OPEN), "");
 			optStr = optStr.replaceFirst(Pattern.quote(COMPACT_OPT_CLOSE) + "$", "");
 			return parseOptions(optStr, isFake);
 		}
 		
 		return null;
+	}
+	
+	/**
+	 * Determins if the given compact element contains compact options.
+	 * That means, it starts with **(** and ends with **)**.
+	 * 
+	 * @param compactElement  the compact element to check
+	 * @return **true** if the compact element contains compact options
+	 */
+	private boolean hasCompactOptions(String compactElement) {
+		return compactElement.startsWith(COMPACT_OPT_OPEN) && compactElement.endsWith(COMPACT_OPT_CLOSE);
 	}
 	
 	/**
