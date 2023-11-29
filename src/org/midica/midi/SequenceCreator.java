@@ -482,6 +482,63 @@ public class SequenceCreator {
 	}
 	
 	/**
+	 * Adds a sound effect based on a direct channel message (no controller, no n/rpn).
+	 * 
+	 * @param effect   Status byte of the effect without the channel part.
+	 * @param channel  Channel number from 0 to 15.
+	 * @param data1    First data byte.
+	 * @param data2    Second data byte.
+	 * @param tick     MIDI tick.
+	 * @throws InvalidMidiDataException
+	 */
+	public static void addMessageChannelEffect(int effect, int channel, int data1, int data2, long tick) throws InvalidMidiDataException {
+		ShortMessage msg = new ShortMessage(effect, channel, data1, data2);
+		MidiEvent event = new MidiEvent(msg, tick);
+		tracks[channel + NUM_META_TRACKS].add(event);
+	}
+	
+	/**
+	 * Adds a sound effect based on a continous controller change.
+	 * 
+	 * @param ctrl     Continous controller number.
+	 * @param channel  Channel number from 0 to 15.
+	 * @param value    Value to be set.
+	 * @param tick     MIDI tick.
+	 * @throws InvalidMidiDataException
+	 */
+	public static void addMessageCtrl(int ctrl, int channel, int value, long tick) throws InvalidMidiDataException {
+		ShortMessage msg = new ShortMessage(ShortMessage.CONTROL_CHANGE, channel, ctrl, value);
+		MidiEvent event = new MidiEvent(msg, tick);
+		tracks[channel + NUM_META_TRACKS].add(event);
+	}
+	
+	/**
+	 * Adds a sound effect based on an RPN.
+	 * 
+	 * @param rpn      Number of the RPN.
+	 * @param channel  Channel number from 0 to 15.
+	 * @param value    Value to be set.
+	 * @param tick     MIDI tick.
+	 * @throws InvalidMidiDataException
+	 */
+	public static void addMessageRpn(int rpn, int channel, int value, long tick) throws InvalidMidiDataException {
+		// TODO: implement
+	}
+	
+	/**
+	 * Adds a sound effect based on an NRPN.
+	 * 
+	 * @param nrpn     Number of the RPN.
+	 * @param channel  Channel number from 0 to 15.
+	 * @param value    Value to be set.
+	 * @param tick     MIDI tick.
+	 * @throws InvalidMidiDataException
+	 */
+	public static void addMessageNrpn(int nrpn, int channel, int value, long tick) throws InvalidMidiDataException {
+		// TODO: implement
+	}
+	
+	/**
 	 * Adds a channel-dependent generic message.
 	 * This is called by the {@link MidiParser} to add messages that are not handled by another
 	 * method.

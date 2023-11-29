@@ -226,6 +226,63 @@ public class MidicaPLParser extends SequenceParser {
 	public static String TUPLET_INTRO       = null;
 	public static String TUPLET_FOR         = null;
 	public static String LENGTH_PLUS        = null;
+	public static String PL_DOT             = null;
+	public static String PL_KEEP            = null;
+	public static String PL_DOUBLE          = null;
+	public static String PL_CTRL            = null;
+	public static String PL_RPN             = null;
+	public static String PL_NRPN            = null;
+	public static String PL_ASSIGNER        = null;
+	public static String FUNC_SET           = null;
+	public static String FUNC_ON            = null;
+	public static String FUNC_OFF           = null;
+	public static String FUNC_LINE          = null;
+	public static String FUNC_SIN           = null;
+	public static String FUNC_COS           = null;
+	public static String FUNC_NSIN          = null;
+	public static String FUNC_NCOS          = null;
+	public static String FUNC_LENGTH        = null;
+	public static String FUNC_WAIT          = null;
+	public static String FUNC_NOTE          = null;
+	public static String CH_A_POLY_AT       = null;
+	public static String CH_D_MONO_AT       = null;
+	public static String CH_E_PITCH_BEND    = null;
+	public static String CC_01_MOD          = null;
+	public static String CC_02_BREATH       = null;
+	public static String CC_04_FOOT         = null;
+	public static String CC_05_PORT_TIME    = null;
+	public static String CC_08_BALANCE      = null;
+	public static String CC_0A_PAN          = null;
+	public static String CC_0B_EXPRESSION   = null;
+	public static String CC_0C_EFFECT_1     = null;
+	public static String CC_0D_EFFECT_2     = null;
+	public static String CC_40_HOLD_1       = null;
+	public static String CC_41_PORTAMENTO   = null;
+	public static String CC_42_SOSTENUTO    = null;
+	public static String CC_43_SOFT         = null;
+	public static String CC_44_LEGATO       = null;
+	public static String CC_45_HOLD_2       = null;
+	public static String CC_46_SC1_VAR      = null;
+	public static String CC_47_SC2_TIMB     = null;
+	public static String CC_48_SC3_REL_T    = null;
+	public static String CC_49_SC4_ATT_T    = null;
+	public static String CC_4A_SC5_BRI      = null;
+	public static String CC_4B_SC6_DEC_T    = null;
+	public static String CC_4C_SC7_VIB_R    = null;
+	public static String CC_4D_SC8_VIB_DP   = null;
+	public static String CC_4E_SC9_VIB_DL   = null;
+	public static String CC_54_PORTAMENTO   = null;
+	public static String CC_5B_EFF1_DEP     = null;
+	public static String CC_5C_EFF2_DEP     = null;
+	public static String CC_5D_EFF3_DEP     = null;
+	public static String CC_5E_EFF4_DEP     = null;
+	public static String CC_5F_EFF4_DEP     = null;
+	public static String RPN_0_PITCH_BEND_R = null;
+	public static String RPN_1_FINE_TUNE    = null;
+	public static String RPN_2_COARSE_TUNE  = null;
+	public static String RPN_3_TUNING_PROG  = null;
+	public static String RPN_4_TUNING_BANK  = null;
+	public static String RPN_5_MOD_DEPTH_R  = null;
 	
 	public static String ORIGINAL_DEFINE  = null;
 	public static String ORIGINAL_INCLUDE = null;
@@ -452,6 +509,63 @@ public class MidicaPLParser extends SequenceParser {
 		COND_GE            = Dict.getSyntax( Dict.SYNTAX_COND_GE            );
 		COND_IN            = Dict.getSyntax( Dict.SYNTAX_COND_IN            );
 		COND_IN_SEP        = Dict.getSyntax( Dict.SYNTAX_COND_IN_SEP        );
+		PL_DOT             = Dict.getSyntax( Dict.SYNTAX_PL_DOT             );
+		PL_KEEP            = Dict.getSyntax( Dict.SYNTAX_PL_KEEP            );
+		PL_DOUBLE          = Dict.getSyntax( Dict.SYNTAX_PL_DOUBLE          );
+		PL_CTRL            = Dict.getSyntax( Dict.SYNTAX_PL_CTRL            );
+		PL_RPN             = Dict.getSyntax( Dict.SYNTAX_PL_RPN             );
+		PL_NRPN            = Dict.getSyntax( Dict.SYNTAX_PL_NRPN            );
+		PL_ASSIGNER        = Dict.getSyntax( Dict.SYNTAX_PL_ASSIGNER        );
+		FUNC_SET           = Dict.getSyntax( Dict.SYNTAX_FUNC_SET           );
+		FUNC_ON            = Dict.getSyntax( Dict.SYNTAX_FUNC_ON            );
+		FUNC_OFF           = Dict.getSyntax( Dict.SYNTAX_FUNC_OFF           );
+		FUNC_LINE          = Dict.getSyntax( Dict.SYNTAX_FUNC_LINE          );
+		FUNC_SIN           = Dict.getSyntax( Dict.SYNTAX_FUNC_SIN           );
+		FUNC_COS           = Dict.getSyntax( Dict.SYNTAX_FUNC_COS           );
+		FUNC_NSIN          = Dict.getSyntax( Dict.SYNTAX_FUNC_NSIN          );
+		FUNC_NCOS          = Dict.getSyntax( Dict.SYNTAX_FUNC_NCOS          );
+		FUNC_LENGTH        = Dict.getSyntax( Dict.SYNTAX_FUNC_LENGTH        );
+		FUNC_WAIT          = Dict.getSyntax( Dict.SYNTAX_FUNC_WAIT          );
+		FUNC_NOTE          = Dict.getSyntax( Dict.SYNTAX_FUNC_NOTE          );
+		CH_A_POLY_AT       = Dict.getSyntax( Dict.SYNTAX_CH_A_POLY_AT       );
+		CH_D_MONO_AT       = Dict.getSyntax( Dict.SYNTAX_CH_D_MONO_AT       );
+		CH_E_PITCH_BEND    = Dict.getSyntax( Dict.SYNTAX_CH_E_PITCH_BEND    );
+		CC_01_MOD          = Dict.getSyntax( Dict.SYNTAX_CC_01_MOD          );
+		CC_02_BREATH       = Dict.getSyntax( Dict.SYNTAX_CC_02_BREATH       );
+		CC_04_FOOT         = Dict.getSyntax( Dict.SYNTAX_CC_04_FOOT         );
+		CC_05_PORT_TIME    = Dict.getSyntax( Dict.SYNTAX_CC_05_PORT_TIME    );
+		CC_08_BALANCE      = Dict.getSyntax( Dict.SYNTAX_CC_08_BALANCE      );
+		CC_0A_PAN          = Dict.getSyntax( Dict.SYNTAX_CC_0A_PAN          );
+		CC_0B_EXPRESSION   = Dict.getSyntax( Dict.SYNTAX_CC_0B_EXPRESSION   );
+		CC_0C_EFFECT_1     = Dict.getSyntax( Dict.SYNTAX_CC_0C_EFFECT_1     );
+		CC_0D_EFFECT_2     = Dict.getSyntax( Dict.SYNTAX_CC_0D_EFFECT_2     );
+		CC_40_HOLD_1       = Dict.getSyntax( Dict.SYNTAX_CC_40_HOLD_1       );
+		CC_41_PORTAMENTO   = Dict.getSyntax( Dict.SYNTAX_CC_41_PORTAMENTO   );
+		CC_42_SOSTENUTO    = Dict.getSyntax( Dict.SYNTAX_CC_42_SOSTENUTO    );
+		CC_43_SOFT         = Dict.getSyntax( Dict.SYNTAX_CC_43_SOFT         );
+		CC_44_LEGATO       = Dict.getSyntax( Dict.SYNTAX_CC_44_LEGATO       );
+		CC_45_HOLD_2       = Dict.getSyntax( Dict.SYNTAX_CC_45_HOLD_2       );
+		CC_46_SC1_VAR      = Dict.getSyntax( Dict.SYNTAX_CC_46_SC1_VAR      );
+		CC_47_SC2_TIMB     = Dict.getSyntax( Dict.SYNTAX_CC_47_SC2_TIMB     );
+		CC_48_SC3_REL_T    = Dict.getSyntax( Dict.SYNTAX_CC_48_SC3_REL_T    );
+		CC_49_SC4_ATT_T    = Dict.getSyntax( Dict.SYNTAX_CC_49_SC4_ATT_T    );
+		CC_4A_SC5_BRI      = Dict.getSyntax( Dict.SYNTAX_CC_4A_SC5_BRI      );
+		CC_4B_SC6_DEC_T    = Dict.getSyntax( Dict.SYNTAX_CC_4B_SC6_DEC_T    );
+		CC_4C_SC7_VIB_R    = Dict.getSyntax( Dict.SYNTAX_CC_4C_SC7_VIB_R    );
+		CC_4D_SC8_VIB_DP   = Dict.getSyntax( Dict.SYNTAX_CC_4D_SC8_VIB_DP   );
+		CC_4E_SC9_VIB_DL   = Dict.getSyntax( Dict.SYNTAX_CC_4E_SC9_VIB_DL   );
+		CC_54_PORTAMENTO   = Dict.getSyntax( Dict.SYNTAX_CC_54_PORTAMENTO   );
+		CC_5B_EFF1_DEP     = Dict.getSyntax( Dict.SYNTAX_CC_5B_EFF1_DEP     );
+		CC_5C_EFF2_DEP     = Dict.getSyntax( Dict.SYNTAX_CC_5C_EFF2_DEP     );
+		CC_5D_EFF3_DEP     = Dict.getSyntax( Dict.SYNTAX_CC_5D_EFF3_DEP     );
+		CC_5E_EFF4_DEP     = Dict.getSyntax( Dict.SYNTAX_CC_5E_EFF4_DEP     );
+		CC_5F_EFF4_DEP     = Dict.getSyntax( Dict.SYNTAX_CC_5F_EFF4_DEP     );
+		RPN_0_PITCH_BEND_R = Dict.getSyntax( Dict.SYNTAX_RPN_0_PITCH_BEND_R );
+		RPN_1_FINE_TUNE    = Dict.getSyntax( Dict.SYNTAX_RPN_1_FINE_TUNE    );
+		RPN_2_COARSE_TUNE  = Dict.getSyntax( Dict.SYNTAX_RPN_2_COARSE_TUNE  );
+		RPN_3_TUNING_PROG  = Dict.getSyntax( Dict.SYNTAX_RPN_3_TUNING_PROG  );
+		RPN_4_TUNING_BANK  = Dict.getSyntax( Dict.SYNTAX_RPN_4_TUNING_BANK  );
+		RPN_5_MOD_DEPTH_R  = Dict.getSyntax( Dict.SYNTAX_RPN_5_MOD_DEPTH_R  );
 		
 		// Remember the original names of some commands.
 		// Needed to redefine them without getting an error in the following parsing runs.
@@ -518,6 +632,9 @@ public class MidicaPLParser extends SequenceParser {
 				// compile regex patterns that are needed after the
 				// define run is finished.
 				compilePatterns();
+				
+				// organize syntax symbols for sound effects
+				Effect.init();
 				
 				// look for constant definitions
 				isConstParsRun = true;
@@ -3630,6 +3747,63 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_TUPLET_INTRO.equals(cmdId)       ) TUPLET_INTRO       = cmdName;
 		else if ( Dict.SYNTAX_TUPLET_FOR.equals(cmdId)         ) TUPLET_FOR         = cmdName;
 		else if ( Dict.SYNTAX_LENGTH_PLUS.equals(cmdId)        ) LENGTH_PLUS        = cmdName;
+		else if ( Dict.SYNTAX_PL_DOT.equals(cmdId)             ) PL_DOT             = cmdName;
+		else if ( Dict.SYNTAX_PL_KEEP.equals(cmdId)            ) PL_KEEP            = cmdName;
+		else if ( Dict.SYNTAX_PL_DOUBLE.equals(cmdId)          ) PL_DOUBLE          = cmdName;
+		else if ( Dict.SYNTAX_PL_CTRL.equals(cmdId)            ) PL_CTRL            = cmdName;
+		else if ( Dict.SYNTAX_PL_RPN.equals(cmdId)             ) PL_RPN             = cmdName;
+		else if ( Dict.SYNTAX_PL_NRPN.equals(cmdId)            ) PL_NRPN            = cmdName;
+		else if ( Dict.SYNTAX_PL_ASSIGNER.equals(cmdId)        ) PL_ASSIGNER        = cmdName;
+		else if ( Dict.SYNTAX_FUNC_SET.equals(cmdId)           ) FUNC_SET           = cmdName;
+		else if ( Dict.SYNTAX_FUNC_ON.equals(cmdId)            ) FUNC_ON            = cmdName;
+		else if ( Dict.SYNTAX_FUNC_OFF.equals(cmdId)           ) FUNC_OFF           = cmdName;
+		else if ( Dict.SYNTAX_FUNC_LINE.equals(cmdId)          ) FUNC_LINE          = cmdName;
+		else if ( Dict.SYNTAX_FUNC_SIN.equals(cmdId)           ) FUNC_SIN           = cmdName;
+		else if ( Dict.SYNTAX_FUNC_COS.equals(cmdId)           ) FUNC_COS           = cmdName;
+		else if ( Dict.SYNTAX_FUNC_NSIN.equals(cmdId)          ) FUNC_NSIN          = cmdName;
+		else if ( Dict.SYNTAX_FUNC_NCOS.equals(cmdId)          ) FUNC_NCOS          = cmdName;
+		else if ( Dict.SYNTAX_FUNC_LENGTH.equals(cmdId)        ) FUNC_LENGTH        = cmdName;
+		else if ( Dict.SYNTAX_FUNC_WAIT.equals(cmdId)          ) FUNC_WAIT          = cmdName;
+		else if ( Dict.SYNTAX_FUNC_NOTE.equals(cmdId)          ) FUNC_NOTE          = cmdName;
+		else if ( Dict.SYNTAX_CH_A_POLY_AT.equals(cmdId)       ) CH_A_POLY_AT       = cmdName;
+		else if ( Dict.SYNTAX_CH_D_MONO_AT.equals(cmdId)       ) CH_D_MONO_AT       = cmdName;
+		else if ( Dict.SYNTAX_CH_E_PITCH_BEND.equals(cmdId)    ) CH_E_PITCH_BEND    = cmdName;
+		else if ( Dict.SYNTAX_CC_01_MOD.equals(cmdId)          ) CC_01_MOD          = cmdName;
+		else if ( Dict.SYNTAX_CC_02_BREATH.equals(cmdId)       ) CC_02_BREATH       = cmdName;
+		else if ( Dict.SYNTAX_CC_04_FOOT.equals(cmdId)         ) CC_04_FOOT         = cmdName;
+		else if ( Dict.SYNTAX_CC_05_PORT_TIME.equals(cmdId)    ) CC_05_PORT_TIME    = cmdName;
+		else if ( Dict.SYNTAX_CC_08_BALANCE.equals(cmdId)      ) CC_08_BALANCE      = cmdName;
+		else if ( Dict.SYNTAX_CC_0A_PAN.equals(cmdId)          ) CC_0A_PAN          = cmdName;
+		else if ( Dict.SYNTAX_CC_0B_EXPRESSION.equals(cmdId)   ) CC_0B_EXPRESSION   = cmdName;
+		else if ( Dict.SYNTAX_CC_0C_EFFECT_1.equals(cmdId)     ) CC_0C_EFFECT_1     = cmdName;
+		else if ( Dict.SYNTAX_CC_0D_EFFECT_2.equals(cmdId)     ) CC_0D_EFFECT_2     = cmdName;
+		else if ( Dict.SYNTAX_CC_40_HOLD_1.equals(cmdId)       ) CC_40_HOLD_1       = cmdName;
+		else if ( Dict.SYNTAX_CC_41_PORTAMENTO.equals(cmdId)   ) CC_41_PORTAMENTO   = cmdName;
+		else if ( Dict.SYNTAX_CC_42_SOSTENUTO.equals(cmdId)    ) CC_42_SOSTENUTO    = cmdName;
+		else if ( Dict.SYNTAX_CC_43_SOFT.equals(cmdId)         ) CC_43_SOFT         = cmdName;
+		else if ( Dict.SYNTAX_CC_44_LEGATO.equals(cmdId)       ) CC_44_LEGATO       = cmdName;
+		else if ( Dict.SYNTAX_CC_45_HOLD_2.equals(cmdId)       ) CC_45_HOLD_2       = cmdName;
+		else if ( Dict.SYNTAX_CC_46_SC1_VAR.equals(cmdId)      ) CC_46_SC1_VAR      = cmdName;
+		else if ( Dict.SYNTAX_CC_47_SC2_TIMB.equals(cmdId)     ) CC_47_SC2_TIMB     = cmdName;
+		else if ( Dict.SYNTAX_CC_48_SC3_REL_T.equals(cmdId)    ) CC_48_SC3_REL_T    = cmdName;
+		else if ( Dict.SYNTAX_CC_49_SC4_ATT_T.equals(cmdId)    ) CC_49_SC4_ATT_T    = cmdName;
+		else if ( Dict.SYNTAX_CC_4A_SC5_BRI.equals(cmdId)      ) CC_4A_SC5_BRI      = cmdName;
+		else if ( Dict.SYNTAX_CC_4B_SC6_DEC_T.equals(cmdId)    ) CC_4B_SC6_DEC_T    = cmdName;
+		else if ( Dict.SYNTAX_CC_4C_SC7_VIB_R.equals(cmdId)    ) CC_4C_SC7_VIB_R    = cmdName;
+		else if ( Dict.SYNTAX_CC_4D_SC8_VIB_DP.equals(cmdId)   ) CC_4D_SC8_VIB_DP   = cmdName;
+		else if ( Dict.SYNTAX_CC_4E_SC9_VIB_DL.equals(cmdId)   ) CC_4E_SC9_VIB_DL   = cmdName;
+		else if ( Dict.SYNTAX_CC_54_PORTAMENTO.equals(cmdId)   ) CC_54_PORTAMENTO   = cmdName;
+		else if ( Dict.SYNTAX_CC_5B_EFF1_DEP.equals(cmdId)     ) CC_5B_EFF1_DEP     = cmdName;
+		else if ( Dict.SYNTAX_CC_5C_EFF2_DEP.equals(cmdId)     ) CC_5C_EFF2_DEP     = cmdName;
+		else if ( Dict.SYNTAX_CC_5D_EFF3_DEP.equals(cmdId)     ) CC_5D_EFF3_DEP     = cmdName;
+		else if ( Dict.SYNTAX_CC_5E_EFF4_DEP.equals(cmdId)     ) CC_5E_EFF4_DEP     = cmdName;
+		else if ( Dict.SYNTAX_CC_5F_EFF4_DEP.equals(cmdId)     ) CC_5F_EFF4_DEP     = cmdName;
+		else if ( Dict.SYNTAX_RPN_0_PITCH_BEND_R.equals(cmdId) ) RPN_0_PITCH_BEND_R = cmdName;
+		else if ( Dict.SYNTAX_RPN_1_FINE_TUNE.equals(cmdId)    ) RPN_1_FINE_TUNE    = cmdName;
+		else if ( Dict.SYNTAX_RPN_2_COARSE_TUNE.equals(cmdId)  ) RPN_2_COARSE_TUNE  = cmdName;
+		else if ( Dict.SYNTAX_RPN_3_TUNING_PROG.equals(cmdId)  ) RPN_3_TUNING_PROG  = cmdName;
+		else if ( Dict.SYNTAX_RPN_4_TUNING_BANK.equals(cmdId)  ) RPN_4_TUNING_BANK  = cmdName;
+		else if ( Dict.SYNTAX_RPN_5_MOD_DEPTH_R.equals(cmdId)  ) RPN_5_MOD_DEPTH_R  = cmdName;
 		else {
 			throw new ParseException(Dict.get(Dict.ERROR_UNKNOWN_COMMAND_ID) + cmdId);
 		}
@@ -4615,10 +4789,7 @@ public class MidicaPLParser extends SequenceParser {
 			if (invalidNoteIdxPattern.matcher(tokens[1]).matches()) {
 				return;
 			}
-			
 		}
-		
-		int note = parseNote(tokens[1], channel);
 		
 		// separate the duration from further arguments
 		String[] subTokens = tokens[2].split("\\s+", 2);
@@ -4628,9 +4799,19 @@ public class MidicaPLParser extends SequenceParser {
 		// replace variables in duration
 		if (isDefaultParsRun && ! isFake)
 			subTokens[0] = replaceVariables(subTokens[0]);
+		String durationStr = subTokens[0];
+		
+		// effect?
+		if (!isFake) {
+			if (Effect.applyPipelineIfPossible(channel, tokens[1], durationStr)) {
+				return;
+			}
+		}
+		
+		// note or rest
+		int note = parseNote(tokens[1], channel);
 		
 		// process duration
-		String durationStr = subTokens[0];
 		int duration;
 		if (isFake) {
 			if (varPattern.matcher(durationStr).find()) {
