@@ -1,9 +1,9 @@
 INCLUDE inc/instruments.midica
 
 1 ch3         /4
-1 bbb,c##,dbb /4
+1 bbb/c##/dbb /4
 
-CHORD ch1=c,d,e
+CHORD ch1=c/d/e
 CHORD ch2 f g 99
 
 FUNCTION test
@@ -11,22 +11,22 @@ FUNCTION test
 		0 ch1 /4
 		0 ch2 /4
 		0 ch3 /4
-		0 c,e,g /4
+		0 c/e/g /4
 	}
 	0 c /4
-	1 bbb,c##,dbb /8
+	1 bbb/c##/dbb /8
 	1 ch3         /8
 END
 CALL test q=3
 
-0 c,e,g /4
+0 c/e/g /4
 {
-	0 c,e,g /4
+	0 c/e/g /4
 }
-CHORD ch3 bbb, c##, dbb
+CHORD ch3 bbb/ c##/ dbb
 
 
-CHORD perc = to, bd1, sd1
+CHORD perc = to/ bd1/ sd1
 p: perc:4
 {
 	9: perc:4
@@ -35,5 +35,5 @@ p: perc:4
 	}
 }
 
-2: (m,d=100%) c+,e+:2 -:*1
-2  c+,e+  /2   m, d=100%
+2: (m,d=100%) c+/e+:2 -:*1
+2  c+/e+  /2   m, d=100%

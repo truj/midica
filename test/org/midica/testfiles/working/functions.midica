@@ -29,8 +29,8 @@ FUNCTION test4
 	0 c /4
 END
 
-FUNCTION test3                         // 4800
-	CALL test1(/4)                     // 2880
+FUNCTION test3                    // 4800
+	CALL test1(/4)                // 2880
 	CALL test2(dur=/2,l1=bbb,??)  // 1920
 END
 

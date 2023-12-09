@@ -82,8 +82,8 @@ END
 ///////////////////////////
 
 // define some guitar chords
-CHORD  amaj  a-2, e-, a-, c#
-CHORD  dmaj  d-,  a-, d,  f#
+CHORD  amaj  a-2 / e- / a- / c#
+CHORD  dmaj  d-  / a- / d  / f#
 
 // define a picking pattern for both chords
 PATTERN pick

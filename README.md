@@ -217,7 +217,7 @@ This example uses a guitar picking pattern with several chords. It produces the 
 	// Define the picking pattern (Travis picking)
 	// The numbers inside the pattern aren't channel numbers but note indices
 	PATTERN travis
-	    : 0,3:4  1:8 2 0 3 1 2
+	    : 0/3:4  1:8 2 0 3 1 2
 	END
 	
 	// play the chords using this pattern
@@ -266,7 +266,7 @@ It produces the first beats of "Another one bites the Dust":
 	// p = 9 = percussion channel
 	// hhc = hi-hat-closed, bd1 = base-drum-1, sd1 = snare-drum-1
 	FUNCTION drums
-	    p:   (v=127) hhc,bd1:8    (v=80) hhc   (v=127) hhc,bd1,sd1   (v=80) hhc
+	    p:   (v=127) hhc/bd1:8    (v=80) hhc   (v=127) hhc/bd1/sd1   (v=80) hhc
 	END
 
 The resulting sequence looks like this:

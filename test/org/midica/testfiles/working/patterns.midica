@@ -13,7 +13,7 @@ PATTERN pat_qvd
 	0      /4
 	1      /8
 	2      /16  q=2, v=127, d=10%
-	0,1,2  /4
+	0/1/2  /4
 END
 
 PATTERN pat_mtr
@@ -27,7 +27,7 @@ END
 
 // PART 1:
 // q+m as outer options, m+v+d as inner options
-0  c,e,g  pat_qvd  q=2, m
+0  c/e/g  pat_qvd  q=2, m
 0  c+3    /8
 0  -      *2
 
@@ -36,11 +36,11 @@ END
 // 0  c      /4
 // 0  e      /8
 // 0  g      /4        v=127, d=10%
-// 0  c,e,g  /16
+// 0  c/e/g  /16
 // 0  c      /4        v=90, d=80%
 // 0  e      /8
 // 0  g      /16       v=127, d=10%
-// 0  c,e,g  /4
+// 0  c/e/g  /4
 
 // PART 2:
 // v+d as outer options, no inner options
@@ -94,8 +94,8 @@ END
 
 1  c_maj      pat_ch129
 1  c_maj_rev  pat_ch129
-1  c,d        pat_ch129
-1  d,c        pat_ch129
+1  c/d        pat_ch129
+1  d/c        pat_ch129
 
 // same as:
 // 0  c  /4
@@ -115,8 +115,8 @@ END
 // channel 9:
 ////////////////////////////////////////////////////////////
 
-p  bd1,hhc  pat_ch129
-p  hhc,bd1  pat_ch129
+p  bd1/hhc  pat_ch129
+p  hhc/bd1  pat_ch129
 
 // same as:
 // 0  bd1  /4
@@ -140,7 +140,7 @@ END
 FUNCTION func2
 	{
 		{
-			2  e,c  pat_ch129  q=2, m
+			2  e/c  pat_ch129  q=2, m
 		}
 	}
 END
@@ -163,7 +163,7 @@ PATTERN pat_with_blocks
 		1  /4
 	}
 END
-3  e,c  pat_with_blocks  v=120
+3  e/c  pat_with_blocks  v=120
 
 ////////////////////////////////////////////////////////////
 // channel 4:
@@ -171,15 +171,15 @@ END
 
 PATTERN pat_out
 	0    /4
-	3,2  pat_in
+	3/2  pat_in
 END
 
 PATTERN pat_in
 	-    /8
-	0,1  /8
+	0/1  /8
 END
 
-4  c,d,e,f  pat_out
+4  c/d/e/f  pat_out
 
 ////////////////////////////////////////////////////////////
 // channel 5:
@@ -211,21 +211,21 @@ PATTERN upstroke_name
 	} m
 	- ${length}
 END
-5  f,e,d,c  upstroke_number ( /32 , /1 )
+5  f/e/d/c  upstroke_number ( /32 , /1 )
 5  -  /1
-5  f,e,d,c  upstroke_number ( /32 , /1 )  q=2
+5  f/e/d/c  upstroke_number ( /32 , /1 )  q=2
 5  -  /1
-5  f,e,d,c  upstroke_name(distance=/32,length=/1)  q=2
+5  f/e/d/c  upstroke_name(distance=/32,length=/1)  q=2
 5  -  /1
-5  f,e,d,c  cond_pattern(foo)     // if     ==> f
-5  f,e,d,c  cond_pattern(bar=123) // elsif  ==> e
-5  f,e,d,c  cond_pattern(bar)     // else   ==> d
+5  f/e/d/c  cond_pattern(foo)     // if     ==> f
+5  f/e/d/c  cond_pattern(bar=123) // elsif  ==> e
+5  f/e/d/c  cond_pattern(bar)     // else   ==> d
 CALL try_cond(foo)                // if     ==> f
 
 FUNCTION try_cond
 	{
 		{
-			5  f,e,d,c  cond_pattern ( $[0] )
+			5  f/e/d/c  cond_pattern ( $[0] )
 		}
 	}
 END

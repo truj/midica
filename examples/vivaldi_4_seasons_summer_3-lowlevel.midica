@@ -360,7 +360,7 @@ $c  f+2   /16
 CALL  c0m41part
 
 // m. 44
-$c  d,a+,e+2  /4
+$c  d/a+/e+2  /4
 $c  -         /16
 $c  d+        /16  q=2
 $c  f+        /16  q=2
@@ -397,7 +397,7 @@ $c  bb+   /16
 CALL  c0m45part
 
 // m. 48-50
-$c  d,d+,a+  /4
+$c  d/d+/a+  /4
 $c  -        /16
 $c  a+2      /16  q=2
 $c  g+2      /16  q=2
@@ -869,7 +869,7 @@ CALL  c0m109part
 CALL  c0m110
 
 // m. 113-114
-$c  g,d+  /16  m   // second voice (m. 113)
+$c  g/d+  /16  m   // second voice (m. 113)
 FUNCTION c0m113_114
 	// m. 113
 	$c  g-   /16
@@ -2125,33 +2125,33 @@ CALL  c0m6_9
 CALL  rest_full_measure
 
 // m. 11-20
-$c  g-,d     /4  q=6  // m. 11-12
-$c  g-,eb    /4  q=6  // m. 13-14
-$c  g-,c,g   /4  q=6  // m. 14-16
-$c  bb-,d    /4  q=3  // m. 17
-$c  bb-,d,g  /4  q=3  // m. 18
-$c  d,g,bb   /4  q=3  // m. 19
+$c  g-/d     /4  q=6  // m. 11-12
+$c  g-/eb    /4  q=6  // m. 13-14
+$c  g-/c/g   /4  q=6  // m. 14-16
+$c  bb-/d    /4  q=3  // m. 17
+$c  bb-/d/g  /4  q=3  // m. 18
+$c  d/g/bb   /4  q=3  // m. 19
 CALL  c2m20
 
 // m. 21-28
 { q=2
-	$c  f#,a,d+  /4  q=6  // m. 21-22 == 25-26
-	$c  d,g,bb   /4  q=3  // m. 23 == 27
-	$c  d,f#,a   /4  q=3  // m. 24 == 28
+	$c  f#/a/d+  /4  q=6  // m. 21-22 == 25-26
+	$c  d/g/bb   /4  q=3  // m. 23 == 27
+	$c  d/f#/a   /4  q=3  // m. 24 == 28
 }
 
 // m. 29-37
-$c  bb-,d,g  /2.  q=3  // m. 29-31
-$c  d,g,b    /2.       // m. 32
-$c  eb,g,c+  /2.       // m. 33
-$c  e,a,c#+  /2.       // m. 34
-$c  f,a,d+   /2.       // m. 35
-$c  e,a,d+   /2.       // m. 36
-$c  e,a,c#+  /2.       // m. 37
+$c  bb-/d/g  /2.  q=3  // m. 29-31
+$c  d/g/b    /2.       // m. 32
+$c  eb/g/c+  /2.       // m. 33
+$c  e/a/c#+  /2.       // m. 34
+$c  f/a/d+   /2.       // m. 35
+$c  e/a/d+   /2.       // m. 36
+$c  e/a/c#+  /2.       // m. 37
 
 // m. 38-41
 { q=2
-	$c  f,a,d+  /4
+	$c  f/a/d+  /4
 	$c  -       /2
 	CALL  rest_full_measure
 }
@@ -2169,109 +2169,109 @@ CALL  rest_full_measure  q=11
 }
 
 // m. 55-66
-$c  f,a      /2+/8  m  // m. 55
+$c  f/a      /2+/8  m  // m. 55
 $c  -        /2
 $c  d+       /8
 $c  -        /8
-$c  d,g,bb   /2+/8     // m. 56
+$c  d/g/bb   /2+/8     // m. 56
 $c  -        /8
-$c  e,g,c+   /2+/8     // m. 57
+$c  e/g/c+   /2+/8     // m. 57
 $c  -        /8
-$c  c,f,a    /2+/8     // m. 58
+$c  c/f/a    /2+/8     // m. 58
 $c  -        /8
-$c  d,f,a    /2+/8     // m. 59
+$c  d/f/a    /2+/8     // m. 59
 $c  -        /8
-$c  bb-,eb,g /2+/8     // m. 60
+$c  bb-/eb/g /2+/8     // m. 60
 $c  -        /8
-$c  c,f,ab   /2+/8     // m. 61
+$c  c/f/ab   /2+/8     // m. 61
 $c  -        /8
-$c  d,g,d+   /2+/8     // m. 62
+$c  d/g/d+   /2+/8     // m. 62
 $c  -        /8
-$c  d,f,b    /2+/8     // m. 63
+$c  d/f/b    /2+/8     // m. 63
 $c  -        /8
 { q=3                  // m. 64-66
-	$c  eb,g,c+  /2+/8
+	$c  eb/g/c+  /2+/8
 	$c  -        /8
 }
 
 // m. 67-70/1
-$c  g,c+     /2.  // m. 67
-$c  d,ab,c+  /2.  // m. 68
-$c  d,g,c+   /2   // m. 69/1
-$c  d,g,b    /4   // m. 69/2
-$c  eb,g,c+  /16  // m. 70/1
+$c  g/c+     /2.  // m. 67
+$c  d/ab/c+  /2.  // m. 68
+$c  d/g/c+   /2   // m. 69/1
+$c  d/g/b    /4   // m. 69/2
+$c  eb/g/c+  /16  // m. 70/1
 
 // m. 70/2-73
 CALL  c0m70second_73
 
 // m. 74-96
-$c  g,c+,eb+    /4  q=3  // m. 74
-$c  g,b,d+      /4       // m. 75
+$c  g/c+/eb+    /4  q=3  // m. 74
+$c  g/b/d+      /4       // m. 75
 $c  -           /2
-$c  g,c+,eb+    /4  q=3  // m. 76
-$c  bb,d+,f+    /4       // m. 77
+$c  g/c+/eb+    /4  q=3  // m. 76
+$c  bb/d+/f+    /4       // m. 77
 $c  -           /2
-$c  bb,eb+,g+   /4  q=3  // m. 78
-$c  bb,eb+,bb+  /4       // m. 79
+$c  bb/eb+/g+   /4  q=3  // m. 78
+$c  bb/eb+/bb+  /4       // m. 79
 $c  -           /2
-$c  eb,bb       /2.      // m. 80
-$c  c,eb,ab     /4       // m. 81
+$c  eb/bb       /2.      // m. 80
+$c  c/eb/ab     /4       // m. 81
 $c  -           /2
-$c  f,c+        /2.      // m. 82
-$c  d,bb        /4       // m. 83
+$c  f/c+        /2.      // m. 82
+$c  d/bb        /4       // m. 83
 $c  -           /2
-$c  g,d+        /2.      // m. 84
-$c  eb,g,c+     /2.      // m. 85
-$c  eb,ab       /2.      // m. 86
-$c  d,f,ab      /2.      // m. 87
-$c  d,g         /2.      // m. 88
-$c  c,eb,g      /2.      // m. 89
-$c  c,f         /2.      // m. 90
-$c  b-,d,f      /2.      // m. 91
+$c  g/d+        /2.      // m. 84
+$c  eb/g/c+     /2.      // m. 85
+$c  eb/ab       /2.      // m. 86
+$c  d/f/ab      /2.      // m. 87
+$c  d/g         /2.      // m. 88
+$c  c/eb/g      /2.      // m. 89
+$c  c/f         /2.      // m. 90
+$c  b-/d/f      /2.      // m. 91
 $c  c           /4       // m. 92
 $c  g           /4
 $c  c+          /4
-$c  a,c+,eb+    /2.      // m. 93
-$c  a,d+        /2.      // m. 94
-$c  g,bb,d+     /2.      // m. 95
-$c  g,c+        /2.      // m. 96
+$c  a/c+/eb+    /2.      // m. 93
+$c  a/d+        /2.      // m. 94
+$c  g/bb/d+     /2.      // m. 95
+$c  g/c+        /2.      // m. 96
 
 // m. 97-101
 CALL  rest_full_measure  q=5
 
 // m. 102-130
 $c  g-     /2.  q=2              // m. 102-103
-$c  g-,eb  /2.                   // m. 104
+$c  g-/eb  /2.                   // m. 104
 $c  c      /2.                   // m. 105
-$c  bb-,g  /2.                   // m. 106
-$c  c,a    /2.                   // m. 107
-$c  d,bb   /2.                   // m. 108
+$c  bb-/g  /2.                   // m. 106
+$c  c/a    /2.                   // m. 107
+$c  d/bb   /2.                   // m. 108
 
 { q=2                            // m. 109-112
-	$c  bb-,d  /4                // m. 109 == 111
-	$c  c,eb   /4  $p
-	$c  d,f#   /4
-	$c  eb,g   /4                // m. 110 == 112
-	$c  d,f    /4
-	$c  c,eb   /4
+	$c  bb-/d  /4                // m. 109 == 111
+	$c  c/eb   /4  $p
+	$c  d/f#   /4
+	$c  eb/g   /4                // m. 110 == 112
+	$c  d/f    /4
+	$c  c/eb   /4
 }
-$c  bb-,d    /4                  // m. 113
+$c  bb-/d    /4                  // m. 113
 $c  -        /2
 CALL  rest_full_measure       // m. 114
-$c  d,g,d+   /2.   $f            // m. 115
-$c  d,f#,a   /4                  // m. 116
+$c  d/g/d+   /2.   $f            // m. 115
+$c  d/f#/a   /4                  // m. 116
 $c  -        /2
 CALL  rest_full_measure  q=4  // m. 117-120
-$c  d,g      /2.                 // m. 121
-$c  eb,g,a   /2.                 // m. 122
-$c  d,f#,a   /2.                 // m. 123
-$c  d,g,bb   /4                  // m. 124
-$c  d,g      /2
-$c  d,g,a    /2.                 // m. 125
-$c  d,f#,a   /2.                 // m. 126
-$c  d,g,bb   /2.                 // m. 127
-$c  d,bb,d+  /2.                 // m. 128
-$c  d,g,bb   /4                  // m. 129
+$c  d/g      /2.                 // m. 121
+$c  eb/g/a   /2.                 // m. 122
+$c  d/f#/a   /2.                 // m. 123
+$c  d/g/bb   /4                  // m. 124
+$c  d/g      /2
+$c  d/g/a    /2.                 // m. 125
+$c  d/f#/a   /2.                 // m. 126
+$c  d/g/bb   /2.                 // m. 127
+$c  d/bb/d+  /2.                 // m. 128
+$c  d/g/bb   /4                  // m. 129
 $c  g        /4
 $c  d        /4
 $c  g-       /2.                 // m. 130

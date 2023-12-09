@@ -3,14 +3,14 @@ INCLUDE inc/instruments.midica
 // channel 0
 0: c                                   // c:/4 (0)
 0: d e:/8 f g g:/4                     // d:/4 (480)  e:/8 (960)  f:/8 (1200)  g:/8 (1440)  g:/4 (1680)
-0: a b,c+,d+,e+:/1 - f+:/8 g+:4        // a:/4 (2160)  b,c+,d+,e+:/1 (2640)  -:/1 (4560)  f+:/8 (6480)  g+:/4 (6720)
+0: a b/c+/d+/e+:/1 - f+:/8 g+:4        // a:/4 (2160)  b/c+/d+/e+:/1 (2640)  -:/1 (4560)  f+:/8 (6480)  g+:/4 (6720)
 { t, s=-12
 	0: c d:8                           // c-:/4t (7200)  d-:/8t (7520)
-	0: c d,e - f                       // c-:/8t (7680)  d-,e-:/8t (7840)  -:/8t (8000)  f-:/8t (8160)
+	0: c d/e - f                       // c-:/8t (7680)  d-/e-:/8t (7840)  -:/8t (8000)  f-:/8t (8160)
 	0: c d e:/2                        // c-:/8t (8320)  d-:/8t (8480)  e-:/2t (8640)
 	{ t=2:1, s=+12
 		0: c d:8                       // c-:/2tt2:1 (9280)  d-:/8tt2:1 (9600)
-		0: c d,e - f                   // c-:/8tt2:1 (9680)  d-,e-:/8tt2:1 (9760)  -:/8tt2:1 (9840)  f-:/8tt2:1 (9920)
+		0: c d/e - f                   // c-:/8tt2:1 (9680)  d-/e-:/8tt2:1 (9760)  -:/8tt2:1 (9840)  f-:/8tt2:1 (9920)
 		0: c d e:/2                    // c-:/8tt2:1 (10000)  d-:/8tt2:1 (10080)  e-:/2tt2:1 (10160)
 	}
 	0: c d:8                           // c-:/2t (10480)  d-:/8t (11120)
@@ -47,8 +47,8 @@ END
 
 
 // channel 3: patterns
-CHORD crd = c+,d+,e+
-3: c c,d,e:pat_complex(/2,x=30) c crd:pat_complex(/4,x=40) c
+CHORD crd = c+/d+/e+
+3: c c/d/e:pat_complex(/2,x=30) c crd:pat_complex(/4,x=40) c
 PATTERN pat_complex
 	0      /4
 	1      /8  v=${x}
@@ -73,19 +73,19 @@ END
 FUNCTION f4b
 	{
 		{
-			$[0]: c c,d,e:pat_complex($[1],x=$[2]) c crd:pat_complex($[3],x=$[4]) $[5]
+			$[0]: c c/d/e:pat_complex($[1],x=$[2]) c crd:pat_complex($[3],x=$[4]) $[5]
 		}
 	}
 END
 
 
 // channel 5: compact patterns
-CHORD cmaj         = c,d,e
-CHORD cmaj_reverse = e,d,c
-5: c,d,e:pat_outer(70)  c+  e,d,c:pat_outer(60)  c+  cmaj:pat_outer(50)  c+  cmaj_reverse:pat_outer(40)  c+
+CHORD cmaj         = c/d/e
+CHORD cmaj_reverse = e/d/c
+5: c/d/e:pat_outer(70)  c+  e/d/c:pat_outer(60)  c+  cmaj:pat_outer(50)  c+  cmaj_reverse:pat_outer(40)  c+
 PATTERN pat_outer
 	: (v=$[0]) 0
-	: 0 1 2 2,1,0:pat_inner(/2,v1=20,v2=30)
+	: 0 1 2 2/1/0:pat_inner(/2,v1=20,v2=30)
 	: 0 -:8 0
 END
 PATTERN pat_inner
@@ -141,7 +141,7 @@ FUNCTION f8
 		$c: c d                        // c(11640)  d(12600)
 	}
 	{ t
-		$c: f c,d,e:pat7 f g           // f(13560)
+		$c: f c/d/e:pat7 f g           // f(13560)
 		                               // c(14200) d(14440) e(14680)
 		                               // f(14920)  g(15560)
 		$c:                            // no-op command

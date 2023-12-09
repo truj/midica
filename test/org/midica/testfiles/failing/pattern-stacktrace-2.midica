@@ -2,5 +2,5 @@ INCLUDE inc/instruments.midica
 INCLUDE inc/pat-st-incl.midica
 
 {
-	0  c,d  pat_out  q=2, m
+	0  c/d  pat_out  q=2, m
 }

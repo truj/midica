@@ -2,6 +2,10 @@ INSTRUMENTS
 	0    PERCUSSIVE_ORGAN       PERCUSSIVE_ORGAN
 END
 
+// a double chord separator looks like a comment symbol. So we must redefine the chord separator
+// in order to test this.
+DEFINE CHORD_SEPARATOR ,
+
 CHORD crd=c,d,,e
 
 0  crd  /4  v=101

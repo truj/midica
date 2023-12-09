@@ -5,6 +5,6 @@ PATTERN pat
 	1 /4
 END
 
-0 c,d pat
-0 e,f pat
+0 c/d pat
+0 e/f pat
 0 c   pat

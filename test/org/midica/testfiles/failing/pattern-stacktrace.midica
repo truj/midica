@@ -16,7 +16,7 @@ END
 
 FUNCTION test
 	
-	0  c,d  pat  q=2, m
+	0  c/d  pat  q=2, m
 	
 END
 

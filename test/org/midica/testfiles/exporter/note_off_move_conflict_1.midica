@@ -3,7 +3,7 @@ INSTRUMENTS
 END
 
 0  c    /4 d=100%
-0  d,b  /4
+0  d/b  /4
 0  b    /4
 
 * tempo   95

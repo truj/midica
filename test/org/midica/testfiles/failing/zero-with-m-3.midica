@@ -5,7 +5,7 @@ CALL f
 FUNCTION f
 	{
 		{
-			0  c,d  pat
+			0  c/d  pat
 		}
 	}
 END

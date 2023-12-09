@@ -5,6 +5,6 @@ END
 DEFINE CHORD==CRD
 
 
-CRD crd c,d,e
+CRD crd c/d/e
 
 0  crd  /4  v=99

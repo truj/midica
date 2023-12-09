@@ -1,6 +1,6 @@
 INCLUDE inc/instruments.midica
 
-0 c,d,e  simple(foo, bar q=2, m
+0 c/d/e  simple(foo, bar q=2, m
 
 PATTERN simple
 	0      /4

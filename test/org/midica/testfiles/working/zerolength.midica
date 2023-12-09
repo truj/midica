@@ -5,8 +5,8 @@ INCLUDE inc/instruments.midica
 
 CALL func
 
-0  d,e,f  pat
-0  d,e,f  pat  v=110
+0  d/e/f  pat
+0  d/e/f  pat  v=110
 0  c  /1
 0  -  -  l=xyz
 

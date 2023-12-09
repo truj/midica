@@ -165,14 +165,14 @@ CONST  $c0m41part  =  a+ d a+
 $c: | a+2:16  $c0m41part  g+2  $c0m41part  f+2  $c0m41part | // m. 41
 $c: | e+2     $c0m41part  f+2  $c0m41part  g+2  $c0m41part | // m. 42
 $c: | a+2     $c0m41part  g+2  $c0m41part  f+2  $c0m41part | // m. 43
-$c: | d,a+,e+2:4   -:16  d+ d+ f+ f+ a+ a+ d+2             | // m. 44
+$c: | d/a+/e+2:4   -:16  d+ d+ f+ f+ a+ a+ d+2             | // m. 44
 
 // m. 45-50
 CONST  $c0m45part  =  d+ d d+
 $c: | d+2:16  $c0m45part  c+2  $c0m45part  bb+  $c0m45part | // m. 45
 $c: | a+      $c0m45part  bb+  $c0m45part  c#+2 $c0m45part | // m. 46
 $c: | d+2     $c0m45part  c+2  $c0m45part  bb+  $c0m45part | // m. 47
-$c: | d,d+,a+:4  -:16  a+2 a+2 g+2 g+2 f+2 f+2 eb+2        | // m. 48
+$c: | d/d+/a+:4  -:16  a+2 a+2 g+2 g+2 f+2 f+2 eb+2        | // m. 48
 $c: | eb+2 d+2 d+2 c+2 c+2 bb+ bb+ a+ a+ g+ g+ f+          | // m. 49
 $c: | f+   e+  e+  d+  d+  c+  c+  bb bb a  a  g#          | // m. 50
 
@@ -325,7 +325,7 @@ $c: | d+  $c0m109part   eb+ $c0m109part   f#+ $c0m109part | // m. 111
 $c: | g+  $c0m109part   f+  $c0m109part   eb+ $c0m109part | // m. 112
 
 // m. 113-115
-CHORD    crd0m113 = g-,g,d+
+CHORD    crd0m113 = g-/g/d+
 CALL     c0m113_115(crd0m113)
 FUNCTION c0m113_115
 	$c: | (length=/16) $[0]  g  a   bb   c+  d+ e+  f#+   g+  a+ bb+ a+ | // m. 113
@@ -918,22 +918,22 @@ CALL  c0m6_9
 CALL  rest_measure
 
 // m. 11-20
-$c: | (q=6) g-,d:4 | (q=6) g-,eb   | (q=6) g-,c,g |  // m. 11-16
-$c: | (q=3) bb-,d  | (q=3) bb-,d,g | (q=3) d,g,bb |  // m. 17-19
+$c: | (q=6) g-/d:4 | (q=6) g-/eb   | (q=6) g-/c/g |  // m. 11-16
+$c: | (q=3) bb-/d  | (q=3) bb-/d/g | (q=3) d/g/bb |  // m. 17-19
 CALL  c2m20
 
 // m. 21-31
 { q=2  // 21-22 == 25-26      23 == 27       24 == 28
-	$c: | (q=6) f#,a,d+:4 | (q=3) d,g,bb | (q=3) d,f#,a |
+	$c: | (q=6) f#/a/d+:4 | (q=3) d/g/bb | (q=3) d/f#/a |
 }
-$c: | (q=3) bb-,d,g:2. |    // m. 29-31
+$c: | (q=3) bb-/d/g:2. |    // m. 29-31
 
 // m. 32-37
-$c: | d,g,b | eb,g,c+ | e,a,c#+ | f,a,d+ | e,a,d+ | e,a,c#+ |
+$c: | d/g/b | eb/g/c+ | e/a/c#+ | f/a/d+ | e/a/d+ | e/a/c#+ |
 
 // m. 38-52
 { q=2
-	$c: | f,a,d+:4 -:2 |   // m. 38 == 40
+	$c: | f/a/d+:4 -:2 |   // m. 38 == 40
 	CALL  rest_measure     // m. 39 == 41
 }
 CALL  rest_measure  q=11       // m. 42-52
@@ -947,50 +947,50 @@ CALL  rest_measure  q=11       // m. 42-52
 }
 
 // m. 55
-$c: | (m) f,a:2+8      // 1st voice
+$c: | (m) f/a:2+8      // 1st voice
 $c: | -:2  d+:8 - |    // 2nd voice
 
 // m. 56-66
-$c: | d,g,bb:2+8 -:8   | e,g,c+:2+8 -:8 | c,f,a:2+8 -:8  | d,f,a:2+8 -:8 | // m. 56-59
-$c: | bb-,eb,g:2+8 -:8 | c,f,ab:2+8 -:8 | d,g,d+:2+8 -:8 | d,f,b:2+8 -:8 | // m. 60-63
+$c: | d/g/bb:2+8 -:8   | e/g/c+:2+8 -:8 | c/f/a:2+8 -:8  | d/f/a:2+8 -:8 | // m. 56-59
+$c: | bb-/eb/g:2+8 -:8 | c/f/ab:2+8 -:8 | d/g/d+:2+8 -:8 | d/f/b:2+8 -:8 | // m. 60-63
 { q=3
-	$c: | eb,g,c+:2+8 -:8 |                                                // m. 64-66
+	$c: | eb/g/c+:2+8 -:8 |                                                // m. 64-66
 }
 
 // m. 67-69
-$c: | g,c+:2. | d,ab,c+ | d,g,c+:2 d,g,b:4 |
+$c: | g/c+:2. | d/ab/c+ | d/g/c+:2 d/g/b:4 |
 
 // m. 70/2-73
-CHORD   crd6m70 = eb,g,c+
+CHORD   crd6m70 = eb/g/c+
 CALL    c0m70_73(crd6m70)
 
 // m. 74-79
-$c: | (q=3) g,c+,eb+:4   | // m. 74
-$c: | g,b,d+:4 -:2       | // m. 75
-$c: | (q=3) g,c+,eb+:4   | // m. 76
-$c: | bb,d+,f+:4 -:2     | // m. 77
-$c: | (q=3) bb,eb+,g+:4  | // m. 78
-$c: | bb,eb+,bb+:4 -:2   | // m. 79
+$c: | (q=3) g/c+/eb+:4   | // m. 74
+$c: | g/b/d+:4 -:2       | // m. 75
+$c: | (q=3) g/c+/eb+:4   | // m. 76
+$c: | bb/d+/f+:4 -:2     | // m. 77
+$c: | (q=3) bb/eb+/g+:4  | // m. 78
+$c: | bb/eb+/bb+:4 -:2   | // m. 79
 
 // m. 80-96
-$c: | eb,bb:2. | c,eb,ab:4 -:2 | f,c+:2.  | d,bb:4 -:2  | g,d+:2. | // m. 80-84
-$c: | eb,g,c+  | eb,ab         | d,f,ab   | d,g         | c,eb,g  | // m. 85-89
-$c: | c,f      | b-,d,f        | c:4 g c+ | a,c+,eb+:2. | a,d+    | // m. 90-94
-$c: | g,bb,d+  | g,c+          |                                    // m. 95-96
+$c: | eb/bb:2. | c/eb/ab:4 -:2 | f/c+:2.  | d/bb:4 -:2  | g/d+:2. | // m. 80-84
+$c: | eb/g/c+  | eb/ab         | d/f/ab   | d/g         | c/eb/g  | // m. 85-89
+$c: | c/f      | b-/d/f        | c:4 g c+ | a/c+/eb+:2. | a/d+    | // m. 90-94
+$c: | g/bb/d+  | g/c+          |                                    // m. 95-96
 
 // m. 97-101
 CALL  rest_measure  q=5
 
 // m. 102-130
-$c: | g-:2. | g- | g-,eb | c | bb-,g | c,a | d,bb |         // m. 102-108
+$c: | g-:2. | g- | g-/eb | c | bb-/g | c/a | d/bb |         // m. 102-108
 { q=2
-	$c: | bb-,d:4  $piano  c,eb  d,f#  | eb,g  d,f  c,eb |  // m. 109-112
+	$c: | bb-/d:4  $piano  c/eb  d/f#  | eb/g  d/f  c/eb |  // m. 109-112
 }
-$c: | bb-,d -:2 | -:2. | $forte d,g,d+ | d,f#,a:4 -:2    |  // m. 113-116
+$c: | bb-/d -:2 | -:2. | $forte d/g/d+ | d/f#/a:4 -:2    |  // m. 113-116
 CALL  rest_measure  q=4                                     // m. 117-120
-$c: | d,g:2.       | eb,g,a | d,f#,a | d,g,bb:4 d,g:2    |  // m. 121-124
-$c: | d,g,a:2.     | d,f#,a | d,g,bb | d,bb,d+           |  // m. 125-128
-$c: | d,g,bb:4 g d | g-:2.  |                               // m. 129-130
+$c: | d/g:2.       | eb/g/a | d/f#/a | d/g/bb:4 d/g:2    |  // m. 121-124
+$c: | d/g/a:2.     | d/f#/a | d/g/bb | d/bb/d+           |  // m. 125-128
+$c: | d/g/bb:4 g d | g-:2.  |                               // m. 129-130
 
 ////////////////////////////////////
 // channel 7: Organ or Harpsichord (Left Hand)

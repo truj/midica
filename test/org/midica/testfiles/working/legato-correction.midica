@@ -12,9 +12,9 @@ END
 0  e  /4
 
 // with chord
-1  c,d,e  /4  d=500%, v=102
+1  c/d/e  /4  d=500%, v=102
 1  f  /4
-1  g,d,a  /4
+1  g/d/a  /4
 
 // with shift
 2  c  /4  d=300%, v=35

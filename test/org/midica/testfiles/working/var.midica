@@ -20,7 +20,7 @@ FUNCTION test1
 	$c $n /4  d = $staccato
 	{ q=$q
 		$c $n     $l  d $staccato , v=$mezzoforte
-		$c $n,$n2 $l  d $medium_duration
+		$c $n/$n2 $l  d $medium_duration
 	}
 	VAR $c = 0
 	$c $n /4  d= $legato%,v=$forte

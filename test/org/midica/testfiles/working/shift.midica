@@ -22,7 +22,7 @@ END
 
 FUNCTION test2
 	0  c    /4             // c    /  a#-    /  c+     /  a#
-	0  c,d  /4             // c,d  /  a#-,c  /  c+,d+  /  a#,c+
+	0  c/d  /4             // c/d  /  a#-/c  /  c+/d+  /  a#/c+
 END
 
 // EXPECTED NOTE-ON MESSAGES:
@@ -31,8 +31,8 @@ END
 // d  e  c  a#-  c
 // 
 // CALL test1:
-// c  c  c,d  a#-  a#-,c
+// c  c  c/d  a#-  a#-/c
 // 
 // CALL test1  s=12
-// c+  c+  c+,d+  a#  a#,c+
+// c+  c+  c+/d+  a#  a#/c+
 // 

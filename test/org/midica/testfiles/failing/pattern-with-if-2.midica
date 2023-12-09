@@ -1,6 +1,6 @@
 INCLUDE inc/instruments.midica
 
-0  c,d,e  pat_a( y )
+0  c/d/e  pat_a( y )
 
 PATTERN pat_a
 	0  pat_b( x, y, z )  if $[0] == x

@@ -1,2 +1,2 @@
 INCLUDE inc/instruments.midica
-CHORD test c,d,c
+CHORD test c/d/c

@@ -133,10 +133,10 @@ class MidicaPLParserTest extends MidicaPLParser {
 		{
 			int i = 0;
 			// plain
-			assertEquals( "0/0/90/c / 64",        messages.get(i++).toString() ); // bbb,c##,dbb = a,d,c ==> c,d,a
+			assertEquals( "0/0/90/c / 64",        messages.get(i++).toString() ); // bbb/c##/dbb = a/d/c ==> c/d/a
 			assertEquals( "0/0/90/d / 64",        messages.get(i++).toString() );
 			assertEquals( "0/0/90/a / 64",        messages.get(i++).toString() );
-			assertEquals( "480/0/90/c / 64",      messages.get(i++).toString() ); // bbb,c##,dbb = a,d,c ==> c,d,a
+			assertEquals( "480/0/90/c / 64",      messages.get(i++).toString() ); // bbb/c##/dbb = a/d/c ==> c/d/a
 			assertEquals( "480/0/90/d / 64",      messages.get(i++).toString() );
 			assertEquals( "480/0/90/a / 64",      messages.get(i++).toString() );
 			assertEquals( "960/0/90/a+2 / 64",    messages.get(i++).toString() ); // bbb+2  = a+2
@@ -147,10 +147,10 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "3360/0/90/a#+4 / 64",  messages.get(i++).toString() ); // cbb+5  = a#+4
 			assertEquals( "3840/0/90/c#+4 / 64",  messages.get(i++).toString() ); // b##+3  = c#+4
 			// function + block
-			assertEquals( "4320/0/90/c / 64",     messages.get(i++).toString() ); // bbb,c##,dbb = a,d,c ==> c,d,a
+			assertEquals( "4320/0/90/c / 64",     messages.get(i++).toString() ); // bbb/c##/dbb = a/d/c ==> c/d/a
 			assertEquals( "4320/0/90/d / 64",     messages.get(i++).toString() );
 			assertEquals( "4320/0/90/a / 64",     messages.get(i++).toString() );
-			assertEquals( "4800/0/90/c / 64",     messages.get(i++).toString() ); // bbb,c##,dbb = a,d,c ==> c,d,a
+			assertEquals( "4800/0/90/c / 64",     messages.get(i++).toString() ); // bbb/c##/dbb = a/d/c ==> c/d/a
 			assertEquals( "4800/0/90/d / 64",     messages.get(i++).toString() );
 			assertEquals( "4800/0/90/a / 64",     messages.get(i++).toString() );
 			assertEquals( "5280/0/90/a+2 / 64",   messages.get(i++).toString() ); // bbb+2  = a+2
@@ -161,10 +161,10 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "7680/0/90/a#+4 / 64",  messages.get(i++).toString() ); // cbb+5  = a#+4
 			assertEquals( "8160/0/90/c#+4 / 64",  messages.get(i++).toString() ); // b##+3  = c#+4
 			// function
-			assertEquals( "8640/0/90/c / 64",     messages.get(i++).toString() ); // bbb,c##,dbb = a,d,c ==> c,d,a
+			assertEquals( "8640/0/90/c / 64",     messages.get(i++).toString() ); // bbb/c##/dbb = a/d/c ==> c/d/a
 			assertEquals( "8640/0/90/d / 64",     messages.get(i++).toString() );
 			assertEquals( "8640/0/90/a / 64",     messages.get(i++).toString() );
-			assertEquals( "9120/0/90/c / 64",     messages.get(i++).toString() ); // bbb,c##,dbb = a,d,c ==> c,d,a
+			assertEquals( "9120/0/90/c / 64",     messages.get(i++).toString() ); // bbb/c##/dbb = a/d/c ==> c/d/a
 			assertEquals( "9120/0/90/d / 64",     messages.get(i++).toString() );
 			assertEquals( "9120/0/90/a / 64",     messages.get(i++).toString() );
 			assertEquals( "9600/0/90/a+2 / 64",   messages.get(i++).toString() ); // bbb+2  = a+2
@@ -387,10 +387,15 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 14400, instruments.get(0).getCurrentTicks() );  // channel 0
 		assertEquals(  2880, instruments.get(1).getCurrentTicks() );  // channel 1
 		assertEquals(                                                 // channel 0
-			"abc... abc... abc... abc... abc... abc... xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd abc... abc... abc... abc... abc... abc... bbb?? bbb?? bbb?? bbb?? bbb?? bbb?? ",
+			"abc... abc... abc... abc... abc... abc... "      // CALL test1(/2)
+			+ "xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd "    // CALL test2(dur=/4, l1=xyz, 3rd, 4th) q=3, m
+			+ "xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd "
+			+ "xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd xyz3rd "
+			+ "abc... abc... abc... abc... abc... abc... "    // test3()
+			+ "bbb?? bbb?? bbb?? bbb?? bbb?? bbb?? ",
 			getLyrics()
 		);
-		messages = getMessagesByStatus("91");                           // channel 1
+		messages = getMessagesByStatus("91");                         // channel 1
 		assertEquals( 6, messages.size() );
 		{
 			int i = 0;
@@ -439,20 +444,20 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 14, messages.size() );
 		{
 			int i = 0;
-			assertEquals( "0/1/91/c / 102",    messages.get(i++).toString() ); // c,d,e : c ON
-			assertEquals( "0/1/91/d / 102",    messages.get(i++).toString() ); // c,d,e : d ON
-			assertEquals( "0/1/91/e / 102",    messages.get(i++).toString() ); // c,d,e : e ON
+			assertEquals( "0/1/91/c / 102",    messages.get(i++).toString() ); // c/d/e : c ON
+			assertEquals( "0/1/91/d / 102",    messages.get(i++).toString() ); // c/d/e : d ON
+			assertEquals( "0/1/91/e / 102",    messages.get(i++).toString() ); // c/d/e : e ON
 			assertEquals( "480/1/91/f / 102",  messages.get(i++).toString() ); // f     : f ON
-			assertEquals( "959/1/81/d / 0",    messages.get(i++).toString() ); // c,d,e : d OFF (correction)
-			assertEquals( "960/1/91/d / 102",  messages.get(i++).toString() ); // g,d,a : d ON
-			assertEquals( "960/1/91/g / 102",  messages.get(i++).toString() ); // g,d,a : g ON
-			assertEquals( "960/1/91/a / 102",  messages.get(i++).toString() ); // g,d,a : a ON
-			assertEquals( "2400/1/81/c / 0",   messages.get(i++).toString() ); // c,d,e : c OFF
-			assertEquals( "2400/1/81/e / 0",   messages.get(i++).toString() ); // c,d,e : e OFF
+			assertEquals( "959/1/81/d / 0",    messages.get(i++).toString() ); // c/d/e : d OFF (correction)
+			assertEquals( "960/1/91/d / 102",  messages.get(i++).toString() ); // g/d/a : d ON
+			assertEquals( "960/1/91/g / 102",  messages.get(i++).toString() ); // g/d/a : g ON
+			assertEquals( "960/1/91/a / 102",  messages.get(i++).toString() ); // g/d/a : a ON
+			assertEquals( "2400/1/81/c / 0",   messages.get(i++).toString() ); // c/d/e : c OFF
+			assertEquals( "2400/1/81/e / 0",   messages.get(i++).toString() ); // c/d/e : e OFF
 			assertEquals( "2880/1/81/f / 0",   messages.get(i++).toString() ); // f     : f OFF
-			assertEquals( "3360/1/81/d / 0",   messages.get(i++).toString() ); // g,d,a : d OFF
-			assertEquals( "3360/1/81/g / 0",   messages.get(i++).toString() ); // g,d,a : g OFF
-			assertEquals( "3360/1/81/a / 0",   messages.get(i++).toString() ); // g,d,a : a OFF
+			assertEquals( "3360/1/81/d / 0",   messages.get(i++).toString() ); // g/d/a : d OFF
+			assertEquals( "3360/1/81/g / 0",   messages.get(i++).toString() ); // g/d/a : g OFF
+			assertEquals( "3360/1/81/a / 0",   messages.get(i++).toString() ); // g/d/a : a OFF
 		}
 		// channel 2:
 		messages = getNoteOnOffMessagesByChannel(2);
@@ -799,14 +804,14 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "0/0/90/c / 64",      messages.get(i++).toString() );
 			assertEquals( "480/0/90/c / 64",    messages.get(i++).toString() );
 			assertEquals( "720/0/90/c / 64",    messages.get(i++).toString() );
-			// 0: crd2:pat_488 (crd2 = c+,d+)
+			// 0: crd2:pat_488 (crd2 = c+/d+)
 			assertEquals( "960/0/90/c+ / 64",   messages.get(i++).toString() );
 			assertEquals( "960/0/90/d+ / 64",   messages.get(i++).toString() );
 			assertEquals( "1440/0/90/c+ / 64",  messages.get(i++).toString() );
 			assertEquals( "1440/0/90/d+ / 64",  messages.get(i++).toString() );
 			assertEquals( "1680/0/90/c+ / 64",  messages.get(i++).toString() );
 			assertEquals( "1680/0/90/d+ / 64",  messages.get(i++).toString() );
-			// 0  crd3 pat_488 (crd3 = c+2,d+2,e+2)
+			// 0  crd3 pat_488 (crd3 = c+2/d+2/e+2)
 			assertEquals( "1920/0/90/c+2 / 64", messages.get(i++).toString() );
 			assertEquals( "1920/0/90/d+2 / 64", messages.get(i++).toString() );
 			assertEquals( "1920/0/90/e+2 / 64", messages.get(i++).toString() );
@@ -820,14 +825,14 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "2880/0/90/c / 64",   messages.get(i++).toString() );
 			assertEquals( "3360/0/90/c / 64",   messages.get(i++).toString() );
 			assertEquals( "3600/0/90/c / 64",   messages.get(i++).toString() );
-			// 0: c+,d+:pat_488
+			// 0: c+/d+:pat_488
 			assertEquals( "3840/0/90/c+ / 64",  messages.get(i++).toString() );
 			assertEquals( "3840/0/90/d+ / 64",  messages.get(i++).toString() );
 			assertEquals( "4320/0/90/c+ / 64",  messages.get(i++).toString() );
 			assertEquals( "4320/0/90/d+ / 64",  messages.get(i++).toString() );
 			assertEquals( "4560/0/90/c+ / 64",  messages.get(i++).toString() );
 			assertEquals( "4560/0/90/d+ / 64",  messages.get(i++).toString() );
-			// 0: c+2,d+2,e+2:pat_488
+			// 0: c+2/d+2/e+2:pat_488
 			assertEquals( "4800/0/90/c+2 / 64", messages.get(i++).toString() );
 			assertEquals( "4800/0/90/d+2 / 64", messages.get(i++).toString() );
 			assertEquals( "4800/0/90/e+2 / 64", messages.get(i++).toString() );
@@ -855,24 +860,24 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 20, messages.size() );
 		{
 			int i = 0;
-			// 2: c+,d+:pat_order_x2_up
+			// 2: c+/d+:pat_order_x2_up
 			assertEquals( "0/2/92/c+ / 64",      messages.get(i++).toString() );
 			assertEquals( "480/2/92/d+ / 64",   messages.get(i++).toString() );
 			assertEquals( "960/2/92/c+ / 64",   messages.get(i++).toString() );
 			assertEquals( "1440/2/92/d+ / 64",   messages.get(i++).toString() );
-			// 2: c+,d+:pat_order_x2_down
+			// 2: c+/d+:pat_order_x2_down
 			assertEquals( "1920/2/92/d+ / 64",   messages.get(i++).toString() );
 			assertEquals( "2400/2/92/c+ / 64",   messages.get(i++).toString() );
 			assertEquals( "2880/2/92/d+ / 64",   messages.get(i++).toString() );
 			assertEquals( "3360/2/92/c+ / 64",   messages.get(i++).toString() );
-			// 2  c+2,d+2,e+2  pat_order_x2_up
+			// 2  c+2/d+2/e+2  pat_order_x2_up
 			assertEquals( "3840/2/92/c+2 / 64",   messages.get(i++).toString() );
 			assertEquals( "4320/2/92/d+2 / 64",   messages.get(i++).toString() );
 			assertEquals( "4800/2/92/e+2 / 64",   messages.get(i++).toString() );
 			assertEquals( "5280/2/92/c+2 / 64",   messages.get(i++).toString() );
 			assertEquals( "5760/2/92/d+2 / 64",   messages.get(i++).toString() );
 			assertEquals( "6240/2/92/e+2 / 64",   messages.get(i++).toString() );
-			// 2  c+2,d+2,e+2  pat_order_x2_down
+			// 2  c+2/d+2/e+2  pat_order_x2_down
 			assertEquals( "6720/2/92/e+2 / 64",   messages.get(i++).toString() );
 			assertEquals( "7200/2/92/d+2 / 64",   messages.get(i++).toString() );
 			assertEquals( "7680/2/92/c+2 / 64",   messages.get(i++).toString() );
@@ -885,7 +890,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 14, messages.size() );
 		{
 			int i = 0;
-			// 3: c,d,e:pat_outer
+			// 3: c/d/e:pat_outer
 			assertEquals( "0/3/93/e / 64",      messages.get(i++).toString() ); // outer
 			assertEquals( "480/3/93/c / 64",    messages.get(i++).toString() ); // inner
 			assertEquals( "480/3/93/e / 64",    messages.get(i++).toString() ); // inner
@@ -893,7 +898,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "1440/3/93/c / 64",   messages.get(i++).toString() ); // outer
 			assertEquals( "1440/3/93/d / 64",   messages.get(i++).toString() ); // outer
 			assertEquals( "1440/3/93/e / 64",   messages.get(i++).toString() ); // outer
-			// 3  c+,d+,e+ pat_outer
+			// 3  c+/d+/e+ pat_outer
 			assertEquals( "1920/3/93/e+ / 64",   messages.get(i++).toString() ); // outer
 			assertEquals( "2400/3/93/c+ / 64",   messages.get(i++).toString() ); // inner
 			assertEquals( "2400/3/93/e+ / 64",   messages.get(i++).toString() ); // inner
@@ -920,7 +925,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "0/9/99/slap (sl) / 64",      messages.get(i++).toString() );
 			assertEquals( "480/9/99/slap (sl) / 64",    messages.get(i++).toString() );
 			assertEquals( "720/9/99/slap (sl) / 64",    messages.get(i++).toString() );
-			// p  slap,cla pat_488
+			// p  slap/cla pat_488
 			assertEquals( "960/9/99/slap (sl) / 64",    messages.get(i++).toString() );
 			assertEquals( "960/9/99/clave (cla) / 64",  messages.get(i++).toString() );
 			assertEquals( "1440/9/99/slap (sl) / 64",   messages.get(i++).toString() );
@@ -986,12 +991,12 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "0/0/90/c / 10",     messages.get(i++).toString() ); // 0  c  /1
 			assertEquals( "1920/0/90/c+ / 20", messages.get(i++).toString() ); // CALL func
 			
-			// 0  d,e,f  pat
+			// 0  d/e/f  pat
 			assertEquals( "3840/0/90/d / 20",  messages.get(i++).toString() );
 			assertEquals( "4320/0/90/e / 30",  messages.get(i++).toString() );
 			assertEquals( "4800/0/90/f / 40",  messages.get(i++).toString() );
 			
-			// 0  d,e,f  pat  v=110
+			// 0  d/e/f  pat  v=110
 			assertEquals( "5280/0/90/d / 110", messages.get(i++).toString() );
 			assertEquals( "5760/0/90/e / 30",  messages.get(i++).toString() );
 			assertEquals( "6240/0/90/f / 40",  messages.get(i++).toString() );
@@ -1036,7 +1041,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "1440/0/90/g / 64", messages.get(i++).toString() );
 			assertEquals( "1680/0/90/g / 64", messages.get(i++).toString() );
 			
-			// root level: 0: a b,c+,d+,e+:/1 - f+:/8 g+:4
+			// root level: 0: a b/c+/d+/e+:/1 - f+:/8 g+:4
 			assertEquals( "2160/0/90/a / 64", messages.get(i++).toString() );
 			assertEquals( "2640/0/90/b / 64", messages.get(i++).toString() );
 			assertEquals( "2640/0/90/c+ / 64", messages.get(i++).toString() );
@@ -1050,7 +1055,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "7200/0/90/c- / 64", messages.get(i++).toString() );
 				assertEquals( "7520/0/90/d- / 64", messages.get(i++).toString() );
 				
-				// 0: c d,e - f
+				// 0: c d/e - f
 				assertEquals( "7680/0/90/c- / 64", messages.get(i++).toString() );
 				assertEquals( "7840/0/90/d- / 64", messages.get(i++).toString() );
 				assertEquals( "7840/0/90/e- / 64", messages.get(i++).toString() );
@@ -1066,7 +1071,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 					assertEquals( "9280/0/90/c / 64", messages.get(i++).toString() );
 					assertEquals( "9600/0/90/d / 64", messages.get(i++).toString() );
 					
-					// 0: c d,e - f
+					// 0: c d/e - f
 					assertEquals( "9680/0/90/c / 64", messages.get(i++).toString() );
 					assertEquals( "9760/0/90/d / 64", messages.get(i++).toString() );
 					assertEquals( "9760/0/90/e / 64", messages.get(i++).toString() );
@@ -1169,7 +1174,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 			int i = 0;
 			
 			{
-				// c,d,e:pat_outer(70)
+				// c/d/e:pat_outer(70)
 				assertEquals( "0/5/95/c / 70", messages.get(i++).toString() );
 				assertEquals( "480/5/95/c / 70", messages.get(i++).toString() );
 				assertEquals( "960/5/95/d / 70", messages.get(i++).toString() );
@@ -1186,7 +1191,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 			}
 			assertEquals( "7680/5/95/c+ / 64", messages.get(i++).toString() );
 			{
-				// e,d,c:pat_outer(60)
+				// e/d/c:pat_outer(60)
 				assertEquals( "8160/5/95/e / 60", messages.get(i++).toString() );
 				assertEquals( "8640/5/95/e / 60", messages.get(i++).toString() );
 				assertEquals( "9120/5/95/d / 60", messages.get(i++).toString() );
@@ -1415,7 +1420,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 			// }
 			// { q=2 (second run)
 				// (q=2) d:4
-				assertEquals( "3840/1/91/d / 64",  messages.get(i++).toString() );
+				assertEquals( "3840/1/91/d / 64", messages.get(i++).toString() );
 				assertEquals( "4320/1/91/d / 64", messages.get(i++).toString() );
 				// { m
 					// e (m) f
@@ -1435,7 +1440,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 			
 			// c
 			assertEquals( "0/2/92/c / 64", messages.get(i++).toString() );
-			// (m,q=2) d,e:pat (first run) f:*2
+			// (m,q=2) d/e:pat (first run) f:*2
 				// : (q=2) 0:4
 				assertEquals( "480/2/92/d / 64",  messages.get(i++).toString() );
 				assertEquals( "480/2/92/f / 64",  messages.get(i++).toString() );
@@ -1443,19 +1448,19 @@ class MidicaPLParserTest extends MidicaPLParser {
 				// : (m) 0 1
 				assertEquals( "1440/2/92/d / 64",  messages.get(i++).toString() );
 				assertEquals( "1440/2/92/e / 64",  messages.get(i++).toString() );
-				// : (tr=32) 0,1:16
+				// : (tr=32) 0/1:16
 				assertEquals( "1920/2/92/d / 64",  messages.get(i++).toString() );
 				assertEquals( "1920/2/92/e / 64",  messages.get(i++).toString() );
 				assertEquals( "1980/2/92/d / 64",  messages.get(i++).toString() );
 				assertEquals( "1980/2/92/e / 64",  messages.get(i++).toString() );
-			// (m,q=2) d,e:pat (second run)
+			// (m,q=2) d/e:pat (second run)
 				// : (q=2) 0:4
 				assertEquals( "2040/2/92/d / 64",  messages.get(i++).toString() );
 				assertEquals( "2520/2/92/d / 64",  messages.get(i++).toString() );
 				// : (m) 0 1
 				assertEquals( "3000/2/92/d / 64",  messages.get(i++).toString() );
 				assertEquals( "3000/2/92/e / 64",  messages.get(i++).toString() );
-				// : (tr=32) 0,1:16
+				// : (tr=32) 0/1:16
 				assertEquals( "3480/2/92/d / 64",  messages.get(i++).toString() );
 				assertEquals( "3480/2/92/e / 64",  messages.get(i++).toString() );
 				assertEquals( "3540/2/92/d / 64",  messages.get(i++).toString() );
@@ -1481,8 +1486,15 @@ class MidicaPLParserTest extends MidicaPLParser {
 		for (File file : dir.listFiles()) {
 			if (!file.isFile())
 				continue;
-			if (file.getName().endsWith(".midica") || file.getName().endsWith(".mpl"))
-				parse(file);
+			if (file.getName().endsWith(".midica") || file.getName().endsWith(".mpl")) {
+				try {
+					parse(file);
+				}
+				catch (Exception e) {
+					System.err.println(file.getAbsolutePath() + " failed.");
+					throw e;
+				}
+			}
 		}
 	}
 	
@@ -1662,37 +1674,37 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-redefined")) );
 		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "CHORD test c,d,e", e.getLineContent() );
+		assertEquals( "CHORD test c/d/e", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_ALREADY_DEFINED)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-name-like-note")) );
 		assertEquals( 2, e.getLineNumber() );
-		assertEquals( "CHORD c# c,d,c", e.getLineContent() );
+		assertEquals( "CHORD c# c/d/c", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_EQUALS_NOTE)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-name-like-percussion")) );
 		assertEquals( 2, e.getLineNumber() );
-		assertEquals( "CHORD hhc c,d,e", e.getLineContent() );
+		assertEquals( "CHORD hhc c/d/e", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_EQUALS_PERCUSSION)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-with-duplicate-note")) );
 		assertEquals( 2, e.getLineNumber() );
-		assertEquals( "CHORD test c,d,c", e.getLineContent() );
+		assertEquals( "CHORD test c/d/c", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_CONTAINS_ALREADY)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-separator-double")) );
-		assertEquals( 5, e.getLineNumber() );
+		assertEquals( 9, e.getLineNumber() );
 		assertEquals( "CHORD crd=c,d,,e", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_REDUNDANT_SEP)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-separator-leading")) );
 		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "CHORD crd = ,c,d,e", e.getLineContent() );
+		assertEquals( "CHORD crd = /c/d/e", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_REDUNDANT_SEP)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-separator-trailing")) );
 		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "CHORD crd = c,d,e,", e.getLineContent() );
+		assertEquals( "CHORD crd = c/d/e/", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_REDUNDANT_SEP)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-with-invalid-option")) );
@@ -1842,7 +1854,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-assigner-double")) );
 		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "CHORD crd==c,d,e", e.getLineContent() );
+		assertEquals( "CHORD crd==c/d/e", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_CHORD_ELEMENT) + "=c") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-with-note-percussion-mix")) );
@@ -2315,7 +2327,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("define-assigner-double-2")) );
 		assertEquals( 8, e.getLineNumber() );
-		assertEquals( "CRD crd c,d,e", e.getLineContent() );
+		assertEquals( "CRD crd c/d/e", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_CMD) + "CRD") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("const-without-args")) );
@@ -2330,7 +2342,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("const-already-defined")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "CONST $crd c+,d+,e+", e.getLineContent() );
+		assertEquals( "CONST $crd c+/d+/e+", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CONST_ALREADY_DEFINED)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("const-name-eq-value")) );
@@ -2455,12 +2467,12 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-magic-cond-idx-too-high-3")) );
 		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0: 60,62,[2]", e.getLineContent() );
+		assertEquals( "0: 60/62/[2]", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH_2)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-magic-cond-idx-too-high-4")) );
 		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 60,62,[2] /4", e.getLineContent() );
+		assertEquals( "0 60/62/[2] /4", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH_2)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-inside-block")) );
@@ -2505,7 +2517,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-call-without-param-close")) );
 		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 c,d,e  simple(foo, bar q=2, m", e.getLineContent() );
+		assertEquals( "0 c/d/e  simple(foo, bar q=2, m", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_OPTION) + "(foo") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-undefined")) );
@@ -2530,12 +2542,12 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-recursion")) );
 		assertEquals( 13, e.getLineNumber() );
-		assertTrue( "1,0 first".equals(e.getLineContent()) || "0,1 second".equals(e.getLineContent()) );
+		assertTrue( "1/0 first".equals(e.getLineContent()) || "0/1 second".equals(e.getLineContent()) );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_RECURSION_DEPTH)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-before-instruments")) );
 		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "0,1 /4", e.getLineContent() );
+		assertEquals( "0/1 /4", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHANNEL_UNDEFINED).replaceFirst("%s", "0")) );
 		
 		// stacktraces
@@ -2586,7 +2598,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("stacktrace-function")) );
 		assertEquals( 13, e.getLineNumber() );
-		assertEquals( "0 f,e -", e.getLineContent() );
+		assertEquals( "0 f/e -", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_NOT_ALLOWED)) );
 		stackTrace = e.getStackTraceElements();
 		assertEquals( 11, stackTrace.size() );
@@ -2604,7 +2616,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("stacktrace-pattern")) );
 		assertEquals( 13, e.getLineNumber() );
-		assertEquals( "0,1,2 -", e.getLineContent() );
+		assertEquals( "0/1/2 -", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_NOT_ALLOWED)) );
 		stackTrace = e.getStackTraceElements();
 		assertEquals( 11, stackTrace.size() );
@@ -2622,11 +2634,11 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("stacktrace-compact-pattern")) );
 		assertEquals( 13, e.getLineNumber() );
-		assertEquals( "0: 65,64,62:-", e.getLineContent() );
+		assertEquals( "0: 65/64/62:-", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_NOT_ALLOWED)) );
 		stackTrace = e.getStackTraceElements();
 		assertEquals( 11, stackTrace.size() );
-		assertEquals( "stacktrace-compact-pattern.midica/66",    stackTrace.pop().toString() ); // : f,e,d:-
+		assertEquals( "stacktrace-compact-pattern.midica/66",    stackTrace.pop().toString() ); // : f/e/d:-
 		assertEquals( "stacktrace-compact-pattern.midica/58",    stackTrace.pop().toString() ); // CALL pat3(-) from pat2()
 		assertEquals( "stacktrace-compact-pattern.midica/56-59", stackTrace.pop().toString() ); // else-block
 		assertEquals( "stacktrace-compact-pattern.midica/48-60", stackTrace.pop().toString() ); // block
@@ -2650,7 +2662,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-for-chord")) );
 		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 c,d -", e.getLineContent() );
+		assertEquals( "0 c/d -", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_NOT_ALLOWED)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-in-summand")) );
@@ -2705,7 +2717,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("compact-unknown-pattern")) );
 		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0: c c c,d,e:pat_none c c", e.getLineContent() );
+		assertEquals( "0: c c c/d/e:pat_none c c", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOTE_LENGTH_INVALID) + "pat_none") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("compact-invalid-option")) );
@@ -2720,13 +2732,13 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("compact-pattern-call-with-options")) );
 		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0: c d e:8 f,e,d,c:pat(foo,bar)q=2,m a b c", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_COMPACT_PAT_CALL_WITH_OPT), "q=2,m", "f,e,d,c:pat(foo,bar)q=2,m")));
+		assertEquals( "0: c d e:8 f/e/d/c:pat(foo,bar)q=2,m a b c", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_COMPACT_PAT_CALL_WITH_OPT), "q=2,m", "f/e/d/c:pat(foo,bar)q=2,m")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("compact-pattern-call-with-whitespace")) );
 		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0: c d e:8 f,e,d,c:pat(foo, bar) a b c", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_COMPACT_PAT_CALL_WITH_OPT), "(foo,", "f,e,d,c:pat(foo,")));
+		assertEquals( "0: c d e:8 f/e/d/c:pat(foo, bar) a b c", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_COMPACT_PAT_CALL_WITH_OPT), "(foo,", "f/e/d/c:pat(foo,")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("compact-pattern-with-wrong-index")) );
 		assertEquals( 3, e.getLineNumber() );

@@ -1,7 +1,7 @@
 INCLUDE inc/instruments.midica
 
-CHORD crd1 = bbb, c##, dbb  // a, d, c
-CHORD crd2 = a, d, c
+CHORD crd1 = bbb/ c##/ dbb  // a/ d/ c
+CHORD crd2 = a/ d/ c
 
 0   crd1     /4
 0   crd2     /4

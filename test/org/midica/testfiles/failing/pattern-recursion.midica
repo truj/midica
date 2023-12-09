@@ -1,13 +1,13 @@
 INCLUDE inc/instruments.midica
 
 PATTERN first
-	0,1 /4
-	0,1 second
+	0/1 /4
+	0/1 second
 END
 
 PATTERN second
 	1   /8
-	1,0 first
+	1/0 first
 END
 
-0  c,d  first
+0  c/d  first

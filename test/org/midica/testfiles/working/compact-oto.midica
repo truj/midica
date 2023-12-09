@@ -20,7 +20,7 @@ PATTERN pat
 	{
 		: (m) 0 1
 	}
-	: (tr=32) 0,1:16
+	: (tr=32) 0/1:16
 END
-2: c (m,q=2) d,e:pat f:*2 g
+2: c (m,q=2) d/e:pat f:*2 g
 

@@ -11,10 +11,10 @@ PATTERN pat_488
 		:  0:4 0:8 0
 	}
 	{ elsif $NC == 2
-		:  0,1:4 0,1:8 0,1
+		:  0/1:4 0/1:8 0/1
 	}
 	{ elsif $NC == 3
-		:  0,1,2:4 0,1,2:8 0,1,2
+		:  0/1/2:4 0/1/2:8 0/1/2
 	}
 END
 
@@ -23,8 +23,8 @@ END
 0  crd3 pat_488
 
 0  c pat_488
-0: c+,d+:pat_488
-0: c+2,d+2,e+2:pat_488
+0: c+/d+:pat_488
+0: c+2/d+2/e+2:pat_488
 
 // channel 1
 
@@ -34,17 +34,17 @@ PATTERN pat_4
 			0  /4
 		}
 		{ elsif $NC == 2
-			0,1  /4
+			0/1  /4
 		}
 		{ elsif $NC == 3
-			0,1,2  /4
+			0/1/2  /4
 		}
 	}
 END
 
 1: c:pat_4
-1  c+,d+        pat_4
-1  c+2,d+2,e+2  pat_4
+1  c+/d+        pat_4
+1  c+2/d+2/e+2  pat_4
 
 // channel 2
 
@@ -66,16 +66,16 @@ PATTERN pat_order_x2_down
 	$REV  pat_order_up
 END
 
-2: c+,d+:pat_order_x2_up
-2: c+,d+:pat_order_x2_down
-2  c+2,d+2,e+2  pat_order_x2_up
-2  c+2,d+2,e+2  pat_order_x2_down
+2: c+/d+:pat_order_x2_up
+2: c+/d+:pat_order_x2_down
+2  c+2/d+2/e+2  pat_order_x2_up
+2  c+2/d+2/e+2  pat_order_x2_down
 
 // channel 3
 
 PATTERN pat_outer
 	: 2
-	: 0,2:pat_inner
+	: 0/2:pat_inner
 	2 /4
 	: $ALL
 END
@@ -84,8 +84,8 @@ PATTERN pat_inner
 	$REV /4
 END
 
-3: c,d,e:pat_outer
-3  c+,d+,e+ pat_outer
+3: c/d/e:pat_outer
+3  c+/d+/e+ pat_outer
 
 
 // channel 4
@@ -103,11 +103,11 @@ PATTERN pat_4b
 END
 
 4: c:pat_4b(/4)
-4  c+,d+        pat_4b(/4)
-4  c+2,d+2,e+2  pat_4b(/4)
+4  c+/d+        pat_4b(/4)
+4  c+2/d+2/e+2  pat_4b(/4)
 
 
 // channel 9
 
 p: sl:pat_488
-p  slap,cla pat_488
+p  slap/cla pat_488

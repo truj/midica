@@ -1,7 +1,7 @@
 INCLUDE inc/instruments.midica
 
-CONST $crd c,d,e
-CONST $crd c+,d+,e+
+CONST $crd c/d/e
+CONST $crd c+/d+/e+
 
 CHORD test $crd
 
