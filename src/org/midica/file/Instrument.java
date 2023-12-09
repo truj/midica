@@ -449,8 +449,6 @@ public class Instrument implements Comparable<Instrument> {
 	/**
 	 * Returns the one-time tremolo value for compact syntax, if set.
 	 * Otherwise, returns null.
-	 * 
-	 * @param tremolo  one-time tremolo value or null
 	 */
 	public String getOtoTremolo() {
 		return otoTremolo;

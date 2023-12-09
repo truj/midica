@@ -674,8 +674,6 @@ public class AldaExporter extends Decompiler {
 	
 	/**
 	 * Returns a barline for the given channel, if needed.
-	 * 
-	 * @param channel  MIDI channel
 	 */
 	private void createBarlineIfNeeded() {
 		

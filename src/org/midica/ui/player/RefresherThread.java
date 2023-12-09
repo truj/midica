@@ -26,7 +26,7 @@ public class RefresherThread extends Thread {
 	 * 
 	 * @param controller  Event listener object for the player window.
 	 */
-	public RefresherThread( PlayerController controller ) {
+	public RefresherThread(PlayerController controller) {
 		this.controller = controller;
 	}
 	
@@ -40,16 +40,10 @@ public class RefresherThread extends Thread {
 		while (isAlive) {
 			controller.refreshProgressBar();
 			try {
-				sleep( WAITING_TIME );
+				sleep(WAITING_TIME);
 			}
-			catch ( InterruptedException e ) {
+			catch (InterruptedException e) {
 			}
-		}
-		try {
-			finalize();
-		}
-		catch ( Throwable e ) {
-			e.printStackTrace();
 		}
 	}
 	
