@@ -29,7 +29,7 @@ public class Effect {
 	
 	private static MidicaPLParser parser = null;
 	
-	private static EffectPipeline currentPipeline = null;
+	private static EffectFlow flow = null;
 	
 	private static Set<String> functionNames;
 	private static Set<String> effectNames;
@@ -38,9 +38,9 @@ public class Effect {
 	private static Map<String, Integer> channelMsgNameToNumber;
 	private static Map<String, Integer> ctrlNameToNumber;
 	private static Map<String, Integer> rpnNameToNumber;
-	private static Set<String>          pipelineElementNames;
+	private static Set<String>          flowElementNames;
 	
-	private static Pattern pipelinePattern   = null;
+	private static Pattern flowPattern       = null;
 	private static Pattern noteOrRestPattern = null;
 	private static Pattern intPattern        = null;
 	
@@ -59,7 +59,7 @@ public class Effect {
 		channelMsgNameToNumber = new HashMap<>();
 		ctrlNameToNumber       = new HashMap<>();
 		rpnNameToNumber        = new HashMap<>();
-		pipelineElementNames   = new HashSet<>();
+		flowElementNames       = new HashSet<>();
 		
 		functionToParamCount.put( MidicaPLParser.FUNC_SET,    1 );
 		functionToParamCount.put( MidicaPLParser.FUNC_ON,     0 );
@@ -116,9 +116,9 @@ public class Effect {
 		effectNames.add( MidicaPLParser.RPN_4_TUNING_BANK  );
 		effectNames.add( MidicaPLParser.RPN_5_MOD_DEPTH_R  );
 		
-		effectNames.add( MidicaPLParser.PL_CTRL );
-		effectNames.add( MidicaPLParser.PL_RPN  );
-		effectNames.add( MidicaPLParser.PL_NRPN );
+		effectNames.add( MidicaPLParser.FL_CTRL );
+		effectNames.add( MidicaPLParser.FL_RPN  );
+		effectNames.add( MidicaPLParser.FL_NRPN );
 		
 		channelMsgNameToNumber.put( MidicaPLParser.CH_A_POLY_AT,    0xA0 );
 		channelMsgNameToNumber.put( MidicaPLParser.CH_D_MONO_AT,    0xD0 );
@@ -162,27 +162,27 @@ public class Effect {
 		rpnNameToNumber.put( MidicaPLParser.RPN_4_TUNING_BANK,  0x0004 );
 		rpnNameToNumber.put( MidicaPLParser.RPN_5_MOD_DEPTH_R,  0x0005 );
 		
-		// pipeline element names (effect names, function names, or other possible pipeline elements)
+		// flow element names (effect names, function names, or other possible flow elements)
 		for (String effectName : effectNames) {
-			pipelineElementNames.add(effectName);
+			flowElementNames.add(effectName);
 		}
 		for (String functionName : functionNames) {
-			pipelineElementNames.add(functionName);
+			flowElementNames.add(functionName);
 		}
-		pipelineElementNames.add( MidicaPLParser.PL_KEEP   );
-		pipelineElementNames.add( MidicaPLParser.PL_DOUBLE );
+		flowElementNames.add( MidicaPLParser.FL_KEEP   );
+		flowElementNames.add( MidicaPLParser.FL_DOUBLE );
 		
 		// compile regex patterns
-		String pipelineRegex
+		String flowRegex
 			= "\\G"                                                                // end of previous match
-			+"(^|" + Pattern.quote(MidicaPLParser.PL_DOT) + ")"                    // begin or '.'
-			+ "(\\w+)(?:" + Pattern.quote(MidicaPLParser.PL_ASSIGNER) + "(\\d+))?" // pipeline element without parameters
+			+"(^|" + Pattern.quote(MidicaPLParser.FL_DOT) + ")"                    // begin or '.'
+			+ "(\\w+)(?:" + Pattern.quote(MidicaPLParser.FL_ASSIGNER) + "(\\d+))?" // flow element without parameters
 			+ "(?:"
 			+ Pattern.quote(MidicaPLParser.PARAM_OPEN)                             // (
 			+ "(\\S*?)"                                                            // function parameters
 			+ Pattern.quote(MidicaPLParser.PARAM_CLOSE)                            // )
 			+ ")?";                                                                // optional
-		pipelinePattern   = Pattern.compile(pipelineRegex);
+		flowPattern       = Pattern.compile(flowRegex);
 		noteOrRestPattern = Pattern.compile("^[0-9]|" + Pattern.quote(MidicaPLParser.REST) + "$");
 		String intRegex = "^"
 			+ "(\\-?\\d+)"                // direct int value (group 1)
@@ -196,24 +196,24 @@ public class Effect {
 	}
 	
 	/**
-	 * Determins if the given string looks like an effect pipeline or not.
+	 * Determins if the given string looks like an effect flow or not.
 	 * 
-	 * @param pipeline  the string to check
-	 * @return **true** if it looks like a pipeline, otherwise: **false**
+	 * @param flow  the string to check
+	 * @return **true** if it looks like a flow, otherwise: **false**
 	 */
-	public static boolean isPipeline(String pipeline) {
+	public static boolean isFlow(String flow) {
 		
 		// note or rest?
-		if (noteOrRestPattern.matcher(pipeline).find()) {
+		if (noteOrRestPattern.matcher(flow).find()) {
 			return false;
 		}
 		
-		// try to match a pipeline
-		Matcher m = pipelinePattern.matcher(pipeline);
+		// try to match a flow
+		Matcher m = flowPattern.matcher(flow);
 		if (m.find()) {
 			String elemName = m.group(2);
 			
-			if (pipelineElementNames.contains(elemName))
+			if (flowElementNames.contains(elemName))
 				return true;
 			else
 				return false;
@@ -223,27 +223,27 @@ public class Effect {
 	}
 	
 	/**
-	 * Parses and applies the given pipeline string, if it really looks like a pipeline.
+	 * Parses and applies the given flow string, if it really looks like a flow.
 	 * 
-	 * Usually it does **not** look like a pipeline, if it is a note, rest or pattern.
+	 * Usually it does **not** look like a flow, if it is a note, rest or pattern.
 	 * 
 	 * @param channel    MIDI channel
-	 * @param pipeline   Pipeline string, note, rest or pattern.
+	 * @param flowStr    Flow string, note, rest or pattern.
 	 * @param lengthStr  The note length string of the channel command.
-	 * @return **true**, if the pipeline can be parsed, or **false** if it does not look like a pipeline.
-	 * @throws ParseException if it looks like a pipeline but cannot be parsed.
+	 * @return **true**, if the flow can be parsed, or **false** if it does not look like a flow.
+	 * @throws ParseException if it looks like a flow but cannot be parsed.
 	 */
-	public static boolean applyPipelineIfPossible(int channel, String pipeline, String lengthStr) throws ParseException {
+	public static boolean applyFlowIfPossible(int channel, String flowStr, String lengthStr) throws ParseException {
 		
 		// looks like normal note or rest?
-		if (noteOrRestPattern.matcher(pipeline).find()) {
+		if (noteOrRestPattern.matcher(flowStr).find()) {
 			return false;
 		}
 		
-		// try to match an effect pipeline
-		boolean looksLikePipeline = false;
-		int     elemCount         = 0;
-		Matcher m = pipelinePattern.matcher(pipeline);
+		// try to match an effect flow
+		boolean looksLikeFlow = false;
+		int     elemCount     = 0;
+		Matcher m = flowPattern.matcher(flowStr);
 		int lastMatchOffset = 0;
 		try {
 			while (m.find()) {
@@ -256,67 +256,67 @@ public class Effect {
 				String numberStr = m.group(3);
 				String paramStr  = m.group(4);
 				
-				// pipeline or something else?
+				// flow or something else?
 				if (null == elemName) {
 					return false;
 				}
-				if (pipelineElementNames.contains(elemName))
-					looksLikePipeline = true;
+				if (flowElementNames.contains(elemName))
+					looksLikeFlow = true;
 				else
-					throw new ParseException("Dict.get(Dict.ERROR_PL_UNKNOWN_ELEMENT)" + elemName); // TODO: Dict
+					throw new ParseException("Dict.get(Dict.ERROR_FL_UNKNOWN_ELEMENT)" + elemName); // TODO: Dict
 				
-				// starts with dot? - pipeline must be open
+				// starts with dot? - flow must be open
 				if (dot.length() > 0) {
-					if (null == currentPipeline)
-						throw new ParseException("Dict.get(Dict.ERROR_PL_NOT_OPEN)"); // TODO: Dict
+					if (null == flowStr)
+						throw new ParseException("Dict.get(Dict.ERROR_FL_NOT_OPEN)"); // TODO: Dict
 				}
 				else {
-					// open pipeline
+					// open flow
 					if (1 == elemCount)
-						currentPipeline = new EffectPipeline(channel, lengthStr);
+						flow = new EffectFlow(channel, lengthStr);
 					else
-						throw new ParseException("Dict.get(Dict.ERROR_PL_MISSING_DOT)"); // TODO: Dict
+						throw new ParseException("Dict.get(Dict.ERROR_FL_MISSING_DOT)"); // TODO: Dict
 				}
 				
 				// check number
 				int number = -1;
-				if (MidicaPLParser.PL_CTRL.equals(elemName)) {
+				if (MidicaPLParser.FL_CTRL.equals(elemName)) {
 					number = parseGenericNumber(numberStr, 0x7F);
 				}
-				else if (MidicaPLParser.PL_RPN.equals(elemName) || MidicaPLParser.PL_NRPN.equals(elemName)) {
+				else if (MidicaPLParser.FL_RPN.equals(elemName) || MidicaPLParser.FL_NRPN.equals(elemName)) {
 					number = parseGenericNumber(numberStr, 0x3FFF);
 				}
 				else if (numberStr != null) {
-					throw new ParseException("Dict.get(Dict.ERROR_PL_NUMBER_NOT_ALLOWED)" + elemName); // TODO: Dict
+					throw new ParseException("Dict.get(Dict.ERROR_FL_NUMBER_NOT_ALLOWED)" + elemName); // TODO: Dict
 				}
 				
-				// apply the pipeline element
-				applyPipelineElement(elemName, number, paramStr);
+				// apply the flow element
+				applyFlowElement(elemName, number, paramStr);
 			}
 		}
 		catch (ParseException e) {
-			if (!looksLikePipeline)
+			if (!looksLikeFlow)
 				return false;
 			
 			throw e;
 		}
 		
-		// probably no match at all - not a pipeline
-		if (!looksLikePipeline)
+		// probably no match at all - not a flow
+		if (!looksLikeFlow)
 			return false;
 		
 		// unmatched characters left?
-		if (lastMatchOffset != pipeline.length()) {
-			String rest = pipeline.substring(lastMatchOffset);
-			throw new ParseException("Dict.get(Dict.ERROR_PL_UNMATCHED_REMAINDER)" + rest); // TODO: Dict
+		if (lastMatchOffset != flowStr.length()) {
+			String rest = flowStr.substring(lastMatchOffset);
+			throw new ParseException("Dict.get(Dict.ERROR_FL_UNMATCHED_REMAINDER)" + rest); // TODO: Dict
 		}
 		
-		// pipeline applied successfully
+		// flow applied successfully
 		return true;
 	}
 	
 	/**
-	 * Parses a generic controller or (N)RPN number, assigned in a pipeline.
+	 * Parses a generic controller or (N)RPN number, assigned in a flow.
 	 * 
 	 * @param numberStr  The number to be parsed.
 	 * @param maxNum     The maximum allowed number.
@@ -327,7 +327,7 @@ public class Effect {
 		
 		// no number provided?
 		if (null == numberStr)
-			throw new ParseException("Dict.get(Dict.ERROR_PL_NUMBER_MISSING)"); // TODO: Dict
+			throw new ParseException("Dict.get(Dict.ERROR_FL_NUMBER_MISSING)"); // TODO: Dict
 		
 		try {
 			// parse the number
@@ -335,7 +335,7 @@ public class Effect {
 			
 			// number higher then allowed by the controller or (n)rpn?
 			if (number > maxNum)
-				throw new ParseException("Dict.get(Dict.ERROR_PL_NUMBER_TOO_HIGH)" + numberStr); // TODO: Dict
+				throw new ParseException("Dict.get(Dict.ERROR_FL_NUMBER_TOO_HIGH)" + numberStr); // TODO: Dict
 			
 			// ok
 			return number;
@@ -343,50 +343,50 @@ public class Effect {
 		catch (NumberFormatException e) {
 			
 			// number exceeds integer limit
-			throw new ParseException("Dict.get(Dict.ERROR_PL_NUMBER_TOO_HIGH)" + numberStr); // TODO: Dict
+			throw new ParseException("Dict.get(Dict.ERROR_FL_NUMBER_TOO_HIGH)" + numberStr); // TODO: Dict
 		}
 	}
 	
 	/**
-	 * Applies an element of an effect pipeline.
+	 * Applies an element of an effect flow.
 	 * 
-	 * @param elemName    pipeline element name
+	 * @param elemName    flow element name
 	 * @param number      controller/rpn/nrpn number or null
 	 * @param paramStr    parameters or null
 	 * @throws ParseException
 	 */
-	private static void applyPipelineElement(String elemName, int number, String paramStr) throws ParseException {
+	private static void applyFlowElement(String elemName, int number, String paramStr) throws ParseException {
 		
 		// check number
-		if (MidicaPLParser.PL_CTRL.equals(elemName)) {
+		if (MidicaPLParser.FL_CTRL.equals(elemName)) {
 			if (number < 0) {
-				throw new ParseException("Dict.get(Dict.ERROR_PL_NUMBER_REQUIRED)" + elemName); // TODO: Dict
+				throw new ParseException("Dict.get(Dict.ERROR_FL_NUMBER_REQUIRED)" + elemName); // TODO: Dict
 			}
 			else if (number > 127) {
-				throw new ParseException("Dict.get(Dict.ERROR_PL_NUMBER_GT_127)"); // TODO: Dict
+				throw new ParseException("Dict.get(Dict.ERROR_FL_NUMBER_GT_127)"); // TODO: Dict
 			}
 		}
-		else if (MidicaPLParser.PL_RPN.equals(elemName) || MidicaPLParser.PL_RPN.equals(elemName)) {
+		else if (MidicaPLParser.FL_RPN.equals(elemName) || MidicaPLParser.FL_RPN.equals(elemName)) {
 			if (number < 0) {
-				throw new ParseException("Dict.get(Dict.ERROR_PL_NUMBER_REQUIRED)" + elemName); // TODO: Dict
+				throw new ParseException("Dict.get(Dict.ERROR_FL_NUMBER_REQUIRED)" + elemName); // TODO: Dict
 			}
 			else if (number > 16383) {
-				throw new ParseException("Dict.get(Dict.ERROR_PL_NUMBER_GT_16383)"); // TODO: Dict
+				throw new ParseException("Dict.get(Dict.ERROR_FL_NUMBER_GT_16383)"); // TODO: Dict
 			}
 		}
 		else if (number > -1) {
-			throw new ParseException("Dict.get(Dict.ERROR_PL_NUMBER_NOT_ALLOWED)" + elemName); // TODO: Dict
+			throw new ParseException("Dict.get(Dict.ERROR_FL_NUMBER_NOT_ALLOWED)" + elemName); // TODO: Dict
 		}
 		
 		// check presence of params
 		if (functionNames.contains(elemName)) {
 			if (paramStr == null) {
-				throw new ParseException("Dict.get(Dict.ERROR_PL_PARAMS_REQUIRED)" + elemName); // TODO: Dict
+				throw new ParseException("Dict.get(Dict.ERROR_FL_PARAMS_REQUIRED)" + elemName); // TODO: Dict
 			}
 		}
 		else {
 			if (null != paramStr) {
-				throw new ParseException("Dict.get(Dict.ERROR_PL_PARAMS_NOT_ALLOWED)" + elemName); // TODO: Dict
+				throw new ParseException("Dict.get(Dict.ERROR_FL_PARAMS_NOT_ALLOWED)" + elemName); // TODO: Dict
 			}
 		}
 		
@@ -397,31 +397,31 @@ public class Effect {
 			int effectNumber;
 			
 			// generic controller/rpn/nrpn?
-			if (MidicaPLParser.PL_CTRL.equals(elemName)) {
-				effectType   = EffectPipeline.EFF_TYPE_CTRL;
+			if (MidicaPLParser.FL_CTRL.equals(elemName)) {
+				effectType   = EffectFlow.EFF_TYPE_CTRL;
 				effectNumber = number;
 			}
-			else if (MidicaPLParser.PL_RPN.equals(elemName)) {
-				effectType   = EffectPipeline.EFF_TYPE_RPN;
+			else if (MidicaPLParser.FL_RPN.equals(elemName)) {
+				effectType   = EffectFlow.EFF_TYPE_RPN;
 				effectNumber = number;
 			}
-			else if (MidicaPLParser.PL_NRPN.equals(elemName)) {
-				effectType   = EffectPipeline.EFF_TYPE_NRPN;
+			else if (MidicaPLParser.FL_NRPN.equals(elemName)) {
+				effectType   = EffectFlow.EFF_TYPE_NRPN;
 				effectNumber = number;
 			}
 			else {
 				
 				// named channel-msg/controller/rpn?
 				if (channelMsgNameToNumber.containsKey(elemName)) {
-					effectType   = EffectPipeline.EFF_TYPE_CHANNEL;
+					effectType   = EffectFlow.EFF_TYPE_CHANNEL;
 					effectNumber = channelMsgNameToNumber.get(elemName);
 				}
 				else if (ctrlNameToNumber.containsKey(elemName)) {
-					effectType   = EffectPipeline.EFF_TYPE_CTRL;
+					effectType   = EffectFlow.EFF_TYPE_CTRL;
 					effectNumber = ctrlNameToNumber.get(elemName);
 				}
 				else if (rpnNameToNumber.containsKey(elemName)) {
-					effectType   = EffectPipeline.EFF_TYPE_RPN;
+					effectType   = EffectFlow.EFF_TYPE_RPN;
 					effectNumber = rpnNameToNumber.get(elemName);
 				}
 				else {
@@ -430,7 +430,7 @@ public class Effect {
 			}
 			
 			// apply effect
-			currentPipeline.setEffect(effectType, effectNumber);
+			flow.setEffect(effectType, effectNumber);
 			
 			return;
 		}
@@ -450,14 +450,14 @@ public class Effect {
 			else {
 				if (params.length != expectedCount) {
 					throw new ParseException(
-						String.format("Dict.get(Dict.ERROR_PL_WRONG_PARAM_NUM)", elemName, expectedCount, params.length)
+						String.format("Dict.get(Dict.ERROR_FL_WRONG_PARAM_NUM)", elemName, expectedCount, params.length)
 					); // TODO: Dict
 				}
 				
 				// don't allow empty parameters
 				for (String param : params) {
 					if (param.isEmpty())
-						throw new ParseException("Dict.get(Dict.ERROR_PL_EMPTY_PARAM)" + paramStr); // TODO: Dict
+						throw new ParseException("Dict.get(Dict.ERROR_FL_EMPTY_PARAM)" + paramStr); // TODO: Dict
 				}
 			}
 			
@@ -467,21 +467,21 @@ public class Effect {
 			return;
 		}
 		
-		// other pipeline elements
-		if (MidicaPLParser.PL_KEEP.equals(elemName)) {
-			currentPipeline.setKeep();
+		// other flow elements
+		if (MidicaPLParser.FL_KEEP.equals(elemName)) {
+			flow.setKeep();
 			return;
 		}
-		if (MidicaPLParser.PL_DOUBLE.equals(elemName)) {
-			currentPipeline.setDouble();
+		if (MidicaPLParser.FL_DOUBLE.equals(elemName)) {
+			flow.setDouble();
 			return;
 		}
 		
-		throw new ParseException("Don't know what to do with pipeline element '" + elemName + "'. This should not happen. Please report.");
+		throw new ParseException("Don't know what to do with flow element '" + elemName + "'. This should not happen. Please report.");
 	}
 	
 	/**
-	 * Applies a function call inside an effect pipeline.
+	 * Applies a function call inside an effect flow.
 	 * 
 	 * @param funcName  function name
 	 * @param params    parameters
@@ -491,29 +491,29 @@ public class Effect {
 		
 		// wait()
 		if (MidicaPLParser.FUNC_WAIT.equals(funcName)) {
-			currentPipeline.applyWait();
+			flow.applyWait();
 			return;
 		}
 		
 		// length()
 		if (MidicaPLParser.FUNC_LENGTH.equals(funcName)) {
-			currentPipeline.setLength(params[0]);
+			flow.setLength(params[0]);
 			return;
 		}
 		
 		// note()
 		if (MidicaPLParser.FUNC_NOTE.equals(funcName)) {
 			int note = parser.parseNote(params[0]);
-			currentPipeline.setNote(note);
+			flow.setNote(note);
 			return;
 		}
 		
 		// for all other functions we need the effect type
-		int valueType = currentPipeline.getValueType(funcName);
+		int valueType = flow.getValueType(funcName);
 		
 		// on()/off() - boolean functions
 		if (MidicaPLParser.FUNC_ON.equals(funcName) || MidicaPLParser.FUNC_OFF.equals(funcName)) {
-			if (valueType != EffectPipeline.TYPE_BOOLEAN && valueType != EffectPipeline.TYPE_ANY) {
+			if (valueType != EffectFlow.TYPE_BOOLEAN && valueType != EffectFlow.TYPE_ANY) {
 				throw new ParseException("Dict.get(Dict.ERROR_FUNC_TYPE_NOT_BOOL)" + funcName); // TODO: Dict
 			}
 			
@@ -524,7 +524,7 @@ public class Effect {
 		}
 		
 		// non-boolean function for a boolean effect?
-		if (EffectPipeline.TYPE_BOOLEAN == valueType) {
+		if (EffectFlow.TYPE_BOOLEAN == valueType) {
 			throw new ParseException("Dict.get(Dict.ERROR_FUNC_TYPE_BOOL)" + funcName); // TODO: Dict
 		}
 		
@@ -556,13 +556,13 @@ public class Effect {
 	 */
 	private static void setValue(int[] values) throws ParseException {
 		
-		long tick       = currentPipeline.getCurrentTick();
-		int  effectType = currentPipeline.getEffectType();
-		int  effectNum  = currentPipeline.getEffectNumber();
-		int  channel    = currentPipeline.getChannel();
+		long tick       = flow.getCurrentTick();
+		int  effectType = flow.getEffectType();
+		int  effectNum  = flow.getEffectNumber();
+		int  channel    = flow.getChannel();
 		
 		try {
-			if (EffectPipeline.EFF_TYPE_CHANNEL == effectType) {
+			if (EffectFlow.EFF_TYPE_CHANNEL == effectType) {
 				if (0 == values.length) {
 					SequenceCreator.addMessageChannelEffect(effectNum, channel, 0, 0, tick);
 					return;
@@ -576,7 +576,7 @@ public class Effect {
 					return;
 				}
 			}
-			else if (EffectPipeline.EFF_TYPE_CTRL == effectType) {
+			else if (EffectFlow.EFF_TYPE_CTRL == effectType) {
 				if (0 == values.length) {
 					SequenceCreator.addMessageCtrl(effectNum, channel, 0, tick);
 					return;
@@ -591,10 +591,10 @@ public class Effect {
 					return;
 				}
 			}
-			else if (EffectPipeline.EFF_TYPE_RPN == effectType) {
+			else if (EffectFlow.EFF_TYPE_RPN == effectType) {
 				// TODO: implement
 			}
-			else if (EffectPipeline.EFF_TYPE_NRPN == effectType) {
+			else if (EffectFlow.EFF_TYPE_NRPN == effectType) {
 				// TODO: implement
 			}
 			else {
@@ -632,8 +632,8 @@ public class Effect {
 		// TODO: handle TYPE_NONE
 		
 		// get range of the sound effect
-		int min = currentPipeline.getMin();
-		int max = currentPipeline.getMax();
+		int min = flow.getMin();
+		int max = flow.getMax();
 		
 		// parse the parameter
 		Integer value = null;
@@ -680,15 +680,15 @@ public class Effect {
 			throw new ParseException("Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX)" + max); // TODO: Dict
 		
 		// adjust the actual MIDI value for signed types
-		int valueType = currentPipeline.getValueType(valueStr);
-		if (EffectPipeline.TYPE_BYTE_SIGNED == valueType) {
+		int valueType = flow.getValueType(valueStr);
+		if (EffectFlow.TYPE_BYTE_SIGNED == valueType) {
 			value += 64;
 		}
-		if (EffectPipeline.TYPE_DOUBLE_SIGNED == valueType) {
+		if (EffectFlow.TYPE_DOUBLE_SIGNED == valueType) {
 			value += 8192;
 		}
-		if (EffectPipeline.TYPE_MSB_SIGNED == valueType) {
-			if (currentPipeline.isDouble())
+		if (EffectFlow.TYPE_MSB_SIGNED == valueType) {
+			if (flow.isDouble())
 				value += 8192;
 			else
 				value += 64;
@@ -696,11 +696,11 @@ public class Effect {
 		
 		// find out how many bytes are needed
 		int byteCount = 1;
-		if (EffectPipeline.TYPE_DOUBLE == valueType || EffectPipeline.TYPE_DOUBLE_SIGNED == valueType) {
+		if (EffectFlow.TYPE_DOUBLE == valueType || EffectFlow.TYPE_DOUBLE_SIGNED == valueType) {
 			byteCount = 2;
 		}
-		else if (EffectPipeline.TYPE_MSB == valueType || EffectPipeline.TYPE_MSB_SIGNED == valueType) {
-			if (currentPipeline.isDouble())
+		else if (EffectFlow.TYPE_MSB == valueType || EffectFlow.TYPE_MSB_SIGNED == valueType) {
+			if (flow.isDouble())
 				byteCount = 2;
 		}
 		

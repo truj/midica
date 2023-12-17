@@ -226,13 +226,13 @@ public class MidicaPLParser extends SequenceParser {
 	public static String TUPLET_INTRO       = null;
 	public static String TUPLET_FOR         = null;
 	public static String LENGTH_PLUS        = null;
-	public static String PL_DOT             = null;
-	public static String PL_KEEP            = null;
-	public static String PL_DOUBLE          = null;
-	public static String PL_CTRL            = null;
-	public static String PL_RPN             = null;
-	public static String PL_NRPN            = null;
-	public static String PL_ASSIGNER        = null;
+	public static String FL_DOT             = null;
+	public static String FL_KEEP            = null;
+	public static String FL_DOUBLE          = null;
+	public static String FL_CTRL            = null;
+	public static String FL_RPN             = null;
+	public static String FL_NRPN            = null;
+	public static String FL_ASSIGNER        = null;
 	public static String FUNC_SET           = null;
 	public static String FUNC_ON            = null;
 	public static String FUNC_OFF           = null;
@@ -510,13 +510,13 @@ public class MidicaPLParser extends SequenceParser {
 		COND_GE            = Dict.getSyntax( Dict.SYNTAX_COND_GE            );
 		COND_IN            = Dict.getSyntax( Dict.SYNTAX_COND_IN            );
 		COND_IN_SEP        = Dict.getSyntax( Dict.SYNTAX_COND_IN_SEP        );
-		PL_DOT             = Dict.getSyntax( Dict.SYNTAX_PL_DOT             );
-		PL_KEEP            = Dict.getSyntax( Dict.SYNTAX_PL_KEEP            );
-		PL_DOUBLE          = Dict.getSyntax( Dict.SYNTAX_PL_DOUBLE          );
-		PL_CTRL            = Dict.getSyntax( Dict.SYNTAX_PL_CTRL            );
-		PL_RPN             = Dict.getSyntax( Dict.SYNTAX_PL_RPN             );
-		PL_NRPN            = Dict.getSyntax( Dict.SYNTAX_PL_NRPN            );
-		PL_ASSIGNER        = Dict.getSyntax( Dict.SYNTAX_PL_ASSIGNER        );
+		FL_DOT             = Dict.getSyntax( Dict.SYNTAX_FL_DOT             );
+		FL_KEEP            = Dict.getSyntax( Dict.SYNTAX_FL_KEEP            );
+		FL_DOUBLE          = Dict.getSyntax( Dict.SYNTAX_FL_DOUBLE          );
+		FL_CTRL            = Dict.getSyntax( Dict.SYNTAX_FL_CTRL            );
+		FL_RPN             = Dict.getSyntax( Dict.SYNTAX_FL_RPN             );
+		FL_NRPN            = Dict.getSyntax( Dict.SYNTAX_FL_NRPN            );
+		FL_ASSIGNER        = Dict.getSyntax( Dict.SYNTAX_FL_ASSIGNER        );
 		FUNC_SET           = Dict.getSyntax( Dict.SYNTAX_FUNC_SET           );
 		FUNC_ON            = Dict.getSyntax( Dict.SYNTAX_FUNC_ON            );
 		FUNC_OFF           = Dict.getSyntax( Dict.SYNTAX_FUNC_OFF           );
@@ -3749,13 +3749,13 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_TUPLET_INTRO.equals(cmdId)       ) TUPLET_INTRO       = cmdName;
 		else if ( Dict.SYNTAX_TUPLET_FOR.equals(cmdId)         ) TUPLET_FOR         = cmdName;
 		else if ( Dict.SYNTAX_LENGTH_PLUS.equals(cmdId)        ) LENGTH_PLUS        = cmdName;
-		else if ( Dict.SYNTAX_PL_DOT.equals(cmdId)             ) PL_DOT             = cmdName;
-		else if ( Dict.SYNTAX_PL_KEEP.equals(cmdId)            ) PL_KEEP            = cmdName;
-		else if ( Dict.SYNTAX_PL_DOUBLE.equals(cmdId)          ) PL_DOUBLE          = cmdName;
-		else if ( Dict.SYNTAX_PL_CTRL.equals(cmdId)            ) PL_CTRL            = cmdName;
-		else if ( Dict.SYNTAX_PL_RPN.equals(cmdId)             ) PL_RPN             = cmdName;
-		else if ( Dict.SYNTAX_PL_NRPN.equals(cmdId)            ) PL_NRPN            = cmdName;
-		else if ( Dict.SYNTAX_PL_ASSIGNER.equals(cmdId)        ) PL_ASSIGNER        = cmdName;
+		else if ( Dict.SYNTAX_FL_DOT.equals(cmdId)             ) FL_DOT             = cmdName;
+		else if ( Dict.SYNTAX_FL_KEEP.equals(cmdId)            ) FL_KEEP            = cmdName;
+		else if ( Dict.SYNTAX_FL_DOUBLE.equals(cmdId)          ) FL_DOUBLE          = cmdName;
+		else if ( Dict.SYNTAX_FL_CTRL.equals(cmdId)            ) FL_CTRL            = cmdName;
+		else if ( Dict.SYNTAX_FL_RPN.equals(cmdId)             ) FL_RPN             = cmdName;
+		else if ( Dict.SYNTAX_FL_NRPN.equals(cmdId)            ) FL_NRPN            = cmdName;
+		else if ( Dict.SYNTAX_FL_ASSIGNER.equals(cmdId)        ) FL_ASSIGNER        = cmdName;
 		else if ( Dict.SYNTAX_FUNC_SET.equals(cmdId)           ) FUNC_SET           = cmdName;
 		else if ( Dict.SYNTAX_FUNC_ON.equals(cmdId)            ) FUNC_ON            = cmdName;
 		else if ( Dict.SYNTAX_FUNC_OFF.equals(cmdId)           ) FUNC_OFF           = cmdName;
@@ -4806,7 +4806,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// effect?
 		if (!isFake) {
-			if (Effect.applyPipelineIfPossible(channel, tokens[1], durationStr)) {
+			if (Effect.applyFlowIfPossible(channel, tokens[1], durationStr)) {
 				return;
 			}
 		}
@@ -5357,8 +5357,8 @@ public class MidicaPLParser extends SequenceParser {
 			throw new ParseException(Dict.get(Dict.ERROR_CH_CMD_NUM_OF_ARGS));
 		}
 		
-		// effect pipeline?
-		if (Effect.isPipeline(tokens[1])) {
+		// effect flow?
+		if (Effect.isFlow(tokens[1])) {
 			return false;
 		}
 		

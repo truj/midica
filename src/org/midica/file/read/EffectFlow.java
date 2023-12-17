@@ -11,12 +11,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * This class represents a sound effect pipeline.
- * It is mainly responsible to track the state of the pipeline.
+ * This class represents a sound effect flow.
+ * It is mainly responsible to track the state of the flow.
  * 
  * @author Jan Trukenmüller
  */
-public class EffectPipeline {
+public class EffectFlow {
 	
 	//////////////////////////////
 	// static fields
@@ -56,7 +56,7 @@ public class EffectPipeline {
 	private static final Map<Integer, Integer> nrpnToDefault    = new HashMap<>();
 	
 	//////////////////////////////
-	// pipeline fields
+	// flow fields
 	//////////////////////////////
 	
 	private final int channel;
@@ -69,20 +69,20 @@ public class EffectPipeline {
 	private int     note         = -1;
 	
 	/**
-	 * Creates a new sound effect pipeline.
+	 * Creates a new sound effect flow.
 	 * 
 	 * @param channel    MIDI channel
 	 * @param lengthStr  initial length string
 	 * @throws ParseException
 	 */
-	public EffectPipeline(int channel, String lengthStr) throws ParseException {
+	public EffectFlow(int channel, String lengthStr) throws ParseException {
 		this.channel        = channel;
 		this.tick           = MidicaPLParser.instruments.get(channel).getCurrentTicks();
 		this.ticksPerAction = MidicaPLParser.parseDuration(lengthStr);
 	}
 	
 	/**
-	 * Returns the MIDI channel of the pipeline.
+	 * Returns the MIDI channel of the flow.
 	 * 
 	 * @return MIDI channel (0-15)
 	 */
@@ -99,7 +99,7 @@ public class EffectPipeline {
 	 */
 	public void setEffect(int type, int effectNum) throws ParseException {
 		if (effectType > 0) {
-			throw new ParseException("Dict.get(Dict.ERROR_PL_EFF_ALREADY_SET)"); // TODO: Dict
+			throw new ParseException("Dict.get(Dict.ERROR_FL_EFF_ALREADY_SET)"); // TODO: Dict
 		}
 		effectType   = type;
 		effectNumber = effectNum;
@@ -131,7 +131,7 @@ public class EffectPipeline {
 	}
 	
 	/**
-	 * Applies a **length(...)** function call in the pipeline.
+	 * Applies a **length(...)** function call in the flow.
 	 * 
 	 * @param lengthStr  The (note length) parameter of the length() call.
 	 * @throws ParseException if the length string is an invalid note lengh.
@@ -141,7 +141,7 @@ public class EffectPipeline {
 	}
 	
 	/**
-	 * Sets the note in the pipeline.
+	 * Sets the note in the flow.
 	 * 
 	 * @param note  note number (0 - 127)
 	 */
@@ -150,9 +150,9 @@ public class EffectPipeline {
 	}
 	
 	/**
-	 * Applies a **keep** pipeline element.
+	 * Applies a **keep** flow element.
 	 * 
-	 * Causes the parser to keep the changed value after the end of the pipeline.
+	 * Causes the parser to keep the changed value after the end of the flow.
 	 */
 	public void setKeep() {
 		mustKeep = true;
@@ -161,7 +161,7 @@ public class EffectPipeline {
 	/**
 	 * Returns the keep value.
 	 * 
-	 * Determins if the changed value is kept after the end of the pipeline.
+	 * Determins if the changed value is kept after the end of the flow.
 	 * 
 	 * @return the keep value
 	 */
@@ -170,20 +170,20 @@ public class EffectPipeline {
 	}
 	
 	/**
-	 * Apppies a **double** pipeline element.
+	 * Apppies a **double** flow element.
 	 * 
 	 * (Causes MSB/LSB effects to use both bytes.)
 	 * @throws ParseException if no effect has been set yet or the effect doesn't support double.
 	 */
 	public void setDouble() throws ParseException {
 		
-		int valueType = getValueType(MidicaPLParser.PL_DOUBLE);
+		int valueType = getValueType(MidicaPLParser.FL_DOUBLE);
 		if (TYPE_MSB == valueType || TYPE_MSB_SIGNED == valueType) {
 			isDouble = true;
 			return;
 		}
 		
-		throw new ParseException("Dict.get(Dict.ERROR_PL_DOUBLE_NOT_SUPPORTED)"); // TODO: Dict
+		throw new ParseException("Dict.get(Dict.ERROR_FL_DOUBLE_NOT_SUPPORTED)"); // TODO: Dict
 	}
 	
 	/**
@@ -196,14 +196,14 @@ public class EffectPipeline {
 	}
 	
 	/**
-	 * Applies a **wait()** function call in the pipeline.
+	 * Applies a **wait()** function call in the flow.
 	 */
 	public void applyWait() {
 		tick += ticksPerAction;
 	}
 	
 	/**
-	 * Returns the current pipeline tick.
+	 * Returns the current flow tick.
 	 * 
 	 * @return current tick
 	 */
@@ -212,9 +212,9 @@ public class EffectPipeline {
 	}
 	
 	/**
-	 * Returns the tick that the pipeline will have after the next wait().
+	 * Returns the tick that the flow will have after the next wait().
 	 * 
-	 * @return future pipeline tick
+	 * @return future flow tick
 	 */
 	public long getFutureTick() {
 		return tick + ticksPerAction;
@@ -242,7 +242,7 @@ public class EffectPipeline {
 	public int getValueType(String elemName) throws ParseException {
 		
 		if (effectNumber < 0) {
-			throw new ParseException("Dict.get(Dict.ERROR_PL_EFF_NOT_SET)" + elemName); // TODO: Dict
+			throw new ParseException("Dict.get(Dict.ERROR_FL_EFF_NOT_SET)" + elemName); // TODO: Dict
 		}
 		
 		Integer valueType = 0;
