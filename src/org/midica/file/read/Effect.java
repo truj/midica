@@ -14,7 +14,10 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import javax.sound.midi.InvalidMidiDataException;
+
 import org.midica.config.Dict;
+import org.midica.midi.SequenceCreator;
 
 /**
  * This class is used to parse/create sound effects.
@@ -24,44 +27,33 @@ import org.midica.config.Dict;
  */
 public class Effect {
 	
-	private static final int TYPE_BOOLEAN       = 1;  // 0=off, 127=on
-	private static final int TYPE_MSB           = 3;  // default: 0 - 127, double: 0 - 16383
-	private static final int TYPE_LSB           = 5;  // default: 0 - 127, double: 0 - 16383
-	private static final int TYPE_BYTE          = 7;  // 0 - 127
-	private static final int TYPE_DOUBLE        = 9;  // 0 - 16383
-	private static final int TYPE_ANY           = 11; // anything that fits in 7 bits
-	private static final int TYPE_NONE          = 13; // no value allowed (using 0 internally)
-	private static final int TYPE_BYTE_SIGNED   = 17; // -64 - 63
-	private static final int TYPE_DOUBLE_SIGNED = 19; // -8192 - 8191
-	
-	private static final Map<Integer, Integer> channelMsgToType = new HashMap<>();
-	private static final Map<Integer, Integer> ctrlToType       = new HashMap<>();
-	private static final Map<Integer, Integer> rpnToType        = new HashMap<>();
-	private static final Map<Integer, Integer> rpnToDefault     = new HashMap<>();
-	private static final Map<Integer, Integer> nrpnToType       = new HashMap<>();
-	private static final Map<Integer, Integer> nrpnToDefault    = new HashMap<>();
+	private static MidicaPLParser parser = null;
 	
 	private static EffectPipeline currentPipeline = null;
 	
 	private static Set<String> functionNames;
 	private static Set<String> effectNames;
 	
+	private static Map<String, Integer> functionToParamCount;
 	private static Map<String, Integer> channelMsgNameToNumber;
 	private static Map<String, Integer> ctrlNameToNumber;
 	private static Map<String, Integer> rpnNameToNumber;
 	private static Set<String>          pipelineElementNames;
 	
 	private static Pattern pipelinePattern   = null;
-	private static Pattern anyCallPattern    = null;
-	private static Pattern assignCallPattern = null;
 	private static Pattern noteOrRestPattern = null;
-	private static Pattern paramCallPattern  = null;
+	private static Pattern intPattern        = null;
 	
 	/**
 	 * Initializes data structures and regex patterns based on the current syntax.
 	 * Called by {@link MidicaPLParser} if the DEFINE parsing run is finished.
+	 * 
+	 * @param rootParser  the root parser
 	 */
-	public static void init() {
+	public static void init(MidicaPLParser rootParser) {
+		parser = rootParser;
+		
+		functionToParamCount   = new HashMap<>();
 		functionNames          = new HashSet<>();
 		effectNames            = new HashSet<>();
 		channelMsgNameToNumber = new HashMap<>();
@@ -69,17 +61,20 @@ public class Effect {
 		rpnNameToNumber        = new HashMap<>();
 		pipelineElementNames   = new HashSet<>();
 		
-		functionNames.add( MidicaPLParser.FUNC_SET    );
-		functionNames.add( MidicaPLParser.FUNC_ON     );
-		functionNames.add( MidicaPLParser.FUNC_OFF    );
-		functionNames.add( MidicaPLParser.FUNC_LINE   );
-		functionNames.add( MidicaPLParser.FUNC_SIN    );
-		functionNames.add( MidicaPLParser.FUNC_COS    );
-		functionNames.add( MidicaPLParser.FUNC_NSIN   );
-		functionNames.add( MidicaPLParser.FUNC_NCOS   );
-		functionNames.add( MidicaPLParser.FUNC_LENGTH );
-		functionNames.add( MidicaPLParser.FUNC_WAIT   );
-		functionNames.add( MidicaPLParser.FUNC_NOTE   );
+		functionToParamCount.put( MidicaPLParser.FUNC_SET,    1 );
+		functionToParamCount.put( MidicaPLParser.FUNC_ON,     0 );
+		functionToParamCount.put( MidicaPLParser.FUNC_OFF,    0 );
+		functionToParamCount.put( MidicaPLParser.FUNC_LINE,   2 );
+		functionToParamCount.put( MidicaPLParser.FUNC_SIN,    3 );
+		functionToParamCount.put( MidicaPLParser.FUNC_COS,    3 );
+		functionToParamCount.put( MidicaPLParser.FUNC_NSIN,   3 );
+		functionToParamCount.put( MidicaPLParser.FUNC_NCOS,   3 );
+		functionToParamCount.put( MidicaPLParser.FUNC_LENGTH, 1 );
+		functionToParamCount.put( MidicaPLParser.FUNC_WAIT,   0 );
+		functionToParamCount.put( MidicaPLParser.FUNC_NOTE,   1 );
+		for (String key : functionToParamCount.keySet()) {
+			functionNames.add(key);
+		}
 		
 		effectNames.add( MidicaPLParser.CH_A_POLY_AT       );
 		effectNames.add( MidicaPLParser.CH_D_MONO_AT       );
@@ -120,6 +115,10 @@ public class Effect {
 		effectNames.add( MidicaPLParser.RPN_3_TUNING_PROG  );
 		effectNames.add( MidicaPLParser.RPN_4_TUNING_BANK  );
 		effectNames.add( MidicaPLParser.RPN_5_MOD_DEPTH_R  );
+		
+		effectNames.add( MidicaPLParser.PL_CTRL );
+		effectNames.add( MidicaPLParser.PL_RPN  );
+		effectNames.add( MidicaPLParser.PL_NRPN );
 		
 		channelMsgNameToNumber.put( MidicaPLParser.CH_A_POLY_AT,    0xA0 );
 		channelMsgNameToNumber.put( MidicaPLParser.CH_D_MONO_AT,    0xD0 );
@@ -170,11 +169,8 @@ public class Effect {
 		for (String functionName : functionNames) {
 			pipelineElementNames.add(functionName);
 		}
-		pipelineElementNames.add( MidicaPLParser.PL_KEEP );
+		pipelineElementNames.add( MidicaPLParser.PL_KEEP   );
 		pipelineElementNames.add( MidicaPLParser.PL_DOUBLE );
-		pipelineElementNames.add( MidicaPLParser.PL_CTRL );
-		pipelineElementNames.add( MidicaPLParser.PL_RPN );
-		pipelineElementNames.add( MidicaPLParser.PL_NRPN );
 		
 		// compile regex patterns
 		String pipelineRegex
@@ -183,11 +179,47 @@ public class Effect {
 			+ "(\\w+)(?:" + Pattern.quote(MidicaPLParser.PL_ASSIGNER) + "(\\d+))?" // pipeline element without parameters
 			+ "(?:"
 			+ Pattern.quote(MidicaPLParser.PARAM_OPEN)                             // (
-			+ "(\\S+?)"                                                            // function parameters
+			+ "(\\S*?)"                                                            // function parameters
 			+ Pattern.quote(MidicaPLParser.PARAM_CLOSE)                            // )
 			+ ")?";                                                                // optional
 		pipelinePattern   = Pattern.compile(pipelineRegex);
-		noteOrRestPattern = Pattern.compile("^[0-9]|" + Pattern.quote(MidicaPLParser.REST));
+		noteOrRestPattern = Pattern.compile("^[0-9]|" + Pattern.quote(MidicaPLParser.REST) + "$");
+		String intRegex = "^"
+			+ "(\\-?\\d+)"                // direct int value (group 1)
+			+ "|"
+			+ "(?:"
+				+ "(\\-?\\d+(\\.\\d+)?)"  // percentage value (group 2)
+				+ Pattern.quote(MidicaPLParser.EFF_PERCENT)
+			+ ")"
+			+ "$";
+		intPattern = Pattern.compile(intRegex);
+	}
+	
+	/**
+	 * Determins if the given string looks like an effect pipeline or not.
+	 * 
+	 * @param pipeline  the string to check
+	 * @return **true** if it looks like a pipeline, otherwise: **false**
+	 */
+	public static boolean isPipeline(String pipeline) {
+		
+		// note or rest?
+		if (noteOrRestPattern.matcher(pipeline).find()) {
+			return false;
+		}
+		
+		// try to match a pipeline
+		Matcher m = pipelinePattern.matcher(pipeline);
+		if (m.find()) {
+			String elemName = m.group(2);
+			
+			if (pipelineElementNames.contains(elemName))
+				return true;
+			else
+				return false;
+		}
+		
+		return false;
 	}
 	
 	/**
@@ -231,7 +263,7 @@ public class Effect {
 				if (pipelineElementNames.contains(elemName))
 					looksLikePipeline = true;
 				else
-					throw new ParseException("Dict.get(Dict.ERROR_UNKNOWNN_PL_ELEMENT)" + elemName); // TODO: Dict
+					throw new ParseException("Dict.get(Dict.ERROR_PL_UNKNOWN_ELEMENT)" + elemName); // TODO: Dict
 				
 				// starts with dot? - pipeline must be open
 				if (dot.length() > 0) {
@@ -315,96 +347,374 @@ public class Effect {
 		}
 	}
 	
-	// TODO: document
+	/**
+	 * Applies an element of an effect pipeline.
+	 * 
+	 * @param elemName    pipeline element name
+	 * @param number      controller/rpn/nrpn number or null
+	 * @param paramStr    parameters or null
+	 * @throws ParseException
+	 */
 	private static void applyPipelineElement(String elemName, int number, String paramStr) throws ParseException {
-		// TODO: implement
+		
+		// check number
+		if (MidicaPLParser.PL_CTRL.equals(elemName)) {
+			if (number < 0) {
+				throw new ParseException("Dict.get(Dict.ERROR_PL_NUMBER_REQUIRED)" + elemName); // TODO: Dict
+			}
+			else if (number > 127) {
+				throw new ParseException("Dict.get(Dict.ERROR_PL_NUMBER_GT_127)"); // TODO: Dict
+			}
+		}
+		else if (MidicaPLParser.PL_RPN.equals(elemName) || MidicaPLParser.PL_RPN.equals(elemName)) {
+			if (number < 0) {
+				throw new ParseException("Dict.get(Dict.ERROR_PL_NUMBER_REQUIRED)" + elemName); // TODO: Dict
+			}
+			else if (number > 16383) {
+				throw new ParseException("Dict.get(Dict.ERROR_PL_NUMBER_GT_16383)"); // TODO: Dict
+			}
+		}
+		else if (number > -1) {
+			throw new ParseException("Dict.get(Dict.ERROR_PL_NUMBER_NOT_ALLOWED)" + elemName); // TODO: Dict
+		}
+		
+		// check presence of params
+		if (functionNames.contains(elemName)) {
+			if (paramStr == null) {
+				throw new ParseException("Dict.get(Dict.ERROR_PL_PARAMS_REQUIRED)" + elemName); // TODO: Dict
+			}
+		}
+		else {
+			if (null != paramStr) {
+				throw new ParseException("Dict.get(Dict.ERROR_PL_PARAMS_NOT_ALLOWED)" + elemName); // TODO: Dict
+			}
+		}
+		
+		// effect type?
+		if (effectNames.contains(elemName)) {
+			
+			int effectType;
+			int effectNumber;
+			
+			// generic controller/rpn/nrpn?
+			if (MidicaPLParser.PL_CTRL.equals(elemName)) {
+				effectType   = EffectPipeline.EFF_TYPE_CTRL;
+				effectNumber = number;
+			}
+			else if (MidicaPLParser.PL_RPN.equals(elemName)) {
+				effectType   = EffectPipeline.EFF_TYPE_RPN;
+				effectNumber = number;
+			}
+			else if (MidicaPLParser.PL_NRPN.equals(elemName)) {
+				effectType   = EffectPipeline.EFF_TYPE_NRPN;
+				effectNumber = number;
+			}
+			else {
+				
+				// named channel-msg/controller/rpn?
+				if (channelMsgNameToNumber.containsKey(elemName)) {
+					effectType   = EffectPipeline.EFF_TYPE_CHANNEL;
+					effectNumber = channelMsgNameToNumber.get(elemName);
+				}
+				else if (ctrlNameToNumber.containsKey(elemName)) {
+					effectType   = EffectPipeline.EFF_TYPE_CTRL;
+					effectNumber = ctrlNameToNumber.get(elemName);
+				}
+				else if (rpnNameToNumber.containsKey(elemName)) {
+					effectType   = EffectPipeline.EFF_TYPE_RPN;
+					effectNumber = rpnNameToNumber.get(elemName);
+				}
+				else {
+					throw new ParseException("Don't know what to do with effect '" + elemName + "'. This should not happen. Please report.");
+				}
+			}
+			
+			// apply effect
+			currentPipeline.setEffect(effectType, effectNumber);
+			
+			return;
+		}
+		
+		// function?
+		if (functionNames.contains(elemName)) {
+			String[] params = paramStr.split(Pattern.quote(MidicaPLParser.PARAM_SEPARATOR), -1);
+			
+			// check number of parameters
+			Integer expectedCount = functionToParamCount.get(elemName);
+			if (null == expectedCount) {
+				throw new ParseException("Expected parameter count unknown for function '" + elemName + "'. This should not happen. Please report.");
+			}
+			if (0 == expectedCount && 1 == params.length && paramStr.isEmpty()) {
+				// OK. Special case for functions without any parameter.
+			}
+			else {
+				if (params.length != expectedCount) {
+					throw new ParseException(
+						String.format("Dict.get(Dict.ERROR_PL_WRONG_PARAM_NUM)", elemName, expectedCount, params.length)
+					); // TODO: Dict
+				}
+				
+				// don't allow empty parameters
+				for (String param : params) {
+					if (param.isEmpty())
+						throw new ParseException("Dict.get(Dict.ERROR_PL_EMPTY_PARAM)" + paramStr); // TODO: Dict
+				}
+			}
+			
+			// call function
+			applyFunction(elemName, params);
+			
+			return;
+		}
+		
+		// other pipeline elements
+		if (MidicaPLParser.PL_KEEP.equals(elemName)) {
+			currentPipeline.setKeep();
+			return;
+		}
+		if (MidicaPLParser.PL_DOUBLE.equals(elemName)) {
+			currentPipeline.setDouble();
+			return;
+		}
+		
+		throw new ParseException("Don't know what to do with pipeline element '" + elemName + "'. This should not happen. Please report.");
 	}
 	
-	/////////////////////////////////////////////////////
-	// Define which effect can have which value(s).
-	// This is independent from the configured syntax.
-	/////////////////////////////////////////////////////
-	static {
+	/**
+	 * Applies a function call inside an effect pipeline.
+	 * 
+	 * @param funcName  function name
+	 * @param params    parameters
+	 * @throws ParseException
+	 */
+	private static void applyFunction(String funcName, String[] params) throws ParseException {
 		
-		/////////////////////////////
-		// channel message-based effects
-		/////////////////////////////
-		channelMsgToType.put(0xA0, TYPE_BYTE);
-		channelMsgToType.put(0xD0, TYPE_BYTE);
-		channelMsgToType.put(0xE0, TYPE_DOUBLE);
-		
-		/////////////////////////////
-		// continuous controllers
-		/////////////////////////////
-		
-		// coarse controllers (MSB)
-		for (int i = 0x00; i < 0x20; i++) {
-			ctrlToType.put(i, TYPE_MSB);
+		// wait()
+		if (MidicaPLParser.FUNC_WAIT.equals(funcName)) {
+			currentPipeline.applyWait();
+			return;
 		}
 		
-		// fine controllers (LSB)
-		for (int i = 0x20; i < 0x40; i++) {
-			ctrlToType.put(i, TYPE_LSB);
+		// length()
+		if (MidicaPLParser.FUNC_LENGTH.equals(funcName)) {
+			currentPipeline.setLength(params[0]);
+			return;
 		}
 		
-		// boolean (switch) controllers
-		for (int i = 0x40; i < 0x46; i++) {
-			ctrlToType.put(i, TYPE_BOOLEAN);
+		// note()
+		if (MidicaPLParser.FUNC_NOTE.equals(funcName)) {
+			int note = parser.parseNote(params[0]);
+			currentPipeline.setNote(note);
+			return;
 		}
 		
-		// simple controllers (values from 0 to 127)
-		for (int i = 0x46; i < 0x50; i++) {
-			ctrlToType.put(i, TYPE_BYTE);
+		// for all other functions we need the effect type
+		int valueType = currentPipeline.getValueType(funcName);
+		
+		// on()/off() - boolean functions
+		if (MidicaPLParser.FUNC_ON.equals(funcName) || MidicaPLParser.FUNC_OFF.equals(funcName)) {
+			if (valueType != EffectPipeline.TYPE_BOOLEAN && valueType != EffectPipeline.TYPE_ANY) {
+				throw new ParseException("Dict.get(Dict.ERROR_FUNC_TYPE_NOT_BOOL)" + funcName); // TODO: Dict
+			}
+			
+			int value = MidicaPLParser.FUNC_ON.equals(funcName) ? 127 : 0;
+			setValue(new int[] {value, value});
+			
+			return;
 		}
 		
-		// general purpose or undefined (1 byte)
-		for (int i = 0x50; i < 0x5B; i++) {
-			ctrlToType.put(i, TYPE_ANY);
+		// non-boolean function for a boolean effect?
+		if (EffectPipeline.TYPE_BOOLEAN == valueType) {
+			throw new ParseException("Dict.get(Dict.ERROR_FUNC_TYPE_BOOL)" + funcName); // TODO: Dict
 		}
 		
-		// level controllers (1 byte)
-		for (int i = 0x5B; i < 0x66; i++) {
-			ctrlToType.put(i, TYPE_BYTE);
+		// set()
+		if (MidicaPLParser.FUNC_SET.equals(funcName)) {
+			int[] values = parseIntParam(params[0]);
+			setValue(values);
+			return;
 		}
 		
-		// undefined
-		for (int i = 0x66; i < 0x78; i++) {
-			ctrlToType.put(i, TYPE_ANY);
+		// continuous functions
+		if (MidicaPLParser.FUNC_LINE.equals(funcName)
+			|| MidicaPLParser.FUNC_SIN.equals(funcName) || MidicaPLParser.FUNC_COS.equals(funcName)
+			|| MidicaPLParser.FUNC_NSIN.equals(funcName) || MidicaPLParser.FUNC_NCOS.equals(funcName)) {
+			
+			// TODO: implement
+			
+			return;
 		}
 		
-		// channel mode messages
-		for (int i = 0x78; i < 0x80; i++) {
-			ctrlToType.put(i, TYPE_NONE);
+		throw new ParseException("Don't know what to do with function '" + funcName + "'. This should not happen. Please report.");
+	}
+	
+	/**
+	 * 
+	 * 
+	 * @param values
+	 * @throws ParseException
+	 */
+	private static void setValue(int[] values) throws ParseException {
+		
+		long tick       = currentPipeline.getCurrentTick();
+		int  effectType = currentPipeline.getEffectType();
+		int  effectNum  = currentPipeline.getEffectNumber();
+		int  channel    = currentPipeline.getChannel();
+		
+		try {
+			if (EffectPipeline.EFF_TYPE_CHANNEL == effectType) {
+				if (0 == values.length) {
+					SequenceCreator.addMessageChannelEffect(effectNum, channel, 0, 0, tick);
+					return;
+				}
+				else if (2 == values.length) {
+					SequenceCreator.addMessageChannelEffect(effectNum, channel, values[1], 0, tick);
+					return;
+				}
+				else if (3 == values.length) {
+					SequenceCreator.addMessageChannelEffect(effectNum, channel, values[1], values[2], tick);
+					return;
+				}
+			}
+			else if (EffectPipeline.EFF_TYPE_CTRL == effectType) {
+				if (0 == values.length) {
+					SequenceCreator.addMessageCtrl(effectNum, channel, 0, tick);
+					return;
+				}
+				else if (2 == values.length) {
+					SequenceCreator.addMessageCtrl(effectNum, channel, values[1], tick);
+					return;
+				}
+				else if (3 == values.length) {
+					SequenceCreator.addMessageCtrl(effectNum,        channel, values[1], tick); // MSB
+					SequenceCreator.addMessageCtrl(effectNum + 0x20, channel, values[2], tick); // LSB
+					return;
+				}
+			}
+			else if (EffectPipeline.EFF_TYPE_RPN == effectType) {
+				// TODO: implement
+			}
+			else if (EffectPipeline.EFF_TYPE_NRPN == effectType) {
+				// TODO: implement
+			}
+			else {
+				throw new ParseException("Unknown effect type: " + effectType + ". This should not happen. Please report.");
+			}
+			throw new ParseException("Unknown effect type/number/byte-count combination: " + effectType + "/" + effectNum + "/" + values.length + ". This should not happen. Please report.");
+		}
+		catch (InvalidMidiDataException e) {
+			throw new ParseException("Invalid MIDI data when trying to apply effect " + effectType + "/" + effectNum + ". This should not happen. Please report.");
+		}
+	}
+	
+	private static void setByte() {
+		
+	}
+	
+	/**
+	 * Parses a numeric or percentage function parameter, checks it against the
+	 * sound effect's min/max and returns the resulting value byte(s).
+	 * 
+	 * The returned array consists of the following bytes:
+	 * 
+	 * - first byte: the complete value
+	 * - second byte: first data byte (or MSB)
+	 * - third byte: second data byte (or LSB)
+	 * 
+	 * Single-byte values only return 2 bytes.
+	 * 
+	 * @param valueStr  numeric or percentage parameter string
+	 * @return resulting value and byte(s), as described above
+	 * @throws ParseException if the parameter cannot be parsed or is out of range
+	 */
+	private static int[] parseIntParam(String valueStr) throws ParseException {
+		
+		// TODO: handle TYPE_NONE
+		
+		// get range of the sound effect
+		int min = currentPipeline.getMin();
+		int max = currentPipeline.getMax();
+		
+		// parse the parameter
+		Integer value = null;
+		try {
+			Matcher m = intPattern.matcher(valueStr);
+			if (m.matches()) {
+				String intStr     = m.group(1);
+				String percentStr = m.group(2);
+				//String floatStr   = m.group(3); // TODO: something to make pitch bend easier to use
+				if (intStr != null) {
+					value = Integer.parseInt(intStr);
+				}
+				else if (percentStr != null) {
+					float percent = Float.parseFloat(percentStr);
+					
+					// A negative percentage with a minimum of 0 should NOT evaluate to 0
+					// but throw an exception instead.
+					if (percent < 0 && 0 == min)
+						throw new ParseException("Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN)" + min); // TODO: Dict
+					
+					// TODO: check
+					if (percent < 0)
+						// theoretically: value = percent * min / 100
+						value = (int) ((percent * -min * 10 + 100 * 5) / (100 * 10));
+					else
+						// theoretically: value = percent * max / 100
+						value = (int) ((percent * max * 10 + 100 * 5) / (100 * 10));
+				}
+				else {
+					throw new ParseException("Dict.get(Dict.ERROR_FUNC_NO_INT)" + valueStr); // TODO: Dict
+				}
+			}
+		}
+		catch (NumberFormatException e) {
+			throw new ParseException("Dict.get(Dict.ERROR_FUNC_NO_NUMBER)" + valueStr); // TODO: Dict
+		}
+		if (null == value)
+			throw new ParseException("Dict.get(Dict.ERROR_FUNC_NO_NUMBER)" + valueStr); // TODO: Dict
+		
+		// check value against min / max
+		if (value < min)
+			throw new ParseException("Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN)" + min); // TODO: Dict
+		if (value > max)
+			throw new ParseException("Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX)" + max); // TODO: Dict
+		
+		// adjust the actual MIDI value for signed types
+		int valueType = currentPipeline.getValueType(valueStr);
+		if (EffectPipeline.TYPE_BYTE_SIGNED == valueType) {
+			value += 64;
+		}
+		if (EffectPipeline.TYPE_DOUBLE_SIGNED == valueType) {
+			value += 8192;
+		}
+		if (EffectPipeline.TYPE_MSB_SIGNED == valueType) {
+			if (currentPipeline.isDouble())
+				value += 8192;
+			else
+				value += 64;
 		}
 		
-		// exceptions for the above ranges
-		ctrlToType.put(0x54, TYPE_ANY);     // portamento ctrl
-		ctrlToType.put(0x58, TYPE_ANY);     // high resolution velocity prefix
-		ctrlToType.put(0x60, TYPE_NONE);    // data increment
-		ctrlToType.put(0x61, TYPE_NONE);    // data decrement
-		ctrlToType.put(0x7A, TYPE_BOOLEAN); // local control on/off
-		ctrlToType.put(0x7E, TYPE_BYTE);    // mono mode on
-		
-		/////////////////////////////
-		// (N)RPNs
-		/////////////////////////////
-		
-		for (int i = 0x0000; i < 0x4000; i++) {
-			rpnToType.put(i, TYPE_DOUBLE);
-			rpnToDefault.put(i, 0);
-			nrpnToType.put(i, TYPE_DOUBLE);
-			nrpnToDefault.put(i, 0);
+		// find out how many bytes are needed
+		int byteCount = 1;
+		if (EffectPipeline.TYPE_DOUBLE == valueType || EffectPipeline.TYPE_DOUBLE_SIGNED == valueType) {
+			byteCount = 2;
+		}
+		else if (EffectPipeline.TYPE_MSB == valueType || EffectPipeline.TYPE_MSB_SIGNED == valueType) {
+			if (currentPipeline.isDouble())
+				byteCount = 2;
 		}
 		
-		// exceptions (default)
-		rpnToDefault.put(0x0000, 0x0200); // pitch bend sensitivity
-		rpnToDefault.put(0x0001, 0x4000); // channel fine tuning
-		rpnToDefault.put(0x0002, 0x4000); // channel coarse tuning
-		rpnToDefault.put(0x0005, 0x0040); // modulation depth range
+		// handle 0 and 1 byte
+		if (0 == byteCount) {
+			return new int[] {};
+		}
+		else if (1 == byteCount) {
+			return new int[] {value, value};
+		}
 		
-		// exceptions (type)
-		rpnToType.put(0x0001, TYPE_DOUBLE_SIGNED); // channel fine tuning
-		rpnToType.put(0x0002, TYPE_DOUBLE_SIGNED); // channel coarse tuning
-		rpnToType.put(0x7F7F, TYPE_NONE);          // reset RPN
+		// handle 2 bytes
+		int msb = value >> 7;
+		int lsb = value & 0x7F;
+		return new int[] {value, msb, lsb};
 	}
 }

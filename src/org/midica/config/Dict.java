@@ -217,6 +217,7 @@ public class Dict {
 	public static final String SYNTAX_FUNC_LENGTH        = "FUNC_LENGTH";
 	public static final String SYNTAX_FUNC_WAIT          = "FUNC_WAIT";
 	public static final String SYNTAX_FUNC_NOTE          = "FUNC_NOTE";
+	public static final String SYNTAX_EFF_PERCENT        = "EFF_PERCENT";
 	public static final String SYNTAX_CH_A_POLY_AT       = "CH_A_POLY_AT";
 	public static final String SYNTAX_CH_D_MONO_AT       = "CH_D_MONO_AT";
 	public static final String SYNTAX_CH_E_PITCH_BEND    = "CH_E_PITCH_BEND";
@@ -2954,6 +2955,7 @@ public class Dict {
 		set( SYNTAX_FUNC_LENGTH,        "set the length for the next function in the pipeline" );
 		set( SYNTAX_FUNC_WAIT,          "wait for the current length"                     );
 		set( SYNTAX_FUNC_NOTE,          "set note name (e.g. for portamento ctrl)"        );
+		set( SYNTAX_EFF_PERCENT,        "percent symbol for parameters"                   );
 		set( SYNTAX_CH_A_POLY_AT,       "Polyphonic Aftertouch (Poly Pressure)"           );
 		set( SYNTAX_CH_D_MONO_AT,       "Monophonic Aftertouch (Channel Pressure)"        );
 		set( SYNTAX_CH_E_PITCH_BEND,    "'off' value for binary set functions"            );
@@ -4312,6 +4314,7 @@ public class Dict {
 		setSyntax( SYNTAX_FUNC_LENGTH,         "length"       );
 		setSyntax( SYNTAX_FUNC_WAIT,           "wait"         );
 		setSyntax( SYNTAX_FUNC_NOTE,           "note"         );
+		setSyntax( SYNTAX_EFF_PERCENT,         "%"            );
 		setSyntax( SYNTAX_CH_A_POLY_AT,        "poly_at"      );
 		setSyntax( SYNTAX_CH_D_MONO_AT,        "mono_at"      );
 		setSyntax( SYNTAX_CH_E_PITCH_BEND,     "bend"         );
@@ -4526,6 +4529,7 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_FUNC_LENGTH        );
 		addSyntaxForInfoView( SYNTAX_FUNC_WAIT          );
 		addSyntaxForInfoView( SYNTAX_FUNC_NOTE          );
+		addSyntaxForInfoView( SYNTAX_EFF_PERCENT        );
 		addSyntaxForInfoView( SYNTAX_CH_A_POLY_AT       );
 		addSyntaxForInfoView( SYNTAX_CH_D_MONO_AT       );
 		addSyntaxForInfoView( SYNTAX_CH_E_PITCH_BEND    );
