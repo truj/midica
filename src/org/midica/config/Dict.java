@@ -106,7 +106,6 @@ public class Dict {
 	public static final String SYNTAX_BLOCK_CLOSE        = "BLOCK_CLOSE";
 	public static final String SYNTAX_FUNCTION           = "FUNCTION";
 	public static final String SYNTAX_PATTERN            = "PATTERN";
-	public static final String SYNTAX_PATTERN_INDEX_SEP  = "PATTERN_INDEX_SEP";
 	public static final String SYNTAX_PARAM_OPEN         = "PARAM_OPEN";
 	public static final String SYNTAX_PARAM_CLOSE        = "PARAM_CLOSE";
 	public static final String SYNTAX_PARAM_SEPARATOR    = "PARAM_SEPARATOR";
@@ -2864,7 +2863,6 @@ public class Dict {
 		set( SYNTAX_BLOCK_CLOSE,        "closes a nestable block"                          );
 		set( SYNTAX_FUNCTION,           "function definition"                              );
 		set( SYNTAX_PATTERN,            "pattern definition"                               );
-		set( SYNTAX_PATTERN_INDEX_SEP,  "index separator inside of a pattern definition"   );
 		set( SYNTAX_PARAM_OPEN,         "opens a parameter list (in a function or pattern call)"  );
 		set( SYNTAX_PARAM_CLOSE,        "closes a parameter list (in a function or pattern call)" );
 		set( SYNTAX_PARAM_SEPARATOR,    "separates parameters in a function or pattern call"      );
@@ -2935,7 +2933,7 @@ public class Dict {
 		set( SYNTAX_REST,               "rest character"                                   );
 		set( SYNTAX_CHORD,              "chord definition"                                 );
 		set( SYNTAX_CHORD_ASSIGNER,     "assign symbol between chord name and notes"       );
-		set( SYNTAX_CHORD_SEPARATOR,    "separator for chord notes"                        );
+		set( SYNTAX_CHORD_SEPARATOR,    "separator for chord notes (or pattern indices)"   );
 		set( SYNTAX_INCLUDE,            "including another file"                           );
 		set( SYNTAX_SOUNDBANK,          "including a soundbank file or URL (SF2 or DLS)"   );
 		set( SYNTAX_SOUNDFONT,          "Deprecated. Will be removed in a future Version"  );
@@ -4247,7 +4245,6 @@ public class Dict {
 		setSyntax( SYNTAX_BLOCK_CLOSE,         "}"            );
 		setSyntax( SYNTAX_FUNCTION,            "FUNCTION"     );
 		setSyntax( SYNTAX_PATTERN,             "PATTERN"      );
-		setSyntax( SYNTAX_PATTERN_INDEX_SEP,   "/"            );
 		setSyntax( SYNTAX_PARAM_OPEN,          "("            );
 		setSyntax( SYNTAX_PARAM_CLOSE,         ")"            );
 		setSyntax( SYNTAX_PARAM_SEPARATOR,     ","            );
@@ -4421,7 +4418,6 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_FUNCTION          );
 		addSyntaxForInfoView( SYNTAX_END               );
 		addSyntaxForInfoView( SYNTAX_PATTERN           );
-		addSyntaxForInfoView( SYNTAX_PATTERN_INDEX_SEP );
 		addSyntaxForInfoView( SYNTAX_CHORD             );
 		addSyntaxForInfoView( SYNTAX_CHORD_ASSIGNER    );
 		addSyntaxForInfoView( SYNTAX_CHORD_SEPARATOR   );

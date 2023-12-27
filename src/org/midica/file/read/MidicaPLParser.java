@@ -177,7 +177,6 @@ public class MidicaPLParser extends SequenceParser {
 	public static String LYRICS_COMMA       = null;
 	public static String FUNCTION           = null;
 	public static String PATTERN            = null;
-	public static String PATTERN_INDEX_SEP  = null;
 	public static String PARAM_OPEN         = null;
 	public static String PARAM_CLOSE        = null;
 	public static String PARAM_SEPARATOR    = null;
@@ -459,7 +458,6 @@ public class MidicaPLParser extends SequenceParser {
 		LYRICS_COMMA       = Dict.getSyntax( Dict.SYNTAX_LYRICS_COMMA       );
 		FUNCTION           = Dict.getSyntax( Dict.SYNTAX_FUNCTION           );
 		PATTERN            = Dict.getSyntax( Dict.SYNTAX_PATTERN            );
-		PATTERN_INDEX_SEP  = Dict.getSyntax( Dict.SYNTAX_PATTERN_INDEX_SEP  );
 		PARAM_OPEN         = Dict.getSyntax( Dict.SYNTAX_PARAM_OPEN         );
 		PARAM_CLOSE        = Dict.getSyntax( Dict.SYNTAX_PARAM_CLOSE        );
 		PARAM_SEPARATOR    = Dict.getSyntax( Dict.SYNTAX_PARAM_SEPARATOR    );
@@ -2940,7 +2938,7 @@ public class MidicaPLParser extends SequenceParser {
 		ArrayList<String> notes = new ArrayList<>();
 		
 		// note or chord
-		String[] indexStrings = indicesStr.split(Pattern.quote(PATTERN_INDEX_SEP), -1);
+		String[] indexStrings = indicesStr.split(Pattern.quote(CHORD_SEPARATOR), -1);
 		for (String indexStr : indexStrings) {
 			try {
 				int index = Integer.parseInt(indexStr);
@@ -3123,7 +3121,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * @throws ParseException
 	 */
 	private void checkPatternIndices(String indicesStr) throws ParseException {
-		String[] indexStrings = indicesStr.split(Pattern.quote(PATTERN_INDEX_SEP), -1);
+		String[] indexStrings = indicesStr.split(Pattern.quote(CHORD_SEPARATOR), -1);
 		for (String indexStr : indexStrings) {
 			try {
 				Integer.parseInt(indexStr);
@@ -3697,7 +3695,6 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_LYRICS_COMMA.equals(cmdId)       ) LYRICS_COMMA       = cmdName;
 		else if ( Dict.SYNTAX_FUNCTION.equals(cmdId)           ) FUNCTION           = cmdName;
 		else if ( Dict.SYNTAX_PATTERN.equals(cmdId)            ) PATTERN            = cmdName;
-		else if ( Dict.SYNTAX_PATTERN_INDEX_SEP.equals(cmdId)  ) PATTERN_INDEX_SEP  = cmdName;
 		else if ( Dict.SYNTAX_PARAM_OPEN.equals(cmdId)         ) PARAM_OPEN         = cmdName;
 		else if ( Dict.SYNTAX_PARAM_CLOSE.equals(cmdId)        ) PARAM_CLOSE        = cmdName;
 		else if ( Dict.SYNTAX_PARAM_SEPARATOR.equals(cmdId)    ) PARAM_SEPARATOR    = cmdName;
