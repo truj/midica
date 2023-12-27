@@ -10,6 +10,8 @@ package org.midica.file.read;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.midica.config.Dict;
+
 /**
  * This class represents a sound effect flow.
  * It is mainly responsible to track the state of the flow.
@@ -40,20 +42,22 @@ public class EffectFlow {
 	public static final int EFF_TYPE_NRPN    = 4;
 	
 	// data structures
-	private static final Map<Integer, Integer> channelMsgToType = new HashMap<>();
-	private static final Map<Integer, Integer> channelMsgToMin  = new HashMap<>();
-	private static final Map<Integer, Integer> channelMsgToMax  = new HashMap<>();
-	private static final Map<Integer, Integer> ctrlToType       = new HashMap<>();
-	private static final Map<Integer, Integer> ctrlToMin        = new HashMap<>();
-	private static final Map<Integer, Integer> ctrlToMax        = new HashMap<>();
-	private static final Map<Integer, Integer> rpnToType        = new HashMap<>();
-	private static final Map<Integer, Integer> rpnToMin         = new HashMap<>();
-	private static final Map<Integer, Integer> rpnToMax         = new HashMap<>();
-	private static final Map<Integer, Integer> rpnToDefault     = new HashMap<>();
-	private static final Map<Integer, Integer> nrpnToType       = new HashMap<>();
-	private static final Map<Integer, Integer> nrpnToMin        = new HashMap<>();
-	private static final Map<Integer, Integer> nrpnToMax        = new HashMap<>();
-	private static final Map<Integer, Integer> nrpnToDefault    = new HashMap<>();
+	private static final Map<Integer, Integer> channelMsgToType    = new HashMap<>();
+	private static final Map<Integer, Integer> channelMsgToMin     = new HashMap<>();
+	private static final Map<Integer, Integer> channelMsgToMax     = new HashMap<>();
+	private static final Map<Integer, Integer> channelMsgToDefault = new HashMap<>(); // TODO: delete?
+	private static final Map<Integer, Integer> ctrlToType          = new HashMap<>();
+	private static final Map<Integer, Integer> ctrlToMin           = new HashMap<>();
+	private static final Map<Integer, Integer> ctrlToMax           = new HashMap<>();
+	private static final Map<Integer, Integer> ctrlToDefault       = new HashMap<>(); // TODO: delete?
+	private static final Map<Integer, Integer> rpnToType           = new HashMap<>();
+	private static final Map<Integer, Integer> rpnToMin            = new HashMap<>();
+	private static final Map<Integer, Integer> rpnToMax            = new HashMap<>();
+	private static final Map<Integer, Integer> rpnToDefault        = new HashMap<>(); // TODO: delete?
+	private static final Map<Integer, Integer> nrpnToType          = new HashMap<>();
+	private static final Map<Integer, Integer> nrpnToMin           = new HashMap<>();
+	private static final Map<Integer, Integer> nrpnToMax           = new HashMap<>();
+	private static final Map<Integer, Integer> nrpnToDefault       = new HashMap<>(); // TODO: delete?
 	
 	//////////////////////////////
 	// flow fields
@@ -64,7 +68,6 @@ public class EffectFlow {
 	private long    ticksPerAction;
 	private int     effectType   = 0;
 	private int     effectNumber = -1;
-	private boolean mustKeep     = false;
 	private boolean isDouble     = false;
 	private int     note         = -1;
 	
@@ -99,7 +102,7 @@ public class EffectFlow {
 	 */
 	public void setEffect(int type, int effectNum) throws ParseException {
 		if (effectType > 0) {
-			throw new ParseException("Dict.get(Dict.ERROR_FL_EFF_ALREADY_SET)"); // TODO: Dict
+			throw new ParseException(Dict.get(Dict.ERROR_FL_EFF_ALREADY_SET));
 		}
 		effectType   = type;
 		effectNumber = effectNum;
@@ -150,26 +153,6 @@ public class EffectFlow {
 	}
 	
 	/**
-	 * Applies a **keep** flow element.
-	 * 
-	 * Causes the parser to keep the changed value after the end of the flow.
-	 */
-	public void setKeep() {
-		mustKeep = true;
-	}
-	
-	/**
-	 * Returns the keep value.
-	 * 
-	 * Determins if the changed value is kept after the end of the flow.
-	 * 
-	 * @return the keep value
-	 */
-	public boolean mustKeep() {
-		return mustKeep;
-	}
-	
-	/**
 	 * Apppies a **double** flow element.
 	 * 
 	 * (Causes MSB/LSB effects to use both bytes.)
@@ -183,7 +166,7 @@ public class EffectFlow {
 			return;
 		}
 		
-		throw new ParseException("Dict.get(Dict.ERROR_FL_DOUBLE_NOT_SUPPORTED)"); // TODO: Dict
+		throw new ParseException(Dict.get(Dict.ERROR_FL_DOUBLE_NOT_SUPPORTED) + MidicaPLParser.FL_DOUBLE);
 	}
 	
 	/**
@@ -196,10 +179,21 @@ public class EffectFlow {
 	}
 	
 	/**
-	 * Applies a **wait()** function call in the flow.
+	 * Applies a **wait()** function call in the flow - without parameter.
 	 */
 	public void applyWait() {
 		tick += ticksPerAction;
+	}
+	
+	/**
+	 * Applies a **wait(...)** function call in the flow - with length parameter.
+	 * 
+	 * @param lengthStr  note length string
+	 * @throws ParseException if the length string is an invalid note lengh.
+	 */
+	public void applyWait(String lengthStr) throws ParseException {
+		int length = MidicaPLParser.parseDuration(lengthStr);
+		tick += length;
 	}
 	
 	/**
@@ -209,6 +203,15 @@ public class EffectFlow {
 	 */
 	public long getCurrentTick() {
 		return tick;
+	}
+	
+	/**
+	 * Updates the current flow tick.
+	 * 
+	 * @param tick  the new MIDI tick for the flow
+	 */
+	public void setCurrentTick(long tick) {
+		this.tick = tick;
 	}
 	
 	/**
@@ -241,9 +244,8 @@ public class EffectFlow {
 	 */
 	public int getValueType(String elemName) throws ParseException {
 		
-		if (effectNumber < 0) {
-			throw new ParseException("Dict.get(Dict.ERROR_FL_EFF_NOT_SET)" + elemName); // TODO: Dict
-		}
+		if (effectNumber < 0)
+			throw new ParseException(Dict.get(Dict.ERROR_FL_EFF_NOT_SET) + elemName);
 		
 		Integer valueType = 0;
 		String  typeStr   = "none";
@@ -265,9 +267,8 @@ public class EffectFlow {
 		}
 		
 		// not found?
-		if (null == valueType) {
+		if (null == valueType)
 			throw new ParseException("Unknown effect number '" + effectNumber + "' for effect type '" + typeStr + "'. This should not happen. Please report.");
-		}
 		
 		return valueType;
 	}
@@ -294,9 +295,13 @@ public class EffectFlow {
 			min = nrpnToMin.get(effectNumber);
 		}
 		
-		if (null == min) {
-			throw new ParseException("Unknown min value for '" + effectType + "/" + effectNumber + ". This should not happen. Please report.");
+		// handle MSB / LSB
+		if (isDouble && -64 == min) {
+			return -8192;
 		}
+		
+		if (null == min)
+			throw new ParseException("Unknown min value for '" + effectType + "/" + effectNumber + ". This should not happen. Please report.");
 		
 		return min;
 	}
@@ -323,11 +328,47 @@ public class EffectFlow {
 			max = nrpnToMax.get(effectNumber);
 		}
 		
-		if (null == max) {
-			throw new ParseException("Unknown max value for '" + effectType + "/" + effectNumber + ". This should not happen. Please report.");
+		// handle MSB / LSB
+		if (isDouble) {
+			if (127 == max)
+				return 16383;
+			if (63 == max)
+				return 8191;
 		}
 		
+		if (null == max)
+			throw new ParseException("Unknown max value for '" + effectType + "/" + effectNumber + ". This should not happen. Please report.");
+		
 		return max;
+	}
+	
+	/**
+	 * Calculates and returns the default value for the current effect.
+	 * 
+	 * @return default value
+	 * @throws ParseException if the default value can not be found
+	 */
+	public int getDefault() throws ParseException {
+		
+		Integer def = null;
+		if (EFF_TYPE_CHANNEL == effectType) {
+			def = channelMsgToDefault.get(effectNumber);
+		}
+		else if (EFF_TYPE_CTRL == effectType) {
+			def = ctrlToDefault.get(effectNumber);
+		}
+		else if (EFF_TYPE_RPN == effectType) {
+			def = rpnToDefault.get(effectNumber);
+		}
+		else if (EFF_TYPE_NRPN == effectType) {
+			def = nrpnToDefault.get(effectNumber);
+		}
+		
+		if (null == def) {
+			throw new ParseException("Unknown default value for '" + effectType + "/" + effectNumber + ". This should not happen. Please report.");
+		}
+		
+		return def;
 	}
 	
 	/////////////////////////////////////////////////////
@@ -339,12 +380,12 @@ public class EffectFlow {
 		/////////////////////////////
 		// channel message-based effects
 		/////////////////////////////
-		channelMsgToType.put(0xA0, TYPE_BYTE);          // polyphonic after touch
-		channelMsgToType.put(0xD0, TYPE_BYTE);          // monophonic after touch
-		channelMsgToType.put(0xE0, TYPE_DOUBLE_SIGNED); // pitch bend
+		channelMsgToType.put(0xA0, TYPE_BYTE);       // polyphonic after touch
+		channelMsgToType.put(0xD0, TYPE_BYTE);       // monophonic after touch
+		channelMsgToType.put(0xE0, TYPE_MSB_SIGNED); // pitch bend
 		
 		// min / max
-		applyDefaultMinAndMax(channelMsgToType, channelMsgToMin, channelMsgToMax);
+		applyDefaultMinAndMax(channelMsgToType, channelMsgToDefault, channelMsgToMin, channelMsgToMax);
 		
 		/////////////////////////////
 		// continuous controllers
@@ -401,7 +442,7 @@ public class EffectFlow {
 		ctrlToType.put(0x7E, TYPE_BYTE);       // mono mode on
 		
 		// min / max
-		applyDefaultMinAndMax(ctrlToType, ctrlToMin, ctrlToMax);
+		applyDefaultMinAndMax(ctrlToType, ctrlToDefault, ctrlToMin, ctrlToMax);
 		
 		/////////////////////////////
 		// (N)RPNs
@@ -415,8 +456,8 @@ public class EffectFlow {
 		}
 		
 		// min / max
-		applyDefaultMinAndMax(rpnToType, rpnToMin, rpnToMax);
-		applyDefaultMinAndMax(nrpnToType, nrpnToMin, nrpnToMax);
+		applyDefaultMinAndMax(rpnToType,  rpnToDefault,  rpnToMin,  rpnToMax);
+		applyDefaultMinAndMax(nrpnToType, nrpnToDefault, nrpnToMin, nrpnToMax);
 		
 		// exceptions (default)
 		rpnToDefault.put(0x0000, 0x0200); // pitch bend sensitivity
@@ -431,16 +472,18 @@ public class EffectFlow {
 	}
 	
 	/**
-	 * Applies default min and max values according to the effect type.
+	 * Applies values for 'default', 'min' and 'max' values according to the effect type.
 	 * 
-	 * @param typeStructure  map containing the effect type
-	 * @param minStructure   map to be filled with the default minimum
-	 * @param maxStructure   map to be filled with the default maximum
+	 * @param typeStructure     map containing the effect type
+	 * @param defaultStructure  map to be filled with the default value
+	 * @param minStructure      map to be filled with the default value
+	 * @param maxStructure      map to be filled with the default value
 	 */
-	private static void applyDefaultMinAndMax(Map<Integer, Integer> typeStructure, Map<Integer, Integer> minStructure, Map<Integer, Integer> maxStructure) {
+	private static void applyDefaultMinAndMax(Map<Integer, Integer> typeStructure, Map<Integer, Integer> defaultStructure, Map<Integer, Integer> minStructure, Map<Integer, Integer> maxStructure) {
 		
 		for (int number : typeStructure.keySet()) {
 			int type = typeStructure.get(number);
+			defaultStructure.put(number, 0);
 			if (TYPE_BYTE == type || TYPE_MSB == type || TYPE_ANY == type) {
 				minStructure.put(number, 0);
 				maxStructure.put(number, 127);

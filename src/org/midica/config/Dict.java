@@ -200,7 +200,6 @@ public class Dict {
 	public static final String SYNTAX_TUPLET_FOR         = "TUPLET_FOR";
 	public static final String SYNTAX_LENGTH_PLUS        = "LENGTH_PLUS";
 	public static final String SYNTAX_FL_DOT             = "FL_DOT";
-	public static final String SYNTAX_FL_KEEP            = "FL_KEEP";
 	public static final String SYNTAX_FL_DOUBLE          = "FL_DOUBLE";
 	public static final String SYNTAX_FL_CTRL            = "FL_CTRL";
 	public static final String SYNTAX_FL_RPN             = "FL_RPN";
@@ -1741,6 +1740,29 @@ public class Dict {
 	public static final String ERROR_OTO_DUPLICATE_QUANTITY      = "error_oto_duplicate_quantity";
 	public static final String ERROR_OTO_DUPLICATE_MULTIPLE      = "error_oto_duplicate_multiple";
 	public static final String ERROR_OTO_DUPLICATE_TREMOLO       = "error_oto_duplicate_tremolo";
+	public static final String ERROR_FL_EFF_ALREADY_SET          = "error_fl_already_set";
+	public static final String ERROR_FL_DOUBLE_NOT_SUPPORTED     = "error_fl_double_not_supported";
+	public static final String ERROR_FL_EFF_NOT_SET              = "error_fl_eff_not_set";
+	public static final String ERROR_FL_UNKNOWN_ELEMENT          = "error_fl_unknown_element";
+	public static final String ERROR_FL_NOT_OPEN                 = "error_fl_not_open";
+	public static final String ERROR_FL_MISSING_DOT              = "error_fl_missing_dot";
+	public static final String ERROR_FL_NUMBER_NOT_ALLOWED       = "error_fl_number_not_allowed";
+	public static final String ERROR_FL_UNMATCHED_REMAINDER      = "error_fl_unmatched_remainder";
+	public static final String ERROR_FL_NUMBER_MISSING           = "error_fl_number_missing";
+	public static final String ERROR_FL_NUMBER_TOO_HIGH          = "error_fl_number_too_high";
+	public static final String ERROR_FL_PARAMS_REQUIRED          = "error_fl_params_required";
+	public static final String ERROR_FL_PARAMS_NOT_ALLOWED       = "error_fl_params_not_allowed";
+	public static final String ERROR_FL_WRONG_PARAM_NUM          = "error_fl_wrong_param_num";
+	public static final String ERROR_FL_EMPTY_PARAM              = "error_fl_empty_param";
+	public static final String ERROR_FL_CONT_RPN                 = "error_fl_cont_rpn";
+	public static final String ERROR_FL_CONT_NRPN                = "error_fl_cont_nrpn";
+	public static final String ERROR_FUNC_TYPE_NOT_BOOL          = "error_func_type_not_bool";
+	public static final String ERROR_FUNC_TYPE_BOOL              = "error_func_type_bool";
+	public static final String ERROR_FUNC_VAL_LOWER_MIN          = "error_func_val_lower_min";
+	public static final String ERROR_FUNC_VAL_GREATER_MAX        = "error_func_val_greater_max";
+	public static final String ERROR_FUNC_NO_NUMBER              = "error_func_no_number";
+	public static final String ERROR_FUNC_PERIODS_NEG            = "error_func_periods_neg";
+	public static final String ERROR_FUNC_PERIODS_NO_NUMBER      = "error_func_periods_no_number";
 	
 	// NestableBlock
 	public static final String ERROR_BLOCK_ARG_ALREADY_SET      = "error_block_arg_already_set";
@@ -2938,7 +2960,6 @@ public class Dict {
 		set( SYNTAX_LENGTH_PLUS,        "note length addition symbol"                     );
 		
 		set( SYNTAX_FL_DOT,             "separator between flow elements (controller, function name, etc.)" );
-		set( SYNTAX_FL_KEEP,            "keep function value after function ends (flow element)" );
 		set( SYNTAX_FL_DOUBLE,          "use double precision (flow element)"             );
 		set( SYNTAX_FL_CTRL,            "Generic Controller (flow element)"               );
 		set( SYNTAX_FL_RPN,             "Generic RPN (flow element)"                      );
@@ -3525,6 +3546,29 @@ public class Dict {
 		set( ERROR_OTO_DUPLICATE_QUANTITY,        "Unconsumed one-type option 'quantity' cannot be set again."        );
 		set( ERROR_OTO_DUPLICATE_MULTIPLE,        "Unconsumed one-type option 'multiple' cannot be set again."        );
 		set( ERROR_OTO_DUPLICATE_TREMOLO,         "Unconsumed one-type option 'tremolo' cannot be set again."         );
+		set( ERROR_FL_EFF_ALREADY_SET,            "An effect has already been set. More than one effect is not allowed in the same flow." );
+		set( ERROR_FL_DOUBLE_NOT_SUPPORTED,       "Double precision not supported for the chosen effect. Forbidden element: " );
+		set( ERROR_FL_EFF_NOT_SET,                "An effect type must be set before using: "                         );
+		set( ERROR_FL_UNKNOWN_ELEMENT,            "Unknown effect flow element: "                                     );
+		set( ERROR_FL_NOT_OPEN,                   "An effect flow is not yet open. Don't use '%s' to start a flow."   );
+		set( ERROR_FL_MISSING_DOT,                "Effect flow elements must be separated with '%s'"                  );
+		set( ERROR_FL_NUMBER_NOT_ALLOWED,         "A generic number is not allowed for this effect flow element: "    );
+		set( ERROR_FL_UNMATCHED_REMAINDER,        "Effect flow ends with an invalid remainder: "                      );
+		set( ERROR_FL_NUMBER_MISSING,             "Effect flow element '%s' needs to be assigned with a generic number" );
+		set( ERROR_FL_NUMBER_TOO_HIGH,            "Generic number %s too high for element %s. Maximum is %d."         );
+		set( ERROR_FL_PARAMS_REQUIRED,            "Function '%s' needs parameters."                                   );
+		set( ERROR_FL_PARAMS_NOT_ALLOWED,         "Effect flow element '%s' does not support parameters."             );
+		set( ERROR_FL_WRONG_PARAM_NUM,            "Wrong number of parameters for function '%s'. Expected: %d. Got: %d. Parameters: '%s'" );
+		set( ERROR_FL_EMPTY_PARAM,                "Empty parameter not allowed. Parameters: "                         );
+		set( ERROR_FL_CONT_RPN,                   "Effect function '%s' is not allowed for RPN-based effects."        );
+		set( ERROR_FL_CONT_NRPN,                  "Effect function '%s' is not allowed for NRPN-based effects."       );
+		set( ERROR_FUNC_TYPE_NOT_BOOL,            "Effect type not boolean. Function '%s' is not allowed."            );
+		set( ERROR_FUNC_TYPE_BOOL,                "Effect type is boolean. Function '%s' is not allowed."             );
+		set( ERROR_FUNC_VAL_LOWER_MIN,            "Parameter '%s' is smaller than the minimum value (%s)"             );
+		set( ERROR_FUNC_VAL_GREATER_MAX,          "Parameter '%s' is greater than the maximum value (%s)"             );
+		set( ERROR_FUNC_NO_NUMBER,                "Parameter is not a valid number or percentage value: "             );
+		set( ERROR_FUNC_PERIODS_NEG,              "The 'periods' parameter cannot be negative: "                      );
+		set( ERROR_FUNC_PERIODS_NO_NUMBER,        "The 'periods' parameter is not a valid number: "                   );
 		
 		// NestableBlock
 		set( ERROR_BLOCK_ARG_ALREADY_SET,         "Block argument has already been set before: "                      );
@@ -4297,7 +4341,6 @@ public class Dict {
 		setSyntax( SYNTAX_TUPLET_FOR,          ":"            );
 		setSyntax( SYNTAX_LENGTH_PLUS,         "+"            );
 		setSyntax( SYNTAX_FL_DOT,              "."            );
-		setSyntax( SYNTAX_FL_KEEP,             "keep"         );
 		setSyntax( SYNTAX_FL_DOUBLE,           "double"       );
 		setSyntax( SYNTAX_FL_CTRL,             "ctrl"         );
 		setSyntax( SYNTAX_FL_RPN,              "rpn"          );
@@ -4309,8 +4352,8 @@ public class Dict {
 		setSyntax( SYNTAX_FUNC_LINE,           "line"         );
 		setSyntax( SYNTAX_FUNC_SIN,            "sin"          );
 		setSyntax( SYNTAX_FUNC_COS,            "cos"          );
-		setSyntax( SYNTAX_FUNC_NSIN,           "neg_sin"      );
-		setSyntax( SYNTAX_FUNC_NCOS,           "neg_cos"      );
+		setSyntax( SYNTAX_FUNC_NSIN,           "nsin"         );
+		setSyntax( SYNTAX_FUNC_NCOS,           "ncos"         );
 		setSyntax( SYNTAX_FUNC_LENGTH,         "length"       );
 		setSyntax( SYNTAX_FUNC_WAIT,           "wait"         );
 		setSyntax( SYNTAX_FUNC_NOTE,           "note"         );
@@ -4512,7 +4555,6 @@ public class Dict {
 		
 		addSyntaxCategory(get(SYNTAX_CAT_SND_EFFECT));
 		addSyntaxForInfoView( SYNTAX_FL_DOT             );
-		addSyntaxForInfoView( SYNTAX_FL_KEEP            );
 		addSyntaxForInfoView( SYNTAX_FL_DOUBLE          );
 		addSyntaxForInfoView( SYNTAX_FL_CTRL            );
 		addSyntaxForInfoView( SYNTAX_FL_RPN             );

@@ -43,6 +43,7 @@ public class Effect {
 	private static Pattern flowPattern       = null;
 	private static Pattern noteOrRestPattern = null;
 	private static Pattern intPattern        = null;
+	private static Pattern periodsPattern    = null;
 	
 	/**
 	 * Initializes data structures and regex patterns based on the current syntax.
@@ -70,7 +71,7 @@ public class Effect {
 		functionToParamCount.put( MidicaPLParser.FUNC_NSIN,   3 );
 		functionToParamCount.put( MidicaPLParser.FUNC_NCOS,   3 );
 		functionToParamCount.put( MidicaPLParser.FUNC_LENGTH, 1 );
-		functionToParamCount.put( MidicaPLParser.FUNC_WAIT,   0 );
+		functionToParamCount.put( MidicaPLParser.FUNC_WAIT,   1 );
 		functionToParamCount.put( MidicaPLParser.FUNC_NOTE,   1 );
 		for (String key : functionToParamCount.keySet()) {
 			functionNames.add(key);
@@ -169,8 +170,7 @@ public class Effect {
 		for (String functionName : functionNames) {
 			flowElementNames.add(functionName);
 		}
-		flowElementNames.add( MidicaPLParser.FL_KEEP   );
-		flowElementNames.add( MidicaPLParser.FL_DOUBLE );
+		flowElementNames.add(MidicaPLParser.FL_DOUBLE);
 		
 		// compile regex patterns
 		String flowRegex
@@ -193,6 +193,13 @@ public class Effect {
 			+ ")"
 			+ "$";
 		intPattern = Pattern.compile(intRegex);
+		String periodsRegex = "^"
+			+ "(\\-?\\d+(?:\\.\\d*))"     // int or float (group 1)
+			+ "("                         // percent (group 2)
+				+ Pattern.quote(MidicaPLParser.EFF_PERCENT)
+			+ ")?"
+			+ "$";
+		periodsPattern = Pattern.compile(periodsRegex);
 	}
 	
 	/**
@@ -263,31 +270,31 @@ public class Effect {
 				if (flowElementNames.contains(elemName))
 					looksLikeFlow = true;
 				else
-					throw new ParseException("Dict.get(Dict.ERROR_FL_UNKNOWN_ELEMENT)" + elemName); // TODO: Dict
+					throw new ParseException(Dict.get(Dict.ERROR_FL_UNKNOWN_ELEMENT) + elemName);
 				
 				// starts with dot? - flow must be open
 				if (dot.length() > 0) {
 					if (null == flowStr)
-						throw new ParseException("Dict.get(Dict.ERROR_FL_NOT_OPEN)"); // TODO: Dict
+						throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), MidicaPLParser.FL_DOT));
 				}
 				else {
 					// open flow
 					if (1 == elemCount)
 						flow = new EffectFlow(channel, lengthStr);
 					else
-						throw new ParseException("Dict.get(Dict.ERROR_FL_MISSING_DOT)"); // TODO: Dict
+						throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_MISSING_DOT), MidicaPLParser.FL_DOT));
 				}
 				
 				// check number
 				int number = -1;
 				if (MidicaPLParser.FL_CTRL.equals(elemName)) {
-					number = parseGenericNumber(numberStr, 0x7F);
+					number = parseGenericNumber(numberStr, 0x7F, elemName);
 				}
 				else if (MidicaPLParser.FL_RPN.equals(elemName) || MidicaPLParser.FL_NRPN.equals(elemName)) {
-					number = parseGenericNumber(numberStr, 0x3FFF);
+					number = parseGenericNumber(numberStr, 0x3FFF, elemName);
 				}
 				else if (numberStr != null) {
-					throw new ParseException("Dict.get(Dict.ERROR_FL_NUMBER_NOT_ALLOWED)" + elemName); // TODO: Dict
+					throw new ParseException(Dict.get(Dict.ERROR_FL_NUMBER_NOT_ALLOWED) + elemName);
 				}
 				
 				// apply the flow element
@@ -307,8 +314,8 @@ public class Effect {
 		
 		// unmatched characters left?
 		if (lastMatchOffset != flowStr.length()) {
-			String rest = flowStr.substring(lastMatchOffset);
-			throw new ParseException("Dict.get(Dict.ERROR_FL_UNMATCHED_REMAINDER)" + rest); // TODO: Dict
+			String remainder = flowStr.substring(lastMatchOffset);
+			throw new ParseException(Dict.get(Dict.ERROR_FL_UNMATCHED_REMAINDER) + remainder);
 		}
 		
 		// flow applied successfully
@@ -316,18 +323,26 @@ public class Effect {
 	}
 	
 	/**
+	 * Closes the current flow, if there is an open flow.
+	 */
+	public static void closeFlowIfPossible() {
+		flow = null;
+	}
+	
+	/**
 	 * Parses a generic controller or (N)RPN number, assigned in a flow.
 	 * 
 	 * @param numberStr  The number to be parsed.
 	 * @param maxNum     The maximum allowed number.
+	 * @param elemName   Flow element name (for error messages).
 	 * @return the parsed number
 	 * @throws ParseException if the number cannot be parsed or is too high.
 	 */
-	private static int parseGenericNumber(String numberStr, int maxNum) throws ParseException {
+	private static int parseGenericNumber(String numberStr, int maxNum, String elemName) throws ParseException {
 		
 		// no number provided?
 		if (null == numberStr)
-			throw new ParseException("Dict.get(Dict.ERROR_FL_NUMBER_MISSING)"); // TODO: Dict
+			throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_NUMBER_MISSING), elemName));
 		
 		try {
 			// parse the number
@@ -335,7 +350,7 @@ public class Effect {
 			
 			// number higher then allowed by the controller or (n)rpn?
 			if (number > maxNum)
-				throw new ParseException("Dict.get(Dict.ERROR_FL_NUMBER_TOO_HIGH)" + numberStr); // TODO: Dict
+				throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_NUMBER_TOO_HIGH), numberStr, elemName, maxNum));
 			
 			// ok
 			return number;
@@ -343,7 +358,7 @@ public class Effect {
 		catch (NumberFormatException e) {
 			
 			// number exceeds integer limit
-			throw new ParseException("Dict.get(Dict.ERROR_FL_NUMBER_TOO_HIGH)" + numberStr); // TODO: Dict
+			throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_NUMBER_TOO_HIGH), numberStr, elemName, maxNum));
 		}
 	}
 	
@@ -359,35 +374,29 @@ public class Effect {
 		
 		// check number
 		if (MidicaPLParser.FL_CTRL.equals(elemName)) {
-			if (number < 0) {
-				throw new ParseException("Dict.get(Dict.ERROR_FL_NUMBER_REQUIRED)" + elemName); // TODO: Dict
-			}
-			else if (number > 127) {
-				throw new ParseException("Dict.get(Dict.ERROR_FL_NUMBER_GT_127)"); // TODO: Dict
-			}
+			if (number < 0)
+				throw new ParseException("Number missing for element '" + elemName + "'. This should not happen. Please report.");
+			else if (number > 127)
+				throw new ParseException("Number for element '" + elemName + "' is higher than 127. This should not happen. Please report.");
 		}
 		else if (MidicaPLParser.FL_RPN.equals(elemName) || MidicaPLParser.FL_RPN.equals(elemName)) {
-			if (number < 0) {
-				throw new ParseException("Dict.get(Dict.ERROR_FL_NUMBER_REQUIRED)" + elemName); // TODO: Dict
-			}
-			else if (number > 16383) {
-				throw new ParseException("Dict.get(Dict.ERROR_FL_NUMBER_GT_16383)"); // TODO: Dict
-			}
+			if (number < 0)
+				throw new ParseException("Number missing for element '" + elemName + "'. This should not happen. Please report.");
+			else if (number > 16383)
+				throw new ParseException("Number for element '" + elemName + "' is higher than 16383. This should not happen. Please report.");
 		}
 		else if (number > -1) {
-			throw new ParseException("Dict.get(Dict.ERROR_FL_NUMBER_NOT_ALLOWED)" + elemName); // TODO: Dict
+			throw new ParseException("Number missing for element '" + elemName + "' not allowed. This should not happen. Please report.");
 		}
 		
 		// check presence of params
 		if (functionNames.contains(elemName)) {
-			if (paramStr == null) {
-				throw new ParseException("Dict.get(Dict.ERROR_FL_PARAMS_REQUIRED)" + elemName); // TODO: Dict
-			}
+			if (paramStr == null && ! MidicaPLParser.FUNC_WAIT.equals(elemName))
+				throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_PARAMS_REQUIRED), elemName));
 		}
 		else {
-			if (null != paramStr) {
-				throw new ParseException("Dict.get(Dict.ERROR_FL_PARAMS_NOT_ALLOWED)" + elemName); // TODO: Dict
-			}
+			if (null != paramStr)
+				throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_PARAMS_NOT_ALLOWED), elemName));
 		}
 		
 		// effect type?
@@ -437,7 +446,13 @@ public class Effect {
 		
 		// function?
 		if (functionNames.contains(elemName)) {
-			String[] params = paramStr.split(Pattern.quote(MidicaPLParser.PARAM_SEPARATOR), -1);
+			
+			// unpack parameters - special case: treat 'wait' like 'wait()'
+			String[] params;
+			if ((null == paramStr || paramStr.isEmpty()) && MidicaPLParser.FUNC_WAIT.equals(elemName))
+				params = new String[] {};
+			else
+				params = paramStr.split(Pattern.quote(MidicaPLParser.PARAM_SEPARATOR), -1);
 			
 			// check number of parameters
 			Integer expectedCount = functionToParamCount.get(elemName);
@@ -447,17 +462,19 @@ public class Effect {
 			if (0 == expectedCount && 1 == params.length && paramStr.isEmpty()) {
 				// OK. Special case for functions without any parameter.
 			}
+			else if (0 == params.length && MidicaPLParser.FUNC_WAIT.equals(elemName)) {
+				// OK. Special case for wait() without parameter
+			}
 			else {
-				if (params.length != expectedCount) {
+				if (params.length != expectedCount)
 					throw new ParseException(
-						String.format("Dict.get(Dict.ERROR_FL_WRONG_PARAM_NUM)", elemName, expectedCount, params.length)
-					); // TODO: Dict
-				}
+						String.format(Dict.get(Dict.ERROR_FL_WRONG_PARAM_NUM), elemName, expectedCount, params.length, paramStr)
+					);
 				
 				// don't allow empty parameters
 				for (String param : params) {
 					if (param.isEmpty())
-						throw new ParseException("Dict.get(Dict.ERROR_FL_EMPTY_PARAM)" + paramStr); // TODO: Dict
+						throw new ParseException(Dict.get(Dict.ERROR_FL_EMPTY_PARAM) + paramStr);
 				}
 			}
 			
@@ -468,10 +485,6 @@ public class Effect {
 		}
 		
 		// other flow elements
-		if (MidicaPLParser.FL_KEEP.equals(elemName)) {
-			flow.setKeep();
-			return;
-		}
 		if (MidicaPLParser.FL_DOUBLE.equals(elemName)) {
 			flow.setDouble();
 			return;
@@ -491,7 +504,10 @@ public class Effect {
 		
 		// wait()
 		if (MidicaPLParser.FUNC_WAIT.equals(funcName)) {
-			flow.applyWait();
+			if (params.length > 0)
+				flow.applyWait(params[0]);
+			else
+				flow.applyWait();
 			return;
 		}
 		
@@ -514,7 +530,7 @@ public class Effect {
 		// on()/off() - boolean functions
 		if (MidicaPLParser.FUNC_ON.equals(funcName) || MidicaPLParser.FUNC_OFF.equals(funcName)) {
 			if (valueType != EffectFlow.TYPE_BOOLEAN && valueType != EffectFlow.TYPE_ANY) {
-				throw new ParseException("Dict.get(Dict.ERROR_FUNC_TYPE_NOT_BOOL)" + funcName); // TODO: Dict
+				throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_NOT_BOOL), funcName));
 			}
 			
 			int value = MidicaPLParser.FUNC_ON.equals(funcName) ? 127 : 0;
@@ -525,7 +541,7 @@ public class Effect {
 		
 		// non-boolean function for a boolean effect?
 		if (EffectFlow.TYPE_BOOLEAN == valueType) {
-			throw new ParseException("Dict.get(Dict.ERROR_FUNC_TYPE_BOOL)" + funcName); // TODO: Dict
+			throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_BOOL), funcName));
 		}
 		
 		// set()
@@ -535,12 +551,19 @@ public class Effect {
 			return;
 		}
 		
-		// continuous functions
+		// continuous functions: line(), sin(), cos(), nsin(), ncos()
 		if (MidicaPLParser.FUNC_LINE.equals(funcName)
 			|| MidicaPLParser.FUNC_SIN.equals(funcName) || MidicaPLParser.FUNC_COS.equals(funcName)
 			|| MidicaPLParser.FUNC_NSIN.equals(funcName) || MidicaPLParser.FUNC_NCOS.equals(funcName)) {
 			
-			// TODO: implement
+			// don't allow (N)RPN
+			int effectType = flow.getEffectType();
+			if (EffectFlow.EFF_TYPE_RPN == effectType)
+				throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_CONT_RPN), funcName));
+			if (EffectFlow.EFF_TYPE_NRPN == effectType)
+				throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_CONT_NRPN), funcName));
+			
+			applyContinousFunction(funcName, params);
 			
 			return;
 		}
@@ -549,10 +572,19 @@ public class Effect {
 	}
 	
 	/**
+	 * Applies the given value array to the MIDI sequence.
 	 * 
+	 * The given **values** array has the same format as the one returned
+	 * by {@link #parseIntParam(String)}. It contains 2 or 3 bytes.
 	 * 
-	 * @param values
-	 * @throws ParseException
+	 * The first byte is always the raw value.
+	 * 
+	 * The second byte is either the MSB (if there is a third byte) or the only value.
+	 * 
+	 * If the third value is available, it contains the LSB.
+	 * 
+	 * @param values  see above.
+	 * @throws ParseException if there is an unexpected problem.
 	 */
 	private static void setValue(int[] values) throws ParseException {
 		
@@ -568,11 +600,26 @@ public class Effect {
 					return;
 				}
 				else if (2 == values.length) {
-					SequenceCreator.addMessageChannelEffect(effectNum, channel, values[1], 0, tick);
+					
+					// pitch bend?
+					if (0xE0 == flow.getEffectNumber()) {
+						// special case: set(0) for MSB only - set the LSB to 0 - to get no bend at all
+						if (0x40 == values[1])
+							SequenceCreator.addMessageChannelEffect(effectNum, channel, 0, values[1], tick);
+						else
+							// use the MSB in both positions - cover the whole range
+							SequenceCreator.addMessageChannelEffect(effectNum, channel, values[1], values[1], tick);
+					}
+					else {
+						// TODO: mono_at, poly_at
+						// MSB first, LSB second
+						SequenceCreator.addMessageChannelEffect(effectNum, channel, values[1], 0, tick);
+					}
 					return;
 				}
 				else if (3 == values.length) {
-					SequenceCreator.addMessageChannelEffect(effectNum, channel, values[1], values[2], tick);
+					// pitch bend: lsb first, msb second
+					SequenceCreator.addMessageChannelEffect(effectNum, channel, values[2], values[1], tick);
 					return;
 				}
 			}
@@ -607,8 +654,114 @@ public class Effect {
 		}
 	}
 	
-	private static void setByte() {
+	/**
+	 * Applies a continuous function like line(), sin(), and so on.
+	 * 
+	 * @param function  function name
+	 * @param params    function parameters
+	 * @throws ParseException if the parameters are invalid.
+	 */
+	private static void applyContinousFunction(String function, String[] params) throws ParseException {
 		
+		// prepare common data
+		long startTick = flow.getCurrentTick();
+		long endTick   = flow.getFutureTick();
+		long tickDiff  = endTick - startTick;
+		int  byteCount = 0;
+		int  lastMsb   = -1;
+		int  lastLsb   = -1;
+		
+		// prepare data for line()
+		boolean isLine    = false;
+		long    valueDiff = 0;
+		long    fromVal   = 0;
+		
+		// prepare data for sin(), cos(), nsin(), ncos()
+		boolean isSin          = false;
+		boolean isNeg          = false;
+		int     middleVal      = 0;
+		int     posDiff        = 0;
+		int     negDiff        = 0;
+		double  ticksPerPeriod = 0;
+		
+		// parse parameters
+		if (MidicaPLParser.FUNC_LINE.equals(function)) {
+			isLine            = true;
+			int[] fromValues  = parseIntParam(params[0]);
+			int[] untilValues = parseIntParam(params[1]);
+			fromVal           = fromValues[0];
+			long untilVal     = untilValues[0];
+			valueDiff         = untilVal - fromVal;
+			byteCount         = fromValues.length;
+		}
+		else {
+			// sin, cos, nsin, ncos
+			int[] minValues = parseIntParam(params[0]);
+			int[] maxValues = parseIntParam(params[1]);
+			int   minVal    = minValues[0];
+			int   maxVal    = maxValues[0];
+			middleVal       = (minVal + maxVal + 1) / 2;
+			negDiff         = middleVal - minVal;
+			posDiff         = maxVal - middleVal;
+			float periods   = parsePeriodsParam(params[2]);
+			ticksPerPeriod  = (tickDiff / periods);
+			byteCount       = minValues.length;
+			if (MidicaPLParser.FUNC_SIN.equals(function) || MidicaPLParser.FUNC_NSIN.equals(function)) {
+				isSin = true;
+			}
+			if (MidicaPLParser.FUNC_NSIN.equals(function) || MidicaPLParser.FUNC_NCOS.equals(function)) {
+				isNeg = true;
+			}
+		}
+		
+		// calculate the value for each tick
+		System.err.println("_____");
+		for (long tick = 0; tick <= tickDiff; tick++) {
+			int[] setValues = new int[byteCount];
+			
+			if (isLine) {
+				// line(): f(tick) = (tick * valueDiff / tickDiff) + from
+				long value = tick * valueDiff / tickDiff;
+				setValues[0] = ((int) value) + ((int) fromVal);
+			}
+			else {
+				// sin, cos, nsin, ncos
+				double radian = Math.PI * 2 * (tick / ticksPerPeriod);
+				double value  = isSin ? Math.sin(radian) : Math.cos(radian);
+				if (isNeg)
+					value = -value;
+				value = value < 0 ? value * negDiff : value * posDiff;
+				value = Math.round(value) + middleVal;
+				setValues[0] = (int) value;
+				System.err.println(setValues[0]); // TODO: delete
+			}
+			
+			// calculate MSB / LSB
+			int msb = setValues[0];
+			int lsb = lastLsb;
+			if (byteCount > 2) {
+				msb = setValues[0] >> 7;
+				lsb = setValues[0] & 0x7F;
+			}
+			
+			// nothing to be changed?
+			if (msb == lastMsb && lsb == lastLsb)
+				continue;
+			
+			// calculate and set the real MIDI tick for the effect's event
+			flow.setCurrentTick(tick + startTick);
+			
+			// apply the value similar to set()
+			setValues[1] = msb;
+			if (byteCount > 2)
+				setValues[2] = lsb;
+			setValue(setValues);
+			lastMsb = msb;
+			lastLsb = lsb;
+		}
+		
+		// update flow tick
+		flow.setCurrentTick(endTick);
 	}
 	
 	/**
@@ -652,32 +805,32 @@ public class Effect {
 					// A negative percentage with a minimum of 0 should NOT evaluate to 0
 					// but throw an exception instead.
 					if (percent < 0 && 0 == min)
-						throw new ParseException("Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN)" + min); // TODO: Dict
+						throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), valueStr, min));
 					
 					// TODO: check
 					if (percent < 0)
-						// theoretically: value = percent * min / 100
-						value = (int) ((percent * -min * 10 + 100 * 5) / (100 * 10));
+						// theoretically: value = percent * -min / 100
+						value = (int) ((percent * -min * 10 - 100 * 5) / (100 * 10));
 					else
 						// theoretically: value = percent * max / 100
 						value = (int) ((percent * max * 10 + 100 * 5) / (100 * 10));
 				}
 				else {
-					throw new ParseException("Dict.get(Dict.ERROR_FUNC_NO_INT)" + valueStr); // TODO: Dict
+					throw new ParseException(Dict.get(Dict.ERROR_FUNC_NO_NUMBER) + valueStr);
 				}
 			}
 		}
 		catch (NumberFormatException e) {
-			throw new ParseException("Dict.get(Dict.ERROR_FUNC_NO_NUMBER)" + valueStr); // TODO: Dict
+			throw new ParseException(Dict.get(Dict.ERROR_FUNC_NO_NUMBER) + valueStr);
 		}
 		if (null == value)
-			throw new ParseException("Dict.get(Dict.ERROR_FUNC_NO_NUMBER)" + valueStr); // TODO: Dict
+			throw new ParseException(Dict.get(Dict.ERROR_FUNC_NO_NUMBER) + valueStr);
 		
 		// check value against min / max
 		if (value < min)
-			throw new ParseException("Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN)" + min); // TODO: Dict
+			throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), valueStr, min));
 		if (value > max)
-			throw new ParseException("Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX)" + max); // TODO: Dict
+			throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), valueStr, max));
 		
 		// adjust the actual MIDI value for signed types
 		int valueType = flow.getValueType(valueStr);
@@ -716,5 +869,39 @@ public class Effect {
 		int msb = value >> 7;
 		int lsb = value & 0x7F;
 		return new int[] {value, msb, lsb};
+	}
+	
+	/**
+	 * Parses the 'periods' argument of a trigonometric function call like sin() etc.
+	 * 
+	 * @param valueStr  numeric or percentage parameter string
+	 * @return the parsed periods value
+	 * @throws ParseException if the parameter cannot be parsed or is out of range
+	 */
+	private static float parsePeriodsParam(String valueStr) throws ParseException {
+		
+		try {
+			Matcher m = periodsPattern.matcher(valueStr);
+			if (m.matches()) {
+				String floatStr   = m.group(1);
+				String percentStr = m.group(2);
+				float  periods;
+				if (floatStr != null) {
+					periods = Float.parseFloat(floatStr);
+					if (periods < 0) {
+						throw new ParseException(Dict.get(Dict.ERROR_FUNC_PERIODS_NEG) + valueStr);
+					}
+					if (percentStr != null) {
+						periods /= 100;
+					}
+					return periods;
+				}
+			}
+		}
+		catch (NumberFormatException e) {
+			throw new ParseException(Dict.get(Dict.ERROR_FUNC_PERIODS_NO_NUMBER) + valueStr);
+		}
+		
+		throw new ParseException(Dict.get(Dict.ERROR_FUNC_PERIODS_NO_NUMBER) + valueStr);
 	}
 }

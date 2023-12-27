@@ -227,7 +227,6 @@ public class MidicaPLParser extends SequenceParser {
 	public static String TUPLET_FOR         = null;
 	public static String LENGTH_PLUS        = null;
 	public static String FL_DOT             = null;
-	public static String FL_KEEP            = null;
 	public static String FL_DOUBLE          = null;
 	public static String FL_CTRL            = null;
 	public static String FL_RPN             = null;
@@ -511,7 +510,6 @@ public class MidicaPLParser extends SequenceParser {
 		COND_IN            = Dict.getSyntax( Dict.SYNTAX_COND_IN            );
 		COND_IN_SEP        = Dict.getSyntax( Dict.SYNTAX_COND_IN_SEP        );
 		FL_DOT             = Dict.getSyntax( Dict.SYNTAX_FL_DOT             );
-		FL_KEEP            = Dict.getSyntax( Dict.SYNTAX_FL_KEEP            );
 		FL_DOUBLE          = Dict.getSyntax( Dict.SYNTAX_FL_DOUBLE          );
 		FL_CTRL            = Dict.getSyntax( Dict.SYNTAX_FL_CTRL            );
 		FL_RPN             = Dict.getSyntax( Dict.SYNTAX_FL_RPN             );
@@ -3750,7 +3748,6 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_TUPLET_FOR.equals(cmdId)         ) TUPLET_FOR         = cmdName;
 		else if ( Dict.SYNTAX_LENGTH_PLUS.equals(cmdId)        ) LENGTH_PLUS        = cmdName;
 		else if ( Dict.SYNTAX_FL_DOT.equals(cmdId)             ) FL_DOT             = cmdName;
-		else if ( Dict.SYNTAX_FL_KEEP.equals(cmdId)            ) FL_KEEP            = cmdName;
 		else if ( Dict.SYNTAX_FL_DOUBLE.equals(cmdId)          ) FL_DOUBLE          = cmdName;
 		else if ( Dict.SYNTAX_FL_CTRL.equals(cmdId)            ) FL_CTRL            = cmdName;
 		else if ( Dict.SYNTAX_FL_RPN.equals(cmdId)             ) FL_RPN             = cmdName;
