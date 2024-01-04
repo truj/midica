@@ -1,0 +1,4 @@
+INCLUDE inc/instruments.midica
+
+
+0: balance.line(63,-65)

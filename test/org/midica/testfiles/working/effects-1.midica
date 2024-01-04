@@ -1,0 +1,127 @@
+INCLUDE inc/instruments.midica
+
+////////////////////////////////////////
+// channel 0: CTRL / MSB (vol == Expression)
+////////////////////////////////////////
+
+// set, wait, length
+0: vol.wait.set(10).wait().set(20) .wait(/8) .set(30)
+0: .wait.wait.set(40)
+0: .length(/2).wait.set(50) .wait .set(60)
+
+// %
+0: .length(64).wait.set(0%)
+0: .wait.set(100.000%)
+
+// double
+0: .double.wait.set(100%)
+
+////////////////////////////////////////
+// channel 1: CTRL / MSB_SIGNED (balance)
+////////////////////////////////////////
+
+// set, wait, length
+1: balance.length(64).wait.set(-64)
+1: .wait.set(63)
+1: .wait.set(0)
+1: .wait.set(-100%)
+1: .wait.set(100%)
+1: .wait.set(0%)
+
+// double
+1: .double.wait.set(-100%)
+1: .wait.set(100%)
+1: .wait.set(0%)
+1: .wait.set(-8192)
+1: .wait.set(8191)
+1: .wait.set(0)
+
+////////////////////////////////////////
+// channel 2: CTRL / BYTE (chorus)
+////////////////////////////////////////
+
+2: chorus.length(64).wait.set(0)
+2: .wait.set(127)
+2: .wait.set(0)
+2: .wait.set(100%)
+2: .wait.set(0%)
+2: .wait.set(50%)
+
+////////////////////////////////////////
+// channel 3: CTRL / BOOLEAN (hold)
+////////////////////////////////////////
+
+3: hold.length(64).wait.on()
+3: .wait.off()
+
+////////////////////////////////////////
+// channel 4: CTRL / ANY (0x50 == 80)
+////////////////////////////////////////
+
+4: length(64).wait.ctrl=80.on()
+4: .wait.off()
+4: .wait.set(100%)
+4: .wait.set(0%)
+4: .wait.set(50%)
+4: .wait.set(127)
+4: .wait.set(0)
+
+////////////////////////////////////////
+// channel 5: CTRL / NONE (0x7B == 123 == all notes off)
+////////////////////////////////////////
+
+5: ctrl=123.length(64).wait.on()
+
+////////////////////////////////////////
+// channel 6: RPN / MSB (modulation depth range)
+////////////////////////////////////////
+
+6: mod_depth_range.length(32).wait.set(0)
+6: .wait.set(127)
+6: .wait.set(0%)
+6: .wait.set(100%)
+
+// double
+6: .double.wait.set(0)
+6: .wait.set(16383)
+6: .wait.set(0%)
+6: .wait.set(50%)
+6: .wait.set(100%)
+
+6: c c
+6: rpn=0/5.set(50%)
+6: c
+6: rpn=5.set(0%)
+
+////////////////////////////////////////
+// channel 7: RPN / MSB_SIGNED (channel coarse tuning)
+////////////////////////////////////////
+
+7: coarse_tune.length(32).wait.set(0)
+7: .wait.set(63)
+7: .wait.set(-64)
+7: .wait.set(100%)
+7: .wait.set(0%)
+7: .wait.set(-100%)
+
+// double
+7: .double.wait.set(0)
+7: .wait.set(8191)
+7: .wait.set(-8192)
+7: .wait.set(0%)
+7: .wait.set(100%)
+7: .wait.set(-100%)
+
+7: c c
+7: rpn=0/2.set(50%)
+7: c
+7: rpn=2.set(0%)
+
+////////////////////////////////////////
+// channel 8: NRPN / 4/7 (+ RPNs)
+////////////////////////////////////////
+
+8: nrpn=4/7.length(32).wait.double.set(100%)
+8: c
+8: nrpn=519.length(32).wait.double.set(50%)       // MSB * 128 + LSB == 128 * 4 + 7 == 512 + 7 == 519
+

@@ -1,0 +1,4 @@
+INCLUDE inc/instruments.midica
+
+
+0: vol.set(30,40)

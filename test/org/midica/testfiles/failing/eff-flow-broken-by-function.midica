@@ -1,0 +1,9 @@
+INCLUDE inc/instruments.midica
+
+
+0: vol.wait()
+FUNCTION func
+END
+0: .set(50)
+
+CALL func

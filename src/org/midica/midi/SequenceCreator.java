@@ -513,32 +513,6 @@ public class SequenceCreator {
 	}
 	
 	/**
-	 * Adds a sound effect based on an RPN.
-	 * 
-	 * @param rpn      Number of the RPN.
-	 * @param channel  Channel number from 0 to 15.
-	 * @param value    Value to be set.
-	 * @param tick     MIDI tick.
-	 * @throws InvalidMidiDataException
-	 */
-	public static void addMessageRpn(int rpn, int channel, int value, long tick) throws InvalidMidiDataException {
-		// TODO: implement
-	}
-	
-	/**
-	 * Adds a sound effect based on an NRPN.
-	 * 
-	 * @param nrpn     Number of the RPN.
-	 * @param channel  Channel number from 0 to 15.
-	 * @param value    Value to be set.
-	 * @param tick     MIDI tick.
-	 * @throws InvalidMidiDataException
-	 */
-	public static void addMessageNrpn(int nrpn, int channel, int value, long tick) throws InvalidMidiDataException {
-		// TODO: implement
-	}
-	
-	/**
 	 * Adds a channel-dependent generic message.
 	 * This is called by the {@link MidiParser} to add messages that are not handled by another
 	 * method.

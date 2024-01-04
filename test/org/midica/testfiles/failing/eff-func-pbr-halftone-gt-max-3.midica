@@ -1,0 +1,4 @@
+INCLUDE inc/instruments.midica
+
+
+0: pitch_bend_range.set(127.0001)

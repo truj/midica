@@ -1,0 +1,4 @@
+INCLUDE inc/instruments.midica
+
+
+0: ctrl=0/11.set(50)

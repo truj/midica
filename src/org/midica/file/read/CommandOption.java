@@ -78,7 +78,7 @@ public class CommandOption {
 		}
 		else {
 			// should never happen
-			throw new ParseException("Invalid option name: " + name + ". Please report.");
+			throw new FatalParseException("Invalid option name: " + name + ".");
 		}
 	}
 	

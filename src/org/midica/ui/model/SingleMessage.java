@@ -250,6 +250,20 @@ public class SingleMessage implements IMessageType, Comparable<SingleMessage> {
 		
 		// probably a SHORT message (used in MidicaPLParserTest)
 		if (getOption(IMessageType.OPT_CHANNEL) != null && getOption(IMessageType.OPT_SUMMARY) != null) {
+			
+			// CTRL change?
+			if (getOption(IMessageType.OPT_STATUS_BYTE).toString().startsWith("B")) {
+				String ctrlByte = Integer.toHexString((byte) getOption(IMessageType.OPT_CONTROLLER)).toUpperCase();
+				if (1 == ctrlByte.length())
+					ctrlByte = "0" + ctrlByte;
+				return (Long) getOption(IMessageType.OPT_TICK)
+						+ "/" + (Integer) getOption(IMessageType.OPT_CHANNEL)
+						+ "/" + (String) getOption(IMessageType.OPT_STATUS_BYTE)
+						+ "-" + ctrlByte
+						+ "/" + (String) getOption(IMessageType.OPT_SUMMARY);
+			}
+			
+			// something else
 			return (Long) getOption(IMessageType.OPT_TICK)
 				+ "/" + (Integer) getOption(IMessageType.OPT_CHANNEL)
 				+ "/" + (String) getOption(IMessageType.OPT_STATUS_BYTE)

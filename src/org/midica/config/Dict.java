@@ -204,6 +204,7 @@ public class Dict {
 	public static final String SYNTAX_FL_RPN             = "FL_RPN";
 	public static final String SYNTAX_FL_NRPN            = "FL_NRPN";
 	public static final String SYNTAX_FL_ASSIGNER        = "FL_ASSIGNER";
+	public static final String SYNTAX_FL_GEN_NUM_SEP     = "FL_GEN_NUM_SEP";
 	public static final String SYNTAX_FUNC_SET           = "FUNC_SET";
 	public static final String SYNTAX_FUNC_ON            = "FUNC_ON";
 	public static final String SYNTAX_FUNC_OFF           = "FUNC_OFF";
@@ -1693,7 +1694,6 @@ public class Dict {
 	public static final String ERROR_GLOBAL_NUM_OF_ARGS          = "error_global_num_of_args";
 	public static final String ERROR_UNKNOWN_GLOBAL_CMD          = "error_unknown_global_cmd: ";
 	public static final String ERROR_UNKNOWN_COMMAND_ID          = "error_unknown_command_id";
-	public static final String ERROR_MIDI_PROBLEM                = "error_midi_problem";
 	public static final String ERROR_CH_CMD_NUM_OF_ARGS          = "error_ch_num_of_args";
 	public static final String ERROR_CANT_PARSE_OPTIONS          = "error_cant_parse_options";
 	public static final String ERROR_OPTION_NEEDS_VAL            = "error_option_needs_val";
@@ -1746,6 +1746,7 @@ public class Dict {
 	public static final String ERROR_FL_NOT_OPEN                 = "error_fl_not_open";
 	public static final String ERROR_FL_MISSING_DOT              = "error_fl_missing_dot";
 	public static final String ERROR_FL_NUMBER_NOT_ALLOWED       = "error_fl_number_not_allowed";
+	public static final String ERROR_FL_NUM_SEP_NOT_ALLOWED      = "error_fl_num_sep_not_allowed";
 	public static final String ERROR_FL_UNMATCHED_REMAINDER      = "error_fl_unmatched_remainder";
 	public static final String ERROR_FL_NUMBER_MISSING           = "error_fl_number_missing";
 	public static final String ERROR_FL_NUMBER_TOO_HIGH          = "error_fl_number_too_high";
@@ -1755,10 +1756,18 @@ public class Dict {
 	public static final String ERROR_FL_EMPTY_PARAM              = "error_fl_empty_param";
 	public static final String ERROR_FL_CONT_RPN                 = "error_fl_cont_rpn";
 	public static final String ERROR_FL_CONT_NRPN                = "error_fl_cont_nrpn";
+	public static final String ERROR_FL_NOTE_NOT_SUPP            = "error_fl_note_not_supp";
 	public static final String ERROR_FUNC_TYPE_NOT_BOOL          = "error_func_type_not_bool";
 	public static final String ERROR_FUNC_TYPE_BOOL              = "error_func_type_bool";
+	public static final String ERROR_FUNC_TYPE_NONE              = "error_func_type_none";
 	public static final String ERROR_FUNC_VAL_LOWER_MIN          = "error_func_val_lower_min";
 	public static final String ERROR_FUNC_VAL_GREATER_MAX        = "error_func_val_greater_max";
+	public static final String ERROR_FUNC_NEED_HALFTONE          = "error_func_need_halftone";
+	public static final String ERROR_FUNC_HALFTONE_NOT_ALLOWED   = "error_func_halftone_not_allowed";
+	public static final String ERROR_FUNC_HALFTONE_GT_RANGE      = "error_func_halftone_gt_range";
+	public static final String ERROR_FUNC_MSB_LSB_NEEDS_DOUBLE   = "error_func_msb_lsb_needs_double";
+	public static final String ERROR_FUNC_MSB_TOO_HIGH           = "error_func_msb_too_high";
+	public static final String ERROR_FUNC_LSB_TOO_HIGH           = "error_func_lsb_too_high";
 	public static final String ERROR_FUNC_NO_NUMBER              = "error_func_no_number";
 	public static final String ERROR_FUNC_PERIODS_NEG            = "error_func_periods_neg";
 	public static final String ERROR_FUNC_PERIODS_NO_NUMBER      = "error_func_periods_no_number";
@@ -2963,6 +2972,7 @@ public class Dict {
 		set( SYNTAX_FL_RPN,             "Generic RPN (flow element)"                      );
 		set( SYNTAX_FL_NRPN,            "Generic NRPN (flow element)"                     );
 		set( SYNTAX_FL_ASSIGNER,        "asssigner for flow elements, e.g. Ctrl/(N)RPN number or note name" );
+		set( SYNTAX_FL_GEN_NUM_SEP,     "MSB/LSB separator for generic (N)RPN numbers in an effect flow" );
 		set( SYNTAX_FUNC_SET,           "set function"                                    );
 		set( SYNTAX_FUNC_ON,            "function to enable a binary effect"              );
 		set( SYNTAX_FUNC_OFF,           "function to disable a binary effect"             );
@@ -3364,7 +3374,7 @@ public class Dict {
 		set( MSG_DESC_F_UNKNOWN_TONALITY, "Unknown tonality"                               );
 		
 		// UiControler + PlayerControler
-		set( ERROR_IN_LINE,                       "<html>parsing error in file:<br>%s<br>line: %s<br>" );
+		set( ERROR_IN_LINE, "<html>parsing error in file:<br>%s<br>line: %s<br>" );
 		
 		// SoundbankParser
 		set( UNKNOWN_SOUND_EXT,        "<html>Allowed file extensions: *.sf2 or *.dls"
@@ -3475,7 +3485,7 @@ public class Dict {
 		set( ERROR_CALL_DUPLICATE_PARAM_NAME,     "duplicate parameter name: "                                        );
 		set( ERROR_CALL_PARAM_MORE_ASSIGNERS,     "named parameter must not contain more than one assign symbol: "    );
 		set( ERROR_COMPACT_INVALID_OPTION,        "option invalid for compact commands: %s - Erroneous part: %s"      );
-		set( ERROR_COMPACT_PAT_CALL_WITH_OPT,     "<html>Pattern call contains additional data: %s<br>"
+		set( ERROR_COMPACT_PAT_CALL_WITH_OPT,     "Pattern call contains additional data: %s<br>"
 		                                        + "Pattern call: %s<br>"
 		                                        + "(Forgotten whitespace after call? Failed to close parameter list? Faulty whitespace in parameter list?)" );
 		set( ERROR_INVALID_TIME_DENOM,            "invalid denominator in time signature: "                           );
@@ -3498,7 +3508,6 @@ public class Dict {
 		set( ERROR_GLOBAL_NUM_OF_ARGS,            "wrong number of arguments in global command"                       );
 		set( ERROR_UNKNOWN_GLOBAL_CMD,            "unknown global command: "                                          );
 		set( ERROR_UNKNOWN_COMMAND_ID,            "Unknown command ID: "                                              );
-		set( ERROR_MIDI_PROBLEM,                  "<html>Midi Problem!<br>"                                           );
 		set( ERROR_CH_CMD_NUM_OF_ARGS,            "wrong number of arguments in channel command"                      );
 		set( ERROR_CANT_PARSE_OPTIONS,            "cannot parse options: "                                            );
 		set( ERROR_OPTION_NEEDS_VAL,              "option needs value: "                                              );
@@ -3551,6 +3560,7 @@ public class Dict {
 		set( ERROR_FL_NOT_OPEN,                   "An effect flow is not yet open. Don't use '%s' to start a flow."   );
 		set( ERROR_FL_MISSING_DOT,                "Effect flow elements must be separated with '%s'"                  );
 		set( ERROR_FL_NUMBER_NOT_ALLOWED,         "A generic number is not allowed for this effect flow element: "    );
+		set( ERROR_FL_NUM_SEP_NOT_ALLOWED,        "The gereric number has only one byte. MSB/LSB not allowed for element: " );
 		set( ERROR_FL_UNMATCHED_REMAINDER,        "Effect flow ends with an invalid remainder: "                      );
 		set( ERROR_FL_NUMBER_MISSING,             "Effect flow element '%s' needs to be assigned with a generic number" );
 		set( ERROR_FL_NUMBER_TOO_HIGH,            "Generic number %s too high for element %s. Maximum is %d."         );
@@ -3560,10 +3570,23 @@ public class Dict {
 		set( ERROR_FL_EMPTY_PARAM,                "Empty parameter not allowed. Parameters: "                         );
 		set( ERROR_FL_CONT_RPN,                   "Effect function '%s' is not allowed for RPN-based effects."        );
 		set( ERROR_FL_CONT_NRPN,                  "Effect function '%s' is not allowed for NRPN-based effects."       );
+		set( ERROR_FL_NOTE_NOT_SUPP,              "A note is not supported for the chosen effect type. Invalid element: " );
 		set( ERROR_FUNC_TYPE_NOT_BOOL,            "Effect type not boolean. Function '%s' is not allowed."            );
-		set( ERROR_FUNC_TYPE_BOOL,                "Effect type is boolean. Function '%s' is not allowed."             );
+		set( ERROR_FUNC_TYPE_BOOL,                "Value type is 'boolean'. Function '%s' is not allowed."            );
+		set( ERROR_FUNC_TYPE_NONE,                "Value type is 'none'. Function '%s' is not allowed."               );
 		set( ERROR_FUNC_VAL_LOWER_MIN,            "Parameter '%s' is smaller than the minimum value (%s)"             );
 		set( ERROR_FUNC_VAL_GREATER_MAX,          "Parameter '%s' is greater than the maximum value (%s)"             );
+		set( ERROR_FUNC_NEED_HALFTONE,            "Effect needs half-tones as parameter. Parameter not accepted: "    );
+		set( ERROR_FUNC_HALFTONE_NOT_ALLOWED,     "Parameter '%s' not allowed. The effect type does not support half tone steps." );
+		set( ERROR_FUNC_HALFTONE_GT_RANGE,        "Half-tone parameter '%s' exceeds the current pitch bend range (%s)<br>"
+		                                          + "Consider to increase the pitch bend range before setting this value." );
+		set( ERROR_FUNC_MSB_LSB_NEEDS_DOUBLE,     "MSB/LSB parameters can only be used with double precision.<br>"
+		                                          + "Parameter not accepted: %s.<br>"
+		                                          + "Consider using '%s'." );
+		set( ERROR_FUNC_MSB_TOO_HIGH,             "The MSB part of the following parameter is too high: '%s'<br>"
+		                                          + "MSB not accepted: '%s'" );
+		set( ERROR_FUNC_LSB_TOO_HIGH,             "The LSB part of the following parameter is too high: '%s'<br>"
+		                                          + "LSB not accepted: '%s'" );
 		set( ERROR_FUNC_NO_NUMBER,                "Parameter is not a valid number or percentage value: "             );
 		set( ERROR_FUNC_PERIODS_NEG,              "The 'periods' parameter cannot be negative: "                      );
 		set( ERROR_FUNC_PERIODS_NO_NUMBER,        "The 'periods' parameter is not a valid number: "                   );
@@ -3622,7 +3645,7 @@ public class Dict {
 		set( TITLE_WAIT,                          "Please Wait"                                                       );
 		set( WAIT_PARSE_MPL,                      "Parsing the MidicaPL file..."                                      );
 		set( WAIT_PARSE_MID,                      "Parsing the MIDI file..."                                          );
-		set( WAIT_PARSE_SB,                      "Parsing the Soundbank"                                             );
+		set( WAIT_PARSE_SB,                       "Parsing the Soundbank"                                             );
 		set( WAIT_PARSE_URL,                      "Downloading the Soundbank"                                         );
 		set( WAIT_PARSE_FOREIGN,                  "Importing the file using %s"                                       );
 		set( WAIT_REPARSE,                        "Reloading the File"                                                );
@@ -4343,6 +4366,7 @@ public class Dict {
 		setSyntax( SYNTAX_FL_RPN,              "rpn"          );
 		setSyntax( SYNTAX_FL_NRPN,             "nrpn"         );
 		setSyntax( SYNTAX_FL_ASSIGNER,         "="            );
+		setSyntax( SYNTAX_FL_GEN_NUM_SEP,      "/"            );
 		setSyntax( SYNTAX_FUNC_SET,            "set"          );
 		setSyntax( SYNTAX_FUNC_ON,             "on"           );
 		setSyntax( SYNTAX_FUNC_OFF,            "off"          );
@@ -4556,6 +4580,7 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_FL_RPN             );
 		addSyntaxForInfoView( SYNTAX_FL_NRPN            );
 		addSyntaxForInfoView( SYNTAX_FL_ASSIGNER        );
+		addSyntaxForInfoView( SYNTAX_FL_GEN_NUM_SEP     );
 		addSyntaxForInfoView( SYNTAX_FUNC_SET           );
 		addSyntaxForInfoView( SYNTAX_FUNC_ON            );
 		addSyntaxForInfoView( SYNTAX_FUNC_OFF           );

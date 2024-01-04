@@ -7,10 +7,14 @@
 
 package org.midica.file.read;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,9 +31,13 @@ import org.midica.midi.SequenceCreator;
  */
 public class Effect {
 	
+	private static final long RPN_DISTANCE = 10;
+	
 	private static MidicaPLParser parser = null;
 	
 	private static EffectFlow flow = null;
+	
+	private static List<TreeMap<Long, Float>> pitchBendRangeByChannel;
 	
 	private static Set<String> functionNames;
 	private static Set<String> effectNames;
@@ -54,6 +62,18 @@ public class Effect {
 	public static void init(MidicaPLParser rootParser) {
 		parser = rootParser;
 		
+		// create and initialize special structures
+		{
+			// pitch bend range by channel/tick
+			pitchBendRangeByChannel = new ArrayList<>();
+			for (int channel = 0; channel < 16; channel++) {
+				TreeMap<Long, Float> rangeMap = new TreeMap<>();
+				rangeMap.put(0L, 2f);                // default: 2.0
+				pitchBendRangeByChannel.add(rangeMap);
+			}
+		}
+		
+		// create structures
 		functionToParamCount   = new HashMap<>();
 		functionNames          = new HashSet<>();
 		effectNames            = new HashSet<>();
@@ -62,6 +82,7 @@ public class Effect {
 		rpnNameToNumber        = new HashMap<>();
 		flowElementNames       = new HashSet<>();
 		
+		// init structures for functions
 		functionToParamCount.put( MidicaPLParser.FUNC_SET,    1 );
 		functionToParamCount.put( MidicaPLParser.FUNC_ON,     0 );
 		functionToParamCount.put( MidicaPLParser.FUNC_OFF,    0 );
@@ -77,6 +98,7 @@ public class Effect {
 			functionNames.add(key);
 		}
 		
+		// init structures for effects
 		effectNames.add( MidicaPLParser.CH_A_POLY_AT       );
 		effectNames.add( MidicaPLParser.CH_D_MONO_AT       );
 		effectNames.add( MidicaPLParser.CH_E_PITCH_BEND    );
@@ -116,15 +138,16 @@ public class Effect {
 		effectNames.add( MidicaPLParser.RPN_3_TUNING_PROG  );
 		effectNames.add( MidicaPLParser.RPN_4_TUNING_BANK  );
 		effectNames.add( MidicaPLParser.RPN_5_MOD_DEPTH_R  );
+		effectNames.add( MidicaPLParser.FL_CTRL );  // generic controller with number
+		effectNames.add( MidicaPLParser.FL_RPN  );  // generic RPN  with number or MSB/LSB
+		effectNames.add( MidicaPLParser.FL_NRPN );  // generic NRPN with number or MSB/LSB
 		
-		effectNames.add( MidicaPLParser.FL_CTRL );
-		effectNames.add( MidicaPLParser.FL_RPN  );
-		effectNames.add( MidicaPLParser.FL_NRPN );
-		
+		// init structures for channel-based effects
 		channelMsgNameToNumber.put( MidicaPLParser.CH_A_POLY_AT,    0xA0 );
 		channelMsgNameToNumber.put( MidicaPLParser.CH_D_MONO_AT,    0xD0 );
 		channelMsgNameToNumber.put( MidicaPLParser.CH_E_PITCH_BEND, 0xE0 );
 		
+		// init structures for controller-based effects
 		ctrlNameToNumber.put( MidicaPLParser.CC_01_MOD,        0x01 );
 		ctrlNameToNumber.put( MidicaPLParser.CC_02_BREATH,     0x02 );
 		ctrlNameToNumber.put( MidicaPLParser.CC_04_FOOT,       0x04 );
@@ -156,6 +179,7 @@ public class Effect {
 		ctrlNameToNumber.put( MidicaPLParser.CC_5E_EFF4_DEP,   0x5E );
 		ctrlNameToNumber.put( MidicaPLParser.CC_5F_EFF4_DEP,   0x5F );
 		
+		// init structures for RPN-based effects
 		rpnNameToNumber.put( MidicaPLParser.RPN_0_PITCH_BEND_R, 0x0000 );
 		rpnNameToNumber.put( MidicaPLParser.RPN_1_FINE_TUNE,    0x0001 );
 		rpnNameToNumber.put( MidicaPLParser.RPN_2_COARSE_TUNE,  0x0002 );
@@ -163,7 +187,7 @@ public class Effect {
 		rpnNameToNumber.put( MidicaPLParser.RPN_4_TUNING_BANK,  0x0004 );
 		rpnNameToNumber.put( MidicaPLParser.RPN_5_MOD_DEPTH_R,  0x0005 );
 		
-		// flow element names (effect names, function names, or other possible flow elements)
+		// init flow element names (effect names, function names, or other possible flow elements)
 		for (String effectName : effectNames) {
 			flowElementNames.add(effectName);
 		}
@@ -174,29 +198,45 @@ public class Effect {
 		
 		// compile regex patterns
 		String flowRegex
-			= "\\G"                                                                // end of previous match
-			+"(^|" + Pattern.quote(MidicaPLParser.FL_DOT) + ")"                    // begin or '.'
-			+ "(\\w+)(?:" + Pattern.quote(MidicaPLParser.FL_ASSIGNER) + "(\\d+))?" // flow element without parameters
-			+ "(?:"
-			+ Pattern.quote(MidicaPLParser.PARAM_OPEN)                             // (
-			+ "(\\S*?)"                                                            // function parameters
-			+ Pattern.quote(MidicaPLParser.PARAM_CLOSE)                            // )
-			+ ")?";                                                                // optional
+			= "\\G"                                               // end of previous match
+			+ "(^|" + Pattern.quote(MidicaPLParser.FL_DOT) + ")?" // begin or '.'
+			+ "(\\w+)"                                            // name
+			+ "(?:"                                               // generic number (optional)
+			    + Pattern.quote(MidicaPLParser.FL_ASSIGNER)
+			    + "(\\d+)"                                        // MSB or whole number
+			    + "(?:"
+			    + Pattern.quote(MidicaPLParser.FL_GEN_NUM_SEP)
+			    + "(\\d+)"                                        // LSB of generic number
+			    + ")?"
+			+ ")?"
+			+ "(?:"                                               // parameters (optional)
+			+ Pattern.quote(MidicaPLParser.PARAM_OPEN)            // (
+			+ "(\\S*?)"                                           // function parameters
+			+ Pattern.quote(MidicaPLParser.PARAM_CLOSE)           // )
+			+ ")?";                                               // optional
 		flowPattern       = Pattern.compile(flowRegex);
 		noteOrRestPattern = Pattern.compile("^[0-9]|" + Pattern.quote(MidicaPLParser.REST) + "$");
 		String intRegex = "^"
-			+ "(\\-?\\d+)"                // direct int value (group 1)
+			+ "(\\-?\\d+)"                  // direct int value (group 1)
 			+ "|"
 			+ "(?:"
-				+ "(\\-?\\d+(\\.\\d+)?)"  // percentage value (group 2)
-				+ Pattern.quote(MidicaPLParser.EFF_PERCENT)
+			    + "(\\-?\\d+(?:\\.\\d+)?)"  // percentage value (group 2)
+			    + Pattern.quote(MidicaPLParser.EFF_PERCENT)
+			+ ")"
+			+ "|"
+			+ "(\\-?\\d+\\.\\d+)"           // half-tone-steps (group 3)
+			+ "|"
+			+ "(?:"
+			    + "(\\d+)"                   // MSB (group 4)
+			    + Pattern.quote(MidicaPLParser.FL_GEN_NUM_SEP)
+			    + "(\\d+)"                   // LSB (group 5)
 			+ ")"
 			+ "$";
 		intPattern = Pattern.compile(intRegex);
 		String periodsRegex = "^"
 			+ "(\\-?\\d+(?:\\.\\d*))"     // int or float (group 1)
 			+ "("                         // percent (group 2)
-				+ Pattern.quote(MidicaPLParser.EFF_PERCENT)
+			    + Pattern.quote(MidicaPLParser.EFF_PERCENT)
 			+ ")?"
 			+ "$";
 		periodsPattern = Pattern.compile(periodsRegex);
@@ -242,6 +282,10 @@ public class Effect {
 	 */
 	public static boolean applyFlowIfPossible(int channel, String flowStr, String lengthStr) throws ParseException {
 		
+		// flow active but for a different channel? - close flow
+		if (flow != null && channel != flow.getChannel())
+			closeFlowIfPossible();
+		
 		// looks like normal note or rest?
 		if (noteOrRestPattern.matcher(flowStr).find()) {
 			return false;
@@ -261,7 +305,8 @@ public class Effect {
 				String dot       = m.group(1);
 				String elemName  = m.group(2);
 				String numberStr = m.group(3);
-				String paramStr  = m.group(4);
+				String numberLsb = m.group(4);
+				String paramStr  = m.group(5);
 				
 				// flow or something else?
 				if (null == elemName) {
@@ -272,9 +317,9 @@ public class Effect {
 				else
 					throw new ParseException(Dict.get(Dict.ERROR_FL_UNKNOWN_ELEMENT) + elemName);
 				
-				// starts with dot? - flow must be open
-				if (dot.length() > 0) {
-					if (null == flowStr)
+				// starts with dot? - flow must be open (from the same channel)
+				if (dot != null && dot.length() > 0) {
+					if (null == flow)
 						throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), MidicaPLParser.FL_DOT));
 				}
 				else {
@@ -288,10 +333,12 @@ public class Effect {
 				// check number
 				int number = -1;
 				if (MidicaPLParser.FL_CTRL.equals(elemName)) {
-					number = parseGenericNumber(numberStr, 0x7F, elemName);
+					if (numberLsb != null)
+						throw new ParseException(Dict.get(Dict.ERROR_FL_NUM_SEP_NOT_ALLOWED) + elemName);
+					number = parseGenericNumber(numberStr, numberLsb, 0x7F, elemName);
 				}
 				else if (MidicaPLParser.FL_RPN.equals(elemName) || MidicaPLParser.FL_NRPN.equals(elemName)) {
-					number = parseGenericNumber(numberStr, 0x3FFF, elemName);
+					number = parseGenericNumber(numberStr, numberLsb, 0x3FFF, elemName);
 				}
 				else if (numberStr != null) {
 					throw new ParseException(Dict.get(Dict.ERROR_FL_NUMBER_NOT_ALLOWED) + elemName);
@@ -332,21 +379,34 @@ public class Effect {
 	/**
 	 * Parses a generic controller or (N)RPN number, assigned in a flow.
 	 * 
-	 * @param numberStr  The number to be parsed.
+	 * Needed by one of the following elements:
+	 * 
+	 * - .ctrl=...
+	 * - .rpn=...
+	 * - .nrpn=...
+	 * 
+	 * @param numberStr  The MSB or whole number to be parsed.
+	 * @param numberLsb  The LSB, if numberStr is an MSB, or **null** if numberStr is the whole 14-bit number.
 	 * @param maxNum     The maximum allowed number.
 	 * @param elemName   Flow element name (for error messages).
 	 * @return the parsed number
 	 * @throws ParseException if the number cannot be parsed or is too high.
 	 */
-	private static int parseGenericNumber(String numberStr, int maxNum, String elemName) throws ParseException {
+	private static int parseGenericNumber(String numberStr, String numberLsb, int maxNum, String elemName) throws ParseException {
 		
 		// no number provided?
 		if (null == numberStr)
 			throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_NUMBER_MISSING), elemName));
 		
 		try {
-			// parse the number
+			// parse the number or MSB
 			int number = Integer.parseInt(numberStr);
+			
+			// LSB available? - parse it
+			if (numberLsb != null) {
+				int lsb = Integer.parseInt(numberLsb);
+				number = number * 128 + lsb;
+			}
 			
 			// number higher then allowed by the controller or (n)rpn?
 			if (number > maxNum)
@@ -371,23 +431,6 @@ public class Effect {
 	 * @throws ParseException
 	 */
 	private static void applyFlowElement(String elemName, int number, String paramStr) throws ParseException {
-		
-		// check number
-		if (MidicaPLParser.FL_CTRL.equals(elemName)) {
-			if (number < 0)
-				throw new ParseException("Number missing for element '" + elemName + "'. This should not happen. Please report.");
-			else if (number > 127)
-				throw new ParseException("Number for element '" + elemName + "' is higher than 127. This should not happen. Please report.");
-		}
-		else if (MidicaPLParser.FL_RPN.equals(elemName) || MidicaPLParser.FL_RPN.equals(elemName)) {
-			if (number < 0)
-				throw new ParseException("Number missing for element '" + elemName + "'. This should not happen. Please report.");
-			else if (number > 16383)
-				throw new ParseException("Number for element '" + elemName + "' is higher than 16383. This should not happen. Please report.");
-		}
-		else if (number > -1) {
-			throw new ParseException("Number missing for element '" + elemName + "' not allowed. This should not happen. Please report.");
-		}
 		
 		// check presence of params
 		if (functionNames.contains(elemName)) {
@@ -434,7 +477,7 @@ public class Effect {
 					effectNumber = rpnNameToNumber.get(elemName);
 				}
 				else {
-					throw new ParseException("Don't know what to do with effect '" + elemName + "'. This should not happen. Please report.");
+					throw new FatalParseException("Don't know what to do with effect '" + elemName + "'.");
 				}
 			}
 			
@@ -449,20 +492,19 @@ public class Effect {
 			
 			// unpack parameters - special case: treat 'wait' like 'wait()'
 			String[] params;
-			if ((null == paramStr || paramStr.isEmpty()) && MidicaPLParser.FUNC_WAIT.equals(elemName))
-				params = new String[] {};
+			if (paramStr != null && paramStr.isEmpty())
+				params = new String[] {};  // special case: Functions without any parameter.
+			else if ((null == paramStr || paramStr.isEmpty()) && MidicaPLParser.FUNC_WAIT.equals(elemName))
+				params = new String[] {};  // special case: wait/wait() without parameter
 			else
 				params = paramStr.split(Pattern.quote(MidicaPLParser.PARAM_SEPARATOR), -1);
 			
 			// check number of parameters
 			Integer expectedCount = functionToParamCount.get(elemName);
 			if (null == expectedCount) {
-				throw new ParseException("Expected parameter count unknown for function '" + elemName + "'. This should not happen. Please report.");
+				throw new FatalParseException("Expected parameter count unknown for function '" + elemName + "'.");
 			}
-			if (0 == expectedCount && 1 == params.length && paramStr.isEmpty()) {
-				// OK. Special case for functions without any parameter.
-			}
-			else if (0 == params.length && MidicaPLParser.FUNC_WAIT.equals(elemName)) {
+			if (0 == params.length && MidicaPLParser.FUNC_WAIT.equals(elemName)) {
 				// OK. Special case for wait() without parameter
 			}
 			else {
@@ -490,7 +532,7 @@ public class Effect {
 			return;
 		}
 		
-		throw new ParseException("Don't know what to do with flow element '" + elemName + "'. This should not happen. Please report.");
+		throw new FatalParseException("Don't know what to do with flow element '" + elemName + "'.");
 	}
 	
 	/**
@@ -520,7 +562,7 @@ public class Effect {
 		// note()
 		if (MidicaPLParser.FUNC_NOTE.equals(funcName)) {
 			int note = parser.parseNote(params[0]);
-			flow.setNote(note);
+			flow.setNote(note, funcName);
 			return;
 		}
 		
@@ -529,20 +571,29 @@ public class Effect {
 		
 		// on()/off() - boolean functions
 		if (MidicaPLParser.FUNC_ON.equals(funcName) || MidicaPLParser.FUNC_OFF.equals(funcName)) {
-			if (valueType != EffectFlow.TYPE_BOOLEAN && valueType != EffectFlow.TYPE_ANY) {
+			int value = MidicaPLParser.FUNC_ON.equals(funcName) ? 127 : 0;
+			
+			// check type
+			if (valueType == EffectFlow.TYPE_NONE && MidicaPLParser.FUNC_ON.equals(funcName)) {
+				// special case: allow on() for type NONE (but then use value=0)
+				value = 0;
+			}
+			else if (valueType != EffectFlow.TYPE_BOOLEAN && valueType != EffectFlow.TYPE_ANY) {
 				throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_NOT_BOOL), funcName));
 			}
 			
-			int value = MidicaPLParser.FUNC_ON.equals(funcName) ? 127 : 0;
 			setValue(new int[] {value, value});
 			
 			return;
 		}
 		
 		// non-boolean function for a boolean effect?
-		if (EffectFlow.TYPE_BOOLEAN == valueType) {
+		if (EffectFlow.TYPE_BOOLEAN == valueType)
 			throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_BOOL), funcName));
-		}
+		
+		// non-boolean function for type 'none'
+		if (EffectFlow.TYPE_NONE == valueType)
+			throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_NONE), funcName));
 		
 		// set()
 		if (MidicaPLParser.FUNC_SET.equals(funcName)) {
@@ -568,7 +619,7 @@ public class Effect {
 			return;
 		}
 		
-		throw new ParseException("Don't know what to do with function '" + funcName + "'. This should not happen. Please report.");
+		throw new FatalParseException("Don't know what to do with function '" + funcName + "'.");
 	}
 	
 	/**
@@ -595,11 +646,7 @@ public class Effect {
 		
 		try {
 			if (EffectFlow.EFF_TYPE_CHANNEL == effectType) {
-				if (0 == values.length) {
-					SequenceCreator.addMessageChannelEffect(effectNum, channel, 0, 0, tick);
-					return;
-				}
-				else if (2 == values.length) {
+				if (2 == values.length) {
 					
 					// pitch bend?
 					if (0xE0 == flow.getEffectNumber()) {
@@ -624,11 +671,7 @@ public class Effect {
 				}
 			}
 			else if (EffectFlow.EFF_TYPE_CTRL == effectType) {
-				if (0 == values.length) {
-					SequenceCreator.addMessageCtrl(effectNum, channel, 0, tick);
-					return;
-				}
-				else if (2 == values.length) {
+				if (2 == values.length) {
 					SequenceCreator.addMessageCtrl(effectNum, channel, values[1], tick);
 					return;
 				}
@@ -639,18 +682,91 @@ public class Effect {
 				}
 			}
 			else if (EffectFlow.EFF_TYPE_RPN == effectType) {
-				// TODO: implement
+				setRpnOrNrpn(true, effectNum, values);
+				return;
 			}
 			else if (EffectFlow.EFF_TYPE_NRPN == effectType) {
-				// TODO: implement
+				setRpnOrNrpn(false, effectNum, values);
+				return;
 			}
 			else {
-				throw new ParseException("Unknown effect type: " + effectType + ". This should not happen. Please report.");
+				throw new FatalParseException("Unknown effect type: " + effectType + ".");
 			}
-			throw new ParseException("Unknown effect type/number/byte-count combination: " + effectType + "/" + effectNum + "/" + values.length + ". This should not happen. Please report.");
+			throw new FatalParseException("Unknown effect type/number/byte-count combination: " + effectType + "/" + effectNum + "/" + values.length + ".");
 		}
 		catch (InvalidMidiDataException e) {
-			throw new ParseException("Invalid MIDI data when trying to apply effect " + effectType + "/" + effectNum + ". This should not happen. Please report.");
+			throw new FatalParseException("Invalid MIDI data when trying to apply effect " + effectType + "/" + effectNum + ".");
+		}
+	}
+	
+	/**
+	 * Writes an RPN or NRPN to the MIDI sequence.
+	 * 
+	 * The given **values** array has the same format as the one returned
+	 * by {@link #parseIntParam(String)}. It contains 2 or 3 bytes.
+	 * 
+	 * The first byte is always the raw value.
+	 * 
+	 * The second byte is either the MSB (if there is a third byte) or the only value.
+	 * 
+	 * If the third value is available, it contains the LSB.
+	 * 
+	 * @param isRpn      **true** to create an RPN, **false** to create an NRPN.
+	 * @param effectNum  14-bit number of the RPN or NRPN
+	 * @param values     see above
+	 * @throws ParseException if there is an unexpected problem.
+	 */
+	private static void setRpnOrNrpn(boolean isRpn, int effectNum, int[] values) throws ParseException {
+		
+		long tick    = flow.getCurrentTick();
+		int  channel = flow.getChannel();
+		
+		int rpnMsb = isRpn ? 0x65 : 0x63;
+		int rpnLsb = isRpn ? 0x64 : 0x62;
+		
+		int effectMsb = effectNum >> 7;
+		int effectLsb = effectNum & 0x7F;
+		
+		long tick1 = tick - 3 * RPN_DISTANCE;
+		long tick2 = tick - 2 * RPN_DISTANCE;
+		long tick3 = tick - RPN_DISTANCE;
+		long tick4 = tick;
+		long tick5 = tick + RPN_DISTANCE;
+		if (tick1 < 0) tick1 = 0;
+		if (tick2 < 0) tick2 = 0;
+		if (tick3 < 0) tick3 = 0;
+		
+		try {
+			// (N)RPN MSB / LSB
+			SequenceCreator.addMessageCtrl(rpnMsb, channel, effectMsb, tick1);
+			SequenceCreator.addMessageCtrl(rpnLsb, channel, effectLsb, tick2);
+			
+			// data entry MSB / LSB
+			SequenceCreator.addMessageCtrl(0x06, channel, values[1], tick3);
+			if (values.length > 2)
+				SequenceCreator.addMessageCtrl(0x26, channel, values[2], tick4);
+			
+			// (N)RPN reset MSB / LSB
+			SequenceCreator.addMessageCtrl(rpnMsb, channel, 0x7F, tick5);
+			SequenceCreator.addMessageCtrl(rpnLsb, channel, 0x7F, tick5);
+		}
+		catch (InvalidMidiDataException e) {
+			throw new FatalParseException("Invalid MIDI data when trying to apply (N)RPN " + effectNum + ".");
+		}
+		
+		// special case: pitch bend range
+		if (isRpn && 0x0000 == flow.getEffectNumber()) {
+			TreeMap<Long, Float> rangeMap = pitchBendRangeByChannel.get(channel);
+			
+			// get range in half tone steps
+			float halfToneSteps = values[1];
+			if (values.length > 2) {
+				float cents = values[2] / 100f;
+				halfToneSteps += cents;
+			}
+			
+			// remember pitch bend range
+			rangeMap.put(tick, halfToneSteps);
 		}
 	}
 	
@@ -715,7 +831,6 @@ public class Effect {
 		}
 		
 		// calculate the value for each tick
-		System.err.println("_____");
 		for (long tick = 0; tick <= tickDiff; tick++) {
 			int[] setValues = new int[byteCount];
 			
@@ -733,7 +848,6 @@ public class Effect {
 				value = value < 0 ? value * negDiff : value * posDiff;
 				value = Math.round(value) + middleVal;
 				setValues[0] = (int) value;
-				System.err.println(setValues[0]); // TODO: delete
 			}
 			
 			// calculate MSB / LSB
@@ -765,12 +879,12 @@ public class Effect {
 	}
 	
 	/**
-	 * Parses a numeric or percentage function parameter, checks it against the
+	 * Parses a numeric or percentage or float or MSB/LSB function parameter, checks it against the
 	 * sound effect's min/max and returns the resulting value byte(s).
 	 * 
 	 * The returned array consists of the following bytes:
 	 * 
-	 * - first byte: the complete value
+	 * - first byte: the complete value (up to 14 bits)
 	 * - second byte: first data byte (or MSB)
 	 * - third byte: second data byte (or LSB)
 	 * 
@@ -782,38 +896,66 @@ public class Effect {
 	 */
 	private static int[] parseIntParam(String valueStr) throws ParseException {
 		
-		// TODO: handle TYPE_NONE
-		
 		// get range of the sound effect
 		int min = flow.getMin();
 		int max = flow.getMax();
+		boolean needHalfTones   = flow.mustUseHalfToneSteps();
+		boolean canUseHalfTones = flow.supportsHalfToneSteps();
+		boolean isMsbLsb = false;
 		
 		// parse the parameter
 		Integer value = null;
 		try {
 			Matcher m = intPattern.matcher(valueStr);
 			if (m.matches()) {
-				String intStr     = m.group(1);
-				String percentStr = m.group(2);
-				//String floatStr   = m.group(3); // TODO: something to make pitch bend easier to use
+				String intStr      = m.group(1);
+				String percentStr  = m.group(2);
+				String halfToneStr = m.group(3);
+				String msbStr      = m.group(4);
+				String lsbStr      = m.group(5);
 				if (intStr != null) {
-					value = Integer.parseInt(intStr);
+					if (canUseHalfTones)
+						value = parseHalfToneSteps(intStr);
+					else
+						value = Integer.parseInt(intStr);
 				}
 				else if (percentStr != null) {
 					float percent = Float.parseFloat(percentStr);
+					if (needHalfTones)
+						throw new ParseException(Dict.get(Dict.ERROR_FUNC_NEED_HALFTONE) + valueStr);
 					
 					// A negative percentage with a minimum of 0 should NOT evaluate to 0
 					// but throw an exception instead.
 					if (percent < 0 && 0 == min)
 						throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), valueStr, min));
 					
-					// TODO: check
 					if (percent < 0)
 						// theoretically: value = percent * -min / 100
 						value = (int) ((percent * -min * 10 - 100 * 5) / (100 * 10));
 					else
 						// theoretically: value = percent * max / 100
 						value = (int) ((percent * max * 10 + 100 * 5) / (100 * 10));
+				}
+				else if (halfToneStr != null) {
+					if (!canUseHalfTones)
+						throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_HALFTONE_NOT_ALLOWED), valueStr));
+					
+					value = parseHalfToneSteps(halfToneStr);
+				}
+				else if (msbStr != null) {
+					isMsbLsb = true;
+					if (!flow.isDouble())
+						throw new ParseException(String.format(
+							Dict.get(Dict.ERROR_FUNC_MSB_LSB_NEEDS_DOUBLE), valueStr, MidicaPLParser.FL_DOUBLE));
+					int msb = Integer.parseInt(msbStr);
+					int lsb = Integer.parseInt(lsbStr);
+					if (msb > 127)
+						throw new ParseException(String.format(
+							Dict.get(Dict.ERROR_FUNC_MSB_TOO_HIGH), valueStr, msbStr));
+					if (lsb > 127)
+						throw new ParseException(String.format(
+							Dict.get(Dict.ERROR_FUNC_LSB_TOO_HIGH), valueStr, lsbStr));
+					value = msb * 128 + lsb;
 				}
 				else {
 					throw new ParseException(Dict.get(Dict.ERROR_FUNC_NO_NUMBER) + valueStr);
@@ -829,18 +971,12 @@ public class Effect {
 		// check value against min / max
 		if (value < min)
 			throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), valueStr, min));
-		if (value > max)
+		if (value > max && !needHalfTones && !isMsbLsb)
 			throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), valueStr, max));
 		
 		// adjust the actual MIDI value for signed types
 		int valueType = flow.getValueType(valueStr);
-		if (EffectFlow.TYPE_BYTE_SIGNED == valueType) {
-			value += 64;
-		}
-		if (EffectFlow.TYPE_DOUBLE_SIGNED == valueType) {
-			value += 8192;
-		}
-		if (EffectFlow.TYPE_MSB_SIGNED == valueType) {
+		if (EffectFlow.TYPE_MSB_SIGNED == valueType && !isMsbLsb) {
 			if (flow.isDouble())
 				value += 8192;
 			else
@@ -849,26 +985,126 @@ public class Effect {
 		
 		// find out how many bytes are needed
 		int byteCount = 1;
-		if (EffectFlow.TYPE_DOUBLE == valueType || EffectFlow.TYPE_DOUBLE_SIGNED == valueType) {
-			byteCount = 2;
-		}
-		else if (EffectFlow.TYPE_MSB == valueType || EffectFlow.TYPE_MSB_SIGNED == valueType) {
+		if (EffectFlow.TYPE_MSB == valueType || EffectFlow.TYPE_MSB_SIGNED == valueType || EffectFlow.TYPE_MSB_HALFTONES == valueType) {
 			if (flow.isDouble())
 				byteCount = 2;
 		}
 		
-		// handle 0 and 1 byte
-		if (0 == byteCount) {
-			return new int[] {};
-		}
-		else if (1 == byteCount) {
+		// handle 1 byte
+		if (1 == byteCount)
 			return new int[] {value, value};
-		}
 		
 		// handle 2 bytes
 		int msb = value >> 7;
 		int lsb = value & 0x7F;
-		return new int[] {value, msb, lsb};
+		int[] values = new int[] {value, msb, lsb};
+		adjustRoundingEdgeCaseForPitchBendRange(values);
+		
+		return values;
+	}
+	
+	/**
+	 * Parses half-tone parameters (flowt or int).
+	 * 
+	 * This is used for one of the following effect types:
+	 * 
+	 * - pitch bend range
+	 * - pitch bend
+	 * 
+	 * @param halfToneStr  the half tone steps parameter
+	 * @return the value that the effect type needs.
+	 * @throws ParseException
+	 */
+	// TODO: also use for channel coarse/fine tuning?
+	private static int parseHalfToneSteps(String halfToneStr) throws ParseException {
+		
+		int effNum = flow.getEffectNumber();
+		
+		float halfToneSteps = Float.parseFloat(halfToneStr);
+		
+		// pitch bend range
+		if (0x0000 == effNum) {
+			
+			float max = flow.isDouble() ? 127.99f : 127;
+			if (halfToneSteps > max)
+				throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), halfToneStr, max));
+			
+			// only one byte?
+			if (!flow.isDouble())
+				return Math.round(halfToneSteps);
+			
+			// 2 bytes
+			int   msb       = (int) halfToneSteps;
+			float remainder = halfToneSteps - msb;
+			int   lsb       = Math.round(remainder * 100);
+			return msb * 128 + lsb;
+		}
+		
+		// pitch bend
+		if (0xE0 == effNum) {
+			
+			// get current pitch bend range
+			int  channel = flow.getChannel();
+			long tick    = flow.getCurrentTick();
+			Entry<Long, Float> entry = pitchBendRangeByChannel.get(channel).floorEntry(tick);
+			float range = entry.getValue();
+			
+			// range exceeded?
+			if (Math.abs(halfToneSteps) > range)
+				throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_HALFTONE_GT_RANGE), halfToneStr, range));
+			
+			// get max value
+			int max;
+			if (flow.isDouble())
+				max = halfToneSteps < 0 ? 8192 : 8191;
+			else
+				max = halfToneSteps < 0 ? 64 : 63;
+			
+			return Math.round(max * (halfToneSteps / range));
+		}
+		
+		// this should never be reached
+		int elemType = flow.getEffectType();
+		throw new FatalParseException("Don't know what to do with half tone steps of effect '" + elemType + "/" + effNum + "'.");
+	}
+	
+	/**
+	 * Checks and corrects rounding errors for half tone parameters with rounding errors.
+	 * 
+	 * Only applies for:
+	 * 
+	 * - pitch bend range
+	 * 
+	 * Does nothing for other effect types.
+	 * 
+	 * Fixes an edge case with MSB and LSB where the rounded LSB value is 100.
+	 * Example: 4.997
+	 * 
+	 * Here the MSB must be set to 5 and the LSB must be set to 0.
+	 * 
+	 * @param values  the values as returned by {@link #parseIntParam(String)}
+	 */
+	private static void adjustRoundingEdgeCaseForPitchBendRange(int[] values) {
+		
+		// not pitch bend range?
+		if (!flow.supportsHalfToneSteps())
+			return;
+		if (flow.getEffectNumber() != 0x0000)
+			return;
+		
+		// the current flow is a pitch bend range RPN
+		int msb = values[1];
+		int lsb = values[2];
+		
+		// fix rounding issue.
+		// Example: 4.997 ==> MSB = 4, LSB = 100
+		// Fix:           ==> MSB = 5, LSB = 0
+		if (lsb >= 100) {
+			msb++;
+			lsb = 0;
+			values[1] = msb;
+			values[2] = lsb;
+		}
 	}
 	
 	/**
@@ -890,6 +1126,9 @@ public class Effect {
 					periods = Float.parseFloat(floatStr);
 					if (periods < 0) {
 						throw new ParseException(Dict.get(Dict.ERROR_FUNC_PERIODS_NEG) + valueStr);
+					}
+					if (Float.isInfinite(periods)) {
+						throw new ParseException(Dict.get(Dict.ERROR_FUNC_PERIODS_NO_NUMBER) + valueStr);
 					}
 					if (percentStr != null) {
 						periods /= 100;

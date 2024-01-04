@@ -28,12 +28,10 @@ public class EffectFlow {
 	public static final int TYPE_BOOLEAN       = 1;  // 0=off, 127=on
 	public static final int TYPE_MSB           = 3;  // default:  0 - 127, double:     0 - 16383
 	public static final int TYPE_MSB_SIGNED    = 5;  // default: -64 - 63, double: -8192 - 8191
+	public static final int TYPE_MSB_HALFTONES = 7;  // default:  0 - 127, double:     0 - 127.99
 	public static final int TYPE_BYTE          = 11; // 0 - 127
-	public static final int TYPE_DOUBLE        = 13; // 0 - 16383
 	public static final int TYPE_ANY           = 15; // anything that fits in 7 bits
 	public static final int TYPE_NONE          = 17; // no value allowed (using 0 internally)
-	public static final int TYPE_BYTE_SIGNED   = 19; // -64 - 63
-	public static final int TYPE_DOUBLE_SIGNED = 21; // -8192 - 8191
 	
 	// effect types
 	public static final int EFF_TYPE_CHANNEL = 1;
@@ -134,6 +132,54 @@ public class EffectFlow {
 	}
 	
 	/**
+	 * Determines if the current effect type supports half-tone-steps as parameters.
+	 * 
+	 * Examples:
+	 * 
+	 * - pitch bend
+	 * - pitch bend range
+	 * 
+	 * @return **true** if half tone steps are supported, otherwise **false**.
+	 */
+	public boolean supportsHalfToneSteps() {
+		
+		if (EFF_TYPE_CHANNEL == effectType) {
+			
+			// pitch bend
+			if (0xE0 == effectNumber)
+				return true;
+		}
+		else if (EFF_TYPE_RPN == effectType) {
+			
+			// pitch bend range
+			if (0x0000 == effectNumber)
+				return true;
+		}
+		
+		// TODO: how do we treat channel coarse/fine tuning?
+		
+		return false;
+	}
+	
+	/**
+	 * Determines if the current effect type supports ONLY half-tone-steps as parameters.
+	 * That means, normal values are **not** accepted.
+	 * 
+	 * This is the case for the **pitch bend range**.
+	 * 
+	 * @return **true** if only half-tone-steps are accepted as parameters.
+	 */
+	public boolean mustUseHalfToneSteps() {
+		
+		// pitch bend range
+		if (EFF_TYPE_RPN == effectType && 0x0000 == effectNumber) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	/**
 	 * Applies a **length(...)** function call in the flow.
 	 * 
 	 * @param lengthStr  The (note length) parameter of the length() call.
@@ -146,9 +192,27 @@ public class EffectFlow {
 	/**
 	 * Sets the note in the flow.
 	 * 
-	 * @param note  note number (0 - 127)
+	 * @param note      note number (0 - 127)
+	 * @param elemName  element name that caused the call (only used for error messages)
+	 * @throws ParseException if the effect is not set or doesn't support a note.
 	 */
-	public void setNote(int note) throws ParseException {
+	public void setNote(int note, String elemName) throws ParseException {
+		
+		// effect not yet set?
+		if (effectNumber < 0)
+			throw new ParseException(Dict.get(Dict.ERROR_FL_EFF_NOT_SET) + elemName);
+		
+		// check if effect type supports a note
+		boolean isNoteSupported = false;
+		if (EFF_TYPE_CHANNEL == effectType && 0xA0 == effectNumber) // poly_at
+			isNoteSupported = true;
+		else if (EFF_TYPE_CTRL == effectType && 0x54 == effectNumber) // portamento ctrl
+			isNoteSupported = true;
+		
+		// note not supported?
+		if (!isNoteSupported)
+			throw new ParseException(Dict.get(Dict.ERROR_FL_NOTE_NOT_SUPP) + elemName);
+		
 		this.note = note;
 	}
 	
@@ -161,7 +225,7 @@ public class EffectFlow {
 	public void setDouble() throws ParseException {
 		
 		int valueType = getValueType(MidicaPLParser.FL_DOUBLE);
-		if (TYPE_MSB == valueType || TYPE_MSB_SIGNED == valueType) {
+		if (TYPE_MSB == valueType || TYPE_MSB_SIGNED == valueType || TYPE_MSB_HALFTONES == valueType) {
 			isDouble = true;
 			return;
 		}
@@ -231,12 +295,10 @@ public class EffectFlow {
 	 * - {@link #TYPE_BOOLEAN}
 	 * - {@link #TYPE_MSB}
 	 * - {@link #TYPE_MSB_SIGNED}
+	 * - {@link #TYPE_MSB_HALFTONES}
 	 * - {@link #TYPE_BYTE}
-	 * - {@link #TYPE_DOUBLE}
 	 * - {@link #TYPE_ANY}
 	 * - {@link #TYPE_NONE}
-	 * - {@link #TYPE_BYTE_SIGNED}
-	 * - {@link #TYPE_DOUBLE_SIGNED}
 	 * 
 	 * @param elemName  element name that caused the call (only used for error messages)
 	 * @return see above
@@ -268,7 +330,7 @@ public class EffectFlow {
 		
 		// not found?
 		if (null == valueType)
-			throw new ParseException("Unknown effect number '" + effectNumber + "' for effect type '" + typeStr + "'. This should not happen. Please report.");
+			throw new FatalParseException("Unknown effect number '" + effectNumber + "' for effect type '" + typeStr + "'.");
 		
 		return valueType;
 	}
@@ -301,7 +363,7 @@ public class EffectFlow {
 		}
 		
 		if (null == min)
-			throw new ParseException("Unknown min value for '" + effectType + "/" + effectNumber + ". This should not happen. Please report.");
+			throw new FatalParseException("Unknown min value for '" + effectType + "/" + effectNumber + ".");
 		
 		return min;
 	}
@@ -331,13 +393,17 @@ public class EffectFlow {
 		// handle MSB / LSB
 		if (isDouble) {
 			if (127 == max)
-				return 16383;
+				max = 16383;
 			if (63 == max)
-				return 8191;
+				max = 8191;
+			
+			// special case: pitch bend range
+			if (TYPE_MSB_HALFTONES == rpnToType.get(effectNumber))
+				max = 128;
 		}
 		
 		if (null == max)
-			throw new ParseException("Unknown max value for '" + effectType + "/" + effectNumber + ". This should not happen. Please report.");
+			throw new FatalParseException("Unknown max value for '" + effectType + "/" + effectNumber + ".");
 		
 		return max;
 	}
@@ -365,7 +431,7 @@ public class EffectFlow {
 		}
 		
 		if (null == def) {
-			throw new ParseException("Unknown default value for '" + effectType + "/" + effectNumber + ". This should not happen. Please report.");
+			throw new FatalParseException("Unknown default value for '" + effectType + "/" + effectNumber + ".");
 		}
 		
 		return def;
@@ -449,11 +515,17 @@ public class EffectFlow {
 		/////////////////////////////
 		
 		for (int i = 0x0000; i < 0x4000; i++) {
-			rpnToType.put(i, TYPE_DOUBLE);
+			rpnToType.put(i, TYPE_MSB);
 			rpnToDefault.put(i, 0);
-			nrpnToType.put(i, TYPE_DOUBLE);
+			nrpnToType.put(i, TYPE_MSB);
 			nrpnToDefault.put(i, 0);
 		}
+		
+		// exceptions (type)
+		rpnToType.put(0x0000, TYPE_MSB_HALFTONES); // pitch bend range
+		rpnToType.put(0x0001, TYPE_MSB_SIGNED);    // channel fine tuning
+		rpnToType.put(0x0002, TYPE_MSB_SIGNED);    // channel coarse tuning
+		rpnToType.put(0x7F7F, TYPE_NONE);          // reset RPN
 		
 		// min / max
 		applyDefaultMinAndMax(rpnToType,  rpnToDefault,  rpnToMin,  rpnToMax);
@@ -464,11 +536,6 @@ public class EffectFlow {
 		rpnToDefault.put(0x0001, 0x4000); // channel fine tuning
 		rpnToDefault.put(0x0002, 0x4000); // channel coarse tuning
 		rpnToDefault.put(0x0005, 0x0040); // modulation depth range
-		
-		// exceptions (type)
-		rpnToType.put(0x0001, TYPE_DOUBLE_SIGNED); // channel fine tuning
-		rpnToType.put(0x0002, TYPE_DOUBLE_SIGNED); // channel coarse tuning
-		rpnToType.put(0x7F7F, TYPE_NONE);          // reset RPN
 	}
 	
 	/**
@@ -484,21 +551,13 @@ public class EffectFlow {
 		for (int number : typeStructure.keySet()) {
 			int type = typeStructure.get(number);
 			defaultStructure.put(number, 0);
-			if (TYPE_BYTE == type || TYPE_MSB == type || TYPE_ANY == type) {
+			if (TYPE_BYTE == type || TYPE_MSB == type || TYPE_MSB_HALFTONES == type || TYPE_ANY == type) {
 				minStructure.put(number, 0);
 				maxStructure.put(number, 127);
 			}
-			else if (TYPE_BYTE_SIGNED == type || TYPE_MSB_SIGNED == type) {
+			else if (TYPE_MSB_SIGNED == type) {
 				minStructure.put(number, -64);
 				maxStructure.put(number, 63);
-			}
-			else if (TYPE_DOUBLE == type) {
-				minStructure.put(number, 0);
-				maxStructure.put(number, 16383);
-			}
-			else if (TYPE_DOUBLE_SIGNED == type) {
-				minStructure.put(number, -8192);
-				maxStructure.put(number, 8191);
 			}
 		}
 	}

@@ -1,0 +1,4 @@
+INCLUDE inc/instruments.midica
+
+
+0: rpn.set(50)

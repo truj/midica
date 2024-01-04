@@ -2814,6 +2814,298 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 5, e.getLineNumber() );
 		assertEquals( "1: (tr=/16) d", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OTO_DUPLICATE_TREMOLO)));
+		
+//		if (1==1) return; // TODO: delete...
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-unknown-flow-elem-1")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: volll.keep.set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_NOTE)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-unknown-flow-elem-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.keeeeeep.set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_UNKNOWN_ELEMENT)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-broken-by-var")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertEquals( "0: .set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), ".")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-broken-by-const")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertEquals( "0: .set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), ".")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-broken-by-call")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertEquals( "0: .set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), ".")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-broken-by-function")) );
+		assertEquals( 7, e.getLineNumber() );
+		assertEquals( "0: .set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), ".")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-broken-by-note")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertEquals( "0: .set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), ".")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-broken-by-other-channel")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertEquals( "0: .set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), ".")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-missing-dot-1")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertEquals( "0: wait().set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_EFF_NOT_SET) + "set"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-missing-dot-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.wait()set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_MISSING_DOT), ".")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-non-generic-with-num")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol=30.set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_NUMBER_NOT_ALLOWED) + "vol"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-rpn-without-num")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: rpn.set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NUMBER_MISSING), "rpn")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-rpn-without-num")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: rpn.set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NUMBER_MISSING), "rpn")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-nrpn-num-too-high")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: nrpn=999999999999999.set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NUMBER_TOO_HIGH), "999999999999999", "nrpn", 16383)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-ctrl-num-too-high")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: ctrl=128.set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NUMBER_TOO_HIGH), 128, "ctrl", 127)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-ctrl-with-lsb")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: ctrl=0/11.set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_NUM_SEP_NOT_ALLOWED) + "ctrl"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-double-with-params")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.double().set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_PARAMS_NOT_ALLOWED), "double")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-double-for-boolean")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: hold.double.on()", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_DOUBLE_NOT_SUPPORTED), "double")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-double-for-single")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: chorus.double.set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_DOUBLE_NOT_SUPPORTED), "double")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-without-params")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.set", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_PARAMS_REQUIRED), "set")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-wrong-param-count-1")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.set(30,40)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_WRONG_PARAM_NUM), "set", 1, 2, "30,40")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-wrong-param-count-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.wait(4,8)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_WRONG_PARAM_NUM), "wait", 1, 2, "4,8")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-wrong-param-count-3")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.set()", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_WRONG_PARAM_NUM), "set", 1, 0, "")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-remainder-1")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.wait().wait().set(50).test", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_UNKNOWN_ELEMENT) + "test"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-remainder-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.wait().wait().set(50).wait-for-me", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_UNMATCHED_REMAINDER) + "-for-me"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-empty-param")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.sin(0,,100%)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_EMPTY_PARAM), "0,,100%")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-bool-with-numeric-1")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.on()", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_NOT_BOOL), "on")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-bool-with-numeric-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: chorus.off()", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_NOT_BOOL), "off")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-numeric-for-bool")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: legato.set(0)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_BOOL), "set")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-cont-rpn")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: pitch_bend_range.line(1,12)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_CONT_RPN), "line")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-cont-nrpn")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: nrpn=123.line(1,12)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_CONT_NRPN), "line")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-invalid-1")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.line(1,9999999999999)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NO_NUMBER) + "9999999999999"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-invalid-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.line(1,0x7F)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NO_NUMBER) + "0x7F"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-too-low-1")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: balance.line(63,-65)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), -65, -64)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-too-low-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.line(1,-0.000001%)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), "-0.000001%", 0)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-too-high-1")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.line(1,128)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 128, 127)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-too-high-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: balance.double.line(1,8192)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 8192, 8191)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-periods-nan-1")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.sin(0,100%,1.2.3)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERIODS_NO_NUMBER) + "1.2.3"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-periods-nan-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.sin(0,100%,999999999999999999999999999999999999999.0)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERIODS_NO_NUMBER) + "999999999999999999999999999999999999999.0"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-periods-neg")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.sin(0,100%,-1.0)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERIODS_NEG) + "-1.0"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-eff-not-set-1")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: wait().set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_EFF_NOT_SET) + "set"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-eff-not-set-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: wait().double.vol.set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_EFF_NOT_SET) + "double"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-eff-already-set")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.wait().vol.set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_EFF_ALREADY_SET)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-halftone-for-vol")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.set(12.0)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_HALFTONE_NOT_ALLOWED), "12.0")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-halftone-gt-max-1")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: pitch_bend_range.set(129.0)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 129.0f, 127f)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-halftone-gt-max-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: pitch_bend_range.double.set(127.997)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 127.997f, 127.99f)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-halftone-gt-max-3")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: pitch_bend_range.set(127.0001)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 127.0001f, 127f)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-halftone-gt-max-4")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: pitch_bend_range.double.set(127.997)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 127.997, 127.99f)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-with-percent")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: pitch_bend_range.set(12.0%)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NEED_HALFTONE) + "12.0%"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-bend-gt-range")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: bend.wait.set(2.3)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_HALFTONE_GT_RANGE), 2.3f, 2.0f)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-invalid")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: mono_at.note(c+6).set(123)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_NOTE) + "c+6"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-without-effect")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: note(c).vol.set(100%)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_EFF_NOT_SET) + "note"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-not-allowed")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.note(c).set(100%)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_NOTE_NOT_SUPP) + "note"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-numeric-for-none")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: ctrl=123.wait.set(12)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_NONE), "set")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-off-for-none")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: ctrl=123.wait.off()", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_NOT_BOOL), "off")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-msblsb-without-double")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.set(12/30)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_MSB_LSB_NEEDS_DOUBLE), "12/30", "double")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-msb-too-high")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.double.set(128/30)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_MSB_TOO_HIGH), "128/30", "128")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-lsb-too-high")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.double.set(30/128)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_LSB_TOO_HIGH), "30/128", "128")));
 	}
 	
 	/**
