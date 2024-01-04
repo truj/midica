@@ -15,6 +15,7 @@ What precommit.pl does:
 The first two of these tasks are always done. The other two are optional.
 The script is configured with the following environment variables:
 - `project_path` - absolute path to your repository
+- `java_home` - absolute path to the `bin` directory inside your Java installation
 - `create_jar` - determins if the old jar file shall be replaced by a new one
 - `create_javadoc` - determins if the old Javadoc files shall be replaced by new ones
 - `javadoc_path` - absolute path to the Javadoc directory to be replaced, if `create_javadoc` is set
@@ -32,10 +33,11 @@ Besides you need the project to be configured the following way:
 You can embed `precommit.pl` into your precommit hook like this:
 
 	project_path=/path/to/project/midica
+	java_home=/path/to/java-installation/bin
 	create_jar=1
 	create_javadoc=1
 	javadoc_path=/path/to/javadoc
-	exec perl -w -CSD -Mutf8 "$project_path/build_helper/precommit.pl" "$project_path" "$create_jar" "$create_javadoc" "$javadoc_path"
+	exec perl -w -CSD -Mutf8 "$project_path/build_helper/precommit.pl" "$project_path" "$java_home" "$create_jar" "$create_javadoc" "$javadoc_path"
 
 ## Javadoc
 The Javadoc comments in this project are written in Markdown instead of HTML.
@@ -55,9 +57,8 @@ In case you want to use a newer version of the doclet, you can find the accordin
 https://github.com/Abnaxos/pegdown-doclet
 
 ## Java Version
-Currently the source is compliant with Java version 1.7 or higher.
+The source is compliant with Java version 1.8 or higher.
 
-However as a developer you need Java Development Kit 1.8 or higher in order to execute the unit tests as they are written in JUnit 5.
 ## Unit Tests
 
 Given your output directory for class files is the **bin** folder, you can execute the unit tests like this:
@@ -69,5 +70,5 @@ In order to create the jar file you can use the file `manifest`.
 
 The command looks like this:
 
-`jar -cvfm /path/to/midica.jar /repository/path/build_helper/manifest -C /path/to/midica/classes org`
+`jar -cvfm /path/to/midica.jar /repository/path/build_helper/manifest -C /path/to/midica/classes org -C /path/to/midica/classes com`
 

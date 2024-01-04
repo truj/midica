@@ -34,7 +34,7 @@ The built-in music programming language MidicaPL supports the same techniques as
 You write your songs in plain text files using the text editor of your choice. Midica converts these files into MIDI or plays them directly.
 
 # Get started
-1. Install Java Runtume Environment (JRE) version 1.7 or higher.
+1. Install Java Runtume Environment (JRE) version 1.8 or higher.
 2. Go to the [latest release](https://github.com/truj/midica/releases/latest) and download the file `midica.jar`.
 3. Start Midica using the command: `java -jar midica.jar` (or just by double-click if your operating system supports that)
 4. Download one of the [example files](examples/) or create your own file and save it with the file extension `.midica`.

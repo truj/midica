@@ -15,6 +15,9 @@ INCLUDE inc/instruments.midica
 
 // double
 0: .double.wait.set(100%)
+0: .double.wait.set(0/0)
+0: .double.wait.set(127/127)
+0: .double.wait.set(127/0)
 
 ////////////////////////////////////////
 // channel 1: CTRL / MSB_SIGNED (balance)
@@ -35,6 +38,7 @@ INCLUDE inc/instruments.midica
 1: .wait.set(-8192)
 1: .wait.set(8191)
 1: .wait.set(0)
+1: .wait.set(64/0)
 
 ////////////////////////////////////////
 // channel 2: CTRL / BYTE (chorus)
@@ -92,6 +96,8 @@ INCLUDE inc/instruments.midica
 6: rpn=0/5.set(50%)
 6: c
 6: rpn=5.set(0%)
+6: c
+6: rpn=0/5.double.set(12/30)
 
 ////////////////////////////////////////
 // channel 7: RPN / MSB_SIGNED (channel coarse tuning)
@@ -124,4 +130,6 @@ INCLUDE inc/instruments.midica
 8: nrpn=4/7.length(32).wait.double.set(100%)
 8: c
 8: nrpn=519.length(32).wait.double.set(50%)       // MSB * 128 + LSB == 128 * 4 + 7 == 512 + 7 == 519
+8: c
+8: nrpn=4/7.length(32).wait.double.set(127/64)
 

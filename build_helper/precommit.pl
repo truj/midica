@@ -11,10 +11,11 @@
 # with the following lines (assuming it's a bourne shell script):
 # 
 # project_path=/path/to/project/midica
+# java_home=/path/to/java-installation/bin
 # create_jar=1
 # create_javadoc=1
 # javadoc_path=/path/to/javadoc
-# exec perl -w -CSD -Mutf8 "$project_path/build_helper/precommit.pl" "$project_path" "$create_jar" "$create_javadoc" "$javadoc_path"
+# exec perl -w -CSD -Mutf8 "$project_path/build_helper/precommit.pl" "$project_path" "$java_home" "$create_jar" "$create_javadoc" "$javadoc_path"
 # 
 # If you don't want to start it as the last command of your precommit hook
 # than you have to evaluate the exit status in .git/hooks/pre_commit
@@ -44,6 +45,7 @@ use File::Path qw(make_path remove_tree);
 
 # get project path from command line
 my $project_path        = shift;
+my $java_home           = shift;
 my $must_create_jar     = shift;
 my $must_create_javadoc = shift;
 my $javadoc_path        = shift;
@@ -82,7 +84,7 @@ if (!$is_clean) {
 # execute unit tests
 my $junit_jar = $project_path . '/build_helper/junit-platform-console-standalone-1.4.0.jar';
 my $bin_path  = $project_path . '/bin';
-my $cmd       = "java -jar '$junit_jar' --class-path '$bin_path' --scan-class-path";
+my $cmd       = "'$java_home/java' -jar '$junit_jar' --class-path '$bin_path' --scan-class-path";
 my $status    = system $cmd;
 if ($status) {
 	die "Unit tests failed (using the following command):\n"
@@ -189,7 +191,7 @@ if ($must_create_jar) {
 	
 	# compile classes into temp dir
 	my $src_path = $project_path . '/src';
-	my $cmd      = "javac -source 8 -target 8 -sourcepath '$src_path' -d '$tmp_path' '$java_file'";
+	my $cmd      = "'$java_home/javac' -source 8 -target 8 -sourcepath '$src_path' -d '$tmp_path' '$java_file'";
 	$status      = system $cmd;
 	if ($status) {
 		die "Command failed: $cmd\n";
@@ -241,7 +243,7 @@ if ($must_create_javadoc && $javadoc_path) {
 	my $doclet_name   = 'ch.raffael.doclets.pegdown.PegdownDoclet';
 	my $source_path   = $project_path . '/src';
 	my $overview_path = $project_path . '/build_helper/overview.html';
-	my $cmd = "javadoc -docletpath '$doclet_path'"
+	my $cmd = "'$java_home/javadoc' -docletpath '$doclet_path'"
 	        . " -doclet $doclet_name"
 	        . " -d '$javadoc_path'"
 	        . " -sourcepath '$source_path'"
