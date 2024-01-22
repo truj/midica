@@ -1471,7 +1471,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		parse(getWorkingFile("bar-lines"));
 		
-		parse(getWorkingFile("effects-1"));
+		parse(getWorkingFile("effects-1-set"));
 		// channel 0
 		{
 			messages = getMessagesByStatus("B0");
@@ -1857,6 +1857,579 @@ class MidicaPLParserTest extends MidicaPLParser {
 			}
 		}
 		
+		parse(getWorkingFile("effects-2-bend"));
+		// channel 0: pitch bend range
+		{
+			messages = getMessagesByStatus("B0");
+			int i = 0;
+			
+			// tick 60: pitch_bend_range.length(32).wait.set(0.0)
+			assertEquals( "30/0/B0-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+			assertEquals( "40/0/B0-64/0",   messages.get(i++).toString() ); // RPN LSB: 0
+			assertEquals( "50/0/B0-06/0",   messages.get(i++).toString() ); // data MSB: 0
+			assertEquals( "70/0/B0-65/127", messages.get(i++).toString() ); // MSB reset
+			assertEquals( "70/0/B0-64/127", messages.get(i++).toString() ); // LSB reset
+			
+			// tick 120: .wait.set(127.0)
+			assertEquals( "90/0/B0-65/0",    messages.get(i++).toString() ); // RPN MSB: 0
+			assertEquals( "100/0/B0-64/0",   messages.get(i++).toString() ); // RPN LSB: 0
+			assertEquals( "110/0/B0-06/127", messages.get(i++).toString() ); // data MSB: 127
+			assertEquals( "130/0/B0-65/127", messages.get(i++).toString() ); // MSB reset
+			assertEquals( "130/0/B0-64/127", messages.get(i++).toString() ); // LSB reset
+			
+			// tick 180: .wait.set(12.7)
+			assertEquals( "150/0/B0-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+			assertEquals( "160/0/B0-64/0",   messages.get(i++).toString() ); // RPN LSB: 0
+			assertEquals( "170/0/B0-06/13",  messages.get(i++).toString() ); // data MSB: 13
+			assertEquals( "190/0/B0-65/127", messages.get(i++).toString() ); // MSB reset
+			assertEquals( "190/0/B0-64/127", messages.get(i++).toString() ); // LSB reset
+			
+			// tick 240: .wait.set(12.0)
+			assertEquals( "210/0/B0-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+			assertEquals( "220/0/B0-64/0",   messages.get(i++).toString() ); // RPN LSB: 0
+			assertEquals( "230/0/B0-06/12",  messages.get(i++).toString() ); // data MSB: 12
+			assertEquals( "250/0/B0-65/127", messages.get(i++).toString() ); // MSB reset
+			assertEquals( "250/0/B0-64/127", messages.get(i++).toString() ); // LSB reset
+			
+			// tick 300: .wait.set(127)
+			assertEquals( "270/0/B0-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+			assertEquals( "280/0/B0-64/0",   messages.get(i++).toString() ); // RPN LSB: 0
+			assertEquals( "290/0/B0-06/127", messages.get(i++).toString() ); // data MSB: 127
+			assertEquals( "310/0/B0-65/127", messages.get(i++).toString() ); // MSB reset
+			assertEquals( "310/0/B0-64/127", messages.get(i++).toString() ); // LSB reset
+			
+			// tick 360: .double.wait.set(0.0)
+			assertEquals( "330/0/B0-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+			assertEquals( "340/0/B0-64/0",   messages.get(i++).toString() ); // RPN LSB: 0
+			assertEquals( "350/0/B0-06/0",   messages.get(i++).toString() ); // data MSB: 0
+			assertEquals( "360/0/B0-26/0",   messages.get(i++).toString() ); // data LSB: 0
+			assertEquals( "370/0/B0-65/127", messages.get(i++).toString() ); // MSB reset
+			assertEquals( "370/0/B0-64/127", messages.get(i++).toString() ); // LSB reset
+			
+			// tick 420: .wait.set(127/5)
+			assertEquals( "390/0/B0-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+			assertEquals( "400/0/B0-64/0",   messages.get(i++).toString() ); // RPN LSB: 0
+			assertEquals( "410/0/B0-06/127", messages.get(i++).toString() ); // data MSB: 127
+			assertEquals( "420/0/B0-26/5",   messages.get(i++).toString() ); // data LSB: 5
+			assertEquals( "430/0/B0-65/127", messages.get(i++).toString() ); // MSB reset
+			assertEquals( "430/0/B0-64/127", messages.get(i++).toString() ); // LSB reset
+			
+			// tick 480: .wait.set(124.998)
+			assertEquals( "450/0/B0-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+			assertEquals( "460/0/B0-64/0",   messages.get(i++).toString() ); // RPN LSB: 0
+			assertEquals( "470/0/B0-06/125", messages.get(i++).toString() ); // data MSB: 125
+			assertEquals( "480/0/B0-26/0",   messages.get(i++).toString() ); // data LSB: 0
+			assertEquals( "490/0/B0-65/127", messages.get(i++).toString() ); // MSB reset
+			assertEquals( "490/0/B0-64/127", messages.get(i++).toString() ); // LSB reset
+			
+			// tick 540: .wait.set(4.997)
+			assertEquals( "510/0/B0-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+			assertEquals( "520/0/B0-64/0",   messages.get(i++).toString() ); // RPN LSB: 0
+			assertEquals( "530/0/B0-06/5",   messages.get(i++).toString() ); // data MSB: 5
+			assertEquals( "540/0/B0-26/0",   messages.get(i++).toString() ); // data LSB: 0
+			assertEquals( "550/0/B0-65/127", messages.get(i++).toString() ); // MSB reset
+			assertEquals( "550/0/B0-64/127", messages.get(i++).toString() ); // LSB reset
+			
+			// tick 600: .wait.set(127.990)
+			assertEquals( "570/0/B0-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+			assertEquals( "580/0/B0-64/0",   messages.get(i++).toString() ); // RPN LSB: 0
+			assertEquals( "590/0/B0-06/127", messages.get(i++).toString() ); // data MSB: 127
+			assertEquals( "600/0/B0-26/99",  messages.get(i++).toString() ); // data LSB: 99
+			assertEquals( "610/0/B0-65/127", messages.get(i++).toString() ); // MSB reset
+			assertEquals( "610/0/B0-64/127", messages.get(i++).toString() ); // LSB reset
+			
+			// tick 660: .wait.set(-0.000001)
+			assertEquals( "630/0/B0-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+			assertEquals( "640/0/B0-64/0",   messages.get(i++).toString() ); // RPN LSB: 0
+			assertEquals( "650/0/B0-06/0",   messages.get(i++).toString() ); // data MSB: 0
+			assertEquals( "660/0/B0-26/0",   messages.get(i++).toString() ); // data LSB: 0
+			assertEquals( "670/0/B0-65/127", messages.get(i++).toString() ); // MSB reset
+			assertEquals( "670/0/B0-64/127", messages.get(i++).toString() ); // LSB reset
+			
+			// tick 720: .wait.set(127)
+			assertEquals( "690/0/B0-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+			assertEquals( "700/0/B0-64/0",   messages.get(i++).toString() ); // RPN LSB: 0
+			assertEquals( "710/0/B0-06/127", messages.get(i++).toString() ); // data MSB: 127
+			assertEquals( "720/0/B0-26/0",   messages.get(i++).toString() ); // data LSB: 0
+			assertEquals( "730/0/B0-65/127", messages.get(i++).toString() ); // MSB reset
+			assertEquals( "730/0/B0-64/127", messages.get(i++).toString() ); // LSB reset
+			
+			// tick 960: rpn=0/0.set(96.7)
+			assertEquals( "930/0/B0-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+			assertEquals( "940/0/B0-64/0",   messages.get(i++).toString() ); // RPN LSB: 0
+			assertEquals( "950/0/B0-06/97",  messages.get(i++).toString() ); // data MSB: 97
+			assertEquals( "970/0/B0-65/127", messages.get(i++).toString() ); // MSB reset
+			assertEquals( "970/0/B0-64/127", messages.get(i++).toString() ); // LSB reset
+			
+			// tick 1440: rpn=0/0.double.set(96.7)
+			assertEquals( "1410/0/B0-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+			assertEquals( "1420/0/B0-64/0",   messages.get(i++).toString() ); // RPN LSB: 0
+			assertEquals( "1430/0/B0-06/96",  messages.get(i++).toString() ); // data MSB: 96
+			assertEquals( "1440/0/B0-26/70",  messages.get(i++).toString() ); // data LSB: 70
+			assertEquals( "1450/0/B0-65/127", messages.get(i++).toString() ); // MSB reset
+			assertEquals( "1450/0/B0-64/127", messages.get(i++).toString() ); // LSB reset
+			
+			// tick 1920: rpn=0.set(2.0)
+			assertEquals( "1890/0/B0-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+			assertEquals( "1900/0/B0-64/0",   messages.get(i++).toString() ); // RPN LSB: 0
+			assertEquals( "1910/0/B0-06/2",   messages.get(i++).toString() ); // data MSB: 2
+			assertEquals( "1930/0/B0-65/127", messages.get(i++).toString() ); // MSB reset
+			assertEquals( "1930/0/B0-64/127", messages.get(i++).toString() ); // LSB reset
+			
+			// tick 2400: rpn=0.double.set(2.0)
+			assertEquals( "2370/0/B0-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+			assertEquals( "2380/0/B0-64/0",   messages.get(i++).toString() ); // RPN LSB: 0
+			assertEquals( "2390/0/B0-06/2",   messages.get(i++).toString() ); // data MSB: 2
+			assertEquals( "2400/0/B0-26/0",   messages.get(i++).toString() ); // data LSB: 0
+			assertEquals( "2410/0/B0-65/127", messages.get(i++).toString() ); // MSB reset
+			assertEquals( "2410/0/B0-64/127", messages.get(i++).toString() ); // LSB reset
+		}
+		// channel 1
+		{
+			messages = getMessagesByStatus("E1");
+			int i = 0;
+			
+			// percentage, range: 2.0
+			{
+				// single byte
+				assertEquals("00/00/-2.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(-100%)
+				assertEquals("20/20/-1.0",     getPitchBendStr(messages.get(i++), 1)); // bend.set(-50%)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(0%)
+				assertEquals("60/60/1.0",      getPitchBendStr(messages.get(i++), 1)); // bend.set(50%)
+				assertEquals("7F/7F/2.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(100%)
+				
+				// double
+				assertEquals("00/00/-2.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-100%)
+				assertEquals("20/00/-1.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-50%)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0%)
+				assertEquals("60/00/1.000",    getPitchBendStr(messages.get(i++), 3)); // bend.double.set(50%)
+				assertEquals("7F/7F/2.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(100%)
+			}
+			
+			// MSB/LSB, range: 2.0
+			{
+				assertEquals("00/00/-2.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(0/0)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(64/0)
+				assertEquals("7F/7F/2.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(127/127)
+			}
+			
+			// half-tone, range: 2.7
+			{
+				// single
+				assertEquals("15/15/-2.0",    getPitchBendStr(messages.get(i++), 1)); // bend.set(-2.0)
+				assertEquals("2B/2B/-1.0",    getPitchBendStr(messages.get(i++), 1)); // bend.set(-1.0)
+				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(0)
+				assertEquals("55/55/1.0",     getPitchBendStr(messages.get(i++), 1)); // bend.set(1.0)
+				assertEquals("6A/6A/2.0",     getPitchBendStr(messages.get(i++), 1)); // bend.set(2.0)
+				
+				// double
+				assertEquals("15/2B/-2.000",  getPitchBendStr(messages.get(i++), 3)); // bend.double.set(-2.0)
+				assertEquals("2A/55/-1.000",  getPitchBendStr(messages.get(i++), 3)); // bend.double.set(-1)
+				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0)
+				assertEquals("55/2A/1.000",   getPitchBendStr(messages.get(i++), 3)); // bend.double.set(1.0)
+				assertEquals("6A/55/2.000",   getPitchBendStr(messages.get(i++), 3)); // bend.double.set(2)
+			}
+			
+			// half-tone, range: 4.0
+			{
+				// single
+				assertEquals("00/00/-4.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(-4.0)
+				assertEquals("20/20/-2.0",     getPitchBendStr(messages.get(i++), 1)); // bend.set(-2)
+				assertEquals("30/30/-1.0",     getPitchBendStr(messages.get(i++), 1)); // bend.set(-1.0)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(0)
+				assertEquals("50/50/1.0",      getPitchBendStr(messages.get(i++), 1)); // bend.set(1.0)
+				assertEquals("60/60/2.0",      getPitchBendStr(messages.get(i++), 1)); // bend.set(2.0)
+				assertEquals("7F/7F/4.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(4)
+				
+				// double
+				assertEquals("00/00/-4.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-4.0)
+				assertEquals("20/00/-2.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-2.0)
+				assertEquals("30/00/-1.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-1.0)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0)
+				assertEquals("50/00/1.000",    getPitchBendStr(messages.get(i++), 3)); // bend.double.set(1.0)
+				assertEquals("60/00/2.000",    getPitchBendStr(messages.get(i++), 3)); // bend.double.set(2.0)
+				assertEquals("7F/7F/4.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(4.0)
+			}
+			// half-tone, range: 8.0
+			{
+				// single
+				assertEquals("00/00/-8.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(-8.0)
+				assertEquals("30/30/-2.0",     getPitchBendStr(messages.get(i++), 1)); // bend.set(-2.0)
+				assertEquals("38/38/-1"  ,     getPitchBendStr(messages.get(i++), 0)); // bend.set(-1.0)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(0)
+				assertEquals("48/48/1",        getPitchBendStr(messages.get(i++), 0)); // bend.set(1.0)
+				assertEquals("50/50/2",        getPitchBendStr(messages.get(i++), 0)); // bend.set(2.0)
+				assertEquals("7F/7F/8.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(8.0)
+				
+				// double
+				assertEquals("00/00/-8.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-8.0)
+				assertEquals("30/00/-2.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-2.0)
+				assertEquals("38/00/-1.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-1.0)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0)
+				assertEquals("48/00/1.000",    getPitchBendStr(messages.get(i++), 3)); // bend.double.set(1.0)
+				assertEquals("50/00/2.000",    getPitchBendStr(messages.get(i++), 3)); // bend.double.set(2.0)
+				assertEquals("7F/7F/8.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(8.0)
+			}
+			// half-tone, range: 12.0
+			{
+				// single
+				assertEquals("00/00/-12.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.set(0)
+				assertEquals("7F/7F/12.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(12.0)
+				
+				// double
+				assertEquals("00/00/-12.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0)
+				assertEquals("7F/7F/12.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(12.0)
+			}
+			// half-tone, range: 24.0
+			{
+				// single
+				assertEquals("00/00/-24.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(-24.0)
+				assertEquals("20/20/-12",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.set(0)
+				assertEquals("60/60/12",        getPitchBendStr(messages.get(i++), 0)); // bend.set(12.0)
+				assertEquals("7F/7F/24.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(24.0)
+				
+				// double
+				assertEquals("00/00/-24.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-24.0)
+				assertEquals("20/00/-12.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0)
+				assertEquals("60/00/12.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(12.0)
+				assertEquals("7F/7F/24.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(24.0)
+			}
+			// half-tone, range: 36.0
+			{
+				// single
+				assertEquals("00/00/-36.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(-36.0)
+				assertEquals("15/15/-24",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-24.0)
+				assertEquals("2B/2B/-12",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.set(0)
+				assertEquals("55/55/12",        getPitchBendStr(messages.get(i++), 0)); // bend.set(12.0)
+				assertEquals("6A/6A/24",        getPitchBendStr(messages.get(i++), 0)); // bend.set(24.0)
+				assertEquals("7F/7F/36.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(36.0)
+				
+				// double
+				assertEquals("00/00/-36.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-36.0)
+				assertEquals("15/2B/-24.00",    getPitchBendStr(messages.get(i++), 2)); // bend.double.set(-24.0)
+				assertEquals("2A/55/-12.00",    getPitchBendStr(messages.get(i++), 2)); // bend.double.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0)
+				assertEquals("55/2A/12.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(12.0)
+				assertEquals("6A/55/24.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(24.0)
+				assertEquals("7F/7F/36.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(36.0)
+			}
+			// half-tone, range: 48.0
+			{
+				// single
+				assertEquals("00/00/-48.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(-48.0)
+				assertEquals("10/10/-36",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-36.0)
+				assertEquals("20/20/-24",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-24.0)
+				assertEquals("30/30/-12",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.set(0)
+				assertEquals("50/50/12",        getPitchBendStr(messages.get(i++), 0)); // bend.set(12.0)
+				assertEquals("60/60/25",        getPitchBendStr(messages.get(i++), 0)); // bend.set(24.0) - rounding error too big
+				assertEquals("6F/6F/36",        getPitchBendStr(messages.get(i++), 0)); // bend.set(36.0)
+				assertEquals("7F/7F/48.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(48.0)
+				
+				// double
+				assertEquals("00/00/-48.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-48.0)
+				assertEquals("10/00/-36.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-36.0)
+				assertEquals("20/00/-24.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-24.0)
+				assertEquals("30/00/-12.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0)
+				assertEquals("50/00/12.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(12.0)
+				assertEquals("60/00/24.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(24.0)
+				assertEquals("6F/7F/36.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(36.0)
+				assertEquals("7F/7F/48.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(48.0)
+			}
+			// half-tone, range: 60.0
+			{
+				// single
+				assertEquals("00/00/-60.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(-60.0)
+				assertEquals("0D/0D/-48",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-48.0)
+				assertEquals("1A/1A/-35",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-36.0) - rounding error too big
+				assertEquals("26/26/-24",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-24.0)
+				assertEquals("33/33/-12",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.set(0)
+				assertEquals("4D/4D/13",        getPitchBendStr(messages.get(i++), 0)); // bend.set(12.0) - rounding error too big
+				assertEquals("59/59/24",        getPitchBendStr(messages.get(i++), 0)); // bend.set(24.0)
+				assertEquals("66/66/36",        getPitchBendStr(messages.get(i++), 0)); // bend.set(36.0)
+				assertEquals("72/72/48",        getPitchBendStr(messages.get(i++), 0)); // bend.set(48.0)
+				assertEquals("7F/7F/60.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(60.0)
+				
+				// double
+				assertEquals("00/00/-60.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-60.0)
+				assertEquals("0C/66/-48.00",    getPitchBendStr(messages.get(i++), 2)); // bend.double.set(-48.0)
+				assertEquals("19/4D/-36.00",    getPitchBendStr(messages.get(i++), 2)); // bend.double.set(-36.0)
+				assertEquals("26/33/-24.00",    getPitchBendStr(messages.get(i++), 2)); // bend.double.set(-24.0)
+				assertEquals("33/1A/-12.00",    getPitchBendStr(messages.get(i++), 2)); // bend.double.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0)
+				assertEquals("4C/66/12.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(12.0)
+				assertEquals("59/4C/24.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(24.0)
+				assertEquals("66/33/36.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(36.0)
+				assertEquals("73/19/48.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(48.0)
+				assertEquals("7F/7F/60.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(60.0)
+			}
+			// half-tone, range: 127.99
+			{
+				// single
+				assertEquals("22/22/-59",     getPitchBendStr(messages.get(i++), 0)); // bend.set(-60.0) - rounding error too big
+				assertEquals("28/28/-47",     getPitchBendStr(messages.get(i++), 0)); // bend.set(-48.0) - rounding error too big
+				assertEquals("2E/2E/-35",     getPitchBendStr(messages.get(i++), 0)); // bend.set(-36.0) - rounding error too big
+				assertEquals("34/34/-23",     getPitchBendStr(messages.get(i++), 0)); // bend.set(-24.0) - rounding error too big
+				assertEquals("3A/3A/-11",     getPitchBendStr(messages.get(i++), 0)); // bend.set(-12.0) - rounding error too big
+				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(0)
+				assertEquals("46/46/13",      getPitchBendStr(messages.get(i++), 0)); // bend.set(12.0)
+				assertEquals("4C/4C/25",      getPitchBendStr(messages.get(i++), 0)); // bend.set(24.0) - rounding error too big
+				assertEquals("52/52/37",      getPitchBendStr(messages.get(i++), 0)); // bend.set(36.0) - rounding error too big
+				assertEquals("58/58/49",      getPitchBendStr(messages.get(i++), 0)); // bend.set(48.0) - rounding error too big
+				assertEquals("5E/5E/61",      getPitchBendStr(messages.get(i++), 0)); // bend.set(60.0) - rounding error too big
+				
+				// double
+				assertEquals("22/00/-60",     getPitchBendStr(messages.get(i++), 0)); // bend.double.set(-60.0)
+				assertEquals("28/00/-48",     getPitchBendStr(messages.get(i++), 0)); // bend.double.set(-48.0)
+				assertEquals("2E/00/-36",     getPitchBendStr(messages.get(i++), 0)); // bend.double.set(-36.0)
+				assertEquals("34/00/-24.0",   getPitchBendStr(messages.get(i++), 1)); // bend.double.set(-24.0)
+				assertEquals("3A/00/-12.0",   getPitchBendStr(messages.get(i++), 1)); // bend.double.set(-12.0)
+				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0)
+				assertEquals("46/00/12.0",    getPitchBendStr(messages.get(i++), 1)); // bend.double.set(12.0)
+				assertEquals("4C/00/24.0",    getPitchBendStr(messages.get(i++), 1)); // bend.double.set(24.0)
+				assertEquals("52/00/36",      getPitchBendStr(messages.get(i++), 0)); // bend.double.set(36.0)
+				assertEquals("58/00/48",      getPitchBendStr(messages.get(i++), 0)); // bend.double.set(48.0)
+				assertEquals("5E/00/60",      getPitchBendStr(messages.get(i++), 0)); // bend.double.set(60.0)
+			}
+		}
+		
+		parse(getWorkingFile("effects-3-at-port"));
+		// channel 0: mono_at
+		{
+			messages = getMessagesByStatus("D0");
+			int i = 0;
+			
+			assertEquals("D0/00", getShortMsgBytesAsStr(messages.get(i++))); // mono_at.wait(4).set(0)
+			assertEquals("D0/40", getShortMsgBytesAsStr(messages.get(i++))); // mono_at.wait(4).set(64)
+			assertEquals("D0/7F", getShortMsgBytesAsStr(messages.get(i++))); // mono_at.wait(4).set(127)
+			assertEquals("D0/00", getShortMsgBytesAsStr(messages.get(i++))); // mono_at.wait(4).set(0%)
+			assertEquals("D0/40", getShortMsgBytesAsStr(messages.get(i++))); // mono_at.wait(4).set(50%)
+			assertEquals("D0/7F", getShortMsgBytesAsStr(messages.get(i++))); // mono_at.wait(4).set(100%)
+			
+			// .line(0%,100%)
+			for (int j = 0; j < 128; j++) {
+				String value = String.format("%02X", j);
+				assertEquals("D0/" + value, getShortMsgBytesAsStr(messages.get(i++)));
+			}
+			
+			// line(100%,0%)
+			for (int j = 127; j > -1; j--) {
+				String value = String.format("%02X", j);
+				assertEquals("D0/" + value, getShortMsgBytesAsStr(messages.get(i++)));
+			}
+			
+			// no further messages
+			assertEquals(messages.size(), i);
+		}
+		// channel 1: poly_at
+		{
+			messages = getMessagesByStatus("A1");
+			int i = 0;
+			
+			// note c#-4 ==> 0D
+			assertEquals("A1/0D/00", getShortMsgBytesAsStr(messages.get(i++))); // poly_at.note(c#-4).wait.set(0)
+			assertEquals("A1/0D/40", getShortMsgBytesAsStr(messages.get(i++))); // .wait(4).set(64)
+			assertEquals("A1/0D/7F", getShortMsgBytesAsStr(messages.get(i++))); // .wait(4).set(127)
+			
+			// note c ==> 3C
+			assertEquals("A1/3C/00", getShortMsgBytesAsStr(messages.get(i++))); // poly_at.note(c).wait(4).set(0)
+			assertEquals("A1/3C/40", getShortMsgBytesAsStr(messages.get(i++))); // poly_at.note(c).wait(4).set(64)
+			assertEquals("A1/3C/7F", getShortMsgBytesAsStr(messages.get(i++))); // poly_at.note(c).wait(4).set(127)
+			
+			// note d ==> 3E
+			assertEquals("A1/3E/00", getShortMsgBytesAsStr(messages.get(i++))); // poly_at.note(d).wait(4).set(0%)
+			assertEquals("A1/3E/40", getShortMsgBytesAsStr(messages.get(i++))); // poly_at.note(d).wait(4).set(50%)
+			assertEquals("A1/3E/7F", getShortMsgBytesAsStr(messages.get(i++))); // poly_at.note(d).wait(4).set(100%)
+			
+			// poly_at.note(c).length(1).line(0%,100%)
+			for (int j = 0; j < 128; j++) {
+				String value = String.format("%02X", j);
+				assertEquals("A1/3C/" + value, getShortMsgBytesAsStr(messages.get(i++)));
+			}
+			
+			// poly_at.note(c).length(1).line(100%,0%)
+			for (int j = 127; j > -1; j--) {
+				String value = String.format("%02X", j);
+				assertEquals("A1/3C/" + value, getShortMsgBytesAsStr(messages.get(i++)));
+			}
+			
+			// no further messages
+			assertEquals(messages.size(), i);
+		}
+		// channel 2: poly_at with patterns (compact)
+		{
+			messages = getMessagesByStatus("A2");
+			int i = 0;
+			
+			// c/d/e:pat1
+			{
+				// .note(1) == .note(d);   d == 62 == 0x3E
+				// .note(1).line(120,121)  120 == 0x78
+				assertEquals("A2/3E/78", getShortMsgBytesAsStr(messages.get(i++)));
+				assertEquals("A2/3E/79", getShortMsgBytesAsStr(messages.get(i++)));
+				
+				// : 0/1/2:pat2
+				assertEquals("A2/3C/0A", getShortMsgBytesAsStr(messages.get(i++))); // .note(0)
+				assertEquals("A2/3C/0B", getShortMsgBytesAsStr(messages.get(i++)));
+				assertEquals("A2/3E/0C", getShortMsgBytesAsStr(messages.get(i++))); // .note(1)
+				assertEquals("A2/3E/0D", getShortMsgBytesAsStr(messages.get(i++)));
+				assertEquals("A2/40/0E", getShortMsgBytesAsStr(messages.get(i++))); // .note(2)
+				assertEquals("A2/40/0F", getShortMsgBytesAsStr(messages.get(i++)));
+				
+				// .note(2) == .note(e);   d == 64 == 0x40
+				// .note(2).line(122,123)
+				assertEquals("A2/40/7A", getShortMsgBytesAsStr(messages.get(i++)));
+				assertEquals("A2/40/7B", getShortMsgBytesAsStr(messages.get(i++)));
+				
+				// : 0/1/2:pat2
+				assertEquals("A2/3C/0A", getShortMsgBytesAsStr(messages.get(i++))); // .note(0)
+				assertEquals("A2/3C/0B", getShortMsgBytesAsStr(messages.get(i++)));
+				assertEquals("A2/3E/0C", getShortMsgBytesAsStr(messages.get(i++))); // .note(1)
+				assertEquals("A2/3E/0D", getShortMsgBytesAsStr(messages.get(i++)));
+				assertEquals("A2/40/0E", getShortMsgBytesAsStr(messages.get(i++))); // .note(2)
+				assertEquals("A2/40/0F", getShortMsgBytesAsStr(messages.get(i++)));
+				
+				// .note(0) == .note(c);   c == 60 == 0x3C
+				// .note(0)
+				// .line(124,125)
+				assertEquals("A2/3C/7C", getShortMsgBytesAsStr(messages.get(i++)));
+				assertEquals("A2/3C/7D", getShortMsgBytesAsStr(messages.get(i++)));
+				
+				// : 2/1/0:pat2
+				assertEquals("A2/40/0A", getShortMsgBytesAsStr(messages.get(i++))); // .note(0)
+				assertEquals("A2/40/0B", getShortMsgBytesAsStr(messages.get(i++)));
+				assertEquals("A2/3E/0C", getShortMsgBytesAsStr(messages.get(i++))); // .note(1)
+				assertEquals("A2/3E/0D", getShortMsgBytesAsStr(messages.get(i++)));
+				assertEquals("A2/3C/0E", getShortMsgBytesAsStr(messages.get(i++))); // .note(2)
+				assertEquals("A2/3C/0F", getShortMsgBytesAsStr(messages.get(i++)));
+			}
+			
+			// no further messages
+			assertEquals(messages.size(), i);
+		}
+		// channel 3: poly_at with patterns (lowlevel)
+		{
+			messages = getMessagesByStatus("A3");
+			int i = 0;
+			
+			// 2 c/d/e pat_ll_1
+			{
+				// .note(1) == .note(d);   d == 62 == 0x3E
+				// .note(1).line(120,121)  120 == 0x78
+				assertEquals("A3/3E/78", getShortMsgBytesAsStr(messages.get(i++)));
+				assertEquals("A3/3E/79", getShortMsgBytesAsStr(messages.get(i++)));
+				
+				// 0/1/2  pat_ll_2
+				assertEquals("A3/3C/0A", getShortMsgBytesAsStr(messages.get(i++))); // .note(0)
+				assertEquals("A3/3C/0B", getShortMsgBytesAsStr(messages.get(i++)));
+				assertEquals("A3/3E/0C", getShortMsgBytesAsStr(messages.get(i++))); // .note(1)
+				assertEquals("A3/3E/0D", getShortMsgBytesAsStr(messages.get(i++)));
+				assertEquals("A3/40/0E", getShortMsgBytesAsStr(messages.get(i++))); // .note(2)
+				assertEquals("A3/40/0F", getShortMsgBytesAsStr(messages.get(i++)));
+				
+				// .note(2) == .note(e);   d == 64 == 0x40
+				// .note(2).line(122,123)
+				assertEquals("A3/40/7A", getShortMsgBytesAsStr(messages.get(i++)));
+				assertEquals("A3/40/7B", getShortMsgBytesAsStr(messages.get(i++)));
+				
+				// 0/1/2  pat_ll_2
+				assertEquals("A3/3C/0A", getShortMsgBytesAsStr(messages.get(i++))); // .note(0)
+				assertEquals("A3/3C/0B", getShortMsgBytesAsStr(messages.get(i++)));
+				assertEquals("A3/3E/0C", getShortMsgBytesAsStr(messages.get(i++))); // .note(1)
+				assertEquals("A3/3E/0D", getShortMsgBytesAsStr(messages.get(i++)));
+				assertEquals("A3/40/0E", getShortMsgBytesAsStr(messages.get(i++))); // .note(2)
+				assertEquals("A3/40/0F", getShortMsgBytesAsStr(messages.get(i++)));
+				
+				// .note(0) == .note(c);   c == 60 == 0x3C
+				// .note(0)
+				// .line(124,125)
+				assertEquals("A3/3C/7C", getShortMsgBytesAsStr(messages.get(i++)));
+				assertEquals("A3/3C/7D", getShortMsgBytesAsStr(messages.get(i++)));
+				
+				// 2/1/0  pat_ll_2
+				assertEquals("A3/40/0A", getShortMsgBytesAsStr(messages.get(i++))); // .note(0)
+				assertEquals("A3/40/0B", getShortMsgBytesAsStr(messages.get(i++)));
+				assertEquals("A3/3E/0C", getShortMsgBytesAsStr(messages.get(i++))); // .note(1)
+				assertEquals("A3/3E/0D", getShortMsgBytesAsStr(messages.get(i++)));
+				assertEquals("A3/3C/0E", getShortMsgBytesAsStr(messages.get(i++))); // .note(2)
+				assertEquals("A3/3C/0F", getShortMsgBytesAsStr(messages.get(i++)));
+			}
+			
+			// no further messages
+			assertEquals(messages.size(), i);
+		}
+		// channel 4: port_ctrl
+		{
+			messages = getMessagesByStatus("B4");
+			int i = 0;
+			
+			// note c#-4 ==> 0D
+			assertEquals("4/c#-2", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(c#-2).wait.on()
+			assertEquals("4/c#+2", getPortCtrlStr(messages.get(i++))); // .wait(4).note(c#+2).on()
+			assertEquals("4/c#+2", getPortCtrlStr(messages.get(i++))); // .wait(4).on()
+			
+			// lower octave
+			assertEquals("4/c-", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(c-).on()
+			assertEquals("4/d-", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(d-)on()
+			assertEquals("4/e-", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(e-)on()
+			
+			// higher octave
+			assertEquals("4/c+", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(c+)on()
+			assertEquals("4/d+", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(d+)on()
+			assertEquals("4/e+", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(e+)on()
+			
+			assertEquals("4/c-3", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(c-3).on()
+			assertEquals("4/c+3", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(c+3).on()
+			
+			// no further messages
+			assertEquals(messages.size(), i);
+		}
+		// channel 5: port_ctrl with patterns
+		{
+			messages = getMessagesByStatus("B5");
+			int i = 0;
+			
+			// c/d/e:pat_p1
+			{
+				assertEquals("5/d", getPortCtrlStr(messages.get(i++))); // .note(1).on()
+				
+				// 0/1/2:pat_p2
+				{
+					assertEquals("5/c", getPortCtrlStr(messages.get(i++))); // .note(0).on()
+					assertEquals("5/d", getPortCtrlStr(messages.get(i++))); // .note(1).on()
+					assertEquals("5/e", getPortCtrlStr(messages.get(i++))); // .note(2).on()
+				}
+				assertEquals("5/e", getPortCtrlStr(messages.get(i++))); // .note(2).on()
+				
+				// 0/1/2:pat_p2
+				{
+					assertEquals("5/c", getPortCtrlStr(messages.get(i++))); // .note(0).on()
+					assertEquals("5/d", getPortCtrlStr(messages.get(i++))); // .note(1).on()
+					assertEquals("5/e", getPortCtrlStr(messages.get(i++))); // .note(2).on()
+				}
+				
+				// .note(0)
+				// .on()
+				assertEquals("5/c", getPortCtrlStr(messages.get(i++))); // .note(2).on()
+				
+				// 2/1/0:pat_p2
+				{
+					assertEquals("5/e", getPortCtrlStr(messages.get(i++))); // .note(0).on()
+					assertEquals("5/d", getPortCtrlStr(messages.get(i++))); // .note(1).on()
+					assertEquals("5/c", getPortCtrlStr(messages.get(i++))); // .note(2).on()
+				}
+			}
+			
+			// no further messages
+			assertEquals(messages.size(), i);
+		}
 	}
 	
 	/**
@@ -3462,10 +4035,30 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "0: note(c).vol.set(100%)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_EFF_NOT_SET) + "note"));
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-not-allowed")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-not-allowed-1")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: vol.note(c).set(100%)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_NOTE_NOT_SUPP) + "note"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-not-allowed-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: mono_at.note(c).set(100%)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_NOTE_NOT_SUPP) + "note"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-not-allowed-3")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: pitch_bend_range.note(c).set(2.0)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_NOTE_NOT_SUPP) + "note"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-not-set-1")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: poly_at.set(100%)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_NOTE_NOT_SET) + "set"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-not-set-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: port_ctrl.on()", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_NOTE_NOT_SET) + "on"));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-numeric-for-none")) );
 		assertEquals( 4, e.getLineNumber() );
@@ -3492,6 +4085,30 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "0: vol.double.set(30/128)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_LSB_TOO_HIGH), "30/128", "128")));
 		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-pattern-index-invalid-1")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( ": poly_at.note(3)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOTE_PAT_IDX_TOO_HIGH), "3", ".note(3)")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-pattern-index-invalid-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( ": poly_at.note(c)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOTE_PAT_IDX_NAN), "c", ".note(c)")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-pattern-index-invalid-3")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( ": poly_at.note(3)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOTE_PAT_IDX_TOO_HIGH), "3", ".note(3)")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-pattern-index-invalid-4")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( ": poly_at.note(3)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOTE_PAT_IDX_TOO_HIGH), "3", ".note(3)")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-pattern-index-invalid-5")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( ": poly_at.note(3)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOTE_PAT_IDX_TOO_HIGH), "3", ".note(3)")));
 	}
 	
 	/**
@@ -3657,5 +4274,91 @@ class MidicaPLParserTest extends MidicaPLParser {
 	 */
 	private static String getLyrics() {
 		return (String) KaraokeAnalyzer.getKaraokeInfo().get("lyrics_full");
+	}
+	
+	/**
+	 * Calculates and returns a summary of a short message without (without tickstamp).
+	 * 
+	 * The summary consists of:
+	 * 
+	 * - Status byte in hex
+	 * - first data byte in hex (if available)
+	 * - second data byte in hex (if available)
+	 * 
+	 * All bytes are separated by slash (/).
+	 * 
+	 * @param msg  the message
+	 * @return the summary.
+	 */
+	private static String getShortMsgBytesAsStr(SingleMessage msg) {
+		
+		// get MSB and LSB
+		byte[] bytes = msg.getMessageBytes();
+		String result = String.format("%02X", bytes[0]);
+		if (bytes.length > 1)
+			result += "/" + String.format("%02X", bytes[1]);
+		if (bytes.length > 2)
+			result += "/" + String.format("%02X", bytes[2]);
+		
+		return result;
+	}
+	
+	/**
+	 * Calculates and returns a summary from a pitch bend message.
+	 * 
+	 * The summary consists of:
+	 * 
+	 * - MSB
+	 * - LSB
+	 * - resulting bend in half tones (rounded)
+	 * 
+	 * @param msg            the message
+	 * @param decimalPlaces  number of decimal places to round the half tones
+	 * @return the summary.
+	 */
+	private static String getPitchBendStr(SingleMessage msg, int decimalPlaces) {
+		
+		// format half tones
+		String summary   = msg.getDistinctOptions(IMessageType.OPT_SUMMARY);
+		float  halfTones = Float.parseFloat(summary);
+		String formatted = String.format("%." + decimalPlaces + "f", halfTones);
+		
+		// get MSB and LSB
+		byte[] bytes = msg.getMessageBytes();
+		String msb   = String.format("%02X", bytes[2]);
+		String lsb   = String.format("%02X", bytes[1]);
+		
+		return msb + "/" + lsb + "/" + formatted;
+	}
+	
+	/**
+	 * Calculates and returns a summary from a portamento control message.
+	 * 
+	 * Throws an exception if the message is not a portamento control message.
+	 * 
+	 * The summary consists of:
+	 * 
+	 * - channel
+	 * - note name
+	 * 
+	 * @param msg  the message
+	 * @return the summary.
+	 */
+	private static String getPortCtrlStr(SingleMessage msg) {
+		
+		String note = msg.getDistinctOptions(IMessageType.OPT_SUMMARY);
+		
+		byte[] bytes   = msg.getMessageBytes();
+		String status  = String.format("%02X", bytes[0]);
+		int    channel = bytes[0] & 0x0F;
+		String ctrl    = String.format("%02X", bytes[1]);
+		
+		// is it a portamento ctrl?
+		if (!status.startsWith("B"))
+			throw new RuntimeException("not a ctrl change");
+		if (!ctrl.startsWith("54"))
+			throw new RuntimeException("not a portamento ctrl message");
+		
+		return channel + "/" + note;
 	}
 }

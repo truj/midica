@@ -1,0 +1,13 @@
+INCLUDE inc/instruments.midica
+
+
+0: c/d/e:pat
+
+
+PATTERN pat
+	{
+		: 0/1/2
+		: poly_at.note(3)
+		: 0/1/2
+	}
+END

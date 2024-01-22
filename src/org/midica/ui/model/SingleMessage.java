@@ -80,10 +80,21 @@ public class SingleMessage implements IMessageType, Comparable<SingleMessage> {
 	 */
 	@Override
 	public String getDistinctOptions(int id) {
-		if ( ! options.containsKey(id) )
+		if (! options.containsKey(id))
 			return null;
 		
 		return options.get(id) + "";
+	}
+	
+	/**
+	 * Returns the message as a byte array.
+	 * 
+	 * Needed for unit tests.
+	 * 
+	 * @return message bytes
+	 */
+	public byte[] getMessageBytes() {
+		return (byte[]) getOption(IMessageType.OPT_MESSAGE);
 	}
 	
 	/**
@@ -260,7 +271,8 @@ public class SingleMessage implements IMessageType, Comparable<SingleMessage> {
 						+ "/" + (Integer) getOption(IMessageType.OPT_CHANNEL)
 						+ "/" + (String) getOption(IMessageType.OPT_STATUS_BYTE)
 						+ "-" + ctrlByte
-						+ "/" + (String) getOption(IMessageType.OPT_SUMMARY);
+						+ "/" + (String) getOption(IMessageType.OPT_SUMMARY)
+						;
 			}
 			
 			// something else

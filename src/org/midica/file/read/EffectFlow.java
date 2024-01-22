@@ -180,6 +180,65 @@ public class EffectFlow {
 	}
 	
 	/**
+	 * Determines if the current effect needs a note to be set.
+	 * 
+	 * @return **true** if a note is needed, otherwise **false**.
+	 */
+	public boolean needsNote() {
+		
+		// poly_at?
+		if (EFF_TYPE_CHANNEL == effectType && 0xA0 == effectNumber)
+			return true;
+		
+		// port_ctrl?
+		if (EFF_TYPE_CTRL == effectType && 0x54 == effectNumber)
+			return true;
+		
+		return false;
+	}
+	
+	/**
+	 * Returns the pre-defined value for the current effect (with type=NONE or type=ANY).
+	 * 
+	 * For most effects with type NONE the predefined value is 0.
+	 * 
+	 * For most effects with type ANY the predefined value is 127.
+	 * 
+	 * Exceptions are:
+	 * 
+	 * - **port_ctrl** - Here the default is the configured note()
+	 * - **mono_mode** - Here the default is 1
+	 * 
+	 * @param valueType  the effect's value type
+	 * @return the default value to be set for **on()**.
+	 * @throws FatalParseException
+	 */
+	public int getDefaultValueForOn(int valueType) throws FatalParseException {
+		
+		// NONE
+		if (TYPE_NONE == valueType) {
+			
+			// port_ctrl?
+			if (EFF_TYPE_CTRL == effectType && 0x54 == effectNumber)
+				return note;
+			
+			return 0;
+		}
+		
+		// ANY
+		if (TYPE_ANY == valueType) {
+			
+			// mono_mode
+			if (EFF_TYPE_CTRL == effectType && 0x7E == effectNumber)
+				return 1;
+			
+			return 127;
+		}
+		
+		throw new FatalParseException("Invalid value type '" + valueType + "' for getDefaultValueForOn().");
+	}
+	
+	/**
 	 * Applies a **length(...)** function call in the flow.
 	 * 
 	 * @param lengthStr  The (note length) parameter of the length() call.
@@ -214,6 +273,17 @@ public class EffectFlow {
 			throw new ParseException(Dict.get(Dict.ERROR_FL_NOTE_NOT_SUPP) + elemName);
 		
 		this.note = note;
+	}
+	
+	/**
+	 * Returns the MIDI note number of the currently set note().
+	 * 
+	 * Returns **-1** if no note has been set.
+	 * 
+	 * @return note number or **-1** if no note has been set.
+	 */
+	public int getNote() {
+		return note;
 	}
 	
 	/**
@@ -498,17 +568,20 @@ public class EffectFlow {
 		}
 		
 		// exceptions for the above ranges
-		ctrlToType.put(0x08, TYPE_MSB_SIGNED); // portamento ctrl
-		ctrlToType.put(0x0A, TYPE_MSB_SIGNED); // portamento ctrl
-		ctrlToType.put(0x54, TYPE_ANY);        // portamento ctrl
+		ctrlToType.put(0x08, TYPE_MSB_SIGNED); // balance
+		ctrlToType.put(0x0A, TYPE_MSB_SIGNED); // panorama
+		ctrlToType.put(0x54, TYPE_NONE);       // portamento ctrl
 		ctrlToType.put(0x58, TYPE_ANY);        // high resolution velocity prefix
 		ctrlToType.put(0x60, TYPE_NONE);       // data increment
 		ctrlToType.put(0x61, TYPE_NONE);       // data decrement
 		ctrlToType.put(0x7A, TYPE_BOOLEAN);    // local control on/off
-		ctrlToType.put(0x7E, TYPE_BYTE);       // mono mode on
+		ctrlToType.put(0x7E, TYPE_ANY);        // mono mode on
 		
 		// min / max
 		applyDefaultMinAndMax(ctrlToType, ctrlToDefault, ctrlToMin, ctrlToMax);
+		
+		// exceptions for max
+		ctrlToMax.put(0x7E, 16); // mono mode on - range: 0-16
 		
 		/////////////////////////////
 		// (N)RPNs

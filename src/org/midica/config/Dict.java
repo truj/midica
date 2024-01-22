@@ -250,6 +250,8 @@ public class Dict {
 	public static final String SYNTAX_CC_5D_EFF3_DEP     = "CC_5D_EFF3_DEP";
 	public static final String SYNTAX_CC_5E_EFF4_DEP     = "CC_5E_EFF4_DEP";
 	public static final String SYNTAX_CC_5F_EFF4_DEP     = "CC_5F_EFF4_DEP";
+	public static final String SYNTAX_CC_7E_MONO_MODE    = "CC_7E_MONO_MODE";
+	public static final String SYNTAX_CC_7F_POLY_MODE    = "CC_7F_POLY_MODE";
 	public static final String SYNTAX_RPN_0_PITCH_BEND_R = "RPN_0_PITCH_BEND_R";
 	public static final String SYNTAX_RPN_1_FINE_TUNE    = "RPN_1_FINE_TUNE";
 	public static final String SYNTAX_RPN_2_COARSE_TUNE  = "RPN_2_COARSE_TUNE";
@@ -1757,6 +1759,9 @@ public class Dict {
 	public static final String ERROR_FL_CONT_RPN                 = "error_fl_cont_rpn";
 	public static final String ERROR_FL_CONT_NRPN                = "error_fl_cont_nrpn";
 	public static final String ERROR_FL_NOTE_NOT_SUPP            = "error_fl_note_not_supp";
+	public static final String ERROR_FL_NOTE_NOT_SET             = "error_fl_note_not_set";
+	public static final String ERROR_FL_NOTE_PAT_IDX_NAN         = "error_fl_note_pat_idx_nan";
+	public static final String ERROR_FL_NOTE_PAT_IDX_TOO_HIGH    = "error_fl_note_pat_idx_too_high";
 	public static final String ERROR_FUNC_TYPE_NOT_BOOL          = "error_func_type_not_bool";
 	public static final String ERROR_FUNC_TYPE_BOOL              = "error_func_type_bool";
 	public static final String ERROR_FUNC_TYPE_NONE              = "error_func_type_none";
@@ -3018,6 +3023,8 @@ public class Dict {
 		set( SYNTAX_CC_5D_EFF3_DEP,     "Controller 93 (0x5D): Effect 3 Depth (Chorus)"         );
 		set( SYNTAX_CC_5E_EFF4_DEP,     "Controller 94 (0x5E): Effect 4 Depth (Celeste/Detune)" );
 		set( SYNTAX_CC_5F_EFF4_DEP,     "Controller 95 (0x5F): Effect 5 Depth (Phaser)"         );
+		set( SYNTAX_CC_7E_MONO_MODE,    "Controller 95 (0x7E): Mono Mode ON (Poly OFF)"         );
+		set( SYNTAX_CC_7F_POLY_MODE,    "Controller 95 (0x7F): Poly Mode ON (Mono OFF)"         );
 		set( SYNTAX_RPN_0_PITCH_BEND_R, "RPN 0 (0x0000): Pitch Bend Range"                 );
 		set( SYNTAX_RPN_1_FINE_TUNE,    "RPN 1 (0x0001): Channel Fine Tune"                );
 		set( SYNTAX_RPN_2_COARSE_TUNE,  "RPN 2 (0x0002): Channel Coarse Tune"              );
@@ -3571,6 +3578,9 @@ public class Dict {
 		set( ERROR_FL_CONT_RPN,                   "Effect function '%s' is not allowed for RPN-based effects."        );
 		set( ERROR_FL_CONT_NRPN,                  "Effect function '%s' is not allowed for NRPN-based effects."       );
 		set( ERROR_FL_NOTE_NOT_SUPP,              "A note is not supported for the chosen effect type. Invalid element: " );
+		set( ERROR_FL_NOTE_NOT_SET,               "The chosen effect needs a note to be set before you can use this function: " );
+		set( ERROR_FL_NOTE_PAT_IDX_NAN,           "pattern index '%s' is not a number in this element: %s"            );
+		set( ERROR_FL_NOTE_PAT_IDX_TOO_HIGH,      "pattern index '%s' too high in this element: %s"                   );
 		set( ERROR_FUNC_TYPE_NOT_BOOL,            "Effect type not boolean. Function '%s' is not allowed."            );
 		set( ERROR_FUNC_TYPE_BOOL,                "Value type is 'boolean'. Function '%s' is not allowed."            );
 		set( ERROR_FUNC_TYPE_NONE,                "Value type is 'none'. Function '%s' is not allowed."               );
@@ -4382,7 +4392,7 @@ public class Dict {
 		setSyntax( SYNTAX_CH_A_POLY_AT,        "poly_at"      );
 		setSyntax( SYNTAX_CH_D_MONO_AT,        "mono_at"      );
 		setSyntax( SYNTAX_CH_E_PITCH_BEND,     "bend"         );
-		setSyntax( SYNTAX_CC_01_MOD,           "modulation"   );
+		setSyntax( SYNTAX_CC_01_MOD,           "mod"          );
 		setSyntax( SYNTAX_CC_02_BREATH,        "breath"       );
 		setSyntax( SYNTAX_CC_04_FOOT,          "foot"         );
 		setSyntax( SYNTAX_CC_05_PORT_TIME,     "port_time"    );
@@ -4412,6 +4422,8 @@ public class Dict {
 		setSyntax( SYNTAX_CC_5D_EFF3_DEP,      "chorus"       );
 		setSyntax( SYNTAX_CC_5E_EFF4_DEP,      "detune"       );
 		setSyntax( SYNTAX_CC_5F_EFF4_DEP,      "phaser"       );
+		setSyntax( SYNTAX_CC_7E_MONO_MODE,     "mono_mode"    );
+		setSyntax( SYNTAX_CC_7F_POLY_MODE,     "poly_mode"    );
 		setSyntax( SYNTAX_RPN_0_PITCH_BEND_R,  "pitch_bend_range" );
 		setSyntax( SYNTAX_RPN_1_FINE_TUNE,     "fine_tune"        );
 		setSyntax( SYNTAX_RPN_2_COARSE_TUNE,   "coarse_tune"      );
@@ -4626,6 +4638,8 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_CC_5D_EFF3_DEP     );
 		addSyntaxForInfoView( SYNTAX_CC_5E_EFF4_DEP     );
 		addSyntaxForInfoView( SYNTAX_CC_5F_EFF4_DEP     );
+		addSyntaxForInfoView( SYNTAX_CC_7E_MONO_MODE    );
+		addSyntaxForInfoView( SYNTAX_CC_7F_POLY_MODE    );
 		addSyntaxForInfoView( SYNTAX_RPN_0_PITCH_BEND_R );
 		addSyntaxForInfoView( SYNTAX_RPN_1_FINE_TUNE    );
 		addSyntaxForInfoView( SYNTAX_RPN_2_COARSE_TUNE  );

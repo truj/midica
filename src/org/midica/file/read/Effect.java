@@ -50,6 +50,7 @@ public class Effect {
 	
 	private static Pattern flowPattern       = null;
 	private static Pattern noteOrRestPattern = null;
+	private static Pattern noteIndexPattern  = null;
 	private static Pattern intPattern        = null;
 	private static Pattern periodsPattern    = null;
 	
@@ -132,6 +133,8 @@ public class Effect {
 		effectNames.add( MidicaPLParser.CC_5D_EFF3_DEP     );
 		effectNames.add( MidicaPLParser.CC_5E_EFF4_DEP     );
 		effectNames.add( MidicaPLParser.CC_5F_EFF4_DEP     );
+		effectNames.add( MidicaPLParser.CC_7E_MONO_MODE    );
+		effectNames.add( MidicaPLParser.CC_7F_POLY_MODE    );
 		effectNames.add( MidicaPLParser.RPN_0_PITCH_BEND_R );
 		effectNames.add( MidicaPLParser.RPN_1_FINE_TUNE    );
 		effectNames.add( MidicaPLParser.RPN_2_COARSE_TUNE  );
@@ -178,6 +181,8 @@ public class Effect {
 		ctrlNameToNumber.put( MidicaPLParser.CC_5D_EFF3_DEP,   0x5D );
 		ctrlNameToNumber.put( MidicaPLParser.CC_5E_EFF4_DEP,   0x5E );
 		ctrlNameToNumber.put( MidicaPLParser.CC_5F_EFF4_DEP,   0x5F );
+		ctrlNameToNumber.put( MidicaPLParser.CC_7E_MONO_MODE,  0x7E );
+		ctrlNameToNumber.put( MidicaPLParser.CC_7F_POLY_MODE,  0x7F );
 		
 		// init structures for RPN-based effects
 		rpnNameToNumber.put( MidicaPLParser.RPN_0_PITCH_BEND_R, 0x0000 );
@@ -197,49 +202,69 @@ public class Effect {
 		flowElementNames.add(MidicaPLParser.FL_DOUBLE);
 		
 		// compile regex patterns
-		String flowRegex
-			= "\\G"                                               // end of previous match
-			+ "(^|" + Pattern.quote(MidicaPLParser.FL_DOT) + ")?" // begin or '.'
-			+ "(\\w+)"                                            // name
-			+ "(?:"                                               // generic number (optional)
-			    + Pattern.quote(MidicaPLParser.FL_ASSIGNER)
-			    + "(\\d+)"                                        // MSB or whole number
-			    + "(?:"
-			    + Pattern.quote(MidicaPLParser.FL_GEN_NUM_SEP)
-			    + "(\\d+)"                                        // LSB of generic number
-			    + ")?"
-			+ ")?"
-			+ "(?:"                                               // parameters (optional)
-			+ Pattern.quote(MidicaPLParser.PARAM_OPEN)            // (
-			+ "(\\S*?)"                                           // function parameters
-			+ Pattern.quote(MidicaPLParser.PARAM_CLOSE)           // )
-			+ ")?";                                               // optional
-		flowPattern       = Pattern.compile(flowRegex);
-		noteOrRestPattern = Pattern.compile("^[0-9]|" + Pattern.quote(MidicaPLParser.REST) + "$");
-		String intRegex = "^"
-			+ "(\\-?\\d+)"                  // direct int value (group 1)
-			+ "|"
-			+ "(?:"
-			    + "(\\-?\\d+(?:\\.\\d+)?)"  // percentage value (group 2)
-			    + Pattern.quote(MidicaPLParser.EFF_PERCENT)
-			+ ")"
-			+ "|"
-			+ "(\\-?\\d+\\.\\d+)"           // half-tone-steps (group 3)
-			+ "|"
-			+ "(?:"
-			    + "(\\d+)"                   // MSB (group 4)
-			    + Pattern.quote(MidicaPLParser.FL_GEN_NUM_SEP)
-			    + "(\\d+)"                   // LSB (group 5)
-			+ ")"
-			+ "$";
-		intPattern = Pattern.compile(intRegex);
-		String periodsRegex = "^"
-			+ "(\\-?\\d+(?:\\.\\d*))"     // int or float (group 1)
-			+ "("                         // percent (group 2)
-			    + Pattern.quote(MidicaPLParser.EFF_PERCENT)
-			+ ")?"
-			+ "$";
-		periodsPattern = Pattern.compile(periodsRegex);
+		{
+			// flow pattern
+			String flowRegex
+				= "\\G"                                               // end of previous match
+				+ "(^|" + Pattern.quote(MidicaPLParser.FL_DOT) + ")?" // begin or '.'
+				+ "(\\w+)"                                            // name
+				+ "(?:"                                               // generic number (optional)
+				    + Pattern.quote(MidicaPLParser.FL_ASSIGNER)
+				    + "(\\d+)"                                        // MSB or whole number
+				    + "(?:"
+				    + Pattern.quote(MidicaPLParser.FL_GEN_NUM_SEP)
+				    + "(\\d+)"                                        // LSB of generic number
+				    + ")?"
+				+ ")?"
+				+ "(?:"                                               // parameters (optional)
+				+ Pattern.quote(MidicaPLParser.PARAM_OPEN)            // (
+				+ "(\\S*?)"                                           // function parameters
+				+ Pattern.quote(MidicaPLParser.PARAM_CLOSE)           // )
+				+ ")?";                                               // optional
+			flowPattern = Pattern.compile(flowRegex);
+			
+			// note index pattern (to replace .note(idx) by .note(name))
+			String noteIndexRegex
+				= "\\G"                                       // end of previous match
+				+ "(.*?)"                                     // anything (group 1)
+				+ Pattern.quote(MidicaPLParser.FL_DOT)        // '.'
+				+ Pattern.quote(MidicaPLParser.FUNC_NOTE)     // note
+				+ Pattern.quote(MidicaPLParser.PARAM_OPEN)    // (
+				+ "(\\S*?)"                                   // parameter (group 2)
+				+ Pattern.quote(MidicaPLParser.PARAM_CLOSE);  // )
+			noteIndexPattern = Pattern.compile(noteIndexRegex);
+			
+			// note/rest pattern
+			noteOrRestPattern = Pattern.compile("^[0-9]|" + Pattern.quote(MidicaPLParser.REST) + "$");
+			
+			// int pattern (for function parameters)
+			String intRegex = "^"
+				+ "(\\-?\\d+)"                  // direct int value (group 1)
+				+ "|"
+				+ "(?:"
+				    + "(\\-?\\d+(?:\\.\\d+)?)"  // percentage value (group 2)
+				    + Pattern.quote(MidicaPLParser.EFF_PERCENT)
+				+ ")"
+				+ "|"
+				+ "(\\-?\\d+\\.\\d+)"           // half-tone-steps (group 3)
+				+ "|"
+				+ "(?:"
+				    + "(\\d+)"                   // MSB (group 4)
+				    + Pattern.quote(MidicaPLParser.FL_GEN_NUM_SEP)
+				    + "(\\d+)"                   // LSB (group 5)
+				+ ")"
+				+ "$";
+			intPattern = Pattern.compile(intRegex);
+			
+			// periods pattern (for function parameters)
+			String periodsRegex = "^"
+				+ "(\\-?\\d+(?:\\.\\d*))"     // int or float (group 1)
+				+ "("                         // percent (group 2)
+				    + Pattern.quote(MidicaPLParser.EFF_PERCENT)
+				+ ")?"
+				+ "$";
+			periodsPattern = Pattern.compile(periodsRegex);
+		}
 	}
 	
 	/**
@@ -308,10 +333,6 @@ public class Effect {
 				String numberLsb = m.group(4);
 				String paramStr  = m.group(5);
 				
-				// flow or something else?
-				if (null == elemName) {
-					return false;
-				}
 				if (flowElementNames.contains(elemName))
 					looksLikeFlow = true;
 				else
@@ -374,6 +395,57 @@ public class Effect {
 	 */
 	public static void closeFlowIfPossible() {
 		flow = null;
+	}
+	
+	/**
+	 * Translates the pattern indices inside the given effect flow to notes.
+	 * 
+	 * Needed for pattern calls.
+	 * 
+	 * @param flowStr      the effect flow to be translated
+	 * @param noteNumbers  the note numbers
+	 * @return the translated flow
+	 * @throws ParseException if an index is not a positive integer or too high for the given noteNumbers.
+	 */
+	public static String translatePatternIndices(String flowStr, Integer[] noteNumbers) throws ParseException {
+		
+		String translated = "";
+		Matcher m = noteIndexPattern.matcher(flowStr);
+		int lastMatchOffset = 0;
+		while (m.find()) {
+			lastMatchOffset  = m.end();
+			String beforeStr = m.group(1);
+			String indexStr  = m.group(2);
+			try {
+				int index = Integer.parseInt(indexStr);
+				int note  = noteNumbers[index];
+				translated += beforeStr + MidicaPLParser.FL_DOT + MidicaPLParser.FUNC_NOTE
+					+ MidicaPLParser.PARAM_OPEN + note + MidicaPLParser.PARAM_CLOSE;
+				
+			}
+			catch (NumberFormatException e) {
+				String noteElem = MidicaPLParser.FL_DOT + MidicaPLParser.FUNC_NOTE
+					+ MidicaPLParser.PARAM_OPEN + indexStr + MidicaPLParser.PARAM_CLOSE;
+				throw new ParseException(
+					String.format(Dict.get(Dict.ERROR_FL_NOTE_PAT_IDX_NAN), indexStr, noteElem)
+				);
+			}
+			catch (IndexOutOfBoundsException e) {
+				String noteElem = MidicaPLParser.FL_DOT + MidicaPLParser.FUNC_NOTE
+					+ MidicaPLParser.PARAM_OPEN + indexStr + MidicaPLParser.PARAM_CLOSE;
+				throw new ParseException(
+					String.format(Dict.get(Dict.ERROR_FL_NOTE_PAT_IDX_TOO_HIGH), indexStr, noteElem)
+				);
+			}
+		}
+		
+		// unmatched characters left?
+		if (lastMatchOffset != flowStr.length()) {
+			String remainder = flowStr.substring(lastMatchOffset);
+			translated += remainder;
+		}
+		
+		return translated;
 	}
 	
 	/**
@@ -569,14 +641,24 @@ public class Effect {
 		// for all other functions we need the effect type
 		int valueType = flow.getValueType(funcName);
 		
+		// note required but not set?
+		if (flow.needsNote() && flow.getNote() < 0)
+			throw new ParseException(Dict.get(Dict.ERROR_FL_NOTE_NOT_SET) + funcName);
+		
 		// on()/off() - boolean functions
 		if (MidicaPLParser.FUNC_ON.equals(funcName) || MidicaPLParser.FUNC_OFF.equals(funcName)) {
 			int value = MidicaPLParser.FUNC_ON.equals(funcName) ? 127 : 0;
 			
 			// check type
-			if (valueType == EffectFlow.TYPE_NONE && MidicaPLParser.FUNC_ON.equals(funcName)) {
-				// special case: allow on() for type NONE (but then use value=0)
-				value = 0;
+			if (MidicaPLParser.FUNC_ON.equals(funcName)) {
+				
+				// special case: allow on() for ANY / NONE (but then use a predefined value)
+				if (valueType == EffectFlow.TYPE_NONE || valueType == EffectFlow.TYPE_ANY) {
+					value = flow.getDefaultValueForOn(valueType);
+				}
+				else if (valueType != EffectFlow.TYPE_BOOLEAN) {
+					throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_NOT_BOOL), funcName));
+				}
 			}
 			else if (valueType != EffectFlow.TYPE_BOOLEAN && valueType != EffectFlow.TYPE_ANY) {
 				throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_NOT_BOOL), funcName));
@@ -649,20 +731,28 @@ public class Effect {
 				if (2 == values.length) {
 					
 					// pitch bend?
-					if (0xE0 == flow.getEffectNumber()) {
+					if (0xE0 == effectNum) {
 						// special case: set(0) for MSB only - set the LSB to 0 - to get no bend at all
 						if (0x40 == values[1])
 							SequenceCreator.addMessageChannelEffect(effectNum, channel, 0, values[1], tick);
 						else
 							// use the MSB in both positions - cover the whole range
 							SequenceCreator.addMessageChannelEffect(effectNum, channel, values[1], values[1], tick);
+						return;
 					}
-					else {
-						// TODO: mono_at, poly_at
-						// MSB first, LSB second
+					
+					// mono_at?
+					if (0xD0 == effectNum) {
 						SequenceCreator.addMessageChannelEffect(effectNum, channel, values[1], 0, tick);
+						return;
 					}
-					return;
+					
+					// poly_at?
+					if (0xA0 == effectNum) {
+						int note = flow.getNote();
+						SequenceCreator.addMessageChannelEffect(effectNum, channel, note, values[1], tick);
+						return;
+					}
 				}
 				else if (3 == values.length) {
 					// pitch bend: lsb first, msb second

@@ -1,0 +1,220 @@
+INCLUDE inc/instruments.midica
+
+INSTRUMENT 0 VIOLIN
+INSTRUMENT 1 VIOLIN
+INSTRUMENT 2 VIOLIN
+INSTRUMENT 3 VIOLIN
+INSTRUMENT 4 VIOLIN
+INSTRUMENT 5 VIOLIN
+INSTRUMENT 6 VIOLIN
+INSTRUMENT 7 VIOLIN
+
+////////////////////////////////////////////////////////////
+// channel 0: monophonic aftertouch (channel aftertouch)
+////////////////////////////////////////////////////////////
+
+0: (l=MONO_AT:\r) -:8
+{
+	0: mono_at.wait(4).set(0)     (l=0_)   -:4
+	0: mono_at.wait(4).set(64)    (l=64_)  -
+	0: mono_at.wait(4).set(127)   (l=127_) -
+	
+	// percent
+	0: mono_at.wait(4).set(0%)    (l=0%_)   -
+	0: mono_at.wait(4).set(50%)   (l=50%_)  -
+	0: mono_at.wait(4).set(100%)  (l=100%\r) -
+} m
+0: c/e/g:1+2
+*
+0: (l=line(0%\c100%)\r)  mono_at.length(1).line(0%,100%) c:1
+*
+0: (l=line(100%\c0%)\r)  mono_at.length(1).line(100%,0%) c:1
+*
+////////////////////////////////////////////////////////////
+// channel 1: polyphonic aftertouch
+////////////////////////////////////////////////////////////
+
+*
+1: (l=POLY_AT:\r) -:8
+
+1: poly_at.note(c#-4).wait.set(0)
+1: .wait(4).set(64)
+1: .wait(4).set(127)
+1: c:2.
+{
+	{
+		1: poly_at.note(c).wait(4).set(0)     (l=0_)   -:8
+		1: poly_at.note(c).wait(4).set(64)    (l=64_)  -
+		1: poly_at.note(c).wait(4).set(127)   (l=127_) -
+		
+		// percent
+		1: poly_at.note(d).wait(4).set(0%)    (l=0%_)   -
+		1: poly_at.note(d).wait(4).set(50%)   (l=50%_)  -
+		1: poly_at.note(d).wait(4).set(100%)  (l=100%\r) -
+	} m
+}
+1: c/e/g:1+1
+
+
+1: (l=line(0%\c100%)\r)  poly_at.note(c).length(1).line(0%,100%) c:1
+1: (l=line(100%\c0%)\r)  poly_at.note(c).length(1).line(100%,0%) c:1
+
+////////////////////////////////////////////////////////////
+// channel 2: poly_at in patterns with note index
+////////////////////////////////////////////////////////////
+
+*
+2: (l=POLY_AT-patterns:\r) -:8
+2: (l=c/d/e:pat1) c/d/e:pat1
+
+PATTERN pat1
+	: 0:8 poly_at.length(2).note(1).line(120,121) 0 1 2 0
+	: 0/1/2:pat2
+	{
+		: 0:8 poly_at.note(0).wait.note(1).note(2).line(122,123) 0 1 2 0
+		: 0/1/2:pat2
+		{
+			: 0:8 poly_at.note(2).wait.note(1).note(0)
+			: .line(124,125) 0 1 2 0
+			: 2/1/0:pat2
+		}
+	}
+END
+
+PATTERN pat2
+	{
+		{
+			: 0:8 poly_at.note(0).line(10,11) 0 1 2 0
+		}
+		: 0:8 poly_at.note(1).line(12,13) 0 1 2 0
+	}
+	: 0:8 poly_at.note(2).line(14,15) 0 1 2 0
+END
+
+////////////////////////////////////////////////////////////
+// channel 3: poly_at in patterns with note index
+////////////////////////////////////////////////////////////
+
+*
+3  -      8         l=POLY_AT-patterns:\r
+3  c/d/e  pat_ll_1  l=c/d/e:pat_ll_1\r
+
+PATTERN pat_ll_1
+	0                                         8
+	poly_at.length(2).note(1).line(120,121)   8
+	0                                         8
+	1                                         8
+	2                                         8
+	0                                         8
+	0/1/2                                     pat_ll_2
+	{
+		0                                         8
+		poly_at.length(2).note(2).line(122,123)   8
+		0                                         8
+		1                                         8
+		2                                         8
+		0                                         8
+		0/1/2                                     pat_ll_2
+		{
+			0                          8
+			poly_at.length(2).note(0)  8
+			.line(124,125)             8
+			0                                         8
+			1                                         8
+			2                                         8
+			0                                         8
+			2/1/0                                     pat_ll_2
+		}
+	}
+END
+
+PATTERN pat_ll_2
+	{
+		{
+			0                            8
+			poly_at.note(0).line(10,11)  8
+			0                            8
+			1                            8
+			2                            8
+			0                            8
+		}
+		0                            8
+		poly_at.note(1).line(12,13)  8
+		0                            8
+		1                            8
+		2                            8
+		0                            8
+	}
+	0                            8
+	poly_at.note(2).line(14,15)  8
+	0                            8
+	1                            8
+	2                            8
+	0                            8
+END
+
+////////////////////////////////////////////////////////////
+// channel 4: portamento control
+////////////////////////////////////////////////////////////
+
+*
+4: (l=PORT_CTRL:\r) -:8
+
+4: port_ctrl.note(c#-2).wait.on()
+4: .wait().note(c#+2).on()
+4: .wait().on()
+4: -:2 c c c -:8
+{
+	{
+		// lower octave
+		4: port_ctrl.note(c-).on()  -  c  (l=c-_)  -
+		4: port_ctrl.note(d-).on()  -  c  (l=d-_)  -
+		4: port_ctrl.note(e-).on()  -  c  (l=e-_)  -
+		
+		// higher octave
+		4: port_ctrl.note(c+).on()  -  c  (l=c+_)   -
+		4: port_ctrl.note(d+).on()  -  c  (l=d+_)   -
+		4: port_ctrl.note(e+).on()  -  c  (l=e+\r)  -
+	}
+}
+4: -
+4: (l=c-\r)  port_ctrl.note(c-3).on() c:1
+4: (l=c+\r)  port_ctrl.note(c+3).on() c:1
+
+////////////////////////////////////////////////////////////
+// channel 5: port_ctrl in patterns with note index
+////////////////////////////////////////////////////////////
+
+*
+5: (l=PORT_CTRL-patterns:\r) -:8
+5: (l=c/d/e:pat_p1) c/d/e:pat_p1
+
+PATTERN pat_p1
+	: 0:8 port_ctrl.note(1).on() 0 1 2 0
+	: 0/1/2:pat_p2
+	{
+		: 0:8 port_ctrl.note(0).wait.note(1).note(2).on() 0 1 2 0
+		: 0/1/2:pat_p2
+		{
+			: 0:8 port_ctrl.note(2).wait.note(1).note(0)
+			: .on() 0 1 2 0
+			: 2/1/0:pat_p2
+		}
+	}
+END
+
+PATTERN pat_p2
+	{
+		{
+			: 0:8 port_ctrl.note(0).on() 0 1 2 0
+		}
+		: 0:8 port_ctrl.note(1).on() 0 1 2 0
+	}
+	: 0:8 port_ctrl.note(2).on() 0 1 2 0
+END
+
+
+
+
+
+

@@ -277,6 +277,8 @@ public class MidicaPLParser extends SequenceParser {
 	public static String CC_5D_EFF3_DEP     = null;
 	public static String CC_5E_EFF4_DEP     = null;
 	public static String CC_5F_EFF4_DEP     = null;
+	public static String CC_7E_MONO_MODE    = null;
+	public static String CC_7F_POLY_MODE    = null;
 	public static String RPN_0_PITCH_BEND_R = null;
 	public static String RPN_1_FINE_TUNE    = null;
 	public static String RPN_2_COARSE_TUNE  = null;
@@ -560,6 +562,8 @@ public class MidicaPLParser extends SequenceParser {
 		CC_5D_EFF3_DEP     = Dict.getSyntax( Dict.SYNTAX_CC_5D_EFF3_DEP     );
 		CC_5E_EFF4_DEP     = Dict.getSyntax( Dict.SYNTAX_CC_5E_EFF4_DEP     );
 		CC_5F_EFF4_DEP     = Dict.getSyntax( Dict.SYNTAX_CC_5F_EFF4_DEP     );
+		CC_7E_MONO_MODE    = Dict.getSyntax( Dict.SYNTAX_CC_7E_MONO_MODE    );
+		CC_7F_POLY_MODE    = Dict.getSyntax( Dict.SYNTAX_CC_7F_POLY_MODE    );
 		RPN_0_PITCH_BEND_R = Dict.getSyntax( Dict.SYNTAX_RPN_0_PITCH_BEND_R );
 		RPN_1_FINE_TUNE    = Dict.getSyntax( Dict.SYNTAX_RPN_1_FINE_TUNE    );
 		RPN_2_COARSE_TUNE  = Dict.getSyntax( Dict.SYNTAX_RPN_2_COARSE_TUNE  );
@@ -2806,13 +2810,13 @@ public class MidicaPLParser extends SequenceParser {
 							if (compactElement.startsWith(BAR_LINE))
 								continue;
 							
-							// rest/note/chord
+							// rest/note/chord/flow
 							String[] parts = compactElement.split(Pattern.quote(COMPACT_NOTE_SEP), 2);
 							String chord = parts[0];
 							if (REST.equals(chord))
 								continue;
 							
-							patLineTokens[j] = patternIndicesToChord(chord, noteNumbers);
+							patLineTokens[j] = translatePatternIndices(chord, noteNumbers);
 							if (parts.length > 1)
 								patLineTokens[j] += COMPACT_NOTE_SEP + parts[1];
 						}
@@ -2867,8 +2871,8 @@ public class MidicaPLParser extends SequenceParser {
 					lineNotes.add(REST);
 				}
 				else {
-					// note or chord
-					String noteOrChord = patternIndicesToChord(patLineTokens[0], noteNumbers);
+					// note or chord or effect flow
+					String noteOrChord = translatePatternIndices(patLineTokens[0], noteNumbers);
 					lineNotes.add(noteOrChord);
 				}
 				
@@ -2934,20 +2938,30 @@ public class MidicaPLParser extends SequenceParser {
 	}
 	
 	/**
-	 * Translates a string with comma-separated indices to a chord with comma-separated notes.
+	 * Translates the pattern indices inside the given string to notes.
+	 * 
+	 * The given string can be one of the following:
+	 * 
+	 * - slash-separated indices
+	 * - an effect flow
 	 * 
 	 * Needed for pattern calls.
 	 * 
-	 * @param indicesStr    the comma-separated indices string (e.g. "0,2,3")
-	 * @param noteNumbers   the note numbers to be used for the chord (e.g. [64, 66, 67, 76])
-	 * @return the chord (e.g. "64,67,76")
-	 * @throws ParseException if an index is not a positie integer or too high for the given noteNumbers.
+	 * @param strWithIndices    the slash-separated indices string (e.g. "0/2/3") or the effect flow (e.g. ".note(0)")
+	 * @param noteNumbers       the note numbers to be used for the replacement (e.g. [64, 66, 67, 76])
+	 * @return the chord (e.g. "64/67/76") or effect flow (e.g. ".note(64)")
+	 * @throws ParseException if an index is not a positive integer or too high for the given noteNumbers.
 	 */
-	private String patternIndicesToChord(String indicesStr, Integer[] noteNumbers) throws ParseException {
+	private String translatePatternIndices(String strWithIndices, Integer[] noteNumbers) throws ParseException {
 		ArrayList<String> notes = new ArrayList<>();
 		
+		// effect flow? - replace index in .note(...)
+		if (Effect.isFlow(strWithIndices)) {
+			return Effect.translatePatternIndices(strWithIndices, noteNumbers);
+		}
+		
 		// note or chord
-		String[] indexStrings = indicesStr.split(Pattern.quote(CHORD_SEPARATOR), -1);
+		String[] indexStrings = strWithIndices.split(Pattern.quote(CHORD_SEPARATOR), -1);
 		for (String indexStr : indexStrings) {
 			try {
 				int index = Integer.parseInt(indexStr);
@@ -3080,7 +3094,7 @@ public class MidicaPLParser extends SequenceParser {
 				// ok - checks will be done later when the pattern is called
 			}
 			
-			// normal channel command
+			// lowlevel channel command
 			else {
 				if (tokens.length < 2) {
 					throw new ParseException(Dict.get(Dict.ERROR_PATTERN_NUM_OF_ARGS));
@@ -3092,7 +3106,7 @@ public class MidicaPLParser extends SequenceParser {
 					// They will be checked later, when the pattern is called
 				}
 				else {
-					// check if indices are numbers
+					// check if indices are numbers or effect flows
 					checkPatternIndices(tokens[0]);
 				}
 				
@@ -3122,14 +3136,20 @@ public class MidicaPLParser extends SequenceParser {
 	}
 	
 	/**
-	 * Checks if the given string consists of comma-separated note index numbers.
+	 * Checks if the given string consists of slash-separated note index numbers or an effect flow.
 	 * 
 	 * Needed to check a pattern at pattern line parsing time (before any pattern call).
 	 * 
-	 * @param indicesStr
-	 * @throws ParseException
+	 * @param indicesStr  string to be checked
+	 * @throws ParseException if the check fails
 	 */
 	private void checkPatternIndices(String indicesStr) throws ParseException {
+		
+		// effect flow?
+		if (Effect.isFlow(indicesStr))
+			return;
+		
+		// note indices
 		String[] indexStrings = indicesStr.split(Pattern.quote(CHORD_SEPARATOR), -1);
 		for (String indexStr : indexStrings) {
 			try {
@@ -3805,6 +3825,8 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_CC_5D_EFF3_DEP.equals(cmdId)     ) CC_5D_EFF3_DEP     = cmdName;
 		else if ( Dict.SYNTAX_CC_5E_EFF4_DEP.equals(cmdId)     ) CC_5E_EFF4_DEP     = cmdName;
 		else if ( Dict.SYNTAX_CC_5F_EFF4_DEP.equals(cmdId)     ) CC_5F_EFF4_DEP     = cmdName;
+		else if ( Dict.SYNTAX_CC_7E_MONO_MODE.equals(cmdId)    ) CC_7E_MONO_MODE    = cmdName;
+		else if ( Dict.SYNTAX_CC_7F_POLY_MODE.equals(cmdId)    ) CC_7F_POLY_MODE    = cmdName;
 		else if ( Dict.SYNTAX_RPN_0_PITCH_BEND_R.equals(cmdId) ) RPN_0_PITCH_BEND_R = cmdName;
 		else if ( Dict.SYNTAX_RPN_1_FINE_TUNE.equals(cmdId)    ) RPN_1_FINE_TUNE    = cmdName;
 		else if ( Dict.SYNTAX_RPN_2_COARSE_TUNE.equals(cmdId)  ) RPN_2_COARSE_TUNE  = cmdName;
@@ -4804,13 +4826,15 @@ public class MidicaPLParser extends SequenceParser {
 		String durationStr = subTokens[0];
 		
 		// effect?
-		if (!isFake) {
-			if (Effect.applyFlowIfPossible(channel, tokens[1], durationStr)) {
+		if (isFake) {
+			if (Effect.isFlow(tokens[1]))
 				return;
-			}
-			else {
+		}
+		else {
+			if (Effect.applyFlowIfPossible(channel, tokens[1], durationStr))
+				return;
+			else
 				Effect.closeFlowIfPossible();
-			}
 		}
 		
 		// note or rest
@@ -5320,7 +5344,7 @@ public class MidicaPLParser extends SequenceParser {
 		if (token.matches(".*" + Pattern.quote(CHORD_SEPARATOR) + ".*") || chords.containsKey(token)) {
 			ArrayList<Integer> chordElements = new ArrayList<>();
 			
-			// collect comma-separated inline chord parts
+			// collect slash-separated inline chord parts
 			String[] inlineElements = token.split(Pattern.quote(CHORD_SEPARATOR));
 			for (String inlineElement : inlineElements) {
 				
