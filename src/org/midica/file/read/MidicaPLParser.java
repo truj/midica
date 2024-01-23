@@ -1017,13 +1017,13 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		catch (Exception e) {
 			// any other exception? - wrap it into a parsing exception with file and line
-			ParseException pe = new ParseException(e.toString());
+			FatalParseException fpe = new FatalParseException(e.toString());
 			e.printStackTrace();
-			pe.setLineNumber(currentLineNumber);
-			pe.setFile(file);
-			pe.setStackTrace(stackTrace);
-			pe.setLineContentIfNotYetDone(currentLineContent);
-			throw pe;
+			fpe.setLineNumber(currentLineNumber);
+			fpe.setFile(file);
+			fpe.setStackTrace(stackTrace);
+			fpe.setLineContentIfNotYetDone(currentLineContent);
+			throw fpe;
 		}
 	}
 	
@@ -1589,7 +1589,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// should never happen
 		else {
-			throw new ParseException("Undefined parsing run called");
+			throw new FatalParseException("Undefined parsing run called");
 		}
 		
 		return false;
@@ -1666,7 +1666,7 @@ public class MidicaPLParser extends SequenceParser {
 	 * 
 	 * - Does nothing if called in the wrong parsing run.
 	 * - Does nothing if the instruments are already parsed.
-	 * - Does nothing instruments are currently being parsed.
+	 * - Does nothing if instruments are currently being parsed.
 	 * 
 	 * @throws ParseException the first instruments block has not yet been parsed.
 	 */
@@ -1911,7 +1911,7 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		else
 			// pattern doesn't match
-			throw new ParseException(Dict.get(Dict.ERROR_NOTE_LENGTH_INVALID) + s);
+			throw new FatalParseException(Dict.get(Dict.ERROR_NOTE_LENGTH_INVALID) + s);
 	}
 	
 	/**
@@ -2010,7 +2010,7 @@ public class MidicaPLParser extends SequenceParser {
 			}
 		}
 		else {
-			throw new ParseException(Dict.get(Dict.ERROR_UNKNOWN_CMD) + cmd);
+			throw new FatalParseException(Dict.get(Dict.ERROR_UNKNOWN_CMD) + cmd);
 		}
 	}
 	
@@ -2052,7 +2052,7 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void parseFUNCTION(String[] tokens) throws ParseException {
 		if (MODE_DEFAULT != currentMode) {
-			throw new ParseException(Dict.get(Dict.ERROR_FUNCTION_NOT_ALLOWED_HERE));
+			throw new FatalParseException("FUNCTION inside a block.");
 		}
 		if (2 == tokens.length) {
 			currentMode         = MODE_FUNCTION;
@@ -2088,7 +2088,7 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void parsePATTERN(String[] tokens) throws ParseException {
 		if (MODE_DEFAULT != currentMode) {
-			throw new ParseException(Dict.get(Dict.ERROR_PATTERN_NOT_ALLOWED_HERE));
+			throw new FatalParseException("PATTERN inside a block.");
 		}
 		if (2 == tokens.length) {
 			currentMode        = MODE_PATTERN;
@@ -2124,7 +2124,7 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void parseMETA(String[] tokens) throws ParseException {
 		if (MODE_DEFAULT != currentMode) {
-			throw new ParseException(Dict.get(Dict.ERROR_META_NOT_ALLOWED_HERE));
+			throw new FatalParseException("META inside a block.");
 		}
 		if (1 == tokens.length) {
 			currentMode = MODE_META;
@@ -2376,7 +2376,7 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void parseCHORD(String[] tokens) throws ParseException {
 		if (MODE_DEFAULT != currentMode) {
-			throw new ParseException(Dict.get(Dict.ERROR_CHORD_DEF_NOT_ALLOWED_HERE));
+			throw new FatalParseException("CHORD inside a block.");
 		}
 		String chordDef;
 		if (2 == tokens.length) {
@@ -2474,7 +2474,7 @@ public class MidicaPLParser extends SequenceParser {
 			optionString = callMatcher.group(4);
 		}
 		else {
-			throw new ParseException(Dict.get(Dict.ERROR_CALL_SYNTAX));
+			throw new FatalParseException("invalid syntax in call command");
 		}
 		
 		// parse options
@@ -3862,6 +3862,12 @@ public class MidicaPLParser extends SequenceParser {
 		String name  = assignParts[0];
 		String value = assignParts[1];
 		
+		// name looks like a variable?
+		Matcher varMatcher = varPattern.matcher(name);
+		if (!varMatcher.matches()) {
+			throw new ParseException(Dict.get(Dict.ERROR_CONST_NAME_INVALID) + name);
+		}
+		
 		// recursion not allowed
 		if (name.equals(value)) {
 			throw new ParseException(Dict.get(Dict.ERROR_CONST_NAME_EQ_VALUE) + name);
@@ -3903,7 +3909,7 @@ public class MidicaPLParser extends SequenceParser {
 		String name  = assignParts[0];
 		String value = assignParts[1];
 		if (constants.containsKey(name)) {
-			throw new ParseException(Dict.get(Dict.ERROR_VAR_ALREADY_DEF_AS_CONST) + name);
+			throw new FatalParseException("variable name collides with constant name");
 		}
 		
 		// recursion not allowed
@@ -3941,7 +3947,7 @@ public class MidicaPLParser extends SequenceParser {
 			String key = varMatcher.group(6);
 			HashMap<String, String> params = paramStackNamed.peek();
 			if (null == params) {
-				throw new ParseException(Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + name);
+				throw new FatalParseException(Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + name);
 			}
 			if (! params.containsKey(key)) {
 				throw new ParseException(Dict.get(Dict.ERROR_PARAM_NAMED_UNKNOWN) + name);
@@ -3953,13 +3959,13 @@ public class MidicaPLParser extends SequenceParser {
 			int index = toInt(varMatcher.group(5));
 			ArrayList<String> params = paramStackIndexed.peek();
 			if (null == params) {
-				throw new ParseException(Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + name);
+				throw new FatalParseException(Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + name);
 			}
 			if (index >= params.size()) {
 				throw new ParseException(Dict.get(Dict.ERROR_PARAM_INDEX_TOO_HIGH) + name);
 			}
 			if (null == params.get(index)) {
-				throw new ParseException(Dict.get(Dict.ERROR_PARAM_INDEX_UNDEFINED) + name);
+				throw new FatalParseException(Dict.get(Dict.ERROR_PARAM_INDEX_UNDEFINED) + name);
 			}
 			params.set(index, value);
 		}
@@ -4384,7 +4390,7 @@ public class MidicaPLParser extends SequenceParser {
 		int    tokenCount  = tokens.length;
 		
 		if (tokenCount > 3)
-			throw new ParseException(Dict.get(Dict.ERROR_GLOBAL_NUM_OF_ARGS));
+			throw new FatalParseException("wrong number of arguments in global command");
 		if (2 == tokenCount)
 			channelDesc = tokens[1]; // partial sync
 		
@@ -4985,12 +4991,7 @@ public class MidicaPLParser extends SequenceParser {
 						Long tickToCorrect = instr.getStopTickToCorrect();
 						if (tickToCorrect != null) {
 							long targetTick = startTicks - 1;
-							try {
-								SequenceCreator.moveNoteOffMessage(channel, newNote, tickToCorrect, targetTick);
-							}
-							catch (Exception e) {
-								throw new ParseException(e.getMessage());
-							}
+							SequenceCreator.moveNoteOffMessage(channel, newNote, tickToCorrect, targetTick);
 						}
 						
 						// create and add messages
@@ -5127,7 +5128,7 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	CommandOption parseOption(String[] optParts, boolean isFake) throws ParseException {
 		if (optParts.length > 2)
-			throw new ParseException(Dict.get(Dict.ERROR_CANT_PARSE_OPTIONS) + String.join(" ", optParts));
+			throw new FatalParseException("cannot parse options: " + String.join(" ", optParts));
 		
 		// value is a variable? - don't check if this is fake
 		if (isFake && optParts.length > 1 && varPattern.matcher(optParts[1]).find())
@@ -5835,11 +5836,11 @@ public class MidicaPLParser extends SequenceParser {
 		long totalTicks = instr.getCurrentTicks() - lastTimeSigTick;
 		
 		// check bar line
-		boolean isBarlineTooEarly = true;
+		boolean isBarlineTooEarly = false;
 		long remainder = totalTicks % measureLength;
 		if (remainder > measureLength / 2) {
 			remainder = measureLength - remainder;
-			isBarlineTooEarly = false;
+			isBarlineTooEarly = true;
 		}
 		
 		// check failed?
@@ -5897,7 +5898,7 @@ public class MidicaPLParser extends SequenceParser {
 				SequenceCreator.reset(chosenCharset);
 			}
 			catch (InvalidMidiDataException e) {
-				throw new ParseException(e.toString());
+				throw new FatalParseException(e.toString());
 			}
 			instrumentsParsed    = false;
 			metaInfo             = new HashMap<>();

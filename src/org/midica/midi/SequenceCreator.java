@@ -23,6 +23,7 @@ import javax.sound.midi.Track;
 import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.CharsetUtils;
+import org.midica.file.read.FatalParseException;
 import org.midica.file.read.MidiParser;
 import org.midica.file.read.MidicaPLParser;
 
@@ -272,15 +273,15 @@ public class SequenceCreator {
 	 * @param note        Note number.
 	 * @param fromTick    Tick from where the event shall be moved away.
 	 * @param toTick      Tick where the event shall be moved to.
-	 * @throws Exception if the event to be moved was not found or has a different tick than expected.
+	 * @throws FatalParseException if the event to be moved was not found or has a different tick than expected.
 	 */
-	public static void moveNoteOffMessage(int channel, int note, long fromTick, long toTick) throws Exception {
+	public static void moveNoteOffMessage(int channel, int note, long fromTick, long toTick) throws FatalParseException {
 		Track track = tracks[channel + NUM_META_TRACKS];
 		
 		// get the event to be corrected
 		MidiEvent event = lastNoteOffEvent.get(channel).get(note);
 		if (event == null) {
-			throw new Exception("Cannot move note-off: event not found. This should not happen. Please report.");
+			throw new FatalParseException("Cannot move note-off: event not found.");
 		}
 		
 		// remove the event
@@ -288,7 +289,7 @@ public class SequenceCreator {
 		
 		// check
 		if (event.getTick() != fromTick) {
-			throw new Exception("cannot move note-off - wrong 'from' tick. This should not happen. Please report.");
+			throw new FatalParseException("cannot move note-off - wrong 'from' tick.");
 		}
 		
 		// change tick

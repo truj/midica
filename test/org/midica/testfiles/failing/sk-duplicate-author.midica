@@ -1,0 +1,11 @@
+INCLUDE inc/instruments.midica
+
+META
+	composer	Beethoven
+	copyright   2nd line
+	SOFT_KARAOKE
+		language   ENGL
+		author     the karaoke author
+		author     another author
+	END
+END

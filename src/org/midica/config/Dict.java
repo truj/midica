@@ -1607,13 +1607,10 @@ public class Dict {
 	public static final String ERROR_NAMED_BLOCK_OPEN_AT_EOF     = "error_named_block_open_at_eof";
 	public static final String ERROR_ARGS_NOT_ALLOWED            = "error_args_not_allowed";
 	public static final String ERROR_FUNCTION_ALREADY_DEFINED    = "error_function_already_defined";
-	public static final String ERROR_FUNCTION_NOT_ALLOWED_HERE   = "error_function_not_allowed_here";
-	public static final String ERROR_META_NOT_ALLOWED_HERE       = "error_meta_not_allowed_here";
 	public static final String ERROR_CHORD_ALREADY_DEFINED       = "error_chord_already_defined";
 	public static final String ERROR_CHORD_EQUALS_NOTE           = "error_chord_equals_note";
 	public static final String ERROR_CHORD_EQUALS_PERCUSSION     = "error_chord_equals_percussion";
 	public static final String ERROR_CHORD_CONTAINS_ALREADY      = "error_chord_contains_already";
-	public static final String ERROR_CHORD_DEF_NOT_ALLOWED_HERE  = "error_chord_def_not_allowed_here";
 	public static final String ERROR_CHORD_NUM_OF_ARGS           = "error_chord_num_of_args";
 	public static final String ERROR_CHORD_REDUNDANT_SEP         = "error_chord_redundant_sep";
 	public static final String ERROR_CONST_NUM_OF_ARGS           = "error_const_num_of_args";
@@ -1621,11 +1618,11 @@ public class Dict {
 	public static final String ERROR_CONST_NAME_EQ_VALUE         = "error_const_name_eq_value";
 	public static final String ERROR_CONST_RECURSION             = "error_const_recursion";
 	public static final String ERROR_VAR_NUM_OF_ARGS             = "error_var_num_of_args";
-	public static final String ERROR_VAR_ALREADY_DEF_AS_CONST    = "error_var_already_def_as_const";
 	public static final String ERROR_VAR_VAL_HAS_WHITESPACE      = "error_var_val_has_whitespace";
 	public static final String ERROR_VAR_NOT_DEFINED             = "error_var_not_defined";
 	public static final String ERROR_VAR_NOT_ALLOWED             = "error_var_not_allowed";
 	public static final String ERROR_VAR_NAME_INVALID            = "error_var_name_invalid";
+	public static final String ERROR_CONST_NAME_INVALID          = "error_const_name_invalid";
 	public static final String ERROR_VAR_NAME_EQ_VALUE           = "error_var_name_eq_value";
 	public static final String ERROR_VAR_RECURSION               = "error_var_recursion";
 	public static final String ERROR_PARAM_OUTSIDE_FUNCTION      = "error_param_outside_function";
@@ -1643,7 +1640,6 @@ public class Dict {
 	public static final String ERROR_SOUNDBANK_IO                = "error_soundbank_io";
 	public static final String ERROR_SOUNDBANK_ALREADY_PARSED    = "error_soundbank_already_parsed";
 	public static final String ERROR_FUNCTION_NUM_OF_ARGS        = "error_function_num_of_args";
-	public static final String ERROR_PATTERN_NOT_ALLOWED_HERE    = "error_pattern_not_allowed_here";
 	public static final String ERROR_PATTERN_ALREADY_DEFINED     = "error_pattern_already_defined";
 	public static final String ERROR_PATTERN_NUM_OF_ARGS         = "error_pattern_num_of_args";
 	public static final String ERROR_PATTERN_INVALID_OUTER_OPT   = "error_pattern_invalid_outer_opt";
@@ -1667,7 +1663,6 @@ public class Dict {
 	public static final String ERROR_FUNCTION_UNDEFINED          = "error_function_undefined";
 	public static final String ERROR_CALL_NUM_OF_ARGS            = "error_call_num_of_args";
 	public static final String ERROR_CALL_UNKNOWN_OPT            = "error_call_unknown_opt";
-	public static final String ERROR_CALL_SYNTAX                 = "error_call_syntax";
 	public static final String ERROR_CALL_EMPTY_PARAM            = "error_call_empty_param";
 	public static final String ERROR_CALL_PARAM_NAME_EMPTY       = "error_call_param_name_empty";
 	public static final String ERROR_CALL_PARAM_VALUE_EMPTY      = "error_call_param_value_empty";
@@ -1693,11 +1688,9 @@ public class Dict {
 	public static final String ERROR_INSTR_NUM_OF_ARGS           = "error_num_of_args";
 	public static final String ERROR_INSTR_NUM_OF_ARGS_SINGLE    = "error_num_of_args_single";
 	public static final String ERROR_INSTR_BANK                  = "error_instr_bank";
-	public static final String ERROR_GLOBAL_NUM_OF_ARGS          = "error_global_num_of_args";
 	public static final String ERROR_UNKNOWN_GLOBAL_CMD          = "error_unknown_global_cmd: ";
 	public static final String ERROR_UNKNOWN_COMMAND_ID          = "error_unknown_command_id";
 	public static final String ERROR_CH_CMD_NUM_OF_ARGS          = "error_ch_num_of_args";
-	public static final String ERROR_CANT_PARSE_OPTIONS          = "error_cant_parse_options";
 	public static final String ERROR_OPTION_NEEDS_VAL            = "error_option_needs_val";
 	public static final String ERROR_OPTION_VAL_NOT_ALLOWED      = "error_option_val_not_allowed";
 	public static final String ERROR_DUPLICATE_OPTION            = "error_duplicate_option";
@@ -3427,7 +3420,6 @@ public class Dict {
 		set( ERROR_CHORD_EQUALS_NOTE,             "illegal chord name (equals a note name): "                         );
 		set( ERROR_CHORD_EQUALS_PERCUSSION,       "illegal chord name (equals a percussion ID): "                     );
 		set( ERROR_CHORD_CONTAINS_ALREADY,        "Note cannot be defined more than once in the same chord: "         );
-		set( ERROR_CHORD_DEF_NOT_ALLOWED_HERE,    "a chord definition is not allowed inside a block<br>maybe you forgot to close the block." );
 		set( ERROR_CHORD_NUM_OF_ARGS,             "wrong number of arguments in CHORD command"                        );
 		set( ERROR_CHORD_REDUNDANT_SEP,           "redundant separator in chord definition"                           );
 		set( ERROR_CONST_NUM_OF_ARGS,             "wrong number of arguments in CONSTANT definition"                  );
@@ -3435,11 +3427,11 @@ public class Dict {
 		set( ERROR_CONST_NAME_EQ_VALUE,           "constant name must be different from it's value: "                 );
 		set( ERROR_CONST_RECURSION,               "recursion depth in interpolation of a constant too high"           );
 		set( ERROR_VAR_NUM_OF_ARGS,               "wrong number of arguments in VAR definition or assignment"         );
-		set( ERROR_VAR_ALREADY_DEF_AS_CONST,      "variable name already used for a constant: "                       );
 		set( ERROR_VAR_VAL_HAS_WHITESPACE,        "Variables must not contain a whitespace in the value: "            );
 		set( ERROR_VAR_NOT_DEFINED,               "variable undefined: "                                              );
 		set( ERROR_VAR_NOT_ALLOWED,               "variable not allowed here: "                                       );
 		set( ERROR_VAR_NAME_INVALID,              "invalid variable or parameter name: "                              );
+		set( ERROR_CONST_NAME_INVALID,            "invalid constant name: "                                           );
 		set( ERROR_VAR_NAME_EQ_VALUE,             "variable name must be different from it's value: "                 );
 		set( ERROR_VAR_RECURSION,                 "recursion depth in interpolation of a variable or parameter too high" );
 		set( ERROR_PARAM_OUTSIDE_FUNCTION,        "parameter cannot be used outside of a function: "                  );
@@ -3457,7 +3449,6 @@ public class Dict {
 		set( ERROR_SOUNDBANK_IO,                  "soundbank cannot be parsed:<br>"                                   );
 		set( ERROR_SOUNDBANK_ALREADY_PARSED,      "a soundbank can be included only once"                             );
 		set( ERROR_FUNCTION_NUM_OF_ARGS,          "wrong number of arguments in function command"                     );
-		set( ERROR_PATTERN_NOT_ALLOWED_HERE,      "a pattern definition is not allowed inside a block<br>maybe you forgot to close the block." );
 		set( ERROR_PATTERN_ALREADY_DEFINED,       "pattern name has been already defined: "                           );
 		set( ERROR_PATTERN_NUM_OF_ARGS,           "wrong number of arguments in pattern command"                      );
 		set( ERROR_PATTERN_INVALID_OUTER_OPT,     "in a channel command with a pattern this option is not allowed: "  );
@@ -3480,11 +3471,8 @@ public class Dict {
 		set( ERROR_FUNCTION_RECURSION_DEPTH,      "Recursion depth in function call too big."                         );
 		set( ERROR_FUNCTION_UNDEFINED,            "Call failed. Function not defined."                                );
 		set( ERROR_FUNCTION_ALREADY_DEFINED,      "function name has been already defined: "                          );
-		set( ERROR_FUNCTION_NOT_ALLOWED_HERE,     "a function definition is not allowed inside a block<br>maybe you forgot to close the block." );
-		set( ERROR_META_NOT_ALLOWED_HERE,         "a meta definition is not allowed inside a block<br>maybe you forgot to close the block." );
 		set( ERROR_CALL_NUM_OF_ARGS,              "wrong number of arguments in function call command"                );
 		set( ERROR_CALL_UNKNOWN_OPT,              "unknown option for function call command: "                        );
-		set( ERROR_CALL_SYNTAX,                   "invalid syntax in call command"                                    );
 		set( ERROR_CALL_EMPTY_PARAM,              "empty parameter in parameter list: "                               );
 		set( ERROR_CALL_PARAM_NAME_EMPTY,         "empty named parameter in parameter list: "                         );
 		set( ERROR_CALL_PARAM_VALUE_EMPTY,        "value of named parameter is empty: "                               );
@@ -3512,11 +3500,9 @@ public class Dict {
 		set( ERROR_INSTR_NUM_OF_ARGS,             "wrong number of arguments in instrument command"                   );
 		set( ERROR_INSTR_NUM_OF_ARGS_SINGLE,      "wrong number of arguments in single-line instrument command"       );
 		set( ERROR_INSTR_BANK,                    "Instrument and/or Bank definition erroneous"                       );
-		set( ERROR_GLOBAL_NUM_OF_ARGS,            "wrong number of arguments in global command"                       );
 		set( ERROR_UNKNOWN_GLOBAL_CMD,            "unknown global command: "                                          );
 		set( ERROR_UNKNOWN_COMMAND_ID,            "Unknown command ID: "                                              );
-		set( ERROR_CH_CMD_NUM_OF_ARGS,            "wrong number of arguments in channel command"                      );
-		set( ERROR_CANT_PARSE_OPTIONS,            "cannot parse options: "                                            );
+		set( ERROR_CH_CMD_NUM_OF_ARGS,            "wrong number of arguments in lowlevel channel command"             );
 		set( ERROR_OPTION_NEEDS_VAL,              "option needs value: "                                              );
 		set( ERROR_OPTION_VAL_NOT_ALLOWED,        "no value allowed for option: "                                     );
 		set( ERROR_DUPLICATE_OPTION,              "duplicate option: "                                                );
@@ -3524,7 +3510,7 @@ public class Dict {
 		set( ERROR_VEL_NOT_LESS_THAN_1,           "velocity must be more than 0"                                      );
 		set( ERROR_TUPLET_INVALID,                "Invalid tuplet definition: "                                       );
 		set( ERROR_DURATION_MORE_THAN_0,          "duration must be more than 0.0 (or 0%)"                            );
-		set( ERROR_OPT_LENGTH_MORE_THAN_0,        "a zero-length is not allowed in a compact option"                  );
+		set( ERROR_OPT_LENGTH_MORE_THAN_0,        "a zero-length is not allowed in a compact option: "                );
 		set( ERROR_UNKNOWN_OPTION,                "unknown option: "                                                  );
 		set( ERROR_UNKNOWN_NOTE,                  "unknown note: "                                                    );
 		set( ERROR_UNKNOWN_PERCUSSION,            "unknown percussion ID: "                                           );
@@ -3547,8 +3533,8 @@ public class Dict {
 		set( ERROR_COND_WHITESPACE_IN_IN_ELEM,    "Invalid whitespace in list element: "                              );
 		set( ERROR_COND_EMPTY_ELEM_IN_IN_LIST,    "Empty element in 'in' list: "                                      );
 		set( ERROR_BAR_LINE_INCORRECT,            "Incorrect bar line!<br>"                                           );
-		set( ERROR_BAR_LINE_TOO_EARLY,            "bar line number <b>%d</b> is <b>%d</b> ticks after a measure border.<br>"  );
-		set( ERROR_BAR_LINE_TOO_LATE,             "bar line number <b>%d</b> is <b>%d</b> ticks before a measure border.<br>" );
+		set( ERROR_BAR_LINE_TOO_EARLY,            "bar line number <b>%d</b> is <b>%d</b> ticks before a measure border.<br>"  );
+		set( ERROR_BAR_LINE_TOO_LATE,             "bar line number <b>%d</b> is <b>%d</b> ticks after a measure border.<br>" );
 		set( ERROR_BAR_LINE_EXACT_NOTE_LEN,       "This equates exactly the following note length:<br><b>%s</b>"      );
 		set( ERROR_BAR_LINE_BETWEEN,              "This is between the following note lengths:<br>- <b>%s</b> (%d ticks)<br>- <b>%s</b> (%d ticks)<br>" );
 		set( ERROR_BAR_LINE_SMALL,                "For comparison:<br>The note length <b>%s</b> equates to %d ticks"  );

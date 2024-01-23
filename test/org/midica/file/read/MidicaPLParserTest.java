@@ -2522,6 +2522,11 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "p 128 testing", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INSTR_BANK)) );
 		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-duplicate-channel")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "1 0 test2", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_CHANNEL_REDEFINED), 1)) );
+		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-param")) );
 		assertEquals( 1, e.getLineNumber() );
 		assertEquals( "INSTRUMENTS param", e.getLineContent() );
@@ -2766,6 +2771,11 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 9, e.getLineNumber() );
 		assertEquals( "SOFT_KARAOKE", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOFT_KARAOKE_ALREADY_SET)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("sk-duplicate-author")) );
+		assertEquals( 9, e.getLineNumber() );
+		assertEquals( "author     another author", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SK_VALUE_ALREADY_SET) + "author") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("sk-unknown-sk-cmd")) );
 		assertEquals( 8, e.getLineNumber() );
@@ -3280,6 +3290,11 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "DEFINE UNKNOWN_ID something", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_COMMAND_ID)) );
 		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("define-twice")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "DEFINE CHORD b", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ALREADY_REDEFINED) + "CHORD") );
+		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("define-assigner-double")) );
 		assertEquals( 5, e.getLineNumber() );
 		assertEquals( "DEFINE CHORD == CRD", e.getLineContent() );
@@ -3304,6 +3319,11 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "CONST $crd c+/d+/e+", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CONST_ALREADY_DEFINED)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("const-without-dollar")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "CONST xy = z", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CONST_NAME_INVALID) + "xy") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("const-name-eq-value")) );
 		assertEquals( 3, e.getLineNumber() );
@@ -3610,10 +3630,25 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "stacktrace-compact-pattern.midica/22",    stackTrace.pop().toString() ); // CALL pat1(...) from func()
 		assertEquals( "stacktrace-compact-pattern.midica/13",    stackTrace.pop().toString() ); // CALL func(...)
 		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-tempo")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "* tempo 0", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_0_NOT_ALLOWED)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-quantity")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "1: (q=0) c", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_0_NOT_ALLOWED)) );
+		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-for-note")) );
 		assertEquals( 3, e.getLineNumber() );
 		assertEquals( "0 c -", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_NOT_ALLOWED)) );
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-in-compact-opt")) );
+		assertEquals( 3, e.getLineNumber() );
+		assertEquals( "0: (length=-)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPT_LENGTH_MORE_THAN_0) + "length") );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-for-note-2")) );
 		assertEquals( 3, e.getLineNumber() );
@@ -3705,10 +3740,33 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( ": 0 1 a", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INDEX_INVALID)), "a");
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("bar-line-too-early")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("bar-line-too-early-1")) );
 		assertEquals( 9, e.getLineNumber() );
 		assertEquals( "0: | c   | c:16 c c c  c c c c  c c c c  c c c c:32 |", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BAR_LINE_INCORRECT)));
+		assertTrue( e.getMessage().contains(String.format(Dict.get(Dict.ERROR_BAR_LINE_TOO_EARLY), 3, 60)));
+		assertTrue( e.getMessage().contains(String.format(Dict.get(Dict.ERROR_BAR_LINE_EXACT_NOTE_LEN), "/32")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("bar-line-too-early-2")) );
+		assertEquals( 9, e.getLineNumber() );
+		assertEquals( "0: | c   | c:16 c c c  c c c c  c c c c  c c c c:32. |", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BAR_LINE_INCORRECT)));
+		assertTrue( e.getMessage().contains(String.format(Dict.get(Dict.ERROR_BAR_LINE_TOO_EARLY), 3, 30)));
+		assertTrue( e.getMessage().contains(String.format(Dict.get(Dict.ERROR_BAR_LINE_SMALL), "/32", 60)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("bar-line-too-late-1")) );
+		assertEquals( 9, e.getLineNumber() );
+		assertEquals( "0: | c   | c:16 c c c  c c c c  c c c c  c c c c  c:32 |", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BAR_LINE_INCORRECT)));
+		assertTrue( e.getMessage().contains(String.format(Dict.get(Dict.ERROR_BAR_LINE_TOO_LATE), 3, 60)));
+		assertTrue( e.getMessage().contains(String.format(Dict.get(Dict.ERROR_BAR_LINE_EXACT_NOTE_LEN), "/32")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("bar-line-too-late-2")) );
+		assertEquals( 9, e.getLineNumber() );
+		assertEquals( "0: | c   | c:16 c c c  c c c c  c c c c  c c c c  c:32.. |", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BAR_LINE_INCORRECT)));
+		assertTrue( e.getMessage().contains(String.format(Dict.get(Dict.ERROR_BAR_LINE_TOO_LATE), 3, 105)));
+		assertTrue( e.getMessage().contains(String.format(Dict.get(Dict.ERROR_BAR_LINE_BETWEEN), "/32.", 90, "/16", 120)));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-before-block")) );
 		assertEquals( 4, e.getLineNumber() );
@@ -4113,7 +4171,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 	
 	/**
 	 * Returns a source file for testing the parse() method with a
-	 * file that is supposed to be parseble.
+	 * file that is supposed to be parsable.
 	 * 
 	 * @param name file name without the extension .midicapl
 	 * @return file object of the file to be tested
@@ -4127,7 +4185,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 	
 	/**
 	 * Returns a source file for testing the parse() method with a
-	 * file that is supposed to be parseble.
+	 * file that is supposed to be parsable.
 	 * 
 	 * @param name file name without the extension .midicapl
 	 * @return file object of the file to be tested
