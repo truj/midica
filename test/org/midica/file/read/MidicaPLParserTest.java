@@ -1502,6 +1502,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 			// .double.wait.set(127/0)
 			assertEquals( "4260/0/B0-0B/127", messages.get(i++).toString() ); // MSB
 			assertEquals( "4260/0/B0-2B/0",   messages.get(i++).toString() ); // LSB
+			
+			// no further messages
+			assertEquals(messages.size(), i);
 		}
 		// channel 1
 		{
@@ -1543,6 +1546,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 			// .wait.set(64/0)
 			assertEquals( "390/1/B1-08/64", messages.get(i++).toString() ); // MSB
 			assertEquals( "390/1/B1-28/0",  messages.get(i++).toString() ); // LSB
+			
+			// no further messages
+			assertEquals(messages.size(), i);
 		}
 		// channel 2
 		{
@@ -1556,6 +1562,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "120/2/B2-5D/127", messages.get(i++).toString() ); // .wait.set(100%)
 			assertEquals( "150/2/B2-5D/0",   messages.get(i++).toString() ); // .wait.set(0%)
 			assertEquals( "180/2/B2-5D/64",  messages.get(i++).toString() ); // .wait.set(0%)
+			
+			// no further messages
+			assertEquals(messages.size(), i);
 		}
 		// channel 3
 		{
@@ -1565,6 +1574,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 			// hold pedal == 40
 			assertEquals( "30/3/B3-40/ON",  messages.get(i++).toString() ); // hold.length(64).wait.on()
 			assertEquals( "60/3/B3-40/OFF", messages.get(i++).toString() ); // .wait.off()
+			
+			// no further messages
+			assertEquals(messages.size(), i);
 		}
 		// channel 4
 		{
@@ -1579,6 +1591,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "150/4/B4-50/64",  messages.get(i++).toString() ); // .wait.set(50%)
 			assertEquals( "180/4/B4-50/127", messages.get(i++).toString() ); // .wait.set(127)
 			assertEquals( "210/4/B4-50/0",   messages.get(i++).toString() ); // .wait.set(0)
+			
+			// no further messages
+			assertEquals(messages.size(), i);
 		}
 		// channel 5
 		{
@@ -1587,6 +1602,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 			
 			// ctrl=7B == 123
 			assertEquals( "30/5/B5-7B/0",  messages.get(i++).toString() ); // ctrl=123.length(64).wait.on()
+			
+			// no further messages
+			assertEquals(messages.size(), i);
 		}
 		// channel 6
 		{
@@ -1595,7 +1613,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 			
 			// modulation depth range == RPN 00/05
 			{
-				// tick 60: mod_depth_range.length(32).wait.set(0)
+				// tick 60: mod_range.length(32).wait.set(0)
 				assertEquals( "30/6/B6-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "40/6/B6-64/5",   messages.get(i++).toString() ); // RPN LSB: 5
 				assertEquals( "50/6/B6-06/0",   messages.get(i++).toString() ); // data MSB: 0
@@ -1696,131 +1714,286 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "1930/6/B6-65/127", messages.get(i++).toString() ); // MSB reset
 				assertEquals( "1930/6/B6-64/127", messages.get(i++).toString() ); // LSB reset
 			}
+			
+			// no further messages
+			assertEquals(messages.size(), i);
 		}
 		// channel 7
 		{
 			messages = getMessagesByStatus("B7");
 			int i = 0;
 			
-			// channel coarse tuning == RPN 00/01
+			// channel coarse tuning == RPN 00/02
 			{
-				// tick 60: coarse_tune.length(32).wait.set(0)
+				// tick 60: coarse_tune.length(32).wait.set(-64.0)
 				assertEquals( "30/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "40/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
-				assertEquals( "50/7/B7-06/64",  messages.get(i++).toString() ); // data MSB: 64
+				assertEquals( "50/7/B7-06/0",   messages.get(i++).toString() ); // data MSB: 0
 				assertEquals( "70/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
 				assertEquals( "70/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 120: .wait.set(63)
+				// tick 120: .wait.set(-12)
 				assertEquals( "90/7/B7-65/0",    messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "100/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
-				assertEquals( "110/7/B7-06/127", messages.get(i++).toString() ); // data MSB: 127
+				assertEquals( "110/7/B7-06/52",  messages.get(i++).toString() ); // data MSB: 52
 				assertEquals( "130/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
 				assertEquals( "130/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 180: .wait.set(-64)
-				assertEquals( "150/7/B7-65/0",    messages.get(i++).toString() ); // RPN MSB: 0
+				// tick 180: .wait.set(-1.0)
+				assertEquals( "150/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "160/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
-				assertEquals( "170/7/B7-06/0",   messages.get(i++).toString() ); // data MSB: 0
+				assertEquals( "170/7/B7-06/63",  messages.get(i++).toString() ); // data MSB: 63
 				assertEquals( "190/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
 				assertEquals( "190/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 240: .wait.set(100%)
+				// tick 240: .wait.set(0)
 				assertEquals( "210/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "220/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
-				assertEquals( "230/7/B7-06/127", messages.get(i++).toString() ); // data MSB: 127
+				assertEquals( "230/7/B7-06/64",  messages.get(i++).toString() ); // data MSB: 64
 				assertEquals( "250/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
 				assertEquals( "250/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 300: .wait.set(0%)
+				// tick 300: .wait.set(1)
 				assertEquals( "270/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "280/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
-				assertEquals( "290/7/B7-06/64",  messages.get(i++).toString() ); // data MSB: 64
+				assertEquals( "290/7/B7-06/65",  messages.get(i++).toString() ); // data MSB: 65
 				assertEquals( "310/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
 				assertEquals( "310/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 360: .wait.set(-100%)
+				// tick 360: .wait.set(12.0)
 				assertEquals( "330/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "340/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
-				assertEquals( "350/7/B7-06/0",   messages.get(i++).toString() ); // data MSB: 0
+				assertEquals( "350/7/B7-06/76",  messages.get(i++).toString() ); // data MSB: 76
 				assertEquals( "370/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
 				assertEquals( "370/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 420: .double.wait.set(0)
+				// tick 420: .wait.set(63)
 				assertEquals( "390/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "400/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
-				assertEquals( "410/7/B7-06/64",  messages.get(i++).toString() ); // data MSB: 64
-				assertEquals( "420/7/B7-26/0",   messages.get(i++).toString() ); // data LSB: 0
+				assertEquals( "410/7/B7-06/127", messages.get(i++).toString() ); // data MSB: 127
 				assertEquals( "430/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
 				assertEquals( "430/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 480: .wait.set(8191)
-				assertEquals( "450/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
-				assertEquals( "460/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
-				assertEquals( "470/7/B7-06/127", messages.get(i++).toString() ); // data MSB: 127
-				assertEquals( "480/7/B7-26/127", messages.get(i++).toString() ); // data LSB: 127
-				assertEquals( "490/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
-				assertEquals( "490/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
-			}
-			{
-				// tick 540: .wait.set(-8192)
-				assertEquals( "510/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
-				assertEquals( "520/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
-				assertEquals( "530/7/B7-06/0",   messages.get(i++).toString() ); // data MSB: 0
-				assertEquals( "540/7/B7-26/0",   messages.get(i++).toString() ); // data LSB: 0
-				assertEquals( "550/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
-				assertEquals( "550/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
-			}
-			{
-				// tick 600: .wait.set(0%)
-				assertEquals( "570/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
-				assertEquals( "580/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
-				assertEquals( "590/7/B7-06/64",  messages.get(i++).toString() ); // data MSB: 64
-				assertEquals( "600/7/B7-26/0",   messages.get(i++).toString() ); // data LSB: 0
-				assertEquals( "610/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
-				assertEquals( "610/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
-			}
-			{
-				// tick 660: .wait.set(100%)
-				assertEquals( "630/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
-				assertEquals( "640/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
-				assertEquals( "650/7/B7-06/127", messages.get(i++).toString() ); // data MSB: 127
-				assertEquals( "660/7/B7-26/127", messages.get(i++).toString() ); // data LSB: 127
-				assertEquals( "670/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
-				assertEquals( "670/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
-			}
-			{
-				// tick 720: .wait.set(-100%)
-				assertEquals( "690/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
-				assertEquals( "700/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
-				assertEquals( "710/7/B7-06/0",   messages.get(i++).toString() ); // data MSB: 0
-				assertEquals( "720/7/B7-26/0",   messages.get(i++).toString() ); // data LSB: 0
-				assertEquals( "730/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
-				assertEquals( "730/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
-			}
-			{
-				// tick 960: rpn=0/2.set(50%)
+				// c:2
+				// tick 960: rpn=0/2.set(12.0)
 				assertEquals( "930/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "940/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
-				assertEquals( "950/7/B7-06/96",  messages.get(i++).toString() ); // data MSB: 96
+				assertEquals( "950/7/B7-06/76",  messages.get(i++).toString() ); // data MSB: 76
 				assertEquals( "970/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
 				assertEquals( "970/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 1440: rpn=2.set(0%)
+				// c:4
+				// tick 1440: rpn=2.set(0.0)
 				assertEquals( "1410/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "1420/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
 				assertEquals( "1430/7/B7-06/64",  messages.get(i++).toString() ); // data MSB: 64
 				assertEquals( "1450/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
 				assertEquals( "1450/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
+			
+			// channel fine tuning == RPN 00/01
+			{
+				// c:4
+				// tick 1980: fine_tune.length(32).wait.set(-100%)
+				assertEquals( "1950/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "1960/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "1970/7/B7-06/0",   messages.get(i++).toString() ); // data MSB: 0
+				assertEquals( "1990/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "1990/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 2040: .wait.set(-50.0%)
+				assertEquals( "2010/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "2020/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "2030/7/B7-06/32",  messages.get(i++).toString() ); // data MSB: 32
+				assertEquals( "2050/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "2050/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 2100: .wait.set(0.0%)
+				assertEquals( "2070/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "2080/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "2090/7/B7-06/64",  messages.get(i++).toString() ); // data MSB: 64
+				assertEquals( "2110/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "2110/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 2160: .wait.set(50%)
+				assertEquals( "2130/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "2140/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "2150/7/B7-06/96",  messages.get(i++).toString() ); // data MSB: 96
+				assertEquals( "2170/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "2170/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 2220: .wait.set(100%)
+				assertEquals( "2190/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "2200/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "2210/7/B7-06/127", messages.get(i++).toString() ); // data MSB: 127
+				assertEquals( "2230/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "2230/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 2280: .wait.set(-1.0)
+				assertEquals( "2250/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "2260/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "2270/7/B7-06/0",   messages.get(i++).toString() ); // data MSB: 0
+				assertEquals( "2290/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "2290/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 2340: .wait.set(-0.5)
+				assertEquals( "2310/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "2320/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "2330/7/B7-06/32",  messages.get(i++).toString() ); // data MSB: 32
+				assertEquals( "2350/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "2350/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 2400: .wait.set(0)
+				assertEquals( "2370/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "2380/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "2390/7/B7-06/64",   messages.get(i++).toString() ); // data MSB: 64
+				assertEquals( "2410/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "2410/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 2460: .wait.set(0.5)
+				assertEquals( "2430/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "2440/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "2450/7/B7-06/96",  messages.get(i++).toString() ); // data MSB: 96
+				assertEquals( "2470/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "2470/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 2520: .wait.set(1.0)
+				assertEquals( "2490/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "2500/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "2510/7/B7-06/127", messages.get(i++).toString() ); // data MSB: 127
+				assertEquals( "2530/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "2530/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 2580: .double.wait.set(-100%)
+				assertEquals( "2550/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "2560/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "2570/7/B7-06/0",   messages.get(i++).toString() ); // data MSB: 0
+				assertEquals( "2580/7/B7-26/0",   messages.get(i++).toString() ); // data LSB: 0
+				assertEquals( "2590/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "2590/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 2640: .wait.set(-50%)
+				assertEquals( "2610/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "2620/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "2630/7/B7-06/32",  messages.get(i++).toString() ); // data MSB: 32
+				assertEquals( "2640/7/B7-26/0",   messages.get(i++).toString() ); // data LSB: 0
+				assertEquals( "2650/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "2650/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 2700: .wait.set(0.0%)
+				assertEquals( "2670/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "2680/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "2690/7/B7-06/64",  messages.get(i++).toString() ); // data MSB: 64
+				assertEquals( "2700/7/B7-26/0",   messages.get(i++).toString() ); // data LSB: 0
+				assertEquals( "2710/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "2710/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 2760: .wait.set(50%)
+				assertEquals( "2730/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "2740/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "2750/7/B7-06/96",  messages.get(i++).toString() ); // data MSB: 96
+				assertEquals( "2760/7/B7-26/0",   messages.get(i++).toString() ); // data LSB: 0
+				assertEquals( "2770/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "2770/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 2820: .wait.set(100%)
+				assertEquals( "2790/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "2800/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "2810/7/B7-06/127", messages.get(i++).toString() ); // data MSB: 127
+				assertEquals( "2820/7/B7-26/127", messages.get(i++).toString() ); // data LSB: 127
+				assertEquals( "2830/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "2830/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 2880: .wait.set(-1.0)
+				assertEquals( "2850/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "2860/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "2870/7/B7-06/0",   messages.get(i++).toString() ); // data MSB: 0
+				assertEquals( "2880/7/B7-26/0",   messages.get(i++).toString() ); // data LSB: 0
+				assertEquals( "2890/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "2890/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 2940: .wait.set(-0.5)
+				assertEquals( "2910/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "2920/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "2930/7/B7-06/32",  messages.get(i++).toString() ); // data MSB: 32
+				assertEquals( "2940/7/B7-26/0",   messages.get(i++).toString() ); // data LSB: 0
+				assertEquals( "2950/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "2950/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 3000: .wait.set(0)
+				assertEquals( "2970/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "2980/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "2990/7/B7-06/64",  messages.get(i++).toString() ); // data MSB: 64
+				assertEquals( "3000/7/B7-26/0",   messages.get(i++).toString() ); // data LSB: 0
+				assertEquals( "3010/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "3010/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 3060: .wait.set(0.5)
+				assertEquals( "3030/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "3040/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "3050/7/B7-06/96",  messages.get(i++).toString() ); // data MSB: 96
+				assertEquals( "3060/7/B7-26/0",   messages.get(i++).toString() ); // data LSB: 0
+				assertEquals( "3070/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "3070/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 3120: .wait.set(1.0)
+				assertEquals( "3090/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "3100/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "3110/7/B7-06/127", messages.get(i++).toString() ); // data MSB: 127
+				assertEquals( "3120/7/B7-26/127", messages.get(i++).toString() ); // data LSB: 127
+				assertEquals( "3130/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "3130/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// c:1
+				// tick 3840: rpn=0/1.double.set(0.5)
+				assertEquals( "3810/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "3820/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "3830/7/B7-06/96",  messages.get(i++).toString() ); // data MSB: 96
+				assertEquals( "3840/7/B7-26/0",   messages.get(i++).toString() ); // data LSB: 0
+				assertEquals( "3850/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "3850/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// c:4
+				// tick 4320: rpn=1.double.set(0.0)
+				assertEquals( "4290/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "4300/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
+				assertEquals( "4310/7/B7-06/64",  messages.get(i++).toString() ); // data MSB: 64
+				assertEquals( "4320/7/B7-26/0",   messages.get(i++).toString() ); // data LSB: 0
+				assertEquals( "4330/7/B7-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "4330/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			
+			// no further messages
+			assertEquals(messages.size(), i);
 		}
 		// channel 8
 		{
@@ -1855,6 +2028,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "1030/8/B8-63/127", messages.get(i++).toString() ); // MSB reset
 				assertEquals( "1030/8/B8-62/127", messages.get(i++).toString() ); // LSB reset
 			}
+			
+			// no further messages
+			assertEquals(messages.size(), i);
 		}
 		
 		parse(getWorkingFile("effects-2-bend"));
@@ -1863,7 +2039,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 			messages = getMessagesByStatus("B0");
 			int i = 0;
 			
-			// tick 60: pitch_bend_range.length(32).wait.set(0.0)
+			// tick 60: bend_range.length(32).wait.set(0.0)
 			assertEquals( "30/0/B0-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 			assertEquals( "40/0/B0-64/0",   messages.get(i++).toString() ); // RPN LSB: 0
 			assertEquals( "50/0/B0-06/0",   messages.get(i++).toString() ); // data MSB: 0
@@ -1983,6 +2159,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "2400/0/B0-26/0",   messages.get(i++).toString() ); // data LSB: 0
 			assertEquals( "2410/0/B0-65/127", messages.get(i++).toString() ); // MSB reset
 			assertEquals( "2410/0/B0-64/127", messages.get(i++).toString() ); // LSB reset
+			
+			// no further messages
+			assertEquals(messages.size(), i);
 		}
 		// channel 1
 		{
@@ -2198,6 +2377,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals("58/00/48",      getPitchBendStr(messages.get(i++), 0)); // bend.double.set(48.0)
 				assertEquals("5E/00/60",      getPitchBendStr(messages.get(i++), 0)); // bend.double.set(60.0)
 			}
+			
+			// no further messages
+			assertEquals(messages.size(), i);
 		}
 		
 		parse(getWorkingFile("effects-3-at-port"));
@@ -2370,20 +2552,32 @@ class MidicaPLParserTest extends MidicaPLParser {
 			messages = getMessagesByStatus("B4");
 			int i = 0;
 			
+			// mono_mode.on()
+			assertEquals(0x7E, Integer.valueOf((byte) messages.get(i++).getOption(SingleMessage.OPT_CONTROLLER)));
+			
+			// port_time.set(50%) - only MSB
+			assertEquals( 0x05, Integer.valueOf((byte) messages.get(i++).getOption(SingleMessage.OPT_CONTROLLER)));
+			
 			// note c#-4 ==> 0D
 			assertEquals("4/c#-2", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(c#-2).wait.on()
 			assertEquals("4/c#+2", getPortCtrlStr(messages.get(i++))); // .wait(4).note(c#+2).on()
 			assertEquals("4/c#+2", getPortCtrlStr(messages.get(i++))); // .wait(4).on()
 			
+			// port_time.set(40%)
+			assertEquals( 0x05, Integer.valueOf((byte) messages.get(i++).getOption(SingleMessage.OPT_CONTROLLER)));
+			
 			// lower octave
-			assertEquals("4/c-", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(c-).on()
-			assertEquals("4/d-", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(d-)on()
-			assertEquals("4/e-", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(e-)on()
+			assertEquals("4/c-",  getPortCtrlStr(messages.get(i++))); // port_ctrl.note(c-).on()
+			assertEquals("4/d-2", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(d-2)on()
+			assertEquals("4/e-",  getPortCtrlStr(messages.get(i++))); // port_ctrl.note(e-)on()
 			
 			// higher octave
-			assertEquals("4/c+", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(c+)on()
-			assertEquals("4/d+", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(d+)on()
-			assertEquals("4/e+", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(e+)on()
+			assertEquals("4/c+",  getPortCtrlStr(messages.get(i++))); // port_ctrl.note(c+)on()
+			assertEquals("4/d+2", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(d+2)on()
+			assertEquals("4/e+",  getPortCtrlStr(messages.get(i++))); // port_ctrl.note(e+)on()
+			
+			// port_time.set(10%)
+			assertEquals( 0x05, Integer.valueOf((byte) messages.get(i++).getOption(SingleMessage.OPT_CONTROLLER)));
 			
 			assertEquals("4/c-3", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(c-3).on()
 			assertEquals("4/c+3", getPortCtrlStr(messages.get(i++))); // port_ctrl.note(c+3).on()
@@ -2395,6 +2589,12 @@ class MidicaPLParserTest extends MidicaPLParser {
 		{
 			messages = getMessagesByStatus("B5");
 			int i = 0;
+			
+			// mono_mode.on()
+			assertEquals(0x7E, Integer.valueOf((byte) messages.get(i++).getOption(SingleMessage.OPT_CONTROLLER)));
+			
+			// port_time.set(50%) - only MSB
+			assertEquals( 0x05, Integer.valueOf((byte) messages.get(i++).getOption(SingleMessage.OPT_CONTROLLER)));
 			
 			// c/d/e:pat_p1
 			{
@@ -3928,6 +4128,56 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "0: chorus.double.set(50)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_DOUBLE_NOT_SUPPORTED), "double")));
 		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-double-for-coarse-tune")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: coarse_tune.double.set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_DOUBLE_NOT_SUPPORTED), "double")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-coarse-invalid-1")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: coarse_tune.set(-65)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), -65, -64)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-coarse-invalid-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: coarse_tune.set(64)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 64, 63)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-coarse-invalid-3")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: coarse_tune.set(0%)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_PERCENT_FORBIDDEN), "0%")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-coarse-invalid-4")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: coarse_tune.set(3.5)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_BROKEN_HALFTONE), "3.5")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-fine-invalid-1")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: fine_tune.set(-1.0001)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), -1.0001f, -1.0f)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-fine-invalid-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: fine_tune.set(1.0001)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 1.0001f, 1.0f)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-fine-invalid-3")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: fine_tune.set(-101%)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), "-101%", "-100%")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-fine-invalid-4")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: fine_tune.set(101%)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), "101%", "100%")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-fine-invalid-5")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: fine_tune.double.set(2)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), "2", "1.0")));
+		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-without-params")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: vol.set", e.getLineContent() );
@@ -3963,30 +4213,60 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "0: vol.sin(0,,100%)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_EMPTY_PARAM), "0,,100%")));
 		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-poly-mode-off")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: poly_mode.off()", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "off"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-poly-mode-set")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: poly_mode.set(0)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "set"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-mono-mode-off")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: mono_mode.off()", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "off"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-mono-mode-set-17")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: mono_mode.set(17)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 17, 16)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-mono-mode-set-percent")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: mono_mode.set(50%)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERCENT_FORBIDDEN) + "50%"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-mono-mode-line")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: mono_mode.line(0,16)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "line"));
+		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-bool-with-numeric-1")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: vol.on()", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_NOT_BOOL), "on")));
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "on"));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-bool-with-numeric-2")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: chorus.off()", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_NOT_BOOL), "off")));
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "off"));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-numeric-for-bool")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: legato.set(0)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_BOOL), "set")));
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "set"));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-cont-rpn")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: pitch_bend_range.line(1,12)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_CONT_RPN), "line")));
+		assertEquals( "0: bend_range.line(1,12)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "line"));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-cont-nrpn")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: nrpn=123.line(1,12)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_CONT_NRPN), "line")));
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "line"));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-invalid-1")) );
 		assertEquals( 4, e.getLineNumber() );
@@ -4006,7 +4286,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-too-low-2")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: vol.line(1,-0.000001%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), "-0.000001%", 0)));
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), "-0.000001%", "0%")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-too-high-1")) );
 		assertEquals( 4, e.getLineNumber() );
@@ -4055,28 +4335,28 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-halftone-gt-max-1")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: pitch_bend_range.set(129.0)", e.getLineContent() );
+		assertEquals( "0: bend_range.set(129.0)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 129.0f, 127f)));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-halftone-gt-max-2")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: pitch_bend_range.double.set(127.997)", e.getLineContent() );
+		assertEquals( "0: bend_range.double.set(127.997)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 127.997f, 127.99f)));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-halftone-gt-max-3")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: pitch_bend_range.set(127.0001)", e.getLineContent() );
+		assertEquals( "0: bend_range.set(127.0001)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 127.0001f, 127f)));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-halftone-gt-max-4")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: pitch_bend_range.double.set(127.997)", e.getLineContent() );
+		assertEquals( "0: bend_range.double.set(127.997)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 127.997, 127.99f)));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-with-percent")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: pitch_bend_range.set(12.0%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NEED_HALFTONE) + "12.0%"));
+		assertEquals( "0: bend_range.set(12.0%)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERCENT_FORBIDDEN) + "12.0%"));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-bend-gt-range")) );
 		assertEquals( 4, e.getLineNumber() );
@@ -4085,7 +4365,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-invalid")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: mono_at.note(c+6).set(123)", e.getLineContent() );
+		assertEquals( "0: poly_at.note(c+6).set(123)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_NOTE) + "c+6"));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-without-effect")) );
@@ -4096,17 +4376,17 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-not-allowed-1")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: vol.note(c).set(100%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_NOTE_NOT_SUPP) + "note"));
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "note"));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-not-allowed-2")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: mono_at.note(c).set(100%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_NOTE_NOT_SUPP) + "note"));
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "note"));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-not-allowed-3")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: pitch_bend_range.note(c).set(2.0)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_NOTE_NOT_SUPP) + "note"));
+		assertEquals( "0: bend_range.note(c).set(2.0)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "note"));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-not-set-1")) );
 		assertEquals( 4, e.getLineNumber() );
@@ -4121,12 +4401,12 @@ class MidicaPLParserTest extends MidicaPLParser {
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-numeric-for-none")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: ctrl=123.wait.set(12)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_NONE), "set")));
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "set"));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-off-for-none")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: ctrl=123.wait.off()", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_NOT_BOOL), "off")));
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "off"));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-msblsb-without-double")) );
 		assertEquals( 4, e.getLineNumber() );
@@ -4413,9 +4693,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		// is it a portamento ctrl?
 		if (!status.startsWith("B"))
-			throw new RuntimeException("not a ctrl change");
+			throw new RuntimeException("not a ctrl change. status byte: 0x" + status);
 		if (!ctrl.startsWith("54"))
-			throw new RuntimeException("not a portamento ctrl message");
+			throw new RuntimeException("not a portamento ctrl message. ctrl: 0x" + ctrl);
 		
 		return channel + "/" + note;
 	}

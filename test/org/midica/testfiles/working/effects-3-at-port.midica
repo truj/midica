@@ -158,45 +158,49 @@ END
 ////////////////////////////////////////////////////////////
 
 *
-4: (l=PORT_CTRL:\r) -:8
+4: (l=PORT_CTRL:\r) -:8 (d=101%)
+4: mono_mode.on() port_time.set(50%)
 
-4: port_ctrl.note(c#-2).wait.on()
+4: (length=2)
+4: port_ctrl.wait(128).note(c#-2).on()
 4: .wait().note(c#+2).on()
 4: .wait().on()
-4: -:2 c c c -:8
+4: c#-2 c#+2 c -:8 (length=4) port_time.set(40%)
 {
 	{
 		// lower octave
-		4: port_ctrl.note(c-).on()  -  c  (l=c-_)  -
-		4: port_ctrl.note(d-).on()  -  c  (l=d-_)  -
-		4: port_ctrl.note(e-).on()  -  c  (l=e-_)  -
+		4: port_ctrl.wait(128).note(c-).on()   (l=c-_)   c-
+		4: port_ctrl.wait(128).note(d-2).on()  (l=d-2_)  d-2
+		4: port_ctrl.wait(128).note(e-).on()   (l=e-_)   e-
 		
 		// higher octave
-		4: port_ctrl.note(c+).on()  -  c  (l=c+_)   -
-		4: port_ctrl.note(d+).on()  -  c  (l=d+_)   -
-		4: port_ctrl.note(e+).on()  -  c  (l=e+\r)  -
+		4: port_ctrl.wait(128).note(c+).on()   (l=c+_)   c+
+		4: port_ctrl.wait(128).note(d+2).on()  (l=d+2_)  d+2
+		4: port_ctrl.wait(128).note(e+).on()   (l=e+\r)  e+
 	}
 }
-4: -
-4: (l=c-\r)  port_ctrl.note(c-3).on() c:1
-4: (l=c+\r)  port_ctrl.note(c+3).on() c:1
+4:  port_time.set(30%) -
+4: (l=c-\r)  port_ctrl.wait(128).note(c-3).on() c-3:1
+4: (l=c+\r)  port_ctrl.wait(128).note(c+3).on() c+3:1
 
 ////////////////////////////////////////////////////////////
 // channel 5: port_ctrl in patterns with note index
 ////////////////////////////////////////////////////////////
 
 *
-5: (l=PORT_CTRL-patterns:\r) -:8
+5: (l=PORT_CTRL-patterns:\r)
+5: (d=101%) mono_mode.on() port_time.set(50%)
+5: -:8
 5: (l=c/d/e:pat_p1) c/d/e:pat_p1
 
 PATTERN pat_p1
-	: 0:8 port_ctrl.note(1).on() 0 1 2 0
+	: 0:8 port_ctrl.wait(128).note(1).on() 1 2
 	: 0/1/2:pat_p2
 	{
-		: 0:8 port_ctrl.note(0).wait.note(1).note(2).on() 0 1 2 0
+		: 0:8 port_ctrl.wait(128).note(0).note(1).note(2).on() 2 1 2 0
 		: 0/1/2:pat_p2
 		{
-			: 0:8 port_ctrl.note(2).wait.note(1).note(0)
+			: 0:8 port_ctrl.wait(128).note(2).note(1).note(0)
 			: .on() 0 1 2 0
 			: 2/1/0:pat_p2
 		}
@@ -206,11 +210,11 @@ END
 PATTERN pat_p2
 	{
 		{
-			: 0:8 port_ctrl.note(0).on() 0 1 2 0
+			: port_ctrl.wait(128).note(0).on() 0:4 1 2
 		}
-		: 0:8 port_ctrl.note(1).on() 0 1 2 0
+		: port_ctrl.wait(128).note(1).on() 1 2 0
 	}
-	: 0:8 port_ctrl.note(2).on() 0 1 2 0
+	: port_ctrl.wait(128).note(2).on() 2 1 0
 END
 
 

@@ -1344,8 +1344,8 @@ public class Dict {
 	public static final String MSG4_C_GEN_PURP_CTRL_3_LSB  = "msg4_c_gen_purp_3_lsb";
 	public static final String MSG4_C_GEN_PURP_CTRL_4_LSB  = "msg4_c_gen_purp_4_lsb";
 	public static final String MSG4_RPN_PITCH_BEND_SENS    = "msg4_rpn_pitch_band_sens";       // MSG5_C_RPN_[MSB|LSB]
-	public static final String MSG4_RPN_MASTER_FINE_TUN    = "msg4_rpn_master_fine_tuning";    // MSG5_C_RPN_[MSB|LSB]
-	public static final String MSG4_RPN_MASTER_COARSE_TUN  = "msg4_rpn_master_coarse_tuning";  // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_RPN_CHANNEL_FINE_TUN   = "msg4_rpn_channel_fine_tuning";   // MSG5_C_RPN_[MSB|LSB]
+	public static final String MSG4_RPN_CHANNEL_COARSE_TUN = "msg4_rpn_channel_coarse_tuning"; // MSG5_C_RPN_[MSB|LSB]
 	public static final String MSG4_RPN_TUN_PROG_CHANGE    = "msg4_rpn_tuning_program_change"; // MSG5_C_RPN_[MSB|LSB]
 	public static final String MSG4_RPN_TUN_BANK_SELECT    = "msg4_rpn_tuning_bank_select";    // MSG5_C_RPN_[MSB|LSB]
 	public static final String MSG4_RPN_MOD_DEPTH_RANGE    = "msg4_rpn_mod_depth_range";       // MSG5_C_RPN_[MSB|LSB]
@@ -1749,18 +1749,14 @@ public class Dict {
 	public static final String ERROR_FL_PARAMS_NOT_ALLOWED       = "error_fl_params_not_allowed";
 	public static final String ERROR_FL_WRONG_PARAM_NUM          = "error_fl_wrong_param_num";
 	public static final String ERROR_FL_EMPTY_PARAM              = "error_fl_empty_param";
-	public static final String ERROR_FL_CONT_RPN                 = "error_fl_cont_rpn";
-	public static final String ERROR_FL_CONT_NRPN                = "error_fl_cont_nrpn";
-	public static final String ERROR_FL_NOTE_NOT_SUPP            = "error_fl_note_not_supp";
 	public static final String ERROR_FL_NOTE_NOT_SET             = "error_fl_note_not_set";
 	public static final String ERROR_FL_NOTE_PAT_IDX_NAN         = "error_fl_note_pat_idx_nan";
 	public static final String ERROR_FL_NOTE_PAT_IDX_TOO_HIGH    = "error_fl_note_pat_idx_too_high";
-	public static final String ERROR_FUNC_TYPE_NOT_BOOL          = "error_func_type_not_bool";
-	public static final String ERROR_FUNC_TYPE_BOOL              = "error_func_type_bool";
-	public static final String ERROR_FUNC_TYPE_NONE              = "error_func_type_none";
+	public static final String ERROR_FUNC_NOT_SUPPORTED_BY_EFF   = "error_func_not_supported_by_eff";
 	public static final String ERROR_FUNC_VAL_LOWER_MIN          = "error_func_val_lower_min";
 	public static final String ERROR_FUNC_VAL_GREATER_MAX        = "error_func_val_greater_max";
-	public static final String ERROR_FUNC_NEED_HALFTONE          = "error_func_need_halftone";
+	public static final String ERROR_FUNC_PERCENT_FORBIDDEN      = "error_func_percent_forbidden";
+	public static final String ERROR_FUNC_BROKEN_HALFTONE        = "error_func_broken_halftone";
 	public static final String ERROR_FUNC_HALFTONE_NOT_ALLOWED   = "error_func_halftone_not_allowed";
 	public static final String ERROR_FUNC_HALFTONE_GT_RANGE      = "error_func_halftone_gt_range";
 	public static final String ERROR_FUNC_MSB_LSB_NEEDS_DOUBLE   = "error_func_msb_lsb_needs_double";
@@ -3158,8 +3154,8 @@ public class Dict {
 		set( MSG4_C_GEN_PURP_CTRL_3_LSB,  "LSB (General Purpose Controller 3)"             );
 		set( MSG4_C_GEN_PURP_CTRL_4_LSB,  "LSB (General Purpose Controller 4)"             );
 		set( MSG4_RPN_PITCH_BEND_SENS,    "Pitch Bend Sensitivity"                         );
-		set( MSG4_RPN_MASTER_FINE_TUN,    "Master Fine Tuning (in Cents)"                  );
-		set( MSG4_RPN_MASTER_COARSE_TUN,  "Master Coarse Tuning (in Half Steps)"           );
+		set( MSG4_RPN_CHANNEL_FINE_TUN,   "Channel Fine Tuning (in Cents)"                 );
+		set( MSG4_RPN_CHANNEL_COARSE_TUN, "Channel Coarse Tuning (in Halftone Steps)"      );
 		set( MSG4_RPN_TUN_PROG_CHANGE,    "Tuning Program Change"                          );
 		set( MSG4_RPN_TUN_BANK_SELECT,    "Tuning Bank Select"                             );
 		set( MSG4_RPN_MOD_DEPTH_RANGE,    "Modulation Depth Range"                         );
@@ -3561,18 +3557,14 @@ public class Dict {
 		set( ERROR_FL_PARAMS_NOT_ALLOWED,         "Effect flow element '%s' does not support parameters."             );
 		set( ERROR_FL_WRONG_PARAM_NUM,            "Wrong number of parameters for function '%s'. Expected: %d. Got: %d. Parameters: '%s'" );
 		set( ERROR_FL_EMPTY_PARAM,                "Empty parameter not allowed. Parameters: "                         );
-		set( ERROR_FL_CONT_RPN,                   "Effect function '%s' is not allowed for RPN-based effects."        );
-		set( ERROR_FL_CONT_NRPN,                  "Effect function '%s' is not allowed for NRPN-based effects."       );
-		set( ERROR_FL_NOTE_NOT_SUPP,              "A note is not supported for the chosen effect type. Invalid element: " );
 		set( ERROR_FL_NOTE_NOT_SET,               "The chosen effect needs a note to be set before you can use this function: " );
 		set( ERROR_FL_NOTE_PAT_IDX_NAN,           "pattern index '%s' is not a number in this element: %s"            );
 		set( ERROR_FL_NOTE_PAT_IDX_TOO_HIGH,      "pattern index '%s' too high in this element: %s"                   );
-		set( ERROR_FUNC_TYPE_NOT_BOOL,            "Effect type not boolean. Function '%s' is not allowed."            );
-		set( ERROR_FUNC_TYPE_BOOL,                "Value type is 'boolean'. Function '%s' is not allowed."            );
-		set( ERROR_FUNC_TYPE_NONE,                "Value type is 'none'. Function '%s' is not allowed."               );
+		set( ERROR_FUNC_NOT_SUPPORTED_BY_EFF,     "The chosen effect does not support this function: "                );
 		set( ERROR_FUNC_VAL_LOWER_MIN,            "Parameter '%s' is smaller than the minimum value (%s)"             );
 		set( ERROR_FUNC_VAL_GREATER_MAX,          "Parameter '%s' is greater than the maximum value (%s)"             );
-		set( ERROR_FUNC_NEED_HALFTONE,            "Effect needs half-tones as parameter. Parameter not accepted: "    );
+		set( ERROR_FUNC_PERCENT_FORBIDDEN,        "The chosen effect does not allow percentage values. Invalid parameter: " );
+		set( ERROR_FUNC_BROKEN_HALFTONE,          "The chosen effect does not allow broken halftones. Invalid parameter: " );
 		set( ERROR_FUNC_HALFTONE_NOT_ALLOWED,     "Parameter '%s' not allowed. The effect type does not support half tone steps." );
 		set( ERROR_FUNC_HALFTONE_GT_RANGE,        "Half-tone parameter '%s' exceeds the current pitch bend range (%s)<br>"
 		                                          + "Consider to increase the pitch bend range before setting this value." );
@@ -4410,12 +4402,12 @@ public class Dict {
 		setSyntax( SYNTAX_CC_5F_EFF4_DEP,      "phaser"       );
 		setSyntax( SYNTAX_CC_7E_MONO_MODE,     "mono_mode"    );
 		setSyntax( SYNTAX_CC_7F_POLY_MODE,     "poly_mode"    );
-		setSyntax( SYNTAX_RPN_0_PITCH_BEND_R,  "pitch_bend_range" );
-		setSyntax( SYNTAX_RPN_1_FINE_TUNE,     "fine_tune"        );
-		setSyntax( SYNTAX_RPN_2_COARSE_TUNE,   "coarse_tune"      );
-		setSyntax( SYNTAX_RPN_3_TUNING_PROG,   "tuning_program"   );
-		setSyntax( SYNTAX_RPN_4_TUNING_BANK,   "tuning_bank"      );
-		setSyntax( SYNTAX_RPN_5_MOD_DEPTH_R,   "mod_depth_range"  );
+		setSyntax( SYNTAX_RPN_0_PITCH_BEND_R,  "bend_range"   );
+		setSyntax( SYNTAX_RPN_1_FINE_TUNE,     "fine_tune"    );
+		setSyntax( SYNTAX_RPN_2_COARSE_TUNE,   "coarse_tune"  );
+		setSyntax( SYNTAX_RPN_3_TUNING_PROG,   "tuning_prog"  );
+		setSyntax( SYNTAX_RPN_4_TUNING_BANK,   "tuning_bank"  );
+		setSyntax( SYNTAX_RPN_5_MOD_DEPTH_R,   "mod_range"    );
 		
 		// switch to lower/upper, if needed
 		if (Config.CBX_SYNTAX_LOWER.equals(configuredSyntax)) {

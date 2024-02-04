@@ -145,14 +145,14 @@ public class SequenceAnalyzerTest {
 		assertEquals( "RPN (Registered Parameter)",          getMsgNodeText(messages, ++i, 2) );
 		assertEquals( "[100] LSB (RPN)",                     getMsgNodeText(messages,   i, 1) );
 		assertEquals( "[1] 0x01",                            getMsgNodeText(messages,   i, 0) );
-		assertEquals( "[0,1] Master Fine Tuning (in Cents)", getMsgNodeText(messages, ++i, 1) );
+		assertEquals( "[0,1] Channel Fine Tuning (in Cents)", getMsgNodeText(messages, ++i, 1) );
 		assertEquals( "[6] MSB (Data Entry)",                getMsgNodeText(messages,   i, 0) );
-		assertEquals( "[0,1] Master Fine Tuning (in Cents)", getMsgNodeText(messages, ++i, 1) );
+		assertEquals( "[0,1] Channel Fine Tuning (in Cents)", getMsgNodeText(messages, ++i, 1) );
 		assertEquals( "[38] LSB (Data Entry)",               getMsgNodeText(messages,   i, 0) );
 		
 		// Data Increment (on a valid RPN)
 		assertEquals( "[96] Data Button Increment",          getMsgNodeText(messages, ++i, 1) );
-		assertEquals( "[0,1] Master Fine Tuning (in Cents)", getMsgNodeText(messages,   i, 0) );
+		assertEquals( "[0,1] Channel Fine Tuning (in Cents)", getMsgNodeText(messages,   i, 0) );
 		
 		// Disable RPN
 		assertEquals( "RPN (Registered Parameter)",          getMsgNodeText(messages, ++i, 2) );

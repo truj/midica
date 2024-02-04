@@ -8,6 +8,7 @@
 package org.midica.file.read;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -631,10 +632,38 @@ public class Effect {
 			return;
 		}
 		
+		// All other functions are not supported by all effect types.
+		// Check if the function is supported.
+		boolean isSupported = false;
+		Collection<Integer> supportedFunctions = flow.getSupportedFunctions(funcName);
+		if (MidicaPLParser.FUNC_ON.equals(funcName)) {
+			if (supportedFunctions.contains(EffectFlow.FUNC_TYPE_ON)) {
+				isSupported = true;
+			}
+		}
+		else if (MidicaPLParser.FUNC_OFF.equals(funcName)) {
+			if (supportedFunctions.contains(EffectFlow.FUNC_TYPE_OFF))
+				isSupported = true;
+		}
+		else if (MidicaPLParser.FUNC_SET.equals(funcName)) {
+			if (supportedFunctions.contains(EffectFlow.FUNC_TYPE_SET))
+				isSupported = true;
+		}
+		else if (MidicaPLParser.FUNC_NOTE.equals(funcName)) {
+			if (supportedFunctions.contains(EffectFlow.FUNC_TYPE_NOTE))
+				isSupported = true;
+		}
+		else if (supportedFunctions.contains(EffectFlow.FUNC_TYPE_CONT)) {
+			isSupported = true;
+		}
+		if (!isSupported)
+			throw new ParseException(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + funcName);
+		
 		// note()
 		if (MidicaPLParser.FUNC_NOTE.equals(funcName)) {
+			
 			int note = parser.parseNote(params[0]);
-			flow.setNote(note, funcName);
+			flow.setNote(note);
 			return;
 		}
 		
@@ -656,26 +685,12 @@ public class Effect {
 				if (valueType == EffectFlow.TYPE_NONE || valueType == EffectFlow.TYPE_ANY) {
 					value = flow.getDefaultValueForOn(valueType);
 				}
-				else if (valueType != EffectFlow.TYPE_BOOLEAN) {
-					throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_NOT_BOOL), funcName));
-				}
-			}
-			else if (valueType != EffectFlow.TYPE_BOOLEAN && valueType != EffectFlow.TYPE_ANY) {
-				throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_NOT_BOOL), funcName));
 			}
 			
 			setValue(new int[] {value, value});
 			
 			return;
 		}
-		
-		// non-boolean function for a boolean effect?
-		if (EffectFlow.TYPE_BOOLEAN == valueType)
-			throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_BOOL), funcName));
-		
-		// non-boolean function for type 'none'
-		if (EffectFlow.TYPE_NONE == valueType)
-			throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_TYPE_NONE), funcName));
 		
 		// set()
 		if (MidicaPLParser.FUNC_SET.equals(funcName)) {
@@ -688,13 +703,6 @@ public class Effect {
 		if (MidicaPLParser.FUNC_LINE.equals(funcName)
 			|| MidicaPLParser.FUNC_SIN.equals(funcName) || MidicaPLParser.FUNC_COS.equals(funcName)
 			|| MidicaPLParser.FUNC_NSIN.equals(funcName) || MidicaPLParser.FUNC_NCOS.equals(funcName)) {
-			
-			// don't allow (N)RPN
-			int effectType = flow.getEffectType();
-			if (EffectFlow.EFF_TYPE_RPN == effectType)
-				throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_CONT_RPN), funcName));
-			if (EffectFlow.EFF_TYPE_NRPN == effectType)
-				throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_CONT_NRPN), funcName));
 			
 			applyContinousFunction(funcName, params);
 			
@@ -989,7 +997,7 @@ public class Effect {
 		// get range of the sound effect
 		int min = flow.getMin();
 		int max = flow.getMax();
-		boolean needHalfTones   = flow.mustUseHalfToneSteps();
+		boolean supportsPercent = flow.supportsPercentage();
 		boolean canUseHalfTones = flow.supportsHalfToneSteps();
 		boolean isMsbLsb = false;
 		
@@ -1011,14 +1019,18 @@ public class Effect {
 				}
 				else if (percentStr != null) {
 					float percent = Float.parseFloat(percentStr);
-					if (needHalfTones)
-						throw new ParseException(Dict.get(Dict.ERROR_FUNC_NEED_HALFTONE) + valueStr);
 					
-					// A negative percentage with a minimum of 0 should NOT evaluate to 0
-					// but throw an exception instead.
+					// check percentage input
+					if (!supportsPercent)
+						throw new ParseException(Dict.get(Dict.ERROR_FUNC_PERCENT_FORBIDDEN) + valueStr);
+					if (percent > 100)
+						throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), valueStr, 100 + MidicaPLParser.EFF_PERCENT));
+					if (percent < -100 && min < 0)
+						throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), valueStr, -100 + MidicaPLParser.EFF_PERCENT));
 					if (percent < 0 && 0 == min)
-						throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), valueStr, min));
+						throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), valueStr, 0 + MidicaPLParser.EFF_PERCENT));
 					
+					// calculate value
 					if (percent < 0)
 						// theoretically: value = percent * -min / 100
 						value = (int) ((percent * -min * 10 - 100 * 5) / (100 * 10));
@@ -1048,7 +1060,7 @@ public class Effect {
 					value = msb * 128 + lsb;
 				}
 				else {
-					throw new ParseException(Dict.get(Dict.ERROR_FUNC_NO_NUMBER) + valueStr);
+					throw new FatalParseException(Dict.get(Dict.ERROR_FUNC_NO_NUMBER) + valueStr);
 				}
 			}
 		}
@@ -1061,7 +1073,7 @@ public class Effect {
 		// check value against min / max
 		if (value < min)
 			throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), valueStr, min));
-		if (value > max && !needHalfTones && !isMsbLsb)
+		if (value > max && !isMsbLsb)
 			throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), valueStr, max));
 		
 		// adjust the actual MIDI value for signed types
@@ -1075,7 +1087,7 @@ public class Effect {
 		
 		// find out how many bytes are needed
 		int byteCount = 1;
-		if (EffectFlow.TYPE_MSB == valueType || EffectFlow.TYPE_MSB_SIGNED == valueType || EffectFlow.TYPE_MSB_HALFTONES == valueType) {
+		if (EffectFlow.TYPE_MSB == valueType || EffectFlow.TYPE_MSB_SIGNED == valueType) {
 			if (flow.isDouble())
 				byteCount = 2;
 		}
@@ -1094,7 +1106,7 @@ public class Effect {
 	}
 	
 	/**
-	 * Parses half-tone parameters (flowt or int).
+	 * Parses half-tone parameters (float or int).
 	 * 
 	 * This is used for one of the following effect types:
 	 * 
@@ -1105,7 +1117,6 @@ public class Effect {
 	 * @return the value that the effect type needs.
 	 * @throws ParseException
 	 */
-	// TODO: also use for channel coarse/fine tuning?
 	private static int parseHalfToneSteps(String halfToneStr) throws ParseException {
 		
 		int effNum = flow.getEffectNumber();
@@ -1115,6 +1126,7 @@ public class Effect {
 		// pitch bend range
 		if (0x0000 == effNum) {
 			
+			// check range
 			float max = flow.isDouble() ? 127.99f : 127;
 			if (halfToneSteps > max)
 				throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), halfToneStr, max));
@@ -1130,6 +1142,38 @@ public class Effect {
 			return msb * 128 + lsb;
 		}
 		
+		// channel coarse tune
+		if (0x0002 == effNum) {
+			
+			// don't allow broken values
+			if (halfToneSteps != Math.round(halfToneSteps))
+				throw new ParseException(Dict.get(Dict.ERROR_FUNC_BROKEN_HALFTONE) + halfToneStr);
+			
+			// only one byte allowed
+			return Math.round(halfToneSteps);
+		}
+		
+		// From here on, we have either channel fine tune or pitch bend.
+		// Both are signed MSBs that can have up to 2 bytes.
+		// get max value
+		int max;
+		if (flow.isDouble())
+			max = halfToneSteps < 0 ? 8192 : 8191;
+		else
+			max = halfToneSteps < 0 ? 64 : 63;
+		
+		// channel fine tune
+		if (0x0001 == effNum) {
+			
+			// not between +/-1.0?
+			if (halfToneSteps < -1.0)
+				throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), halfToneStr, -1.0));
+			if (halfToneSteps > 1.0)
+				throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), halfToneStr, 1.0));
+			
+			return Math.round(halfToneSteps * max);
+		}
+		
 		// pitch bend
 		if (0xE0 == effNum) {
 			
@@ -1142,13 +1186,6 @@ public class Effect {
 			// range exceeded?
 			if (Math.abs(halfToneSteps) > range)
 				throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_HALFTONE_GT_RANGE), halfToneStr, range));
-			
-			// get max value
-			int max;
-			if (flow.isDouble())
-				max = halfToneSteps < 0 ? 8192 : 8191;
-			else
-				max = halfToneSteps < 0 ? 64 : 63;
 			
 			return Math.round(max * (halfToneSteps / range));
 		}

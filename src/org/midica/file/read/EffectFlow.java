@@ -7,8 +7,11 @@
 
 package org.midica.file.read;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import org.midica.config.Dict;
 
@@ -25,19 +28,25 @@ public class EffectFlow {
 	//////////////////////////////
 	
 	// value types
-	public static final int TYPE_BOOLEAN       = 1;  // 0=off, 127=on
-	public static final int TYPE_MSB           = 3;  // default:  0 - 127, double:     0 - 16383
-	public static final int TYPE_MSB_SIGNED    = 5;  // default: -64 - 63, double: -8192 - 8191
-	public static final int TYPE_MSB_HALFTONES = 7;  // default:  0 - 127, double:     0 - 127.99
-	public static final int TYPE_BYTE          = 11; // 0 - 127
-	public static final int TYPE_ANY           = 15; // anything that fits in 7 bits
-	public static final int TYPE_NONE          = 17; // no value allowed (using 0 internally)
+	public static final int TYPE_BOOLEAN    = 1;  // 0=off, 127=on
+	public static final int TYPE_MSB        = 3;  // default:  0 - 127, double:     0 - 16383
+	public static final int TYPE_MSB_SIGNED = 5;  // default: -64 - 63, double: -8192 - 8191
+	public static final int TYPE_BYTE       = 11; // 0 - 127
+	public static final int TYPE_ANY        = 15; // anything that fits in 7 bits
+	public static final int TYPE_NONE       = 17; // no value allowed (using 0 internally)
 	
 	// effect types
 	public static final int EFF_TYPE_CHANNEL = 1;
 	public static final int EFF_TYPE_CTRL    = 2;
 	public static final int EFF_TYPE_RPN     = 3;
 	public static final int EFF_TYPE_NRPN    = 4;
+	
+	// supported functions
+	public static final int FUNC_TYPE_ON   = 1;
+	public static final int FUNC_TYPE_OFF  = 3;
+	public static final int FUNC_TYPE_SET  = 5;
+	public static final int FUNC_TYPE_CONT = 7; // continuous (line, sin, cos, ...)
+	public static final int FUNC_TYPE_NOTE = 9;
 	
 	// data structures
 	private static final Map<Integer, Integer> channelMsgToType    = new HashMap<>();
@@ -132,12 +141,68 @@ public class EffectFlow {
 	}
 	
 	/**
+	 * Return all functions that are supported by the current effect type.
+	 * 
+	 * Each returned element is one of the following:
+	 * 
+	 * - {@link #FUNC_TYPE_ON}
+	 * - {@link #FUNC_TYPE_OFF}
+	 * - {@link #FUNC_TYPE_SET}
+	 * - {@link #FUNC_TYPE_CONT}
+	 * - {@link #FUNC_TYPE_NOTE}
+	 * 
+	 * @param elemName  element name that caused the call (only used for error messages)
+	 * @return the supported functions (see above)
+	 * @throws ParseException
+	 */
+	public Collection<Integer> getSupportedFunctions(String elemName) throws ParseException {
+		
+		Set<Integer> functions = new HashSet<>();
+		int valueType = getValueType(elemName);
+		
+		// special case: mono_mode - allow only on() and set()
+		if (EFF_TYPE_CTRL == effectType && 0x7E == effectNumber) {
+			functions.add(FUNC_TYPE_ON);
+			functions.add(FUNC_TYPE_SET);
+			return functions;
+		}
+		
+		// normal cases
+		if (TYPE_MSB == valueType || TYPE_MSB_SIGNED == valueType
+				|| TYPE_BYTE == valueType || TYPE_ANY == valueType) {
+			functions.add(FUNC_TYPE_SET);
+			functions.add(FUNC_TYPE_CONT);
+		}
+		if (TYPE_BOOLEAN == valueType || TYPE_ANY == valueType) {
+			functions.add(FUNC_TYPE_ON);
+			functions.add(FUNC_TYPE_OFF);
+		}
+		if (TYPE_NONE == valueType) {
+			functions.add(FUNC_TYPE_ON);
+		}
+		
+		// special cases for note()
+		if (EFF_TYPE_CHANNEL == effectType && 0xA0 == effectNumber) // poly_at
+			functions.add(FUNC_TYPE_NOTE);
+		else if (EFF_TYPE_CTRL == effectType && 0x54 == effectNumber) // portamento ctrl
+			functions.add(FUNC_TYPE_NOTE);
+		
+		// special case for (N)RPNs: don't allow continuous functions
+		if (EFF_TYPE_RPN == effectType || EFF_TYPE_NRPN == effectType)
+			functions.remove(FUNC_TYPE_CONT);
+		
+		return functions;
+	}
+	
+	/**
 	 * Determines if the current effect type supports half-tone-steps as parameters.
 	 * 
 	 * Examples:
 	 * 
 	 * - pitch bend
 	 * - pitch bend range
+	 * - channel fine tuning
+	 * - channel coarse tuning
 	 * 
 	 * @return **true** if half tone steps are supported, otherwise **false**.
 	 */
@@ -154,29 +219,49 @@ public class EffectFlow {
 			// pitch bend range
 			if (0x0000 == effectNumber)
 				return true;
+			
+			// channel fine tuning
+			if (0x0001 == effectNumber)
+				return true;
+			
+			// channel coarse tuning
+			if (0x0002 == effectNumber)
+				return true;
 		}
-		
-		// TODO: how do we treat channel coarse/fine tuning?
 		
 		return false;
 	}
 	
 	/**
-	 * Determines if the current effect type supports ONLY half-tone-steps as parameters.
-	 * That means, normal values are **not** accepted.
+	 * Determines if the current effect type supports percentage values as parameters.
 	 * 
-	 * This is the case for the **pitch bend range**.
+	 * This is the case for most effects. Notable exceptions:
 	 * 
-	 * @return **true** if only half-tone-steps are accepted as parameters.
+	 * - pitch bend range
+	 * - channel coarse tuning
+	 * - mono mode
+	 * 
+	 * @return **true** if percentage values are allowed, otherwise: **false**.
 	 */
-	public boolean mustUseHalfToneSteps() {
+	public boolean supportsPercentage() {
 		
-		// pitch bend range
-		if (EFF_TYPE_RPN == effectType && 0x0000 == effectNumber) {
-			return true;
+		// mono_mode
+		if (EFF_TYPE_CTRL == effectType && 0x7E == effectNumber)
+			return false;
+		
+		if (EFF_TYPE_RPN == effectType) {
+			
+			// pitch bend range
+			if (0x0000 == effectNumber)
+				return false;
+			
+			// channel coarse tuning
+			if (0x0002 == effectNumber)
+				return false;
 		}
 		
-		return false;
+		// regular cases
+		return true;
 	}
 	
 	/**
@@ -251,27 +336,9 @@ public class EffectFlow {
 	/**
 	 * Sets the note in the flow.
 	 * 
-	 * @param note      note number (0 - 127)
-	 * @param elemName  element name that caused the call (only used for error messages)
-	 * @throws ParseException if the effect is not set or doesn't support a note.
+	 * @param note  note number (0 - 127)
 	 */
-	public void setNote(int note, String elemName) throws ParseException {
-		
-		// effect not yet set?
-		if (effectNumber < 0)
-			throw new ParseException(Dict.get(Dict.ERROR_FL_EFF_NOT_SET) + elemName);
-		
-		// check if effect type supports a note
-		boolean isNoteSupported = false;
-		if (EFF_TYPE_CHANNEL == effectType && 0xA0 == effectNumber) // poly_at
-			isNoteSupported = true;
-		else if (EFF_TYPE_CTRL == effectType && 0x54 == effectNumber) // portamento ctrl
-			isNoteSupported = true;
-		
-		// note not supported?
-		if (!isNoteSupported)
-			throw new ParseException(Dict.get(Dict.ERROR_FL_NOTE_NOT_SUPP) + elemName);
-		
+	public void setNote(int note) {
 		this.note = note;
 	}
 	
@@ -295,7 +362,13 @@ public class EffectFlow {
 	public void setDouble() throws ParseException {
 		
 		int valueType = getValueType(MidicaPLParser.FL_DOUBLE);
-		if (TYPE_MSB == valueType || TYPE_MSB_SIGNED == valueType || TYPE_MSB_HALFTONES == valueType) {
+		
+		// special case: double not allowed for channel coarse tuning
+		if (EFF_TYPE_RPN == effectType && 0x0002 == effectNumber)
+			throw new ParseException(Dict.get(Dict.ERROR_FL_DOUBLE_NOT_SUPPORTED) + MidicaPLParser.FL_DOUBLE);
+		
+		// normal case: double allowed for all other MSB types
+		if (TYPE_MSB == valueType || TYPE_MSB_SIGNED == valueType) {
 			isDouble = true;
 			return;
 		}
@@ -365,7 +438,6 @@ public class EffectFlow {
 	 * - {@link #TYPE_BOOLEAN}
 	 * - {@link #TYPE_MSB}
 	 * - {@link #TYPE_MSB_SIGNED}
-	 * - {@link #TYPE_MSB_HALFTONES}
 	 * - {@link #TYPE_BYTE}
 	 * - {@link #TYPE_ANY}
 	 * - {@link #TYPE_NONE}
@@ -466,10 +538,6 @@ public class EffectFlow {
 				max = 16383;
 			if (63 == max)
 				max = 8191;
-			
-			// special case: pitch bend range
-			if (TYPE_MSB_HALFTONES == rpnToType.get(effectNumber))
-				max = 128;
 		}
 		
 		if (null == max)
@@ -595,10 +663,9 @@ public class EffectFlow {
 		}
 		
 		// exceptions (type)
-		rpnToType.put(0x0000, TYPE_MSB_HALFTONES); // pitch bend range
-		rpnToType.put(0x0001, TYPE_MSB_SIGNED);    // channel fine tuning
-		rpnToType.put(0x0002, TYPE_MSB_SIGNED);    // channel coarse tuning
-		rpnToType.put(0x7F7F, TYPE_NONE);          // reset RPN
+		rpnToType.put(0x0001, TYPE_MSB_SIGNED); // channel fine tuning
+		rpnToType.put(0x0002, TYPE_MSB_SIGNED); // channel coarse tuning
+		rpnToType.put(0x7F7F, TYPE_NONE);       // reset RPN
 		
 		// min / max
 		applyDefaultMinAndMax(rpnToType,  rpnToDefault,  rpnToMin,  rpnToMax);
@@ -624,7 +691,7 @@ public class EffectFlow {
 		for (int number : typeStructure.keySet()) {
 			int type = typeStructure.get(number);
 			defaultStructure.put(number, 0);
-			if (TYPE_BYTE == type || TYPE_MSB == type || TYPE_MSB_HALFTONES == type || TYPE_ANY == type) {
+			if (TYPE_BYTE == type || TYPE_MSB == type || TYPE_ANY == type) {
 				minStructure.put(number, 0);
 				maxStructure.put(number, 127);
 			}

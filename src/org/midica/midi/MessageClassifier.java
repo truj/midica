@@ -1430,9 +1430,9 @@ public class MessageClassifier {
 				if (0x00 == lsb)
 					paramTxt = Dict.get(Dict.MSG4_RPN_PITCH_BEND_SENS);
 				else if (0x01 == lsb)
-					paramTxt = Dict.get(Dict.MSG4_RPN_MASTER_FINE_TUN);
+					paramTxt = Dict.get(Dict.MSG4_RPN_CHANNEL_FINE_TUN);
 				else if (0x02 == lsb)
-					paramTxt = Dict.get(Dict.MSG4_RPN_MASTER_COARSE_TUN);
+					paramTxt = Dict.get(Dict.MSG4_RPN_CHANNEL_COARSE_TUN);
 				else if (0x03 == lsb)
 					paramTxt = Dict.get(Dict.MSG4_RPN_TUN_PROG_CHANGE);
 				else if (0x04 == lsb)
