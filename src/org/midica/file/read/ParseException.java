@@ -41,10 +41,10 @@ public class ParseException extends Exception {
 	/**
 	 * Throws an exception including a detail message.
 	 * 
-	 * @param message
+	 * @param message  the error message
 	 */
-	public ParseException( String message ) {
-		super( message );
+	public ParseException(String message) {
+		super(message);
 	}
 	
 	/**
@@ -120,7 +120,7 @@ public class ParseException extends Exception {
 	 * 
 	 * @param file    Parsed file.
 	 */
-	public void setFile( File file ) {
+	public void setFile(File file) {
 		this.file = file;
 	}
 	
@@ -158,7 +158,7 @@ public class ParseException extends Exception {
 		}
 		
 		// call stack available? - add stack info
-		if ( stackTrace != null && ! stackTrace.isEmpty() ) {
+		if (stackTrace != null && ! stackTrace.isEmpty()) {
 			
 			// add call stack header?
 			fullMsg.append("<br>" + Dict.get(Dict.STACK_TRACE_HEADER) + "<br>");
@@ -172,13 +172,13 @@ public class ParseException extends Exception {
 			// add call stack to message
 			do { 
 				StackTraceElement elem = stackTraceCopy.pop();
-				fullMsg.append( elem.getTrace() + "<br>" );
-			} while ( ! stackTraceCopy.isEmpty() );
+				fullMsg.append(elem.getTrace() + "<br>");
+			} while (! stackTraceCopy.isEmpty());
 			msg = fullMsg.toString();
 		}
 		
 		// file and line available?
-		else if ( lineNumber > 0 && null != file ) {
+		else if (lineNumber > 0 && null != file) {
 			
 			// get full path if possible (otherwise, only the file name)
 			String filePath = file.getName();
@@ -190,7 +190,7 @@ public class ParseException extends Exception {
 			
 			// compile error message
 			msg = String.format(
-				Dict.get( Dict.ERROR_IN_LINE ),
+				Dict.get(Dict.ERROR_IN_LINE),
 				filePath,
 				lineNumber
 			) + msg;

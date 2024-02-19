@@ -949,14 +949,20 @@ public class MessageClassifier {
 			}
 			if (texts.length > 3 && ! "-".equals(texts[2])) {
 				sub2Str = "0x" + texts[3];
-				
-				// MIDI-CI? - add MIDI channel
-				if (0x0D  == subId1 && sysExChannel < 0x10) {
-					details.put(IMessageType.OPT_CHANNEL, (int) sysExChannel);
-				}
 			}
 			details.put(IMessageType.OPT_SUB_ID_1, sub1Str);
 			details.put(IMessageType.OPT_SUB_ID_2, sub2Str);
+			
+			// add MIDI channel, if possible
+			if (!isRealTime && 0x0D == subId1 && sysExChannel < 0x10) {
+				// MIDI-CI
+				details.put(IMessageType.OPT_CHANNEL, sysExChannel);
+			}
+			else if (isRealTime && 0x09 == subId1 && message.length > 5) {
+				// controller destination
+				int channel = message[5];
+				details.put(IMessageType.OPT_CHANNEL, channel);
+			}
 		}
 		
 		// get general details

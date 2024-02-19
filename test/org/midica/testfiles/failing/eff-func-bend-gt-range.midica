@@ -1,4 +1,0 @@
-INCLUDE inc/instruments.midica
-
-0: bend_range.set(2.0)
-0: bend.wait.set(2.3)

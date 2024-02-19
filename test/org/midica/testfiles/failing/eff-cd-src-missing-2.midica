@@ -1,0 +1,6 @@
+INCLUDE inc/instruments.midica
+
+0: ctrl_dest
+0:   .dest(vol,10%)
+0:   .on()
+

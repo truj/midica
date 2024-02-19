@@ -20,6 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.SysexMessage;
 
 import org.midica.config.Dict;
 import org.midica.midi.SequenceCreator;
@@ -47,9 +48,12 @@ public class Effect {
 	private static Map<String, Integer> channelMsgNameToNumber;
 	private static Map<String, Integer> ctrlNameToNumber;
 	private static Map<String, Integer> rpnNameToNumber;
+	private static Map<String, Integer> sysexNameToNumber;
 	private static Set<String>          flowElementNames;
+	private static Map<String, Integer> ctrlDestToNumber;
 	
 	private static Pattern flowPattern       = null;
+	private static Pattern genCtrlPattern    = null;
 	private static Pattern noteOrRestPattern = null;
 	private static Pattern noteIndexPattern  = null;
 	private static Pattern intPattern        = null;
@@ -82,7 +86,9 @@ public class Effect {
 		channelMsgNameToNumber = new HashMap<>();
 		ctrlNameToNumber       = new HashMap<>();
 		rpnNameToNumber        = new HashMap<>();
+		sysexNameToNumber      = new HashMap<>();
 		flowElementNames       = new HashSet<>();
+		ctrlDestToNumber       = new HashMap<>();
 		
 		// init structures for functions
 		functionToParamCount.put( MidicaPLParser.FUNC_SET,    1 );
@@ -96,6 +102,8 @@ public class Effect {
 		functionToParamCount.put( MidicaPLParser.FUNC_LENGTH, 1 );
 		functionToParamCount.put( MidicaPLParser.FUNC_WAIT,   1 );
 		functionToParamCount.put( MidicaPLParser.FUNC_NOTE,   1 );
+		functionToParamCount.put( MidicaPLParser.FUNC_SRC,    1 );
+		functionToParamCount.put( MidicaPLParser.FUNC_DEST,   2 );
 		for (String key : functionToParamCount.keySet()) {
 			functionNames.add(key);
 		}
@@ -142,6 +150,7 @@ public class Effect {
 		effectNames.add( MidicaPLParser.RPN_3_TUNING_PROG  );
 		effectNames.add( MidicaPLParser.RPN_4_TUNING_BANK  );
 		effectNames.add( MidicaPLParser.RPN_5_MOD_DEPTH_R  );
+		effectNames.add( MidicaPLParser.SX_7F09_CTRL_DEST  );
 		effectNames.add( MidicaPLParser.FL_CTRL );  // generic controller with number
 		effectNames.add( MidicaPLParser.FL_RPN  );  // generic RPN  with number or MSB/LSB
 		effectNames.add( MidicaPLParser.FL_NRPN );  // generic NRPN with number or MSB/LSB
@@ -193,6 +202,17 @@ public class Effect {
 		rpnNameToNumber.put( MidicaPLParser.RPN_4_TUNING_BANK,  0x0004 );
 		rpnNameToNumber.put( MidicaPLParser.RPN_5_MOD_DEPTH_R,  0x0005 );
 		
+		// init structures for SysEx-based effects
+		sysexNameToNumber.put( MidicaPLParser.SX_7F09_CTRL_DEST, 0x7F0900 );
+		
+		// init controler desinations
+		ctrlDestToNumber.put( MidicaPLParser.CD_00_PITCH,         0x00 );
+		ctrlDestToNumber.put( MidicaPLParser.CD_01_FILTER_CUTOFF, 0x01 );
+		ctrlDestToNumber.put( MidicaPLParser.CD_02_AMPLITUDE,     0x02 );
+		ctrlDestToNumber.put( MidicaPLParser.CD_03_LFO_PITCH_D,   0x03 );
+		ctrlDestToNumber.put( MidicaPLParser.CD_04_LFO_FILTER_D,  0x04 );
+		ctrlDestToNumber.put( MidicaPLParser.CD_05_LFO_AMPL_D,    0x05 );
+		
 		// init flow element names (effect names, function names, or other possible flow elements)
 		for (String effectName : effectNames) {
 			flowElementNames.add(effectName);
@@ -223,6 +243,14 @@ public class Effect {
 				+ Pattern.quote(MidicaPLParser.PARAM_CLOSE)           // )
 				+ ")?";                                               // optional
 			flowPattern = Pattern.compile(flowRegex);
+			
+			// generic ctrl for controler destination .src(...)
+			String genCtrlStr = "^"
+				+ Pattern.quote(MidicaPLParser.FL_CTRL)
+				+ Pattern.quote(MidicaPLParser.FL_ASSIGNER)
+			    + "(\\d+)"                                   // CC number
+			    + "$";
+			genCtrlPattern = Pattern.compile(genCtrlStr);
 			
 			// note index pattern (to replace .note(idx) by .note(name))
 			String noteIndexRegex
@@ -549,6 +577,10 @@ public class Effect {
 					effectType   = EffectFlow.EFF_TYPE_RPN;
 					effectNumber = rpnNameToNumber.get(elemName);
 				}
+				else if (sysexNameToNumber.containsKey(elemName)) {
+					effectType   = EffectFlow.EFF_TYPE_SYSEX;
+					effectNumber = sysexNameToNumber.get(elemName);
+				}
 				else {
 					throw new FatalParseException("Don't know what to do with effect '" + elemName + "'.");
 				}
@@ -634,36 +666,29 @@ public class Effect {
 		
 		// All other functions are not supported by all effect types.
 		// Check if the function is supported.
-		boolean isSupported = false;
 		Collection<Integer> supportedFunctions = flow.getSupportedFunctions(funcName);
-		if (MidicaPLParser.FUNC_ON.equals(funcName)) {
-			if (supportedFunctions.contains(EffectFlow.FUNC_TYPE_ON)) {
-				isSupported = true;
-			}
-		}
-		else if (MidicaPLParser.FUNC_OFF.equals(funcName)) {
-			if (supportedFunctions.contains(EffectFlow.FUNC_TYPE_OFF))
-				isSupported = true;
-		}
-		else if (MidicaPLParser.FUNC_SET.equals(funcName)) {
-			if (supportedFunctions.contains(EffectFlow.FUNC_TYPE_SET))
-				isSupported = true;
-		}
-		else if (MidicaPLParser.FUNC_NOTE.equals(funcName)) {
-			if (supportedFunctions.contains(EffectFlow.FUNC_TYPE_NOTE))
-				isSupported = true;
-		}
-		else if (supportedFunctions.contains(EffectFlow.FUNC_TYPE_CONT)) {
-			isSupported = true;
-		}
-		if (!isSupported)
+		int funcType = getFunctionTypeBySyntax(funcName);
+		if (!supportedFunctions.contains(funcType))
 			throw new ParseException(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + funcName);
 		
 		// note()
 		if (MidicaPLParser.FUNC_NOTE.equals(funcName)) {
-			
 			int note = parser.parseNote(params[0]);
 			flow.setNote(note);
+			return;
+		}
+		
+		// src()
+		if (MidicaPLParser.FUNC_SRC.equals(funcName)) {
+			int[] values = parseSrc(params[0]);
+			flow.setSource(values, funcName);
+			return;
+		}
+		
+		// dest()
+		if (MidicaPLParser.FUNC_DEST.equals(funcName)) {
+			int[] values = parseDest(params);
+			flow.putDestination(values);
 			return;
 		}
 		
@@ -687,7 +712,13 @@ public class Effect {
 				}
 			}
 			
-			setValue(new int[] {value, value});
+			// special case: SysEx
+			if (EffectFlow.EFF_TYPE_SYSEX == flow.getEffectType()) {
+				applySysex(funcName);
+			}
+			else {
+				setValue(new int[] {value, value});
+			}
 			
 			return;
 		}
@@ -710,6 +741,32 @@ public class Effect {
 		}
 		
 		throw new FatalParseException("Don't know what to do with function '" + funcName + "'.");
+	}
+	
+	/**
+	 * Translates a currently configured function name to a function type used by
+	 * the {@link EffectFlow} class.
+	 * 
+	 * @param syntax  the configured function name
+	 * @return the function type
+	 */
+	private static int getFunctionTypeBySyntax(String syntax) {
+		
+		if (MidicaPLParser.FUNC_ON.equals(syntax))
+			return EffectFlow.FUNC_TYPE_ON;
+		if (MidicaPLParser.FUNC_OFF.equals(syntax))
+			return EffectFlow.FUNC_TYPE_OFF;
+		if (MidicaPLParser.FUNC_SET.equals(syntax))
+			return EffectFlow.FUNC_TYPE_SET;
+		if (MidicaPLParser.FUNC_NOTE.equals(syntax))
+			return EffectFlow.FUNC_TYPE_NOTE;
+		if (MidicaPLParser.FUNC_SRC.equals(syntax))
+			return EffectFlow.FUNC_TYPE_SRC;
+		if (MidicaPLParser.FUNC_DEST.equals(syntax))
+			return EffectFlow.FUNC_TYPE_DEST;
+		
+		// line, sin, cos, ...
+		return EffectFlow.FUNC_TYPE_CONT;
 	}
 	
 	/**
@@ -865,6 +922,45 @@ public class Effect {
 			
 			// remember pitch bend range
 			rangeMap.put(tick, halfToneSteps);
+		}
+	}
+	
+	/**
+	 * Applies an effect that results in a SysEx message.
+	 * 
+	 * Currently this is only used for controller destination messages.
+	 * 
+	 * @param functionName  the name of the called function (only needed for error messages)
+	 * @throws ParseException if the .src() or .dest() have not yet been called, or an unexpected error occurs.
+	 */
+	private static void applySysex(String functionName) throws ParseException {
+		int effNum = flow.getEffectNumber();
+		
+		try {
+			SysexMessage msg = null;
+			
+			// controller destination
+			if (0x7F0900 == effNum) {
+				byte[] content = flow.getControllerDestination(functionName);
+				msg = new SysexMessage(content, content.length);
+			}
+			
+			// check sysex message
+			if (null == msg)
+				throw new FatalParseException("Don't know how to create sysex msg for effect " + effNum);
+			byte[] content = msg.getMessage();
+			if (content.length < 3)
+				throw new FatalParseException("SysEx message too short for effect " + effNum);
+			if (content[0] != (byte) 0xF0)
+				throw new FatalParseException("SysEx message doesn't start with 0xF0 for effect " + effNum);
+			if (content[content.length - 1] != (byte) 0xF7)
+				throw new FatalParseException("SysEx message doesn't end with 0xF7 for effect " + effNum);
+			
+			// add the message to the right tick
+			SequenceCreator.addMessageGeneric(msg, flow.getCurrentTick());
+		}
+		catch (InvalidMidiDataException e) {
+			throw new FatalParseException("Unable to create sysex message for effect number " + effNum);
 		}
 	}
 	
@@ -1084,6 +1180,9 @@ public class Effect {
 			else
 				value += 64;
 		}
+		else if (EffectFlow.TYPE_BYTE_SIGNED == valueType) {
+			value += 64;
+		}
 		
 		// find out how many bytes are needed
 		int byteCount = 1;
@@ -1112,6 +1211,9 @@ public class Effect {
 	 * 
 	 * - pitch bend range
 	 * - pitch bend
+	 * - channel coarse tuning
+	 * - channel fine tuning
+	 * - controller destination: pitch control
 	 * 
 	 * @param halfToneStr  the half tone steps parameter
 	 * @return the value that the effect type needs.
@@ -1142,8 +1244,9 @@ public class Effect {
 			return msb * 128 + lsb;
 		}
 		
-		// channel coarse tune
-		if (0x0002 == effNum) {
+		// channel coarse tune or
+		// controller destination: pitch control
+		if (0x0002 == effNum || 0x7F0900 == effNum) {
 			
 			// don't allow broken values
 			if (halfToneSteps != Math.round(halfToneSteps))
@@ -1269,5 +1372,79 @@ public class Effect {
 		}
 		
 		throw new ParseException(Dict.get(Dict.ERROR_FUNC_PERIODS_NO_NUMBER) + valueStr);
+	}
+	
+	/**
+	 * Parses the parameter of a src() function call used in a controller destination effect.
+	 * 
+	 * @param param  the parameter
+	 * @return the resulting byte for the SysEx message (2 for mono_at/poly_at, 3 for cc)
+	 * @throws ParseException if the parameter cannot be parsed
+	 */
+	private static int[] parseSrc(String param) throws ParseException {
+		
+		// get channel
+		int channel = flow.getChannel();
+		
+		// mono_at?
+		if (MidicaPLParser.CH_D_MONO_AT.equals(param))
+			return new int[] {0x01, channel};
+		
+		// poly_at?
+		if (MidicaPLParser.CH_A_POLY_AT.equals(param))
+			return new int[] {0x02, channel};
+		
+		// cc (continuous controller) by name?
+		Integer cc = ctrlNameToNumber.get(param);
+		
+		// cc (continuous controller) by generic number? - e.g. ctrl=5
+		if (null == cc) {
+			Matcher m = genCtrlPattern.matcher(param);
+			if (m.matches()) {
+				String ccStr = m.group(1);
+				try {
+					cc = Integer.parseInt(ccStr);
+				}
+				catch (NumberFormatException e) {
+					throw new ParseException(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_UNKNOWN) + param);
+				}
+			}
+		}
+		
+		// cc cannot be parsed?
+		if (null == cc)
+			throw new ParseException(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_UNKNOWN) + param);
+		
+		// cc is allowed?
+		boolean isOk = false;
+		if (0x01 <= cc && cc <= 0x1F)
+			isOk = true;
+		if (0x40 <= cc && cc <= 0x5F)
+			isOk = true;
+		if (!isOk)
+			throw new ParseException(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP) + param);
+		
+		// cc result
+		return new int[] {0x03, channel, cc};
+	}
+	
+	/**
+	 * Parses the parameters of a dest() function call used in a controller destination effect.
+	 * 
+	 * @param params  the parameters
+	 * @return the resulting bytes (2 bytes: destination and range)
+	 * @throws ParseException if the parameters cannot be parsed
+	 */
+	private static int[] parseDest(String[] params) throws ParseException {
+		
+		Integer dest = ctrlDestToNumber.get(params[0]);
+		if (null == dest)
+			throw new ParseException(Dict.get(Dict.ERROR_FUNC_CD_DEST_UNKNOWN) + params[0]);
+		
+		// parse range
+		flow.setCurrentCtrlDest(dest);
+		int range = parseIntParam(params[1])[0];
+		
+		return new int[] {dest, range};
 	}
 }

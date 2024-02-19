@@ -243,6 +243,8 @@ public class MidicaPLParser extends SequenceParser {
 	public static String FUNC_LENGTH        = null;
 	public static String FUNC_WAIT          = null;
 	public static String FUNC_NOTE          = null;
+	public static String FUNC_SRC           = null;
+	public static String FUNC_DEST          = null;
 	public static String EFF_PERCENT        = null;
 	public static String CH_A_POLY_AT       = null;
 	public static String CH_D_MONO_AT       = null;
@@ -285,6 +287,13 @@ public class MidicaPLParser extends SequenceParser {
 	public static String RPN_3_TUNING_PROG  = null;
 	public static String RPN_4_TUNING_BANK  = null;
 	public static String RPN_5_MOD_DEPTH_R  = null;
+	public static String SX_7F09_CTRL_DEST  = null;
+	public static String CD_00_PITCH        = null;
+	public static String CD_01_FILTER_CUTOFF = null;
+	public static String CD_02_AMPLITUDE    = null;
+	public static String CD_03_LFO_PITCH_D  = null;
+	public static String CD_04_LFO_FILTER_D = null;
+	public static String CD_05_LFO_AMPL_D   = null;
 	
 	public static String ORIGINAL_DEFINE  = null;
 	public static String ORIGINAL_INCLUDE = null;
@@ -528,6 +537,8 @@ public class MidicaPLParser extends SequenceParser {
 		FUNC_LENGTH        = Dict.getSyntax( Dict.SYNTAX_FUNC_LENGTH        );
 		FUNC_WAIT          = Dict.getSyntax( Dict.SYNTAX_FUNC_WAIT          );
 		FUNC_NOTE          = Dict.getSyntax( Dict.SYNTAX_FUNC_NOTE          );
+		FUNC_SRC           = Dict.getSyntax( Dict.SYNTAX_FUNC_SRC           );
+		FUNC_DEST          = Dict.getSyntax( Dict.SYNTAX_FUNC_DEST          );
 		EFF_PERCENT        = Dict.getSyntax( Dict.SYNTAX_EFF_PERCENT        );
 		CH_A_POLY_AT       = Dict.getSyntax( Dict.SYNTAX_CH_A_POLY_AT       );
 		CH_D_MONO_AT       = Dict.getSyntax( Dict.SYNTAX_CH_D_MONO_AT       );
@@ -570,6 +581,13 @@ public class MidicaPLParser extends SequenceParser {
 		RPN_3_TUNING_PROG  = Dict.getSyntax( Dict.SYNTAX_RPN_3_TUNING_PROG  );
 		RPN_4_TUNING_BANK  = Dict.getSyntax( Dict.SYNTAX_RPN_4_TUNING_BANK  );
 		RPN_5_MOD_DEPTH_R  = Dict.getSyntax( Dict.SYNTAX_RPN_5_MOD_DEPTH_R  );
+		SX_7F09_CTRL_DEST  = Dict.getSyntax( Dict.SYNTAX_SX_7F09_CTRL_DEST  );
+		CD_00_PITCH        = Dict.getSyntax( Dict.SYNTAX_CD_00_PITCH        );
+		CD_01_FILTER_CUTOFF = Dict.getSyntax( Dict.SYNTAX_CD_01_FILTER_CUTOFF );
+		CD_02_AMPLITUDE    = Dict.getSyntax( Dict.SYNTAX_CD_02_AMPLITUDE    );
+		CD_03_LFO_PITCH_D  = Dict.getSyntax( Dict.SYNTAX_CD_03_LFO_PITCH_D  );
+		CD_04_LFO_FILTER_D = Dict.getSyntax( Dict.SYNTAX_CD_04_LFO_FILTER_D );
+		CD_05_LFO_AMPL_D   = Dict.getSyntax( Dict.SYNTAX_CD_05_LFO_AMPL_D   );
 		
 		// Remember the original names of some commands.
 		// Needed to redefine them without getting an error in the following parsing runs.
@@ -3791,6 +3809,8 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_FUNC_LENGTH.equals(cmdId)        ) FUNC_LENGTH        = cmdName;
 		else if ( Dict.SYNTAX_FUNC_WAIT.equals(cmdId)          ) FUNC_WAIT          = cmdName;
 		else if ( Dict.SYNTAX_FUNC_NOTE.equals(cmdId)          ) FUNC_NOTE          = cmdName;
+		else if ( Dict.SYNTAX_FUNC_SRC.equals(cmdId)           ) FUNC_SRC           = cmdName;
+		else if ( Dict.SYNTAX_FUNC_DEST.equals(cmdId)          ) FUNC_DEST          = cmdName;
 		else if ( Dict.SYNTAX_EFF_PERCENT.equals(cmdId)        ) EFF_PERCENT        = cmdName;
 		else if ( Dict.SYNTAX_CH_A_POLY_AT.equals(cmdId)       ) CH_A_POLY_AT       = cmdName;
 		else if ( Dict.SYNTAX_CH_D_MONO_AT.equals(cmdId)       ) CH_D_MONO_AT       = cmdName;
@@ -3833,6 +3853,13 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_RPN_3_TUNING_PROG.equals(cmdId)  ) RPN_3_TUNING_PROG  = cmdName;
 		else if ( Dict.SYNTAX_RPN_4_TUNING_BANK.equals(cmdId)  ) RPN_4_TUNING_BANK  = cmdName;
 		else if ( Dict.SYNTAX_RPN_5_MOD_DEPTH_R.equals(cmdId)  ) RPN_5_MOD_DEPTH_R  = cmdName;
+		else if ( Dict.SYNTAX_SX_7F09_CTRL_DEST.equals(cmdId)  ) SX_7F09_CTRL_DEST  = cmdName;
+		else if ( Dict.SYNTAX_CD_00_PITCH.equals(cmdId)        ) CD_00_PITCH        = cmdName;
+		else if ( Dict.SYNTAX_CD_01_FILTER_CUTOFF.equals(cmdId) ) CD_01_FILTER_CUTOFF = cmdName;
+		else if ( Dict.SYNTAX_CD_02_AMPLITUDE.equals(cmdId)    ) CD_02_AMPLITUDE    = cmdName;
+		else if ( Dict.SYNTAX_CD_03_LFO_PITCH_D.equals(cmdId)  ) CD_03_LFO_PITCH_D  = cmdName;
+		else if ( Dict.SYNTAX_CD_04_LFO_FILTER_D.equals(cmdId) ) CD_04_LFO_FILTER_D = cmdName;
+		else if ( Dict.SYNTAX_CD_05_LFO_AMPL_D.equals(cmdId)   ) CD_05_LFO_AMPL_D   = cmdName;
 		else {
 			throw new ParseException(Dict.get(Dict.ERROR_UNKNOWN_COMMAND_ID) + cmdId);
 		}

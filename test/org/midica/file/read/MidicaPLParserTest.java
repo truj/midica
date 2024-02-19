@@ -13,6 +13,7 @@ import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.TreeSet;
 
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiEvent;
@@ -2033,13 +2034,13 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals(messages.size(), i);
 		}
 		
-		parse(getWorkingFile("effects-2-bend"));
+		parse(getWorkingFile("effects-2-pitch"));
 		// channel 0: pitch bend range
 		{
 			messages = getMessagesByStatus("B0");
 			int i = 0;
 			
-			// tick 60: bend_range.length(32).wait.set(0.0)
+			// tick 60: pitch_range.length(32).wait.set(0.0)
 			assertEquals( "30/0/B0-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 			assertEquals( "40/0/B0-64/0",   messages.get(i++).toString() ); // RPN LSB: 0
 			assertEquals( "50/0/B0-06/0",   messages.get(i++).toString() ); // data MSB: 0
@@ -2171,211 +2172,211 @@ class MidicaPLParserTest extends MidicaPLParser {
 			// percentage, range: 2.0
 			{
 				// single byte
-				assertEquals("00/00/-2.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(-100%)
-				assertEquals("20/20/-1.0",     getPitchBendStr(messages.get(i++), 1)); // bend.set(-50%)
-				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(0%)
-				assertEquals("60/60/1.0",      getPitchBendStr(messages.get(i++), 1)); // bend.set(50%)
-				assertEquals("7F/7F/2.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(100%)
+				assertEquals("00/00/-2.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(-100%)
+				assertEquals("20/20/-1.0",     getPitchBendStr(messages.get(i++), 1)); // pitch.set(-50%)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(0%)
+				assertEquals("60/60/1.0",      getPitchBendStr(messages.get(i++), 1)); // pitch.set(50%)
+				assertEquals("7F/7F/2.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(100%)
 				
 				// double
-				assertEquals("00/00/-2.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-100%)
-				assertEquals("20/00/-1.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-50%)
-				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0%)
-				assertEquals("60/00/1.000",    getPitchBendStr(messages.get(i++), 3)); // bend.double.set(50%)
-				assertEquals("7F/7F/2.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(100%)
+				assertEquals("00/00/-2.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-100%)
+				assertEquals("20/00/-1.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-50%)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0%)
+				assertEquals("60/00/1.000",    getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(50%)
+				assertEquals("7F/7F/2.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(100%)
 			}
 			
 			// MSB/LSB, range: 2.0
 			{
-				assertEquals("00/00/-2.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(0/0)
-				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(64/0)
-				assertEquals("7F/7F/2.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(127/127)
+				assertEquals("00/00/-2.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(0/0)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(64/0)
+				assertEquals("7F/7F/2.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(127/127)
 			}
 			
 			// half-tone, range: 2.7
 			{
 				// single
-				assertEquals("15/15/-2.0",    getPitchBendStr(messages.get(i++), 1)); // bend.set(-2.0)
-				assertEquals("2B/2B/-1.0",    getPitchBendStr(messages.get(i++), 1)); // bend.set(-1.0)
-				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(0)
-				assertEquals("55/55/1.0",     getPitchBendStr(messages.get(i++), 1)); // bend.set(1.0)
-				assertEquals("6A/6A/2.0",     getPitchBendStr(messages.get(i++), 1)); // bend.set(2.0)
+				assertEquals("15/15/-2.0",    getPitchBendStr(messages.get(i++), 1)); // pitch.set(-2.0)
+				assertEquals("2B/2B/-1.0",    getPitchBendStr(messages.get(i++), 1)); // pitch.set(-1.0)
+				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(0)
+				assertEquals("55/55/1.0",     getPitchBendStr(messages.get(i++), 1)); // pitch.set(1.0)
+				assertEquals("6A/6A/2.0",     getPitchBendStr(messages.get(i++), 1)); // pitch.set(2.0)
 				
 				// double
-				assertEquals("15/2B/-2.000",  getPitchBendStr(messages.get(i++), 3)); // bend.double.set(-2.0)
-				assertEquals("2A/55/-1.000",  getPitchBendStr(messages.get(i++), 3)); // bend.double.set(-1)
-				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0)
-				assertEquals("55/2A/1.000",   getPitchBendStr(messages.get(i++), 3)); // bend.double.set(1.0)
-				assertEquals("6A/55/2.000",   getPitchBendStr(messages.get(i++), 3)); // bend.double.set(2)
+				assertEquals("15/2B/-2.000",  getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(-2.0)
+				assertEquals("2A/55/-1.000",  getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(-1)
+				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0)
+				assertEquals("55/2A/1.000",   getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(1.0)
+				assertEquals("6A/55/2.000",   getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(2)
 			}
 			
 			// half-tone, range: 4.0
 			{
 				// single
-				assertEquals("00/00/-4.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(-4.0)
-				assertEquals("20/20/-2.0",     getPitchBendStr(messages.get(i++), 1)); // bend.set(-2)
-				assertEquals("30/30/-1.0",     getPitchBendStr(messages.get(i++), 1)); // bend.set(-1.0)
-				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(0)
-				assertEquals("50/50/1.0",      getPitchBendStr(messages.get(i++), 1)); // bend.set(1.0)
-				assertEquals("60/60/2.0",      getPitchBendStr(messages.get(i++), 1)); // bend.set(2.0)
-				assertEquals("7F/7F/4.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(4)
+				assertEquals("00/00/-4.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(-4.0)
+				assertEquals("20/20/-2.0",     getPitchBendStr(messages.get(i++), 1)); // pitch.set(-2)
+				assertEquals("30/30/-1.0",     getPitchBendStr(messages.get(i++), 1)); // pitch.set(-1.0)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(0)
+				assertEquals("50/50/1.0",      getPitchBendStr(messages.get(i++), 1)); // pitch.set(1.0)
+				assertEquals("60/60/2.0",      getPitchBendStr(messages.get(i++), 1)); // pitch.set(2.0)
+				assertEquals("7F/7F/4.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(4)
 				
 				// double
-				assertEquals("00/00/-4.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-4.0)
-				assertEquals("20/00/-2.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-2.0)
-				assertEquals("30/00/-1.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-1.0)
-				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0)
-				assertEquals("50/00/1.000",    getPitchBendStr(messages.get(i++), 3)); // bend.double.set(1.0)
-				assertEquals("60/00/2.000",    getPitchBendStr(messages.get(i++), 3)); // bend.double.set(2.0)
-				assertEquals("7F/7F/4.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(4.0)
+				assertEquals("00/00/-4.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-4.0)
+				assertEquals("20/00/-2.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-2.0)
+				assertEquals("30/00/-1.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-1.0)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0)
+				assertEquals("50/00/1.000",    getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(1.0)
+				assertEquals("60/00/2.000",    getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(2.0)
+				assertEquals("7F/7F/4.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(4.0)
 			}
 			// half-tone, range: 8.0
 			{
 				// single
-				assertEquals("00/00/-8.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(-8.0)
-				assertEquals("30/30/-2.0",     getPitchBendStr(messages.get(i++), 1)); // bend.set(-2.0)
-				assertEquals("38/38/-1"  ,     getPitchBendStr(messages.get(i++), 0)); // bend.set(-1.0)
-				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(0)
-				assertEquals("48/48/1",        getPitchBendStr(messages.get(i++), 0)); // bend.set(1.0)
-				assertEquals("50/50/2",        getPitchBendStr(messages.get(i++), 0)); // bend.set(2.0)
-				assertEquals("7F/7F/8.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(8.0)
+				assertEquals("00/00/-8.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(-8.0)
+				assertEquals("30/30/-2.0",     getPitchBendStr(messages.get(i++), 1)); // pitch.set(-2.0)
+				assertEquals("38/38/-1"  ,     getPitchBendStr(messages.get(i++), 0)); // pitch.set(-1.0)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(0)
+				assertEquals("48/48/1",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(1.0)
+				assertEquals("50/50/2",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(2.0)
+				assertEquals("7F/7F/8.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(8.0)
 				
 				// double
-				assertEquals("00/00/-8.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-8.0)
-				assertEquals("30/00/-2.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-2.0)
-				assertEquals("38/00/-1.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-1.0)
-				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0)
-				assertEquals("48/00/1.000",    getPitchBendStr(messages.get(i++), 3)); // bend.double.set(1.0)
-				assertEquals("50/00/2.000",    getPitchBendStr(messages.get(i++), 3)); // bend.double.set(2.0)
-				assertEquals("7F/7F/8.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(8.0)
+				assertEquals("00/00/-8.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-8.0)
+				assertEquals("30/00/-2.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-2.0)
+				assertEquals("38/00/-1.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-1.0)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0)
+				assertEquals("48/00/1.000",    getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(1.0)
+				assertEquals("50/00/2.000",    getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(2.0)
+				assertEquals("7F/7F/8.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(8.0)
 			}
 			// half-tone, range: 12.0
 			{
 				// single
-				assertEquals("00/00/-12.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.set(0)
-				assertEquals("7F/7F/12.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(12.0)
+				assertEquals("00/00/-12.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.set(0)
+				assertEquals("7F/7F/12.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(12.0)
 				
 				// double
-				assertEquals("00/00/-12.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0)
-				assertEquals("7F/7F/12.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(12.0)
+				assertEquals("00/00/-12.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0)
+				assertEquals("7F/7F/12.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(12.0)
 			}
 			// half-tone, range: 24.0
 			{
 				// single
-				assertEquals("00/00/-24.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(-24.0)
-				assertEquals("20/20/-12",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.set(0)
-				assertEquals("60/60/12",        getPitchBendStr(messages.get(i++), 0)); // bend.set(12.0)
-				assertEquals("7F/7F/24.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(24.0)
+				assertEquals("00/00/-24.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(-24.0)
+				assertEquals("20/20/-12",       getPitchBendStr(messages.get(i++), 0)); // pitch.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.set(0)
+				assertEquals("60/60/12",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(12.0)
+				assertEquals("7F/7F/24.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(24.0)
 				
 				// double
-				assertEquals("00/00/-24.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-24.0)
-				assertEquals("20/00/-12.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0)
-				assertEquals("60/00/12.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(12.0)
-				assertEquals("7F/7F/24.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(24.0)
+				assertEquals("00/00/-24.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-24.0)
+				assertEquals("20/00/-12.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0)
+				assertEquals("60/00/12.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(12.0)
+				assertEquals("7F/7F/24.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(24.0)
 			}
 			// half-tone, range: 36.0
 			{
 				// single
-				assertEquals("00/00/-36.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(-36.0)
-				assertEquals("15/15/-24",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-24.0)
-				assertEquals("2B/2B/-12",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.set(0)
-				assertEquals("55/55/12",        getPitchBendStr(messages.get(i++), 0)); // bend.set(12.0)
-				assertEquals("6A/6A/24",        getPitchBendStr(messages.get(i++), 0)); // bend.set(24.0)
-				assertEquals("7F/7F/36.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(36.0)
+				assertEquals("00/00/-36.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(-36.0)
+				assertEquals("15/15/-24",       getPitchBendStr(messages.get(i++), 0)); // pitch.set(-24.0)
+				assertEquals("2B/2B/-12",       getPitchBendStr(messages.get(i++), 0)); // pitch.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.set(0)
+				assertEquals("55/55/12",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(12.0)
+				assertEquals("6A/6A/24",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(24.0)
+				assertEquals("7F/7F/36.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(36.0)
 				
 				// double
-				assertEquals("00/00/-36.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-36.0)
-				assertEquals("15/2B/-24.00",    getPitchBendStr(messages.get(i++), 2)); // bend.double.set(-24.0)
-				assertEquals("2A/55/-12.00",    getPitchBendStr(messages.get(i++), 2)); // bend.double.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0)
-				assertEquals("55/2A/12.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(12.0)
-				assertEquals("6A/55/24.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(24.0)
-				assertEquals("7F/7F/36.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(36.0)
+				assertEquals("00/00/-36.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-36.0)
+				assertEquals("15/2B/-24.00",    getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(-24.0)
+				assertEquals("2A/55/-12.00",    getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0)
+				assertEquals("55/2A/12.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(12.0)
+				assertEquals("6A/55/24.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(24.0)
+				assertEquals("7F/7F/36.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(36.0)
 			}
 			// half-tone, range: 48.0
 			{
 				// single
-				assertEquals("00/00/-48.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(-48.0)
-				assertEquals("10/10/-36",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-36.0)
-				assertEquals("20/20/-24",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-24.0)
-				assertEquals("30/30/-12",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.set(0)
-				assertEquals("50/50/12",        getPitchBendStr(messages.get(i++), 0)); // bend.set(12.0)
-				assertEquals("60/60/25",        getPitchBendStr(messages.get(i++), 0)); // bend.set(24.0) - rounding error too big
-				assertEquals("6F/6F/36",        getPitchBendStr(messages.get(i++), 0)); // bend.set(36.0)
-				assertEquals("7F/7F/48.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(48.0)
+				assertEquals("00/00/-48.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(-48.0)
+				assertEquals("10/10/-36",       getPitchBendStr(messages.get(i++), 0)); // pitch.set(-36.0)
+				assertEquals("20/20/-24",       getPitchBendStr(messages.get(i++), 0)); // pitch.set(-24.0)
+				assertEquals("30/30/-12",       getPitchBendStr(messages.get(i++), 0)); // pitch.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.set(0)
+				assertEquals("50/50/12",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(12.0)
+				assertEquals("60/60/25",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(24.0) - rounding error too big
+				assertEquals("6F/6F/36",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(36.0)
+				assertEquals("7F/7F/48.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(48.0)
 				
 				// double
-				assertEquals("00/00/-48.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-48.0)
-				assertEquals("10/00/-36.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-36.0)
-				assertEquals("20/00/-24.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-24.0)
-				assertEquals("30/00/-12.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0)
-				assertEquals("50/00/12.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(12.0)
-				assertEquals("60/00/24.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(24.0)
-				assertEquals("6F/7F/36.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(36.0)
-				assertEquals("7F/7F/48.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(48.0)
+				assertEquals("00/00/-48.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-48.0)
+				assertEquals("10/00/-36.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-36.0)
+				assertEquals("20/00/-24.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-24.0)
+				assertEquals("30/00/-12.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0)
+				assertEquals("50/00/12.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(12.0)
+				assertEquals("60/00/24.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(24.0)
+				assertEquals("6F/7F/36.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(36.0)
+				assertEquals("7F/7F/48.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(48.0)
 			}
 			// half-tone, range: 60.0
 			{
 				// single
-				assertEquals("00/00/-60.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(-60.0)
-				assertEquals("0D/0D/-48",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-48.0)
-				assertEquals("1A/1A/-35",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-36.0) - rounding error too big
-				assertEquals("26/26/-24",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-24.0)
-				assertEquals("33/33/-12",       getPitchBendStr(messages.get(i++), 0)); // bend.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.set(0)
-				assertEquals("4D/4D/13",        getPitchBendStr(messages.get(i++), 0)); // bend.set(12.0) - rounding error too big
-				assertEquals("59/59/24",        getPitchBendStr(messages.get(i++), 0)); // bend.set(24.0)
-				assertEquals("66/66/36",        getPitchBendStr(messages.get(i++), 0)); // bend.set(36.0)
-				assertEquals("72/72/48",        getPitchBendStr(messages.get(i++), 0)); // bend.set(48.0)
-				assertEquals("7F/7F/60.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.set(60.0)
+				assertEquals("00/00/-60.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(-60.0)
+				assertEquals("0D/0D/-48",       getPitchBendStr(messages.get(i++), 0)); // pitch.set(-48.0)
+				assertEquals("1A/1A/-35",       getPitchBendStr(messages.get(i++), 0)); // pitch.set(-36.0) - rounding error too big
+				assertEquals("26/26/-24",       getPitchBendStr(messages.get(i++), 0)); // pitch.set(-24.0)
+				assertEquals("33/33/-12",       getPitchBendStr(messages.get(i++), 0)); // pitch.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.set(0)
+				assertEquals("4D/4D/13",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(12.0) - rounding error too big
+				assertEquals("59/59/24",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(24.0)
+				assertEquals("66/66/36",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(36.0)
+				assertEquals("72/72/48",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(48.0)
+				assertEquals("7F/7F/60.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(60.0)
 				
 				// double
-				assertEquals("00/00/-60.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(-60.0)
-				assertEquals("0C/66/-48.00",    getPitchBendStr(messages.get(i++), 2)); // bend.double.set(-48.0)
-				assertEquals("19/4D/-36.00",    getPitchBendStr(messages.get(i++), 2)); // bend.double.set(-36.0)
-				assertEquals("26/33/-24.00",    getPitchBendStr(messages.get(i++), 2)); // bend.double.set(-24.0)
-				assertEquals("33/1A/-12.00",    getPitchBendStr(messages.get(i++), 2)); // bend.double.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0)
-				assertEquals("4C/66/12.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(12.0)
-				assertEquals("59/4C/24.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(24.0)
-				assertEquals("66/33/36.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(36.0)
-				assertEquals("73/19/48.00",     getPitchBendStr(messages.get(i++), 2)); // bend.double.set(48.0)
-				assertEquals("7F/7F/60.00000",  getPitchBendStr(messages.get(i++), 5)); // bend.double.set(60.0)
+				assertEquals("00/00/-60.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-60.0)
+				assertEquals("0C/66/-48.00",    getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(-48.0)
+				assertEquals("19/4D/-36.00",    getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(-36.0)
+				assertEquals("26/33/-24.00",    getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(-24.0)
+				assertEquals("33/1A/-12.00",    getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(-12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0)
+				assertEquals("4C/66/12.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(12.0)
+				assertEquals("59/4C/24.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(24.0)
+				assertEquals("66/33/36.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(36.0)
+				assertEquals("73/19/48.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(48.0)
+				assertEquals("7F/7F/60.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(60.0)
 			}
 			// half-tone, range: 127.99
 			{
 				// single
-				assertEquals("22/22/-59",     getPitchBendStr(messages.get(i++), 0)); // bend.set(-60.0) - rounding error too big
-				assertEquals("28/28/-47",     getPitchBendStr(messages.get(i++), 0)); // bend.set(-48.0) - rounding error too big
-				assertEquals("2E/2E/-35",     getPitchBendStr(messages.get(i++), 0)); // bend.set(-36.0) - rounding error too big
-				assertEquals("34/34/-23",     getPitchBendStr(messages.get(i++), 0)); // bend.set(-24.0) - rounding error too big
-				assertEquals("3A/3A/-11",     getPitchBendStr(messages.get(i++), 0)); // bend.set(-12.0) - rounding error too big
-				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // bend.set(0)
-				assertEquals("46/46/13",      getPitchBendStr(messages.get(i++), 0)); // bend.set(12.0)
-				assertEquals("4C/4C/25",      getPitchBendStr(messages.get(i++), 0)); // bend.set(24.0) - rounding error too big
-				assertEquals("52/52/37",      getPitchBendStr(messages.get(i++), 0)); // bend.set(36.0) - rounding error too big
-				assertEquals("58/58/49",      getPitchBendStr(messages.get(i++), 0)); // bend.set(48.0) - rounding error too big
-				assertEquals("5E/5E/61",      getPitchBendStr(messages.get(i++), 0)); // bend.set(60.0) - rounding error too big
+				assertEquals("22/22/-59",     getPitchBendStr(messages.get(i++), 0)); // pitch.set(-60.0) - rounding error too big
+				assertEquals("28/28/-47",     getPitchBendStr(messages.get(i++), 0)); // pitch.set(-48.0) - rounding error too big
+				assertEquals("2E/2E/-35",     getPitchBendStr(messages.get(i++), 0)); // pitch.set(-36.0) - rounding error too big
+				assertEquals("34/34/-23",     getPitchBendStr(messages.get(i++), 0)); // pitch.set(-24.0) - rounding error too big
+				assertEquals("3A/3A/-11",     getPitchBendStr(messages.get(i++), 0)); // pitch.set(-12.0) - rounding error too big
+				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(0)
+				assertEquals("46/46/13",      getPitchBendStr(messages.get(i++), 0)); // pitch.set(12.0)
+				assertEquals("4C/4C/25",      getPitchBendStr(messages.get(i++), 0)); // pitch.set(24.0) - rounding error too big
+				assertEquals("52/52/37",      getPitchBendStr(messages.get(i++), 0)); // pitch.set(36.0) - rounding error too big
+				assertEquals("58/58/49",      getPitchBendStr(messages.get(i++), 0)); // pitch.set(48.0) - rounding error too big
+				assertEquals("5E/5E/61",      getPitchBendStr(messages.get(i++), 0)); // pitch.set(60.0) - rounding error too big
 				
 				// double
-				assertEquals("22/00/-60",     getPitchBendStr(messages.get(i++), 0)); // bend.double.set(-60.0)
-				assertEquals("28/00/-48",     getPitchBendStr(messages.get(i++), 0)); // bend.double.set(-48.0)
-				assertEquals("2E/00/-36",     getPitchBendStr(messages.get(i++), 0)); // bend.double.set(-36.0)
-				assertEquals("34/00/-24.0",   getPitchBendStr(messages.get(i++), 1)); // bend.double.set(-24.0)
-				assertEquals("3A/00/-12.0",   getPitchBendStr(messages.get(i++), 1)); // bend.double.set(-12.0)
-				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // bend.double.set(0)
-				assertEquals("46/00/12.0",    getPitchBendStr(messages.get(i++), 1)); // bend.double.set(12.0)
-				assertEquals("4C/00/24.0",    getPitchBendStr(messages.get(i++), 1)); // bend.double.set(24.0)
-				assertEquals("52/00/36",      getPitchBendStr(messages.get(i++), 0)); // bend.double.set(36.0)
-				assertEquals("58/00/48",      getPitchBendStr(messages.get(i++), 0)); // bend.double.set(48.0)
-				assertEquals("5E/00/60",      getPitchBendStr(messages.get(i++), 0)); // bend.double.set(60.0)
+				assertEquals("22/00/-60",     getPitchBendStr(messages.get(i++), 0)); // pitch.double.set(-60.0)
+				assertEquals("28/00/-48",     getPitchBendStr(messages.get(i++), 0)); // pitch.double.set(-48.0)
+				assertEquals("2E/00/-36",     getPitchBendStr(messages.get(i++), 0)); // pitch.double.set(-36.0)
+				assertEquals("34/00/-24.0",   getPitchBendStr(messages.get(i++), 1)); // pitch.double.set(-24.0)
+				assertEquals("3A/00/-12.0",   getPitchBendStr(messages.get(i++), 1)); // pitch.double.set(-12.0)
+				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0)
+				assertEquals("46/00/12.0",    getPitchBendStr(messages.get(i++), 1)); // pitch.double.set(12.0)
+				assertEquals("4C/00/24.0",    getPitchBendStr(messages.get(i++), 1)); // pitch.double.set(24.0)
+				assertEquals("52/00/36",      getPitchBendStr(messages.get(i++), 0)); // pitch.double.set(36.0)
+				assertEquals("58/00/48",      getPitchBendStr(messages.get(i++), 0)); // pitch.double.set(48.0)
+				assertEquals("5E/00/60",      getPitchBendStr(messages.get(i++), 0)); // pitch.double.set(60.0)
 			}
 			
 			// no further messages
@@ -2626,6 +2627,58 @@ class MidicaPLParserTest extends MidicaPLParser {
 					assertEquals("5/c", getPortCtrlStr(messages.get(i++))); // .note(2).on()
 				}
 			}
+			
+			// no further messages
+			assertEquals(messages.size(), i);
+		}
+		
+		parse(getWorkingFile("effects-4-ctrl-dest"));
+		{
+			messages = getMessagesByStatus("F0");
+			int i = 0;
+			
+			// channel 0
+			
+			// pitch: 0x00
+			assertEquals("0/mono_at==>00:4C", getCtrlDestStr(messages.get(i++))); // mono_at ==> pitch: 12
+			assertEquals("0/mono_at==>00:34", getCtrlDestStr(messages.get(i++))); // mono_at ==> pitch: -12.0
+			assertEquals("0/poly_at==>00:28", getCtrlDestStr(messages.get(i++))); // poly_at ==> pitch: -24
+			assertEquals("0/poly_at==>00:58", getCtrlDestStr(messages.get(i++))); // poly_at ==> pitch: 24
+			
+			// filter cutoff: 0x01
+			assertEquals("0/mono_at==>01:7F", getCtrlDestStr(messages.get(i++))); // mono_at ==> filter_cutoff: 100%
+			assertEquals("0/mono_at==>01:00", getCtrlDestStr(messages.get(i++))); // mono_at ==> filter_cutoff: -100%
+			assertEquals("0/ctrl:01==>01:7F", getCtrlDestStr(messages.get(i++))); // mod ==> filter_cutoff: 63
+			assertEquals("0/ctrl:01==>01:00", getCtrlDestStr(messages.get(i++))); // mod ==> filter_cutoff: -64
+			
+			// vol (amplitude): 0x02
+			assertEquals("0/mono_at==>02:7F", getCtrlDestStr(messages.get(i++))); // mono_at ==> vol: 100%
+			assertEquals("0/mono_at==>02:40", getCtrlDestStr(messages.get(i++))); // mono_at ==> vol: 0%
+			assertEquals("0/ctrl:10==>02:20", getCtrlDestStr(messages.get(i++))); // ctrl=16 ==> vol: -50%
+			assertEquals("0/ctrl:11==>02:00", getCtrlDestStr(messages.get(i++))); // ctrl=17 ==> vol: -64
+			
+			// lfo_pitch: 0x03
+			assertEquals("0/mono_at==>03:00", getCtrlDestStr(messages.get(i++))); // mono_at ==> lfo_pitch: 0
+			assertEquals("0/mono_at==>03:20", getCtrlDestStr(messages.get(i++))); // mono_at ==> lfo_pitch: 25%
+			assertEquals("0/ctrl:46==>03:5F", getCtrlDestStr(messages.get(i++))); // var     ==> lfo_pitch: 75%
+			assertEquals("0/ctrl:46==>03:7F", getCtrlDestStr(messages.get(i++))); // ctrl=70 ==> lfo_pitch: 127
+			
+			// lfo_filter: 0x04
+			assertEquals("0/mono_at==>04:00", getCtrlDestStr(messages.get(i++))); // mono_at ==> lfo_filter: 0%
+			assertEquals("0/mono_at==>04:40", getCtrlDestStr(messages.get(i++))); // mono_at ==> lfo_filter: 64
+			assertEquals("0/mono_at==>04:7F", getCtrlDestStr(messages.get(i++))); // mono_at ==> lfo_filter: 127
+			
+			// lfo_vol: 0x05
+			assertEquals("0/poly_at==>05:00", getCtrlDestStr(messages.get(i++))); // poly_at ==> lfo_filter: 0%
+			assertEquals("0/poly_at==>05:20", getCtrlDestStr(messages.get(i++))); // poly_at ==> lfo_filter: 25%
+			assertEquals("0/poly_at==>05:7F", getCtrlDestStr(messages.get(i++))); // poly_at ==> lfo_filter: 127
+			
+			// channel 1
+			// ctrl_dest.src(ctrl=95)
+			//   .dest(pitch,12).dest(filter_cutoff,-50%).dest(vol,-16)
+			//   .dest(lfo_pitch,25%).dest(lfo_filter,0%).dest(lfo_vol,100%)
+			//   .on()
+			assertEquals("1/ctrl:5F==>00:4C,01:20,02:30,03:20,04:00,05:7F", getCtrlDestStr(messages.get(i++)));
 			
 			// no further messages
 			assertEquals(messages.size(), i);
@@ -4260,7 +4313,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-cont-rpn")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: bend_range.line(1,12)", e.getLineContent() );
+		assertEquals( "0: pitch_range.line(1,12)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "line"));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-cont-nrpn")) );
@@ -4335,32 +4388,32 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-halftone-gt-max-1")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: bend_range.set(129.0)", e.getLineContent() );
+		assertEquals( "0: pitch_range.set(129.0)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 129.0f, 127f)));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-halftone-gt-max-2")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: bend_range.double.set(127.997)", e.getLineContent() );
+		assertEquals( "0: pitch_range.double.set(127.997)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 127.997f, 127.99f)));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-halftone-gt-max-3")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: bend_range.set(127.0001)", e.getLineContent() );
+		assertEquals( "0: pitch_range.set(127.0001)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 127.0001f, 127f)));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-halftone-gt-max-4")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: bend_range.double.set(127.997)", e.getLineContent() );
+		assertEquals( "0: pitch_range.double.set(127.997)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 127.997, 127.99f)));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-with-percent")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: bend_range.set(12.0%)", e.getLineContent() );
+		assertEquals( "0: pitch_range.set(12.0%)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERCENT_FORBIDDEN) + "12.0%"));
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-bend-gt-range")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pitch-gt-range")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: bend.wait.set(2.3)", e.getLineContent() );
+		assertEquals( "0: pitch.wait.set(2.3)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_HALFTONE_GT_RANGE), 2.3f, 2.0f)));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-invalid")) );
@@ -4385,7 +4438,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-not-allowed-3")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: bend_range.note(c).set(2.0)", e.getLineContent() );
+		assertEquals( "0: pitch_range.note(c).set(2.0)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "note"));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-not-set-1")) );
@@ -4447,6 +4500,81 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( ": poly_at.note(3)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOTE_PAT_IDX_TOO_HIGH), "3", ".note(3)")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-note")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: ctrl_dest.note(c)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "note"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-missing-1")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0:   .on()", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_NOT_SET) + "on"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-missing-2")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertEquals( "0:   .on()", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_NOT_SET) + "on"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-unknown-1")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0:   .src(voll)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_UNKNOWN) + "voll"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-unknown-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0:   .src(ctrl=128)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP) + "ctrl=128"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-unknown-3")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0:   .src(ctrl=5=7)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_UNKNOWN) + "ctrl=5=7"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-not-sup-1")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0:   .src(ctrl=0)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP) + "ctrl=0"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-not-sup-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0:   .src(ctrl=32)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP) + "ctrl=32"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-not-sup-3")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0:   .src(ctrl=57)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP) + "ctrl=57"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-not-sup-4")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0:   .src(ctrl=60)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP) + "ctrl=60"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-not-sup-5")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0:   .src(mono_mode)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP) + "mono_mode"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-duplicate")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertEquals( "0:   .src(poly_at)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_ALREADY_SET) + "src"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-dest-missing")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertEquals( "0:   .on()", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_DEST_NOT_SET) + "on"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-dest-unknown-1")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertEquals( "0:   .dest(voll,10%)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_DEST_UNKNOWN) + "voll"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-dest-unknown-2")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertEquals( "0:   .dest(ctrl=11,10%)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_DEST_UNKNOWN) + "ctrl=11"));
 	}
 	
 	/**
@@ -4648,7 +4776,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 	 * 
 	 * - MSB
 	 * - LSB
-	 * - resulting bend in half tones (rounded)
+	 * - resulting pitch bend in half tones (rounded)
 	 * 
 	 * @param msg            the message
 	 * @param decimalPlaces  number of decimal places to round the half tones
@@ -4698,5 +4826,67 @@ class MidicaPLParserTest extends MidicaPLParser {
 			throw new RuntimeException("not a portamento ctrl message. ctrl: 0x" + ctrl);
 		
 		return channel + "/" + note;
+	}
+	
+	/**
+	 * Calculates and returns a summary from a controller destination message.
+	 * 
+	 * Throws an exception is the message is not a controller destination message.
+	 * 
+	 * The summary consists of:
+	 * 
+	 * - channel
+	 * - source
+	 * - list of destinations and their range, separated by comma, ordered alphabetically
+	 * 
+	 * @param msg  the message
+	 * @return the summary.
+	 */
+	private static String getCtrlDestStr(SingleMessage msg) {
+		
+		// handle first 5 bytes
+		byte[] bytes = msg.getMessageBytes();
+		if (bytes.length < 8)
+			throw new RuntimeException("message length too short for controller destination: " + bytes.length);
+		if ((bytes[0] & 0xFF) != 0xF0)
+			throw new RuntimeException("Not a sysex message. Wrong status: " + bytes[0]);
+		if (bytes[1] != 0x7F)
+			throw new RuntimeException("Wrong manufacturer byte: " + bytes[1]);
+		if (bytes[2] != 0x7F)
+			throw new RuntimeException("Wrong device ID: " + bytes[2]);
+		if (bytes[3] != 0x09)
+			throw new RuntimeException("Sub ID 1: " + bytes[3]);
+		byte srcType = bytes[4];
+		byte channel = bytes[5];
+		if (srcType < 1 || srcType > 3)
+			throw new RuntimeException("Sub ID 2: " + srcType);
+		
+		// handle source (1 or 2 bytes)
+		int i = 6;
+		String src = null;
+		if (0x01 == srcType)
+			src = "mono_at";
+		else if (0x02 == srcType)
+			src = "poly_at";
+		else if (0x03 == srcType)
+			src = "ctrl:" + String.format("%02X", bytes[i++]);
+		
+		// handle destinations
+		TreeSet<String> destinations = new TreeSet<>();
+		while (i < bytes.length - 1) {
+			String dest  = String.format("%02X", bytes[i++]);
+			String range = String.format("%02X", bytes[i++]);
+			destinations.add(dest + ":" + range);
+		}
+		
+		// handle last byte
+		if (i != bytes.length - 1)
+			throw new RuntimeException("Odd number of controller destinations");
+		int endByte = bytes[i++] & 0xFF;
+		if (endByte != 0xF7)
+			throw new RuntimeException("Wrong end byte for sysex message: " + bytes[0]);
+		
+		// put everything together
+		return channel + "/" + src + "==>" + String.join(",", destinations);
 	}
 }

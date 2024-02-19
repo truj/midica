@@ -1,0 +1,8 @@
+INCLUDE inc/instruments.midica
+
+
+0: ctrl_dest
+0:   .src(mono_at)
+0:   .src(poly_at)
+0:   .on()
+

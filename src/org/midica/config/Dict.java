@@ -216,6 +216,8 @@ public class Dict {
 	public static final String SYNTAX_FUNC_LENGTH        = "FUNC_LENGTH";
 	public static final String SYNTAX_FUNC_WAIT          = "FUNC_WAIT";
 	public static final String SYNTAX_FUNC_NOTE          = "FUNC_NOTE";
+	public static final String SYNTAX_FUNC_SRC           = "FUNC_SRC";
+	public static final String SYNTAX_FUNC_DEST          = "FUNC_DESC";
 	public static final String SYNTAX_EFF_PERCENT        = "EFF_PERCENT";
 	public static final String SYNTAX_CH_A_POLY_AT       = "CH_A_POLY_AT";
 	public static final String SYNTAX_CH_D_MONO_AT       = "CH_D_MONO_AT";
@@ -258,6 +260,13 @@ public class Dict {
 	public static final String SYNTAX_RPN_3_TUNING_PROG  = "RPN_3_TUNING_PROG";
 	public static final String SYNTAX_RPN_4_TUNING_BANK  = "RPN_4_TUNING_BANK";
 	public static final String SYNTAX_RPN_5_MOD_DEPTH_R  = "RPN_5_MOD_DEPTH_R";
+	public static final String SYNTAX_SX_7F09_CTRL_DEST  = "SX_7F09_CTRL_DEST";
+	public static final String SYNTAX_CD_00_PITCH        = "CD_00_PITCH";
+	public static final String SYNTAX_CD_01_FILTER_CUTOFF = "CD_01_FILTER_CUTOFF";
+	public static final String SYNTAX_CD_02_AMPLITUDE    = "CD_02_AMPLITUDE";
+	public static final String SYNTAX_CD_03_LFO_PITCH_D  = "CD_03_LFO_PITCH_D";
+	public static final String SYNTAX_CD_04_LFO_FILTER_D = "CD_04_LFO_FILTER_D";
+	public static final String SYNTAX_CD_05_LFO_AMPL_D   = "CD_05_LFO_AMPL_D";
 	
 	// TODO: use for the syntax or delete
 	// drumkit identifiers
@@ -1765,6 +1774,12 @@ public class Dict {
 	public static final String ERROR_FUNC_NO_NUMBER              = "error_func_no_number";
 	public static final String ERROR_FUNC_PERIODS_NEG            = "error_func_periods_neg";
 	public static final String ERROR_FUNC_PERIODS_NO_NUMBER      = "error_func_periods_no_number";
+	public static final String ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP   = "error_func_cd_src_ctrl_not_supp";
+	public static final String ERROR_FUNC_CD_SRC_CTRL_UNKNOWN    = "error_func_cd_src_ctrl_unknown";
+	public static final String ERROR_FUNC_CD_DEST_UNKNOWN        = "error_func_cd_dest_unknown";
+	public static final String ERROR_FUNC_CD_SRC_ALREADY_SET     = "error_func_cd_src_already_set";
+	public static final String ERROR_FUNC_CD_SRC_NOT_SET         = "error_func_cd_src_not_set";
+	public static final String ERROR_FUNC_CD_DEST_NOT_SET        = "error_func_cd_dest_not_set";
 	
 	// NestableBlock
 	public static final String ERROR_BLOCK_ARG_ALREADY_SET      = "error_block_arg_already_set";
@@ -2978,10 +2993,12 @@ public class Dict {
 		set( SYNTAX_FUNC_LENGTH,        "set the length for the next function in the flow" );
 		set( SYNTAX_FUNC_WAIT,          "wait for the current length"                     );
 		set( SYNTAX_FUNC_NOTE,          "set note name (e.g. for portamento ctrl)"        );
+		set( SYNTAX_FUNC_SRC,           "source (for controller destination assignment)"  );
+		set( SYNTAX_FUNC_DEST,          "destination (for controller destination assignment)" );
 		set( SYNTAX_EFF_PERCENT,        "percent symbol for parameters"                   );
-		set( SYNTAX_CH_A_POLY_AT,       "Polyphonic Aftertouch (Poly Pressure)"           );
+		set( SYNTAX_CH_A_POLY_AT,       "Polyphonic Aftertouch (Key Pressure)"            );
 		set( SYNTAX_CH_D_MONO_AT,       "Monophonic Aftertouch (Channel Pressure)"        );
-		set( SYNTAX_CH_E_PITCH_BEND,    "'off' value for binary set functions"            );
+		set( SYNTAX_CH_E_PITCH_BEND,    "Pitch Bend"                                      );
 		set( SYNTAX_CC_01_MOD,          "Controller 1 (0x01): Modulation Wheel"           );
 		set( SYNTAX_CC_02_BREATH,       "Controller 2 (0x02): Breath Controller"          );
 		set( SYNTAX_CC_04_FOOT,         "Controller 4 (0x04): Foot Controller"            );
@@ -3020,6 +3037,13 @@ public class Dict {
 		set( SYNTAX_RPN_3_TUNING_PROG,  "RPN 3 (0x0003): Tuning Program Change"            );
 		set( SYNTAX_RPN_4_TUNING_BANK,  "RPN 4 (0x0004): Tuning Bank Select"               );
 		set( SYNTAX_RPN_5_MOD_DEPTH_R,  "RPN 5 (0x0005): Modulation Depth Range"           );
+		set( SYNTAX_SX_7F09_CTRL_DEST,  "Controller Destination"                           );
+		set( SYNTAX_CD_00_PITCH,        "Controller Destination: Pitch Control"            );
+		set( SYNTAX_CD_01_FILTER_CUTOFF, "Controller Destination: Filter Cutoff Control"   );
+		set( SYNTAX_CD_02_AMPLITUDE,    "Controller Destination: Amplitude Control"        );
+		set( SYNTAX_CD_03_LFO_PITCH_D,  "Controller Destination: LFO Pitch Depth"          );
+		set( SYNTAX_CD_04_LFO_FILTER_D, "Controller Destination: LFO Filter Depth"         );
+		set( SYNTAX_CD_05_LFO_AMPL_D,   "Controller Destination: LFO Amplitude Depth"      );
 		
 		// messages for InfoView
 		set( MSG1_CH_VOICE,               "Channel Voice Messages"                         );
@@ -3578,6 +3602,12 @@ public class Dict {
 		set( ERROR_FUNC_NO_NUMBER,                "Parameter is not a valid number or percentage value: "             );
 		set( ERROR_FUNC_PERIODS_NEG,              "The 'periods' parameter cannot be negative: "                      );
 		set( ERROR_FUNC_PERIODS_NO_NUMBER,        "The 'periods' parameter is not a valid number: "                   );
+		set( ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP,     "Controller destination source not supported: "                     );
+		set( ERROR_FUNC_CD_SRC_CTRL_UNKNOWN,      "Controller destination source unknown: "                           );
+		set( ERROR_FUNC_CD_DEST_UNKNOWN,          "Unknown destination for 'controller destination': "                );
+		set( ERROR_FUNC_CD_SRC_ALREADY_SET,       "Controller destination source already set. Duplicate function: "   );
+		set( ERROR_FUNC_CD_SRC_NOT_SET,           "Controller destination source must be set before using function: " );
+		set( ERROR_FUNC_CD_DEST_NOT_SET,          "At least one controller destination must beset before using function: " );
 		
 		// NestableBlock
 		set( ERROR_BLOCK_ARG_ALREADY_SET,         "Block argument has already been set before: "                      );
@@ -4366,10 +4396,12 @@ public class Dict {
 		setSyntax( SYNTAX_FUNC_LENGTH,         "length"       );
 		setSyntax( SYNTAX_FUNC_WAIT,           "wait"         );
 		setSyntax( SYNTAX_FUNC_NOTE,           "note"         );
+		setSyntax( SYNTAX_FUNC_SRC,            "src"          );
+		setSyntax( SYNTAX_FUNC_DEST,           "dest"         );
 		setSyntax( SYNTAX_EFF_PERCENT,         "%"            );
 		setSyntax( SYNTAX_CH_A_POLY_AT,        "poly_at"      );
 		setSyntax( SYNTAX_CH_D_MONO_AT,        "mono_at"      );
-		setSyntax( SYNTAX_CH_E_PITCH_BEND,     "bend"         );
+		setSyntax( SYNTAX_CH_E_PITCH_BEND,     "pitch"        );
 		setSyntax( SYNTAX_CC_01_MOD,           "mod"          );
 		setSyntax( SYNTAX_CC_02_BREATH,        "breath"       );
 		setSyntax( SYNTAX_CC_04_FOOT,          "foot"         );
@@ -4402,12 +4434,19 @@ public class Dict {
 		setSyntax( SYNTAX_CC_5F_EFF4_DEP,      "phaser"       );
 		setSyntax( SYNTAX_CC_7E_MONO_MODE,     "mono_mode"    );
 		setSyntax( SYNTAX_CC_7F_POLY_MODE,     "poly_mode"    );
-		setSyntax( SYNTAX_RPN_0_PITCH_BEND_R,  "bend_range"   );
+		setSyntax( SYNTAX_RPN_0_PITCH_BEND_R,  "pitch_range"  );
 		setSyntax( SYNTAX_RPN_1_FINE_TUNE,     "fine_tune"    );
 		setSyntax( SYNTAX_RPN_2_COARSE_TUNE,   "coarse_tune"  );
 		setSyntax( SYNTAX_RPN_3_TUNING_PROG,   "tuning_prog"  );
 		setSyntax( SYNTAX_RPN_4_TUNING_BANK,   "tuning_bank"  );
 		setSyntax( SYNTAX_RPN_5_MOD_DEPTH_R,   "mod_range"    );
+		setSyntax( SYNTAX_SX_7F09_CTRL_DEST,   "ctrl_dest"    );
+		setSyntax( SYNTAX_CD_00_PITCH,         "pitch"        );
+		setSyntax( SYNTAX_CD_01_FILTER_CUTOFF, "filter_cutoff" );
+		setSyntax( SYNTAX_CD_02_AMPLITUDE,     "vol"          );
+		setSyntax( SYNTAX_CD_03_LFO_PITCH_D,   "lfo_pitch"    );
+		setSyntax( SYNTAX_CD_04_LFO_FILTER_D,  "lfo_filter"   );
+		setSyntax( SYNTAX_CD_05_LFO_AMPL_D,    "lfo_vol"      );
 		
 		// switch to lower/upper, if needed
 		if (Config.CBX_SYNTAX_LOWER.equals(configuredSyntax)) {
@@ -4582,6 +4621,8 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_FUNC_LENGTH        );
 		addSyntaxForInfoView( SYNTAX_FUNC_WAIT          );
 		addSyntaxForInfoView( SYNTAX_FUNC_NOTE          );
+		addSyntaxForInfoView( SYNTAX_FUNC_SRC           );
+		addSyntaxForInfoView( SYNTAX_FUNC_DEST          );
 		addSyntaxForInfoView( SYNTAX_EFF_PERCENT        );
 		addSyntaxForInfoView( SYNTAX_CH_A_POLY_AT       );
 		addSyntaxForInfoView( SYNTAX_CH_D_MONO_AT       );
@@ -4624,6 +4665,13 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_RPN_3_TUNING_PROG  );
 		addSyntaxForInfoView( SYNTAX_RPN_4_TUNING_BANK  );
 		addSyntaxForInfoView( SYNTAX_RPN_5_MOD_DEPTH_R  );
+		addSyntaxForInfoView( SYNTAX_SX_7F09_CTRL_DEST  );
+		addSyntaxForInfoView( SYNTAX_CD_00_PITCH        );
+		addSyntaxForInfoView( SYNTAX_CD_01_FILTER_CUTOFF );
+		addSyntaxForInfoView( SYNTAX_CD_02_AMPLITUDE    );
+		addSyntaxForInfoView( SYNTAX_CD_03_LFO_PITCH_D  );
+		addSyntaxForInfoView( SYNTAX_CD_04_LFO_FILTER_D );
+		addSyntaxForInfoView( SYNTAX_CD_05_LFO_AMPL_D   );
 	}
 	
 	/**

@@ -7,9 +7,11 @@
 
 package org.midica.file.read;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,25 +30,29 @@ public class EffectFlow {
 	//////////////////////////////
 	
 	// value types
-	public static final int TYPE_BOOLEAN    = 1;  // 0=off, 127=on
-	public static final int TYPE_MSB        = 3;  // default:  0 - 127, double:     0 - 16383
-	public static final int TYPE_MSB_SIGNED = 5;  // default: -64 - 63, double: -8192 - 8191
-	public static final int TYPE_BYTE       = 11; // 0 - 127
-	public static final int TYPE_ANY        = 15; // anything that fits in 7 bits
-	public static final int TYPE_NONE       = 17; // no value allowed (using 0 internally)
+	public static final int TYPE_BOOLEAN     = 1;  // 0=off, 127=on
+	public static final int TYPE_MSB         = 3;  // default:  0 - 127, double:     0 - 16383
+	public static final int TYPE_MSB_SIGNED  = 5;  // default: -64 - 63, double: -8192 - 8191
+	public static final int TYPE_BYTE        = 11; // 0 - 127
+	public static final int TYPE_BYTE_SIGNED = 13; // -64 - 63
+	public static final int TYPE_ANY         = 15; // anything that fits in 7 bits
+	public static final int TYPE_NONE        = 17; // no value allowed (using 0 internally)
 	
 	// effect types
 	public static final int EFF_TYPE_CHANNEL = 1;
 	public static final int EFF_TYPE_CTRL    = 2;
 	public static final int EFF_TYPE_RPN     = 3;
 	public static final int EFF_TYPE_NRPN    = 4;
+	public static final int EFF_TYPE_SYSEX   = 5;
 	
 	// supported functions
-	public static final int FUNC_TYPE_ON   = 1;
-	public static final int FUNC_TYPE_OFF  = 3;
-	public static final int FUNC_TYPE_SET  = 5;
-	public static final int FUNC_TYPE_CONT = 7; // continuous (line, sin, cos, ...)
-	public static final int FUNC_TYPE_NOTE = 9;
+	public static final int FUNC_TYPE_ON     = 1;
+	public static final int FUNC_TYPE_OFF    = 3;
+	public static final int FUNC_TYPE_SET    = 5;
+	public static final int FUNC_TYPE_CONT   = 7; // continuous (line, sin, cos, ...)
+	public static final int FUNC_TYPE_NOTE   = 9;
+	public static final int FUNC_TYPE_SRC    = 11;
+	public static final int FUNC_TYPE_DEST   = 13;
 	
 	// data structures
 	private static final Map<Integer, Integer> channelMsgToType    = new HashMap<>();
@@ -65,6 +71,15 @@ public class EffectFlow {
 	private static final Map<Integer, Integer> nrpnToMin           = new HashMap<>();
 	private static final Map<Integer, Integer> nrpnToMax           = new HashMap<>();
 	private static final Map<Integer, Integer> nrpnToDefault       = new HashMap<>(); // TODO: delete?
+	private static final Map<Integer, Integer> sxCtrlDestToType    = new HashMap<>();
+	private static final Map<Integer, Integer> sxCtrlDestToMin     = new HashMap<>();
+	private static final Map<Integer, Integer> sxCtrlDestToMax     = new HashMap<>();
+	private static final Map<Integer, Integer> sxCtrlDestToDefault = new HashMap<>(); // TODO: delete?
+	
+	// controller destination
+	private List<Integer> ctrlDestSrc  = new ArrayList<>();
+	private List<Integer> ctrlDestDest = new ArrayList<>();
+	private int currentCtrlDestination = -1;
 	
 	//////////////////////////////
 	// flow fields
@@ -103,7 +118,7 @@ public class EffectFlow {
 	/**
 	 * Sets the effect type and number.
 	 * 
-	 * @param type         {@link #EFF_TYPE_CHANNEL}, {@link #EFF_TYPE_CTRL}, {@link #EFF_TYPE_RPN} or {@link #EFF_TYPE_NRPN}
+	 * @param type         {@link #EFF_TYPE_CHANNEL}, {@link #EFF_TYPE_CTRL}, {@link #EFF_TYPE_RPN} or {@link #EFF_TYPE_NRPN} or {@link #EFF_TYPE_SYSEX}
 	 * @param effectNum    effect number (e.g. controller number, RPN number etc.)
 	 * @throws ParseException if an effect has already been set.
 	 */
@@ -124,6 +139,7 @@ public class EffectFlow {
 	 * - {@link #EFF_TYPE_CTRL}
 	 * - {@link #EFF_TYPE_RPN}
 	 * - {@link #EFF_TYPE_NRPN}
+	 * - {@link #EFF_TYPE_SYSEX}
 	 * 
 	 * @return see above
 	 */
@@ -150,6 +166,8 @@ public class EffectFlow {
 	 * - {@link #FUNC_TYPE_SET}
 	 * - {@link #FUNC_TYPE_CONT}
 	 * - {@link #FUNC_TYPE_NOTE}
+	 * - {@link #FUNC_TYPE_SRC}
+	 * - {@link #FUNC_TYPE_DEST}
 	 * 
 	 * @param elemName  element name that caused the call (only used for error messages)
 	 * @return the supported functions (see above)
@@ -167,9 +185,18 @@ public class EffectFlow {
 			return functions;
 		}
 		
+		// special case for controller destination
+		if (EFF_TYPE_SYSEX == effectType && 0x7F0900 == effectNumber) {
+			functions.add(FUNC_TYPE_SRC);
+			functions.add(FUNC_TYPE_DEST);
+			functions.add(FUNC_TYPE_ON);
+			return functions;
+		}
+		
 		// normal cases
 		if (TYPE_MSB == valueType || TYPE_MSB_SIGNED == valueType
-				|| TYPE_BYTE == valueType || TYPE_ANY == valueType) {
+				|| TYPE_BYTE == valueType || TYPE_BYTE_SIGNED == valueType
+				|| TYPE_ANY == valueType) {
 			functions.add(FUNC_TYPE_SET);
 			functions.add(FUNC_TYPE_CONT);
 		}
@@ -203,6 +230,7 @@ public class EffectFlow {
 	 * - pitch bend range
 	 * - channel fine tuning
 	 * - channel coarse tuning
+	 * - controller destination: pitch control
 	 * 
 	 * @return **true** if half tone steps are supported, otherwise **false**.
 	 */
@@ -229,6 +257,14 @@ public class EffectFlow {
 				return true;
 		}
 		
+		// controller destination
+		else if (EFF_TYPE_SYSEX == effectType && 0x7F0900 == effectNumber) {
+			
+			// pitch control
+			if (0x00 == currentCtrlDestination)
+				return true;
+		}
+		
 		return false;
 	}
 	
@@ -240,6 +276,7 @@ public class EffectFlow {
 	 * - pitch bend range
 	 * - channel coarse tuning
 	 * - mono mode
+	 * - controller destination: pitch control
 	 * 
 	 * @return **true** if percentage values are allowed, otherwise: **false**.
 	 */
@@ -257,6 +294,14 @@ public class EffectFlow {
 			
 			// channel coarse tuning
 			if (0x0002 == effectNumber)
+				return false;
+		}
+		
+		// controller destination
+		else if (EFF_TYPE_SYSEX == effectType && 0x7F0900 == effectNumber) {
+			
+			// pitch control
+			if (0x00 == currentCtrlDestination)
 				return false;
 		}
 		
@@ -363,10 +408,6 @@ public class EffectFlow {
 		
 		int valueType = getValueType(MidicaPLParser.FL_DOUBLE);
 		
-		// special case: double not allowed for channel coarse tuning
-		if (EFF_TYPE_RPN == effectType && 0x0002 == effectNumber)
-			throw new ParseException(Dict.get(Dict.ERROR_FL_DOUBLE_NOT_SUPPORTED) + MidicaPLParser.FL_DOUBLE);
-		
 		// normal case: double allowed for all other MSB types
 		if (TYPE_MSB == valueType || TYPE_MSB_SIGNED == valueType) {
 			isDouble = true;
@@ -383,6 +424,84 @@ public class EffectFlow {
 	 */
 	public boolean isDouble() {
 		return isDouble;
+	}
+	
+	/**
+	 * Sets the next controller destination in a controller destination effect.
+	 * 
+	 * (One controller destination effect can have only one source but several destinations.)
+	 * 
+	 * @param dest  the destination
+	 */
+	public void setCurrentCtrlDest(int dest) {
+		currentCtrlDestination = dest;
+	}
+	
+	/**
+	 * Sets the source for a controller destination effect.
+	 * 
+	 * The source can have 2 or 3 bytes.
+	 * 
+	 * - first byte: 0x01, 0x02, 0x03 (mono_at, poly_at, cc)
+	 * - second byte: channel
+	 * - third byte: cc number (only available if the first byte is 0x03)
+	 * 
+	 * @param values    the values
+	 * @param elemName
+	 * @throws ParseException
+	 */
+	public void setSource(int[] values, String elemName) throws ParseException {
+		
+		if (!ctrlDestSrc.isEmpty())
+			throw new ParseException(Dict.get(Dict.ERROR_FUNC_CD_SRC_ALREADY_SET) + elemName);
+		
+		for (int val : values)
+			ctrlDestSrc.add(val);
+	}
+	
+	/**
+	 * Remembers the received bytes so that they can
+	 * be put into a controller destination message later.
+	 * 
+	 * @param values  first byte: destination type (0x00-0x05); second byte: range (0x00-0x7F)
+	 */
+	public void putDestination(int[] values) {
+		ctrlDestDest.add(values[0]);
+		ctrlDestDest.add(values[1]);
+	}
+	
+	/**
+	 * Constructs and returns the content of a SysEx message with the meaning 'controller destination'.
+	 * 
+	 * @param elemName  the called function (only needed for error messages)
+	 * @return the message content
+	 * @throws ParseException if source or destination have not yet been set
+	 */
+	public byte[] getControllerDestination(String elemName) throws ParseException {
+		
+		// checks
+		if (ctrlDestSrc.isEmpty())
+			throw new ParseException(Dict.get(Dict.ERROR_FUNC_CD_SRC_NOT_SET) + elemName);
+		if (ctrlDestDest.isEmpty())
+			throw new ParseException(Dict.get(Dict.ERROR_FUNC_CD_DEST_NOT_SET) + elemName);
+		
+		// construct result
+		int length = 5 + ctrlDestSrc.size() + ctrlDestDest.size();
+		byte[] result = new byte[length];
+		int i = 0;
+		result[i++] = (byte) 0xF0; // sysex
+		result[i++] =        0x7F; // universal real time
+		result[i++] =        0x7F; // device ID: all devices
+		result[i++] =        0x09; // sub ID 1: controller destination
+		for (int val : ctrlDestSrc) {
+			result[i++] = (byte) val; // sub ID 2 + channel + (optional) controller
+		}
+		for (int val : ctrlDestDest) {
+			result[i++] = (byte) val; // pairs of destination + range
+		}
+		result[i++] = (byte) 0xF7;    // end of sysex
+		
+		return result;
 	}
 	
 	/**
@@ -439,6 +558,7 @@ public class EffectFlow {
 	 * - {@link #TYPE_MSB}
 	 * - {@link #TYPE_MSB_SIGNED}
 	 * - {@link #TYPE_BYTE}
+	 * - {@link #TYPE_BYTE_SIGNED}
 	 * - {@link #TYPE_ANY}
 	 * - {@link #TYPE_NONE}
 	 * 
@@ -468,6 +588,15 @@ public class EffectFlow {
 		else if (EFF_TYPE_NRPN == effectType) {
 			valueType = nrpnToType.get(effectNumber);
 			typeStr   = "nrpn";
+		}
+		else if (EFF_TYPE_SYSEX == effectType && 0x7F0900 == effectNumber) {
+			
+			// source not yet set?
+			if (currentCtrlDestination < 0)
+				return EFF_TYPE_SYSEX;
+			
+			valueType = sxCtrlDestToType.get(currentCtrlDestination);
+			typeStr   = "sysex (ctrl dest)";
 		}
 		
 		// not found?
@@ -504,6 +633,11 @@ public class EffectFlow {
 			return -8192;
 		}
 		
+		// special case: controller destination
+		if (EFF_TYPE_SYSEX == effectType && 0x7F0900 == effectNumber) {
+			min = sxCtrlDestToMin.get(currentCtrlDestination);
+		}
+		
 		if (null == min)
 			throw new FatalParseException("Unknown min value for '" + effectType + "/" + effectNumber + ".");
 		
@@ -538,6 +672,11 @@ public class EffectFlow {
 				max = 16383;
 			if (63 == max)
 				max = 8191;
+		}
+		
+		// special case: controller destination
+		if (EFF_TYPE_SYSEX == effectType && 0x7F0900 == effectNumber) {
+			max = sxCtrlDestToMax.get(currentCtrlDestination);
 		}
 		
 		if (null == max)
@@ -663,9 +802,9 @@ public class EffectFlow {
 		}
 		
 		// exceptions (type)
-		rpnToType.put(0x0001, TYPE_MSB_SIGNED); // channel fine tuning
-		rpnToType.put(0x0002, TYPE_MSB_SIGNED); // channel coarse tuning
-		rpnToType.put(0x7F7F, TYPE_NONE);       // reset RPN
+		rpnToType.put(0x0001, TYPE_MSB_SIGNED);  // channel fine tuning
+		rpnToType.put(0x0002, TYPE_BYTE_SIGNED); // channel coarse tuning
+		rpnToType.put(0x7F7F, TYPE_NONE);        // reset RPN
 		
 		// min / max
 		applyDefaultMinAndMax(rpnToType,  rpnToDefault,  rpnToMin,  rpnToMax);
@@ -676,6 +815,25 @@ public class EffectFlow {
 		rpnToDefault.put(0x0001, 0x4000); // channel fine tuning
 		rpnToDefault.put(0x0002, 0x4000); // channel coarse tuning
 		rpnToDefault.put(0x0005, 0x0040); // modulation depth range
+		
+		/////////////////////////////
+		// SysEx
+		/////////////////////////////
+		
+		// controller destination - type
+		sxCtrlDestToType.put( 0x00, TYPE_BYTE_SIGNED ); // 00: pitch control
+		sxCtrlDestToType.put( 0x01, TYPE_BYTE_SIGNED ); // 01: filter cutoff control
+		sxCtrlDestToType.put( 0x02, TYPE_BYTE_SIGNED ); // 02: amplitude control
+		sxCtrlDestToType.put( 0x03, TYPE_BYTE        ); // 03: LFO pitch depth
+		sxCtrlDestToType.put( 0x04, TYPE_BYTE        ); // 04: LFO filter depth
+		sxCtrlDestToType.put( 0x05, TYPE_BYTE        ); // 05: LFO amplitude depth
+		
+		// controller destination - min / max
+		applyDefaultMinAndMax(sxCtrlDestToType, sxCtrlDestToDefault, sxCtrlDestToMin, sxCtrlDestToMax);
+		
+		// controller destination - exceptions
+		sxCtrlDestToMin.put( 0x00, -24 ); // 00: pitch control
+		sxCtrlDestToMax.put( 0x00,  24 ); // 00: pitch control
 	}
 	
 	/**
@@ -695,7 +853,7 @@ public class EffectFlow {
 				minStructure.put(number, 0);
 				maxStructure.put(number, 127);
 			}
-			else if (TYPE_MSB_SIGNED == type) {
+			else if (TYPE_MSB_SIGNED == type || TYPE_BYTE_SIGNED == type) {
 				minStructure.put(number, -64);
 				maxStructure.put(number, 63);
 			}

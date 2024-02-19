@@ -1,4 +1,4 @@
 INCLUDE inc/instruments.midica
 
 
-0: bend_range.set(129.0)
+0: pitch_range.set(129.0)

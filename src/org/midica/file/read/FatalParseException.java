@@ -25,7 +25,7 @@ public class FatalParseException extends ParseException {
 	/**
 	 * Throws an exception including a detail message.
 	 * 
-	 * @param message
+	 * @param message  the error message
 	 */
 	public FatalParseException(String message) {
 		super(message + suffix);
@@ -33,7 +33,8 @@ public class FatalParseException extends ParseException {
 	
 	/**
 	 * Throws an exception caused by an InvalidMidiDataException.
-	 * @param e
+	 * 
+	 * @param e  the original exception
 	 */
 	public FatalParseException(InvalidMidiDataException e) {
 		super("Invalid MIDI data: " + e.getMessage() + suffix);

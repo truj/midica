@@ -75,8 +75,8 @@ public class MessageTableSorter<M> extends MidicaSorter<M> {
 		if (null == filterBoolean) {
 			
 			// string filter set?
-			if ( ! filterStr.contentEquals("") ) {
-				setRowFilter( RowFilter.regexFilter(filterStr) );
+			if (!filterStr.contentEquals("")) {
+				setRowFilter(RowFilter.regexFilter(filterStr));
 			}
 			return;
 		}
@@ -86,12 +86,14 @@ public class MessageTableSorter<M> extends MidicaSorter<M> {
 		channelFilters.clear();
 		
 		// show channel-independent messages?
-		boolean isFltrIndep = filterBoolean.get( InfoView.FILTER_CBX_CHAN_INDEP );
+		boolean isFltrIndep = filterBoolean.get(InfoView.FILTER_CBX_CHAN_INDEP);
 		if (isFltrIndep) {
 			channelFilters.add(new RowFilter<MessageTableModel, Integer>() {
 				@Override
 				public boolean include(Entry<? extends MessageTableModel, ? extends Integer> entry) {
-					Integer channel = (Integer) entry.getModel().getMsg( entry.getIdentifier() ).getOption( SingleMessage.OPT_CHANNEL );
+					Integer channel = (Integer) entry.getModel()
+							.getMsg(entry.getIdentifier())
+							.getOption(SingleMessage.OPT_CHANNEL);
 					if (null == channel)
 						return true;
 					return false;
@@ -100,9 +102,9 @@ public class MessageTableSorter<M> extends MidicaSorter<M> {
 		}
 		
 		// show channel messages?
-		for ( channel = 0; channel < 16; channel++ ) {
+		for (channel = 0; channel < 16; channel++) {
 			String name             = InfoView.FILTER_CBX_CHAN_PREFIX + channel;
-			boolean mustShowChannel = filterBoolean.get( name );
+			boolean mustShowChannel = filterBoolean.get(name);
 			if (mustShowChannel) {
 				channelFilters.add(new RowFilter<MessageTableModel, Integer>() {
 					
@@ -111,7 +113,9 @@ public class MessageTableSorter<M> extends MidicaSorter<M> {
 					
 					@Override
 					public boolean include(Entry<? extends MessageTableModel, ? extends Integer> entry) {
-						Integer channel = (Integer) entry.getModel().getMsg( entry.getIdentifier() ).getOption( SingleMessage.OPT_CHANNEL );
+						Integer channel = (Integer) entry.getModel()
+								.getMsg(entry.getIdentifier())
+								.getOption(SingleMessage.OPT_CHANNEL);
 						if (null == channel)
 							return false;
 						if (channel == filteredChannel)
@@ -123,15 +127,17 @@ public class MessageTableSorter<M> extends MidicaSorter<M> {
 		}
 		
 		// combine channel and channel-independent filters
-		andFilters.add( RowFilter.orFilter(channelFilters) );
+		andFilters.add(RowFilter.orFilter(channelFilters));
 		
 		// apply limit-ticks filter
-		boolean limitTicks = filterBoolean.get( InfoView.FILTER_CBX_LIMIT_TICKS  );
+		boolean limitTicks = filterBoolean.get(InfoView.FILTER_CBX_LIMIT_TICKS);
 		if (limitTicks) {
 			andFilters.add(new RowFilter<MessageTableModel, Integer>() {
 				@Override
 				public boolean include(Entry<? extends MessageTableModel, ? extends Integer> entry) {
-					long tick = (long) entry.getModel().getMsg( entry.getIdentifier() ).getOption( SingleMessage.OPT_TICK );
+					long tick = (long) entry.getModel()
+							.getMsg(entry.getIdentifier())
+							.getOption(SingleMessage.OPT_TICK);
 					if (tick < filterFrom)
 						return false;
 					if (tick > filterTo)
@@ -142,18 +148,20 @@ public class MessageTableSorter<M> extends MidicaSorter<M> {
 		}
 		
 		// apply node filter
-		boolean mustFilterNodes = filterBoolean.get( InfoView.FILTER_CBX_NODE );
+		boolean mustFilterNodes = filterBoolean.get(InfoView.FILTER_CBX_NODE);
 		if (mustFilterNodes) {
 			andFilters.add(new RowFilter<MessageTableModel, Integer>() {
 				@Override
 				public boolean include(Entry<? extends MessageTableModel, ? extends Integer> entry) {
 					
 					// get leaf node of the message
-					MessageTreeNode leaf = (MessageTreeNode) entry.getModel().getMsg( entry.getIdentifier() ).getOption( SingleMessage.OPT_LEAF_NODE );
+					MessageTreeNode leaf = (MessageTreeNode) entry.getModel()
+							.getMsg(entry.getIdentifier())
+							.getOption(SingleMessage.OPT_LEAF_NODE);
 					
 					// check if the leaf node is a descendant of one of the selected nodes
-					for ( MessageTreeNode node : filterNodes ) {
-						if ( leaf.isNodeAncestor(node) ) {
+					for (MessageTreeNode node : filterNodes) {
+						if (leaf.isNodeAncestor(node)) {
 							return true;
 						}
 					}
@@ -163,13 +171,15 @@ public class MessageTableSorter<M> extends MidicaSorter<M> {
 		}
 		
 		// apply limit-tracks filter
-		boolean limitTracks = filterBoolean.get( InfoView.FILTER_CBX_LIMIT_TRACKS );
+		boolean limitTracks = filterBoolean.get(InfoView.FILTER_CBX_LIMIT_TRACKS);
 		if (limitTracks) {
 			andFilters.add(new RowFilter<MessageTableModel, Integer>() {
 				@Override
 				public boolean include(Entry<? extends MessageTableModel, ? extends Integer> entry) {
-					Integer track = (Integer) entry.getModel().getMsg( entry.getIdentifier() ).getOption( SingleMessage.OPT_TRACK );
-					if ( filterTracks.contains(track) )
+					Integer track = (Integer) entry.getModel()
+							.getMsg(entry.getIdentifier())
+							.getOption(SingleMessage.OPT_TRACK);
+					if (filterTracks.contains(track))
 						return true;
 					return false;
 				}
@@ -177,8 +187,8 @@ public class MessageTableSorter<M> extends MidicaSorter<M> {
 		}
 		
 		// apply string filter
-		if ( ! filterStr.contentEquals("") ) {
-			andFilters.add( RowFilter.regexFilter(filterStr) );
+		if (!filterStr.contentEquals("")) {
+			andFilters.add(RowFilter.regexFilter(filterStr));
 		}
 		
 		// set resulting filter
