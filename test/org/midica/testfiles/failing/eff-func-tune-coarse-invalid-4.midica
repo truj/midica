@@ -1,4 +1,4 @@
 INCLUDE inc/instruments.midica
 
 
-0: coarse_tune.set(3.5)
+0: coarse_tune.set(+3.5)

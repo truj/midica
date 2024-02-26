@@ -35,6 +35,7 @@ public class EffectFlow {
 	public static final int TYPE_MSB_SIGNED  = 5;  // default: -64 - 63, double: -8192 - 8191
 	public static final int TYPE_BYTE        = 11; // 0 - 127
 	public static final int TYPE_BYTE_SIGNED = 13; // -64 - 63
+	public static final int TYPE_BYTE_FLEX   = 14; // signed (-64 - 63) or unsigned (0 - 127)
 	public static final int TYPE_ANY         = 15; // anything that fits in 7 bits
 	public static final int TYPE_NONE        = 17; // no value allowed (using 0 internally)
 	
@@ -196,7 +197,7 @@ public class EffectFlow {
 		// normal cases
 		if (TYPE_MSB == valueType || TYPE_MSB_SIGNED == valueType
 				|| TYPE_BYTE == valueType || TYPE_BYTE_SIGNED == valueType
-				|| TYPE_ANY == valueType) {
+				|| TYPE_BYTE_FLEX == valueType || TYPE_ANY == valueType) {
 			functions.add(FUNC_TYPE_SET);
 			functions.add(FUNC_TYPE_CONT);
 		}
@@ -264,6 +265,44 @@ public class EffectFlow {
 			if (0x00 == currentCtrlDestination)
 				return true;
 		}
+		
+		return false;
+	}
+	
+	/**
+	 * Determines if the given value type supports signed (+/-) parameters.
+	 * 
+	 * @param valueType  the effect's value type
+	 * @return **true** for types that support signed parameters, otherwise: **false**.
+	 */
+	public boolean supportsSign(int valueType) {
+		
+		// exception for mono_mode (type ANY)
+		if (EFF_TYPE_CTRL == effectType && 0x7E == effectNumber)
+			return false;
+		
+		if (requiresSign(valueType))
+			return true;
+		if (TYPE_BYTE_FLEX == valueType)
+			return true;
+		if (TYPE_ANY == valueType)
+			return true;
+		
+		return false;
+	}
+	
+	/**
+	 * Determines if the given value type requires signed (+/-) parameters.
+	 * 
+	 * @param valueType  the effect's value type
+	 * @return **true** for types that require signed parameters, otherwise: **false**.
+	 */
+	public boolean requiresSign(int valueType) {
+		
+		if (TYPE_MSB_SIGNED == valueType)
+			return true;
+		if (TYPE_BYTE_SIGNED == valueType)
+			return true;
 		
 		return false;
 	}
@@ -559,6 +598,7 @@ public class EffectFlow {
 	 * - {@link #TYPE_MSB_SIGNED}
 	 * - {@link #TYPE_BYTE}
 	 * - {@link #TYPE_BYTE_SIGNED}
+	 * - {@link #TYPE_BYTE_FLEX}
 	 * - {@link #TYPE_ANY}
 	 * - {@link #TYPE_NONE}
 	 * 
@@ -749,8 +789,16 @@ public class EffectFlow {
 			ctrlToType.put(i, TYPE_BOOLEAN);
 		}
 		
+		// sound variation: 0 to 127
+		ctrlToType.put(0x46, TYPE_BYTE);
+		
+		// signed simple controllers (values from -64 to 63)
+		for (int i = 0x47; i < 0x4F; i++) {
+			ctrlToType.put(i, TYPE_BYTE_SIGNED);
+		}
+		
 		// simple controllers (values from 0 to 127)
-		for (int i = 0x46; i < 0x50; i++) {
+		for (int i = 0x4F; i < 0x50; i++) {
 			ctrlToType.put(i, TYPE_BYTE);
 		}
 		
@@ -774,7 +822,7 @@ public class EffectFlow {
 			ctrlToType.put(i, TYPE_NONE);
 		}
 		
-		// exceptions for the above ranges
+		// exceptions for the above types
 		ctrlToType.put(0x08, TYPE_MSB_SIGNED); // balance
 		ctrlToType.put(0x0A, TYPE_MSB_SIGNED); // panorama
 		ctrlToType.put(0x54, TYPE_NONE);       // portamento ctrl
@@ -786,6 +834,11 @@ public class EffectFlow {
 		
 		// min / max
 		applyDefaultMinAndMax(ctrlToType, ctrlToDefault, ctrlToMin, ctrlToMax);
+		
+		// exceptions for default
+		ctrlToDefault.put(0x07, 0x64); // volume: 100
+		ctrlToDefault.put(0x0B, 0x7F); // vol (expression)
+		ctrlToDefault.put(0x5B, 0x28); // reverb
 		
 		// exceptions for max
 		ctrlToMax.put(0x7E, 16); // mono mode on - range: 0-16
@@ -824,7 +877,7 @@ public class EffectFlow {
 		sxCtrlDestToType.put( 0x00, TYPE_BYTE_SIGNED ); // 00: pitch control
 		sxCtrlDestToType.put( 0x01, TYPE_BYTE_SIGNED ); // 01: filter cutoff control
 		sxCtrlDestToType.put( 0x02, TYPE_BYTE_SIGNED ); // 02: amplitude control
-		sxCtrlDestToType.put( 0x03, TYPE_BYTE        ); // 03: LFO pitch depth
+		sxCtrlDestToType.put( 0x03, TYPE_BYTE_FLEX   ); // 03: LFO pitch depth
 		sxCtrlDestToType.put( 0x04, TYPE_BYTE        ); // 04: LFO filter depth
 		sxCtrlDestToType.put( 0x05, TYPE_BYTE        ); // 05: LFO amplitude depth
 		
@@ -849,7 +902,7 @@ public class EffectFlow {
 		for (int number : typeStructure.keySet()) {
 			int type = typeStructure.get(number);
 			defaultStructure.put(number, 0);
-			if (TYPE_BYTE == type || TYPE_MSB == type || TYPE_ANY == type) {
+			if (TYPE_BYTE == type || TYPE_MSB == type || TYPE_ANY == type || TYPE_BYTE_FLEX == type) {
 				minStructure.put(number, 0);
 				maxStructure.put(number, 127);
 			}

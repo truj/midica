@@ -1,4 +1,4 @@
 INCLUDE inc/instruments.midica
 
 
-0: balance.double.line(1,8192)
+0: balance.double.line(+1,+8192)

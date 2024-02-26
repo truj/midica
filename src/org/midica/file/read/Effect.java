@@ -268,27 +268,40 @@ public class Effect {
 			
 			// int pattern (for function parameters)
 			String intRegex = "^"
-				+ "(\\-?\\d+)"                  // direct int value (group 1)
+				+ "("                           // direct int value (group 1)
+				    + "(\\-|\\+)?"              // +/- sign (group 2)
+				    + "\\d+"
+				+ ")"
 				+ "|"
 				+ "(?:"
-				    + "(\\-?\\d+(?:\\.\\d+)?)"  // percentage value (group 2)
+				    + "("                       // percentage value (group 3)
+				        + "(\\-|\\+)?"          // +/- sign (group 4)
+				        + "\\d+(?:\\.\\d+)?"
+				    + ")"
 				    + Pattern.quote(MidicaPLParser.EFF_PERCENT)
 				+ ")"
 				+ "|"
-				+ "(\\-?\\d+\\.\\d+)"           // half-tone-steps (group 3)
+				+ "("                           // half-tone-steps (group 5)
+				    + "(\\-|\\+)?"              // +/- sign (group 6)
+				    + "\\d+\\.\\d+"
+				+ ")"
 				+ "|"
 				+ "(?:"
-				    + "(\\d+)"                   // MSB (group 4)
+				    + "(\\d+)"                  // MSB (group 7)
 				    + Pattern.quote(MidicaPLParser.FL_GEN_NUM_SEP)
-				    + "(\\d+)"                   // LSB (group 5)
+				    + "(\\d+)"                  // LSB (group 8)
 				+ ")"
 				+ "$";
 			intPattern = Pattern.compile(intRegex);
 			
 			// periods pattern (for function parameters)
 			String periodsRegex = "^"
-				+ "(\\-?\\d+(?:\\.\\d*))"     // int or float (group 1)
-				+ "("                         // percent (group 2)
+				+ "("                         // int or float (group 1)
+				    + "(\\-|\\+)?"            // +/- sign (group 2)
+				    + "\\d+"                  // integer part
+				    + "(?:\\.\\d*)?"          // decial part (optional)
+				+ ")"
+				+ "("                         // percent (group 3)
 				    + Pattern.quote(MidicaPLParser.EFF_PERCENT)
 				+ ")?"
 				+ "$";
@@ -1091,11 +1104,15 @@ public class Effect {
 	private static int[] parseIntParam(String valueStr) throws ParseException {
 		
 		// get range of the sound effect
-		int min = flow.getMin();
-		int max = flow.getMax();
+		int valueType = flow.getValueType(valueStr);
+		int min       = flow.getMin();
+		int max       = flow.getMax();
+		boolean requiresSign    = flow.requiresSign(valueType);
 		boolean supportsPercent = flow.supportsPercentage();
 		boolean canUseHalfTones = flow.supportsHalfToneSteps();
 		boolean isMsbLsb = false;
+		String  maxStr        = requiresSign ? "+" + max : max + "";
+		String  maxPercentStr = requiresSign ? "+100" : "100";
 		
 		// parse the parameter
 		Integer value = null;
@@ -1103,28 +1120,46 @@ public class Effect {
 			Matcher m = intPattern.matcher(valueStr);
 			if (m.matches()) {
 				String intStr      = m.group(1);
-				String percentStr  = m.group(2);
-				String halfToneStr = m.group(3);
-				String msbStr      = m.group(4);
-				String lsbStr      = m.group(5);
+				String sign1       = m.group(2);
+				String percentStr  = m.group(3);
+				String sign2       = m.group(4);
+				String halfToneStr = m.group(5);
+				String sign3       = m.group(6);
+				String msbStr      = m.group(7);
+				String lsbStr      = m.group(8);
+				
+				// check sign (+/-)
+				boolean isSigned     = (sign1 != null || sign2 != null || sign3 != null);
+				boolean isFlexSigned = isSigned && (EffectFlow.TYPE_ANY == valueType || EffectFlow.TYPE_BYTE_FLEX == valueType);
+				if (null == msbStr) {
+					if (isSigned && !flow.supportsSign(valueType))
+						throw new ParseException(Dict.get(Dict.ERROR_FUNC_SIGNED_FORBIDDEN) + valueStr);
+					if (!isSigned && flow.requiresSign(valueType))
+						throw new ParseException(Dict.get(Dict.ERROR_FUNC_SIGNED_REQUIRED) + valueStr);
+				}
+				
 				if (intStr != null) {
-					if (canUseHalfTones)
+					if (canUseHalfTones) {
 						value = parseHalfToneSteps(intStr);
-					else
+					}
+					else {
 						value = Integer.parseInt(intStr);
+						if (isFlexSigned)
+							value += 64;
+					}
 				}
 				else if (percentStr != null) {
 					float percent = Float.parseFloat(percentStr);
+					if (isFlexSigned)
+						percent = percent / 2 + 50;
 					
 					// check percentage input
 					if (!supportsPercent)
 						throw new ParseException(Dict.get(Dict.ERROR_FUNC_PERCENT_FORBIDDEN) + valueStr);
 					if (percent > 100)
-						throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), valueStr, 100 + MidicaPLParser.EFF_PERCENT));
+						throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), valueStr, maxPercentStr + MidicaPLParser.EFF_PERCENT));
 					if (percent < -100 && min < 0)
 						throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), valueStr, -100 + MidicaPLParser.EFF_PERCENT));
-					if (percent < 0 && 0 == min)
-						throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), valueStr, 0 + MidicaPLParser.EFF_PERCENT));
 					
 					// calculate value
 					if (percent < 0)
@@ -1170,10 +1205,9 @@ public class Effect {
 		if (value < min)
 			throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), valueStr, min));
 		if (value > max && !isMsbLsb)
-			throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), valueStr, max));
+			throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), valueStr, maxStr));
 		
 		// adjust the actual MIDI value for signed types
-		int valueType = flow.getValueType(valueStr);
 		if (EffectFlow.TYPE_MSB_SIGNED == valueType && !isMsbLsb) {
 			if (flow.isDouble())
 				value += 8192;
@@ -1272,7 +1306,7 @@ public class Effect {
 			if (halfToneSteps < -1.0)
 				throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), halfToneStr, -1.0));
 			if (halfToneSteps > 1.0)
-				throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), halfToneStr, 1.0));
+				throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), halfToneStr, "+1.0"));
 			
 			return Math.round(halfToneSteps * max);
 		}
@@ -1350,21 +1384,22 @@ public class Effect {
 			Matcher m = periodsPattern.matcher(valueStr);
 			if (m.matches()) {
 				String floatStr   = m.group(1);
-				String percentStr = m.group(2);
+				String sign       = m.group(2);
+				String percentStr = m.group(3);
 				float  periods;
-				if (floatStr != null) {
-					periods = Float.parseFloat(floatStr);
-					if (periods < 0) {
-						throw new ParseException(Dict.get(Dict.ERROR_FUNC_PERIODS_NEG) + valueStr);
-					}
-					if (Float.isInfinite(periods)) {
-						throw new ParseException(Dict.get(Dict.ERROR_FUNC_PERIODS_NO_NUMBER) + valueStr);
-					}
-					if (percentStr != null) {
-						periods /= 100;
-					}
-					return periods;
+				if (sign != null)
+					throw new ParseException(Dict.get(Dict.ERROR_FUNC_PERIODS_SIGNED) + valueStr);
+				
+				periods = Float.parseFloat(floatStr);
+				if (periods <= 0)
+					throw new ParseException(Dict.get(Dict.ERROR_FUNC_PERIODS_NOT_POS) + valueStr);
+				if (Float.isInfinite(periods))
+					throw new ParseException(Dict.get(Dict.ERROR_FUNC_PERIODS_NO_NUMBER) + valueStr);
+				if (percentStr != null) {
+					periods /= 100;
 				}
+				
+				return periods;
 			}
 		}
 		catch (NumberFormatException e) {

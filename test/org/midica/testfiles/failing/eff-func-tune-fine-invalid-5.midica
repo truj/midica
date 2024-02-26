@@ -1,4 +1,4 @@
 INCLUDE inc/instruments.midica
 
 
-0: fine_tune.double.set(2)
+0: fine_tune.double.set(+2)

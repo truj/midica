@@ -1,4 +1,4 @@
 INCLUDE inc/instruments.midica
 
 
-0: fine_tune.set(101%)
+0: fine_tune.set(+101%)

@@ -19,7 +19,7 @@ INSTRUMENT 1 VIOLIN
 0: .wait.set(124.998)
 0: .wait.set(4.997)
 0: .wait.set(127.990)
-0: .wait.set(-0.000001)
+0: .wait.set(0.000001)
 0: .wait.set(127)
 
 // generic RPN
@@ -45,26 +45,26 @@ INSTRUMENT 1 VIOLIN
 // single byte
 	1: (l=range:_2.0\c_percentage\c_single:\r) -
 	1: pitch.set(-100%)  (l=-100%_c_)  c
-//	1: pitch.set(0)      (l=0_a#_)     a#-
+//	1: pitch.set(+0)     (l=+0_a#_)    a#-
 	1: pitch.set(-50%)   (l=-50%_c_)   c
-//	1: pitch.set(0)      (l=0_b_)      b-
-	1: pitch.set(0%)     (l=0%_c_)     c
-	1: pitch.set(50%)    (l=50%_c_)    c
-//	1: pitch.set(0)      (l=0_c#_)     c#
-	1: pitch.set(100%)   (l=100%_c_)   c
-//	1: pitch.set(0)      (l=0_d_)      d
+//	1: pitch.set(+0)     (l=+0_b_)     b-
+	1: pitch.set(+0%)    (l=+0%_c_)    c
+	1: pitch.set(+50%)   (l=+50%_c_)   c
+//	1: pitch.set(+0)     (l=+0_c#_)    c#
+	1: pitch.set(+100%)  (l=+100%_c_)  c
+//	1: pitch.set(+0)     (l=+0_d_)     d
 
 // double
 	1: (l=\rrange:_2.0\c_percentage\c_double:\r) -
 	1: pitch.double.set(-100%)  (l=-100%_c_) c
-//	1: pitch.double.set(0)      (l=0_a#_)    a#-
+//	1: pitch.double.set(+0)     (l=+0_a#_)   a#-
 	1: pitch.double.set(-50%)   (l=-50%_c_)  c
-//	1: pitch.double.set(0)      (l=0_b_)     b-
-	1: pitch.double.set(0%)     (l=0%_c_)    c
-	1: pitch.double.set(50%)    (l=50%_c_)   c
-//	1: pitch.double.set(0)      (l=0_c#_)    c#
-	1: pitch.double.set(100%)   (l=100%_c_)  c
-//	1: pitch.double.set(0)      (l=0_d_)     d
+//	1: pitch.double.set(+0)     (l=+0_b_)    b-
+	1: pitch.double.set(-0%)    (l=-0%_c_)   c
+	1: pitch.double.set(+50%)   (l=+50%_c_)  c
+//	1: pitch.double.set(+0)     (l=+0_c#_)   c#
+	1: pitch.double.set(+100%)  (l=+100%_c_) c
+//	1: pitch.double.set(+0)     (l=+0_d_)    d
 
 // MSB / LSB
 /////////////////////
@@ -89,27 +89,27 @@ INSTRUMENT 1 VIOLIN
 // single byte
 	1:                  (l=\r2.7\c_single:\r) -
 	1: pitch.set(-2.0)   (l=-2.0_c_)  c
-//	1: pitch.set(0)      (l=0_a#_)    a#-
+//	1: pitch.set(+0)     (l=0_a#_)    a#-
 	1: pitch.set(-1.0)   (l=-1.0_c_)  c
-//	1: pitch.set(0)      (l=0_b_)     b-
-	1: pitch.set(0)      (l=0_c_)     c
-	1: pitch.set(1.0)    (l=1.0_c_)   c
-//	1: pitch.set(0)      (l=0_c#_)    c#
-	1: pitch.set(2.0)    (l=2.0_c_)   c
-//	1: pitch.set(0)      (l=0_d_)     d
+//	1: pitch.set(+0)     (l=+0_b_)    b-
+	1: pitch.set(+0)     (l=+0_c_)    c
+	1: pitch.set(+1.0)   (l=+1.0_c_)  c
+//	1: pitch.set(+0)     (l=+0_c#_)   c#
+	1: pitch.set(+2.0)   (l=+2.0_c_)  c
+//	1: pitch.set(+0)     (l=+0_d_)    d
 
 
 // double
 	1:                         (l=\r2.7\c_double:\r) -
 	1: pitch.double.set(-2.0)   (l=-2.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_a#_)    a#-
+//	1: pitch.double.set(+0)     (l=0_a#_)    a#-
 	1: pitch.double.set(-1)     (l=-1_c_)    c
-//	1: pitch.double.set(0)      (l=0_b_)     b-
-	1: pitch.double.set(0)      (l=0_c_)     c
-	1: pitch.double.set(1.0)    (l=1.0_c_)   c
-//	1: pitch.double.set(0)      (l=0_c#_)    c#
-	1: pitch.double.set(2)      (l=2_c_)     c
-//	1: pitch.double.set(0)      (l=0_d_)     d
+//	1: pitch.double.set(+0)     (l=+0_b_)    b-
+	1: pitch.double.set(+0)     (l=+0_c_)    c
+	1: pitch.double.set(+1.0)   (l=+1.0_c_)  c
+//	1: pitch.double.set(+0)     (l=+0_c#_)   c#
+	1: pitch.double.set(+2)     (l=+2_c_)    c
+//	1: pitch.double.set(+0)     (l=+0_d_)    d
 
 // 4.0
 /////////////////////
@@ -118,35 +118,35 @@ INSTRUMENT 1 VIOLIN
 // single byte
 	1:                  (l=\r4.0\c_single:\r) -
 	1: pitch.set(-4.0)   (l=-4.0_c_)  c
-//	1: pitch.set(0)      (l=0_g#-_)   g#-
+//	1: pitch.set(+0)     (l=+0_g#-_)  g#-
 	1: pitch.set(-2)     (l=-2_c_)    c
-//	1: pitch.set(0)      (l=0_a#_)    a#-
+//	1: pitch.set(+0)     (l=+0_a#_)   a#-
 	1: pitch.set(-1.0)   (l=-1.0_c_)  c
-//	1: pitch.set(0)      (l=0_b_)     b-
-	1: pitch.set(0)      (l=0_c_)     c
-	1: pitch.set(1.0)    (l=1.0_c_)   c
-//	1: pitch.set(0)      (l=0_c#_)    c#
-	1: pitch.set(2.0)    (l=2.0_c_)   c
-//	1: pitch.set(0)      (l=0_d_)     d
-	1: pitch.set(4)      (l=4_c_)     c
-//	1: pitch.set(0)      (l=0_e_)     e
+//	1: pitch.set(+0)     (l=+0_b_)    b-
+	1: pitch.set(+0)     (l=+0_c_)    c
+	1: pitch.set(+1.0)   (l=+1.0_c_)  c
+//	1: pitch.set(+0)     (l=+0_c#_)   c#
+	1: pitch.set(+2.0)   (l=+2.0_c_)  c
+//	1: pitch.set(+0)     (l=+0_d_)    d
+	1: pitch.set(+4)     (l=+4_c_)    c
+//	1: pitch.set(+0)     (l=+0_e_)    e
 
 
 // double
 	1:                         (l=\r4.0\c_double:\r) -
 	1: pitch.double.set(-4.0)   (l=-4.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_g#-_)   g#-
+//	1: pitch.double.set(+0)     (l=+0_g#-_)  g#-
 	1: pitch.double.set(-2.0)   (l=-2.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_a#_)    a#-
+//	1: pitch.double.set(+0)     (l=+0_a#_)   a#-
 	1: pitch.double.set(-1.0)   (l=-1.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_b_)     b-
-	1: pitch.double.set(0)      (l=0_c_)     c
-	1: pitch.double.set(1.0)    (l=1.0_c_)   c
-//	1: pitch.double.set(0)      (l=0_c#_)    c#
-	1: pitch.double.set(2.0)    (l=2.0_c_)   c
-//	1: pitch.double.set(0)      (l=0_d_)     d
-	1: pitch.double.set(4.0)    (l=4.0_c_)   c
-//	1: pitch.double.set(0)      (l=0_e_)     e
+//	1: pitch.double.set(+0)     (l=+0_b_)    b-
+	1: pitch.double.set(+0)     (l=+0_c_)    c
+	1: pitch.double.set(+1.0)   (l=+1.0_c_)  c
+//	1: pitch.double.set(+0)     (l=+0_c#_)   c#
+	1: pitch.double.set(+2.0)   (l=+2.0_c_)  c
+//	1: pitch.double.set(+0)     (l=+0_d_)    d
+	1: pitch.double.set(+4.0)   (l=+4.0_c_)  c
+//	1: pitch.double.set(+0)     (l=+0_e_)    e
 
 // 8.0
 /////////////////////
@@ -155,34 +155,34 @@ INSTRUMENT 1 VIOLIN
 // single byte
 	1:                  (l=\r8.0\c_single:\r) -
 	1: pitch.set(-8.0)   (l=-8.0_c_)  c
-//	1: pitch.set(0)      (l=0_e-_)    e-
+//	1: pitch.set(+0)     (l=+0_e-_)   e-
 	1: pitch.set(-2.0)   (l=-2.0_c_)  c
-//	1: pitch.set(0)      (l=0_a#_)    a#-
+//	1: pitch.set(+0)     (l=+0_a#_)   a#-
 	1: pitch.set(-1.0)   (l=-1.0_c_)  c
-//	1: pitch.set(0)      (l=0_b_)     b-
-	1: pitch.set(0)      (l=0_c_)     c
-	1: pitch.set(1.0)    (l=1.0_c_)   c
-//	1: pitch.set(0)      (l=0_c#_)    c#
-	1: pitch.set(2.0)    (l=2.0_c_)   c
-//	1: pitch.set(0)      (l=0_d_)     d
-	1: pitch.set(8.0)    (l=8.0_c_)   c
-//	1: pitch.set(0)      (l=0_g#_)    g#
+//	1: pitch.set(+0)     (l=+0_b_)    b-
+	1: pitch.set(+0)     (l=+0_c_)    c
+	1: pitch.set(+1.0)   (l=+1.0_c_)  c
+//	1: pitch.set(+0)     (l=+0_c#_)   c#
+	1: pitch.set(+2.0)   (l=+2.0_c_)  c
+//	1: pitch.set(+0)     (l=+0_d_)    d
+	1: pitch.set(+8.0)   (l=+8.0_c_)  c
+//	1: pitch.set(+0)     (l=+0_g#_)   g#
 
 // double
 	1:                         (l=\r8.0\c_double:\r) -
 	1: pitch.double.set(-8.0)   (l=-8.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_e-_)    e-
+//	1: pitch.double.set(+0)     (l=+0_e-_)   e-
 	1: pitch.double.set(-2.0)   (l=-2.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_a#_)    a#-
+//	1: pitch.double.set(+0)     (l=+0_a#_)   a#-
 	1: pitch.double.set(-1.0)   (l=-1.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_b_)     b-
-	1: pitch.double.set(0)      (l=0_c_)     c
-	1: pitch.double.set(1.0)    (l=1.0_c_)   c
-//	1: pitch.double.set(0)      (l=0_c#_)    c#
-	1: pitch.double.set(2.0)    (l=2.0_c_)   c
-//	1: pitch.double.set(0)      (l=0_d_)     d
-	1: pitch.double.set(8.0)    (l=8.0_c_)   c
-//	1: pitch.double.set(0)      (l=0_g#_)    g#
+//	1: pitch.double.set(+0)     (l=+0_b_)    b-
+	1: pitch.double.set(+0)     (l=+0_c_)    c
+	1: pitch.double.set(+1.0)   (l=+1.0_c_)  c
+//	1: pitch.double.set(+0)     (l=+0_c#_)   c#
+	1: pitch.double.set(+2.0)   (l=+2.0_c_)  c
+//	1: pitch.double.set(+0)     (l=+0_d_)    d
+	1: pitch.double.set(+8.0)   (l=+8.0_c_)  c
+//	1: pitch.double.set(+0)     (l=+0_g#_)   g#
 
 // 12.0
 /////////////////////
@@ -191,18 +191,18 @@ INSTRUMENT 1 VIOLIN
 // single byte
 	1:                  (l=\r12.0\c_single:\r) -
 	1: pitch.set(-12.0)  (l=-12.0_c_) c
-//	1: pitch.set(0)      (l=0_c-_)    c-
-	1: pitch.set(0)      (l=0_c_)     c
-	1: pitch.set(12.0)   (l=12.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+_)    c+
+//	1: pitch.set(+0)     (l=+0_c-_)   c-
+	1: pitch.set(+0)     (l=+0_c_)    c
+	1: pitch.set(+12.0)  (l=+12.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+_)   c+
 
 // double
 	1:                         (l=\r12.0\c_double:\r) -
 	1: pitch.double.set(-12.0)  (l=-12.0_c_) c
-//	1: pitch.set(0)             (l=0_c-_)    c-
-	1: pitch.double.set(0)      (l=0_c_)     c
-	1: pitch.double.set(12.0)   (l=12.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+_)    c+
+//	1: pitch.set(+0)            (l=+0_c-_)   c-
+	1: pitch.double.set(+0)     (l=+0_c_)    c
+	1: pitch.double.set(+12.0)  (l=+12.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+_)   c+
 
 // 24.0
 /////////////////////
@@ -211,26 +211,26 @@ INSTRUMENT 1 VIOLIN
 // single byte
 	1:                  (l=\r24.0\c_single:\r) -
 	1: pitch.set(-24.0)  (l=-24.0_c_) c
-//	1: pitch.set(0)      (l=0_c-2_)   c-2
+//	1: pitch.set(+0)     (l=+0_c-2_)  c-2
 	1: pitch.set(-12.0)  (l=-12.0_c_) c
-//	1: pitch.set(0)      (l=0_c-_)    c-
-	1: pitch.set(0)      (l=0_c_)     c
-	1: pitch.set(12.0)   (l=12.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+_)    c+
-	1: pitch.set(24.0)   (l=24.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+2_)   c+2
+//	1: pitch.set(+0)     (l=+0_c-_)   c-
+	1: pitch.set(+0)     (l=+0_c_)    c
+	1: pitch.set(+12.0)  (l=+12.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+_)   c+
+	1: pitch.set(+24.0)  (l=+24.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+2_)  c+2
 
 // double
 	1:                         (l=\r24.0\c_double:\r) -
 	1: pitch.double.set(-24.0)  (l=-24.0_c_) c
-//	1: pitch.double.set(0)      (l=0_c-2_)   c-2
+//	1: pitch.double.set(+0)     (l=+0_c-2_)  c-2
 	1: pitch.double.set(-12.0)  (l=-12.0_c_) c
-//	1: pitch.double.set(0)      (l=0_c-_)    c-
-	1: pitch.double.set(0)      (l=0_c_)     c
-	1: pitch.double.set(12.0)   (l=12.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+_)    c+
-	1: pitch.double.set(24.0)   (l=24.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+2_)   c+2
+//	1: pitch.double.set(+0)     (l=+0_c-_)   c-
+	1: pitch.double.set(+0)     (l=+0_c_)    c
+	1: pitch.double.set(+12.0)  (l=+12.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+_)   c+
+	1: pitch.double.set(+24.0)  (l=+24.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+2_)  c+2
 
 // 36.0
 /////////////////////
@@ -239,34 +239,34 @@ INSTRUMENT 1 VIOLIN
 // single byte
 	1:                  (l=\r36.0\c_single:\r) -
 	1: pitch.set(-36.0)  (l=-36.0_c_) c
-//	1: pitch.set(0)      (l=0_c-3_)   c-3
+//	1: pitch.set(+0)     (l=+0_c-3_)  c-3
 	1: pitch.set(-24.0)  (l=-24.0_c_) c
-//	1: pitch.set(0)      (l=0_c-2_)   c-2
+//	1: pitch.set(+0)     (l=+0_c-2_)  c-2
 	1: pitch.set(-12.0)  (l=-12.0_c_) c
-//	1: pitch.set(0)      (l=0_c-_)    c-
-	1: pitch.set(0)      (l=0_c_)     c
-	1: pitch.set(12.0)   (l=12.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+_)    c+
-	1: pitch.set(24.0)   (l=24.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+2_)   c+2
-	1: pitch.set(36.0)   (l=36.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+3_)   c+3
+//	1: pitch.set(+0)     (l=+0_c-_)   c-
+	1: pitch.set(+0)     (l=+0_c_)    c
+	1: pitch.set(+12.0)  (l=+12.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+_)   c+
+	1: pitch.set(+24.0)  (l=+24.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+2_)  c+2
+	1: pitch.set(+36.0)  (l=+36.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+3_)  c+3
 
 // double
 	1:                         (l=\r36.0\c_double:\r) -
 	1: pitch.double.set(-36.0)  (l=-36.0_c_) c
-//	1: pitch.double.set(0)      (l=0_c-3_)   c-3
+//	1: pitch.double.set(+0)     (l=+0_c-3_)  c-3
 	1: pitch.double.set(-24.0)  (l=-24.0_c_) c
-//	1: pitch.double.set(0)      (l=0_c-2_)   c-2
+//	1: pitch.double.set(+0)     (l=+0_c-2_)  c-2
 	1: pitch.double.set(-12.0)  (l=-12.0_c_) c
-//	1: pitch.double.set(0)      (l=0_c-_)    c-
-	1: pitch.double.set(0)      (l=0_c_)     c
-	1: pitch.double.set(12.0)   (l=12.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+_)    c+
-	1: pitch.double.set(24.0)   (l=24.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+2_)   c+2
-	1: pitch.double.set(36.0)   (l=36.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+3_)   c+3
+//	1: pitch.double.set(+0)     (l=+0_c-_)   c-
+	1: pitch.double.set(+0)     (l=+0_c_)    c
+	1: pitch.double.set(+12.0)  (l=+12.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+_)   c+
+	1: pitch.double.set(+24.0)  (l=+24.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+2_)  c+2
+	1: pitch.double.set(+36.0)  (l=+36.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+3_)  c+3
 
 // 48.0
 /////////////////////
@@ -275,42 +275,42 @@ INSTRUMENT 1 VIOLIN
 // single byte
 	1:                  (l=\r48.0\c_single:\r) -
 	1: pitch.set(-48.0)  (l=-48.0_c_) c
-//	1: pitch.set(0)      (l=0_c-3_)   c-4
+//	1: pitch.set(+0)     (l=+0_c-3_)  c-4
 	1: pitch.set(-36.0)  (l=-36.0_c_) c
-//	1: pitch.set(0)      (l=0_c-3_)   c-3
+//	1: pitch.set(+0)     (l=+0_c-3_)  c-3
 	1: pitch.set(-24.0)  (l=-24.0_c_) c
-//	1: pitch.set(0)      (l=0_c-2_)   c-2
+//	1: pitch.set(+0)     (l=+0_c-2_)  c-2
 	1: pitch.set(-12.0)  (l=-12.0_c_) c
-//	1: pitch.set(0)      (l=0_c-_)    c-
-	1: pitch.set(0)      (l=0_c_)     c
-	1: pitch.set(12.0)   (l=12.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+_)    c+
-	1: pitch.set(24.0)   (l=24.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+2_)   c+2
-	1: pitch.set(36.0)   (l=36.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+3_)   c+3
-	1: pitch.set(48.0)   (l=48.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+4_)   c+4
+//	1: pitch.set(+0)     (l=+0_c-_)   c-
+	1: pitch.set(+0)     (l=+0_c_)    c
+	1: pitch.set(+12.0)  (l=+12.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+_)   c+
+	1: pitch.set(+24.0)  (l=+24.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+2_)  c+2
+	1: pitch.set(+36.0)  (l=+36.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+3_)  c+3
+	1: pitch.set(+48.0)  (l=+48.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+4_)  c+4
 
 // double
 	1:                         (l=\r48.0\c_double:\r) -
 	1: pitch.double.set(-48.0)  (l=-48.0_c_) c
-//	1: pitch.double.set(0)      (l=0_c-3_)   c-4
+//	1: pitch.double.set(+0)     (l=+0_c-3_)  c-4
 	1: pitch.double.set(-36.0)  (l=-36.0_c_) c
-//	1: pitch.double.set(0)      (l=0_c-3_)   c-3
+//	1: pitch.double.set(+0)     (l=+0_c-3_)  c-3
 	1: pitch.double.set(-24.0)  (l=-24.0_c_) c
-//	1: pitch.double.set(0)      (l=0_c-2_)   c-2
+//	1: pitch.double.set(+0)     (l=+0_c-2_)  c-2
 	1: pitch.double.set(-12.0)  (l=-12.0_c_) c
-//	1: pitch.double.set(0)      (l=0_c-_)    c-
-	1: pitch.double.set(0)      (l=0_c_)     c
-	1: pitch.double.set(12.0)   (l=12.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+_)    c+
-	1: pitch.double.set(24.0)   (l=24.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+2_)   c+2
-	1: pitch.double.set(36.0)   (l=36.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+3_)   c+3
-	1: pitch.double.set(48.0)   (l=48.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+4_)   c+4
+//	1: pitch.double.set(+0)     (l=+0_c-_)   c-
+	1: pitch.double.set(+0)     (l=+0_c_)    c
+	1: pitch.double.set(+12.0)  (l=+12.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+_)   c+
+	1: pitch.double.set(+24.0)  (l=+24.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+2_)  c+2
+	1: pitch.double.set(+36.0)  (l=+36.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+3_)  c+3
+	1: pitch.double.set(+48.0)  (l=+48.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+4_)  c+4
 
 // 60.0
 /////////////////////
@@ -319,50 +319,50 @@ INSTRUMENT 1 VIOLIN
 // single byte
 	1:                  (l=\r60.0\c_single:\r) -
 	1: pitch.set(-60.0)  (l=-60.0_c_) c
-//	1: pitch.set(0)      (l=0_c-5_)   c-5
+//	1: pitch.set(+0)     (l=+0_c-5_)  c-5
 	1: pitch.set(-48.0)  (l=-48.0_c_) c
-//	1: pitch.set(0)      (l=0_c-3_)   c-4
+//	1: pitch.set(+0)     (l=+0_c-3_)  c-4
 	1: pitch.set(-36.0)  (l=-36.0_c_) c
-//	1: pitch.set(0)      (l=0_c-3_)   c-3
+//	1: pitch.set(+0)     (l=+0_c-3_)  c-3
 	1: pitch.set(-24.0)  (l=-24.0_c_) c
-//	1: pitch.set(0)      (l=0_c-2_)   c-2
+//	1: pitch.set(+0)     (l=+0_c-2_)  c-2
 	1: pitch.set(-12.0)  (l=-12.0_c_) c
-//	1: pitch.set(0)      (l=0_c-_)    c-
-	1: pitch.set(0)      (l=0_c_)     c
-	1: pitch.set(12.0)   (l=12.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+_)    c+
-	1: pitch.set(24.0)   (l=24.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+2_)   c+2
-	1: pitch.set(36.0)   (l=36.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+3_)   c+3
-	1: pitch.set(48.0)   (l=48.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+4_)   c+4
-	1: pitch.set(60.0)   (l=60.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+5_)   c+5
+//	1: pitch.set(+0)     (l=+0_c-_)   c-
+	1: pitch.set(+0)     (l=+0_c_)    c
+	1: pitch.set(+12.0)  (l=+12.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+_)   c+
+	1: pitch.set(+24.0)  (l=+24.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+2_)  c+2
+	1: pitch.set(+36.0)  (l=+36.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+3_)  c+3
+	1: pitch.set(+48.0)  (l=+48.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+4_)  c+4
+	1: pitch.set(+60.0)  (l=+60.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+5_)  c+5
 
 // double
 	1:                         (l=\r60.0\c_double:\r) -
 	1: pitch.double.set(-60.0)  (l=-60.0_c_) c
-//	1: pitch.double.set(0)      (l=0_c-5_)   c-5
+//	1: pitch.double.set(+0)     (l=+0_c-5_)  c-5
 	1: pitch.double.set(-48.0)  (l=-48.0_c_) c
-//	1: pitch.double.set(0)      (l=0_c-3_)   c-4
+//	1: pitch.double.set(+0)     (l=+0_c-3_)  c-4
 	1: pitch.double.set(-36.0)  (l=-36.0_c_) c
-//	1: pitch.double.set(0)      (l=0_c-3_)   c-3
+//	1: pitch.double.set(+0)     (l=+0_c-3_)  c-3
 	1: pitch.double.set(-24.0)  (l=-24.0_c_) c
-//	1: pitch.double.set(0)      (l=0_c-2_)   c-2
+//	1: pitch.double.set(+0)     (l=+0_c-2_)  c-2
 	1: pitch.double.set(-12.0)  (l=-12.0_c_) c
-//	1: pitch.double.set(0)      (l=0_c-_)    c-
-	1: pitch.double.set(0)      (l=0_c_)     c
-	1: pitch.double.set(12.0)   (l=12.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+_)    c+
-	1: pitch.double.set(24.0)   (l=24.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+2_)   c+2
-	1: pitch.double.set(36.0)   (l=36.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+3_)   c+3
-	1: pitch.double.set(48.0)   (l=48.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+4_)   c+4
-	1: pitch.double.set(60.0)   (l=60.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+5_)   c+5
+//	1: pitch.double.set(+0)     (l=+0_c-_)   c-
+	1: pitch.double.set(+0)     (l=+0_c_)    c
+	1: pitch.double.set(+12.0)  (l=+12.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+_)   c+
+	1: pitch.double.set(+24.0)  (l=+24.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+2_)  c+2
+	1: pitch.double.set(+36.0)  (l=+36.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+3_)  c+3
+	1: pitch.double.set(+48.0)  (l=+48.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+4_)  c+4
+	1: pitch.double.set(+60.0)  (l=+60.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+5_)  c+5
 
 // 127.99
 /////////////////////
@@ -371,48 +371,48 @@ INSTRUMENT 1 VIOLIN
 // single byte
 	1:                  (l=\r127.99\c_single:\r) -
 	1: pitch.set(-60.0)  (l=-60.0_c_) c
-//	1: pitch.set(0)      (l=0_c-5_)   c-5
+//	1: pitch.set(+0)     (l=+0_c-5_)  c-5
 	1: pitch.set(-48.0)  (l=-48.0_c_) c
-//	1: pitch.set(0)      (l=0_c-3_)   c-4
+//	1: pitch.set(+0)     (l=+0_c-3_)  c-4
 	1: pitch.set(-36.0)  (l=-36.0_c_) c
-//	1: pitch.set(0)      (l=0_c-3_)   c-3
+//	1: pitch.set(+0)     (l=+0_c-3_)  c-3
 	1: pitch.set(-24.0)  (l=-24.0_c_) c
-//	1: pitch.set(0)      (l=0_c-2_)   c-2
+//	1: pitch.set(+0)     (l=+0_c-2_)  c-2
 	1: pitch.set(-12.0)  (l=-12.0_c_) c
-//	1: pitch.set(0)      (l=0_c-_)    c-
-	1: pitch.set(0)      (l=0_c_)     c
-	1: pitch.set(12.0)   (l=12.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+_)    c+
-	1: pitch.set(24.0)   (l=24.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+2_)   c+2
-	1: pitch.set(36.0)   (l=36.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+3_)   c+3
-	1: pitch.set(48.0)   (l=48.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+4_)   c+4
-	1: pitch.set(60.0)   (l=60.0_c_)  c
-//	1: pitch.set(0)      (l=0_c+5_)   c+5
+//	1: pitch.set(+0)     (l=+0_c-_)   c-
+	1: pitch.set(+0)     (l=+0_c_)    c
+	1: pitch.set(+12.0)  (l=+12.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+_)   c+
+	1: pitch.set(+24.0)  (l=+24.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+2_)  c+2
+	1: pitch.set(+36.0)  (l=+36.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+3_)  c+3
+	1: pitch.set(+48.0)  (l=+48.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+4_)  c+4
+	1: pitch.set(+60.0)  (l=+60.0_c_) c
+//	1: pitch.set(+0)     (l=+0_c+5_)  c+5
 
 // double
 	1:                         (l=\r127.99\c_double:\r) -
 	1: pitch.double.set(-60.0)  (l=-60.0_c_) c
-//	1: pitch.double.set(0)      (l=0_c-5_)   c-5
+//	1: pitch.double.set(+0)     (l=+0_c-5_)  c-5
 	1: pitch.double.set(-48.0)  (l=-48.0_c_) c
-//	1: pitch.double.set(0)      (l=0_c-3_)   c-4
+//	1: pitch.double.set(+0)     (l=+0_c-3_)  c-4
 	1: pitch.double.set(-36.0)  (l=-36.0_c_) c
-//	1: pitch.double.set(0)      (l=0_c-3_)   c-3
+//	1: pitch.double.set(+0)     (l=+0_c-3_)  c-3
 	1: pitch.double.set(-24.0)  (l=-24.0_c_) c
-//	1: pitch.double.set(0)      (l=0_c-2_)   c-2
+//	1: pitch.double.set(+0)     (l=+0_c-2_)  c-2
 	1: pitch.double.set(-12.0)  (l=-12.0_c_) c
-//	1: pitch.double.set(0)      (l=0_c-_)    c-
-	1: pitch.double.set(0)      (l=0_c_)     c
-	1: pitch.double.set(12.0)   (l=12.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+_)    c+
-	1: pitch.double.set(24.0)   (l=24.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+2_)   c+2
-	1: pitch.double.set(36.0)   (l=36.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+3_)   c+3
-	1: pitch.double.set(48.0)   (l=48.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+4_)   c+4
-	1: pitch.double.set(60.0)   (l=60.0_c_)  c
-//	1: pitch.double.set(0)      (l=0_c+5_)   c+5
+//	1: pitch.double.set(+0)     (l=+0_c-_)   c-
+	1: pitch.double.set(+0)     (l=+0_c_)    c
+	1: pitch.double.set(+12.0)  (l=+12.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+_)   c+
+	1: pitch.double.set(+24.0)  (l=+24.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+2_)  c+2
+	1: pitch.double.set(+36.0)  (l=+36.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+3_)  c+3
+	1: pitch.double.set(+48.0)  (l=+48.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+4_)  c+4
+	1: pitch.double.set(+60.0)  (l=+60.0_c_) c
+//	1: pitch.double.set(+0)     (l=+0_c+5_)  c+5
 

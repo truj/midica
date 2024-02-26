@@ -1764,6 +1764,8 @@ public class Dict {
 	public static final String ERROR_FUNC_NOT_SUPPORTED_BY_EFF   = "error_func_not_supported_by_eff";
 	public static final String ERROR_FUNC_VAL_LOWER_MIN          = "error_func_val_lower_min";
 	public static final String ERROR_FUNC_VAL_GREATER_MAX        = "error_func_val_greater_max";
+	public static final String ERROR_FUNC_SIGNED_FORBIDDEN       = "error_func_signed_forbidden";
+	public static final String ERROR_FUNC_SIGNED_REQUIRED        = "error_func_signed_required";
 	public static final String ERROR_FUNC_PERCENT_FORBIDDEN      = "error_func_percent_forbidden";
 	public static final String ERROR_FUNC_BROKEN_HALFTONE        = "error_func_broken_halftone";
 	public static final String ERROR_FUNC_HALFTONE_NOT_ALLOWED   = "error_func_halftone_not_allowed";
@@ -1772,7 +1774,8 @@ public class Dict {
 	public static final String ERROR_FUNC_MSB_TOO_HIGH           = "error_func_msb_too_high";
 	public static final String ERROR_FUNC_LSB_TOO_HIGH           = "error_func_lsb_too_high";
 	public static final String ERROR_FUNC_NO_NUMBER              = "error_func_no_number";
-	public static final String ERROR_FUNC_PERIODS_NEG            = "error_func_periods_neg";
+	public static final String ERROR_FUNC_PERIODS_SIGNED         = "error_func_periods_signed";
+	public static final String ERROR_FUNC_PERIODS_NOT_POS        = "error_func_periods_not_pos";
 	public static final String ERROR_FUNC_PERIODS_NO_NUMBER      = "error_func_periods_no_number";
 	public static final String ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP   = "error_func_cd_src_ctrl_not_supp";
 	public static final String ERROR_FUNC_CD_SRC_CTRL_UNKNOWN    = "error_func_cd_src_ctrl_unknown";
@@ -3588,6 +3591,8 @@ public class Dict {
 		set( ERROR_FUNC_VAL_LOWER_MIN,            "Parameter '%s' is smaller than the minimum value (%s)"             );
 		set( ERROR_FUNC_VAL_GREATER_MAX,          "Parameter '%s' is greater than the maximum value (%s)"             );
 		set( ERROR_FUNC_PERCENT_FORBIDDEN,        "The chosen effect does not allow percentage values. Invalid parameter: " );
+		set( ERROR_FUNC_SIGNED_FORBIDDEN,         "The chosen effect does not allow signed values ('+' or '-').<br>Invalid parameter: " );
+		set( ERROR_FUNC_SIGNED_REQUIRED,          "The chosen effect requires signed values with '+' or '-'.<br>Invalid parameter: " );
 		set( ERROR_FUNC_BROKEN_HALFTONE,          "The chosen effect does not allow broken halftones. Invalid parameter: " );
 		set( ERROR_FUNC_HALFTONE_NOT_ALLOWED,     "Parameter '%s' not allowed. The effect type does not support half tone steps." );
 		set( ERROR_FUNC_HALFTONE_GT_RANGE,        "Half-tone parameter '%s' exceeds the current pitch bend range (%s)<br>"
@@ -3600,7 +3605,8 @@ public class Dict {
 		set( ERROR_FUNC_LSB_TOO_HIGH,             "The LSB part of the following parameter is too high: '%s'<br>"
 		                                          + "LSB not accepted: '%s'" );
 		set( ERROR_FUNC_NO_NUMBER,                "Parameter is not a valid number or percentage value: "             );
-		set( ERROR_FUNC_PERIODS_NEG,              "The 'periods' parameter cannot be negative: "                      );
+		set( ERROR_FUNC_PERIODS_SIGNED,           "The 'periods' parameter must not be signed. '+' or '-' not allowed.<br>Invalid parameter: " );
+		set( ERROR_FUNC_PERIODS_NOT_POS,          "The 'periods' parameter must be positive. Invalid parameter: "     );
 		set( ERROR_FUNC_PERIODS_NO_NUMBER,        "The 'periods' parameter is not a valid number: "                   );
 		set( ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP,     "Controller destination source not supported: "                     );
 		set( ERROR_FUNC_CD_SRC_CTRL_UNKNOWN,      "Controller destination source unknown: "                           );

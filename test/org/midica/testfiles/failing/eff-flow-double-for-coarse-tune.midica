@@ -1,4 +1,4 @@
 INCLUDE inc/instruments.midica
 
 
-0: coarse_tune.double.set(50)
+0: coarse_tune.double.set(+50)

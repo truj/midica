@@ -1,0 +1,4 @@
+INCLUDE inc/instruments.midica
+
+0: pitch_range.set(2.0)
+0: pitch.wait.set(+2.3)

@@ -2,29 +2,29 @@ INCLUDE inc/instruments.midica
 
 // pitch
 0: -
-0: ctrl_dest.src(mono_at).dest(pitch,12).on()
+0: ctrl_dest.src(mono_at).dest(pitch,+12).on()
 0: -
 0: ctrl_dest.src(mono_at).dest(pitch,-12.0).on()
 0: -
 0: ctrl_dest.src(poly_at).dest(pitch,-24).on()
 0: -
-0: ctrl_dest.src(poly_at).dest(pitch,24).on()
+0: ctrl_dest.src(poly_at).dest(pitch,+24).on()
 
 // filter cutoff
 0: -
-0: ctrl_dest.src(mono_at).dest(filter_cutoff,100%).on()
+0: ctrl_dest.src(mono_at).dest(filter_cutoff,+100%).on()
 0: -
 0: ctrl_dest.src(mono_at).dest(filter_cutoff,-100%).on()
 0: -
-0: ctrl_dest.src(mod).dest(filter_cutoff,63).on()
+0: ctrl_dest.src(mod).dest(filter_cutoff,+63).on()
 0: -
 0: ctrl_dest.src(mod).dest(filter_cutoff,-64).on()
 
 // vol
 0: -
-0: ctrl_dest.src(mono_at).dest(vol,100%).on()
+0: ctrl_dest.src(mono_at).dest(vol,+100%).on()
 0: -
-0: ctrl_dest.src(mono_at).dest(vol,0%).on()
+0: ctrl_dest.src(mono_at).dest(vol,+0%).on()
 0: -
 0: ctrl_dest.src(ctrl=16).dest(vol,-50%).on()
 0: -
@@ -39,6 +39,14 @@ INCLUDE inc/instruments.midica
 0: ctrl_dest.src(var).dest(lfo_pitch,75%).on()
 0: -
 0: ctrl_dest.src(ctrl=70).dest(lfo_pitch,127).on()
+0: -
+0: ctrl_dest.src(mono_at).dest(lfo_pitch,-64).on()
+0: -
+0: ctrl_dest.src(mono_at).dest(lfo_pitch,-50%).on()
+0: -
+0: ctrl_dest.src(var).dest(lfo_pitch,+50%).on()
+0: -
+0: ctrl_dest.src(ctrl=70).dest(lfo_pitch,+63).on()
 0: -
 
 // lfo_filter
@@ -65,7 +73,7 @@ INCLUDE inc/instruments.midica
 1: -
 1: ctrl_dest
 1:   .src(ctrl=95)
-1:   .dest(pitch,12)
+1:   .dest(pitch,+12)
 1:   .dest(filter_cutoff,-50%)
 1:   .dest(vol,-16)
 1:   .dest(lfo_pitch,25%)

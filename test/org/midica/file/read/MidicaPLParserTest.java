@@ -1514,21 +1514,21 @@ class MidicaPLParserTest extends MidicaPLParser {
 			
 			// Balance == 08
 			assertEquals( "30/1/B1-08/0",    messages.get(i++).toString() ); // balance.length(64).wait.set(-64)
-			assertEquals( "60/1/B1-08/127",  messages.get(i++).toString() ); // .wait.set(63)
-			assertEquals( "90/1/B1-08/64",   messages.get(i++).toString() ); // .wait.set(0)
+			assertEquals( "60/1/B1-08/127",  messages.get(i++).toString() ); // .wait.set(+63)
+			assertEquals( "90/1/B1-08/64",   messages.get(i++).toString() ); // .wait.set(+0)
 			assertEquals( "120/1/B1-08/0",   messages.get(i++).toString() ); // .wait.set(-100%)
-			assertEquals( "150/1/B1-08/127", messages.get(i++).toString() ); // .wait.set(100%)
-			assertEquals( "180/1/B1-08/64",  messages.get(i++).toString() ); // .wait.set(0%)
+			assertEquals( "150/1/B1-08/127", messages.get(i++).toString() ); // .wait.set(+100%)
+			assertEquals( "180/1/B1-08/64",  messages.get(i++).toString() ); // .wait.set(-0%)
 			
 			// .double.wait.set(-100%)
 			assertEquals( "210/1/B1-08/0", messages.get(i++).toString() ); // MSB
 			assertEquals( "210/1/B1-28/0", messages.get(i++).toString() ); // LSB
 			
-			// .wait.set(100%)
+			// .wait.set(+100%)
 			assertEquals( "240/1/B1-08/127", messages.get(i++).toString() ); // MSB
 			assertEquals( "240/1/B1-28/127", messages.get(i++).toString() ); // LSB
 			
-			// .wait.set(0%)
+			// .wait.set(+0%)
 			assertEquals( "270/1/B1-08/64", messages.get(i++).toString() ); // MSB
 			assertEquals( "270/1/B1-28/0",  messages.get(i++).toString() ); // LSB
 			
@@ -1536,11 +1536,11 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "300/1/B1-08/0", messages.get(i++).toString() ); // MSB
 			assertEquals( "300/1/B1-28/0", messages.get(i++).toString() ); // LSB
 			
-			// .wait.set(8191)
+			// .wait.set(+8191)
 			assertEquals( "330/1/B1-08/127", messages.get(i++).toString() ); // MSB
 			assertEquals( "330/1/B1-28/127", messages.get(i++).toString() ); // LSB
 			
-			// .wait.set(0)
+			// .wait.set(-0)
 			assertEquals( "360/1/B1-08/64", messages.get(i++).toString() ); // MSB
 			assertEquals( "360/1/B1-28/0",  messages.get(i++).toString() ); // LSB
 			
@@ -1592,6 +1592,20 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "150/4/B4-50/64",  messages.get(i++).toString() ); // .wait.set(50%)
 			assertEquals( "180/4/B4-50/127", messages.get(i++).toString() ); // .wait.set(127)
 			assertEquals( "210/4/B4-50/0",   messages.get(i++).toString() ); // .wait.set(0)
+			assertEquals( "240/4/B4-50/0",   messages.get(i++).toString() ); // .wait.set(-100%)
+			assertEquals( "270/4/B4-50/16",  messages.get(i++).toString() ); // .wait.set(-75%)
+			assertEquals( "300/4/B4-50/32",  messages.get(i++).toString() ); // .wait.set(-50%)
+			assertEquals( "330/4/B4-50/48",  messages.get(i++).toString() ); // .wait.set(-25%)
+			assertEquals( "360/4/B4-50/64",  messages.get(i++).toString() ); // .wait.set(-0%)
+			assertEquals( "390/4/B4-50/64",  messages.get(i++).toString() ); // .wait.set(+0%)
+			assertEquals( "420/4/B4-50/79",  messages.get(i++).toString() ); // .wait.set(+25%)
+			assertEquals( "450/4/B4-50/95",  messages.get(i++).toString() ); // .wait.set(+50%)
+			assertEquals( "480/4/B4-50/111", messages.get(i++).toString() ); // .wait.set(+75%)
+			assertEquals( "510/4/B4-50/127", messages.get(i++).toString() ); // .wait.set(+100%)
+			assertEquals( "540/4/B4-50/64",  messages.get(i++).toString() ); // .wait.set(-0)
+			assertEquals( "570/4/B4-50/0",   messages.get(i++).toString() ); // .wait.set(-64)
+			assertEquals( "600/4/B4-50/127", messages.get(i++).toString() ); // .wait.set(+63)
+			assertEquals( "630/4/B4-50/64",  messages.get(i++).toString() ); // .wait.set(+0)
 			
 			// no further messages
 			assertEquals(messages.size(), i);
@@ -1750,7 +1764,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "190/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 240: .wait.set(0)
+				// tick 240: .wait.set(+0)
 				assertEquals( "210/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "220/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
 				assertEquals( "230/7/B7-06/64",  messages.get(i++).toString() ); // data MSB: 64
@@ -1758,7 +1772,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "250/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 300: .wait.set(1)
+				// tick 300: .wait.set(+1)
 				assertEquals( "270/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "280/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
 				assertEquals( "290/7/B7-06/65",  messages.get(i++).toString() ); // data MSB: 65
@@ -1766,7 +1780,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "310/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 360: .wait.set(12.0)
+				// tick 360: .wait.set(+12.0)
 				assertEquals( "330/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "340/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
 				assertEquals( "350/7/B7-06/76",  messages.get(i++).toString() ); // data MSB: 76
@@ -1774,7 +1788,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "370/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 420: .wait.set(63)
+				// tick 420: .wait.set(+63)
 				assertEquals( "390/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "400/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
 				assertEquals( "410/7/B7-06/127", messages.get(i++).toString() ); // data MSB: 127
@@ -1783,7 +1797,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 			}
 			{
 				// c:2
-				// tick 960: rpn=0/2.set(12.0)
+				// tick 960: rpn=0/2.set(+12.0)
 				assertEquals( "930/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "940/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
 				assertEquals( "950/7/B7-06/76",  messages.get(i++).toString() ); // data MSB: 76
@@ -1792,7 +1806,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 			}
 			{
 				// c:4
-				// tick 1440: rpn=2.set(0.0)
+				// tick 1440: rpn=2.set(-0.0)
 				assertEquals( "1410/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "1420/7/B7-64/2",   messages.get(i++).toString() ); // RPN LSB: 2
 				assertEquals( "1430/7/B7-06/64",  messages.get(i++).toString() ); // data MSB: 64
@@ -1819,7 +1833,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "2050/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 2100: .wait.set(0.0%)
+				// tick 2100: .wait.set(-0.0%)
 				assertEquals( "2070/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "2080/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
 				assertEquals( "2090/7/B7-06/64",  messages.get(i++).toString() ); // data MSB: 64
@@ -1827,7 +1841,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "2110/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 2160: .wait.set(50%)
+				// tick 2160: .wait.set(+50%)
 				assertEquals( "2130/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "2140/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
 				assertEquals( "2150/7/B7-06/96",  messages.get(i++).toString() ); // data MSB: 96
@@ -1835,7 +1849,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "2170/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 2220: .wait.set(100%)
+				// tick 2220: .wait.set(+100%)
 				assertEquals( "2190/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "2200/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
 				assertEquals( "2210/7/B7-06/127", messages.get(i++).toString() ); // data MSB: 127
@@ -1859,7 +1873,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "2350/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 2400: .wait.set(0)
+				// tick 2400: .wait.set(-0)
 				assertEquals( "2370/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "2380/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
 				assertEquals( "2390/7/B7-06/64",   messages.get(i++).toString() ); // data MSB: 64
@@ -1867,7 +1881,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "2410/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 2460: .wait.set(0.5)
+				// tick 2460: .wait.set(+0.5)
 				assertEquals( "2430/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "2440/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
 				assertEquals( "2450/7/B7-06/96",  messages.get(i++).toString() ); // data MSB: 96
@@ -1875,7 +1889,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "2470/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 2520: .wait.set(1.0)
+				// tick 2520: .wait.set(+1.0)
 				assertEquals( "2490/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "2500/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
 				assertEquals( "2510/7/B7-06/127", messages.get(i++).toString() ); // data MSB: 127
@@ -1901,7 +1915,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "2650/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 2700: .wait.set(0.0%)
+				// tick 2700: .wait.set(+0.0%)
 				assertEquals( "2670/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "2680/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
 				assertEquals( "2690/7/B7-06/64",  messages.get(i++).toString() ); // data MSB: 64
@@ -1910,7 +1924,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "2710/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 2760: .wait.set(50%)
+				// tick 2760: .wait.set(+50%)
 				assertEquals( "2730/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "2740/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
 				assertEquals( "2750/7/B7-06/96",  messages.get(i++).toString() ); // data MSB: 96
@@ -1919,7 +1933,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "2770/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 2820: .wait.set(100%)
+				// tick 2820: .wait.set(+100%)
 				assertEquals( "2790/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "2800/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
 				assertEquals( "2810/7/B7-06/127", messages.get(i++).toString() ); // data MSB: 127
@@ -1946,7 +1960,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "2950/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 3000: .wait.set(0)
+				// tick 3000: .wait.set(-0)
 				assertEquals( "2970/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "2980/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
 				assertEquals( "2990/7/B7-06/64",  messages.get(i++).toString() ); // data MSB: 64
@@ -1955,7 +1969,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "3010/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 3060: .wait.set(0.5)
+				// tick 3060: .wait.set(+0.5)
 				assertEquals( "3030/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "3040/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
 				assertEquals( "3050/7/B7-06/96",  messages.get(i++).toString() ); // data MSB: 96
@@ -1964,7 +1978,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "3070/7/B7-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			{
-				// tick 3120: .wait.set(1.0)
+				// tick 3120: .wait.set(+1.0)
 				assertEquals( "3090/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "3100/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
 				assertEquals( "3110/7/B7-06/127", messages.get(i++).toString() ); // data MSB: 127
@@ -1974,7 +1988,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 			}
 			{
 				// c:1
-				// tick 3840: rpn=0/1.double.set(0.5)
+				// tick 3840: rpn=0/1.double.set(+0.5)
 				assertEquals( "3810/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "3820/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
 				assertEquals( "3830/7/B7-06/96",  messages.get(i++).toString() ); // data MSB: 96
@@ -1984,7 +1998,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 			}
 			{
 				// c:4
-				// tick 4320: rpn=1.double.set(0.0)
+				// tick 4320: rpn=1.double.set(+0.0)
 				assertEquals( "4290/7/B7-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 				assertEquals( "4300/7/B7-64/1",   messages.get(i++).toString() ); // RPN LSB: 1
 				assertEquals( "4310/7/B7-06/64",  messages.get(i++).toString() ); // data MSB: 64
@@ -2115,7 +2129,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "610/0/B0-65/127", messages.get(i++).toString() ); // MSB reset
 			assertEquals( "610/0/B0-64/127", messages.get(i++).toString() ); // LSB reset
 			
-			// tick 660: .wait.set(-0.000001)
+			// tick 660: .wait.set(0.000001)
 			assertEquals( "630/0/B0-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
 			assertEquals( "640/0/B0-64/0",   messages.get(i++).toString() ); // RPN LSB: 0
 			assertEquals( "650/0/B0-06/0",   messages.get(i++).toString() ); // data MSB: 0
@@ -2174,16 +2188,16 @@ class MidicaPLParserTest extends MidicaPLParser {
 				// single byte
 				assertEquals("00/00/-2.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(-100%)
 				assertEquals("20/20/-1.0",     getPitchBendStr(messages.get(i++), 1)); // pitch.set(-50%)
-				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(0%)
-				assertEquals("60/60/1.0",      getPitchBendStr(messages.get(i++), 1)); // pitch.set(50%)
-				assertEquals("7F/7F/2.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(100%)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(+0%)
+				assertEquals("60/60/1.0",      getPitchBendStr(messages.get(i++), 1)); // pitch.set(+50%)
+				assertEquals("7F/7F/2.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(+100%)
 				
 				// double
 				assertEquals("00/00/-2.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-100%)
 				assertEquals("20/00/-1.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-50%)
-				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0%)
-				assertEquals("60/00/1.000",    getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(50%)
-				assertEquals("7F/7F/2.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(100%)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-0%)
+				assertEquals("60/00/1.000",    getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(+50%)
+				assertEquals("7F/7F/2.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(+100%)
 			}
 			
 			// MSB/LSB, range: 2.0
@@ -2198,16 +2212,16 @@ class MidicaPLParserTest extends MidicaPLParser {
 				// single
 				assertEquals("15/15/-2.0",    getPitchBendStr(messages.get(i++), 1)); // pitch.set(-2.0)
 				assertEquals("2B/2B/-1.0",    getPitchBendStr(messages.get(i++), 1)); // pitch.set(-1.0)
-				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(0)
-				assertEquals("55/55/1.0",     getPitchBendStr(messages.get(i++), 1)); // pitch.set(1.0)
-				assertEquals("6A/6A/2.0",     getPitchBendStr(messages.get(i++), 1)); // pitch.set(2.0)
+				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(+0)
+				assertEquals("55/55/1.0",     getPitchBendStr(messages.get(i++), 1)); // pitch.set(+1.0)
+				assertEquals("6A/6A/2.0",     getPitchBendStr(messages.get(i++), 1)); // pitch.set(+2.0)
 				
 				// double
 				assertEquals("15/2B/-2.000",  getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(-2.0)
 				assertEquals("2A/55/-1.000",  getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(-1)
-				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0)
-				assertEquals("55/2A/1.000",   getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(1.0)
-				assertEquals("6A/55/2.000",   getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(2)
+				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(+0)
+				assertEquals("55/2A/1.000",   getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(+1.0)
+				assertEquals("6A/55/2.000",   getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(+2)
 			}
 			
 			// half-tone, range: 4.0
@@ -2216,19 +2230,19 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals("00/00/-4.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(-4.0)
 				assertEquals("20/20/-2.0",     getPitchBendStr(messages.get(i++), 1)); // pitch.set(-2)
 				assertEquals("30/30/-1.0",     getPitchBendStr(messages.get(i++), 1)); // pitch.set(-1.0)
-				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(0)
-				assertEquals("50/50/1.0",      getPitchBendStr(messages.get(i++), 1)); // pitch.set(1.0)
-				assertEquals("60/60/2.0",      getPitchBendStr(messages.get(i++), 1)); // pitch.set(2.0)
-				assertEquals("7F/7F/4.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(4)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(+0)
+				assertEquals("50/50/1.0",      getPitchBendStr(messages.get(i++), 1)); // pitch.set(+1.0)
+				assertEquals("60/60/2.0",      getPitchBendStr(messages.get(i++), 1)); // pitch.set(+2.0)
+				assertEquals("7F/7F/4.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(+4)
 				
 				// double
 				assertEquals("00/00/-4.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-4.0)
 				assertEquals("20/00/-2.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-2.0)
 				assertEquals("30/00/-1.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-1.0)
-				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0)
-				assertEquals("50/00/1.000",    getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(1.0)
-				assertEquals("60/00/2.000",    getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(2.0)
-				assertEquals("7F/7F/4.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(4.0)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(+0)
+				assertEquals("50/00/1.000",    getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(+1.0)
+				assertEquals("60/00/2.000",    getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(+2.0)
+				assertEquals("7F/7F/4.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(+4.0)
 			}
 			// half-tone, range: 8.0
 			{
@@ -2236,47 +2250,47 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals("00/00/-8.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(-8.0)
 				assertEquals("30/30/-2.0",     getPitchBendStr(messages.get(i++), 1)); // pitch.set(-2.0)
 				assertEquals("38/38/-1"  ,     getPitchBendStr(messages.get(i++), 0)); // pitch.set(-1.0)
-				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(0)
-				assertEquals("48/48/1",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(1.0)
-				assertEquals("50/50/2",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(2.0)
-				assertEquals("7F/7F/8.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(8.0)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(+0)
+				assertEquals("48/48/1",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(+1.0)
+				assertEquals("50/50/2",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(+2.0)
+				assertEquals("7F/7F/8.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(+8.0)
 				
 				// double
 				assertEquals("00/00/-8.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-8.0)
 				assertEquals("30/00/-2.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-2.0)
 				assertEquals("38/00/-1.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-1.0)
-				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0)
-				assertEquals("48/00/1.000",    getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(1.0)
-				assertEquals("50/00/2.000",    getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(2.0)
-				assertEquals("7F/7F/8.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(8.0)
+				assertEquals("40/00/0.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(+0)
+				assertEquals("48/00/1.000",    getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(+1.0)
+				assertEquals("50/00/2.000",    getPitchBendStr(messages.get(i++), 3)); // pitch.double.set(+2.0)
+				assertEquals("7F/7F/8.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(+8.0)
 			}
 			// half-tone, range: 12.0
 			{
 				// single
 				assertEquals("00/00/-12.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.set(0)
-				assertEquals("7F/7F/12.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.set(+0)
+				assertEquals("7F/7F/12.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(+12.0)
 				
 				// double
 				assertEquals("00/00/-12.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0)
-				assertEquals("7F/7F/12.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(12.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(+0)
+				assertEquals("7F/7F/12.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(+12.0)
 			}
 			// half-tone, range: 24.0
 			{
 				// single
 				assertEquals("00/00/-24.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(-24.0)
 				assertEquals("20/20/-12",       getPitchBendStr(messages.get(i++), 0)); // pitch.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.set(0)
-				assertEquals("60/60/12",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(12.0)
-				assertEquals("7F/7F/24.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(24.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.set(+0)
+				assertEquals("60/60/12",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(+12.0)
+				assertEquals("7F/7F/24.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(+24.0)
 				
 				// double
 				assertEquals("00/00/-24.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-24.0)
 				assertEquals("20/00/-12.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0)
-				assertEquals("60/00/12.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(12.0)
-				assertEquals("7F/7F/24.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(24.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(+0)
+				assertEquals("60/00/12.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(+12.0)
+				assertEquals("7F/7F/24.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(+24.0)
 			}
 			// half-tone, range: 36.0
 			{
@@ -2284,19 +2298,19 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals("00/00/-36.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(-36.0)
 				assertEquals("15/15/-24",       getPitchBendStr(messages.get(i++), 0)); // pitch.set(-24.0)
 				assertEquals("2B/2B/-12",       getPitchBendStr(messages.get(i++), 0)); // pitch.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.set(0)
-				assertEquals("55/55/12",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(12.0)
-				assertEquals("6A/6A/24",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(24.0)
-				assertEquals("7F/7F/36.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(36.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.set(+0)
+				assertEquals("55/55/12",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(+12.0)
+				assertEquals("6A/6A/24",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(+24.0)
+				assertEquals("7F/7F/36.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(+36.0)
 				
 				// double
 				assertEquals("00/00/-36.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-36.0)
 				assertEquals("15/2B/-24.00",    getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(-24.0)
 				assertEquals("2A/55/-12.00",    getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0)
-				assertEquals("55/2A/12.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(12.0)
-				assertEquals("6A/55/24.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(24.0)
-				assertEquals("7F/7F/36.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(36.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(+0)
+				assertEquals("55/2A/12.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(+12.0)
+				assertEquals("6A/55/24.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(+24.0)
+				assertEquals("7F/7F/36.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(+36.0)
 			}
 			// half-tone, range: 48.0
 			{
@@ -2305,22 +2319,22 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals("10/10/-36",       getPitchBendStr(messages.get(i++), 0)); // pitch.set(-36.0)
 				assertEquals("20/20/-24",       getPitchBendStr(messages.get(i++), 0)); // pitch.set(-24.0)
 				assertEquals("30/30/-12",       getPitchBendStr(messages.get(i++), 0)); // pitch.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.set(0)
-				assertEquals("50/50/12",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(12.0)
-				assertEquals("60/60/25",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(24.0) - rounding error too big
-				assertEquals("6F/6F/36",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(36.0)
-				assertEquals("7F/7F/48.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(48.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.set(+0)
+				assertEquals("50/50/12",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(+12.0)
+				assertEquals("60/60/25",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(+24.0) - rounding error too big
+				assertEquals("6F/6F/36",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(+36.0)
+				assertEquals("7F/7F/48.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(+48.0)
 				
 				// double
 				assertEquals("00/00/-48.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-48.0)
 				assertEquals("10/00/-36.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-36.0)
 				assertEquals("20/00/-24.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-24.0)
 				assertEquals("30/00/-12.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0)
-				assertEquals("50/00/12.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(12.0)
-				assertEquals("60/00/24.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(24.0)
-				assertEquals("6F/7F/36.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(36.0)
-				assertEquals("7F/7F/48.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(48.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(+0)
+				assertEquals("50/00/12.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(+12.0)
+				assertEquals("60/00/24.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(+24.0)
+				assertEquals("6F/7F/36.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(+36.0)
+				assertEquals("7F/7F/48.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(+48.0)
 			}
 			// half-tone, range: 60.0
 			{
@@ -2330,12 +2344,12 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals("1A/1A/-35",       getPitchBendStr(messages.get(i++), 0)); // pitch.set(-36.0) - rounding error too big
 				assertEquals("26/26/-24",       getPitchBendStr(messages.get(i++), 0)); // pitch.set(-24.0)
 				assertEquals("33/33/-12",       getPitchBendStr(messages.get(i++), 0)); // pitch.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.set(0)
-				assertEquals("4D/4D/13",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(12.0) - rounding error too big
-				assertEquals("59/59/24",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(24.0)
-				assertEquals("66/66/36",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(36.0)
-				assertEquals("72/72/48",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(48.0)
-				assertEquals("7F/7F/60.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(60.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.set(+0)
+				assertEquals("4D/4D/13",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(+12.0) - rounding error too big
+				assertEquals("59/59/24",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(+24.0)
+				assertEquals("66/66/36",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(+36.0)
+				assertEquals("72/72/48",        getPitchBendStr(messages.get(i++), 0)); // pitch.set(+48.0)
+				assertEquals("7F/7F/60.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.set(+60.0)
 				
 				// double
 				assertEquals("00/00/-60.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(-60.0)
@@ -2343,12 +2357,12 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals("19/4D/-36.00",    getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(-36.0)
 				assertEquals("26/33/-24.00",    getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(-24.0)
 				assertEquals("33/1A/-12.00",    getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(-12.0)
-				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0)
-				assertEquals("4C/66/12.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(12.0)
-				assertEquals("59/4C/24.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(24.0)
-				assertEquals("66/33/36.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(36.0)
-				assertEquals("73/19/48.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(48.0)
-				assertEquals("7F/7F/60.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(60.0)
+				assertEquals("40/00/0.00000",   getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(+0)
+				assertEquals("4C/66/12.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(+12.0)
+				assertEquals("59/4C/24.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(+24.0)
+				assertEquals("66/33/36.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(+36.0)
+				assertEquals("73/19/48.00",     getPitchBendStr(messages.get(i++), 2)); // pitch.double.set(+48.0)
+				assertEquals("7F/7F/60.00000",  getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(+60.0)
 			}
 			// half-tone, range: 127.99
 			{
@@ -2358,12 +2372,12 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals("2E/2E/-35",     getPitchBendStr(messages.get(i++), 0)); // pitch.set(-36.0) - rounding error too big
 				assertEquals("34/34/-23",     getPitchBendStr(messages.get(i++), 0)); // pitch.set(-24.0) - rounding error too big
 				assertEquals("3A/3A/-11",     getPitchBendStr(messages.get(i++), 0)); // pitch.set(-12.0) - rounding error too big
-				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(0)
-				assertEquals("46/46/13",      getPitchBendStr(messages.get(i++), 0)); // pitch.set(12.0)
-				assertEquals("4C/4C/25",      getPitchBendStr(messages.get(i++), 0)); // pitch.set(24.0) - rounding error too big
-				assertEquals("52/52/37",      getPitchBendStr(messages.get(i++), 0)); // pitch.set(36.0) - rounding error too big
-				assertEquals("58/58/49",      getPitchBendStr(messages.get(i++), 0)); // pitch.set(48.0) - rounding error too big
-				assertEquals("5E/5E/61",      getPitchBendStr(messages.get(i++), 0)); // pitch.set(60.0) - rounding error too big
+				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.set(+0)
+				assertEquals("46/46/13",      getPitchBendStr(messages.get(i++), 0)); // pitch.set(+12.0)
+				assertEquals("4C/4C/25",      getPitchBendStr(messages.get(i++), 0)); // pitch.set(+24.0) - rounding error too big
+				assertEquals("52/52/37",      getPitchBendStr(messages.get(i++), 0)); // pitch.set(+36.0) - rounding error too big
+				assertEquals("58/58/49",      getPitchBendStr(messages.get(i++), 0)); // pitch.set(+48.0) - rounding error too big
+				assertEquals("5E/5E/61",      getPitchBendStr(messages.get(i++), 0)); // pitch.set(+60.0) - rounding error too big
 				
 				// double
 				assertEquals("22/00/-60",     getPitchBendStr(messages.get(i++), 0)); // pitch.double.set(-60.0)
@@ -2371,12 +2385,12 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals("2E/00/-36",     getPitchBendStr(messages.get(i++), 0)); // pitch.double.set(-36.0)
 				assertEquals("34/00/-24.0",   getPitchBendStr(messages.get(i++), 1)); // pitch.double.set(-24.0)
 				assertEquals("3A/00/-12.0",   getPitchBendStr(messages.get(i++), 1)); // pitch.double.set(-12.0)
-				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(0)
-				assertEquals("46/00/12.0",    getPitchBendStr(messages.get(i++), 1)); // pitch.double.set(12.0)
-				assertEquals("4C/00/24.0",    getPitchBendStr(messages.get(i++), 1)); // pitch.double.set(24.0)
-				assertEquals("52/00/36",      getPitchBendStr(messages.get(i++), 0)); // pitch.double.set(36.0)
-				assertEquals("58/00/48",      getPitchBendStr(messages.get(i++), 0)); // pitch.double.set(48.0)
-				assertEquals("5E/00/60",      getPitchBendStr(messages.get(i++), 0)); // pitch.double.set(60.0)
+				assertEquals("40/00/0.00000", getPitchBendStr(messages.get(i++), 5)); // pitch.double.set(+0)
+				assertEquals("46/00/12.0",    getPitchBendStr(messages.get(i++), 1)); // pitch.double.set(+12.0)
+				assertEquals("4C/00/24.0",    getPitchBendStr(messages.get(i++), 1)); // pitch.double.set(+24.0)
+				assertEquals("52/00/36",      getPitchBendStr(messages.get(i++), 0)); // pitch.double.set(+36.0)
+				assertEquals("58/00/48",      getPitchBendStr(messages.get(i++), 0)); // pitch.double.set(+48.0)
+				assertEquals("5E/00/60",      getPitchBendStr(messages.get(i++), 0)); // pitch.double.set(+60.0)
 			}
 			
 			// no further messages
@@ -2640,20 +2654,20 @@ class MidicaPLParserTest extends MidicaPLParser {
 			// channel 0
 			
 			// pitch: 0x00
-			assertEquals("0/mono_at==>00:4C", getCtrlDestStr(messages.get(i++))); // mono_at ==> pitch: 12
+			assertEquals("0/mono_at==>00:4C", getCtrlDestStr(messages.get(i++))); // mono_at ==> pitch: +12
 			assertEquals("0/mono_at==>00:34", getCtrlDestStr(messages.get(i++))); // mono_at ==> pitch: -12.0
 			assertEquals("0/poly_at==>00:28", getCtrlDestStr(messages.get(i++))); // poly_at ==> pitch: -24
-			assertEquals("0/poly_at==>00:58", getCtrlDestStr(messages.get(i++))); // poly_at ==> pitch: 24
+			assertEquals("0/poly_at==>00:58", getCtrlDestStr(messages.get(i++))); // poly_at ==> pitch: +24
 			
 			// filter cutoff: 0x01
-			assertEquals("0/mono_at==>01:7F", getCtrlDestStr(messages.get(i++))); // mono_at ==> filter_cutoff: 100%
+			assertEquals("0/mono_at==>01:7F", getCtrlDestStr(messages.get(i++))); // mono_at ==> filter_cutoff: +100%
 			assertEquals("0/mono_at==>01:00", getCtrlDestStr(messages.get(i++))); // mono_at ==> filter_cutoff: -100%
-			assertEquals("0/ctrl:01==>01:7F", getCtrlDestStr(messages.get(i++))); // mod ==> filter_cutoff: 63
+			assertEquals("0/ctrl:01==>01:7F", getCtrlDestStr(messages.get(i++))); // mod ==> filter_cutoff: +63
 			assertEquals("0/ctrl:01==>01:00", getCtrlDestStr(messages.get(i++))); // mod ==> filter_cutoff: -64
 			
 			// vol (amplitude): 0x02
-			assertEquals("0/mono_at==>02:7F", getCtrlDestStr(messages.get(i++))); // mono_at ==> vol: 100%
-			assertEquals("0/mono_at==>02:40", getCtrlDestStr(messages.get(i++))); // mono_at ==> vol: 0%
+			assertEquals("0/mono_at==>02:7F", getCtrlDestStr(messages.get(i++))); // mono_at ==> vol: +100%
+			assertEquals("0/mono_at==>02:40", getCtrlDestStr(messages.get(i++))); // mono_at ==> vol: +0%
 			assertEquals("0/ctrl:10==>02:20", getCtrlDestStr(messages.get(i++))); // ctrl=16 ==> vol: -50%
 			assertEquals("0/ctrl:11==>02:00", getCtrlDestStr(messages.get(i++))); // ctrl=17 ==> vol: -64
 			
@@ -2662,6 +2676,10 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals("0/mono_at==>03:20", getCtrlDestStr(messages.get(i++))); // mono_at ==> lfo_pitch: 25%
 			assertEquals("0/ctrl:46==>03:5F", getCtrlDestStr(messages.get(i++))); // var     ==> lfo_pitch: 75%
 			assertEquals("0/ctrl:46==>03:7F", getCtrlDestStr(messages.get(i++))); // ctrl=70 ==> lfo_pitch: 127
+			assertEquals("0/mono_at==>03:00", getCtrlDestStr(messages.get(i++))); // mono_at ==> lfo_pitch: -64
+			assertEquals("0/mono_at==>03:20", getCtrlDestStr(messages.get(i++))); // mono_at ==> lfo_pitch: -50%
+			assertEquals("0/ctrl:46==>03:5F", getCtrlDestStr(messages.get(i++))); // var     ==> lfo_pitch: +50%
+			assertEquals("0/ctrl:46==>03:7F", getCtrlDestStr(messages.get(i++))); // ctrl=70 ==> lfo_pitch: +63
 			
 			// lfo_filter: 0x04
 			assertEquals("0/mono_at==>04:00", getCtrlDestStr(messages.get(i++))); // mono_at ==> lfo_filter: 0%
@@ -2675,7 +2693,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 			
 			// channel 1
 			// ctrl_dest.src(ctrl=95)
-			//   .dest(pitch,12).dest(filter_cutoff,-50%).dest(vol,-16)
+			//   .dest(pitch,+12).dest(filter_cutoff,-50%).dest(vol,-16)
 			//   .dest(lfo_pitch,25%).dest(lfo_filter,0%).dest(lfo_vol,100%)
 			//   .on()
 			assertEquals("1/ctrl:5F==>00:4C,01:20,02:30,03:20,04:00,05:7F", getCtrlDestStr(messages.get(i++)));
@@ -4183,7 +4201,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-double-for-coarse-tune")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: coarse_tune.double.set(50)", e.getLineContent() );
+		assertEquals( "0: coarse_tune.double.set(+50)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_DOUBLE_NOT_SUPPORTED), "double")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-coarse-invalid-1")) );
@@ -4193,18 +4211,18 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-coarse-invalid-2")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: coarse_tune.set(64)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 64, 63)));
+		assertEquals( "0: coarse_tune.set(+64)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), "+64", "+63")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-coarse-invalid-3")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: coarse_tune.set(0%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_PERCENT_FORBIDDEN), "0%")));
+		assertEquals( "0: coarse_tune.set(+0%)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_PERCENT_FORBIDDEN), "+0%")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-coarse-invalid-4")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: coarse_tune.set(3.5)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_BROKEN_HALFTONE), "3.5")));
+		assertEquals( "0: coarse_tune.set(+3.5)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_BROKEN_HALFTONE), "+3.5")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-fine-invalid-1")) );
 		assertEquals( 4, e.getLineNumber() );
@@ -4213,8 +4231,8 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-fine-invalid-2")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: fine_tune.set(1.0001)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 1.0001f, 1.0f)));
+		assertEquals( "0: fine_tune.set(+1.0001)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), "+1.0001", "+1.0")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-fine-invalid-3")) );
 		assertEquals( 4, e.getLineNumber() );
@@ -4223,13 +4241,13 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-fine-invalid-4")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: fine_tune.set(101%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), "101%", "100%")));
+		assertEquals( "0: fine_tune.set(+101%)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), "+101%", "+100%")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-fine-invalid-5")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: fine_tune.double.set(2)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), "2", "1.0")));
+		assertEquals( "0: fine_tune.double.set(+2)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), "+2", "+1.0")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-without-params")) );
 		assertEquals( 4, e.getLineNumber() );
@@ -4271,9 +4289,14 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "0: poly_mode.off()", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "off"));
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-poly-mode-set")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-poly-mode-set-1")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: poly_mode.set(0)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "set"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-poly-mode-set-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: poly_mode.set(+0)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "set"));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-mono-mode-off")) );
@@ -4306,9 +4329,14 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "0: chorus.off()", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "off"));
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-numeric-for-bool")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-numeric-for-bool-1")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: legato.set(0)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "set"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-numeric-for-bool-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: legato.set(+0)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "set"));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-cont-rpn")) );
@@ -4333,13 +4361,18 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-too-low-1")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: balance.line(63,-65)", e.getLineContent() );
+		assertEquals( "0: balance.line(+63,-65)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), -65, -64)));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-too-low-2")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: vol.line(1,-0.000001%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), "-0.000001%", "0%")));
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_SIGNED_FORBIDDEN) + "-0.000001%"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-too-low-3")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: balance.line(+1,-101%)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), "-101%", "-100%")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-too-high-1")) );
 		assertEquals( 4, e.getLineNumber() );
@@ -4348,8 +4381,8 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-too-high-2")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: balance.double.line(1,8192)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 8192, 8191)));
+		assertEquals( "0: balance.double.line(+1,+8192)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), "+8192", "+8191")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-periods-nan-1")) );
 		assertEquals( 4, e.getLineNumber() );
@@ -4361,10 +4394,30 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "0: vol.sin(0,100%,999999999999999999999999999999999999999.0)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERIODS_NO_NUMBER) + "999999999999999999999999999999999999999.0"));
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-periods-neg")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-periods-signed-1")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: vol.sin(0,100%,-1.0)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERIODS_NEG) + "-1.0"));
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERIODS_SIGNED) + "-1.0"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-periods-signed-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.sin(0,100%,+1.0)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERIODS_SIGNED) + "+1.0"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-periods-signed-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.sin(0,100%,+1.0)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERIODS_SIGNED) + "+1.0"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-periods-signed-3")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.sin(0,100%,+10%)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERIODS_SIGNED) + "+10%"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-periods-zero")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.sin(0,100%,0)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERIODS_NOT_POS) + "0"));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-eff-not-set-1")) );
 		assertEquals( 4, e.getLineNumber() );
@@ -4381,10 +4434,15 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "0: vol.wait().vol.set(50)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_EFF_ALREADY_SET)));
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-halftone-for-vol")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-halftone-for-vol-1")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: vol.set(12.0)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_HALFTONE_NOT_ALLOWED), "12.0")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-halftone-for-vol-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.set(+12.0)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_SIGNED_FORBIDDEN), "+12.0")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-halftone-gt-max-1")) );
 		assertEquals( 4, e.getLineNumber() );
@@ -4411,10 +4469,15 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "0: pitch_range.set(12.0%)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERCENT_FORBIDDEN) + "12.0%"));
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pitch-gt-range")) );
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pitch-gt-range-1")) );
 		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: pitch.wait.set(2.3)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_HALFTONE_GT_RANGE), 2.3f, 2.0f)));
+		assertEquals( "0: pitch.wait.set(+2.3)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_HALFTONE_GT_RANGE), "+2.3", "2.0")));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pitch-gt-range-2")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: pitch.wait.set(-2.3)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_HALFTONE_GT_RANGE), "-2.3", "2.0")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-invalid")) );
 		assertEquals( 4, e.getLineNumber() );
@@ -4531,6 +4594,11 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "0:   .src(ctrl=5=7)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_UNKNOWN) + "ctrl=5=7"));
 		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-unknown-4")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0:   .src(ctrl=9999999999999999999999999999)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_UNKNOWN) + "ctrl=9999999999999999999999999999"));
+		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-not-sup-1")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0:   .src(ctrl=0)", e.getLineContent() );
@@ -4575,6 +4643,21 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 6, e.getLineNumber() );
 		assertEquals( "0:   .dest(ctrl=11,10%)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_DEST_UNKNOWN) + "ctrl=11"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-signed-vol")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: vol.set(+50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_SIGNED_FORBIDDEN) + "+50"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-unsigned-balance")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: balance.set(50)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_SIGNED_REQUIRED) + "50"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-mono-mode-set-signed")) );
+		assertEquals( 4, e.getLineNumber() );
+		assertEquals( "0: mono_mode.set(+5)", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_SIGNED_FORBIDDEN) + "+5"));
 	}
 	
 	/**

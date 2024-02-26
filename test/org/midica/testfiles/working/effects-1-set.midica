@@ -25,19 +25,19 @@ INCLUDE inc/instruments.midica
 
 // set, wait, length
 1: balance.length(64).wait.set(-64)
-1: .wait.set(63)
-1: .wait.set(0)
+1: .wait.set(+63)
+1: .wait.set(+0)
 1: .wait.set(-100%)
-1: .wait.set(100%)
-1: .wait.set(0%)
+1: .wait.set(+100%)
+1: .wait.set(-0%)
 
 // double
 1: .double.wait.set(-100%)
-1: .wait.set(100%)
-1: .wait.set(0%)
+1: .wait.set(+100%)
+1: .wait.set(+0%)
 1: .wait.set(-8192)
-1: .wait.set(8191)
-1: .wait.set(0)
+1: .wait.set(+8191)
+1: .wait.set(-0)
 1: .wait.set(64/0)
 
 ////////////////////////////////////////
@@ -69,6 +69,20 @@ INCLUDE inc/instruments.midica
 4: .wait.set(50%)
 4: .wait.set(127)
 4: .wait.set(0)
+4: .wait.set(-100%)
+4: .wait.set(-75%)
+4: .wait.set(-50%)
+4: .wait.set(-25%)
+4: .wait.set(-0%)
+4: .wait.set(+0%)
+4: .wait.set(+25%)
+4: .wait.set(+50%)
+4: .wait.set(+75%)
+4: .wait.set(+100%)
+4: .wait.set(-0)
+4: .wait.set(-64)
+4: .wait.set(+63)
+4: .wait.set(+0)
 
 ////////////////////////////////////////
 // channel 5: CTRL / NONE (0x7B == 123 == all notes off)
@@ -108,53 +122,53 @@ INCLUDE inc/instruments.midica
 7:   .wait.set(-64.0)
 7:   .wait.set(-12)
 7:   .wait.set(-1.0)
-7:   .wait.set(0)
-7:   .wait.set(1)
-7:   .wait.set(12.0)
-7:   .wait.set(63)
+7:   .wait.set(+0)
+7:   .wait.set(+1)
+7:   .wait.set(+12.0)
+7:   .wait.set(+63)
 7: c:2
 
 // coarse tune (generic RPN)
-7: rpn=0/2.set(12.0)
+7: rpn=0/2.set(+12.0)
 7: c:4
-7: rpn=2.set(0.0)
+7: rpn=2.set(-0.0)
 7: c:4
 
 // fine tune (single, percentage)
 7: fine_tune.length(32)
 7:   .wait.set(-100%)
 7:   .wait.set(-50.0%)
-7:   .wait.set(0.0%)
-7:   .wait.set(50%)
-7:   .wait.set(100.0%)
+7:   .wait.set(-0.0%)
+7:   .wait.set(+50%)
+7:   .wait.set(+100.0%)
 
 // fine tune (single, halftones)
 7:   .wait.set(-1.0)
 7:   .wait.set(-0.5)
-7:   .wait.set(0)
-7:   .wait.set(0.5)
-7:   .wait.set(1.0)
+7:   .wait.set(-0)
+7:   .wait.set(+0.5)
+7:   .wait.set(+1.0)
 
 // fine tune (double, percentage)
 7: .double
 7:   .wait.set(-100.0%)
 7:   .wait.set(-50%)
-7:   .wait.set(0.0%)
-7:   .wait.set(50.0%)
-7:   .wait.set(100%)
+7:   .wait.set(+0.0%)
+7:   .wait.set(+50.0%)
+7:   .wait.set(+100%)
 
 // fine tune (double, halftones)
 7:   .wait.set(-1.0)
 7:   .wait.set(-0.5)
-7:   .wait.set(0)
-7:   .wait.set(0.5)
-7:   .wait.set(1.0)
+7:   .wait.set(-0)
+7:   .wait.set(+0.5)
+7:   .wait.set(+1.0)
 7: c:1
 
 // fine tune (generic RPN)
-7: rpn=0/1.double.set(0.5)
+7: rpn=0/1.double.set(+0.5)
 7: c:4
-7: rpn=1.double.set(0.0)
+7: rpn=1.double.set(+0.0)
 
 ////////////////////////////////////////
 // channel 8: NRPN / 4/7 (+ RPNs)

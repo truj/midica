@@ -1,4 +1,4 @@
 INCLUDE inc/instruments.midica
 
 
-0: fine_tune.set(+1.0001)
+0: vol.sin(0,100%,+1.0)
