@@ -1761,6 +1761,7 @@ public class Dict {
 	public static final String ERROR_FL_NOTE_NOT_SET             = "error_fl_note_not_set";
 	public static final String ERROR_FL_NOTE_PAT_IDX_NAN         = "error_fl_note_pat_idx_nan";
 	public static final String ERROR_FL_NOTE_PAT_IDX_TOO_HIGH    = "error_fl_note_pat_idx_too_high";
+	public static final String ERROR_FL_PENDING                  = "error_fl_pending";
 	public static final String ERROR_FUNC_NOT_SUPPORTED_BY_EFF   = "error_func_not_supported_by_eff";
 	public static final String ERROR_FUNC_VAL_LOWER_MIN          = "error_func_val_lower_min";
 	public static final String ERROR_FUNC_VAL_GREATER_MAX        = "error_func_val_greater_max";
@@ -3587,6 +3588,7 @@ public class Dict {
 		set( ERROR_FL_NOTE_NOT_SET,               "The chosen effect needs a note to be set before you can use this function: " );
 		set( ERROR_FL_NOTE_PAT_IDX_NAN,           "pattern index '%s' is not a number in this element: %s"            );
 		set( ERROR_FL_NOTE_PAT_IDX_TOO_HIGH,      "pattern index '%s' too high in this element: %s"                   );
+		set( ERROR_FL_PENDING,                    "Pending effect flow found before this line.<br>Delete the useless parts of the flow." );
 		set( ERROR_FUNC_NOT_SUPPORTED_BY_EFF,     "The chosen effect does not support this function: "                );
 		set( ERROR_FUNC_VAL_LOWER_MIN,            "Parameter '%s' is smaller than the minimum value (%s)"             );
 		set( ERROR_FUNC_VAL_GREATER_MAX,          "Parameter '%s' is greater than the maximum value (%s)"             );

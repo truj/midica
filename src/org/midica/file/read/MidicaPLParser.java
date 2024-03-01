@@ -717,6 +717,12 @@ public class MidicaPLParser extends SequenceParser {
 			e.printStackTrace();
 			throw new ParseException(e.toString());
 		}
+		finally {
+			// Close the flow.
+			// Avoids problems in the NEXT parsing attempt.
+			if (isRootParser)
+				Effect.closeFlowAfterParsingFinished();
+		}
 		
 		// allow an empty sequence?
 		if (isRootParser) {
@@ -1017,6 +1023,9 @@ public class MidicaPLParser extends SequenceParser {
 			// In case of wrong block nesting make sure that the correct
 			// error message and line number is shown
 			nestableBlkDepth = 0;
+			
+			// check if a pending flow was the last command
+			Effect.closeFlowIfPossible();
 		}
 		catch (ParseException e) {
 			// Add file name and line number to exception and throw it again

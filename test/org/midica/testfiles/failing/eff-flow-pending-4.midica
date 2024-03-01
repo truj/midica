@@ -1,0 +1,24 @@
+INCLUDE inc/instruments.midica
+
+
+
+FUNCTION func
+	{
+		{
+			0: hold.wait
+			
+			0: c
+			
+		}
+	}
+END
+
+{
+	{
+		
+		CALL func
+		0: a
+		
+	}
+}
+

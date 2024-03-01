@@ -91,6 +91,7 @@ public class EffectFlow {
 	private long    ticksPerAction;
 	private int     effectType   = 0;
 	private int     effectNumber = -1;
+	private boolean isPending    = true;
 	private boolean isDouble     = false;
 	private int     note         = -1;
 	
@@ -155,6 +156,32 @@ public class EffectFlow {
 	 */
 	public int getEffectNumber() {
 		return effectNumber;
+	}
+	
+	/**
+	 * Marks the flow as pending or not pending.
+	 * 
+	 * "Pending" means that the last called function was something like length(), wait(), note(), src(), dest() etc.
+	 * 
+	 * "Not pending" means that the last called function was something like set(), on(), off(), line(), sin(), etc.
+	 * 
+	 * @param isPending  **true** for pending, **false** for not pending
+	 */
+	public void setPending(boolean isPending) {
+		this.isPending = isPending;
+	}
+	
+	/**
+	 * Indicates if the flow is pending.
+	 * 
+	 * "Pending" means that the last called function was something like length(), wait(), note(), src(), dest() etc.
+	 * 
+	 * "Not pending" means that the last called function was something like set(), on(), off(), line(), sin(), etc.
+	 * 
+	 * @return **true** if the flow is pending, otherwise: **false**.
+	 */
+	public boolean isPending() {
+		return isPending;
 	}
 	
 	/**

@@ -4116,32 +4116,32 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-broken-by-var")) );
 		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "0: .set(50)", e.getLineContent() );
+		assertEquals( "0: .wait.set(50)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), ".")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-broken-by-const")) );
 		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "0: .set(50)", e.getLineContent() );
+		assertEquals( "0: .wait.set(50)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), ".")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-broken-by-call")) );
 		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "0: .set(50)", e.getLineContent() );
+		assertEquals( "0: .wait.set(50)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), ".")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-broken-by-function")) );
 		assertEquals( 7, e.getLineNumber() );
-		assertEquals( "0: .set(50)", e.getLineContent() );
+		assertEquals( "0: .wait.set(50)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), ".")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-broken-by-note")) );
 		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "0: .set(50)", e.getLineContent() );
+		assertEquals( "0: .wait.set(50)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), ".")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-broken-by-other-channel")) );
 		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "0: .set(50)", e.getLineContent() );
+		assertEquals( "0: .wait.set(50)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), ".")));
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-missing-dot-1")) );
@@ -4658,6 +4658,26 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: mono_mode.set(+5)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_SIGNED_FORBIDDEN) + "+5"));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-pending-1")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertEquals( "1: c", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_PENDING)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-pending-2")) );
+		assertEquals( 5, e.getLineNumber() );
+		assertEquals( "0: hold.wait", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_PENDING)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-pending-3")) );
+		assertEquals( 6, e.getLineNumber() );
+		assertEquals( "", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_PENDING)));
+		
+		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-pending-4")) );
+		assertEquals( 23, e.getLineNumber() );
+		assertEquals( "0: c", e.getLineContent() );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_PENDING)));
 	}
 	
 	/**

@@ -67,6 +67,7 @@ public class Effect {
 	 */
 	public static void init(MidicaPLParser rootParser) {
 		parser = rootParser;
+		flow   = null;
 		
 		// create and initialize special structures
 		{
@@ -434,8 +435,29 @@ public class Effect {
 	
 	/**
 	 * Closes the current flow, if there is an open flow.
+	 * 
+	 * @throws ParseException if the current flow is pending.
 	 */
-	public static void closeFlowIfPossible() {
+	public static void closeFlowIfPossible() throws ParseException {
+		
+		// check if there is a pending flow
+		if (flow != null && flow.isPending()) {
+			throw new ParseException(Dict.get(Dict.ERROR_FL_PENDING));
+		}
+		
+		flow = null;
+	}
+	
+	/**
+	 * Closes the current flow, if there is an open flow.
+	 * 
+	 * Does **not** check if the flow is pending or not.
+	 * 
+	 * Called after all parsing runs are finished, no matter if an exception is thrown or not.
+	 * 
+	 * Does **not** throw a further exception.
+	 */
+	public static void closeFlowAfterParsingFinished() {
 		flow = null;
 	}
 	
@@ -545,6 +567,8 @@ public class Effect {
 	 * @throws ParseException
 	 */
 	private static void applyFlowElement(String elemName, int number, String paramStr) throws ParseException {
+		
+		flow.setPending(true);
 		
 		// check presence of params
 		if (functionNames.contains(elemName)) {
@@ -707,6 +731,7 @@ public class Effect {
 		
 		// for all other functions we need the effect type
 		int valueType = flow.getValueType(funcName);
+		flow.setPending(false);
 		
 		// note required but not set?
 		if (flow.needsNote() && flow.getNote() < 0)
