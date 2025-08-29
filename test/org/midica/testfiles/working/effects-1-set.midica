@@ -19,6 +19,20 @@ INCLUDE inc/instruments.midica
 0: .double.wait.set(127/127)
 0: .double.wait.set(127/0)
 
+// hex values
+0: -:*4
+0: vol.length(64).set(x00)
+0: .wait.set(x7F)
+0: .wait.set(x40)
+
+// double
+0: .double.wait.set(x00/x00)
+0: .wait.set(x00/x7F)
+0: .wait.set(x7F/x00)
+0: .wait.set(x12/127)
+0: .wait.set(127/x3F)
+
+
 ////////////////////////////////////////
 // channel 1: CTRL / MSB_SIGNED (balance)
 ////////////////////////////////////////
@@ -59,7 +73,7 @@ INCLUDE inc/instruments.midica
 3: .wait.off()
 
 ////////////////////////////////////////
-// channel 4: CTRL / ANY (0x50 == 80)
+// channel 4: CTRL / ANY (x50 == 80)
 ////////////////////////////////////////
 
 4: length(64).wait.ctrl=80.on()
@@ -85,10 +99,12 @@ INCLUDE inc/instruments.midica
 4: .wait.set(+0)
 
 ////////////////////////////////////////
-// channel 5: CTRL / NONE (0x7B == 123 == all notes off)
+// channel 5: CTRL / NONE (x7B == 123 == all notes off)
 ////////////////////////////////////////
 
 5: ctrl=123.length(64).wait.on()
+5: -:64
+5: ctrl=x7B.length(64).wait.on()
 
 ////////////////////////////////////////
 // channel 6: RPN / MSB (modulation depth range)
@@ -112,6 +128,12 @@ INCLUDE inc/instruments.midica
 6: rpn=5.set(0%)
 6: c
 6: rpn=0/5.double.set(12/30)
+6: c
+6: rpn=x00/5.set(127)
+6: c
+6: rpn=0/x05.set(0)
+6: c
+6: rpn=x00/x05.set(127)
 
 ////////////////////////////////////////
 // channel 7: RPN / MSB_SIGNED (channel coarse tuning / channel fine tuning)
@@ -179,4 +201,19 @@ INCLUDE inc/instruments.midica
 8: nrpn=519.length(32).wait.double.set(50%)       // MSB * 128 + LSB == 128 * 4 + 7 == 512 + 7 == 519
 8: c
 8: nrpn=4/7.length(32).wait.double.set(127/64)
+
+////////////////////////////////////////
+// channel 10: reverb
+////////////////////////////////////////
+
+10: reverb.length(64)
+10:   .wait.set(-0)
+10:   .wait.set(+0)
+10:   .wait().set(-100%)
+10:   .wait().set(+100%)
+10:   .wait().set(-40)
+10:   .wait().set(+87)
+10:   .wait().set(x00)
+10:   .wait().set(x7F)
+
 

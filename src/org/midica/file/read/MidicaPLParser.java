@@ -245,6 +245,7 @@ public class MidicaPLParser extends SequenceParser {
 	public static String FUNC_NOTE          = null;
 	public static String FUNC_SRC           = null;
 	public static String FUNC_DEST          = null;
+	public static String EFF_HEX            = null;
 	public static String EFF_PERCENT        = null;
 	public static String CH_A_POLY_AT       = null;
 	public static String CH_D_MONO_AT       = null;
@@ -539,6 +540,7 @@ public class MidicaPLParser extends SequenceParser {
 		FUNC_NOTE          = Dict.getSyntax( Dict.SYNTAX_FUNC_NOTE          );
 		FUNC_SRC           = Dict.getSyntax( Dict.SYNTAX_FUNC_SRC           );
 		FUNC_DEST          = Dict.getSyntax( Dict.SYNTAX_FUNC_DEST          );
+		EFF_HEX            = Dict.getSyntax( Dict.SYNTAX_EFF_HEX            );
 		EFF_PERCENT        = Dict.getSyntax( Dict.SYNTAX_EFF_PERCENT        );
 		CH_A_POLY_AT       = Dict.getSyntax( Dict.SYNTAX_CH_A_POLY_AT       );
 		CH_D_MONO_AT       = Dict.getSyntax( Dict.SYNTAX_CH_D_MONO_AT       );
@@ -3820,6 +3822,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_FUNC_NOTE.equals(cmdId)          ) FUNC_NOTE          = cmdName;
 		else if ( Dict.SYNTAX_FUNC_SRC.equals(cmdId)           ) FUNC_SRC           = cmdName;
 		else if ( Dict.SYNTAX_FUNC_DEST.equals(cmdId)          ) FUNC_DEST          = cmdName;
+		else if ( Dict.SYNTAX_EFF_HEX.equals(cmdId)            ) EFF_HEX            = cmdName;
 		else if ( Dict.SYNTAX_EFF_PERCENT.equals(cmdId)        ) EFF_PERCENT        = cmdName;
 		else if ( Dict.SYNTAX_CH_A_POLY_AT.equals(cmdId)       ) CH_A_POLY_AT       = cmdName;
 		else if ( Dict.SYNTAX_CH_D_MONO_AT.equals(cmdId)       ) CH_D_MONO_AT       = cmdName;

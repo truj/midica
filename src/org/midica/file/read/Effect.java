@@ -64,8 +64,9 @@ public class Effect {
 	 * Called by {@link MidicaPLParser} if the DEFINE parsing run is finished.
 	 * 
 	 * @param rootParser  the root parser
+	 * @throws FatalParseException 
 	 */
-	public static void init(MidicaPLParser rootParser) {
+	public static void init(MidicaPLParser rootParser) throws FatalParseException {
 		parser = rootParser;
 		flow   = null;
 		
@@ -228,20 +229,34 @@ public class Effect {
 			// flow pattern
 			String flowRegex
 				= "\\G"                                               // end of previous match
-				+ "(^|" + Pattern.quote(MidicaPLParser.FL_DOT) + ")?" // begin or '.'
-				+ "(\\w+)"                                            // name
+				+ "(^|" + Pattern.quote(MidicaPLParser.FL_DOT) + ")?" // (group 1) begin or '.'
+				+ "(\\w+)"                                            // (group 2) name
 				+ "(?:"                                               // generic number (optional)
 				    + Pattern.quote(MidicaPLParser.FL_ASSIGNER)
-				    + "(\\d+)"                                        // MSB or whole number
 				    + "(?:"
-				    + Pattern.quote(MidicaPLParser.FL_GEN_NUM_SEP)
-				    + "(\\d+)"                                        // LSB of generic number
+				        + "(?:"
+				            + Pattern.quote(MidicaPLParser.EFF_HEX)
+				            + "(\\w*)"                                // (group 3) hex MSB or whole number
+				        + ")"
+				        + "|"
+				        + "(\\d*)"                                    // (group 4) decimal MSB or whole number
+				    + ")"
+				    + "(?:"
+				        + Pattern.quote(MidicaPLParser.FL_GEN_NUM_SEP)
+				        + "(?:"
+				            + "(?:"
+				                + Pattern.quote(MidicaPLParser.EFF_HEX)
+				                + "(\\w*)"                            // (group 5) hex LSB
+				            + ")"
+				            + "|"
+				            + "(\\d*)"                                // (group 6) decimal LSB of generic number
+				        + ")"
 				    + ")?"
 				+ ")?"
 				+ "(?:"                                               // parameters (optional)
-				+ Pattern.quote(MidicaPLParser.PARAM_OPEN)            // (
-				+ "(\\S*?)"                                           // function parameters
-				+ Pattern.quote(MidicaPLParser.PARAM_CLOSE)           // )
+				    + Pattern.quote(MidicaPLParser.PARAM_OPEN)        // (
+				    + "(\\S*?)"                                       // (group 7) function parameters
+				    + Pattern.quote(MidicaPLParser.PARAM_CLOSE)       // )
 				+ ")?";                                               // optional
 			flowPattern = Pattern.compile(flowRegex);
 			
@@ -288,10 +303,24 @@ public class Effect {
 				+ ")"
 				+ "|"
 				+ "(?:"
-				    + "(\\d+)"                  // MSB (group 7)
-				    + Pattern.quote(MidicaPLParser.FL_GEN_NUM_SEP)
-				    + "(\\d+)"                  // LSB (group 8)
+				    + "(\\d*)"                  // (group 7) decimal MSB or whole number
+				    + "|"
+				    + "(?:"
+				        + Pattern.quote(MidicaPLParser.EFF_HEX)
+				        + "(\\w+)"              // (group 8) hex MSB or whole number
+				    + ")"
 				+ ")"
+				+ "(?:"
+				    + Pattern.quote(MidicaPLParser.FL_GEN_NUM_SEP)
+				    + "(?:"
+				        + "(\\d*)"              // (group 9) decimal LSB of generic number
+				        + "|"
+				        + "(?:"
+				            + Pattern.quote(MidicaPLParser.EFF_HEX)
+				            + "(\\w+)"          // (group 10) hex LSB
+				        + ")"
+				    + ")"
+				+ ")?"
 				+ "$";
 			intPattern = Pattern.compile(intRegex);
 			
@@ -307,6 +336,22 @@ public class Effect {
 				+ ")?"
 				+ "$";
 			periodsPattern = Pattern.compile(periodsRegex);
+		}
+		
+		// turn on GM2 mode
+		try {
+			byte[] content = new byte[6];
+			content[0] = (byte) 0xF0; // sysex
+			content[1] =        0x7E; // universal non-real time
+			content[2] =        0x7F; // device ID: all devices
+			content[3] =        0x09; // sub ID 1: GM message
+			content[4] =        0x03; // sub ID 2: GM 2 ON
+			content[5] = (byte) 0xF7; // end of sysex
+			SysexMessage msg = new SysexMessage(content, content.length);
+			SequenceCreator.addMessageGeneric(msg, 0);
+		}
+		catch (InvalidMidiDataException e) {
+			throw new FatalParseException("Invalid MIDI data when trying to set GM2 on.");
 		}
 	}
 	
@@ -372,9 +417,11 @@ public class Effect {
 				lastMatchOffset  = m.end();
 				String dot       = m.group(1);
 				String elemName  = m.group(2);
-				String numberStr = m.group(3);
-				String numberLsb = m.group(4);
-				String paramStr  = m.group(5);
+				String hexMsbStr = m.group(3);
+				String decMsbStr = m.group(4);
+				String hexLsbStr = m.group(5);
+				String decLsbStr = m.group(6);
+				String paramStr  = m.group(7);
 				
 				if (flowElementNames.contains(elemName))
 					looksLikeFlow = true;
@@ -394,22 +441,11 @@ public class Effect {
 						throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_MISSING_DOT), MidicaPLParser.FL_DOT));
 				}
 				
-				// check number
-				int number = -1;
-				if (MidicaPLParser.FL_CTRL.equals(elemName)) {
-					if (numberLsb != null)
-						throw new ParseException(Dict.get(Dict.ERROR_FL_NUM_SEP_NOT_ALLOWED) + elemName);
-					number = parseGenericNumber(numberStr, numberLsb, 0x7F, elemName);
-				}
-				else if (MidicaPLParser.FL_RPN.equals(elemName) || MidicaPLParser.FL_NRPN.equals(elemName)) {
-					number = parseGenericNumber(numberStr, numberLsb, 0x3FFF, elemName);
-				}
-				else if (numberStr != null) {
-					throw new ParseException(Dict.get(Dict.ERROR_FL_NUMBER_NOT_ALLOWED) + elemName);
-				}
+				// get generic number for ctrl / (n)rpn
+				int genericNumber = parseNumber(elemName, decMsbStr, hexMsbStr, decLsbStr, hexLsbStr);
 				
 				// apply the flow element
-				applyFlowElement(elemName, number, paramStr);
+				applyFlowElement(elemName, genericNumber, paramStr);
 			}
 		}
 		catch (ParseException e) {
@@ -513,7 +549,13 @@ public class Effect {
 	}
 	
 	/**
-	 * Parses a generic controller or (N)RPN number, assigned in a flow.
+	 * Parses a number.
+	 * 
+	 * This can be:
+	 * 
+	 * - a function parameter
+	 * - or a generic controller, assigned in a flow
+	 * - an (N)RPN number, assigned in a flow
 	 * 
 	 * Needed by one of the following elements:
 	 * 
@@ -521,27 +563,114 @@ public class Effect {
 	 * - .rpn=...
 	 * - .nrpn=...
 	 * 
-	 * @param numberStr  The MSB or whole number to be parsed.
-	 * @param numberLsb  The LSB, if numberStr is an MSB, or **null** if numberStr is the whole 14-bit number.
-	 * @param maxNum     The maximum allowed number.
-	 * @param elemName   Flow element name (for error messages).
-	 * @return the parsed number
+	 * @param elemName   Flow element name.
+	 * @param decMsbStr´ decimal MSB or full 14-bit number (or null)
+	 * @param hexMsbStr´ hex MSB or full 14-bit number (or null)
+	 * @param decLsbStr´ decimal LSB (or null)
+	 * @param hexLsbStr´ hex LSB (or null)
+	 * @return the parsed number (or -1)
 	 * @throws ParseException if the number cannot be parsed or is too high.
 	 */
-	private static int parseGenericNumber(String numberStr, String numberLsb, int maxNum, String elemName) throws ParseException {
+	private static Integer parseNumber(String elemName, String decMsbStr, String hexMsbStr, String decLsbStr, String hexLsbStr) throws ParseException {
 		
-		// no number provided?
-		if (null == numberStr)
+		// reconstruct provided number for error messages
+		boolean isMsbHex = hexMsbStr != null;
+		boolean isLsbHex = hexLsbStr != null;
+		boolean hasLsb   = decLsbStr != null || hexLsbStr != null;
+		String numberStr = hexMsbStr != null ? MidicaPLParser.EFF_HEX + hexMsbStr : decMsbStr;
+		if (hexLsbStr != null || decLsbStr != null) {
+			numberStr += MidicaPLParser.FL_GEN_NUM_SEP;
+			numberStr += isLsbHex ? MidicaPLParser.EFF_HEX + hexLsbStr : decLsbStr;
+		}
+		
+		// do we expect a number at all?
+		boolean isCtrl     = MidicaPLParser.FL_CTRL.equals(elemName);
+		boolean isFuncCall = null == elemName;
+		boolean isGeneric  = isCtrl
+				|| MidicaPLParser.FL_RPN.equals(elemName)
+				|| MidicaPLParser.FL_NRPN.equals(elemName);
+		boolean isDouble  = isGeneric ? ! isCtrl : flow.isDouble();
+		int expectedBytes = 0;
+		if (isGeneric) {
+			expectedBytes = isDouble ? 2 : 1;
+		}
+		else if (flowElementNames.contains(elemName)) {
+			if (numberStr != null)
+				throw new ParseException(Dict.get(Dict.ERROR_FL_NUMBER_NOT_ALLOWED) + elemName);
+			return -1;
+		}
+		else {
+			// function call
+			expectedBytes = isDouble ? 2 : 1;
+		}
+		
+		// empty strings?
+		if ("".equals(decMsbStr) || "".equals(decLsbStr)) {
+			if (isGeneric)
+				throw new ParseException(Dict.get(Dict.ERROR_FL_NUMBER_EMPTY) + elemName);
+			else
+				throw new ParseException(Dict.get(Dict.ERROR_FUNC_NUMBER_EMPTY) + numberStr);
+		}
+		
+		// nothing to parse?
+		if (0 == expectedBytes) {
+			if (numberStr != null)
+				throw new FatalParseException("0 bytes expected. Unexpected number: " + numberStr);
+			return -1;
+		}
+		else if (null == numberStr) {
 			throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_NUMBER_MISSING), elemName));
+		}
+		
+		// LSB correct?
+		if (1 == expectedBytes && hasLsb) {
+			if (isGeneric)
+				throw new ParseException(Dict.get(Dict.ERROR_FL_NUM_SEP_NOT_ALLOWED) + elemName);
+			throw new ParseException(String.format(
+					Dict.get(Dict.ERROR_FUNC_MSB_LSB_NEEDS_DOUBLE), numberStr, MidicaPLParser.FL_DOUBLE));
+		}
+		if (2 == expectedBytes && hexMsbStr != null && !hasLsb) {
+			if (isGeneric)
+				throw new ParseException(Dict.get(Dict.ERROR_FL_HEX_LSB_REQUIRED) + numberStr);
+			throw new ParseException(Dict.get(Dict.ERROR_FUNC_HEX_LSB_REQUIRED) + numberStr);
+		}
+		
+		// unify number
+		try {
+			if (hexMsbStr != null) {
+				if (2 == expectedBytes && !hasLsb)
+					throw new FatalParseException("LSB required");
+				decMsbStr = "" + parseHex(hexMsbStr);
+			}
+			if (hexLsbStr != null) {
+				decLsbStr = "" + parseHex(hexLsbStr);
+			}
+		}
+		catch (NumberFormatException e) {
+			if (isGeneric)
+				throw new ParseException(Dict.get(Dict.ERROR_FL_HEX_FORMAT) + numberStr);
+			throw new ParseException(Dict.get(Dict.ERROR_FUNC_HEX_FORMAT) + numberStr);
+		}
+		
+		// get max value
+		int maxNum = 1 == expectedBytes ? 0x7F : 0x3FFF;
 		
 		try {
 			// parse the number or MSB
-			int number = Integer.parseInt(numberStr);
+			int number = Integer.parseInt(decMsbStr);
+			
+			// MSB too high?
+			if (hasLsb && number > 127)
+				throw new ParseException(String.format(
+						Dict.get(Dict.ERROR_FUNC_MSB_TOO_HIGH), numberStr, decMsbStr));
 			
 			// LSB available? - parse it
-			if (numberLsb != null) {
-				int lsb = Integer.parseInt(numberLsb);
+			if (decLsbStr != null) {
+				int lsb = Integer.parseInt(decLsbStr);
 				number = number * 128 + lsb;
+				if (lsb > 127)
+					throw new ParseException(String.format(
+							Dict.get(Dict.ERROR_FUNC_LSB_TOO_HIGH), numberStr, decLsbStr));
 			}
 			
 			// number higher then allowed by the controller or (n)rpn?
@@ -559,14 +688,32 @@ public class Effect {
 	}
 	
 	/**
+	 * Parses a hex string and returns its int value.
+	 * 
+	 * @param hexStr  the hex string
+	 * @return the value
+	 * @throws ParseException 
+	 */
+	private static int parseHex(String hexStr) throws ParseException {
+		if (hexStr.length() != 2)
+			throw new ParseException(Dict.get(Dict.ERROR_FUNC_HEX_DIGITS) + MidicaPLParser.EFF_HEX + hexStr);
+		int value = Integer.parseInt(hexStr, 16);
+		if (value > 127) {
+			throw new ParseException(String.format(
+				Dict.get(Dict.ERROR_FUNC_HEX_TOO_HIGH), MidicaPLParser.EFF_HEX, MidicaPLParser.EFF_HEX, hexStr));
+		}
+		return value;
+	}
+	
+	/**
 	 * Applies an element of an effect flow.
 	 * 
-	 * @param elemName    flow element name
-	 * @param number      controller/rpn/nrpn number or null
-	 * @param paramStr    parameters or null
+	 * @param elemName      flow element name
+	 * @param genericNum    controller/rpn/nrpn number or -1
+	 * @param paramStr      parameters or null
 	 * @throws ParseException
 	 */
-	private static void applyFlowElement(String elemName, int number, String paramStr) throws ParseException {
+	private static void applyFlowElement(String elemName, int genericNum, String paramStr) throws ParseException {
 		
 		flow.setPending(true);
 		
@@ -589,15 +736,15 @@ public class Effect {
 			// generic controller/rpn/nrpn?
 			if (MidicaPLParser.FL_CTRL.equals(elemName)) {
 				effectType   = EffectFlow.EFF_TYPE_CTRL;
-				effectNumber = number;
+				effectNumber = genericNum;
 			}
 			else if (MidicaPLParser.FL_RPN.equals(elemName)) {
 				effectType   = EffectFlow.EFF_TYPE_RPN;
-				effectNumber = number;
+				effectNumber = genericNum;
 			}
 			else if (MidicaPLParser.FL_NRPN.equals(elemName)) {
 				effectType   = EffectFlow.EFF_TYPE_NRPN;
-				effectNumber = number;
+				effectNumber = genericNum;
 			}
 			else {
 				
@@ -1135,9 +1282,12 @@ public class Effect {
 		boolean requiresSign    = flow.requiresSign(valueType);
 		boolean supportsPercent = flow.supportsPercentage();
 		boolean canUseHalfTones = flow.supportsHalfToneSteps();
-		boolean isMsbLsb = false;
+		boolean isHex         = false;
+		boolean isMsbLsb      = false;
 		String  maxStr        = requiresSign ? "+" + max : max + "";
 		String  maxPercentStr = requiresSign ? "+100" : "100";
+		boolean isReverb      = EffectFlow.EFF_TYPE_CTRL == flow.getEffectType()
+		                        && 0x5B == flow.getEffectNumber();
 		
 		// parse the parameter
 		Integer value = null;
@@ -1150,19 +1300,29 @@ public class Effect {
 				String sign2       = m.group(4);
 				String halfToneStr = m.group(5);
 				String sign3       = m.group(6);
-				String msbStr      = m.group(7);
-				String lsbStr      = m.group(8);
+				String decMsbStr   = m.group(7);
+				String hexMsbStr   = m.group(8);
+				String decLsbStr   = m.group(9);
+				String hexLsbStr   = m.group(10);
+				
+				// hex or MSB/LSB? - expert mode
+				boolean isExpert = decMsbStr != null || hexMsbStr != null;
+				if (isExpert) {
+					value = parseNumber(null, decMsbStr, hexMsbStr, decLsbStr, hexLsbStr);
+					return buildParsedIntParam(value);
+				}
 				
 				// check sign (+/-)
 				boolean isSigned     = (sign1 != null || sign2 != null || sign3 != null);
 				boolean isFlexSigned = isSigned && (EffectFlow.TYPE_ANY == valueType || EffectFlow.TYPE_BYTE_FLEX == valueType);
-				if (null == msbStr) {
+				if (null == decMsbStr && null == hexMsbStr) {
 					if (isSigned && !flow.supportsSign(valueType))
 						throw new ParseException(Dict.get(Dict.ERROR_FUNC_SIGNED_FORBIDDEN) + valueStr);
 					if (!isSigned && flow.requiresSign(valueType))
 						throw new ParseException(Dict.get(Dict.ERROR_FUNC_SIGNED_REQUIRED) + valueStr);
 				}
 				
+				// get value
 				if (intStr != null) {
 					if (canUseHalfTones) {
 						value = parseHalfToneSteps(intStr);
@@ -1200,21 +1360,6 @@ public class Effect {
 					
 					value = parseHalfToneSteps(halfToneStr);
 				}
-				else if (msbStr != null) {
-					isMsbLsb = true;
-					if (!flow.isDouble())
-						throw new ParseException(String.format(
-							Dict.get(Dict.ERROR_FUNC_MSB_LSB_NEEDS_DOUBLE), valueStr, MidicaPLParser.FL_DOUBLE));
-					int msb = Integer.parseInt(msbStr);
-					int lsb = Integer.parseInt(lsbStr);
-					if (msb > 127)
-						throw new ParseException(String.format(
-							Dict.get(Dict.ERROR_FUNC_MSB_TOO_HIGH), valueStr, msbStr));
-					if (lsb > 127)
-						throw new ParseException(String.format(
-							Dict.get(Dict.ERROR_FUNC_LSB_TOO_HIGH), valueStr, lsbStr));
-					value = msb * 128 + lsb;
-				}
 				else {
 					throw new FatalParseException(Dict.get(Dict.ERROR_FUNC_NO_NUMBER) + valueStr);
 				}
@@ -1241,7 +1386,30 @@ public class Effect {
 		}
 		else if (EffectFlow.TYPE_BYTE_SIGNED == valueType) {
 			value += 64;
+			
+			// reverb? - center is not 64 but 40
+			if (isReverb)
+				value -= 24;
 		}
+		
+		// handle 1 or 2 bytes
+		return buildParsedIntParam(value);
+	}
+	
+	/**
+	 * Transforms a parsed value into 2 or 3 bytes.
+	 * 
+	 * - first byte: the value itself
+	 * - second byte: MSB or full value (7 bits)
+	 * - third byte: LSB (7 bits)
+	 * 
+	 * @param value  the value to transform
+	 * @return the structure above
+	 * @throws ParseException
+	 */
+	private static int[] buildParsedIntParam(Integer value) throws ParseException {
+		
+		int valueType = flow.getValueType(null);
 		
 		// find out how many bytes are needed
 		int byteCount = 1;

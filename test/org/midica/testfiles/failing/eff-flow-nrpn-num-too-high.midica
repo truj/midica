@@ -1,4 +1,0 @@
-INCLUDE inc/instruments.midica
-
-
-0: nrpn=999999999999999.set(50)

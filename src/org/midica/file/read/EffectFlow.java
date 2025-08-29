@@ -31,11 +31,11 @@ public class EffectFlow {
 	
 	// value types
 	public static final int TYPE_BOOLEAN     = 1;  // 0=off, 127=on
-	public static final int TYPE_MSB         = 3;  // default:  0 - 127, double:     0 - 16383
-	public static final int TYPE_MSB_SIGNED  = 5;  // default: -64 - 63, double: -8192 - 8191
-	public static final int TYPE_BYTE        = 11; // 0 - 127
-	public static final int TYPE_BYTE_SIGNED = 13; // -64 - 63
-	public static final int TYPE_BYTE_FLEX   = 14; // signed (-64 - 63) or unsigned (0 - 127)
+	public static final int TYPE_MSB         = 3;  // default:   0 - 127, double:     0 - 16383
+	public static final int TYPE_MSB_SIGNED  = 5;  // default: -64 - +63, double: -8192 - +8191
+	public static final int TYPE_BYTE        = 11; //   0 - 127
+	public static final int TYPE_BYTE_SIGNED = 13; // -64 - +63
+	public static final int TYPE_BYTE_FLEX   = 14; // signed (-64 - +63) or unsigned (0 - 127)
 	public static final int TYPE_ANY         = 15; // anything that fits in 7 bits
 	public static final int TYPE_NONE        = 17; // no value allowed (using 0 internally)
 	
@@ -221,6 +221,12 @@ public class EffectFlow {
 			return functions;
 		}
 		
+		// var (sound variation)
+		if (EFF_TYPE_CTRL == effectType && 0x46 == effectNumber) {
+			functions.add(FUNC_TYPE_SET);
+			return functions;
+		}
+		
 		// normal cases
 		if (TYPE_MSB == valueType || TYPE_MSB_SIGNED == valueType
 				|| TYPE_BYTE == valueType || TYPE_BYTE_SIGNED == valueType
@@ -350,6 +356,10 @@ public class EffectFlow {
 		
 		// mono_mode
 		if (EFF_TYPE_CTRL == effectType && 0x7E == effectNumber)
+			return false;
+		
+		// var (sound variation)
+		if (EFF_TYPE_CTRL == effectType && 0x46 == effectNumber)
 			return false;
 		
 		if (EFF_TYPE_RPN == effectType) {
@@ -819,6 +829,11 @@ public class EffectFlow {
 		// sound variation: 0 to 127
 		ctrlToType.put(0x46, TYPE_BYTE);
 		
+		// timbre/harmonic:
+		// unsigned according to MIDI 1.0
+		// signed according to GM2
+		ctrlToType.put(0x47, TYPE_BYTE_FLEX);
+		
 		// signed simple controllers (values from -64 to 63)
 		for (int i = 0x47; i < 0x4F; i++) {
 			ctrlToType.put(i, TYPE_BYTE_SIGNED);
@@ -854,6 +869,7 @@ public class EffectFlow {
 		ctrlToType.put(0x0A, TYPE_MSB_SIGNED); // panorama
 		ctrlToType.put(0x54, TYPE_NONE);       // portamento ctrl
 		ctrlToType.put(0x58, TYPE_ANY);        // high resolution velocity prefix
+		ctrlToType.put(0x5B, TYPE_BYTE_SIGNED); // reverb
 		ctrlToType.put(0x60, TYPE_NONE);       // data increment
 		ctrlToType.put(0x61, TYPE_NONE);       // data decrement
 		ctrlToType.put(0x7A, TYPE_BOOLEAN);    // local control on/off
@@ -867,8 +883,12 @@ public class EffectFlow {
 		ctrlToDefault.put(0x0B, 0x7F); // vol (expression)
 		ctrlToDefault.put(0x5B, 0x28); // reverb
 		
+		// exceptions for min
+		ctrlToMin.put(0x5B, -40); // reverb
+		
 		// exceptions for max
 		ctrlToMax.put(0x7E, 16); // mono mode on - range: 0-16
+		ctrlToMax.put(0x5B, 87); // reverb
 		
 		/////////////////////////////
 		// (N)RPNs
@@ -921,8 +941,8 @@ public class EffectFlow {
 	 * 
 	 * @param typeStructure     map containing the effect type
 	 * @param defaultStructure  map to be filled with the default value
-	 * @param minStructure      map to be filled with the default value
-	 * @param maxStructure      map to be filled with the default value
+	 * @param minStructure      map to be filled with the min value
+	 * @param maxStructure      map to be filled with the max value
 	 */
 	private static void applyDefaultMinAndMax(Map<Integer, Integer> typeStructure, Map<Integer, Integer> defaultStructure, Map<Integer, Integer> minStructure, Map<Integer, Integer> maxStructure) {
 		

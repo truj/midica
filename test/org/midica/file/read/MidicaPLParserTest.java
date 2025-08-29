@@ -9,8 +9,12 @@ package org.midica.file.read;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.TreeSet;
@@ -19,6 +23,7 @@ import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiEvent;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.Sequence;
+import javax.sound.midi.SysexMessage;
 import javax.swing.JComboBox;
 
 import org.junit.jupiter.api.BeforeAll;
@@ -46,8 +51,15 @@ class MidicaPLParserTest extends MidicaPLParser {
 	
 	private static JComboBox<?>[] cbxs;
 	
-	public MidicaPLParserTest() {
+	private File tmpTestFile;
+	
+	public MidicaPLParserTest() throws Exception {
 		super(true);
+		
+		// create temp file
+		Path tempPath = Files.createTempFile("generic_test_file-", ".midica");
+		tmpTestFile = tempPath.toFile();
+		tmpTestFile.deleteOnExit();
 	}
 
 	/**
@@ -239,7 +251,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 		parse(getWorkingFile("meta"));
 		assertEquals(
 			"(c) test\r\n2nd line",
-			getMetaMsgText(0, 0)  // copyright
+			getMetaMsgText(0, 1)  // copyright
 		);
 		assertEquals(
 			  "{#title=Title with tab\\t!}"
@@ -248,14 +260,14 @@ class MidicaPLParserTest extends MidicaPLParser {
 			+ "{#artist=\\{Someone\\} \\[Else\\]}"
 			+ "{#software=Midica " + Midica.VERSION + "}"
 			+ "{#}",
-			getMetaMsgText(0, 1)  // RP-026 tags
+			getMetaMsgText(0, 2)  // RP-026 tags
 		);
 		// soft karaoke fields (meta track)
-		assertEquals( "@KMIDI KARAOKE FILE", getMetaMsgText(0, 2) );
-		assertEquals( "@V0100",              getMetaMsgText(0, 3) );
-		assertEquals( "@Iinfo 1",            getMetaMsgText(0, 4) );
-		assertEquals( "@Iinfo 2",            getMetaMsgText(0, 5) );
-		assertEquals( "@Iinfo 3",            getMetaMsgText(0, 6) );
+		assertEquals( "@KMIDI KARAOKE FILE", getMetaMsgText(0, 3) );
+		assertEquals( "@V0100",              getMetaMsgText(0, 4) );
+		assertEquals( "@Iinfo 1",            getMetaMsgText(0, 5) );
+		assertEquals( "@Iinfo 2",            getMetaMsgText(0, 6) );
+		assertEquals( "@Iinfo 3",            getMetaMsgText(0, 7) );
 		// soft karaoke fields (lyrics track)
 		assertEquals( "@LENGL",           getMetaMsgText(1, 0) );
 		assertEquals( "@Tsk-title",       getMetaMsgText(1, 1) );
@@ -1504,6 +1516,33 @@ class MidicaPLParserTest extends MidicaPLParser {
 			assertEquals( "4260/0/B0-0B/127", messages.get(i++).toString() ); // MSB
 			assertEquals( "4260/0/B0-2B/0",   messages.get(i++).toString() ); // LSB
 			
+			// single
+			// -:*4
+			assertEquals( "7680/0/B0-0B/0",   messages.get(i++).toString() ); // vol.length(64).wait.set(x00)
+			assertEquals( "7710/0/B0-0B/127", messages.get(i++).toString() ); // .length(64).wait.set(x7F)
+			assertEquals( "7740/0/B0-0B/64",  messages.get(i++).toString() ); // .length(64).wait.set(x40)
+			
+			// double
+			// .double.wait.set(x00)
+			assertEquals( "7770/0/B0-0B/0",   messages.get(i++).toString() ); // MSB
+			assertEquals( "7770/0/B0-2B/0",   messages.get(i++).toString() ); // LSB
+			
+			// .wait.set(x00/x7F)
+			assertEquals( "7800/0/B0-0B/0",   messages.get(i++).toString() ); // MSB
+			assertEquals( "7800/0/B0-2B/127", messages.get(i++).toString() ); // LSB
+			
+			// .wait.set(x7F/x00)
+			assertEquals( "7830/0/B0-0B/127", messages.get(i++).toString() ); // MSB
+			assertEquals( "7830/0/B0-2B/0",   messages.get(i++).toString() ); // LSB
+			
+			// .wait.set(x12/127)
+			assertEquals( "7860/0/B0-0B/18",  messages.get(i++).toString() ); // MSB
+			assertEquals( "7860/0/B0-2B/127", messages.get(i++).toString() ); // LSB
+			
+			// .wait.set(127/x3F)
+			assertEquals( "7890/0/B0-0B/127", messages.get(i++).toString() ); // MSB
+			assertEquals( "7890/0/B0-2B/63",  messages.get(i++).toString() ); // LSB
+			
 			// no further messages
 			assertEquals(messages.size(), i);
 		}
@@ -1617,6 +1656,7 @@ class MidicaPLParserTest extends MidicaPLParser {
 			
 			// ctrl=7B == 123
 			assertEquals( "30/5/B5-7B/0",  messages.get(i++).toString() ); // ctrl=123.length(64).wait.on()
+			assertEquals( "60/5/B5-7B/0",  messages.get(i++).toString() ); // ctrl=x7B.length(64).wait.on()
 			
 			// no further messages
 			assertEquals(messages.size(), i);
@@ -1728,6 +1768,30 @@ class MidicaPLParserTest extends MidicaPLParser {
 				assertEquals( "1920/6/B6-26/30",  messages.get(i++).toString() ); // data LSB: 30
 				assertEquals( "1930/6/B6-65/127", messages.get(i++).toString() ); // MSB reset
 				assertEquals( "1930/6/B6-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 2880: rpn=x00/5.set(127)
+				assertEquals( "2370/6/B6-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "2380/6/B6-64/5",   messages.get(i++).toString() ); // RPN LSB: 5
+				assertEquals( "2390/6/B6-06/127", messages.get(i++).toString() ); // data MSB: 127
+				assertEquals( "2410/6/B6-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "2410/6/B6-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 3360: rpn=0/x05.set(0)
+				assertEquals( "2850/6/B6-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "2860/6/B6-64/5",   messages.get(i++).toString() ); // RPN LSB: 5
+				assertEquals( "2870/6/B6-06/0",   messages.get(i++).toString() ); // data MSB: 0
+				assertEquals( "2890/6/B6-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "2890/6/B6-64/127", messages.get(i++).toString() ); // LSB reset
+			}
+			{
+				// tick 3840: rpn=x00/x05.set(127)
+				assertEquals( "3330/6/B6-65/0",   messages.get(i++).toString() ); // RPN MSB: 0
+				assertEquals( "3340/6/B6-64/5",   messages.get(i++).toString() ); // RPN LSB: 5
+				assertEquals( "3350/6/B6-06/127", messages.get(i++).toString() ); // data MSB: 127
+				assertEquals( "3370/6/B6-65/127", messages.get(i++).toString() ); // MSB reset
+				assertEquals( "3370/6/B6-64/127", messages.get(i++).toString() ); // LSB reset
 			}
 			
 			// no further messages
@@ -2046,6 +2110,21 @@ class MidicaPLParserTest extends MidicaPLParser {
 			
 			// no further messages
 			assertEquals(messages.size(), i);
+		}
+		// channel 10
+		{
+			messages = getMessagesByStatus("BA");
+			int i = 0;
+			
+			// Balance == 08
+			assertEquals( "30/10/BA-5B/40",   messages.get(i++).toString() ); // reverb.set(-0)
+			assertEquals( "60/10/BA-5B/40",   messages.get(i++).toString() ); // reverb.set(+0)
+			assertEquals( "90/10/BA-5B/0",    messages.get(i++).toString() ); // reverb.set(-100%)
+			assertEquals( "120/10/BA-5B/127", messages.get(i++).toString() ); // reverb.set(+100%)
+			assertEquals( "150/10/BA-5B/0",   messages.get(i++).toString() ); // reverb.set(-40)
+			assertEquals( "180/10/BA-5B/127", messages.get(i++).toString() ); // reverb.set(+87)
+			assertEquals( "210/10/BA-5B/0",   messages.get(i++).toString() ); // reverb.set(x00)
+			assertEquals( "240/10/BA-5B/127", messages.get(i++).toString() ); // reverb.set(x7F)
 		}
 		
 		parse(getWorkingFile("effects-2-pitch"));
@@ -2650,6 +2729,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 		{
 			messages = getMessagesByStatus("F0");
 			int i = 0;
+			
+			// first message in channel 0 is "GM2 on"
+			i++;
 			
 			// channel 0
 			
@@ -4159,31 +4241,6 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "0: vol=30.set(50)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_NUMBER_NOT_ALLOWED) + "vol"));
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-rpn-without-num")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: rpn.set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NUMBER_MISSING), "rpn")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-rpn-without-num")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: rpn.set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NUMBER_MISSING), "rpn")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-nrpn-num-too-high")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: nrpn=999999999999999.set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NUMBER_TOO_HIGH), "999999999999999", "nrpn", 16383)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-ctrl-num-too-high")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: ctrl=128.set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NUMBER_TOO_HIGH), 128, "ctrl", 127)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-ctrl-with-lsb")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: ctrl=0/11.set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_NUM_SEP_NOT_ALLOWED) + "ctrl"));
-		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-double-with-params")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: vol.double().set(50)", e.getLineContent() );
@@ -4349,11 +4406,13 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "0: nrpn=123.line(1,12)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "line"));
 		
+		// TODO: delete file, test as line
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-invalid-1")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: vol.line(1,9999999999999)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NO_NUMBER) + "9999999999999"));
 		
+		// TODO: delete file, test as line
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-invalid-2")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( "0: vol.line(1,0x7F)", e.getLineContent() );
@@ -4529,16 +4588,6 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "0: vol.set(12/30)", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_MSB_LSB_NEEDS_DOUBLE), "12/30", "double")));
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-msb-too-high")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.double.set(128/30)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_MSB_TOO_HIGH), "128/30", "128")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-lsb-too-high")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.double.set(30/128)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_LSB_TOO_HIGH), "30/128", "128")));
-		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-pattern-index-invalid-1")) );
 		assertEquals( 4, e.getLineNumber() );
 		assertEquals( ": poly_at.note(3)", e.getLineContent() );
@@ -4681,6 +4730,68 @@ class MidicaPLParserTest extends MidicaPLParser {
 	}
 	
 	/**
+	 * Tests for parsing single failing lines.
+	 * 
+	 * @throws Exception 
+	 */
+	@Test
+	void testParseFailingLines() throws Exception {
+		ParseException e;
+		
+		// functions with hex or MSB/LSB parameters
+		aemF("0: vol.double.set(128/30)", Dict.ERROR_FUNC_MSB_TOO_HIGH, "128/30", "128");
+		aemF("0: vol.double.set(30/128)", Dict.ERROR_FUNC_LSB_TOO_HIGH, "30/128", "128");
+		aemF("0: vol.line(1,x8F)", Dict.ERROR_FUNC_HEX_TOO_HIGH, "x", "x", "8F");
+		aemF("0: vol.double.set(x7F/x80)", Dict.ERROR_FUNC_HEX_TOO_HIGH, "x", "x", "80");
+		aemF("0: vol.double.set(x81/x32)", Dict.ERROR_FUNC_HEX_TOO_HIGH, "x", "x", "81");
+		aemC("0: vol.line(1,x123)", Dict.ERROR_FUNC_HEX_DIGITS, "x123");
+		aemC("0: vol.line(1,xF)", Dict.ERROR_FUNC_HEX_DIGITS, "xF");
+		aemC("0: vol.double.set(x00/x123)", Dict.ERROR_FUNC_HEX_DIGITS, "x123");
+		aemC("0: vol.double.set(x00/x1)", Dict.ERROR_FUNC_HEX_DIGITS, "x1");
+		aemC("0: vol.double.set(x123/x5)", Dict.ERROR_FUNC_HEX_DIGITS, "x123");
+		aemC("0: vol.double.set(x1/x00)", Dict.ERROR_FUNC_HEX_DIGITS, "x1");
+		aemC("0: vol.double.set(x7F)", Dict.ERROR_FUNC_HEX_LSB_REQUIRED, "x7F");
+		aemC("0: vol.set(x7F/)", Dict.ERROR_FUNC_NUMBER_EMPTY, "x7F/");
+		aemC("0: vol.set(x7F/x)", Dict.ERROR_FUNC_NO_NUMBER, "x7F/x");
+		aemC("0: vol.double.set(x7F/)", Dict.ERROR_FUNC_NUMBER_EMPTY, "x7F/");
+		aemC("0: vol.double.set(x7F/x)", Dict.ERROR_FUNC_NO_NUMBER, "x7F/x");
+		aemC("0: vol.set(xAG)", Dict.ERROR_FUNC_HEX_FORMAT, "xAG");
+		aemC("0: vol.double.set(x7F)", Dict.ERROR_FUNC_HEX_LSB_REQUIRED, "x7F");
+		aemF("0: vol.set(x00/x00)", Dict.ERROR_FUNC_MSB_LSB_NEEDS_DOUBLE, "x00/x00", "double");
+		aemF("0: vol.on(x12)", Dict.ERROR_FL_WRONG_PARAM_NUM, "on", 0, 1, "x12");
+		aemF("0: hold.on(5)", Dict.ERROR_FL_WRONG_PARAM_NUM, "on", 0, 1, "5");
+		
+		// generic numbers (ctrl / rpn / nrpn)
+		aemF("0: nrpn=999999999999999.set(50)", Dict.ERROR_FL_NUMBER_TOO_HIGH, "999999999999999", "nrpn", 16383);
+		aemF("0: ctrl=128.set(50)", Dict.ERROR_FL_NUMBER_TOO_HIGH, 128, "ctrl", 127);
+		aemC("0: vol=12.set(50)", Dict.ERROR_FL_NUMBER_NOT_ALLOWED, "vol");
+		aemF("0: rpn.set(50)", Dict.ERROR_FL_NUMBER_MISSING, "rpn");
+		aemC("0: nrpn=.set(50)", Dict.ERROR_FL_NUMBER_EMPTY, "nrpn");
+		aemC("0: ctrl=0/11.set(50)", Dict.ERROR_FL_NUM_SEP_NOT_ALLOWED, "ctrl");
+		aemF("0: ctrl=x8F.set(100)", Dict.ERROR_FUNC_HEX_TOO_HIGH, "x", "x", "8F");
+		aemF("0: rpn=x7F/x80.set(100)", Dict.ERROR_FUNC_HEX_TOO_HIGH, "x", "x", "80");
+		aemF("0: rpn=x81/x32.set(100)", Dict.ERROR_FUNC_HEX_TOO_HIGH, "x", "x", "81");
+		aemC("0: rpn=x7F.set(5)", Dict.ERROR_FL_HEX_LSB_REQUIRED, "x7F");
+		aemC("0: nrpn=x12.set(x7F)", Dict.ERROR_FL_HEX_LSB_REQUIRED, "x12");
+		aemC("0: nrpn=x123.set(100)", Dict.ERROR_FL_HEX_LSB_REQUIRED, "x123");
+		aemC("0: nrpn=x.set(50)", Dict.ERROR_FL_HEX_LSB_REQUIRED, "x");
+		aemC("0: ctrl=xF.line(1,100)", Dict.ERROR_FUNC_HEX_DIGITS, "xF");
+		aemC("0: nrpn=x00/x123.set(100)", Dict.ERROR_FUNC_HEX_DIGITS, "x123");
+		aemC("0: rpn=x00/x1.set(100)", Dict.ERROR_FUNC_HEX_DIGITS, "x1");
+		aemC("0: nrpn=x123/x5.set(10)", Dict.ERROR_FUNC_HEX_DIGITS, "x123");
+		aemC("0: rpn=x1/x00.set(20)", Dict.ERROR_FUNC_HEX_DIGITS, "x1");
+		aemC("0: ctrl=x.set(6)", Dict.ERROR_FUNC_HEX_DIGITS, "x");
+		aemC("0: rpn=x/x23.set(6)", Dict.ERROR_FUNC_HEX_DIGITS, "x");
+		aemC("0: ctrl=x7F/.set(20)", Dict.ERROR_FL_NUMBER_EMPTY, "ctrl");
+		aemC("0: ctrl=/x7F.set(20)", Dict.ERROR_FL_NUMBER_EMPTY, "ctrl");
+		aemC("0: ctrl=x/x7F.set(20)", Dict.ERROR_FL_NUM_SEP_NOT_ALLOWED, "ctrl");
+		aemC("0: ctrl=x7F/x.set(6)", Dict.ERROR_FL_NUM_SEP_NOT_ALLOWED, "ctrl");
+		aemC("0: rpn=x7F/x.set(6)", Dict.ERROR_FUNC_HEX_DIGITS, "x");
+		aemC("0: rpn=x7F/xAG.set(6)", Dict.ERROR_FL_HEX_FORMAT, "x7F/xAG");
+		
+	}
+	
+	/**
 	 * Returns a source file for testing the parse() method with a
 	 * file that is supposed to be parsable.
 	 * 
@@ -4709,6 +4820,78 @@ class MidicaPLParserTest extends MidicaPLParser {
 	}
 	
 	/**
+	 * Tests the given line, expects a {@link ParseException}, and
+	 * checks the error message (with concatenation).
+	 * 
+	 * aemC stands for: Assert Error Message (Concatenated).
+	 * 
+	 * @param line             the line to be tested
+	 * @param key              dictionary key for the expected error message
+	 * @param concatenation    string that's concatenated at the end of the expected message
+	 * @throws Exception if something goes wrong
+	 */
+	private void aemC(String line, String key, String concatenation) throws Exception {
+		String expectedMsg = Dict.get(key) + concatenation;
+		ParseException e = parseFailingLine(line, key, expectedMsg);
+		assertEquals(expectedMsg, e.getMessage());
+	}
+	
+	/**
+	 * Tests the given line, expects a {@link ParseException}, and
+	 * checks the error message (with string format).
+	 * 
+	 * aemF stands for: Assert Error Message (Formatted).
+	 * 
+	 * @param line      the line to be tested
+	 * @param key       dictionary key for the expected error message
+	 * @param values    values for the string format
+	 * @throws Exception if something goes wrong
+	 */
+	private void aemF(String line, String key, Object... values) throws Exception {
+		String expectedMsg = String.format(Dict.get(key), values);
+		ParseException e = parseFailingLine(line, key, expectedMsg);
+		assertEquals(expectedMsg, e.getMessage());
+	}
+	
+	/**
+	 * Creates a temporary source file, parses it, and expects a ParseException.
+	 * 
+	 * The temp file contains an include with instruments in the 1st line,
+	 * and the given String as the second line.
+	 * 
+	 * @param line    the line that should throw the exception
+	 * @param key     dictionary key for the expected error message
+	 * @return the ParseException
+	 * @throws Exception 
+	 */
+	private ParseException parseFailingLine(String line, String key, String expectedMsg) throws Exception {
+		
+		// get absolute path to the include file
+		String inclPath = TestUtil.getTestfileDirectory()
+				+ "failing" + File.separator + "inc" + File.separator + "instruments.midica";
+		File inclFile = new File(inclPath);
+		
+		// write (new) content to the test file
+		BufferedWriter writer = Files.newBufferedWriter(tmpTestFile.toPath() , StandardOpenOption.TRUNCATE_EXISTING);
+		writer.append("INCLUDE " + inclFile.getAbsolutePath() + "\n");
+		writer.append(line);
+		writer.append("\n");
+		writer.close();
+		
+		// check line number and content
+		ParseException e = assertThrows(ParseException.class, () -> parse(tmpTestFile));
+		assertEquals(2, e.getLineNumber());
+		assertEquals(line, e.getLineContent());
+		
+		System.err.println("line: " + line);
+		System.err.println("expected msg: " + expectedMsg);
+		System.err.println("got msg     : " + e.getMessage());
+		System.err.println();
+		
+		return e;
+	}
+	
+	/**
 	 * Returns the text of the requested message, assuming that it is a meta message.
 	 * 
 	 * @param track    Track index, beginning with 0.
@@ -4716,13 +4899,24 @@ class MidicaPLParserTest extends MidicaPLParser {
 	 * @return         Text of the message.
 	 */
 	private static String getMetaMsgText(int track, int i) {
-		Sequence  seq = SequenceCreator.getSequence();
+		Sequence seq = SequenceCreator.getSequence();
 		
 		MidiMessage msg  = seq.getTracks()[track].get(i).getMessage();
-		byte[]      data = ((MetaMessage) msg).getData();
-		String      text = CharsetUtils.getTextFromBytes(data, "UTF-8", null);
-		
-		return text;
+		if (msg instanceof MetaMessage) {
+			byte[] data = ((MetaMessage) msg).getData();
+			String text = CharsetUtils.getTextFromBytes(data, "UTF-8", null);
+			
+			return text;
+		}
+		else {
+			SysexMessage sm = (SysexMessage) msg;
+			byte[] data = sm.getMessage();
+			for (byte b : data) {
+				System.err.print(String.format("%02X ", b));
+			}
+			System.err.println("");
+			throw new RuntimeException("Wrong message type");
+		}
 	}
 	
 	/**

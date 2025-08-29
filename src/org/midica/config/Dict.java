@@ -218,6 +218,7 @@ public class Dict {
 	public static final String SYNTAX_FUNC_NOTE          = "FUNC_NOTE";
 	public static final String SYNTAX_FUNC_SRC           = "FUNC_SRC";
 	public static final String SYNTAX_FUNC_DEST          = "FUNC_DESC";
+	public static final String SYNTAX_EFF_HEX            = "EFF_HEX";
 	public static final String SYNTAX_EFF_PERCENT        = "EFF_PERCENT";
 	public static final String SYNTAX_CH_A_POLY_AT       = "CH_A_POLY_AT";
 	public static final String SYNTAX_CH_D_MONO_AT       = "CH_D_MONO_AT";
@@ -1750,7 +1751,10 @@ public class Dict {
 	public static final String ERROR_FL_NOT_OPEN                 = "error_fl_not_open";
 	public static final String ERROR_FL_MISSING_DOT              = "error_fl_missing_dot";
 	public static final String ERROR_FL_NUMBER_NOT_ALLOWED       = "error_fl_number_not_allowed";
+	public static final String ERROR_FL_NUMBER_EMPTY             = "error_fl_number_empty";
 	public static final String ERROR_FL_NUM_SEP_NOT_ALLOWED      = "error_fl_num_sep_not_allowed";
+	public static final String ERROR_FL_HEX_FORMAT               = "error_fl_hex_format";
+	public static final String ERROR_FL_HEX_LSB_REQUIRED         = "error_fl_hex_lsb_required";
 	public static final String ERROR_FL_UNMATCHED_REMAINDER      = "error_fl_unmatched_remainder";
 	public static final String ERROR_FL_NUMBER_MISSING           = "error_fl_number_missing";
 	public static final String ERROR_FL_NUMBER_TOO_HIGH          = "error_fl_number_too_high";
@@ -1767,6 +1771,11 @@ public class Dict {
 	public static final String ERROR_FUNC_VAL_GREATER_MAX        = "error_func_val_greater_max";
 	public static final String ERROR_FUNC_SIGNED_FORBIDDEN       = "error_func_signed_forbidden";
 	public static final String ERROR_FUNC_SIGNED_REQUIRED        = "error_func_signed_required";
+	public static final String ERROR_FUNC_NUMBER_EMPTY           = "error_func_number_empty";
+	public static final String ERROR_FUNC_HEX_FORMAT             = "error_func_hex_format";
+	public static final String ERROR_FUNC_HEX_TOO_HIGH           = "error_func_hex_too_high";
+	public static final String ERROR_FUNC_HEX_DIGITS             = "error_func_hex_digits";
+	public static final String ERROR_FUNC_HEX_LSB_REQUIRED       = "error_func_hex_lsb_required";
 	public static final String ERROR_FUNC_PERCENT_FORBIDDEN      = "error_func_percent_forbidden";
 	public static final String ERROR_FUNC_BROKEN_HALFTONE        = "error_func_broken_halftone";
 	public static final String ERROR_FUNC_HALFTONE_NOT_ALLOWED   = "error_func_halftone_not_allowed";
@@ -2999,6 +3008,7 @@ public class Dict {
 		set( SYNTAX_FUNC_NOTE,          "set note name (e.g. for portamento ctrl)"        );
 		set( SYNTAX_FUNC_SRC,           "source (for controller destination assignment)"  );
 		set( SYNTAX_FUNC_DEST,          "destination (for controller destination assignment)" );
+		set( SYNTAX_EFF_HEX,            "prefix for hexadecimal numbers"                  );
 		set( SYNTAX_EFF_PERCENT,        "percent symbol for parameters"                   );
 		set( SYNTAX_CH_A_POLY_AT,       "Polyphonic Aftertouch (Key Pressure)"            );
 		set( SYNTAX_CH_D_MONO_AT,       "Monophonic Aftertouch (Channel Pressure)"        );
@@ -3577,7 +3587,10 @@ public class Dict {
 		set( ERROR_FL_NOT_OPEN,                   "An effect flow is not yet open. Don't use '%s' to start a flow."   );
 		set( ERROR_FL_MISSING_DOT,                "Effect flow elements must be separated with '%s'"                  );
 		set( ERROR_FL_NUMBER_NOT_ALLOWED,         "A generic number is not allowed for this effect flow element: "    );
-		set( ERROR_FL_NUM_SEP_NOT_ALLOWED,        "The gereric number has only one byte. MSB/LSB not allowed for element: " );
+		set( ERROR_FL_NUMBER_EMPTY,               "Empty numbers are not allowed for element: "                       );
+		set( ERROR_FL_NUM_SEP_NOT_ALLOWED,        "The generic number has only one byte. MSB/LSB not allowed for element: " );
+		set( ERROR_FL_HEX_FORMAT,                 "The generic number has an invalid hex component: "                 );
+		set( ERROR_FL_HEX_LSB_REQUIRED,           "(N)RPNs need an LSB, when using Hex values. <br>Invalid parameter: " );
 		set( ERROR_FL_UNMATCHED_REMAINDER,        "Effect flow ends with an invalid remainder: "                      );
 		set( ERROR_FL_NUMBER_MISSING,             "Effect flow element '%s' needs to be assigned with a generic number" );
 		set( ERROR_FL_NUMBER_TOO_HIGH,            "Generic number %s too high for element %s. Maximum is %d."         );
@@ -3595,6 +3608,11 @@ public class Dict {
 		set( ERROR_FUNC_PERCENT_FORBIDDEN,        "The chosen effect does not allow percentage values. Invalid parameter: " );
 		set( ERROR_FUNC_SIGNED_FORBIDDEN,         "The chosen effect does not allow signed values ('+' or '-').<br>Invalid parameter: " );
 		set( ERROR_FUNC_SIGNED_REQUIRED,          "The chosen effect requires signed values with '+' or '-'.<br>Invalid parameter: " );
+		set( ERROR_FUNC_NUMBER_EMPTY,             "Function parameter contains an empty number: "                     );
+		set( ERROR_FUNC_HEX_FORMAT,               "The given number has an invalid hex component: "                   );
+		set( ERROR_FUNC_HEX_TOO_HIGH,             "The given hex value is higher than %s7F.<br>Invalid parameter: %s%s" );
+		set( ERROR_FUNC_HEX_DIGITS,               "Hex values need exactly two digits.<br>Invalid parameter: "        );
+		set( ERROR_FUNC_HEX_LSB_REQUIRED,         "Double Precision needs an LSB, when using Hex values. <br>Invalid parameter: " );
 		set( ERROR_FUNC_BROKEN_HALFTONE,          "The chosen effect does not allow broken halftones. Invalid parameter: " );
 		set( ERROR_FUNC_HALFTONE_NOT_ALLOWED,     "Parameter '%s' not allowed. The effect type does not support half tone steps." );
 		set( ERROR_FUNC_HALFTONE_GT_RANGE,        "Half-tone parameter '%s' exceeds the current pitch bend range (%s)<br>"
@@ -4406,6 +4424,7 @@ public class Dict {
 		setSyntax( SYNTAX_FUNC_NOTE,           "note"         );
 		setSyntax( SYNTAX_FUNC_SRC,            "src"          );
 		setSyntax( SYNTAX_FUNC_DEST,           "dest"         );
+		setSyntax( SYNTAX_EFF_HEX,             "x"            );
 		setSyntax( SYNTAX_EFF_PERCENT,         "%"            );
 		setSyntax( SYNTAX_CH_A_POLY_AT,        "poly_at"      );
 		setSyntax( SYNTAX_CH_D_MONO_AT,        "mono_at"      );
@@ -4631,6 +4650,7 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_FUNC_NOTE          );
 		addSyntaxForInfoView( SYNTAX_FUNC_SRC           );
 		addSyntaxForInfoView( SYNTAX_FUNC_DEST          );
+		addSyntaxForInfoView( SYNTAX_EFF_HEX            );
 		addSyntaxForInfoView( SYNTAX_EFF_PERCENT        );
 		addSyntaxForInfoView( SYNTAX_CH_A_POLY_AT       );
 		addSyntaxForInfoView( SYNTAX_CH_D_MONO_AT       );
