@@ -1,4 +1,0 @@
-INCLUDE inc/instruments.midica
-
-
-0: vol.set(12.0)

@@ -36,6 +36,8 @@ import org.midica.Midica;
 import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.Instrument;
+import org.midica.file.read.exception.FatalParseException;
+import org.midica.file.read.exception.ParseException;
 import org.midica.midi.LyricUtil;
 import org.midica.midi.MidiDevices;
 import org.midica.midi.SequenceCreator;
@@ -139,7 +141,6 @@ public class MidicaPLParser extends SequenceParser {
 	public static String CALL               = null;
 	public static String INCLUDE            = null;
 	public static String SOUNDBANK          = null;
-	public static String SOUNDFONT          = null; // TODO: delete in a later version
 	public static String INSTRUMENT         = null;
 	public static String INSTRUMENTS        = null;
 	public static String META               = null;
@@ -434,7 +435,6 @@ public class MidicaPLParser extends SequenceParser {
 		CALL               = Dict.getSyntax( Dict.SYNTAX_CALL               );
 		INCLUDE            = Dict.getSyntax( Dict.SYNTAX_INCLUDE            );
 		SOUNDBANK          = Dict.getSyntax( Dict.SYNTAX_SOUNDBANK          );
-		SOUNDFONT          = Dict.getSyntax( Dict.SYNTAX_SOUNDFONT          );
 		INSTRUMENT         = Dict.getSyntax( Dict.SYNTAX_INSTRUMENT         );
 		INSTRUMENTS        = Dict.getSyntax( Dict.SYNTAX_INSTRUMENTS        );
 		META               = Dict.getSyntax( Dict.SYNTAX_META               );
@@ -713,11 +713,11 @@ public class MidicaPLParser extends SequenceParser {
 			}
 		}
 		catch (FileNotFoundException e) {
-			throw new ParseException(e.toString());
+			throw ParseException.concat(Dict.ERROR_FILE_NOT_FOUND, e.getMessage());
 		}
 		catch (IOException e) {
 			e.printStackTrace();
-			throw new ParseException(e.toString());
+			throw ParseException.wrapGenericException(e);
 		}
 		finally {
 			// Close the flow.
@@ -990,7 +990,7 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		int channel = toInt(s);
 		if (channel > 15)
-			throw new ParseException(Dict.get(Dict.ERROR_INVALID_CHANNEL_NUMBER) + s);
+			throw ParseException.concat(Dict.ERROR_INVALID_CHANNEL_NUMBER, s);
 		return channel;
 	}
 	
@@ -1144,7 +1144,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if (tokens[0].matches("^" + Pattern.quote(GLOBAL) + "$")) {
 			if (MODE_INSTRUMENTS == currentMode) {
 				// we are inside an instruments definition
-				throw new ParseException(Dict.get(Dict.ERROR_GLOBALS_IN_INSTR_DEF));
+				throw ParseException.simple(Dict.ERROR_GLOBALS_IN_INSTR_DEF);
 			}
 			else if (isFunct) {
 				currentFunction.add(String.join(" ", tokens)); // add to function
@@ -1231,7 +1231,7 @@ public class MidicaPLParser extends SequenceParser {
 			else if (isBlock)
 				nestableBlkStack.peek().add(tokens); // add to block
 			else
-				throw new ParseException(Dict.get(Dict.ERROR_VAR_NOT_ALLOWED) + tokens[0]);
+				throw ParseException.concat(Dict.ERROR_VAR_NOT_ALLOWED, tokens[0]);
 		}
 		
 		// (single line) instrument switch
@@ -1239,7 +1239,7 @@ public class MidicaPLParser extends SequenceParser {
 			if (!isFake)
 				checkInstrumentsParsed();
 			if (MODE_INSTRUMENTS == currentMode)
-				throw new ParseException(Dict.get(Dict.ERROR_SINGLE_INSTR_IN_INSTR_DEF));
+				throw ParseException.simple(Dict.ERROR_SINGLE_INSTR_IN_INSTR_DEF);
 			
 			// only remember the line?
 			if (isFunct)
@@ -1352,7 +1352,6 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( CALL.equals(cmd)                  ) {}
 		else if ( INCLUDE.equals(cmd)               ) {}
 		else if ( SOUNDBANK.equals(cmd)             ) {}
-		else if ( SOUNDFONT.equals(cmd)             ) {}
 		else if ( DEFINE.equals(cmd)                ) {}
 		else if ( CONST.equals(cmd)                 ) {}
 		else if ( VAR.equals(cmd)                   ) {}
@@ -1389,7 +1388,7 @@ public class MidicaPLParser extends SequenceParser {
 			}
 		}
 		else {
-			throw new ParseException(Dict.get(Dict.ERROR_UNKNOWN_CMD) + cmd);
+			throw ParseException.concat(Dict.ERROR_UNKNOWN_CMD, cmd);
 		}
 	}
 	
@@ -1659,18 +1658,18 @@ public class MidicaPLParser extends SequenceParser {
 	private void checkNesting(String cmd) throws ParseException {
 		if (INSTRUMENTS.equals(cmd) || FUNCTION.equals(cmd) || PATTERN.equals(cmd) || META.equals(cmd) || END.equals(cmd)) {
 			if (nestableBlkDepth > 0) {
-				throw new ParseException(Dict.get(Dict.ERROR_BLOCK_UNMATCHED_OPEN));
+				throw ParseException.simple(Dict.ERROR_BLOCK_UNMATCHED_OPEN);
 			}
 			if (MODE_DEFAULT != currentMode && ! END.equals(cmd)) {
-				throw new ParseException(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK) + cmd);
+				throw ParseException.concat(Dict.ERROR_NOT_ALLOWED_IN_BLK, cmd);
 			}
 		}
 		else if (BLOCK_OPEN.equals(cmd) || BLOCK_CLOSE.equals(cmd)) {
 			if (MODE_INSTRUMENTS == currentMode) {
-				throw new ParseException(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_INSTR_BLK) + cmd);
+				throw ParseException.concat(Dict.ERROR_NOT_ALLOWED_IN_INSTR_BLK, cmd);
 			}
 			if (MODE_META == currentMode || MODE_SOFT_KARAOKE == currentMode) {
-				throw new ParseException(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_META_BLK) + cmd);
+				throw ParseException.concat(Dict.ERROR_NOT_ALLOWED_IN_META_BLK, cmd);
 			}
 		}
 	}
@@ -1682,10 +1681,10 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void checkNestingAtEOF() throws ParseException {
 		if (nestableBlkDepth > 0) {
-			throw new ParseException(Dict.get(Dict.ERROR_NESTABLE_BLOCK_OPEN_AT_EOF));
+			throw ParseException.simple(Dict.ERROR_NESTABLE_BLOCK_OPEN_AT_EOF);
 		}
 		if (currentMode != MODE_DEFAULT) {
-			throw new ParseException(Dict.get(Dict.ERROR_NAMED_BLOCK_OPEN_AT_EOF));
+			throw ParseException.simple(Dict.ERROR_NAMED_BLOCK_OPEN_AT_EOF);
 		}
 	}
 	
@@ -1713,7 +1712,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// instruments not yet parsed?
 		if (0 == instruments.size()) {
-			throw new ParseException(Dict.get(Dict.ERROR_INSTRUMENTS_NOT_DEFINED));
+			throw ParseException.simple(Dict.ERROR_INSTRUMENTS_NOT_DEFINED);
 		}
 	}
 	
@@ -1789,7 +1788,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// check range
 		if (number > 127) {
-			throw new ParseException(Dict.get(Dict.ERROR_INSTR_BANK));
+			throw ParseException.simple(Dict.ERROR_INSTR_BANK);
 		}
 		
 		return number;
@@ -1815,7 +1814,7 @@ public class MidicaPLParser extends SequenceParser {
 		int      duration = 0;
 		for (String summand : summands) {
 			if ("".equals(summand))
-				throw new ParseException(Dict.get(Dict.ERROR_EMPTY_LENGTH_SUMMAND) + s);
+				throw ParseException.concat(Dict.ERROR_EMPTY_LENGTH_SUMMAND, s);
 			duration += parseDurationSummand(summand);
 		}
 		
@@ -1878,9 +1877,9 @@ public class MidicaPLParser extends SequenceParser {
 			else if (LENGTH_M32.equals(prefix))
 				factor *= 32;
 			else if (LENGTH_ZERO.equals(prefix))
-				throw new ParseException(Dict.get(Dict.ERROR_ZEROLENGTH_IN_SUM));
+				throw ParseException.simple(Dict.ERROR_ZEROLENGTH_IN_SUM);
 			else
-				throw new ParseException(Dict.get(Dict.ERROR_NOTE_LENGTH_INVALID) + s);
+				throw ParseException.concat(Dict.ERROR_NOTE_LENGTH_INVALID, s);
 			
 			// parse modifications by dots
 			int dot_count = 0;
@@ -1978,7 +1977,7 @@ public class MidicaPLParser extends SequenceParser {
 				currentMode = MODE_INSTRUMENTS;
 			}
 			else {
-				throw new ParseException(Dict.get(Dict.ERROR_MODE_INSTR_NUM_OF_ARGS));
+				throw ParseException.simple(Dict.ERROR_MODE_INSTR_NUM_OF_ARGS);
 			}
 		}
 		else if (META.equals(cmd)) {
@@ -2017,7 +2016,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// check nesting
 		if (currentMode != MODE_DEFAULT || nestableBlkDepth > 0) {
-			throw new ParseException(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK) + cmd);
+			throw ParseException.concat(Dict.ERROR_NOT_ALLOWED_IN_BLK, cmd);
 		}
 		
 		// parse command
@@ -2027,7 +2026,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if (INCLUDE.equals(cmd) || ORIGINAL_INCLUDE.equals(cmd)) {
 			parseINCLUDE(tokens);
 		}
-		else if (SOUNDBANK.equals(cmd) || SOUNDFONT.equals(cmd)) {
+		else if (SOUNDBANK.equals(cmd)) {
 			parseSOUNDBANK(tokens);
 		}
 		else if (DEFINE.equals(cmd) || ORIGINAL_DEFINE.equals(cmd)) {
@@ -2053,7 +2052,7 @@ public class MidicaPLParser extends SequenceParser {
 	private void parseEND(String[] tokens) throws ParseException {
 		if (1 == tokens.length) {
 			if (MODE_DEFAULT == currentMode) {
-				throw new ParseException(Dict.get(Dict.ERROR_CMD_END_WITHOUT_BEGIN));
+				throw ParseException.simple(Dict.ERROR_CMD_END_WITHOUT_BEGIN);
 			}
 			if (MODE_INSTRUMENTS == currentMode) {
 				// create defined and undefined instruments for all channels
@@ -2069,7 +2068,7 @@ public class MidicaPLParser extends SequenceParser {
 			currentFunctionName = null;
 		}
 		else
-			throw new ParseException(Dict.get(Dict.ERROR_ARGS_NOT_ALLOWED));
+			throw ParseException.simple(Dict.ERROR_ARGS_NOT_ALLOWED);
 	}
 	
 	/**
@@ -2087,7 +2086,7 @@ public class MidicaPLParser extends SequenceParser {
 			currentMode         = MODE_FUNCTION;
 			currentFunctionName = tokens[1];
 			if (functions.containsKey(currentFunctionName)) {
-				throw new ParseException(Dict.get(Dict.ERROR_FUNCTION_ALREADY_DEFINED) + currentFunctionName);
+				throw ParseException.concat(Dict.ERROR_FUNCTION_ALREADY_DEFINED, currentFunctionName);
 			}
 			
 			// only collect the function name?
@@ -2105,7 +2104,7 @@ public class MidicaPLParser extends SequenceParser {
 			functionToLineOffset.put(currentFunctionName, currentLineNumber);
 		}
 		else
-			throw new ParseException(Dict.get(Dict.ERROR_FUNCTION_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_FUNCTION_NUM_OF_ARGS);
 	}
 	
 	/**
@@ -2123,7 +2122,7 @@ public class MidicaPLParser extends SequenceParser {
 			currentMode        = MODE_PATTERN;
 			currentPatternName = tokens[1];
 			if (patterns.containsKey(currentPatternName)) {
-				throw new ParseException(Dict.get(Dict.ERROR_PATTERN_ALREADY_DEFINED) + currentPatternName);
+				throw ParseException.concat(Dict.ERROR_PATTERN_ALREADY_DEFINED, currentPatternName);
 			}
 			
 			// only collect the function name?
@@ -2141,7 +2140,7 @@ public class MidicaPLParser extends SequenceParser {
 			patternToLineOffset.put(currentPatternName, currentLineNumber);
 		}
 		else
-			throw new ParseException(Dict.get(Dict.ERROR_PATTERN_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_PATTERN_NUM_OF_ARGS);
 	}
 	
 	/**
@@ -2159,7 +2158,7 @@ public class MidicaPLParser extends SequenceParser {
 			currentMode = MODE_META;
 		}
 		else
-			throw new ParseException(Dict.get(Dict.ERROR_META_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_META_NUM_OF_ARGS);
 	}
 	
 	/**
@@ -2172,17 +2171,17 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void parseSOFT_KARAOKE(String[] tokens) throws ParseException {
 		if (MODE_META != currentMode) {
-			throw new ParseException(Dict.get(Dict.ERROR_SOFT_KARAOKE_NOT_ALLOWED_HERE));
+			throw ParseException.simple(Dict.ERROR_SOFT_KARAOKE_NOT_ALLOWED_HERE);
 		}
 		if (1 == tokens.length) {
 			if (isSoftKaraoke) {
-				throw new ParseException(Dict.get(Dict.ERROR_SOFT_KARAOKE_ALREADY_SET));
+				throw ParseException.simple(Dict.ERROR_SOFT_KARAOKE_ALREADY_SET);
 			}
 			currentMode   = MODE_SOFT_KARAOKE;
 			isSoftKaraoke = true;
 		}
 		else
-			throw new ParseException(Dict.get(Dict.ERROR_SOFT_KARAOKE_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_SOFT_KARAOKE_NUM_OF_ARGS);
 	}
 	
 	/**
@@ -2204,7 +2203,7 @@ public class MidicaPLParser extends SequenceParser {
 			nestableBlkDepth--;
 		}
 		if (nestableBlkDepth < 0) {
-			throw new ParseException(Dict.get(Dict.ERROR_BLOCK_UNMATCHED_CLOSE));
+			throw ParseException.simple(Dict.ERROR_BLOCK_UNMATCHED_CLOSE);
 		}
 		
 		// nothing more needed for functions
@@ -2247,30 +2246,30 @@ public class MidicaPLParser extends SequenceParser {
 					shift += opt.getShift();
 				else if (OPT_IF.equals(optName)) {
 					if (condIf != null || condElsif != null || isElse) {
-						throw new ParseException(Dict.get(Dict.ERROR_BLOCK_IF_MUST_BE_ALONE));
+						throw ParseException.simple(Dict.ERROR_BLOCK_IF_MUST_BE_ALONE);
 					}
 					condIf = opt.getCondition();
 				}
 				else if (OPT_ELSIF.equals(optName)) {
 					if (condIf != null || condElsif != null || isElse) {
-						throw new ParseException(Dict.get(Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE));
+						throw ParseException.simple(Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE);
 					}
 					if (mustCheckChain && ! condChainOpened) {
-						throw new ParseException(Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND) + ": " + optName);
+						throw ParseException.concat(Dict.ERROR_BLOCK_NO_IF_FOUND, ": " + optName);
 					}
 					condElsif = opt.getCondition();
 				}
 				else if (OPT_ELSE.equals(optName)) {
 					if (condIf != null || condElsif != null || isElse) {
-						throw new ParseException(Dict.get(Dict.ERROR_BLOCK_ELSE_MUST_BE_ALONE));
+						throw ParseException.simple(Dict.ERROR_BLOCK_ELSE_MUST_BE_ALONE);
 					}
 					if (mustCheckChain && ! condChainOpened) {
-						throw new ParseException(Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND) + ": " + optName);
+						throw ParseException.concat(Dict.ERROR_BLOCK_NO_IF_FOUND, ": " + optName);
 					}
 					isElse = true;
 				}
 				else
-					throw new ParseException(Dict.get(Dict.ERROR_BLOCK_INVALID_OPT) + optName);
+					throw ParseException.concat(Dict.ERROR_BLOCK_INVALID_OPT, optName);
 				
 				// only check?
 				if (isCondCheckParsRun) {
@@ -2365,7 +2364,7 @@ public class MidicaPLParser extends SequenceParser {
 					// check if-elsif-else
 					if (COND_TYPE_ELSIF == conditionType || COND_TYPE_ELSE == conditionType) {
 						if (! condChainOpened)
-							throw new ParseException(Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND));
+							throw ParseException.simple(Dict.ERROR_BLOCK_NO_IF_FOUND);
 					}
 					if (COND_TYPE_ELSE == conditionType)
 						mustPlay = ! condChainHit;
@@ -2418,23 +2417,23 @@ public class MidicaPLParser extends SequenceParser {
 			chordDef = tokens[1] + " " + tokens[2];
 		}
 		else
-			throw new ParseException(Dict.get(Dict.ERROR_CHORD_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_CHORD_NUM_OF_ARGS);
 		
 		// get and process chord name
 		String[] chordParts = chordAssignPattern.split(chordDef, 2); // element 0: name; element 1: value
 		if (chordParts.length < 2) {
-			throw new ParseException(Dict.get(Dict.ERROR_CHORD_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_CHORD_NUM_OF_ARGS);
 		}
 		String chordName  = chordParts[0];
 		String chordValue = chordParts[1];
 		if (chords.containsKey(chordName)) {
-			throw new ParseException(Dict.get(Dict.ERROR_CHORD_ALREADY_DEFINED) + chordName);
+			throw ParseException.concat(Dict.ERROR_CHORD_ALREADY_DEFINED, chordName);
 		}
 		else if (Dict.noteExists(chordName)) {
-			throw new ParseException(Dict.get(Dict.ERROR_CHORD_EQUALS_NOTE) + chordName);
+			throw ParseException.concat(Dict.ERROR_CHORD_EQUALS_NOTE, chordName);
 		}
 		else if (Dict.percussionExists(chordName)) {
-			throw new ParseException(Dict.get(Dict.ERROR_CHORD_EQUALS_PERCUSSION) + chordName);
+			throw ParseException.concat(Dict.ERROR_CHORD_EQUALS_PERCUSSION, chordName);
 		}
 		
 		// get and process chord elements
@@ -2446,7 +2445,7 @@ public class MidicaPLParser extends SequenceParser {
 		for (String note : notes) {
 			
 			if ("".equals(note))
-				throw new ParseException(Dict.get(Dict.ERROR_CHORD_REDUNDANT_SEP));
+				throw ParseException.simple(Dict.ERROR_CHORD_REDUNDANT_SEP);
 			
 			// get MIDI value for note or percussion
 			int noteVal;
@@ -2460,11 +2459,11 @@ public class MidicaPLParser extends SequenceParser {
 				
 				noteVal = Dict.getPercussion(note);
 				if (Dict.UNKNOWN_CODE == noteVal)
-					throw new ParseException(Dict.get(Dict.ERROR_UNKNOWN_CHORD_ELEMENT) + note);
+					throw ParseException.concat(Dict.ERROR_UNKNOWN_CHORD_ELEMENT, note);
 				hasPercussion = true;
 			}
 			if (chord.contains(noteVal)) {
-				throw new ParseException(Dict.get(Dict.ERROR_CHORD_CONTAINS_ALREADY) + note);
+				throw ParseException.concat(Dict.ERROR_CHORD_CONTAINS_ALREADY, note);
 			}
 			chord.add(noteVal);
 		}
@@ -2472,7 +2471,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// don't allow mixing notes and percussion in the same chord
 		if (hasNotes && hasPercussion)
-			throw new ParseException(Dict.get(Dict.ERROR_CHORD_WITH_NOTES_AND_PERC) + chordName);
+			throw ParseException.concat(Dict.ERROR_CHORD_WITH_NOTES_AND_PERC, chordName);
 	}
 	
 	/**
@@ -2486,7 +2485,7 @@ public class MidicaPLParser extends SequenceParser {
 	private void parseCALL(String[] tokens, boolean isFake) throws ParseException {
 		
 		if (tokens.length < 2)
-			throw new ParseException(Dict.get(Dict.ERROR_CALL_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_CALL_NUM_OF_ARGS);
 		
 		// check for open one-time options
 		if (!isFake)
@@ -2532,7 +2531,7 @@ public class MidicaPLParser extends SequenceParser {
 					}
 				}
 				else
-					throw new ParseException(Dict.get(Dict.ERROR_CALL_UNKNOWN_OPT) + optName);
+					throw ParseException.concat(Dict.ERROR_CALL_UNKNOWN_OPT, optName);
 			}
 		}
 		
@@ -2541,10 +2540,10 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// check function name
 		if (functionName.equals(currentFunctionName)) {
-			throw new ParseException(Dict.get(Dict.ERROR_FUNCTION_RECURSION));
+			throw ParseException.simple(Dict.ERROR_FUNCTION_RECURSION);
 		}
 		if (! definedFunctionNames.contains(functionName)) {
-			throw new ParseException(Dict.get(Dict.ERROR_FUNCTION_UNDEFINED));
+			throw ParseException.simple(Dict.ERROR_FUNCTION_UNDEFINED);
 		}
 		
 		// parse parameters
@@ -2583,7 +2582,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// check recursion
 		if (functionNameStack.size() > MAX_RECURSION_DEPTH_FUNCTION) {
-			throw new ParseException(Dict.get(Dict.ERROR_FUNCTION_RECURSION_DEPTH));
+			throw ParseException.simple(Dict.ERROR_FUNCTION_RECURSION_DEPTH);
 		}
 		
 		// apply all lines of the called function
@@ -2648,7 +2647,7 @@ public class MidicaPLParser extends SequenceParser {
 		tokens = reorganizePatternCallTokens(tokens, 2);
 		
 		if (tokens.length < 3) {
-			throw new ParseException(Dict.get(Dict.ERROR_CH_CMD_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_CH_CMD_NUM_OF_ARGS);
 		}
 		
 		// parse call
@@ -2712,14 +2711,14 @@ public class MidicaPLParser extends SequenceParser {
 				else if (OPT_LYRICS.equals(optName)) {
 					outerSyllable = opt.getLyrics();
 					if (isSoftKaraoke && crlfSkPattern.matcher(outerSyllable).find()) {
-						throw new ParseException(Dict.get(Dict.ERROR_SK_SYLLABLE_CRLF_NOT_ALLOWED));
+						throw ParseException.simple(Dict.ERROR_SK_SYLLABLE_CRLF_NOT_ALLOWED);
 					}
 				}
 				else if (OPT_SHIFT.equals(optName)) {
 					outerShift += opt.getShift();
 				}
 				else
-					throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INVALID_OUTER_OPT) + optName);
+					throw ParseException.concat(Dict.ERROR_PATTERN_INVALID_OUTER_OPT, optName);
 			}
 		}
 		
@@ -2773,7 +2772,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// check recursion
 		if (patternNameStack.size() > MAX_RECURSION_DEPTH_PATTERN) {
-			throw new ParseException(Dict.get(Dict.ERROR_PATTERN_RECURSION_DEPTH));
+			throw ParseException.simple(Dict.ERROR_PATTERN_RECURSION_DEPTH);
 		}
 		
 		// apply pattern lines
@@ -2891,7 +2890,7 @@ public class MidicaPLParser extends SequenceParser {
 							innerTremolo = opt.getRawValue();
 						}
 						else
-							throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INVALID_INNER_OPT) + optName);
+							throw ParseException.concat(Dict.ERROR_PATTERN_INVALID_INNER_OPT, optName);
 					}
 				}
 				
@@ -2998,11 +2997,11 @@ public class MidicaPLParser extends SequenceParser {
 				notes.add(note + "");
 			}
 			catch (NumberFormatException e) {
-				throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INDEX_INVALID) + indexStr);
+				throw ParseException.concat(Dict.ERROR_PATTERN_INDEX_INVALID, indexStr);
 			}
 			catch (IndexOutOfBoundsException e) {
 				if (nestableBlkDepth == 0) {
-					throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH) + indexStr);
+					throw ParseException.concat(Dict.ERROR_PATTERN_INDEX_TOO_HIGH, indexStr);
 				}
 				else {
 					notes.add("[" + indexStr + "]");
@@ -3039,7 +3038,7 @@ public class MidicaPLParser extends SequenceParser {
 			String[] params = paramStr.split("\\s*" + Pattern.quote(PARAM_SEPARATOR) + "\\s*", -1);
 			for (String rawParam : params) {
 				if ("".equals(rawParam)) {
-					throw new ParseException(Dict.get(Dict.ERROR_CALL_EMPTY_PARAM) + paramStr);
+					throw ParseException.concat(Dict.ERROR_CALL_EMPTY_PARAM, paramStr);
 				}
 				
 				// save as indexed param?
@@ -3061,29 +3060,29 @@ public class MidicaPLParser extends SequenceParser {
 					String name  = paramParts[0];
 					String value = paramParts[1];
 					if ("".equals(name)) {
-						throw new ParseException(Dict.get(Dict.ERROR_CALL_PARAM_NAME_EMPTY) + paramStr);
+						throw ParseException.concat(Dict.ERROR_CALL_PARAM_NAME_EMPTY, paramStr);
 					}
 					else if ("".equals(value)) {
-						throw new ParseException(Dict.get(Dict.ERROR_CALL_PARAM_VALUE_EMPTY) + name);
+						throw ParseException.concat(Dict.ERROR_CALL_PARAM_VALUE_EMPTY, name);
 					}
 					
 					// don't allow special characters in parameter names
 					Pattern paramNamePatt    = Pattern.compile("[^\\w]");
 					Matcher paramNameMatcher = paramNamePatt.matcher(name);
 					if (paramNameMatcher.find()) {
-						throw new ParseException(Dict.get(Dict.ERROR_CALL_PARAM_NAME_WITH_SPEC) + name);
+						throw ParseException.concat(Dict.ERROR_CALL_PARAM_NAME_WITH_SPEC, name);
 					}
 					
 					// duplicate param name?
 					if (paramsNamed.containsKey(name)) {
-						throw new ParseException(Dict.get(Dict.ERROR_CALL_DUPLICATE_PARAM_NAME) + name);
+						throw ParseException.concat(Dict.ERROR_CALL_DUPLICATE_PARAM_NAME, name);
 					}
 					
 					// add named param
 					paramsNamed.put(name, value);
 				}
 				else {
-					throw new ParseException(Dict.get(Dict.ERROR_CALL_PARAM_MORE_ASSIGNERS) + rawParam);
+					throw ParseException.concat(Dict.ERROR_CALL_PARAM_MORE_ASSIGNERS, rawParam);
 				}
 			}
 		}
@@ -3126,7 +3125,7 @@ public class MidicaPLParser extends SequenceParser {
 			// lowlevel channel command
 			else {
 				if (tokens.length < 2) {
-					throw new ParseException(Dict.get(Dict.ERROR_PATTERN_NUM_OF_ARGS));
+					throw ParseException.simple(Dict.ERROR_PATTERN_NUM_OF_ARGS);
 				}
 				
 				// variable instead of pattern indices?
@@ -3151,7 +3150,7 @@ public class MidicaPLParser extends SequenceParser {
 							// ok
 						}
 						else
-							throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INVALID_INNER_OPT) + optName);
+							throw ParseException.concat(Dict.ERROR_PATTERN_INVALID_INNER_OPT, optName);
 					}
 				}
 			}
@@ -3185,7 +3184,7 @@ public class MidicaPLParser extends SequenceParser {
 				Integer.parseInt(indexStr);
 			}
 			catch (NumberFormatException e) {
-				throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INDEX_INVALID) + indexStr);
+				throw ParseException.concat(Dict.ERROR_PATTERN_INDEX_INVALID, indexStr);
 			}
 		}
 	}
@@ -3246,7 +3245,7 @@ public class MidicaPLParser extends SequenceParser {
 				
 				// parameters? - not existing pattern name
 				if (paramString != null)
-					throw new ParseException(Dict.get(Dict.ERROR_PATTERN_UNDEFINED) + patternName);
+					throw ParseException.concat(Dict.ERROR_PATTERN_UNDEFINED, patternName);
 				
 				// probably a note length
 				// don't change anything
@@ -3316,13 +3315,13 @@ public class MidicaPLParser extends SequenceParser {
 		// get condition parts
 		String[] parts = condPattern.split(condition, -1);
 		if (parts.length > 2)
-			throw new ParseException(Dict.get(Dict.ERROR_TOO_MANY_OPERATORS_IN_COND) + condition);
+			throw ParseException.concat(Dict.ERROR_TOO_MANY_OPERATORS_IN_COND, condition);
 		else if (parts.length == 1) {
 			
 			// defined
 			Matcher wsMatcher = whitespace.matcher(parts[0]);
 			if (wsMatcher.find())
-				throw new ParseException(Dict.get(Dict.ERROR_COND_DEFINED_HAS_WHITESPACE) + condition);
+				throw ParseException.concat(Dict.ERROR_COND_DEFINED_HAS_WHITESPACE, condition);
 			
 			if ("".equals(parts[0]))
 				return false;
@@ -3342,19 +3341,19 @@ public class MidicaPLParser extends SequenceParser {
 			// check for forbidden whitespaces
 			Matcher wsFirstMatcher = whitespace.matcher(first);
 			if (wsFirstMatcher.find())
-				throw new ParseException(Dict.get(Dict.ERROR_COND_WHITESPACE_IN_FIRST_OP) + first);
+				throw ParseException.concat(Dict.ERROR_COND_WHITESPACE_IN_FIRST_OP, first);
 			if (! COND_IN.equals(operator)) {
 				Matcher wsSecondMatcher = whitespace.matcher(second);
 				if (wsSecondMatcher.find())
-					throw new ParseException(Dict.get(Dict.ERROR_COND_WHITESPACE_IN_SEC_OP) + second);
+					throw ParseException.concat(Dict.ERROR_COND_WHITESPACE_IN_SEC_OP, second);
 			}
 			
 			// evaluate binary operation
 			if (COND_NDEF.equals(operator)) {
 				if (isCondCheckParsRun && "".equals(second))
-					throw new ParseException(Dict.get(Dict.ERROR_COND_UNDEF_EMPTY) + condition);
+					throw ParseException.concat(Dict.ERROR_COND_UNDEF_EMPTY, condition);
 				if (! "".equals(first))
-					throw new ParseException(Dict.get(Dict.ERROR_COND_UNDEF_IN_CENTER) + condition);
+					throw ParseException.concat(Dict.ERROR_COND_UNDEF_IN_CENTER, condition);
 				
 				if ("".equals(second))
 					return true;
@@ -3395,9 +3394,9 @@ public class MidicaPLParser extends SequenceParser {
 				for (String candidate : candidateList) {
 					Matcher wsMatcher = whitespace.matcher(candidate);
 					if (wsMatcher.find())
-						throw new ParseException(Dict.get(Dict.ERROR_COND_WHITESPACE_IN_IN_ELEM) + candidate);
+						throw ParseException.concat(Dict.ERROR_COND_WHITESPACE_IN_IN_ELEM, candidate);
 					else if (isCondCheckParsRun && "".equals(candidate))
-						throw new ParseException(Dict.get(Dict.ERROR_COND_EMPTY_ELEM_IN_IN_LIST) + second);
+						throw ParseException.concat(Dict.ERROR_COND_EMPTY_ELEM_IN_IN_LIST, second);
 				}
 				
 				return candidateList.contains(first);
@@ -3535,22 +3534,22 @@ public class MidicaPLParser extends SequenceParser {
 				
 				// check if the file can be parsed
 				if (! inclFile.exists())
-					throw new ParseException(Dict.get(Dict.ERROR_FILE_EXISTS) + inclFile.getCanonicalPath());
+					throw ParseException.concat(Dict.ERROR_FILE_EXISTS, inclFile.getCanonicalPath());
 				if (! inclFile.isFile())
-					throw new ParseException(Dict.get(Dict.ERROR_FILE_NORMAL) + inclFile.getCanonicalPath());
+					throw ParseException.concat(Dict.ERROR_FILE_NORMAL, inclFile.getCanonicalPath());
 				if (! inclFile.canRead())
-					throw new ParseException(Dict.get(Dict.ERROR_FILE_READABLE) + inclFile.getCanonicalPath());
+					throw ParseException.concat(Dict.ERROR_FILE_READABLE, inclFile.getCanonicalPath());
 				
 				// parse it
 				MidicaPLParser parser = new MidicaPLParser(false);
 				parser.parse(inclFile);
 			}
 			catch (IOException e) {
-				throw new ParseException(Dict.get(Dict.ERROR_FILE_IO) + e.getMessage());
+				throw ParseException.concat(Dict.ERROR_FILE_IO, e.getMessage());
 			}
 		}
 		else
-			throw new ParseException(Dict.get(Dict.ERROR_FILE_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_FILE_NUM_OF_ARGS);
 	}
 	
 	/**
@@ -3564,7 +3563,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// prevent more than one soundbank include
 		if (soundbankParsed) {
-			throw new ParseException(Dict.get(Dict.ERROR_SOUNDBANK_ALREADY_PARSED));
+			throw ParseException.simple(Dict.ERROR_SOUNDBANK_ALREADY_PARSED);
 		}
 		soundbankParsed = true;
 		
@@ -3620,11 +3619,11 @@ public class MidicaPLParser extends SequenceParser {
 					
 					// check if the file can be parsed
 					if (! inclFile.exists())
-						throw new ParseException(Dict.get(Dict.ERROR_FILE_EXISTS) + newCanonicalPath);
+						throw ParseException.concat(Dict.ERROR_FILE_EXISTS, newCanonicalPath);
 					if (! inclFile.isFile())
-						throw new ParseException(Dict.get(Dict.ERROR_FILE_NORMAL) + newCanonicalPath);
+						throw ParseException.concat(Dict.ERROR_FILE_NORMAL, newCanonicalPath);
 					if (! inclFile.canRead())
-						throw new ParseException(Dict.get(Dict.ERROR_FILE_READABLE) + newCanonicalPath);
+						throw ParseException.concat(Dict.ERROR_FILE_READABLE, newCanonicalPath);
 				}
 				
 				// parse it
@@ -3635,11 +3634,11 @@ public class MidicaPLParser extends SequenceParser {
 				Midica.uiController.soundbankLoadedBySourceCode();
 			}
 			catch (IOException e) {
-				throw new ParseException(Dict.get(Dict.ERROR_SOUNDBANK_IO) + e.getMessage());
+				throw ParseException.concat(Dict.ERROR_SOUNDBANK_IO, e.getMessage());
 			}
 		}
 		else
-			throw new ParseException(Dict.get(Dict.ERROR_SOUNDBANK_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_SOUNDBANK_NUM_OF_ARGS);
 	}
 	
 	/**
@@ -3661,7 +3660,7 @@ public class MidicaPLParser extends SequenceParser {
 			def = tokens[1] + " " + tokens[2];
 		}
 		else {
-			throw new ParseException(Dict.get(Dict.ERROR_DEFINE_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_DEFINE_NUM_OF_ARGS);
 		}
 		
 		// Further checks would fail in the default run, if the COMMENT command has
@@ -3673,15 +3672,15 @@ public class MidicaPLParser extends SequenceParser {
 		// split definition string by OPT_ASSIGNER (e,g, "=") and/or whitespace(s)
 		String[] defParts = def.split("\\s*" + Pattern.quote(OPT_ASSIGNER) + "\\s*|\\s+", 2);
 		if (defParts.length < 2)
-			throw new ParseException(Dict.get(Dict.ERROR_DEFINE_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_DEFINE_NUM_OF_ARGS);
 		String cmdId      = clean(defParts[0]);
 		String cmdName    = clean(defParts[1]);
 		if (! cmdName.matches("^\\S+$"))
-			throw new ParseException(Dict.get(Dict.ERROR_DEFINE_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_DEFINE_NUM_OF_ARGS);
 		
 		// only one redefinition allowed per command
 		if (redefinitions.contains(cmdId)) {
-			throw new ParseException(Dict.get(Dict.ERROR_ALREADY_REDEFINED) + cmdId);
+			throw ParseException.concat(Dict.ERROR_ALREADY_REDEFINED, cmdId);
 		}
 		redefinitions.add(cmdId);
 		
@@ -3716,7 +3715,6 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_CALL.equals(cmdId)               ) CALL               = cmdName;
 		else if ( Dict.SYNTAX_INCLUDE.equals(cmdId)            ) INCLUDE            = cmdName;
 		else if ( Dict.SYNTAX_SOUNDBANK.equals(cmdId)          ) SOUNDBANK          = cmdName;
-		else if ( Dict.SYNTAX_SOUNDFONT.equals(cmdId)          ) SOUNDFONT          = cmdName;
 		else if ( Dict.SYNTAX_INSTRUMENT.equals(cmdId)         ) INSTRUMENT         = cmdName;
 		else if ( Dict.SYNTAX_INSTRUMENTS.equals(cmdId)        ) INSTRUMENTS        = cmdName;
 		else if ( Dict.SYNTAX_META.equals(cmdId)               ) META               = cmdName;
@@ -3873,7 +3871,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if ( Dict.SYNTAX_CD_04_LFO_FILTER_D.equals(cmdId) ) CD_04_LFO_FILTER_D = cmdName;
 		else if ( Dict.SYNTAX_CD_05_LFO_AMPL_D.equals(cmdId)   ) CD_05_LFO_AMPL_D   = cmdName;
 		else {
-			throw new ParseException(Dict.get(Dict.ERROR_UNKNOWN_COMMAND_ID) + cmdId);
+			throw ParseException.concat(Dict.ERROR_UNKNOWN_COMMAND_ID, cmdId);
 		}
 	}
 	
@@ -3888,13 +3886,13 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// CONST without name?
 		if (tokens.length < 2) {
-			throw new ParseException(Dict.get(Dict.ERROR_CONST_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_CONST_NUM_OF_ARGS);
 		}
 		
 		// CONST with name but without value?
 		String[] assignParts = tokens[1].split("\\s*" + Pattern.quote(VAR_ASSIGNER) + "\\s*|\\s+", 2); // const name and value can be separated by "=" and/or whitespace(s)
 		if (assignParts.length < 2) {
-			throw new ParseException(Dict.get(Dict.ERROR_CONST_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_CONST_NUM_OF_ARGS);
 		}
 		
 		// constant name already defined?
@@ -3904,19 +3902,19 @@ public class MidicaPLParser extends SequenceParser {
 		// name looks like a variable?
 		Matcher varMatcher = varPattern.matcher(name);
 		if (!varMatcher.matches()) {
-			throw new ParseException(Dict.get(Dict.ERROR_CONST_NAME_INVALID) + name);
+			throw ParseException.concat(Dict.ERROR_CONST_NAME_INVALID, name);
 		}
 		
 		// recursion not allowed
 		if (name.equals(value)) {
-			throw new ParseException(Dict.get(Dict.ERROR_CONST_NAME_EQ_VALUE) + name);
+			throw ParseException.concat(Dict.ERROR_CONST_NAME_EQ_VALUE, name);
 		}
 		
 		// the value could contain other constants as well
 		value = replaceConstants(value);
 		
 		if (constants.containsKey(name)) {
-			throw new ParseException(Dict.get(Dict.ERROR_CONST_ALREADY_DEFINED) + name);
+			throw ParseException.concat(Dict.ERROR_CONST_ALREADY_DEFINED, name);
 		}
 		
 		// store it
@@ -3935,13 +3933,13 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// VAR without name?
 		if (tokens.length < 2) {
-			throw new ParseException(Dict.get(Dict.ERROR_VAR_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_VAR_NUM_OF_ARGS);
 		}
 		
 		// VAR with name but without value?
 		String[] assignParts = varAssignPattern.split(tokens[1], 2); // element 0: name; element 1: value
 		if (assignParts.length < 2) {
-			throw new ParseException(Dict.get(Dict.ERROR_VAR_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_VAR_NUM_OF_ARGS);
 		}
 		
 		// name already defined as a constant?
@@ -3953,13 +3951,13 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// recursion not allowed
 		if (name.equals(value)) {
-			throw new ParseException(Dict.get(Dict.ERROR_VAR_NAME_EQ_VALUE) + name);
+			throw ParseException.concat(Dict.ERROR_VAR_NAME_EQ_VALUE, name);
 		}
 		
 		// no whitespace in variable values allowed!
 		Matcher matcher = whitespace.matcher(value);
 		if (matcher.find()) {
-			throw new ParseException(Dict.get(Dict.ERROR_VAR_VAL_HAS_WHITESPACE) + value);
+			throw ParseException.concat(Dict.ERROR_VAR_VAL_HAS_WHITESPACE, value);
 		}
 		
 		if (isFake)
@@ -3974,7 +3972,7 @@ public class MidicaPLParser extends SequenceParser {
 			isNamedParam   = varMatcher.group(6) != null;
 		}
 		else {
-			throw new ParseException(Dict.get(Dict.ERROR_VAR_NAME_INVALID) + name);
+			throw ParseException.concat(Dict.ERROR_VAR_NAME_INVALID, name);
 		}
 		
 		// the value could contain other variables as well
@@ -3989,7 +3987,7 @@ public class MidicaPLParser extends SequenceParser {
 				throw new FatalParseException(Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + name);
 			}
 			if (! params.containsKey(key)) {
-				throw new ParseException(Dict.get(Dict.ERROR_PARAM_NAMED_UNKNOWN) + name);
+				throw ParseException.concat(Dict.ERROR_PARAM_NAMED_UNKNOWN, name);
 			}
 			params.put(key, value);
 		}
@@ -4001,7 +3999,7 @@ public class MidicaPLParser extends SequenceParser {
 				throw new FatalParseException(Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + name);
 			}
 			if (index >= params.size()) {
-				throw new ParseException(Dict.get(Dict.ERROR_PARAM_INDEX_TOO_HIGH) + name);
+				throw ParseException.concat(Dict.ERROR_PARAM_INDEX_TOO_HIGH, name);
 			}
 			if (null == params.get(index)) {
 				throw new FatalParseException(Dict.get(Dict.ERROR_PARAM_INDEX_UNDEFINED) + name);
@@ -4056,7 +4054,7 @@ public class MidicaPLParser extends SequenceParser {
 			
 			// recursion depth too high?
 			if (recursionCount > MAX_RECURSION_DEPTH_CONST) {
-				throw new ParseException(Dict.get(Dict.ERROR_CONST_RECURSION));
+				throw ParseException.simple(Dict.ERROR_CONST_RECURSION);
 			}
 		}
 		
@@ -4098,7 +4096,7 @@ public class MidicaPLParser extends SequenceParser {
 						int index = toInt(varMatcher.group(5));
 						ArrayList<String> params = paramStackIndexed.peek();
 						if (null == params) {
-							throw new ParseException(Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + varName);
+							throw ParseException.concat(Dict.ERROR_PARAM_OUTSIDE_FUNCTION, varName);
 						}
 						if (index < params.size()) {
 							varValue = params.get(index);
@@ -4108,7 +4106,7 @@ public class MidicaPLParser extends SequenceParser {
 						String name = varMatcher.group(6);
 						HashMap<String, String> params = paramStackNamed.peek();
 						if (null == params) {
-							throw new ParseException(Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + varName);
+							throw ParseException.concat(Dict.ERROR_PARAM_OUTSIDE_FUNCTION, varName);
 						}
 						varValue = params.get(name);
 					}
@@ -4136,7 +4134,7 @@ public class MidicaPLParser extends SequenceParser {
 					if (isIndexedParam || isNamedParam)
 						varValue = ""; // allow undefined parameters
 					else
-						throw new ParseException(Dict.get(Dict.ERROR_VAR_NOT_DEFINED) + varName);
+						throw ParseException.concat(Dict.ERROR_VAR_NOT_DEFINED, varName);
 				}
 				
 				// replace
@@ -4151,7 +4149,7 @@ public class MidicaPLParser extends SequenceParser {
 			
 			// recursion depth too high?
 			if (recursionCount > MAX_RECURSION_DEPTH_VAR) {
-				throw new ParseException(Dict.get(Dict.ERROR_VAR_RECURSION));
+				throw ParseException.simple(Dict.ERROR_VAR_RECURSION);
 			}
 		}
 		
@@ -4169,7 +4167,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// not enough arguments?
 		if (tokens.length < 3) {
-			throw new ParseException(Dict.get(Dict.ERROR_INSTR_NUM_OF_ARGS_SINGLE));
+			throw ParseException.simple(Dict.ERROR_INSTR_NUM_OF_ARGS_SINGLE);
 		}
 		
 		// add channel to new command
@@ -4207,7 +4205,7 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void parseInstrumentCmd(String[] tokens, boolean isFake) throws ParseException {
 		if (3 != tokens.length) {
-			throw new ParseException(Dict.get(Dict.ERROR_INSTR_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_INSTR_NUM_OF_ARGS);
 		}
 		
 		int    channel   = toChannel(tokens[0]);
@@ -4231,7 +4229,7 @@ public class MidicaPLParser extends SequenceParser {
 			if (1 == msbLsb.length) {
 				if (bankMSB > 127 * 127) {
 					// too big
-					throw new ParseException(Dict.get(Dict.ERROR_INSTR_BANK));
+					throw ParseException.simple(Dict.ERROR_INSTR_BANK);
 				}
 				else if (bankMSB > 127) {
 					// full number
@@ -4250,7 +4248,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// wrong syntax?
 		if (bankMSB > 127 || bankLSB > 127) {
-			throw new ParseException(Dict.get(Dict.ERROR_INSTR_BANK));
+			throw ParseException.simple(Dict.ERROR_INSTR_BANK);
 		}
 		
 		if (instrumentsParsed) {
@@ -4292,9 +4290,7 @@ public class MidicaPLParser extends SequenceParser {
 			// check if the channel has already been defined
 			for (Instrument instr : instruments) {
 				if (channel == instr.channel) {
-					throw new ParseException(
-						String.format(Dict.get(Dict.ERROR_CHANNEL_REDEFINED), channel)
-					);
+					throw ParseException.format(Dict.ERROR_CHANNEL_REDEFINED, channel);
 				}
 			}
 			
@@ -4339,7 +4335,7 @@ public class MidicaPLParser extends SequenceParser {
 			return;
 		}
 		else
-			throw new ParseException(Dict.get(Dict.ERROR_META_UNKNOWN_CMD) + tokens[0]);
+			throw ParseException.concat(Dict.ERROR_META_UNKNOWN_CMD, tokens[0]);
 		
 		// prepare the new meta line
 		String line = tokens[1];
@@ -4384,7 +4380,7 @@ public class MidicaPLParser extends SequenceParser {
 		else if (META_SK_INFO.equals(tokens[0]))
 			key = "sk_info";
 		else
-			throw new ParseException(Dict.get(Dict.ERROR_SOFT_KARAOKE_UNKNOWN_CMD) + tokens[0]);
+			throw ParseException.concat(Dict.ERROR_SOFT_KARAOKE_UNKNOWN_CMD, tokens[0]);
 		
 		// create a new value, if necessary
 		ArrayList<String> values = softKaraokeInfo.get(key);
@@ -4397,13 +4393,13 @@ public class MidicaPLParser extends SequenceParser {
 			// no limit for info events
 			// other values may exist only once
 			if (! META_SK_INFO.equals(tokens[0])) {
-				throw new ParseException(Dict.get(Dict.ERROR_SK_VALUE_ALREADY_SET) + tokens[0]);
+				throw ParseException.concat(Dict.ERROR_SK_VALUE_ALREADY_SET, tokens[0]);
 			}
 		}
 		
 		// don't allow line breaks (\r or \n)
 		if (crlfSkPattern.matcher(tokens[1]).find()) {
-			throw new ParseException(Dict.get(Dict.ERROR_SK_FIELD_CRLF_NOT_ALLOWED));
+			throw ParseException.simple(Dict.ERROR_SK_FIELD_CRLF_NOT_ALLOWED);
 		}
 		
 		// add content
@@ -4471,7 +4467,7 @@ public class MidicaPLParser extends SequenceParser {
 					}
 				}
 				else {
-					throw new ParseException( Dict.get(Dict.ERROR_INVALID_TIME_SIG) + value);
+					throw ParseException.concat(Dict.ERROR_INVALID_TIME_SIG, value);
 				}
 			}
 			
@@ -4499,7 +4495,7 @@ public class MidicaPLParser extends SequenceParser {
 					else if (tonality.equals(KEY_MIN))
 						isMajor = false;
 					else
-						throw new ParseException(Dict.get(Dict.ERROR_INVALID_TONALITY) + tonality);
+						throw ParseException.concat(Dict.ERROR_INVALID_TONALITY, tonality);
 					
 					// set the key signature message
 					if (! isFake) {
@@ -4512,12 +4508,12 @@ public class MidicaPLParser extends SequenceParser {
 					}
 				}
 				else {
-					throw new ParseException( Dict.get(Dict.ERROR_INVALID_KEY_SIG) + value);
+					throw ParseException.concat(Dict.ERROR_INVALID_KEY_SIG, value);
 				}
 			}
 			
 			else {
-				throw new ParseException(Dict.get(Dict.ERROR_UNKNOWN_GLOBAL_CMD) + cmd);
+				throw ParseException.concat(Dict.ERROR_UNKNOWN_GLOBAL_CMD, cmd);
 			}
 		}
 		catch (InvalidMidiDataException e) {
@@ -4635,9 +4631,7 @@ public class MidicaPLParser extends SequenceParser {
 							nonRestOptions.add(opt);
 						}
 						else {
-							throw new ParseException(
-								String.format(Dict.get(Dict.ERROR_COMPACT_INVALID_OPTION), optName, compactElement)
-							);
+							throw ParseException.format(Dict.ERROR_COMPACT_INVALID_OPTION, optName, compactElement);
 						}
 					}
 					
@@ -4697,7 +4691,7 @@ public class MidicaPLParser extends SequenceParser {
 								
 								// tremolo is not allowed in pattern calls
 								if (!isFake && instruments.get(channel).getOtoTremolo() != null) {
-									throw new ParseException(Dict.get(Dict.ERROR_OTO_TREMOLO_PATTERN_CALL));
+									throw ParseException.simple(Dict.ERROR_OTO_TREMOLO_PATTERN_CALL);
 								}
 								
 								// create pattern command
@@ -4711,9 +4705,7 @@ public class MidicaPLParser extends SequenceParser {
 							
 							// pattern options are not allowed in compact syntax
 							if (optionString != null) {
-								throw new ParseException(
-									String.format(Dict.get(Dict.ERROR_COMPACT_PAT_CALL_WITH_OPT), optionString, compactElement)
-								);
+								throw ParseException.format(Dict.ERROR_COMPACT_PAT_CALL_WITH_OPT, optionString, compactElement);
 							}
 						}
 						
@@ -4845,7 +4837,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		int tokenCount = tokens.length;
 		if (tokenCount < 3)
-			throw new ParseException(Dict.get(Dict.ERROR_CH_CMD_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_CH_CMD_NUM_OF_ARGS);
 		
 		int channel = toChannel(tokens[0]);
 		
@@ -4863,7 +4855,7 @@ public class MidicaPLParser extends SequenceParser {
 		// separate the duration from further arguments
 		String[] subTokens = tokens[2].split("\\s+", 2);
 		if (0 == subTokens.length)
-			throw new ParseException(Dict.get(Dict.ERROR_CH_CMD_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_CH_CMD_NUM_OF_ARGS);
 		
 		// replace variables in duration
 		if (isDefaultParsRun && ! isFake)
@@ -4907,7 +4899,7 @@ public class MidicaPLParser extends SequenceParser {
 		
 		// illegal zero-length duration?
 		if (0 == duration && LENGTH_ZERO.equals(durationStr) && note != REST_VALUE) {
-			throw new ParseException(Dict.get(Dict.ERROR_ZEROLENGTH_NOT_ALLOWED));
+			throw ParseException.simple(Dict.ERROR_ZEROLENGTH_NOT_ALLOWED);
 		}
 		
 		// allow drum-only sequences without an INSTRUMENTS block
@@ -4944,7 +4936,7 @@ public class MidicaPLParser extends SequenceParser {
 				else if (OPT_LYRICS.equals(optName)) {
 					syllable = opt.getLyrics();
 					if (isSoftKaraoke && crlfSkPattern.matcher(syllable).find()) {
-						throw new ParseException(Dict.get(Dict.ERROR_SK_SYLLABLE_CRLF_NOT_ALLOWED));
+						throw ParseException.simple(Dict.ERROR_SK_SYLLABLE_CRLF_NOT_ALLOWED);
 					}
 				}
 				else if (OPT_TREMOLO.equals(optName)) {
@@ -4954,13 +4946,13 @@ public class MidicaPLParser extends SequenceParser {
 					shift += opt.getShift();
 				}
 				else
-					throw new ParseException(Dict.get(Dict.ERROR_CHANNEL_INVALID_OPT) + optName);
+					throw ParseException.concat(Dict.ERROR_CHANNEL_INVALID_OPT, optName);
 				
 				// invalid command for zero-length command?
 				if (0 == duration && LENGTH_ZERO.equals(durationStr)) {
 					if (OPT_MULTIPLE.equals(optName) || OPT_QUANTITY.equals(optName)
 						|| OPT_TREMOLO.equals(optName) || OPT_SHIFT.equals(optName)) {
-						throw new ParseException(Dict.get(Dict.ERROR_ZEROLENGTH_INVALID_OPTION) + optName);
+						throw ParseException.concat(Dict.ERROR_ZEROLENGTH_INVALID_OPTION, optName);
 					}
 				}
 			}
@@ -4974,9 +4966,7 @@ public class MidicaPLParser extends SequenceParser {
 		Instrument instr = instruments.get(channel);
 		
 		if (instr.autoChannel)
-			throw new ParseException(
-				String.format(Dict.get(Dict.ERROR_CHANNEL_UNDEFINED), channel)
-			);
+			throw ParseException.format(Dict.ERROR_CHANNEL_UNDEFINED, channel);
 		
 		// get start ticks of the first note and velocity
 		long absoluteStartTicks = instr.getCurrentTicks();
@@ -5145,7 +5135,7 @@ public class MidicaPLParser extends SequenceParser {
 			if (optNames.contains(optName)) {
 				if (OPT_SHIFT.equals(optName)) // duplicate shift is allowed
 					continue;
-				throw new ParseException(Dict.get(Dict.ERROR_DUPLICATE_OPTION) + optName);
+				throw ParseException.concat(Dict.ERROR_DUPLICATE_OPTION, optName);
 			}
 			optNames.add(optName);
 		}
@@ -5184,19 +5174,19 @@ public class MidicaPLParser extends SequenceParser {
 		
 		if (V.equals(optName) || VELOCITY.equals(optName)) {
 			if (optParts.length < 2 || "".equals(rawValue)) {
-				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
+				throw ParseException.concat(Dict.ERROR_OPTION_NEEDS_VAL, optName);
 			}
 			optName = OPT_VELOCITY;
 			int val = toInt(rawValue);
 			if (val > 127)
-				throw new ParseException(Dict.get(Dict.ERROR_VEL_NOT_MORE_THAN_127));
+				throw ParseException.simple(Dict.ERROR_VEL_NOT_MORE_THAN_127);
 			if (val < 1)
-				throw new ParseException(Dict.get(Dict.ERROR_VEL_NOT_LESS_THAN_1));
+				throw ParseException.simple(Dict.ERROR_VEL_NOT_LESS_THAN_1);
 			cmdOpt.set(optName, val, rawName, rawValue);
 		}
 		else if (D.equals(optName) || DURATION.equals(optName)) {
 			if (optParts.length < 2 || "".equals(rawValue)) {
-				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
+				throw ParseException.concat(Dict.ERROR_OPTION_NEEDS_VAL, optName);
 			}
 			optName = OPT_DURATION;
 			String[] valueParts = rawValue.split(Pattern.quote(DURATION_PERCENT), -1);
@@ -5204,22 +5194,22 @@ public class MidicaPLParser extends SequenceParser {
 			if (valueParts.length > 1)
 				val /= 100; // percentage --> numeric
 			if (val <= 0.0)
-				throw new ParseException(Dict.get(Dict.ERROR_DURATION_MORE_THAN_0));
+				throw ParseException.simple(Dict.ERROR_DURATION_MORE_THAN_0);
 			cmdOpt.set(optName, val, rawName, rawValue);
 		}
 		else if (LENGTH.equals(optName)) {
 			if (optParts.length < 2 || "".equals(rawValue)) {
-				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
+				throw ParseException.concat(Dict.ERROR_OPTION_NEEDS_VAL, optName);
 			}
 			optName = OPT_LENGTH;
 			int length = parseDuration(rawValue);
 			if (length <= 0)
-				throw new ParseException(Dict.get(Dict.ERROR_OPT_LENGTH_MORE_THAN_0) + optName);
+				throw ParseException.concat(Dict.ERROR_OPT_LENGTH_MORE_THAN_0, optName);
 			cmdOpt.set(optName, rawValue, rawName, rawValue);
 		}
 		else if (Q.equals(optName) || QUANTITY.equals(optName)) {
 			if (optParts.length < 2 || "".equals(rawValue)) {
-				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
+				throw ParseException.concat(Dict.ERROR_OPTION_NEEDS_VAL, optName);
 			}
 			optName = OPT_QUANTITY;
 			cmdOpt.set(optName, toInt(rawValue, true), rawName, rawValue);
@@ -5228,11 +5218,11 @@ public class MidicaPLParser extends SequenceParser {
 			optName = OPT_MULTIPLE;
 			cmdOpt.set(optName, true, rawName, rawValue);
 			if (optParts.length > 1)
-				throw new ParseException(Dict.get(Dict.ERROR_OPTION_VAL_NOT_ALLOWED) + optName);
+				throw ParseException.concat(Dict.ERROR_OPTION_VAL_NOT_ALLOWED, optName);
 		}
 		else if (L.equals(optName) || LYRICS.equals(optName)) {
 			if (optParts.length < 2 || "".equals(rawValue)) {
-				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
+				throw ParseException.concat(Dict.ERROR_OPTION_NEEDS_VAL, optName);
 			}
 			optName = OPT_LYRICS;
 			cmdOpt.set(optName, rawValue, rawName, rawValue);
@@ -5249,31 +5239,31 @@ public class MidicaPLParser extends SequenceParser {
 					String num1 = matcher.group(1);
 					String num2 = matcher.group(2);
 					if ("0".equals(num1) || "0".equals(num2))
-						throw new ParseException(Dict.get(Dict.ERROR_TUPLET_INVALID) + rawValue);
+						throw ParseException.concat(Dict.ERROR_TUPLET_INVALID, rawValue);
 					cmdOpt.set(optName, rawValue, rawName, rawValue);
 				}
 				else {
-					throw new ParseException(Dict.get(Dict.ERROR_TUPLET_INVALID) + rawValue);
+					throw ParseException.concat(Dict.ERROR_TUPLET_INVALID, rawValue);
 				}
 			}
 		}
 		else if (TR.equals(optName) || TREMOLO.equals(optName)) {
 			if (optParts.length < 2 || "".equals(rawValue)) {
-				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
+				throw ParseException.concat(Dict.ERROR_OPTION_NEEDS_VAL, optName);
 			}
 			optName = OPT_TREMOLO;
 			cmdOpt.set(optName, parseDuration(rawValue), rawName, rawValue);
 		}
 		else if (S.equals(optName) || SHIFT.equals(optName)) {
 			if (optParts.length < 2 || "".equals(rawValue)) {
-				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
+				throw ParseException.concat(Dict.ERROR_OPTION_NEEDS_VAL, optName);
 			}
 			optName = OPT_SHIFT;
 			cmdOpt.set(optName, toInt(rawValue, false), rawName, rawValue);
 		}
 		else if (IF.equals(optName)) {
 			if (isCondCheckParsRun && (optParts.length < 2 || "".equals(rawValue))) {
-				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
+				throw ParseException.concat(Dict.ERROR_OPTION_NEEDS_VAL, optName);
 			}
 			String val = optParts.length >= 2 ? rawValue : "";
 			optName = OPT_IF;
@@ -5281,7 +5271,7 @@ public class MidicaPLParser extends SequenceParser {
 		}
 		else if (ELSIF.equals(optName)) {
 			if (isCondCheckParsRun && (optParts.length < 2 || "".equals(rawValue))) {
-				throw new ParseException(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + optName);
+				throw ParseException.concat(Dict.ERROR_OPTION_NEEDS_VAL, optName);
 			}
 			String val = optParts.length >= 2 ? rawValue : "";
 			optName = OPT_ELSIF;
@@ -5291,10 +5281,10 @@ public class MidicaPLParser extends SequenceParser {
 			optName = OPT_ELSE;
 			cmdOpt.set(optName, true, rawName, rawValue);
 			if (optParts.length > 1)
-				throw new ParseException(Dict.get(Dict.ERROR_OPTION_VAL_NOT_ALLOWED) + optName);
+				throw ParseException.concat(Dict.ERROR_OPTION_VAL_NOT_ALLOWED, optName);
 		}
 		else {
-			throw new ParseException(Dict.get(Dict.ERROR_UNKNOWN_OPTION) + optName);
+			throw ParseException.concat(Dict.ERROR_UNKNOWN_OPTION, optName);
 		}
 		
 		return cmdOpt;
@@ -5324,12 +5314,12 @@ public class MidicaPLParser extends SequenceParser {
 		else {
 			// invalid pattern index inside a block?
 			if (patternNameStack.size() > 0 && invalidNoteIdxPattern.matcher(note).matches())
-				throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH_2) + note);
+				throw ParseException.concat(Dict.ERROR_PATTERN_INDEX_TOO_HIGH_2, note);
 			
 			// other invalid note or percussion instrument
 			if (9 == channel)
-				throw new ParseException(Dict.get(Dict.ERROR_UNKNOWN_PERCUSSION) + note);
-			throw new ParseException(Dict.get(Dict.ERROR_UNKNOWN_NOTE) + note);
+				throw ParseException.concat(Dict.ERROR_UNKNOWN_PERCUSSION, note);
+			throw ParseException.concat(Dict.ERROR_UNKNOWN_NOTE, note);
 		}
 	}
 	
@@ -5358,14 +5348,14 @@ public class MidicaPLParser extends SequenceParser {
 				
 				// invalid pattern index inside a block?
 				if (patternNameStack.size() > 0 && invalidNoteIdxPattern.matcher(noteName).matches())
-					throw new ParseException(Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH_2) + noteName);
+					throw ParseException.concat(Dict.ERROR_PATTERN_INDEX_TOO_HIGH_2, noteName);
 				
 				// other invalid note
-				throw new ParseException(Dict.get(Dict.ERROR_UNKNOWN_NOTE) + noteName);
+				throw ParseException.concat(Dict.ERROR_UNKNOWN_NOTE, noteName);
 			}
 		}
 		if (noteVal > 127) {
-			throw new ParseException(Dict.get(Dict.ERROR_NOTE_TOO_BIG) + noteName);
+			throw ParseException.concat(Dict.ERROR_NOTE_TOO_BIG, noteName);
 		}
 		
 		return noteVal;
@@ -5420,7 +5410,7 @@ public class MidicaPLParser extends SequenceParser {
 	private boolean parseChordNotes(String[] tokens) throws ParseException {
 		
 		if (tokens.length < 3) {
-			throw new ParseException(Dict.get(Dict.ERROR_CH_CMD_NUM_OF_ARGS));
+			throw ParseException.simple(Dict.ERROR_CH_CMD_NUM_OF_ARGS);
 		}
 		
 		// effect flow?
@@ -5527,22 +5517,17 @@ public class MidicaPLParser extends SequenceParser {
 	 */
 	private void assertNoOpenOTO(String dictKey) throws ParseException {
 		
-		String msgTemplate = Dict.get(dictKey);
 		for (Instrument instr : instruments) {
 			int     quantity = instr.getOtoQuantity();
 			String  tremolo  = instr.getOtoTremolo();
 			boolean multiple = instr.isOtoMultiple();
 			
-			String message = null;
 			if (quantity != 1)
-				message = String.format(msgTemplate, QUANTITY, instr.channel);
+				throw ParseException.format(dictKey, QUANTITY, instr.channel);
 			else if (tremolo != null)
-				message = String.format(msgTemplate, TREMOLO, instr.channel);
+				throw ParseException.format(dictKey, TREMOLO, instr.channel);
 			else if (multiple)
-				message = String.format(msgTemplate, MULTIPLE, instr.channel);
-			
-			if (message != null)
-				throw new ParseException(message);
+				throw ParseException.format(dictKey, MULTIPLE, instr.channel);
 		}
 	}
 
@@ -5563,21 +5548,21 @@ public class MidicaPLParser extends SequenceParser {
 			String[] limits = range.split(Pattern.quote(PARTIAL_SYNC_RANGE), -1);
 			if (1 == limits.length) {
 				if ("".equals(range))
-					throw new ParseException(Dict.get(Dict.ERROR_PARTIAL_RANGE_EMPTY));
+					throw ParseException.simple(Dict.ERROR_PARTIAL_RANGE_EMPTY);
 				channels.add(toChannel(range));
 			}
 			else if (2 == limits.length) {
 				int fromCh = toChannel(limits[0]);
 				int toCh   = toChannel(limits[1]);
 				if (toCh <= fromCh) {
-					throw new ParseException(Dict.get(Dict.ERROR_PARTIAL_RANGE_ORDER) + range);
+					throw ParseException.concat(Dict.ERROR_PARTIAL_RANGE_ORDER, range);
 				}
 				for (int channel = fromCh; channel <= toCh; channel++) {
 					channels.add(channel);
 				}
 			}
 			else {
-				throw new ParseException(Dict.get(Dict.ERROR_PARTIAL_RANGE) + range);
+				throw ParseException.concat(Dict.ERROR_PARTIAL_RANGE, range);
 			}
 		}
 		
@@ -5758,7 +5743,7 @@ public class MidicaPLParser extends SequenceParser {
 		if (greaterZero) {
 			i = toInt(s);
 			if (0 == i)
-				throw new ParseException(Dict.get(Dict.ERROR_0_NOT_ALLOWED));
+				throw ParseException.simple(Dict.ERROR_0_NOT_ALLOWED);
 		}
 		else {
 			i = Integer.parseInt(s);
@@ -5777,12 +5762,12 @@ public class MidicaPLParser extends SequenceParser {
 		try {
 			int i = Integer.parseInt(s);
 			if (i < 0) {
-				throw new ParseException(Dict.get(Dict.ERROR_NEGATIVE_NOT_ALLOWED) + s);
+				throw ParseException.concat(Dict.ERROR_NEGATIVE_NOT_ALLOWED, s);
 			}
 			return i;
 		}
 		catch (NumberFormatException e) {
-			throw new ParseException(Dict.get(Dict.ERROR_NOT_AN_INTEGER) + s);
+			throw ParseException.concat(Dict.ERROR_NOT_AN_INTEGER, s);
 		}
 	}
 	
@@ -5799,7 +5784,7 @@ public class MidicaPLParser extends SequenceParser {
 			return f;
 		}
 		catch (NumberFormatException e) {
-			throw new ParseException(Dict.get(Dict.ERROR_NOT_A_FLOAT) + s);
+			throw ParseException.concat(Dict.ERROR_NOT_A_FLOAT, s);
 		}
 	}
 	
@@ -5899,22 +5884,48 @@ public class MidicaPLParser extends SequenceParser {
 			}
 			
 			// construct error message
-			String message = Dict.get(Dict.ERROR_BAR_LINE_INCORRECT);
-			message += Dict.get(isBarlineTooEarly ? Dict.ERROR_BAR_LINE_TOO_EARLY : Dict.ERROR_BAR_LINE_TOO_LATE);
-			message = String.format(message, barLineCounter, remainder);
+			String rawMsg             = Dict.get(Dict.ERROR_BAR_LINE_INCORRECT);
+			String allDictKeys        = Dict.ERROR_BAR_LINE_INCORRECT + "/";
+			List<Object> replacements = new ArrayList<>();
+			if (isBarlineTooEarly) {
+				rawMsg += Dict.get(Dict.ERROR_BAR_LINE_TOO_EARLY);
+				allDictKeys += Dict.ERROR_BAR_LINE_TOO_EARLY + "/";
+			}
+			else {
+				rawMsg += Dict.get(Dict.ERROR_BAR_LINE_TOO_LATE);
+				allDictKeys += Dict.ERROR_BAR_LINE_TOO_LATE + "/";
+			}
+			replacements.add(barLineCounter);
+			replacements.add(remainder);
 			String exactSymbol = tickToSymbol.get((int) remainder);
 			Entry<Integer, String> floor   = tickToSymbol.floorEntry((int) remainder);
 			Entry<Integer, String> ceiling = tickToSymbol.ceilingEntry((int) remainder);
 			if (exactSymbol != null) {
-				message += String.format(Dict.get(Dict.ERROR_BAR_LINE_EXACT_NOTE_LEN), exactSymbol);
+				rawMsg += Dict.get(Dict.ERROR_BAR_LINE_EXACT_NOTE_LEN);
+				allDictKeys += Dict.ERROR_BAR_LINE_EXACT_NOTE_LEN;
+				replacements.add(exactSymbol);
 			}
 			else if (null == floor) {
-				message += String.format(Dict.get(Dict.ERROR_BAR_LINE_SMALL), ceiling.getValue(), ceiling.getKey());
+				rawMsg += Dict.get(Dict.ERROR_BAR_LINE_SMALL);
+				allDictKeys += Dict.ERROR_BAR_LINE_SMALL;
+				replacements.add(ceiling.getValue());
+				replacements.add(ceiling.getKey());
 			}
 			else {
-				message += String.format(Dict.get(Dict.ERROR_BAR_LINE_BETWEEN), floor.getValue(), floor.getKey(), ceiling.getValue(), ceiling.getKey());
+				rawMsg += Dict.get(Dict.ERROR_BAR_LINE_BETWEEN);
+				allDictKeys += Dict.ERROR_BAR_LINE_BETWEEN;
+				replacements.add(floor.getValue());
+				replacements.add(floor.getKey());
+				replacements.add(ceiling.getValue());
+				replacements.add(ceiling.getKey());
 			}
-			throw new ParseException(message);
+			
+			// throw exception
+			String message = String.format(rawMsg, replacements.toArray());
+			ParseException e = ParseException.raw(message);
+			e.setDictKey(allDictKeys);
+			e.setRawMsg(rawMsg);
+			throw e;
 		}
 	}
 	

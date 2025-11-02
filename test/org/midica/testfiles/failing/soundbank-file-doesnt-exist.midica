@@ -1,5 +1,0 @@
-INCLUDE inc/instruments.midica
-
-SOUNDBANK  soundfont.sf2
-
-0 c /4

@@ -23,6 +23,8 @@ import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.SysexMessage;
 
 import org.midica.config.Dict;
+import org.midica.file.read.exception.FatalParseException;
+import org.midica.file.read.exception.ParseException;
 import org.midica.midi.SequenceCreator;
 
 /**
@@ -426,19 +428,19 @@ public class Effect {
 				if (flowElementNames.contains(elemName))
 					looksLikeFlow = true;
 				else
-					throw new ParseException(Dict.get(Dict.ERROR_FL_UNKNOWN_ELEMENT) + elemName);
+					throw ParseException.concat(Dict.ERROR_FL_UNKNOWN_ELEMENT, elemName);
 				
 				// starts with dot? - flow must be open (from the same channel)
 				if (dot != null && dot.length() > 0) {
 					if (null == flow)
-						throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), MidicaPLParser.FL_DOT));
+						throw ParseException.format(Dict.ERROR_FL_NOT_OPEN, MidicaPLParser.FL_DOT);
 				}
 				else {
 					// open flow
 					if (1 == elemCount)
 						flow = new EffectFlow(channel, lengthStr);
 					else
-						throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_MISSING_DOT), MidicaPLParser.FL_DOT));
+						throw ParseException.format(Dict.ERROR_FL_MISSING_DOT, MidicaPLParser.FL_DOT);
 				}
 				
 				// get generic number for ctrl / (n)rpn
@@ -462,7 +464,7 @@ public class Effect {
 		// unmatched characters left?
 		if (lastMatchOffset != flowStr.length()) {
 			String remainder = flowStr.substring(lastMatchOffset);
-			throw new ParseException(Dict.get(Dict.ERROR_FL_UNMATCHED_REMAINDER) + remainder);
+			throw ParseException.concat(Dict.ERROR_FL_UNMATCHED_REMAINDER, remainder);
 		}
 		
 		// flow applied successfully
@@ -478,7 +480,7 @@ public class Effect {
 		
 		// check if there is a pending flow
 		if (flow != null && flow.isPending()) {
-			throw new ParseException(Dict.get(Dict.ERROR_FL_PENDING));
+			throw ParseException.simple(Dict.ERROR_FL_PENDING);
 		}
 		
 		flow = null;
@@ -526,16 +528,12 @@ public class Effect {
 			catch (NumberFormatException e) {
 				String noteElem = MidicaPLParser.FL_DOT + MidicaPLParser.FUNC_NOTE
 					+ MidicaPLParser.PARAM_OPEN + indexStr + MidicaPLParser.PARAM_CLOSE;
-				throw new ParseException(
-					String.format(Dict.get(Dict.ERROR_FL_NOTE_PAT_IDX_NAN), indexStr, noteElem)
-				);
+				throw ParseException.format(Dict.ERROR_FL_NOTE_PAT_IDX_NAN, indexStr, noteElem);
 			}
 			catch (IndexOutOfBoundsException e) {
 				String noteElem = MidicaPLParser.FL_DOT + MidicaPLParser.FUNC_NOTE
 					+ MidicaPLParser.PARAM_OPEN + indexStr + MidicaPLParser.PARAM_CLOSE;
-				throw new ParseException(
-					String.format(Dict.get(Dict.ERROR_FL_NOTE_PAT_IDX_TOO_HIGH), indexStr, noteElem)
-				);
+				throw ParseException.format(Dict.ERROR_FL_NOTE_PAT_IDX_TOO_HIGH, indexStr, noteElem);
 			}
 		}
 		
@@ -596,7 +594,7 @@ public class Effect {
 		}
 		else if (flowElementNames.contains(elemName)) {
 			if (numberStr != null)
-				throw new ParseException(Dict.get(Dict.ERROR_FL_NUMBER_NOT_ALLOWED) + elemName);
+				throw ParseException.concat(Dict.ERROR_FL_NUMBER_NOT_ALLOWED, elemName);
 			return -1;
 		}
 		else {
@@ -607,9 +605,9 @@ public class Effect {
 		// empty strings?
 		if ("".equals(decMsbStr) || "".equals(decLsbStr)) {
 			if (isGeneric)
-				throw new ParseException(Dict.get(Dict.ERROR_FL_NUMBER_EMPTY) + elemName);
+				throw ParseException.concat(Dict.ERROR_FL_NUMBER_EMPTY, elemName);
 			else
-				throw new ParseException(Dict.get(Dict.ERROR_FUNC_NUMBER_EMPTY) + numberStr);
+				throw ParseException.concat(Dict.ERROR_FUNC_NUMBER_EMPTY, numberStr);
 		}
 		
 		// nothing to parse?
@@ -619,20 +617,19 @@ public class Effect {
 			return -1;
 		}
 		else if (null == numberStr) {
-			throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_NUMBER_MISSING), elemName));
+			throw ParseException.format(Dict.ERROR_FL_NUMBER_MISSING, elemName);
 		}
 		
 		// LSB correct?
 		if (1 == expectedBytes && hasLsb) {
 			if (isGeneric)
-				throw new ParseException(Dict.get(Dict.ERROR_FL_NUM_SEP_NOT_ALLOWED) + elemName);
-			throw new ParseException(String.format(
-					Dict.get(Dict.ERROR_FUNC_MSB_LSB_NEEDS_DOUBLE), numberStr, MidicaPLParser.FL_DOUBLE));
+				throw ParseException.concat(Dict.ERROR_FL_NUM_SEP_NOT_ALLOWED, elemName);
+			throw ParseException.format(Dict.ERROR_FUNC_MSB_LSB_NEEDS_DOUBLE, numberStr, MidicaPLParser.FL_DOUBLE);
 		}
 		if (2 == expectedBytes && hexMsbStr != null && !hasLsb) {
 			if (isGeneric)
-				throw new ParseException(Dict.get(Dict.ERROR_FL_HEX_LSB_REQUIRED) + numberStr);
-			throw new ParseException(Dict.get(Dict.ERROR_FUNC_HEX_LSB_REQUIRED) + numberStr);
+				throw ParseException.concat(Dict.ERROR_FL_HEX_LSB_REQUIRED, numberStr);
+			throw ParseException.concat(Dict.ERROR_FUNC_HEX_LSB_REQUIRED, numberStr);
 		}
 		
 		// unify number
@@ -648,8 +645,8 @@ public class Effect {
 		}
 		catch (NumberFormatException e) {
 			if (isGeneric)
-				throw new ParseException(Dict.get(Dict.ERROR_FL_HEX_FORMAT) + numberStr);
-			throw new ParseException(Dict.get(Dict.ERROR_FUNC_HEX_FORMAT) + numberStr);
+				throw ParseException.concat(Dict.ERROR_FL_HEX_FORMAT, numberStr);
+			throw ParseException.concat(Dict.ERROR_FUNC_HEX_FORMAT, numberStr);
 		}
 		
 		// get max value
@@ -661,21 +658,19 @@ public class Effect {
 			
 			// MSB too high?
 			if (hasLsb && number > 127)
-				throw new ParseException(String.format(
-						Dict.get(Dict.ERROR_FUNC_MSB_TOO_HIGH), numberStr, decMsbStr));
+				throw ParseException.format(Dict.ERROR_FUNC_MSB_TOO_HIGH, numberStr, decMsbStr);
 			
 			// LSB available? - parse it
 			if (decLsbStr != null) {
 				int lsb = Integer.parseInt(decLsbStr);
 				number = number * 128 + lsb;
 				if (lsb > 127)
-					throw new ParseException(String.format(
-							Dict.get(Dict.ERROR_FUNC_LSB_TOO_HIGH), numberStr, decLsbStr));
+					throw ParseException.format(Dict.ERROR_FUNC_LSB_TOO_HIGH, numberStr, decLsbStr);
 			}
 			
 			// number higher then allowed by the controller or (n)rpn?
 			if (number > maxNum)
-				throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_NUMBER_TOO_HIGH), numberStr, elemName, maxNum));
+				throw ParseException.format(Dict.ERROR_FL_NUMBER_TOO_HIGH, numberStr, elemName, maxNum);
 			
 			// ok
 			return number;
@@ -683,7 +678,7 @@ public class Effect {
 		catch (NumberFormatException e) {
 			
 			// number exceeds integer limit
-			throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_NUMBER_TOO_HIGH), numberStr, elemName, maxNum));
+			throw ParseException.format(Dict.ERROR_FL_NUMBER_TOO_HIGH, numberStr, elemName, maxNum);
 		}
 	}
 	
@@ -696,11 +691,10 @@ public class Effect {
 	 */
 	private static int parseHex(String hexStr) throws ParseException {
 		if (hexStr.length() != 2)
-			throw new ParseException(Dict.get(Dict.ERROR_FUNC_HEX_DIGITS) + MidicaPLParser.EFF_HEX + hexStr);
+			throw ParseException.concat(Dict.ERROR_FUNC_HEX_DIGITS, MidicaPLParser.EFF_HEX + hexStr);
 		int value = Integer.parseInt(hexStr, 16);
 		if (value > 127) {
-			throw new ParseException(String.format(
-				Dict.get(Dict.ERROR_FUNC_HEX_TOO_HIGH), MidicaPLParser.EFF_HEX, MidicaPLParser.EFF_HEX, hexStr));
+			throw ParseException.format(Dict.ERROR_FUNC_HEX_TOO_HIGH, MidicaPLParser.EFF_HEX, MidicaPLParser.EFF_HEX, hexStr);
 		}
 		return value;
 	}
@@ -720,11 +714,11 @@ public class Effect {
 		// check presence of params
 		if (functionNames.contains(elemName)) {
 			if (paramStr == null && ! MidicaPLParser.FUNC_WAIT.equals(elemName))
-				throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_PARAMS_REQUIRED), elemName));
+				throw ParseException.format(Dict.ERROR_FL_PARAMS_REQUIRED, elemName);
 		}
 		else {
 			if (null != paramStr)
-				throw new ParseException(String.format(Dict.get(Dict.ERROR_FL_PARAMS_NOT_ALLOWED), elemName));
+				throw ParseException.format(Dict.ERROR_FL_PARAMS_NOT_ALLOWED, elemName);
 		}
 		
 		// effect type?
@@ -798,14 +792,12 @@ public class Effect {
 			}
 			else {
 				if (params.length != expectedCount)
-					throw new ParseException(
-						String.format(Dict.get(Dict.ERROR_FL_WRONG_PARAM_NUM), elemName, expectedCount, params.length, paramStr)
-					);
+					throw ParseException.format(Dict.ERROR_FL_WRONG_PARAM_NUM, elemName, expectedCount, params.length, paramStr);
 				
 				// don't allow empty parameters
 				for (String param : params) {
 					if (param.isEmpty())
-						throw new ParseException(Dict.get(Dict.ERROR_FL_EMPTY_PARAM) + paramStr);
+						throw ParseException.concat(Dict.ERROR_FL_EMPTY_PARAM, paramStr);
 				}
 			}
 			
@@ -853,7 +845,7 @@ public class Effect {
 		Collection<Integer> supportedFunctions = flow.getSupportedFunctions(funcName);
 		int funcType = getFunctionTypeBySyntax(funcName);
 		if (!supportedFunctions.contains(funcType))
-			throw new ParseException(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + funcName);
+			throw ParseException.concat(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF, funcName);
 		
 		// note()
 		if (MidicaPLParser.FUNC_NOTE.equals(funcName)) {
@@ -882,7 +874,7 @@ public class Effect {
 		
 		// note required but not set?
 		if (flow.needsNote() && flow.getNote() < 0)
-			throw new ParseException(Dict.get(Dict.ERROR_FL_NOTE_NOT_SET) + funcName);
+			throw ParseException.concat(Dict.ERROR_FL_NOTE_NOT_SET, funcName);
 		
 		// on()/off() - boolean functions
 		if (MidicaPLParser.FUNC_ON.equals(funcName) || MidicaPLParser.FUNC_OFF.equals(funcName)) {
@@ -1317,9 +1309,9 @@ public class Effect {
 				boolean isFlexSigned = isSigned && (EffectFlow.TYPE_ANY == valueType || EffectFlow.TYPE_BYTE_FLEX == valueType);
 				if (null == decMsbStr && null == hexMsbStr) {
 					if (isSigned && !flow.supportsSign(valueType))
-						throw new ParseException(Dict.get(Dict.ERROR_FUNC_SIGNED_FORBIDDEN) + valueStr);
+						throw ParseException.concat(Dict.ERROR_FUNC_SIGNED_FORBIDDEN, valueStr);
 					if (!isSigned && flow.requiresSign(valueType))
-						throw new ParseException(Dict.get(Dict.ERROR_FUNC_SIGNED_REQUIRED) + valueStr);
+						throw ParseException.concat(Dict.ERROR_FUNC_SIGNED_REQUIRED, valueStr);
 				}
 				
 				// get value
@@ -1340,11 +1332,11 @@ public class Effect {
 					
 					// check percentage input
 					if (!supportsPercent)
-						throw new ParseException(Dict.get(Dict.ERROR_FUNC_PERCENT_FORBIDDEN) + valueStr);
+						throw ParseException.concat(Dict.ERROR_FUNC_PERCENT_FORBIDDEN, valueStr);
 					if (percent > 100)
-						throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), valueStr, maxPercentStr + MidicaPLParser.EFF_PERCENT));
+						throw ParseException.format(Dict.ERROR_FUNC_VAL_GREATER_MAX, valueStr, maxPercentStr + MidicaPLParser.EFF_PERCENT);
 					if (percent < -100 && min < 0)
-						throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), valueStr, -100 + MidicaPLParser.EFF_PERCENT));
+						throw ParseException.format(Dict.ERROR_FUNC_VAL_LOWER_MIN, valueStr, -100 + MidicaPLParser.EFF_PERCENT);
 					
 					// calculate value
 					if (percent < 0)
@@ -1356,7 +1348,7 @@ public class Effect {
 				}
 				else if (halfToneStr != null) {
 					if (!canUseHalfTones)
-						throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_HALFTONE_NOT_ALLOWED), valueStr));
+						throw ParseException.format(Dict.ERROR_FUNC_HALFTONE_NOT_ALLOWED, valueStr);
 					
 					value = parseHalfToneSteps(halfToneStr);
 				}
@@ -1366,16 +1358,16 @@ public class Effect {
 			}
 		}
 		catch (NumberFormatException e) {
-			throw new ParseException(Dict.get(Dict.ERROR_FUNC_NO_NUMBER) + valueStr);
+			throw ParseException.concat(Dict.ERROR_FUNC_NO_NUMBER, valueStr);
 		}
 		if (null == value)
-			throw new ParseException(Dict.get(Dict.ERROR_FUNC_NO_NUMBER) + valueStr);
+			throw ParseException.concat(Dict.ERROR_FUNC_NO_NUMBER, valueStr);
 		
 		// check value against min / max
 		if (value < min)
-			throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), valueStr, min));
+			throw ParseException.format(Dict.ERROR_FUNC_VAL_LOWER_MIN, valueStr, min);
 		if (value > max && !isMsbLsb)
-			throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), valueStr, maxStr));
+			throw ParseException.format(Dict.ERROR_FUNC_VAL_GREATER_MAX, valueStr, maxStr);
 		
 		// adjust the actual MIDI value for signed types
 		if (EffectFlow.TYPE_MSB_SIGNED == valueType && !isMsbLsb) {
@@ -1458,7 +1450,7 @@ public class Effect {
 			// check range
 			float max = flow.isDouble() ? 127.99f : 127;
 			if (halfToneSteps > max)
-				throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), halfToneStr, max));
+				throw ParseException.format(Dict.ERROR_FUNC_VAL_GREATER_MAX, halfToneStr, max);
 			
 			// only one byte?
 			if (!flow.isDouble())
@@ -1477,7 +1469,7 @@ public class Effect {
 			
 			// don't allow broken values
 			if (halfToneSteps != Math.round(halfToneSteps))
-				throw new ParseException(Dict.get(Dict.ERROR_FUNC_BROKEN_HALFTONE) + halfToneStr);
+				throw ParseException.concat(Dict.ERROR_FUNC_BROKEN_HALFTONE, halfToneStr);
 			
 			// only one byte allowed
 			return Math.round(halfToneSteps);
@@ -1497,9 +1489,9 @@ public class Effect {
 			
 			// not between +/-1.0?
 			if (halfToneSteps < -1.0)
-				throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), halfToneStr, -1.0));
+				throw ParseException.format(Dict.ERROR_FUNC_VAL_LOWER_MIN, halfToneStr, "-1.0");
 			if (halfToneSteps > 1.0)
-				throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), halfToneStr, "+1.0"));
+				throw ParseException.format(Dict.ERROR_FUNC_VAL_GREATER_MAX, halfToneStr, "+1.0");
 			
 			return Math.round(halfToneSteps * max);
 		}
@@ -1515,7 +1507,7 @@ public class Effect {
 			
 			// range exceeded?
 			if (Math.abs(halfToneSteps) > range)
-				throw new ParseException(String.format(Dict.get(Dict.ERROR_FUNC_HALFTONE_GT_RANGE), halfToneStr, range));
+				throw ParseException.format(Dict.ERROR_FUNC_HALFTONE_GT_RANGE, halfToneStr, range);
 			
 			return Math.round(max * (halfToneSteps / range));
 		}
@@ -1581,13 +1573,13 @@ public class Effect {
 				String percentStr = m.group(3);
 				float  periods;
 				if (sign != null)
-					throw new ParseException(Dict.get(Dict.ERROR_FUNC_PERIODS_SIGNED) + valueStr);
+					throw ParseException.concat(Dict.ERROR_FUNC_PERIODS_SIGNED, valueStr);
 				
 				periods = Float.parseFloat(floatStr);
 				if (periods <= 0)
-					throw new ParseException(Dict.get(Dict.ERROR_FUNC_PERIODS_NOT_POS) + valueStr);
+					throw ParseException.concat(Dict.ERROR_FUNC_PERIODS_NOT_POS, valueStr);
 				if (Float.isInfinite(periods))
-					throw new ParseException(Dict.get(Dict.ERROR_FUNC_PERIODS_NO_NUMBER) + valueStr);
+					throw ParseException.concat(Dict.ERROR_FUNC_PERIODS_NO_NUMBER, valueStr);
 				if (percentStr != null) {
 					periods /= 100;
 				}
@@ -1596,10 +1588,10 @@ public class Effect {
 			}
 		}
 		catch (NumberFormatException e) {
-			throw new ParseException(Dict.get(Dict.ERROR_FUNC_PERIODS_NO_NUMBER) + valueStr);
+			throw ParseException.concat(Dict.ERROR_FUNC_PERIODS_NO_NUMBER, valueStr);
 		}
 		
-		throw new ParseException(Dict.get(Dict.ERROR_FUNC_PERIODS_NO_NUMBER) + valueStr);
+		throw ParseException.concat(Dict.ERROR_FUNC_PERIODS_NO_NUMBER, valueStr);
 	}
 	
 	/**
@@ -1634,14 +1626,14 @@ public class Effect {
 					cc = Integer.parseInt(ccStr);
 				}
 				catch (NumberFormatException e) {
-					throw new ParseException(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_UNKNOWN) + param);
+					throw ParseException.concat(Dict.ERROR_FUNC_CD_SRC_CTRL_UNKNOWN, param);
 				}
 			}
 		}
 		
 		// cc cannot be parsed?
 		if (null == cc)
-			throw new ParseException(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_UNKNOWN) + param);
+			throw ParseException.concat(Dict.ERROR_FUNC_CD_SRC_CTRL_UNKNOWN, param);
 		
 		// cc is allowed?
 		boolean isOk = false;
@@ -1650,7 +1642,7 @@ public class Effect {
 		if (0x40 <= cc && cc <= 0x5F)
 			isOk = true;
 		if (!isOk)
-			throw new ParseException(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP) + param);
+			throw ParseException.concat(Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP, param);
 		
 		// cc result
 		return new int[] {0x03, channel, cc};
@@ -1667,7 +1659,7 @@ public class Effect {
 		
 		Integer dest = ctrlDestToNumber.get(params[0]);
 		if (null == dest)
-			throw new ParseException(Dict.get(Dict.ERROR_FUNC_CD_DEST_UNKNOWN) + params[0]);
+			throw ParseException.concat(Dict.ERROR_FUNC_CD_DEST_UNKNOWN, params[0]);
 		
 		// parse range
 		flow.setCurrentCtrlDest(dest);

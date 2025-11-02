@@ -1,4 +1,0 @@
-INCLUDE inc/instruments.midica
-
-
-0: balance.set(50)

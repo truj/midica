@@ -34,6 +34,7 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 
 import org.midica.config.Dict;
+import org.midica.file.read.exception.ParseException;
 import org.midica.midi.MidiDevices;
 
 import com.sun.gervill.DLSSoundbank;
@@ -106,12 +107,12 @@ public class SoundbankParser implements IParser {
 			else {
 				file = (File) fileOrUrl;
 				if (!file.exists()) {
-					throw new ParseException(Dict.get(Dict.ERROR_FILE_EXISTS) + fileOrUrl);
+					throw ParseException.concat(Dict.ERROR_FILE_EXISTS, fileOrUrl.toString());
 				}
 			}
 		}
 		catch (MalformedURLException e) {
-			throw new ParseException(Dict.get(Dict.INVALID_URL) + fullPath);
+			throw ParseException.concat(Dict.INVALID_URL, fullPath);
 		}
 		
 		// try both formats
@@ -145,7 +146,7 @@ public class SoundbankParser implements IParser {
 			MidiDevices.setSoundbank(soundbank);
 		}
 		else {
-			throw new ParseException(errorMsg.toString());
+			throw ParseException.raw(errorMsg.toString());
 		}
 		
 		// read it and build up data structures
@@ -338,13 +339,13 @@ public class SoundbankParser implements IParser {
 			hash = getUrlHash(url.toString());
 		}
 		catch (NoSuchAlgorithmException e) {
-			throw new ParseException("SHA-256 not supported");
+			throw ParseException.simple(Dict.HASH_ALGO_NOT_SUPP);
 		}
 		
 		// create cache directory, if not yet done
 		File cacheDir = getUrlCacheDir();
 		if (!cacheDir.exists())
-			throw new ParseException(Dict.get(Dict.COULDNT_CREATE_CACHE_DIR) + cacheDir);
+			throw ParseException.concat(Dict.COULDNT_CREATE_CACHE_DIR, cacheDir.toString());
 		
 		// file already cached?
 		File cachedFile = new File(cacheDir + File.separator + hash);
@@ -370,10 +371,10 @@ public class SoundbankParser implements IParser {
 			return cachedFile;
 		}
 		catch (UnknownHostException e) {
-			throw new ParseException(Dict.get(Dict.UNKNOWN_HOST) + e.getMessage());
+			throw ParseException.concat(Dict.UNKNOWN_HOST, e.getMessage());
 		}
 		catch (IOException e) {
-			throw new ParseException(Dict.get(Dict.DOWNLOAD_PROBLEM) + url);
+			throw ParseException.concat(Dict.DOWNLOAD_PROBLEM, url.toString());
 		}
 	}
 	

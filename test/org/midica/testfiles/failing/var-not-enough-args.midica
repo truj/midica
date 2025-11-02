@@ -1,6 +1,0 @@
-INCLUDE inc/instruments.midica
-
-VAR $x
-
-
-0  $x  /4

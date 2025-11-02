@@ -16,6 +16,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.midica.config.Dict;
+import org.midica.file.read.exception.FatalParseException;
+import org.midica.file.read.exception.ParseException;
 
 /**
  * This class represents a sound effect flow.
@@ -126,7 +128,7 @@ public class EffectFlow {
 	 */
 	public void setEffect(int type, int effectNum) throws ParseException {
 		if (effectType > 0) {
-			throw new ParseException(Dict.get(Dict.ERROR_FL_EFF_ALREADY_SET));
+			throw ParseException.simple(Dict.ERROR_FL_EFF_ALREADY_SET);
 		}
 		effectType   = type;
 		effectNumber = effectNum;
@@ -490,7 +492,7 @@ public class EffectFlow {
 			return;
 		}
 		
-		throw new ParseException(Dict.get(Dict.ERROR_FL_DOUBLE_NOT_SUPPORTED) + MidicaPLParser.FL_DOUBLE);
+		throw ParseException.concat(Dict.ERROR_FL_DOUBLE_NOT_SUPPORTED, MidicaPLParser.FL_DOUBLE);
 	}
 	
 	/**
@@ -529,7 +531,7 @@ public class EffectFlow {
 	public void setSource(int[] values, String elemName) throws ParseException {
 		
 		if (!ctrlDestSrc.isEmpty())
-			throw new ParseException(Dict.get(Dict.ERROR_FUNC_CD_SRC_ALREADY_SET) + elemName);
+			throw ParseException.concat(Dict.ERROR_FUNC_CD_SRC_ALREADY_SET, elemName);
 		
 		for (int val : values)
 			ctrlDestSrc.add(val);
@@ -557,9 +559,9 @@ public class EffectFlow {
 		
 		// checks
 		if (ctrlDestSrc.isEmpty())
-			throw new ParseException(Dict.get(Dict.ERROR_FUNC_CD_SRC_NOT_SET) + elemName);
+			throw ParseException.concat(Dict.ERROR_FUNC_CD_SRC_NOT_SET, elemName);
 		if (ctrlDestDest.isEmpty())
-			throw new ParseException(Dict.get(Dict.ERROR_FUNC_CD_DEST_NOT_SET) + elemName);
+			throw ParseException.concat(Dict.ERROR_FUNC_CD_DEST_NOT_SET, elemName);
 		
 		// construct result
 		int length = 5 + ctrlDestSrc.size() + ctrlDestDest.size();
@@ -646,7 +648,7 @@ public class EffectFlow {
 	public int getValueType(String elemName) throws ParseException {
 		
 		if (effectNumber < 0)
-			throw new ParseException(Dict.get(Dict.ERROR_FL_EFF_NOT_SET) + elemName);
+			throw ParseException.concat(Dict.ERROR_FL_EFF_NOT_SET, elemName);
 		
 		Integer valueType = 0;
 		String  typeStr   = "none";

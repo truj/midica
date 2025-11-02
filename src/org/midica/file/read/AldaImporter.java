@@ -18,6 +18,7 @@ import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.Foreign;
 import org.midica.file.ForeignException;
+import org.midica.file.read.exception.ParseException;
 import org.midica.midi.SequenceCreator;
 
 /**
@@ -100,9 +101,8 @@ public class AldaImporter extends MidiParser {
 			// no MIDI file was created.
 			// I don't know if that bug still exists in alda 2 but this workaround doesn't
 			// hurt either.
-			if (!tempfile.exists()) {
-				throw new ParseException(Dict.get(Dict.ERROR_ALDA_NO_MIDI_FILE));
-			}
+			if (!tempfile.exists())
+				throw ParseException.simple(Dict.ERROR_ALDA_NO_MIDI_FILE);
 			
 			// sometimes alda 2 needs a little more time to fill the MIDI file
 			if (0L == tempfile.length()) {
@@ -116,7 +116,7 @@ public class AldaImporter extends MidiParser {
 				
 				// file still empty?
 				if (0L == tempfile.length())
-					throw new ParseException(Dict.get(Dict.ERROR_ALDA_MIDI_FILE_EMPTY));
+					throw ParseException.simple(Dict.ERROR_ALDA_MIDI_FILE_EMPTY);
 			}
 			
 			// get MIDI from tempfile
@@ -130,7 +130,7 @@ public class AldaImporter extends MidiParser {
 			postprocessSequence(sequence, chosenCharset); // analyze the original sequence
 		}
 		catch (ForeignException | InvalidMidiDataException | IOException | InterruptedException e) {
-			throw new ParseException(e.getMessage());
+			throw ParseException.wrapGenericException(e);
 		}
 	}
 }

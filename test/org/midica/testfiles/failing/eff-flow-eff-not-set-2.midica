@@ -1,5 +1,0 @@
-INCLUDE inc/instruments.midica
-
-
-0: wait().double.vol.set(50)
-

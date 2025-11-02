@@ -1,4 +1,0 @@
-INCLUDE inc/instruments.midica
-
-
-0: vol.sin(0,100%,999999999999999999999999999999999999999.0)

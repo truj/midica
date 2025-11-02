@@ -30,7 +30,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.midica.TestUtil;
 import org.midica.file.read.MidiParser;
-import org.midica.file.read.ParseException;
+import org.midica.file.read.exception.FatalParseException;
+import org.midica.file.read.exception.ParseException;
 import org.midica.ui.model.IMessageType;
 import org.midica.ui.model.SingleMessage;
 import org.midica.ui.model.MessageTreeNode;
@@ -802,10 +803,10 @@ public class SequenceAnalyzerTest {
 			}
 			else if (META_MSG == type) {
 				// TODO: implement
-				throw new ParseException("not yet implemented");
+				throw new FatalParseException("not yet implemented");
 			}
 			else {
-				throw new ParseException("unknown message type");
+				throw new FatalParseException("unknown message type");
 			}
 			MidiEvent e = new MidiEvent(msg, tick);
 			tracks.get(track).add(e);

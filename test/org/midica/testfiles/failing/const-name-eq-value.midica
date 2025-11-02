@@ -1,4 +1,0 @@
-INCLUDE inc/instruments.midica
-
-CONST $a = $a
-

@@ -1,9 +1,0 @@
-INCLUDE inc/instruments.midica
-
-VAR $ch  = 5
-
-INSTRUMENTS
-	$ch 60 test
-END
-
-

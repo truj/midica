@@ -1,5 +1,0 @@
-INCLUDE inc/instruments.midica
-
-INSTRUMENTS
-	0 5
-END

@@ -12,6 +12,7 @@ import java.io.File;
 import javax.sound.midi.Sequence;
 
 import org.midica.config.Dict;
+import org.midica.file.read.exception.ParseException;
 import org.midica.midi.MidiDevices;
 import org.midica.midi.SequenceAnalyzer;
 import org.midica.midi.SequenceCreator;
@@ -87,9 +88,9 @@ public abstract class SequenceParser implements IParser {
 		
 		note += transposeLevel;
 		if (note < 0)
-			throw new ParseException(Dict.get(Dict.ERROR_NOTE_TOO_SMALL) + note);
+			throw ParseException.concat(Dict.ERROR_NOTE_TOO_SMALL, note + "");
 		if (note > 127)
-			throw new ParseException(Dict.get(Dict.ERROR_NOTE_TOO_BIG) + note);
+			throw ParseException.concat(Dict.ERROR_NOTE_TOO_BIG, note + "");
 		
 		return note;
 	}

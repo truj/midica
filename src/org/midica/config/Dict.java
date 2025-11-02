@@ -179,7 +179,6 @@ public class Dict {
 	public static final String SYNTAX_CHORD_SEPARATOR    = "CHORD_SEPARATOR";
 	public static final String SYNTAX_INCLUDE            = "INCLUDE";
 	public static final String SYNTAX_SOUNDBANK          = "SOUNDBANK";
-	public static final String SYNTAX_SOUNDFONT          = "SOUNDFONT";
 	public static final String SYNTAX_ZEROLENGTH         = "LENGTH_ZERO";
 	public static final String SYNTAX_32                 = "LENGTH_32";
 	public static final String SYNTAX_16                 = "LENGTH_16";
@@ -1588,6 +1587,7 @@ public class Dict {
 	public static final String COULDNT_CREATE_CACHE_DIR    = "couldnt_create_cache_dir";
 	public static final String SOUND_FROM_FILE             = "sound_from_file";
 	public static final String SOUND_FROM_URL              = "sound_from_url";
+	public static final String HASH_ALGO_NOT_SUPP          = "hash_algo_not_supp";
 	
 	// SequenceParser
 	public static final String ERROR_NOTE_TOO_BIG          = "error_note_too_big";
@@ -1598,6 +1598,7 @@ public class Dict {
 	public static final String ERROR_ONLY_PPQ_SUPPORTED    = "error_only_ppq_supported";
 	
 	// MidicaPLParser
+	public static final String ERROR_FILE_NOT_FOUND              = "error_file_not_found";
 	public static final String ERROR_0_NOT_ALLOWED               = "error_0_not_allowed";
 	public static final String ERROR_NEGATIVE_NOT_ALLOWED        = "error_negative_not_allowed";
 	public static final String ERROR_NOT_AN_INTEGER              = "error_not_an_integer";
@@ -2967,7 +2968,6 @@ public class Dict {
 		set( SYNTAX_CHORD_SEPARATOR,    "separator for chord notes (or pattern indices)"   );
 		set( SYNTAX_INCLUDE,            "including another file"                           );
 		set( SYNTAX_SOUNDBANK,          "including a soundbank file or URL (SF2 or DLS)"   );
-		set( SYNTAX_SOUNDFONT,          "Deprecated. Will be removed in a future Version"  );
 		
 		set( SYNTAX_ZEROLENGTH,         "Zero-Length"                                     );
 		set( SYNTAX_32,                 "32nd"                                            );
@@ -3422,6 +3422,7 @@ public class Dict {
 		set( COULDNT_CREATE_CACHE_DIR, "Unable to create cache directory: "        );
 		set( SOUND_FROM_FILE,          "[File] "                                   );
 		set( SOUND_FROM_URL,           "[URL] "                                    );
+		set( HASH_ALGO_NOT_SUPP,       "SHA-256 not supported"                     );
 		
 		// SequenceParser
 		set( ERROR_NOTE_TOO_BIG,                  "note number too big: "                                             );
@@ -3432,6 +3433,7 @@ public class Dict {
 		set( ERROR_ONLY_PPQ_SUPPORTED,            "Only MIDI files with division type PPQ are supported." );
 		
 		// MidicaPLParser
+		set( ERROR_FILE_NOT_FOUND,                "File not found: "              );
 		set( ERROR_0_NOT_ALLOWED,                 "0 not allowed"                 );
 		set( ERROR_NEGATIVE_NOT_ALLOWED,          "negative number not allowed: " );
 		set( ERROR_NOT_AN_INTEGER,                "not an integer: "              );
@@ -3633,7 +3635,7 @@ public class Dict {
 		set( ERROR_FUNC_CD_DEST_UNKNOWN,          "Unknown destination for 'controller destination': "                );
 		set( ERROR_FUNC_CD_SRC_ALREADY_SET,       "Controller destination source already set. Duplicate function: "   );
 		set( ERROR_FUNC_CD_SRC_NOT_SET,           "Controller destination source must be set before using function: " );
-		set( ERROR_FUNC_CD_DEST_NOT_SET,          "At least one controller destination must beset before using function: " );
+		set( ERROR_FUNC_CD_DEST_NOT_SET,          "At least one controller destination must be set before using function: " );
 		
 		// NestableBlock
 		set( ERROR_BLOCK_ARG_ALREADY_SET,         "Block argument has already been set before: "                      );
@@ -4385,7 +4387,6 @@ public class Dict {
 		setSyntax( SYNTAX_CHORD_SEPARATOR,     "/"            );
 		setSyntax( SYNTAX_INCLUDE,             "INCLUDE"      );
 		setSyntax( SYNTAX_SOUNDBANK,           "SOUNDBANK"    );
-		setSyntax( SYNTAX_SOUNDFONT,           "SOUNDFONT"    );
 		setSyntax( SYNTAX_ZEROLENGTH,          "-"            );
 		setSyntax( SYNTAX_32,                  "/32"          );
 		setSyntax( SYNTAX_16,                  "/16"          );
@@ -4516,7 +4517,6 @@ public class Dict {
 		addSyntaxForInfoView( SYNTAX_PARAM_ASSIGNER  );
 		addSyntaxForInfoView( SYNTAX_INCLUDE         );
 		addSyntaxForInfoView( SYNTAX_SOUNDBANK       );
-		addSyntaxForInfoView( SYNTAX_SOUNDFONT       );
 		
 		addSyntaxCategory(get(SYNTAX_CAT_GLOBAL));
 		addSyntaxForInfoView( SYNTAX_GLOBAL             );

@@ -24,6 +24,7 @@ import javax.sound.midi.Track;
 import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.CharsetUtils;
+import org.midica.file.read.exception.ParseException;
 import org.midica.midi.LyricUtil;
 import org.midica.midi.MidiListener;
 import org.midica.midi.SequenceCreator;
@@ -86,11 +87,11 @@ public class MidiParser extends SequenceParser {
 			replaceChannelVolume();
 		}
 		catch (InvalidMidiDataException e) {
-			throw new ParseException(e.getMessage());
+			throw ParseException.wrapGenericException(e);
 		}
 		catch (IOException e) {
 			e.printStackTrace();
-			throw new ParseException(e.getMessage());
+			throw ParseException.wrapGenericException(e);
 		}
 	}
 	
@@ -121,7 +122,7 @@ public class MidiParser extends SequenceParser {
 		// process global parameters and initialize the sequence to create
 		float divisionType = sequence.getDivisionType();
 		if (Sequence.PPQ != divisionType)
-			throw new ParseException(Dict.get(Dict.ERROR_ONLY_PPQ_SUPPORTED));
+			throw ParseException.simple(Dict.ERROR_ONLY_PPQ_SUPPORTED);
 		int resolution = sequence.getResolution();
 		try {
 			SequenceCreator.reset(resolution, chosenCharset, getImportFormat());
@@ -129,7 +130,7 @@ public class MidiParser extends SequenceParser {
 			SequenceCreator.initChannel(9, 0, Dict.get(Dict.PERCUSSION_CHANNEL), SequenceCreator.NOW);
 		}
 		catch (InvalidMidiDataException e) {
-			throw new ParseException(e.getMessage());
+			throw ParseException.wrapGenericException(e);
 		}
 		
 		int trackNum = 0;

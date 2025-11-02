@@ -23,9 +23,9 @@ import javax.sound.midi.Track;
 import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.CharsetUtils;
-import org.midica.file.read.FatalParseException;
 import org.midica.file.read.MidiParser;
 import org.midica.file.read.MidicaPLParser;
+import org.midica.file.read.exception.FatalParseException;
 
 /**
  * This class is used to create a MIDI sequence. It is used by one of the parser methods while

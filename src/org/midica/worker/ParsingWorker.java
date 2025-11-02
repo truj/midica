@@ -8,7 +8,7 @@
 package org.midica.worker;
 
 import org.midica.file.read.IParser;
-import org.midica.file.read.ParseException;
+import org.midica.file.read.exception.ParseException;
 
 
 /**

@@ -1,5 +1,0 @@
-INCLUDE inc/instruments.midica
-
-SOUNDBANK  ../working/java-emergency-soundfont.sf2  ../working/java-emergency-soundfont.sf2
-
-0 c /4

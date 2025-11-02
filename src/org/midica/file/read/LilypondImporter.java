@@ -22,6 +22,7 @@ import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.Foreign;
 import org.midica.file.ForeignException;
+import org.midica.file.read.exception.ParseException;
 import org.midica.midi.SequenceCreator;
 
 /**
@@ -77,7 +78,7 @@ public class LilypondImporter extends MidiParser {
 			// get all MIDI files, created by lilypond
 			File[] files = Foreign.getFiles(dir);
 			if (0 == files.length)
-				throw new ParseException(Dict.get(Dict.ERROR_LILYPOND_NO_MIDI_FILE));
+				throw ParseException.simple(Dict.ERROR_LILYPOND_NO_MIDI_FILE);
 			
 			// create one sequence for each created MIDI file
 			ArrayList<Sequence> sequences = new ArrayList<>();
@@ -87,10 +88,10 @@ public class LilypondImporter extends MidiParser {
 				
 				// check sequence (only PPQ with the same resolution)
 				if (s.getDivisionType() != Sequence.PPQ)
-					throw new ParseException(Dict.get(Dict.ERROR_WRONG_DIVISION_TYPE));
+					throw ParseException.simple(Dict.ERROR_WRONG_DIVISION_TYPE);
 				int res = s.getResolution();
 				if (resolution != null && res != resolution)
-					throw new ParseException(Dict.get(Dict.ERROR_DIFFERENT_RESOLUTION));
+					throw ParseException.simple(Dict.ERROR_DIFFERENT_RESOLUTION);
 				resolution = res;
 				
 				sequences.add(s);
@@ -121,7 +122,7 @@ public class LilypondImporter extends MidiParser {
 			replaceChannelVolume();
 		}
 		catch (ForeignException | InvalidMidiDataException | IOException e) {
-			throw new ParseException(e.getMessage());
+			throw ParseException.wrapGenericException(e);
 		}
 	}
 }

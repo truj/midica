@@ -1,5 +1,0 @@
-INCLUDE inc/instruments.midica
-
-VAR $x = test
-
-$y: c:/4

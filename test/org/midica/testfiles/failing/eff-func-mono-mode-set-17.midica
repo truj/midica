@@ -1,4 +1,0 @@
-INCLUDE inc/instruments.midica
-
-
-0: mono_mode.set(17)

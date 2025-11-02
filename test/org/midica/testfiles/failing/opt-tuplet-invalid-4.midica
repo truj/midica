@@ -1,7 +1,0 @@
-INCLUDE inc/instruments.midica
-
-VAR $x = 5
-
-{ t=:3
-	0  c  /4
-}

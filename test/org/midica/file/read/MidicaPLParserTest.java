@@ -9,15 +9,20 @@ package org.midica.file.read;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiEvent;
@@ -33,8 +38,8 @@ import org.midica.TestUtil;
 import org.midica.config.Dict;
 import org.midica.file.CharsetUtils;
 import org.midica.file.read.MidicaPLParser;
-import org.midica.file.read.ParseException;
 import org.midica.file.read.StackTraceElement;
+import org.midica.file.read.exception.ParseException;
 import org.midica.midi.KaraokeAnalyzer;
 import org.midica.midi.SequenceAnalyzer;
 import org.midica.midi.SequenceCreator;
@@ -49,9 +54,19 @@ import org.midica.ui.model.SingleMessage;
  */
 class MidicaPLParserTest extends MidicaPLParser {
 	
+	private static final String CM = "  // content marker";
+	private static final String NM = "  // number marker";
+	private static final String LM = "  // line marker (content+number)";
+	
 	private static JComboBox<?>[] cbxs;
 	
-	private File tmpTestFile;
+	private File    tmpTestFile;
+	private String  tmpTestDir;
+	private String  failingDir;
+	private String  workingSoundbank;
+	private Pattern patContentMarker = Pattern.compile(Pattern.quote(CM) + "$");
+	private Pattern patNumberMarker  = Pattern.compile(Pattern.quote(NM) + "$");
+	private Pattern patLineMarker    = Pattern.compile(Pattern.quote(LM) + "$");
 	
 	public MidicaPLParserTest() throws Exception {
 		super(true);
@@ -60,6 +75,9 @@ class MidicaPLParserTest extends MidicaPLParser {
 		Path tempPath = Files.createTempFile("generic_test_file-", ".midica");
 		tmpTestFile = tempPath.toFile();
 		tmpTestFile.deleteOnExit();
+		tmpTestDir = tmpTestFile.getParentFile().getAbsolutePath();
+		failingDir = TestUtil.getTestfileDirectory() + "failing";
+		workingSoundbank = TestUtil.getTestfileDirectory() + "working" + File.separator + "java-emergency-soundfont.sf2";
 	}
 
 	/**
@@ -2820,18 +2838,8 @@ class MidicaPLParserTest extends MidicaPLParser {
 	void testParseFilesFailing() {
 		ParseException e;
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("nestable-block-open-at-eof")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "0 d /4", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NESTABLE_BLOCK_OPEN_AT_EOF)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("function-open-at-eof")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "0 d /4", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NAMED_BLOCK_OPEN_AT_EOF)) );
-		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("file-that-does-not-exist")) );
-		assertTrue( e.getMessage().startsWith("java.io.FileNotFoundException:") );
+		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FILE_NOT_FOUND)) );
 		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-failing-file")) );
 		assertEquals( "instruments-with-nestable-block.midica", e.getFile().getName() );
@@ -2840,1051 +2848,12 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_INSTR_BLK)) );
 		e.getStackTraceElements();
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-not-existing-file")) );
-		assertEquals( 1, e.getLineNumber() );
-		assertEquals( "INCLUDE inc/not-existing-file.midica", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FILE_EXISTS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("global-cmd-in-instruments")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "*", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_GLOBALS_IN_INSTR_DEF)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-in-block")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "INSTRUMENTS", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_UNMATCHED_OPEN)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("function-in-block")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "FUNCTION mac1", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_UNMATCHED_OPEN)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("using-channel-without-instr-def")) );
-		assertEquals( 1, e.getLineNumber() );
-		assertEquals( "2 c /4", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHANNEL_UNDEFINED).replaceFirst("%s", "2")) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("using-undefined-channel")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "2 c /4", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHANNEL_UNDEFINED).replaceFirst("%s", "2")) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("using-invalid-drumkit")) );
-		assertEquals( 10, e.getLineNumber() );
-		assertEquals( "p 128 testing", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INSTR_BANK)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-duplicate-channel")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "1 0 test2", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_CHANNEL_REDEFINED), 1)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-param")) );
-		assertEquals( 1, e.getLineNumber() );
-		assertEquals( "INSTRUMENTS param", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_MODE_INSTR_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("end-with-param")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "END param", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ARGS_NOT_ALLOWED)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("unmatched-end")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "END", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CMD_END_WITHOUT_BEGIN)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("unmatched-close")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "}", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_UNMATCHED_CLOSE)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("function-nested")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "FUNCTION inner", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK) + "FUNCTION") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("function-in-meta")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "FUNCTION test", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK) + "FUNCTION") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("function-redefined")) );
-		assertEquals( 8, e.getLineNumber() );
-		assertEquals( "FUNCTION test", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNCTION_ALREADY_DEFINED)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("function-with-second-param")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "FUNCTION test1 test2", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNCTION_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-soundbank-twice")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "SOUNDBANK ../working/java-emergency-soundfont.sf2", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOUNDBANK_ALREADY_PARSED)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-soundbank-inside-block")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "SOUNDBANK ../working/java-emergency-soundfont.sf2", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK) + "SOUNDBANK") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-soundbank-inside-function")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "SOUNDBANK ../working/java-emergency-soundfont.sf2", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK) + "SOUNDBANK") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("unknown-cmd")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "UNKNOWN_CMD", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_CMD)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-reset-multiple")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "} m", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ARG_ALREADY_SET) + "multiple") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-reset-quantity")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "} q=2", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ARG_ALREADY_SET) + "quantity") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-reset-tuplet")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "} t", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ARG_ALREADY_SET) + "tuplet") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-reset-shift")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "} s=3", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ARG_ALREADY_SET) + "shift") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-param-invalid")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "} v=50", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_INVALID_OPT)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-inside-block")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "CHORD testchord c d e", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-inside-function")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "CHORD testchord c d e", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-inside-instruments")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "CHORD testchord c d e", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-without-param")) );
-		assertEquals( 2, e.getLineNumber() );
-		assertEquals( "CHORD", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-without-notes")) );
-		assertEquals( 2, e.getLineNumber() );
-		assertEquals( "CHORD test", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-redefined")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "CHORD test c/d/e", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_ALREADY_DEFINED)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-name-like-note")) );
-		assertEquals( 2, e.getLineNumber() );
-		assertEquals( "CHORD c# c/d/c", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_EQUALS_NOTE)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-name-like-percussion")) );
-		assertEquals( 2, e.getLineNumber() );
-		assertEquals( "CHORD hhc c/d/e", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_EQUALS_PERCUSSION)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-with-duplicate-note")) );
-		assertEquals( 2, e.getLineNumber() );
-		assertEquals( "CHORD test c/d/c", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_CONTAINS_ALREADY)) );
-		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-separator-double")) );
 		assertEquals( 9, e.getLineNumber() );
 		assertEquals( "CHORD crd=c,d,,e", e.getLineContent() );
 		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_REDUNDANT_SEP)) );
 		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-separator-leading")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "CHORD crd = /c/d/e", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_REDUNDANT_SEP)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-separator-trailing")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "CHORD crd = c/d/e/", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_REDUNDANT_SEP)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-with-invalid-option")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "CALL test v=50", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_UNKNOWN_OPT)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-with-recursion")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "CALL test", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNCTION_RECURSION)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-with-recursion-depth")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertTrue( "CALL test2".equals(e.getLineContent()) || "CALL test1".equals(e.getLineContent()) );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNCTION_RECURSION_DEPTH)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-undefined-function")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "CALL test", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNCTION_UNDEFINED)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-without-name")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "CALL", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-more-instr-sep")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "10	0,0,0 test", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_AN_INTEGER) + "0,0") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-more-bank-sep")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "12	0,0/0/0 test", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_AN_INTEGER) + "0/0") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-big-banknumber")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "10	0,9999999 test", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INSTR_BANK)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-big-msb")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "10	0,128/0 test", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INSTR_BANK)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-big-lsb")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "10	0,0/128 test", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INSTR_BANK)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-missing-bank")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "10	0, test", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_AN_INTEGER)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-with-missing-lsb")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "10	0,0/ test", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_AN_INTEGER)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("meta-in-block")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "META", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_UNMATCHED_OPEN)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("meta-with-block")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "{", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_META_BLK)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("meta-in-function")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "META", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK) + "META") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("meta-with-param")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "META test", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_META_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("sk-with-param")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "SOFT_KARAOKE test", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOFT_KARAOKE_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("sk-in-function")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "SOFT_KARAOKE", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOFT_KARAOKE_NOT_ALLOWED_HERE)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("sk-in-root-lvl")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "SOFT_KARAOKE", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOFT_KARAOKE_NOT_ALLOWED_HERE)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("sk-duplicate")) );
-		assertEquals( 9, e.getLineNumber() );
-		assertEquals( "SOFT_KARAOKE", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOFT_KARAOKE_ALREADY_SET)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("sk-duplicate-author")) );
-		assertEquals( 9, e.getLineNumber() );
-		assertEquals( "author     another author", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SK_VALUE_ALREADY_SET) + "author") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("sk-unknown-sk-cmd")) );
-		assertEquals( 8, e.getLineNumber() );
-		assertEquals( "composer   Haydn", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOFT_KARAOKE_UNKNOWN_CMD) + "composer") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("sk-unknown-cmd")) );
-		assertEquals( 8, e.getLineNumber() );
-		assertEquals( "testcmd    Haydn", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_CMD) + "testcmd") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("sk-field-with-crlf")) );
-		assertEquals( 15, e.getLineNumber() );
-		assertEquals( "title      sk\\rtitle", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SK_FIELD_CRLF_NOT_ALLOWED)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("sk-lyrics-with-crlf")) );
-		assertEquals( 15, e.getLineNumber() );
-		assertEquals( "0  c  /4  l=_te\\nst5", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SK_SYLLABLE_CRLF_NOT_ALLOWED)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-inside-meta")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "CHORD testchord c d e", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_META_UNKNOWN_CMD) + "CHORD") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("note-in-percussion-channel")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "p c /4", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_PERCUSSION) + "c") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("note-unknown")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 c+6 /4", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_NOTE) + "c+6") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-with-unknown-note")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "CHORD test c d e c+6", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_CHORD_ELEMENT) + "c+6") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-with-unknown-note-number")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "CHORD test c d 128", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOTE_TOO_BIG) + "128") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-assigner-double")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "CHORD crd==c/d/e", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_CHORD_ELEMENT) + "=c") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("chord-with-note-percussion-mix")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "CHORD test c d to", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHORD_WITH_NOTES_AND_PERC) + "test") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("channel-cmd-missing-param")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 c", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CH_CMD_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("channel-rest-missing-param")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 -", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CH_CMD_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("channel-if")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 c /4 if=123", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHANNEL_INVALID_OPT) + "if") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instrument-in-instruments")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "INSTRUMENT 1 0 test", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SINGLE_INSTR_IN_INSTR_DEF)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("var-in-instruments")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "$ch 60 test", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_NOT_ALLOWED)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("var-undefined")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  l=$x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_NOT_DEFINED) + "$x") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("param-i-outside-function")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "$[1]", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + "$[1]") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("param-i-outside-function-nested")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "$[1]", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + "$[1]") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("param-n-outside-function")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "${x}", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + "${x}") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("param-n-outside-function-nested")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "${x}", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PARAM_OUTSIDE_FUNCTION) + "${x}") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("param-i-with-name")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "$[x]", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_AN_INTEGER)) );
-		assertTrue( e.getFullMessage().contains(Dict.get(Dict.EXCEPTION_CAUSED_BY_INVALID_VAR)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-if-not-alone")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "{ if=$x, elsif $x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_IF_MUST_BE_ALONE))
-			|| e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-if-not-alone-2")) );
-		assertEquals( 7, e.getLineNumber() );
-		assertEquals( "} if $x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_IF_MUST_BE_ALONE)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-if-not-alone-nested")) );
-		assertEquals( 8, e.getLineNumber() );
-		assertEquals( "} if $x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_IF_MUST_BE_ALONE)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-elsif-not-alone")) );
-		assertEquals( 8, e.getLineNumber() );
-		assertEquals( "{ elsif=$x, if $x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_IF_MUST_BE_ALONE))
-			|| e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-elsif-not-alone-2")) );
-		assertEquals( 10, e.getLineNumber() );
-		assertEquals( "} elsif $x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-elsif-not-alone-nested")) );
-		assertEquals( 11, e.getLineNumber() );
-		assertEquals( "} elsif $x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-else-not-alone")) );
-		assertEquals( 8, e.getLineNumber() );
-		assertEquals( "{ else, elsif=$x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE))
-			|| e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSE_MUST_BE_ALONE)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-else-not-alone-2")) );
-		assertEquals( 10, e.getLineNumber() );
-		assertEquals( "} else", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSE_MUST_BE_ALONE)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-else-not-alone-nested")) );
-		assertEquals( 11, e.getLineNumber() );
-		assertEquals( "} else", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_ELSE_MUST_BE_ALONE)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-elsif-without-if")) );
-		assertEquals( 11, e.getLineNumber() );
-		assertTrue( e.getFullMessage().contains(Dict.get(Dict.EXCEPTION_CAUSED_BY_BLK_COND)) );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-elsif-without-if-nested")) );
-		assertEquals( 13, e.getLineNumber() );
-		assertTrue( e.getFullMessage().contains(Dict.get(Dict.EXCEPTION_CAUSED_BY_BLK_COND)) );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-else-without-if")) );
-		assertEquals( 11, e.getLineNumber() );
-		assertTrue( e.getFullMessage().contains(Dict.get(Dict.EXCEPTION_CAUSED_BY_BLK_COND)) );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-else-without-if-2")) );
-		assertEquals( 12, e.getLineNumber() );
-		assertTrue( e.getFullMessage().contains(Dict.get(Dict.EXCEPTION_CAUSED_BY_BLK_COND)) );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-else-without-if-nested")) );
-		assertEquals( 13, e.getLineNumber() );
-		assertTrue( e.getFullMessage().contains(Dict.get(Dict.EXCEPTION_CAUSED_BY_BLK_COND)) );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("block-else-without-if-nested-2")) );
-		assertEquals( 14, e.getLineNumber() );
-		assertTrue( e.getFullMessage().contains(Dict.get(Dict.EXCEPTION_CAUSED_BY_BLK_COND)) );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-elsif")) );
-		assertEquals( 8, e.getLineNumber() );
-		assertEquals( "CALL test elsif=$x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_UNKNOWN_OPT)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-else")) );
-		assertEquals( 8, e.getLineNumber() );
-		assertEquals( "CALL test else", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_UNKNOWN_OPT)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-if-not-alone")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "CALL test if=$x, if $x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_DUPLICATE_OPTION) + "if") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("cond-too-many-operators")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "{ if $x==$x!=$x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_TOO_MANY_OPERATORS_IN_COND)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("cond-defined-with-whitespace")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "{ if $x $x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_COND_DEFINED_HAS_WHITESPACE)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("cond-first-with-whitespace")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "{ if $x $x==5", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_COND_WHITESPACE_IN_FIRST_OP)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("cond-second-with-whitespace")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "{ if $x==5 5", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_COND_WHITESPACE_IN_SEC_OP)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("cond-undef-empty")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "{ if !", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_COND_UNDEF_EMPTY)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("cond-undef-not-at-start")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "{ if $x!$x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_COND_UNDEF_IN_CENTER)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("cond-in-with-whitespace")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "{ if $x in 1;2;3 4;5", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_COND_WHITESPACE_IN_IN_ELEM)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("cond-empty-in-element")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "{ if $x in 1;2;;5", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_COND_EMPTY_ELEM_IN_IN_LIST)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-assigner-double")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "0  c  /4  v==100", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_AN_INTEGER) + "=100") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-velocity")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  /4  v", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "v") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-velocity-2")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  /4  v=", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "v") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-duration")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  /4  d", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "d") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-duration-2")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  /4  d=", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "d") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-quantity")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  /4  q", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "q") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-quantity-2")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  /4  q=", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "q") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-lyrics")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  /4  l", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "l") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-lyrics-2")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  /4  lyrics=", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "lyrics") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-tremolo")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  /4  tr", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "tr") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-tremolo-2")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  /4  tr=", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "tr") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-shift")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  /4  s", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "s") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-shift-2")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  /4  s=", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "s") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-if")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "{ if", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "if") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-if-2")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "{ if=", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "if") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-elsif")) );
-		assertEquals( 8, e.getLineNumber() );
-		assertEquals( "{ elsif", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "elsif") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-without-value-elsif-2")) );
-		assertEquals( 8, e.getLineNumber() );
-		assertEquals( "{ elsif=", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_NEEDS_VAL) + "elsif") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-with-value-multiple")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  /4  m=", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_VAL_NOT_ALLOWED) + "m") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-with-value-else")) );
-		assertEquals( 8, e.getLineNumber() );
-		assertEquals( "{ else=", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPTION_VAL_NOT_ALLOWED) + "else") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-tuplet-invalid")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "{ t=5", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_TUPLET_INVALID) + "5") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-tuplet-invalid-2")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "{ t=5:0", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_TUPLET_INVALID)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-tuplet-invalid-3")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "{ t=5:", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_TUPLET_INVALID) + "5:") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-tuplet-invalid-4")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "{ t=:3", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_TUPLET_INVALID) + ":3") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-unknown")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "{ xyz=5", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_OPTION) + "xyz") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-velocity-too-high")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  /4  v=128", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VEL_NOT_MORE_THAN_127)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-velocity-negative")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  /4  v=-2", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NEGATIVE_NOT_ALLOWED)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-velocity-zero")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  /4  v=0", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VEL_NOT_LESS_THAN_1)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-duration-zero")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  /4  d=0", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_DURATION_MORE_THAN_0)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-duration-not-float")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  /4  d=0.1.2", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_A_FLOAT)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("opt-duration-negative")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0  c  /4  d=-0.1", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_DURATION_MORE_THAN_0)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("channel-negative")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "-1  c  /4", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_CMD) + "-1") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("channel-negative-2")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "-1  c  /4", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_CMD) + "-1") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("channel-too-high")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "16  c  /4", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INVALID_CHANNEL_NUMBER)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-param-empty")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "CALL test(a,)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_EMPTY_PARAM)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-param-name-empty")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "CALL test(=a)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_PARAM_NAME_EMPTY)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-param-name-invalid")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "CALL test(a/=b)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_PARAM_NAME_WITH_SPEC)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-param-name-doublet")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "CALL test(a=x,a=y)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_DUPLICATE_PARAM_NAME)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-param-value-empty")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "CALL test(a=,b=y)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_PARAM_VALUE_EMPTY)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-param-named-more-assigners")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "CALL test(a=b=c)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_PARAM_MORE_ASSIGNERS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("call-param-named-more-assigners-2")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "CALL f(vel==102)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CALL_PARAM_MORE_ASSIGNERS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-directory")) );
-		assertEquals( 1, e.getLineNumber() );
-		assertEquals( "INCLUDE inc/", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FILE_NORMAL)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-without-args")) );
-		assertEquals( 1, e.getLineNumber() );
-		assertEquals( "INCLUDE", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FILE_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("const-assigner-double")) );
-		assertEquals( 7, e.getLineNumber() );
-		assertEquals( "0  c  /4  v==103", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_AN_INTEGER) + "=103") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("include-too-many-args")) );
-		assertEquals( 1, e.getLineNumber() );
-		assertEquals( "INCLUDE inc/instruments.midica  inc/instruments.midica", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FILE_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundbank-file-doesnt-exist")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "SOUNDBANK  soundfont.sf2", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FILE_EXISTS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundbank-file-not-normal")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "SOUNDBANK  .", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FILE_NORMAL)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundbank-file-no-args")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "SOUNDBANK", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOUNDBANK_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundbank-file-too-many-args")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "SOUNDBANK  ../working/java-emergency-soundfont.sf2  ../working/java-emergency-soundfont.sf2", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_SOUNDBANK_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundbank-file-invalid")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "SOUNDBANK  inc/instruments.midica", e.getLineContent() );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundbank-url-invalid")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "SOUNDBANK https:/ /midica.org/assets/sound/invalid.sf2", e.getLineContent() );
-		assertTrue( e.getMessage().contains(Dict.get(Dict.INVALID_RIFF)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("soundbank-url-404")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertTrue( e.getMessage().contains(Dict.get(Dict.DOWNLOAD_PROBLEM)) );
-		assertEquals( "SOUNDBANK https:/ /midica.org/assets/sound/404.sf2", e.getLineContent() );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("define-not-enough-args")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "DEFINE CHORD", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_DEFINE_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("define-too-many-args")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "DEFINE CHORD crd crd", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_DEFINE_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("define-unknown-id")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "DEFINE UNKNOWN_ID something", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_COMMAND_ID)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("define-twice")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "DEFINE CHORD b", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ALREADY_REDEFINED) + "CHORD") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("define-assigner-double")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "DEFINE CHORD == CRD", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_DEFINE_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("define-assigner-double-2")) );
-		assertEquals( 8, e.getLineNumber() );
-		assertEquals( "CRD crd c/d/e", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_CMD) + "CRD") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("const-without-args")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "CONST", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CONST_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("const-not-enough-args")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "CONST $crd", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CONST_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("const-already-defined")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "CONST $crd c+/d+/e+", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CONST_ALREADY_DEFINED)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("const-without-dollar")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "CONST xy = z", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CONST_NAME_INVALID) + "xy") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("const-name-eq-value")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "CONST $a = $a", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CONST_NAME_EQ_VALUE)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("const-recursion")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertTrue( "CONST $a = !$b!".equals(e.getLineContent()) || "CONST $b = !$a!".equals(e.getLineContent()) );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CONST_RECURSION)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("var-without-args")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "VAR", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("var-assigner-double")) );
-		assertEquals( 7, e.getLineNumber() );
-		assertEquals( "0  c  /4  v=$x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_AN_INTEGER) + "=100") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("var-not-enough-args")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "VAR $x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("var-without-dollar")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "VAR x = c", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_NAME_INVALID) + "x") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("var-name-eq-value")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "VAR $a = $a", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_NAME_EQ_VALUE)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("var-recursion")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "VAR $a = $d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$a", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_RECURSION)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("var-with-whitespace")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "VAR x = c c", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_VAL_HAS_WHITESPACE)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("param-n-assign-unknown-name")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "VAR ${y} = b", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PARAM_NAMED_UNKNOWN)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("param-i-assign-index-too-high")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "VAR $[0] = a", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PARAM_INDEX_TOO_HIGH)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instrument-not-enough-args")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "INSTRUMENT 0", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INSTR_NUM_OF_ARGS_SINGLE)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("instruments-elem-not-enough-args")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0 5", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INSTR_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("global-timesig-invalid")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "* time 3:4", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INVALID_TIME_SIG) + "3:4") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("global-tonality-invalid")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "* key c/inval", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INVALID_TONALITY) + "inval") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("global-keysig-invalid-note")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "* key d5/maj", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_NOTE) + "d5") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("global-keysig-invalid")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "* key d5:maj", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_INVALID_KEY_SIG) + "d5:maj") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("global-unknown-cmd")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "* cmd d5:maj", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_GLOBAL_CMD) + "cmd") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("global-partial-empty")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "* 0,1-2,,3", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PARTIAL_RANGE_EMPTY)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("global-partial-order")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "* 0,2-2,3", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PARTIAL_RANGE_ORDER) + "2-2") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("global-partial-invalid-range-elem")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "* 0,2-3-4,5", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PARTIAL_RANGE) + "2-3-4") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-inside-function")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "PATTERN", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOT_ALLOWED_IN_BLK)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-magic-cond-idx-too-high")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 [2] /4", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH_2)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-magic-cond-idx-too-high-2")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0: [2]", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH_2)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-magic-cond-idx-too-high-3")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0: 60/62/[2]", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH_2)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-magic-cond-idx-too-high-4")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 60/62/[2] /4", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH_2)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-inside-block")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "PATTERN", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BLOCK_UNMATCHED_OPEN)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-redefined")) );
-		assertEquals( 7, e.getLineNumber() );
-		assertEquals( "PATTERN p1", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_ALREADY_DEFINED) + "p1") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-def-with-second-arg")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "PATTERN p1 test", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-def-without-name")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "PATTERN", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_NUM_OF_ARGS)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-call-with-tremolo")) );
-		assertEquals( 7, e.getLineNumber() );
-		assertEquals( "0 c pat tr=/4", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INVALID_OUTER_OPT) + "tremolo") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-with-shift")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0 /1  s=1", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INVALID_INNER_OPT) + "shift") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-with-if")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 /1 if y == x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INVALID_INNER_OPT) + "if") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-with-if-2")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 pat_b(x, y, z) if y == x", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INVALID_INNER_OPT) + "if") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-call-without-param-close")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 c/d/e  simple(foo, bar q=2, m", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_OPTION) + "(foo") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-undefined")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "0  not_existing_pattern( x, y, z )  v = 120 , d = 80%", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_UNDEFINED) + "not_existing_pattern") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-undefined-2")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 /42", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOTE_LENGTH_INVALID) + "/42") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-call-index-wrong")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "1.2 /4", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INDEX_INVALID)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-call-index-too-high")) );
-		assertEquals( 10, e.getLineNumber() );
-		assertEquals( "1 /4", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INDEX_TOO_HIGH)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-recursion")) );
-		assertEquals( 13, e.getLineNumber() );
-		assertTrue( "1/0 first".equals(e.getLineContent()) || "0/1 second".equals(e.getLineContent()) );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_RECURSION_DEPTH)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("pattern-before-instruments")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "0/1 /4", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHANNEL_UNDEFINED).replaceFirst("%s", "0")) );
-		
 		// stacktraces
-		
 		e = assertThrows( ParseException.class, () -> parse(getFailingFile("stacktrace")) );
 		assertEquals( 10, e.getLineNumber() );
 		assertEquals( "st-incl-1.midica", e.getFile().getName() );
@@ -3982,751 +2951,6 @@ class MidicaPLParserTest extends MidicaPLParser {
 		assertEquals( "stacktrace-compact-pattern.midica/43",    stackTrace.pop().toString() ); // block execution
 		assertEquals( "stacktrace-compact-pattern.midica/22",    stackTrace.pop().toString() ); // CALL pat1(...) from func()
 		assertEquals( "stacktrace-compact-pattern.midica/13",    stackTrace.pop().toString() ); // CALL func(...)
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-tempo")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "* tempo 0", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_0_NOT_ALLOWED)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-quantity")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "1: (q=0) c", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_0_NOT_ALLOWED)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-for-note")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 c -", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_NOT_ALLOWED)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-in-compact-opt")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0: (length=-)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OPT_LENGTH_MORE_THAN_0) + "length") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-for-note-2")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 -", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_NOT_ALLOWED)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-for-chord")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 c/d -", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_NOT_ALLOWED)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-in-summand")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 - /4+-+/8", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_IN_SUM)) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-with-m")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 - - m", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_INVALID_OPTION) + OPT_MULTIPLE) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-with-m-2")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "- - m", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_INVALID_OPTION) + OPT_MULTIPLE) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-with-m-3")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "- - m", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_INVALID_OPTION) + OPT_MULTIPLE) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-with-q")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 - - q=5", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_INVALID_OPTION) + OPT_QUANTITY) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-with-s")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 - - s=5", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_INVALID_OPTION) + OPT_SHIFT) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("zero-with-tr")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0 - - tr=5", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_ZEROLENGTH_INVALID_OPTION) + OPT_TREMOLO) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("compact-channel-var-invalid")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "test: c:/4", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_CMD) + "test:") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("compact-cmd-without-instruments")) );
-		assertEquals( 1, e.getLineNumber() );
-		assertEquals( "0: c d e", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_CHANNEL_UNDEFINED).replaceFirst("%s", "0")) );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("compact-channel-var-undef")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "$y: c:/4", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_VAR_NOT_DEFINED) + "$y") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("compact-unknown-pattern")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0: c c c/d/e:pat_none c c", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_NOTE_LENGTH_INVALID) + "pat_none") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("compact-invalid-option")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0: c c (v=127,l=text,d=50%) c (s=1) c", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_COMPACT_INVALID_OPTION), "shift", "(s=1)")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("compact-unknown-option")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0: c c (v=127,l=text,d=50%) c (unk=1) c", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_OPTION) + "unk") );
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("compact-pattern-call-with-options")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0: c d e:8 f/e/d/c:pat(foo,bar)q=2,m a b c", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_COMPACT_PAT_CALL_WITH_OPT), "q=2,m", "f/e/d/c:pat(foo,bar)q=2,m")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("compact-pattern-call-with-whitespace")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "0: c d e:8 f/e/d/c:pat(foo, bar) a b c", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_COMPACT_PAT_CALL_WITH_OPT), "(foo,", "f/e/d/c:pat(foo,")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("compact-pattern-with-wrong-index")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( ": 0 1 a", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_PATTERN_INDEX_INVALID)), "a");
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("bar-line-too-early-1")) );
-		assertEquals( 9, e.getLineNumber() );
-		assertEquals( "0: | c   | c:16 c c c  c c c c  c c c c  c c c c:32 |", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BAR_LINE_INCORRECT)));
-		assertTrue( e.getMessage().contains(String.format(Dict.get(Dict.ERROR_BAR_LINE_TOO_EARLY), 3, 60)));
-		assertTrue( e.getMessage().contains(String.format(Dict.get(Dict.ERROR_BAR_LINE_EXACT_NOTE_LEN), "/32")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("bar-line-too-early-2")) );
-		assertEquals( 9, e.getLineNumber() );
-		assertEquals( "0: | c   | c:16 c c c  c c c c  c c c c  c c c c:32. |", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BAR_LINE_INCORRECT)));
-		assertTrue( e.getMessage().contains(String.format(Dict.get(Dict.ERROR_BAR_LINE_TOO_EARLY), 3, 30)));
-		assertTrue( e.getMessage().contains(String.format(Dict.get(Dict.ERROR_BAR_LINE_SMALL), "/32", 60)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("bar-line-too-late-1")) );
-		assertEquals( 9, e.getLineNumber() );
-		assertEquals( "0: | c   | c:16 c c c  c c c c  c c c c  c c c c  c:32 |", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BAR_LINE_INCORRECT)));
-		assertTrue( e.getMessage().contains(String.format(Dict.get(Dict.ERROR_BAR_LINE_TOO_LATE), 3, 60)));
-		assertTrue( e.getMessage().contains(String.format(Dict.get(Dict.ERROR_BAR_LINE_EXACT_NOTE_LEN), "/32")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("bar-line-too-late-2")) );
-		assertEquals( 9, e.getLineNumber() );
-		assertEquals( "0: | c   | c:16 c c c  c c c c  c c c c  c c c c  c:32.. |", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_BAR_LINE_INCORRECT)));
-		assertTrue( e.getMessage().contains(String.format(Dict.get(Dict.ERROR_BAR_LINE_TOO_LATE), 3, 105)));
-		assertTrue( e.getMessage().contains(String.format(Dict.get(Dict.ERROR_BAR_LINE_BETWEEN), "/32.", 90, "/16", 120)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-before-block")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "{", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_OTO_BEFORE_BLOCK), "quantity", 1)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-before-block-2")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "{", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_OTO_BEFORE_BLOCK), "multiple", 1)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-at-end-of-block")) );
-		assertEquals( 8, e.getLineNumber() );
-		assertEquals( "}", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_OTO_AT_END_OF_BLOCK), "multiple", 1)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-at-end-of-block-2")) );
-		assertEquals( 10, e.getLineNumber() );
-		assertEquals( "}", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_OTO_AT_END_OF_BLOCK), "quantity", 1)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-before-function-call")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "CALL f", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_OTO_BEFORE_FUNCTION), "quantity", 1)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-before-function-call-2")) );
-		assertEquals( 7, e.getLineNumber() );
-		assertEquals( "CALL f", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_OTO_BEFORE_FUNCTION), "quantity", 1)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-before-function-call-3")) );
-		assertEquals( 10, e.getLineNumber() );
-		assertEquals( "CALL f", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_OTO_BEFORE_FUNCTION), "quantity", 1)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-at-end-of-function")) );
-		assertEquals( 9, e.getLineNumber() );
-		assertEquals( "END", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_OTO_AT_END_OF_FUNCTION), "quantity", 1)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-tremolo-with-pattern")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "1: c (tr=/32) d:pat", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OTO_TREMOLO_PATTERN_CALL)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-duplicate-option")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "1: c (m,q=2,m) d", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_DUPLICATE_OPTION) + "multiple"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-duplicate-option-m")) );
-		assertEquals( 3, e.getLineNumber() );
-		assertEquals( "1: c (m,q=2) (m) d", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OTO_DUPLICATE_MULTIPLE)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-duplicate-option-q")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "1: (q=3) d", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OTO_DUPLICATE_QUANTITY)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("oto-duplicate-option-tr")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "1: (tr=/16) d", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_OTO_DUPLICATE_TREMOLO)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-unknown-flow-elem-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: volll.keep.set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_NOTE)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-unknown-flow-elem-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.keeeeeep.set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_UNKNOWN_ELEMENT)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-broken-by-var")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "0: .wait.set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), ".")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-broken-by-const")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "0: .wait.set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), ".")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-broken-by-call")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "0: .wait.set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), ".")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-broken-by-function")) );
-		assertEquals( 7, e.getLineNumber() );
-		assertEquals( "0: .wait.set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), ".")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-broken-by-note")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "0: .wait.set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), ".")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-broken-by-other-channel")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "0: .wait.set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOT_OPEN), ".")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-missing-dot-1")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "0: wait().set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_EFF_NOT_SET) + "set"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-missing-dot-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.wait()set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_MISSING_DOT), ".")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-non-generic-with-num")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol=30.set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_NUMBER_NOT_ALLOWED) + "vol"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-double-with-params")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.double().set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_PARAMS_NOT_ALLOWED), "double")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-double-for-boolean")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: hold.double.on()", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_DOUBLE_NOT_SUPPORTED), "double")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-double-for-single")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: chorus.double.set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_DOUBLE_NOT_SUPPORTED), "double")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-double-for-coarse-tune")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: coarse_tune.double.set(+50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_DOUBLE_NOT_SUPPORTED), "double")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-coarse-invalid-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: coarse_tune.set(-65)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), -65, -64)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-coarse-invalid-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: coarse_tune.set(+64)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), "+64", "+63")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-coarse-invalid-3")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: coarse_tune.set(+0%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_PERCENT_FORBIDDEN), "+0%")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-coarse-invalid-4")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: coarse_tune.set(+3.5)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_BROKEN_HALFTONE), "+3.5")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-fine-invalid-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: fine_tune.set(-1.0001)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), -1.0001f, -1.0f)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-fine-invalid-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: fine_tune.set(+1.0001)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), "+1.0001", "+1.0")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-fine-invalid-3")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: fine_tune.set(-101%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), "-101%", "-100%")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-fine-invalid-4")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: fine_tune.set(+101%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), "+101%", "+100%")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-tune-fine-invalid-5")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: fine_tune.double.set(+2)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), "+2", "+1.0")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-without-params")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.set", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_PARAMS_REQUIRED), "set")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-wrong-param-count-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.set(30,40)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_WRONG_PARAM_NUM), "set", 1, 2, "30,40")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-wrong-param-count-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.wait(4,8)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_WRONG_PARAM_NUM), "wait", 1, 2, "4,8")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-wrong-param-count-3")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.set()", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_WRONG_PARAM_NUM), "set", 1, 0, "")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-remainder-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.wait().wait().set(50).test", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_UNKNOWN_ELEMENT) + "test"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-remainder-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.wait().wait().set(50).wait-for-me", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_UNMATCHED_REMAINDER) + "-for-me"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-empty-param")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.sin(0,,100%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_EMPTY_PARAM), "0,,100%")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-poly-mode-off")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: poly_mode.off()", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "off"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-poly-mode-set-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: poly_mode.set(0)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "set"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-poly-mode-set-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: poly_mode.set(+0)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "set"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-mono-mode-off")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: mono_mode.off()", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "off"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-mono-mode-set-17")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: mono_mode.set(17)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 17, 16)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-mono-mode-set-percent")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: mono_mode.set(50%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERCENT_FORBIDDEN) + "50%"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-mono-mode-line")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: mono_mode.line(0,16)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "line"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-bool-with-numeric-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.on()", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "on"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-bool-with-numeric-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: chorus.off()", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "off"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-numeric-for-bool-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: legato.set(0)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "set"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-numeric-for-bool-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: legato.set(+0)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "set"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-cont-rpn")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: pitch_range.line(1,12)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "line"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-cont-nrpn")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: nrpn=123.line(1,12)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "line"));
-		
-		// TODO: delete file, test as line
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-invalid-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.line(1,9999999999999)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NO_NUMBER) + "9999999999999"));
-		
-		// TODO: delete file, test as line
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-invalid-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.line(1,0x7F)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NO_NUMBER) + "0x7F"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-too-low-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: balance.line(+63,-65)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), -65, -64)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-too-low-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.line(1,-0.000001%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_SIGNED_FORBIDDEN) + "-0.000001%"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-too-low-3")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: balance.line(+1,-101%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_LOWER_MIN), "-101%", "-100%")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-too-high-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.line(1,128)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 128, 127)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-too-high-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: balance.double.line(+1,+8192)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), "+8192", "+8191")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-periods-nan-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.sin(0,100%,1.2.3)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERIODS_NO_NUMBER) + "1.2.3"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-periods-nan-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.sin(0,100%,999999999999999999999999999999999999999.0)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERIODS_NO_NUMBER) + "999999999999999999999999999999999999999.0"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-periods-signed-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.sin(0,100%,-1.0)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERIODS_SIGNED) + "-1.0"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-periods-signed-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.sin(0,100%,+1.0)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERIODS_SIGNED) + "+1.0"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-periods-signed-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.sin(0,100%,+1.0)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERIODS_SIGNED) + "+1.0"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-periods-signed-3")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.sin(0,100%,+10%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERIODS_SIGNED) + "+10%"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-param-periods-zero")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.sin(0,100%,0)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERIODS_NOT_POS) + "0"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-eff-not-set-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: wait().set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_EFF_NOT_SET) + "set"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-eff-not-set-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: wait().double.vol.set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_EFF_NOT_SET) + "double"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-eff-already-set")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.wait().vol.set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_EFF_ALREADY_SET)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-halftone-for-vol-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.set(12.0)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_HALFTONE_NOT_ALLOWED), "12.0")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-halftone-for-vol-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.set(+12.0)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_SIGNED_FORBIDDEN), "+12.0")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-halftone-gt-max-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: pitch_range.set(129.0)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 129.0f, 127f)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-halftone-gt-max-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: pitch_range.double.set(127.997)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 127.997f, 127.99f)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-halftone-gt-max-3")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: pitch_range.set(127.0001)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 127.0001f, 127f)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-halftone-gt-max-4")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: pitch_range.double.set(127.997)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_VAL_GREATER_MAX), 127.997, 127.99f)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pbr-with-percent")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: pitch_range.set(12.0%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_PERCENT_FORBIDDEN) + "12.0%"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pitch-gt-range-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: pitch.wait.set(+2.3)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_HALFTONE_GT_RANGE), "+2.3", "2.0")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-pitch-gt-range-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: pitch.wait.set(-2.3)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_HALFTONE_GT_RANGE), "-2.3", "2.0")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-invalid")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: poly_at.note(c+6).set(123)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_UNKNOWN_NOTE) + "c+6"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-without-effect")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: note(c).vol.set(100%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_EFF_NOT_SET) + "note"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-not-allowed-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.note(c).set(100%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "note"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-not-allowed-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: mono_at.note(c).set(100%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "note"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-not-allowed-3")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: pitch_range.note(c).set(2.0)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "note"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-not-set-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: poly_at.set(100%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_NOTE_NOT_SET) + "set"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-note-not-set-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: port_ctrl.on()", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_NOTE_NOT_SET) + "on"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-numeric-for-none")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: ctrl=123.wait.set(12)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "set"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-off-for-none")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: ctrl=123.wait.off()", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "off"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-msblsb-without-double")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.set(12/30)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FUNC_MSB_LSB_NEEDS_DOUBLE), "12/30", "double")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-pattern-index-invalid-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( ": poly_at.note(3)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOTE_PAT_IDX_TOO_HIGH), "3", ".note(3)")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-pattern-index-invalid-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( ": poly_at.note(c)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOTE_PAT_IDX_NAN), "c", ".note(c)")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-pattern-index-invalid-3")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( ": poly_at.note(3)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOTE_PAT_IDX_TOO_HIGH), "3", ".note(3)")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-pattern-index-invalid-4")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( ": poly_at.note(3)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOTE_PAT_IDX_TOO_HIGH), "3", ".note(3)")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-pattern-index-invalid-5")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( ": poly_at.note(3)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(String.format(Dict.get(Dict.ERROR_FL_NOTE_PAT_IDX_TOO_HIGH), "3", ".note(3)")));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-note")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: ctrl_dest.note(c)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF) + "note"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-missing-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0:   .on()", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_NOT_SET) + "on"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-missing-2")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "0:   .on()", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_NOT_SET) + "on"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-unknown-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0:   .src(voll)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_UNKNOWN) + "voll"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-unknown-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0:   .src(ctrl=128)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP) + "ctrl=128"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-unknown-3")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0:   .src(ctrl=5=7)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_UNKNOWN) + "ctrl=5=7"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-unknown-4")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0:   .src(ctrl=9999999999999999999999999999)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_UNKNOWN) + "ctrl=9999999999999999999999999999"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-not-sup-1")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0:   .src(ctrl=0)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP) + "ctrl=0"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-not-sup-2")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0:   .src(ctrl=32)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP) + "ctrl=32"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-not-sup-3")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0:   .src(ctrl=57)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP) + "ctrl=57"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-not-sup-4")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0:   .src(ctrl=60)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP) + "ctrl=60"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-not-sup-5")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0:   .src(mono_mode)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP) + "mono_mode"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-src-duplicate")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "0:   .src(poly_at)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_SRC_ALREADY_SET) + "src"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-dest-missing")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "0:   .on()", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_DEST_NOT_SET) + "on"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-dest-unknown-1")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "0:   .dest(voll,10%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_DEST_UNKNOWN) + "voll"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-cd-dest-unknown-2")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "0:   .dest(ctrl=11,10%)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_CD_DEST_UNKNOWN) + "ctrl=11"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-signed-vol")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: vol.set(+50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_SIGNED_FORBIDDEN) + "+50"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-unsigned-balance")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: balance.set(50)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_SIGNED_REQUIRED) + "50"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-func-mono-mode-set-signed")) );
-		assertEquals( 4, e.getLineNumber() );
-		assertEquals( "0: mono_mode.set(+5)", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FUNC_SIGNED_FORBIDDEN) + "+5"));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-pending-1")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "1: c", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_PENDING)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-pending-2")) );
-		assertEquals( 5, e.getLineNumber() );
-		assertEquals( "0: hold.wait", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_PENDING)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-pending-3")) );
-		assertEquals( 6, e.getLineNumber() );
-		assertEquals( "", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_PENDING)));
-		
-		e = assertThrows( ParseException.class, () -> parse(getFailingFile("eff-flow-pending-4")) );
-		assertEquals( 23, e.getLineNumber() );
-		assertEquals( "0: c", e.getLineContent() );
-		assertTrue( e.getMessage().startsWith(Dict.get(Dict.ERROR_FL_PENDING)));
 	}
 	
 	/**
@@ -4736,59 +2960,549 @@ class MidicaPLParserTest extends MidicaPLParser {
 	 */
 	@Test
 	void testParseFailingLines() throws Exception {
-		ParseException e;
 		
-		// functions with hex or MSB/LSB parameters
-		aemF("0: vol.double.set(128/30)", Dict.ERROR_FUNC_MSB_TOO_HIGH, "128/30", "128");
-		aemF("0: vol.double.set(30/128)", Dict.ERROR_FUNC_LSB_TOO_HIGH, "30/128", "128");
-		aemF("0: vol.line(1,x8F)", Dict.ERROR_FUNC_HEX_TOO_HIGH, "x", "x", "8F");
-		aemF("0: vol.double.set(x7F/x80)", Dict.ERROR_FUNC_HEX_TOO_HIGH, "x", "x", "80");
-		aemF("0: vol.double.set(x81/x32)", Dict.ERROR_FUNC_HEX_TOO_HIGH, "x", "x", "81");
-		aemC("0: vol.line(1,x123)", Dict.ERROR_FUNC_HEX_DIGITS, "x123");
-		aemC("0: vol.line(1,xF)", Dict.ERROR_FUNC_HEX_DIGITS, "xF");
-		aemC("0: vol.double.set(x00/x123)", Dict.ERROR_FUNC_HEX_DIGITS, "x123");
-		aemC("0: vol.double.set(x00/x1)", Dict.ERROR_FUNC_HEX_DIGITS, "x1");
-		aemC("0: vol.double.set(x123/x5)", Dict.ERROR_FUNC_HEX_DIGITS, "x123");
-		aemC("0: vol.double.set(x1/x00)", Dict.ERROR_FUNC_HEX_DIGITS, "x1");
-		aemC("0: vol.double.set(x7F)", Dict.ERROR_FUNC_HEX_LSB_REQUIRED, "x7F");
-		aemC("0: vol.set(x7F/)", Dict.ERROR_FUNC_NUMBER_EMPTY, "x7F/");
-		aemC("0: vol.set(x7F/x)", Dict.ERROR_FUNC_NO_NUMBER, "x7F/x");
-		aemC("0: vol.double.set(x7F/)", Dict.ERROR_FUNC_NUMBER_EMPTY, "x7F/");
-		aemC("0: vol.double.set(x7F/x)", Dict.ERROR_FUNC_NO_NUMBER, "x7F/x");
-		aemC("0: vol.set(xAG)", Dict.ERROR_FUNC_HEX_FORMAT, "xAG");
-		aemC("0: vol.double.set(x7F)", Dict.ERROR_FUNC_HEX_LSB_REQUIRED, "x7F");
-		aemF("0: vol.set(x00/x00)", Dict.ERROR_FUNC_MSB_LSB_NEEDS_DOUBLE, "x00/x00", "double");
-		aemF("0: vol.on(x12)", Dict.ERROR_FL_WRONG_PARAM_NUM, "on", 0, 1, "x12");
-		aemF("0: hold.on(5)", Dict.ERROR_FL_WRONG_PARAM_NUM, "on", 0, 1, "5");
+		// define
+		aeS("DEFINE CHORD == CRD", Dict.ERROR_DEFINE_NUM_OF_ARGS);
+		aeC(arr("DEFINE CHORD==CRD", "CRD crd c/d/e"), Dict.ERROR_UNKNOWN_CMD, "CRD");
+		aeS("DEFINE CHORD", Dict.ERROR_DEFINE_NUM_OF_ARGS);
+		aeS("DEFINE CHORD crd crd", Dict.ERROR_DEFINE_NUM_OF_ARGS);
+		aeC("DEFINE UNKNOWN_ID something", Dict.ERROR_UNKNOWN_COMMAND_ID, "UNKNOWN_ID");
+		aeC(arr("DEFINE CHORD a", "DEFINE CHORD a"), Dict.ERROR_ALREADY_REDEFINED, "CHORD");
+		
+		// meta
+		aeC(arr("META", "  FUNCTION test" + LM, "  END", "END"), Dict.ERROR_NOT_ALLOWED_IN_BLK, "FUNCTION");
+		aeC(arr("META", "  {" + LM, "    composer Beethoven", "  }", "END"), Dict.ERROR_NOT_ALLOWED_IN_META_BLK, "{");
+		aeS(arr("META test" + LM, "    composer Beethoven", "END"), Dict.ERROR_META_NUM_OF_ARGS);
+		aeC(arr("META", "  CHORD testchord c d e" + LM, "END"), Dict.ERROR_META_UNKNOWN_CMD, "CHORD");
+		
+		// soft karaoke
+		aeS(arr("META", "  SOFT_KARAOKE test" + LM, "    language   ENGL", "  END", "END"), Dict.ERROR_SOFT_KARAOKE_NUM_OF_ARGS);
+		aeS(arr("SOFT_KARAOKE" + LM, "END"), Dict.ERROR_SOFT_KARAOKE_NOT_ALLOWED_HERE);
+		aeS(arr("META", "  SOFT_KARAOKE", "    language ENGL", "  END",
+				"  SOFT_KARAOKE" + LM, "    author Somebody", "  END"), Dict.ERROR_SOFT_KARAOKE_ALREADY_SET);
+		aeC(arr("META", "  SOFT_KARAOKE", "    author Somebody", "    author Anybody" + LM, "  END", "  END"), Dict.ERROR_SK_VALUE_ALREADY_SET, "author");
+		aeC(arr("META", "  SOFT_KARAOKE", "    composer Haydn" + LM, "  END", "  END"), Dict.ERROR_SOFT_KARAOKE_UNKNOWN_CMD, "composer");
+		aeC(arr("META", "  SOFT_KARAOKE", "    testcmd Haydn" + LM, "  END", "  END"), Dict.ERROR_UNKNOWN_CMD, "testcmd");
+		aeS(arr("META", "  SOFT_KARAOKE", "    title  sk\\rtitle" + LM, "  END", "  END"), Dict.ERROR_SK_FIELD_CRLF_NOT_ALLOWED);
+		aeS(arr("META", "  SOFT_KARAOKE", "  END", "  END", "0  c  /4  l=_te\\nst5"), Dict.ERROR_SK_SYLLABLE_CRLF_NOT_ALLOWED);
+		
+		// include + soundbank
+		aeS("INCLUDE", Dict.ERROR_FILE_NUM_OF_ARGS);
+		aeS("INCLUDE inc/instruments.midica  inc/instruments.midica", Dict.ERROR_FILE_NUM_OF_ARGS);
+		aeC("INCLUDE inc/not-existing-file.midica", Dict.ERROR_FILE_EXISTS, tmpTestDir + "/inc/not-existing-file.midica");
+		aeC("INCLUDE .", Dict.ERROR_FILE_NORMAL, tmpTestDir);
+		aeS("SOUNDBANK", Dict.ERROR_SOUNDBANK_NUM_OF_ARGS);
+		aeS("SOUNDBANK  sb1.sf2  sb2.sf2", Dict.ERROR_SOUNDBANK_NUM_OF_ARGS);
+		aeC("SOUNDBANK  soundfont.sf2", Dict.ERROR_FILE_EXISTS, tmpTestDir + "/soundfont.sf2");
+		aeC("SOUNDBANK  .", Dict.ERROR_FILE_NORMAL, tmpTestDir);
+		aeS(arr("SOUNDBANK  " + failingDir + File.separator + "inc/instruments.midica"), Dict.INVALID_RIFF,
+				cfg().msg(false).key(false).msgContains(true));
+		aeS(arr("SOUNDBANK https:/ /midica.org/assets/sound/invalid.sf2"), Dict.INVALID_RIFF,
+				cfg().msg(false).key(false).msgContains(true));
+		aeC("SOUNDBANK https:/ /midica.org/assets/sound/404.sf2", Dict.DOWNLOAD_PROBLEM, "https://midica.org/assets/sound/404.sf2");
+		aeS(arr("SOUNDBANK " + workingSoundbank, "SOUNDBANK " + workingSoundbank + LM), Dict.ERROR_SOUNDBANK_ALREADY_PARSED);
+		aeC(arr("{", "SOUNDBANK " + workingSoundbank + LM, "}"), Dict.ERROR_NOT_ALLOWED_IN_BLK, "SOUNDBANK");
+		aeC(arr("FUNCTION test", "SOUNDBANK " + workingSoundbank + LM, "END"), Dict.ERROR_NOT_ALLOWED_IN_BLK, "SOUNDBANK");
+		
+		// instruments
+		aeF("2 c /4", Dict.ERROR_CHANNEL_UNDEFINED, 2);
+		aeS("INSTRUMENT 0", Dict.ERROR_INSTR_NUM_OF_ARGS_SINGLE);
+		aeS(arr("INSTRUMENTS", "  0 5" + LM, "END"), Dict.ERROR_INSTR_NUM_OF_ARGS);
+		aeC(arr("INSTRUMENTS", "  10	0,0,0 test" + LM, "END"), Dict.ERROR_NOT_AN_INTEGER, "0,0");
+		aeC(arr("INSTRUMENTS", "  12  0,0/0/0 test" + LM, "END"), Dict.ERROR_NOT_AN_INTEGER, "0/0");
+		aeS(arr("INSTRUMENTS", "  10  0,9999999 test" + LM, "END"), Dict.ERROR_INSTR_BANK);
+		aeS(arr("INSTRUMENTS", "  10  0,128/0 test" + LM, "END"), Dict.ERROR_INSTR_BANK);
+		aeS(arr("INSTRUMENTS", "  10  0,0/128 test" + LM, "END"), Dict.ERROR_INSTR_BANK);
+		aeC(arr("INSTRUMENTS", "  10  0, test" + LM, "END"), Dict.ERROR_NOT_AN_INTEGER, "");
+		aeC(arr("INSTRUMENTS", "  10  0,0/ test" + LM, "END"), Dict.ERROR_NOT_AN_INTEGER, "");
+		aeS(arr("INSTRUMENTS", "  0 0 test", "  *" + LM, "END"), Dict.ERROR_GLOBALS_IN_INSTR_DEF);
+		aeS(arr("INSTRUMENTS", "  p 128 testing" + LM, "END"), Dict.ERROR_INSTR_BANK, cfg().include(false));
+		aeF(arr("INSTRUMENTS", "  0 0 test1", "  1 0 test2", "  1 0 test2" + LM, "END"), Dict.ERROR_CHANNEL_REDEFINED, 1, cfg().include(false));
+		aeS(arr("INSTRUMENTS param" + LM, "  0 0 test1", "  1 0 test2", "END"), Dict.ERROR_MODE_INSTR_NUM_OF_ARGS, cfg().include(false));
+		aeS(arr("INSTRUMENTS", "  0 0 test1", "  1 0 test2", "END param" + LM), Dict.ERROR_ARGS_NOT_ALLOWED);
+		aeC(arr("INSTRUMENTS", "  0 0 test", "  CHORD testchord c d e" + LM, "END"), Dict.ERROR_NOT_ALLOWED_IN_BLK, "CHORD");
+		aeS(arr("INSTRUMENTS", "  INSTRUMENT 1 0 test" + LM, "END"), Dict.ERROR_SINGLE_INSTR_IN_INSTR_DEF);
+		aeC(arr("VAR $ch = 5", "INSTRUMENTS", "  $ch 60 test" + LM, "END"), Dict.ERROR_VAR_NOT_ALLOWED, "$ch");
+		
+		// chord
+		aeS("CHORD crd = /c/d/e", Dict.ERROR_CHORD_REDUNDANT_SEP);
+		aeS("CHORD crd = c/d/e/", Dict.ERROR_CHORD_REDUNDANT_SEP);
+		aeC("CHORD crd==c/d/e", Dict.ERROR_UNKNOWN_CHORD_ELEMENT, "=c");
+		aeS("CHORD", Dict.ERROR_CHORD_NUM_OF_ARGS);
+		aeS("CHORD test", Dict.ERROR_CHORD_NUM_OF_ARGS);
+		aeC("CHORD c# c/d/c", Dict.ERROR_CHORD_EQUALS_NOTE, "c#");
+		aeC("CHORD hhc c/d/e", Dict.ERROR_CHORD_EQUALS_PERCUSSION, "hhc");
+		aeC("CHORD test c/d/c", Dict.ERROR_CHORD_CONTAINS_ALREADY, "c");
+		aeC("CHORD test c d e c+6", Dict.ERROR_UNKNOWN_CHORD_ELEMENT, "c+6");
+		aeC("CHORD test c d 128", Dict.ERROR_NOTE_TOO_BIG, "128");
+		aeC("CHORD test c d to", Dict.ERROR_CHORD_WITH_NOTES_AND_PERC, "test");
+		aeC(arr("CHORD test c/d/e", "CHORD test c/d/e"), Dict.ERROR_CHORD_ALREADY_DEFINED, "test");
+		
+		// root-level
+		aeS("END", Dict.ERROR_CMD_END_WITHOUT_BEGIN);
+		aeS("}", Dict.ERROR_BLOCK_UNMATCHED_CLOSE);
+		aeC("UNKNOWN_CMD", Dict.ERROR_UNKNOWN_CMD, "UNKNOWN_CMD");
+		aeC(arr("0  c  /4  l=$[1]"), Dict.ERROR_PARAM_OUTSIDE_FUNCTION, "$[1]",
+				cfg().content(false));
+		aeC(arr("{", "0  c  /4  l=$[1]" + LM, "}"), Dict.ERROR_PARAM_OUTSIDE_FUNCTION, "$[1]",
+				cfg().content(false));
+		aeC(arr("0  c  /4  l=${x}"), Dict.ERROR_PARAM_OUTSIDE_FUNCTION, "${x}",
+				cfg().content(false));
+		aeC(arr("{", "0  c  /4  l=${x}" + LM, "}"), Dict.ERROR_PARAM_OUTSIDE_FUNCTION, "${x}",
+				cfg().content(false));
+		
+		// function / call
+		aeS("CALL test", Dict.ERROR_FUNCTION_UNDEFINED);
+		aeS("CALL", Dict.ERROR_CALL_NUM_OF_ARGS);
+		aeS(arr("FUNCTION test1 test2" + LM, "  0 c /4", "END"), Dict.ERROR_FUNCTION_NUM_OF_ARGS);
+		aeC(arr("FUNCTION test", "  CHORD testchord c d e" + LM, "END"), Dict.ERROR_NOT_ALLOWED_IN_BLK, "CHORD");
+		aeC(arr("FUNCTION test", "  0 c /4", "END", "CALL test v=50"), Dict.ERROR_CALL_UNKNOWN_OPT, "velocity");
+		aeS(arr("FUNCTION test", "  0 c /4", "  CALL test" + LM, "END"), Dict.ERROR_FUNCTION_RECURSION);
+		aeS(arr("CALL test1" + LM, "FUNCTION test1", "  CALL test2", "END",
+				"FUNCTION test2", "  CALL test1", "END"), Dict.ERROR_FUNCTION_RECURSION_DEPTH);
+		aeC(arr("FUNCTION test", "  0 c /4", "  META" + LM, "    composer Beethoven", "  END", "END"), Dict.ERROR_NOT_ALLOWED_IN_BLK, "META");
+		aeS(arr("FUNCTION test", "  SOFT_KARAOKE" + LM, "  END", "END"), Dict.ERROR_SOFT_KARAOKE_NOT_ALLOWED_HERE);
+		aeC(arr("FUNCTION test", "  0  c  /4  l=$[x]" + CM, "END", "CALL test(y)" + NM), Dict.ERROR_NOT_AN_INTEGER, "x",
+				cfg().content("$[x]").causedByVar(true));
+		aeC(arr("FUNCTION outer", "  0 c /4", "  FUNCTION inner" + LM, "  END", "END"), Dict.ERROR_NOT_ALLOWED_IN_BLK, "FUNCTION");
+		aeC(arr("FUNCTION test", "  0 c /4", "END",
+				"FUNCTION test" + LM, "  0 d /8", "END"), Dict.ERROR_FUNCTION_ALREADY_DEFINED, "test");
+		aeC(arr("VAR $x = 1", "{ if=$x", "  0  c  /4", "}",
+				"CALL test elsif=$x" + LM, "FUNCTION test", "END"), Dict.ERROR_CALL_UNKNOWN_OPT, "elsif");
+		aeC(arr("VAR $x = 1", "{ if=$x", "  0  c  /4", "}",
+				"CALL test else" + LM, "FUNCTION test", "END"), Dict.ERROR_CALL_UNKNOWN_OPT, "else");
+		aeC(arr("VAR $x = 1", "{ if=$x", "  0  c  /4", "}",
+				"CALL test if=$x, if $x" + LM, "FUNCTION test", "END"), Dict.ERROR_DUPLICATE_OPTION, "if");
+		aeC(arr("FUNCTION test", "  0  c  /4", "END", "CALL test(a,)"), Dict.ERROR_CALL_EMPTY_PARAM, "a,");
+		aeC(arr("FUNCTION test", "  0  c  /4", "END", "CALL test(=a)"), Dict.ERROR_CALL_PARAM_NAME_EMPTY, "=a");
+		aeC(arr("FUNCTION test", "  0  c  /4", "END", "CALL test(a/=b)"), Dict.ERROR_CALL_PARAM_NAME_WITH_SPEC, "a/");
+		aeC(arr("FUNCTION test", "  0  c  /4", "END", "CALL test(a=x,a=y)"), Dict.ERROR_CALL_DUPLICATE_PARAM_NAME, "a");
+		aeC(arr("FUNCTION test", "  0  c  /4", "END", "CALL test(a=,b=y)"), Dict.ERROR_CALL_PARAM_VALUE_EMPTY, "a");
+		aeC(arr("FUNCTION test", "  0  c  /4", "END", "CALL test(a=b=c)"), Dict.ERROR_CALL_PARAM_MORE_ASSIGNERS, "a=b=c");
+		aeC(arr("FUNCTION test", "  0  c  /4", "END", "CALL test(vel==102)"), Dict.ERROR_CALL_PARAM_MORE_ASSIGNERS, "vel==102");
+		aeC(arr("CALL test(x=z)" + NM, "FUNCTION test", "  VAR ${y} = b" + CM, "END"), Dict.ERROR_PARAM_NAMED_UNKNOWN, "${y}");
+		aeC(arr("CALL test" + NM, "FUNCTION test", "  VAR $[0] = a" + CM, "END"), Dict.ERROR_PARAM_INDEX_TOO_HIGH, "$[0]");
+		aeS(arr("FUNCTION test", "0 c /4", "0 d /4", "", ""), Dict.ERROR_NAMED_BLOCK_OPEN_AT_EOF);
+		
+		// patterns
+		aeC(arr("FUNCTION test", "  PATTERN pat" + LM, "  END", "END"), Dict.ERROR_NOT_ALLOWED_IN_BLK, "PATTERN");
+		aeS(arr("{", "  PATTERN pat" + LM, "  END", "}"), Dict.ERROR_BLOCK_UNMATCHED_OPEN);
+		aeC(arr("PATTERN p1", "  0 /4", "END", "PATTERN p1" + LM, "  0 /8", "END"), Dict.ERROR_PATTERN_ALREADY_DEFINED, "p1");
+		aeS(arr("PATTERN p1 test" + LM, "  0 /4", "END"), Dict.ERROR_PATTERN_NUM_OF_ARGS);
+		aeS(arr("PATTERN" + LM, "  0 /4", "END"), Dict.ERROR_PATTERN_NUM_OF_ARGS);
+		aeC(arr("PATTERN p", "  0 /1", "END", "0 c p tr=/4"), Dict.ERROR_PATTERN_INVALID_OUTER_OPT, "tremolo");
+		aeC(arr("PATTERN p", "  0 /1  s=1" + LM, "END", "0 c pat"), Dict.ERROR_PATTERN_INVALID_INNER_OPT, "shift");
+		aeC(arr("0  c/d/e  p( y )" + NM,
+				"PATTERN p", "  0 /1  if $[0] == x" + CM, "END"), Dict.ERROR_PATTERN_INVALID_INNER_OPT, "if",
+				cfg().content("0 /1 if y == x"));
+		aeC(arr("0  c/d/e  pa( y )" + NM,
+				"PATTERN pa", "  0  pb( x, y, z )  if $[0] == x" + CM, "END",
+				"PATTERN pb", "  0 /1", END), Dict.ERROR_PATTERN_INVALID_INNER_OPT, "if",
+				cfg().content("0 pb(x, y, z) if y == x"));
+		aeC(arr("0 c/d/e  p(foo, bar q=2, m" + LM, "PATTERN p", "END"), Dict.ERROR_UNKNOWN_OPTION, "(foo");
+		aeC(arr("0  c/d/e  p( y )", "PATTERN p", "  0 nep(x,y,z) v=120, d=80%" + LM, "END"), Dict.ERROR_PATTERN_UNDEFINED, "nep");
+		aeC(arr("0  c/d/e  p( y )" + NM, "PATTERN p", "  0 /42" + CM, "END"), Dict.ERROR_NOTE_LENGTH_INVALID, "/42");
+		aeC(arr("PATTERN pat", "  1.2 /4" + LM, "END"), Dict.ERROR_PATTERN_INDEX_INVALID, "1.2");
+		aeC(arr("PATTERN pat", "  1 /4" + CM, "END", "0 c pat" + NM), Dict.ERROR_PATTERN_INDEX_TOO_HIGH, "1");
+		aeS(arr("PATTERN p1", "  0/1 p2" + CM, "END", "PATTERN p2", "  0/1 p1", "END", "0 c/d p1" + NM), Dict.ERROR_PATTERN_RECURSION_DEPTH);
+		aeF(arr("PATTERN p1", "  0/1 /4" + CM, "END", "0  c/d  p1"), Dict.ERROR_CHANNEL_UNDEFINED, 0,
+				cfg().include(false));
+		aeC(arr("0: c/d:p1" + NM, "PATTERN p1", "  { if $NC == 2", "    2 /4" + CM, "  }", "END"), Dict.ERROR_PATTERN_INDEX_TOO_HIGH_2, "[2]",
+				cfg().content("0 [2] /4"));
+		aeC(arr("0: c/d:p1" + NM, "PATTERN p1", "  { if $NC == 2", "    : 2" + CM, "  }", "END"), Dict.ERROR_PATTERN_INDEX_TOO_HIGH_2, "[2]",
+				cfg().content("0: [2]"));
+		aeC(arr("0: c/d:p1" + NM, "PATTERN p1", "  { if $NC == 2", "    : 0/1/2" + CM, "  }", "END"), Dict.ERROR_PATTERN_INDEX_TOO_HIGH_2, "[2]",
+				cfg().number(false).content("0: 60/62/[2]"));
+		aeC(arr("0: c/d:p1" + NM, "PATTERN p1", "  { if $NC == 2", "    0/1/2 /4" + CM, "  }", "END"), Dict.ERROR_PATTERN_INDEX_TOO_HIGH_2, "[2]",
+				cfg().content("0 60/62/[2] /4"));
+		aeF(arr("0: c d e:8 f/e/d/c:pat(foo,bar)q=2,m a b c" + LM,
+				"PATTERN pat", "END"), Dict.ERROR_COMPACT_PAT_CALL_WITH_OPT, "q=2,m", "f/e/d/c:pat(foo,bar)q=2,m");
+		aeF(arr("0: c d e:8 f/e/d/c:pat(foo, bar) a b c" + LM,
+				"PATTERN pat", "END"), Dict.ERROR_COMPACT_PAT_CALL_WITH_OPT, "(foo,", "f/e/d/c:pat(foo,");
+		aeC(arr("0: c d e:8 f/e/d/c:pat(foo,bar) a b c" + NM,
+				"PATTERN pat", "  : 0 1 a" + CM, "END"), Dict.ERROR_PATTERN_INDEX_INVALID, "a");
+		
+		// nestable block
+		aeS(arr("{", "  FUNCTION mac1" + LM, "    0 c /4", "  END", "}"), Dict.ERROR_BLOCK_UNMATCHED_OPEN);
+		aeC(arr("{ m", "  0  c  /4", "} m"), Dict.ERROR_BLOCK_ARG_ALREADY_SET, "multiple");
+		aeC(arr("{ q=2", "  0  c  /4", "} q=3"), Dict.ERROR_BLOCK_ARG_ALREADY_SET, "quantity");
+		aeC(arr("{ t=3:5", "  0  c  /4", "} t"), Dict.ERROR_BLOCK_ARG_ALREADY_SET, "tuplet");
+		aeC(arr("{ s=2", "  0  c  /4", "} s=3"), Dict.ERROR_BLOCK_ARG_ALREADY_SET, "shift");
+		aeC(arr("{", "  0  c  /4", "} v=50"), Dict.ERROR_BLOCK_INVALID_OPT, "velocity");
+		aeC(arr("{", "  CHORD testchord c d e" + LM, "}"), Dict.ERROR_NOT_ALLOWED_IN_BLK, "CHORD");
+		aeS(arr("{", "  META" + LM, "    composer Beethoven", "  END", "}"), Dict.ERROR_BLOCK_UNMATCHED_OPEN);
+		aeS(arr("{", "  INSTRUMENTS" + LM, "    0 1 test3", "  END", "}"), Dict.ERROR_BLOCK_UNMATCHED_OPEN);
+		aeS(arr("{", "0 c /4", "0 d /4", "", ""), Dict.ERROR_NESTABLE_BLOCK_OPEN_AT_EOF);
+		
+		// block options
+		aeC(arr("VAR $x = 5", "{ if" + LM, "  0  c  /4", "}"), Dict.ERROR_OPTION_NEEDS_VAL, "if");
+		aeC(arr("VAR $x = 1", "{ if=" + LM, "  0  c  /4", "}"), Dict.ERROR_OPTION_NEEDS_VAL, "if");
+		aeC(arr("VAR $x = 5", "{ if $x", "  0  c  /4", "}",
+				"{ elsif" + LM, "  0  c  /4", "}"), Dict.ERROR_OPTION_NEEDS_VAL, "elsif");
+		aeC(arr("VAR $x = 5", "{ if $x", "  0  c  /4", "}",
+				"{ elsif=" + LM, "  0  c  /4", "}"), Dict.ERROR_OPTION_NEEDS_VAL, "elsif");
+		aeC(arr("VAR $x = 5", "{ if $x", "  0  c  /4", "}",
+				"{ else=" + LM, "  0  c  /4", "}"), Dict.ERROR_OPTION_VAL_NOT_ALLOWED, "else");
+		aeC(arr("{ t=5" + LM, "  0  c  /4", "}"), Dict.ERROR_TUPLET_INVALID, "5");
+		aeC(arr("{ t=5:0" + LM, "  0  c  /4", "}"), Dict.ERROR_TUPLET_INVALID, "5:0");
+		aeC(arr("{ t=5:" + LM, "  0  c  /4", "}"), Dict.ERROR_TUPLET_INVALID, "5:");
+		aeC(arr("{ t=:3" + LM, "  0  c  /4", "}"), Dict.ERROR_TUPLET_INVALID, ":3");
+		aeC(arr("{ xyz=5" + LM, "  0  c  /4", "}"), Dict.ERROR_UNKNOWN_OPTION, "xyz");
+		
+		// block if/elsif/else
+		aeS(arr("VAR $x = 1", "{ if=$x, elsif $x" + LM, "  0  c  /4", "}"), Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE);
+		aeS(arr("VAR $x = 1", "{ if=$x", "  0  c  /4", "} if $x"), Dict.ERROR_BLOCK_IF_MUST_BE_ALONE);
+		aeS(arr("VAR $x = 1", "{", "  { if=$x", "    0  c  /4", "  } if $x" + LM,  "}"), Dict.ERROR_BLOCK_IF_MUST_BE_ALONE);
+		aeS(arr("VAR $x = 1", "{ if=$x", "  0  c  /4", "}",
+				"{  elsif=$x, if $x" + LM, "  0  c  /4",  "}"), Dict.ERROR_BLOCK_IF_MUST_BE_ALONE);
+		aeS(arr("VAR $x = 1", "{ if=$x", "  0  c  /4", "}",
+				"{ elsif=$x", "  0  c  /4",  "} elsif $x"), Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE);
+		aeS(arr("VAR $x = 1", "{", "  { if=$x", "    0  c  /4", "}",
+				"  {  elsif=$x", "    0  c  /4",  "  } elsif $x" + LM, "}"), Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE);
+		aeS(arr("VAR $x = 1", "{ if=$x", "  0  c  /4", "}",
+				"{ else, elsif=$x" + LM, "  0  c  /4",  "}"), Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE);
+		aeS(arr("VAR $x = 1", "{ if=$x", "  0  c  /4", "}",
+				"{ else", "  0  c  /4",  "} else"), Dict.ERROR_BLOCK_ELSE_MUST_BE_ALONE);
+		aeS(arr("VAR $x = 1", "{", "{ if=$x", "  0  c  /4", "}",
+				"{ else", "  0  c  /4",  "} else" + LM, "}"), Dict.ERROR_BLOCK_ELSE_MUST_BE_ALONE);
+		aeS(arr("VAR $x = 1", "{ if=$x", "  0  c  /4", "}",
+				"0  c  /4",
+				"{ elsif=$x", "  0  c  /4",  "}"), Dict.ERROR_BLOCK_NO_IF_FOUND, cfg().causedByBlkCond(true));
+		aeS(arr("VAR $x = 1", "{", "  { if=$x", "    0  c  /4", "  }",
+				"  0  c  /4",
+				"  { elsif=$x", "    0  c  /4",  "  }", "}"), Dict.ERROR_BLOCK_NO_IF_FOUND, cfg().causedByBlkCond(true).content(false));
+		aeS(arr("VAR $x = 1", "{ if=$x", "  0  c  /4", "}",
+				"0  c  /4",
+				"{ else", "  0  c  /4",  "}"), Dict.ERROR_BLOCK_NO_IF_FOUND, cfg().causedByBlkCond(true));
+		aeS(arr("VAR $x = 1", "{ if=$x", "  0  c  /4", "}",
+				"{", "}",
+				"{ else", "  0  c  /4",  "}"), Dict.ERROR_BLOCK_NO_IF_FOUND, cfg().causedByBlkCond(true));
+		aeS(arr("VAR $x = 1", "{", "  { if=$x", "    0  c  /4", "  }",
+				"  0  c  /4",
+				"  { else", "    0  c  /4",  "  }", "}"), Dict.ERROR_BLOCK_NO_IF_FOUND, cfg().causedByBlkCond(true).content(false));
+		aeS(arr("VAR $x = 1", "{", "  { if=$x", "    0  c  /4", "  }",
+				"  {", "  }",
+				"  { else", "    0  c  /4",  "  }", "}"), Dict.ERROR_BLOCK_NO_IF_FOUND, cfg().causedByBlkCond(true).content(false));
+		
+		// conditions
+		aeC(arr("VAR $x = 1", "{ if $x==$x!=$x" + LM, "  0  c  /4", "}"), Dict.ERROR_TOO_MANY_OPERATORS_IN_COND, "$x==$x!=$x");
+		aeC(arr("VAR $x = 1", "{ if $x $x" + LM, "  0  c  /4", "}"), Dict.ERROR_COND_DEFINED_HAS_WHITESPACE, "$x $x");
+		aeC(arr("VAR $x = 1", "{ if $x $x==5" + LM, "  0  c  /4", "}"), Dict.ERROR_COND_WHITESPACE_IN_FIRST_OP, "$x $x");
+		aeC(arr("VAR $x = 1", "{ if $x==5 5" + LM, "  0  c  /4", "}"), Dict.ERROR_COND_WHITESPACE_IN_SEC_OP, "5 5");
+		aeC(arr("VAR $x = 1", "{ if !" + LM, "  0  c  /4", "}"), Dict.ERROR_COND_UNDEF_EMPTY, "!");
+		aeC(arr("VAR $x = 1", "{ if $x!$x" + LM, "  0  c  /4", "}"), Dict.ERROR_COND_UNDEF_IN_CENTER, "$x!$x");
+		aeC(arr("VAR $x = 1", "{ if $x in 1;2;3 4;5" + LM, "  0  c  /4", "}"), Dict.ERROR_COND_WHITESPACE_IN_IN_ELEM, "3 4");
+		aeC(arr("VAR $x = 1", "{ if $x in 1;2;;5" + LM, "  0  c  /4", "}"), Dict.ERROR_COND_EMPTY_ELEM_IN_IN_LIST, "1;2;;5");
+		
+		// lowlevel channel commands
+		aeC("p c /4", Dict.ERROR_UNKNOWN_PERCUSSION, "c");
+		aeC("0 c+6 /4", Dict.ERROR_UNKNOWN_NOTE, "c+6");
+		aeS("0 c", Dict.ERROR_CH_CMD_NUM_OF_ARGS);
+		aeS("0 -", Dict.ERROR_CH_CMD_NUM_OF_ARGS);
+		aeC("-1  c  /4", Dict.ERROR_UNKNOWN_CMD, "-1");
+		aeS("0 -", Dict.ERROR_CH_CMD_NUM_OF_ARGS);
+		aeS("0 -", Dict.ERROR_CH_CMD_NUM_OF_ARGS);
+		aeS("0 -", Dict.ERROR_CH_CMD_NUM_OF_ARGS);
+		aeC(arr("VAR $x = -1", "$x  c  /4"), Dict.ERROR_UNKNOWN_CMD, "-1", cfg().content("-1  c  /4"));
+		aeC("16  c  /4", Dict.ERROR_INVALID_CHANNEL_NUMBER, "16");
+		aeS("0 c -", Dict.ERROR_ZEROLENGTH_NOT_ALLOWED);
+		aeS(arr("0 c/d pat" + NM, "PATTERN pat", "  {", "    {",
+				"      0 -" + CM, "    }", "  }", "END"), Dict.ERROR_ZEROLENGTH_NOT_ALLOWED);
+		aeS("0 c/d -", Dict.ERROR_ZEROLENGTH_NOT_ALLOWED);
+		aeS("0 - /4+-+/8", Dict.ERROR_ZEROLENGTH_IN_SUM);
+		aeC("0 - - m", Dict.ERROR_ZEROLENGTH_INVALID_OPTION, "multiple");
+		aeC(arr("0 c/d pat" + NM, "PATTERN pat", "  - - m" + CM, "END"), Dict.ERROR_ZEROLENGTH_INVALID_OPTION, OPT_MULTIPLE);
+		aeC(arr("CALL f" + NM, "FUNCTION f", "  {", "    {",
+				"      0  c/d  pat", "    }", "  }", "END",
+				"PATTERN pat", "  {", "    {",
+				"      - - m" + CM, "    }", "  }", "END"), Dict.ERROR_ZEROLENGTH_INVALID_OPTION, OPT_MULTIPLE);
+		aeC("0 - - q=5", Dict.ERROR_ZEROLENGTH_INVALID_OPTION, "quantity");
+		aeC("0 - - s=5", Dict.ERROR_ZEROLENGTH_INVALID_OPTION, "shift");
+		aeC("0 - - tr=5", Dict.ERROR_ZEROLENGTH_INVALID_OPTION, "tremolo");
+		aeF("2 c /4", Dict.ERROR_CHANNEL_UNDEFINED, 2, cfg().include(false));
+		
+		// compact channel commands
+		aeS("1: (q=0) c", Dict.ERROR_0_NOT_ALLOWED);
+		aeC("0: (length=-)", Dict.ERROR_OPT_LENGTH_MORE_THAN_0, "length");
+		aeC("0: c c c/d/e:pat_none c c", Dict.ERROR_NOTE_LENGTH_INVALID, "pat_none");
+		aeF("0: c c (v=127,l=text,d=50%) c (s=1) c", Dict.ERROR_COMPACT_INVALID_OPTION, "shift", "(s=1)");
+		aeC("0: c c (v=127,l=text,d=50%) c (unk=1) c", Dict.ERROR_UNKNOWN_OPTION, "unk");
+		aeC("1: c (m,q=2,m) d", Dict.ERROR_DUPLICATE_OPTION, "multiple");
+		aeS("1: c (m,q=2) (m) d", Dict.ERROR_OTO_DUPLICATE_MULTIPLE);
+		aeC(arr("VAR $x = test", "$x: c:/4"), Dict.ERROR_UNKNOWN_CMD, "test:", cfg().content("test: c:/4"));
+		aeF("0: c d e", Dict.ERROR_CHANNEL_UNDEFINED, 0, cfg().include(false));
+		
+		// options
+		aeC("0 c /4 if=123", Dict.ERROR_CHANNEL_INVALID_OPT, "if");
+		aeC("0  c  /4  v==100", Dict.ERROR_NOT_AN_INTEGER, "=100");
+		aeC("0  c  /4  v", Dict.ERROR_OPTION_NEEDS_VAL, "v");
+		aeC("0  c  /4  v=", Dict.ERROR_OPTION_NEEDS_VAL, "v");
+		aeC("0  c  /4  d", Dict.ERROR_OPTION_NEEDS_VAL, "d");
+		aeC("0  c  /4  d=", Dict.ERROR_OPTION_NEEDS_VAL, "d");
+		aeC("0  c  /4  q", Dict.ERROR_OPTION_NEEDS_VAL, "q");
+		aeC("0  c  /4  q=", Dict.ERROR_OPTION_NEEDS_VAL, "q");
+		aeC("0  c  /4  l", Dict.ERROR_OPTION_NEEDS_VAL, "l");
+		aeC("0  c  /4  lyrics=", Dict.ERROR_OPTION_NEEDS_VAL, "lyrics");
+		aeC("0  c  /4  tr", Dict.ERROR_OPTION_NEEDS_VAL, "tr");
+		aeC("0  c  /4  tr=", Dict.ERROR_OPTION_NEEDS_VAL, "tr");
+		aeC("0  c  /4  s", Dict.ERROR_OPTION_NEEDS_VAL, "s");
+		aeC("0  c  /4  s=", Dict.ERROR_OPTION_NEEDS_VAL, "s");
+		aeC("0  c  /4  m=", Dict.ERROR_OPTION_VAL_NOT_ALLOWED, "multiple");
+		aeS("0  c  /4  v=128", Dict.ERROR_VEL_NOT_MORE_THAN_127);
+		aeC("0  c  /4  v=-2", Dict.ERROR_NEGATIVE_NOT_ALLOWED, "-2");
+		aeS("0  c  /4  v=0", Dict.ERROR_VEL_NOT_LESS_THAN_1);
+		aeS("0  c  /4  d=0", Dict.ERROR_DURATION_MORE_THAN_0);
+		aeC("0  c  /4  d=0.1.2", Dict.ERROR_NOT_A_FLOAT, "0.1.2");
+		aeS("0  c  /4  d=-0.1", Dict.ERROR_DURATION_MORE_THAN_0);
+		
+		// one-time-options (oto)
+		aeF(arr("1: c (q=2)", "{" + LM, "}"), Dict.ERROR_OTO_BEFORE_BLOCK, "quantity", 1);
+		aeF(arr("{", "  1: c (m)", "  {" + LM, "  }", "}"), Dict.ERROR_OTO_BEFORE_BLOCK, "multiple", 1);
+		aeF(arr("{", "  {", "    1: d e (m)", "  }" + LM, "  1: f", "}", "1: g"), Dict.ERROR_OTO_AT_END_OF_BLOCK, "multiple", 1);
+		aeF(arr("{", "  {", "    1: d e", "  }", "  1: f (q=2)", "}" + LM, "1: g"), Dict.ERROR_OTO_AT_END_OF_BLOCK, "quantity", 1);
+		aeF(arr("1: c (q=2)", "CALL f" + LM, "FUNCTION f", "END"), Dict.ERROR_OTO_BEFORE_FUNCTION, "quantity", 1);
+		aeF(arr("{", "  1: c (q=2)", "  CALL f" + CM, "}" + NM, "FUNCTION f", "END"), Dict.ERROR_OTO_BEFORE_FUNCTION, "quantity", 1);
+		aeF(arr("{", "  1: c", "  {", "    1: c (q=2)", "    CALL f" + CM, "  }", "}" + NM, "FUNCTION f", "END"), Dict.ERROR_OTO_BEFORE_FUNCTION, "quantity", 1);
+		aeF(arr("CALL f", "FUNCTION f", "  1: (m) c (q=2) d (tr=/32) e (q=2)", "END" + LM), Dict.ERROR_OTO_AT_END_OF_FUNCTION, "quantity", 1);
+		aeS(arr("1: c (tr=/32) d:pat" + LM, "PATTERN pat", "END"), Dict.ERROR_OTO_TREMOLO_PATTERN_CALL);
+		aeS(arr("1: c (q=2)", "1: (q=3) d"), Dict.ERROR_OTO_DUPLICATE_QUANTITY);
+		aeS(arr("1: c (m,q=2,tr=/32)", "0: c", "1: (tr=/16) d"), Dict.ERROR_OTO_DUPLICATE_TREMOLO);
+		
+		// constants and variables
+		aeC("0  c  /4  v==103", Dict.ERROR_NOT_AN_INTEGER, "=103");
+		aeC("0  c  l=$x", Dict.ERROR_VAR_NOT_DEFINED, "$x");
+		aeC("CONST $a = $a", Dict.ERROR_CONST_NAME_EQ_VALUE, "$a");
+		aeC("VAR $a = $a", Dict.ERROR_VAR_NAME_EQ_VALUE, "$a");
+		aeS("CONST", Dict.ERROR_CONST_NUM_OF_ARGS);
+		aeS("CONST $crd", Dict.ERROR_CONST_NUM_OF_ARGS);
+		aeC("CONST xy = z", Dict.ERROR_CONST_NAME_INVALID, "xy");
+		aeS("VAR", Dict.ERROR_VAR_NUM_OF_ARGS);
+		aeC(arr("VAR $x==100", "0  c  /4  v=$x"), Dict.ERROR_NOT_AN_INTEGER, "=100");
+		aeS("VAR $x", Dict.ERROR_VAR_NUM_OF_ARGS);
+		aeC("VAR x = c", Dict.ERROR_VAR_NAME_INVALID, "x");
+		aeC("VAR x = c c", Dict.ERROR_VAR_VAL_HAS_WHITESPACE, "c c");
+		aeC("$y: c:/4", Dict.ERROR_VAR_NOT_DEFINED, "$y");
+		aeC(arr("CONST $crd c/d/e", "CONST $crd d/e/f"), Dict.ERROR_CONST_ALREADY_DEFINED, "$crd");
+		aeS(arr("CONST $a = !$b!" + LM, "CONST $b = !$a!"), Dict.ERROR_CONST_RECURSION);
+		aeS(arr("VAR $d = $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$",
+				"VAR $a = a;", "VAR $a = $d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$d$a"), Dict.ERROR_VAR_RECURSION);
+		
+		// global commands
+		aeC("* time 3:4", Dict.ERROR_INVALID_TIME_SIG, "3:4");
+		aeC("* key c/inval", Dict.ERROR_INVALID_TONALITY, "inval");
+		aeC("* key d5/maj", Dict.ERROR_UNKNOWN_NOTE, "d5");
+		aeC("* key d5:maj", Dict.ERROR_INVALID_KEY_SIG, "d5:maj");
+		aeC("* cmd d5:maj", Dict.ERROR_UNKNOWN_GLOBAL_CMD, "cmd");
+		aeS("* 0,1-2,,3", Dict.ERROR_PARTIAL_RANGE_EMPTY);
+		aeC("* 0,2-2,3", Dict.ERROR_PARTIAL_RANGE_ORDER, "2-2");
+		aeC("* 0,2-3-4,5", Dict.ERROR_PARTIAL_RANGE, "2-3-4");
+		aeS("* tempo 0", Dict.ERROR_0_NOT_ALLOWED);
+		
+		// bar lines
+		aeS(arr("* time 4/4",
+				"0: | c:1 | c |",
+				"0: | c   | c |",
+				"0: | c   | c |",
+				"0: | c   | c:16 c c c  c c c c  c c c c  c c c c:32 |"),
+				Dict.ERROR_BAR_LINE_INCORRECT + "/" + Dict.ERROR_BAR_LINE_TOO_EARLY + "/" + Dict.ERROR_BAR_LINE_EXACT_NOTE_LEN,
+				cfg().msg(false).msgContains(true));
+		aeS(arr("* time 4/4",
+				"0: | c:1 | c |",
+				"0: | c   | c |",
+				"0: | c   | c |",
+				"0: | c   | c |",
+				"0: | c   | c:16 c c c  c c c c  c c c c  c c c c:32. |"),
+				Dict.ERROR_BAR_LINE_INCORRECT + "/" + Dict.ERROR_BAR_LINE_TOO_EARLY + "/" + Dict.ERROR_BAR_LINE_SMALL,
+				cfg().msg(false).msgContains(true));
+		aeS(arr("* time 4/4",
+				"0: | c:1 | c |",
+				"0: | c   | c |",
+				"0: | c   | c |",
+				"0: | c   | c |",
+				"0: | c   | c:16 c c c  c c c c  c c c c  c c c c  c:32 |"),
+				Dict.ERROR_BAR_LINE_INCORRECT + "/" + Dict.ERROR_BAR_LINE_TOO_LATE + "/" + Dict.ERROR_BAR_LINE_EXACT_NOTE_LEN,
+				cfg().msg(false).msgContains(true));
+		aeS(arr("* time 4/4",
+				"0: | c:1 | c |",
+				"0: | c   | c |",
+				"0: | c   | c |",
+				"0: | c   | c |",
+				"0: | c   | c:16 c c c  c c c c  c c c c  c c c c  c:32.. |"),
+				Dict.ERROR_BAR_LINE_INCORRECT + "/" + Dict.ERROR_BAR_LINE_TOO_LATE + "/" + Dict.ERROR_BAR_LINE_BETWEEN,
+				cfg().msg(false).msgContains(true));
+		
+		// effect flows
+		aeC("0: volll.keep.set(50)", Dict.ERROR_UNKNOWN_NOTE, "volll.keep.set(50)");
+		aeC("0: vol.keeeeeep.set(50)", Dict.ERROR_FL_UNKNOWN_ELEMENT, "keeeeeep");
+		aeF("0: vol.wait()set(50)", Dict.ERROR_FL_MISSING_DOT, ".");
+		aeC("0: vol=30.set(50)", Dict.ERROR_FL_NUMBER_NOT_ALLOWED, "vol");
+		aeF("0: vol.double().set(50)", Dict.ERROR_FL_PARAMS_NOT_ALLOWED, "double");
+		aeC("0: hold.double.on()", Dict.ERROR_FL_DOUBLE_NOT_SUPPORTED, "double");
+		aeC("0: chorus.double.set(50)", Dict.ERROR_FL_DOUBLE_NOT_SUPPORTED, "double");
+		aeC("0: coarse_tune.double.set(+50)", Dict.ERROR_FL_DOUBLE_NOT_SUPPORTED, "double");
+		aeF("0: coarse_tune.set(-65)", Dict.ERROR_FUNC_VAL_LOWER_MIN, "-65", "-64");
+		aeF("0: coarse_tune.set(+64)", Dict.ERROR_FUNC_VAL_GREATER_MAX, "+64", "+63");
+		aeC("0: coarse_tune.set(+0%)", Dict.ERROR_FUNC_PERCENT_FORBIDDEN, "+0%");
+		aeC("0: coarse_tune.set(+3.5)", Dict.ERROR_FUNC_BROKEN_HALFTONE, "+3.5");
+		aeF("0: fine_tune.set(-1.0001)", Dict.ERROR_FUNC_VAL_LOWER_MIN, "-1.0001", "-1.0");
+		aeF("0: fine_tune.set(+1.0001)", Dict.ERROR_FUNC_VAL_GREATER_MAX, "+1.0001", "+1.0");
+		aeF("0: fine_tune.set(-101%)", Dict.ERROR_FUNC_VAL_LOWER_MIN, "-101%", "-100%");
+		aeF("0: fine_tune.set(+101%)", Dict.ERROR_FUNC_VAL_GREATER_MAX, "+101%", "+100%");
+		aeF("0: fine_tune.double.set(+2)", Dict.ERROR_FUNC_VAL_GREATER_MAX, "+2", "+1.0");
+		aeC("0: wait().set(50)", Dict.ERROR_FL_EFF_NOT_SET, "set");
+		aeC("0: wait().double.vol.set(50)", Dict.ERROR_FL_EFF_NOT_SET, "double");
+		aeS("0: vol.wait().vol.set(50)", Dict.ERROR_FL_EFF_ALREADY_SET);
+		aeC("0: note(c).vol.set(100%)", Dict.ERROR_FL_EFF_NOT_SET, "note");
+		aeF(arr("0: vol.double.set(50)", "VAR $x = y", "0: .wait.set(50)"), Dict.ERROR_FL_NOT_OPEN, ".");
+		aeF(arr("0: vol.double.set(50)", "CONST $x = y", "0: .wait.set(50)"), Dict.ERROR_FL_NOT_OPEN, ".");
+		aeF(arr("0: vol.double.set(50)", "CALL func", "0: .wait.set(50)" + LM, "FUNCTION func", "END"), Dict.ERROR_FL_NOT_OPEN, ".");
+		aeF(arr("0: vol.double.set(50)", "FUNCTION func", "END", "0: .wait.set(50)"), Dict.ERROR_FL_NOT_OPEN, ".");
+		aeF(arr("0: vol.double.set(50)", "0: c", "0: .wait.set(50)"), Dict.ERROR_FL_NOT_OPEN, ".");
+		aeF(arr("0: vol.wait().set(50)", "1: balance.wait().set(+50)", "0: .wait.set(50)"), Dict.ERROR_FL_NOT_OPEN, ".");
+		aeC(arr("0: vol.wait()", "0: wait().set(50)"), Dict.ERROR_FL_EFF_NOT_SET, "set");
+		aeF(arr("0: c/d/e:pat" + NM, "PATTERN pat",
+				"  : 0/1/2", "  : poly_at.note(3)" + CM, "END"), Dict.ERROR_FL_NOTE_PAT_IDX_TOO_HIGH, "3", ".note(3)");
+		aeF(arr("0: c/d/e:pat" + NM, "PATTERN pat",
+				"  : 0/1/2", "  : poly_at.note(c)" + CM, "END"), Dict.ERROR_FL_NOTE_PAT_IDX_NAN, "c", ".note(c)");
+		aeF(arr("0: c/d/e:pat" + NM, "PATTERN pat", "  {",
+				"    : 0/1/2", "    : poly_at.note(3)" + CM, "  }", "END"), Dict.ERROR_FL_NOTE_PAT_IDX_TOO_HIGH, "3", ".note(3)");
+		aeF(arr("0: c/d/e:pat" + NM, "PATTERN pat", "  {", "    {",
+				"      : 0/1/2", "      : poly_at.note(3)" + CM, "    }", "  }", "END"), Dict.ERROR_FL_NOTE_PAT_IDX_TOO_HIGH, "3", ".note(3)");
+		aeF(arr("0: c/d/e:pat1" + NM, "PATTERN pat1", "  {", "    {",
+				"      : 0/1/2", "      : 0/1/2:pat2", "    }", "  }", "END",
+				"PATTERN pat2", "  {", "    {", "      : poly_at.note(3)" + CM, "    }", "  }", "END"), Dict.ERROR_FL_NOTE_PAT_IDX_TOO_HIGH, "3", ".note(3)");
+		
+		// effect functions
+		aeF("0: vol.set", Dict.ERROR_FL_PARAMS_REQUIRED, "set");
+		aeF("0: vol.set(30,40)", Dict.ERROR_FL_WRONG_PARAM_NUM, "set", 1, 2, "30,40");
+		aeF("0: vol.wait(4,8)", Dict.ERROR_FL_WRONG_PARAM_NUM, "wait", 1, 2, "4,8");
+		aeF("0: vol.set()", Dict.ERROR_FL_WRONG_PARAM_NUM, "set", 1, 0, "");
+		aeC("0: vol.wait().wait().set(50).test", Dict.ERROR_FL_UNKNOWN_ELEMENT, "test");
+		aeC("0: vol.wait().wait().set(50).wait-for-me", Dict.ERROR_FL_UNMATCHED_REMAINDER, "-for-me");
+		aeC("0: vol.sin(0,,100%)", Dict.ERROR_FL_EMPTY_PARAM, "0,,100%");
+		aeC("0: poly_mode.off()", Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF, "off");
+		aeC("0: poly_mode.set(0)", Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF, "set");
+		aeC("0: poly_mode.set(+0)", Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF, "set");
+		aeC("0: mono_mode.off()", Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF, "off");
+		aeF("0: mono_mode.set(17)", Dict.ERROR_FUNC_VAL_GREATER_MAX, "17", "16");
+		aeC("0: mono_mode.set(50%)", Dict.ERROR_FUNC_PERCENT_FORBIDDEN, "50%");
+		aeC("0: mono_mode.line(0,16)", Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF, "line");
+		aeC("0: vol.on()", Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF, "on");
+		aeC("0: chorus.off()", Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF, "off");
+		aeC("0: legato.set(0)", Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF, "set");
+		aeC("0: legato.set(+0)", Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF, "set");
+		aeC("0: pitch_range.line(1,12)", Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF, "line");
+		aeC("0: nrpn=123.line(1,12)", Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF, "line");
+		aeC("0: vol.line(1,9999999999999)", Dict.ERROR_FUNC_NO_NUMBER, "9999999999999");
+		aeC("0: vol.line(1,0x7F)", Dict.ERROR_FUNC_NO_NUMBER, "0x7F");
+		aeF("0: balance.line(+63,-65)", Dict.ERROR_FUNC_VAL_LOWER_MIN, -65, -64);
+		aeC("0: vol.line(1,-0.000001%)", Dict.ERROR_FUNC_SIGNED_FORBIDDEN, "-0.000001%");
+		aeF("0: balance.line(+1,-101%)", Dict.ERROR_FUNC_VAL_LOWER_MIN, "-101%", "-100%");
+		aeF("0: vol.line(1,128)", Dict.ERROR_FUNC_VAL_GREATER_MAX, "128", "127");
+		aeF("0: balance.double.line(+1,+8192)", Dict.ERROR_FUNC_VAL_GREATER_MAX, "+8192", "+8191");
+		aeC("0: vol.sin(0,100%,1.2.3)", Dict.ERROR_FUNC_PERIODS_NO_NUMBER, "1.2.3");
+		aeC("0: vol.sin(0,100%,999999999999999999999999999999999999999.0)", Dict.ERROR_FUNC_PERIODS_NO_NUMBER, "999999999999999999999999999999999999999.0");
+		aeC("0: vol.sin(0,100%,-1.0)", Dict.ERROR_FUNC_PERIODS_SIGNED, "-1.0");
+		aeC("0: vol.sin(0,100%,+1.0)", Dict.ERROR_FUNC_PERIODS_SIGNED, "+1.0");
+		aeC("0: vol.sin(0,100%,+1.0)", Dict.ERROR_FUNC_PERIODS_SIGNED, "+1.0");
+		aeC("0: vol.sin(0,100%,+10%)", Dict.ERROR_FUNC_PERIODS_SIGNED, "+10%");
+		aeC("0: vol.sin(0,100%,0)", Dict.ERROR_FUNC_PERIODS_NOT_POS, "0");
+		aeF("0: vol.set(12.0)", Dict.ERROR_FUNC_HALFTONE_NOT_ALLOWED, "12.0");
+		aeC("0: vol.set(+12.0)", Dict.ERROR_FUNC_SIGNED_FORBIDDEN, "+12.0");
+		aeF("0: pitch_range.set(129.0)", Dict.ERROR_FUNC_VAL_GREATER_MAX, 129.0f, 127f);
+		aeF("0: pitch_range.double.set(127.997)", Dict.ERROR_FUNC_VAL_GREATER_MAX, 127.997f, 127.99f);
+		aeF("0: pitch_range.set(127.0001)", Dict.ERROR_FUNC_VAL_GREATER_MAX, 127.0001f, 127f);
+		aeF("0: pitch_range.double.set(127.997)", Dict.ERROR_FUNC_VAL_GREATER_MAX, 127.997, 127.99f);
+		aeC("0: pitch_range.set(12.0%)", Dict.ERROR_FUNC_PERCENT_FORBIDDEN, "12.0%");
+		aeC("0: poly_at.note(c+6).set(123)", Dict.ERROR_UNKNOWN_NOTE, "c+6");
+		aeC("0: vol.note(c).set(100%)", Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF, "note");
+		aeC("0: mono_at.note(c).set(100%)", Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF, "note");
+		aeC("0: pitch_range.note(c).set(2.0)", Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF, "note");
+		aeC("0: poly_at.set(100%)", Dict.ERROR_FL_NOTE_NOT_SET, "set");
+		aeC("0: port_ctrl.on()", Dict.ERROR_FL_NOTE_NOT_SET, "on");
+		aeC("0: ctrl=123.wait.set(12)", Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF, "set");
+		aeC("0: ctrl=123.wait.off()", Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF, "off");
+		aeF("0: vol.set(12/30)", Dict.ERROR_FUNC_MSB_LSB_NEEDS_DOUBLE, "12/30", "double");
+		aeC("0: vol.set(+50)", Dict.ERROR_FUNC_SIGNED_FORBIDDEN, "+50");
+		aeC("0: balance.set(50)", Dict.ERROR_FUNC_SIGNED_REQUIRED, "50");
+		aeC("0: mono_mode.set(+5)", Dict.ERROR_FUNC_SIGNED_FORBIDDEN, "+5");
+		aeS(arr("0: vol.wait", "1: c" + LM, ""), Dict.ERROR_FL_PENDING);
+		aeS(arr("0: hold.wait"), Dict.ERROR_FL_PENDING, cfg().number(false));
+		aeS(arr("0: hold.wait", "", ""), Dict.ERROR_FL_PENDING);
+		aeS(arr("FUNCTION func", "  {", "    {", "",
+				"      0: hold.wait", "", "      0: c" + CM, "", "    }", "  }", "END",
+				"{", "  {", "    CALL func", "    0: a", "  }", "}" + NM, ""), Dict.ERROR_FL_PENDING);
+		aeF(arr("0: pitch_range.set(2.0)", "0: pitch.wait.set(+2.3)"), Dict.ERROR_FUNC_HALFTONE_GT_RANGE, "+2.3", "2.0");
+		aeF(arr("0: pitch_range.set(2.0)", "0: pitch.wait.set(-2.3)"), Dict.ERROR_FUNC_HALFTONE_GT_RANGE, "-2.3", "2.0");
+		
+		// effect functions with hex or MSB/LSB parameters
+		aeF("0: vol.double.set(128/30)", Dict.ERROR_FUNC_MSB_TOO_HIGH, "128/30", "128");
+		aeF("0: vol.double.set(30/128)", Dict.ERROR_FUNC_LSB_TOO_HIGH, "30/128", "128");
+		aeF("0: vol.line(1,x8F)", Dict.ERROR_FUNC_HEX_TOO_HIGH, "x", "x", "8F");
+		aeF("0: vol.double.set(x7F/x80)", Dict.ERROR_FUNC_HEX_TOO_HIGH, "x", "x", "80");
+		aeF("0: vol.double.set(x81/x32)", Dict.ERROR_FUNC_HEX_TOO_HIGH, "x", "x", "81");
+		aeC("0: vol.line(1,x123)", Dict.ERROR_FUNC_HEX_DIGITS, "x123");
+		aeC("0: vol.line(1,xF)", Dict.ERROR_FUNC_HEX_DIGITS, "xF");
+		aeC("0: vol.double.set(x00/x123)", Dict.ERROR_FUNC_HEX_DIGITS, "x123");
+		aeC("0: vol.double.set(x00/x1)", Dict.ERROR_FUNC_HEX_DIGITS, "x1");
+		aeC("0: vol.double.set(x123/x5)", Dict.ERROR_FUNC_HEX_DIGITS, "x123");
+		aeC("0: vol.double.set(x1/x00)", Dict.ERROR_FUNC_HEX_DIGITS, "x1");
+		aeC("0: vol.double.set(x7F)", Dict.ERROR_FUNC_HEX_LSB_REQUIRED, "x7F");
+		aeC("0: vol.set(x7F/)", Dict.ERROR_FUNC_NUMBER_EMPTY, "x7F/");
+		aeC("0: vol.set(x7F/x)", Dict.ERROR_FUNC_NO_NUMBER, "x7F/x");
+		aeC("0: vol.double.set(x7F/)", Dict.ERROR_FUNC_NUMBER_EMPTY, "x7F/");
+		aeC("0: vol.double.set(x7F/x)", Dict.ERROR_FUNC_NO_NUMBER, "x7F/x");
+		aeC("0: vol.set(xAG)", Dict.ERROR_FUNC_HEX_FORMAT, "xAG");
+		aeC("0: vol.double.set(x7F)", Dict.ERROR_FUNC_HEX_LSB_REQUIRED, "x7F");
+		aeF("0: vol.set(x00/x00)", Dict.ERROR_FUNC_MSB_LSB_NEEDS_DOUBLE, "x00/x00", "double");
+		aeF("0: vol.on(x12)", Dict.ERROR_FL_WRONG_PARAM_NUM, "on", 0, 1, "x12");
+		aeF("0: hold.on(5)", Dict.ERROR_FL_WRONG_PARAM_NUM, "on", 0, 1, "5");
 		
 		// generic numbers (ctrl / rpn / nrpn)
-		aemF("0: nrpn=999999999999999.set(50)", Dict.ERROR_FL_NUMBER_TOO_HIGH, "999999999999999", "nrpn", 16383);
-		aemF("0: ctrl=128.set(50)", Dict.ERROR_FL_NUMBER_TOO_HIGH, 128, "ctrl", 127);
-		aemC("0: vol=12.set(50)", Dict.ERROR_FL_NUMBER_NOT_ALLOWED, "vol");
-		aemF("0: rpn.set(50)", Dict.ERROR_FL_NUMBER_MISSING, "rpn");
-		aemC("0: nrpn=.set(50)", Dict.ERROR_FL_NUMBER_EMPTY, "nrpn");
-		aemC("0: ctrl=0/11.set(50)", Dict.ERROR_FL_NUM_SEP_NOT_ALLOWED, "ctrl");
-		aemF("0: ctrl=x8F.set(100)", Dict.ERROR_FUNC_HEX_TOO_HIGH, "x", "x", "8F");
-		aemF("0: rpn=x7F/x80.set(100)", Dict.ERROR_FUNC_HEX_TOO_HIGH, "x", "x", "80");
-		aemF("0: rpn=x81/x32.set(100)", Dict.ERROR_FUNC_HEX_TOO_HIGH, "x", "x", "81");
-		aemC("0: rpn=x7F.set(5)", Dict.ERROR_FL_HEX_LSB_REQUIRED, "x7F");
-		aemC("0: nrpn=x12.set(x7F)", Dict.ERROR_FL_HEX_LSB_REQUIRED, "x12");
-		aemC("0: nrpn=x123.set(100)", Dict.ERROR_FL_HEX_LSB_REQUIRED, "x123");
-		aemC("0: nrpn=x.set(50)", Dict.ERROR_FL_HEX_LSB_REQUIRED, "x");
-		aemC("0: ctrl=xF.line(1,100)", Dict.ERROR_FUNC_HEX_DIGITS, "xF");
-		aemC("0: nrpn=x00/x123.set(100)", Dict.ERROR_FUNC_HEX_DIGITS, "x123");
-		aemC("0: rpn=x00/x1.set(100)", Dict.ERROR_FUNC_HEX_DIGITS, "x1");
-		aemC("0: nrpn=x123/x5.set(10)", Dict.ERROR_FUNC_HEX_DIGITS, "x123");
-		aemC("0: rpn=x1/x00.set(20)", Dict.ERROR_FUNC_HEX_DIGITS, "x1");
-		aemC("0: ctrl=x.set(6)", Dict.ERROR_FUNC_HEX_DIGITS, "x");
-		aemC("0: rpn=x/x23.set(6)", Dict.ERROR_FUNC_HEX_DIGITS, "x");
-		aemC("0: ctrl=x7F/.set(20)", Dict.ERROR_FL_NUMBER_EMPTY, "ctrl");
-		aemC("0: ctrl=/x7F.set(20)", Dict.ERROR_FL_NUMBER_EMPTY, "ctrl");
-		aemC("0: ctrl=x/x7F.set(20)", Dict.ERROR_FL_NUM_SEP_NOT_ALLOWED, "ctrl");
-		aemC("0: ctrl=x7F/x.set(6)", Dict.ERROR_FL_NUM_SEP_NOT_ALLOWED, "ctrl");
-		aemC("0: rpn=x7F/x.set(6)", Dict.ERROR_FUNC_HEX_DIGITS, "x");
-		aemC("0: rpn=x7F/xAG.set(6)", Dict.ERROR_FL_HEX_FORMAT, "x7F/xAG");
+		aeF("0: nrpn=999999999999999.set(50)", Dict.ERROR_FL_NUMBER_TOO_HIGH, "999999999999999", "nrpn", 16383);
+		aeF("0: ctrl=128.set(50)", Dict.ERROR_FL_NUMBER_TOO_HIGH, 128, "ctrl", 127);
+		aeC("0: vol=12.set(50)", Dict.ERROR_FL_NUMBER_NOT_ALLOWED, "vol");
+		aeF("0: rpn.set(50)", Dict.ERROR_FL_NUMBER_MISSING, "rpn");
+		aeC("0: nrpn=.set(50)", Dict.ERROR_FL_NUMBER_EMPTY, "nrpn");
+		aeC("0: ctrl=0/11.set(50)", Dict.ERROR_FL_NUM_SEP_NOT_ALLOWED, "ctrl");
+		aeF("0: ctrl=x8F.set(100)", Dict.ERROR_FUNC_HEX_TOO_HIGH, "x", "x", "8F");
+		aeF("0: rpn=x7F/x80.set(100)", Dict.ERROR_FUNC_HEX_TOO_HIGH, "x", "x", "80");
+		aeF("0: rpn=x81/x32.set(100)", Dict.ERROR_FUNC_HEX_TOO_HIGH, "x", "x", "81");
+		aeC("0: rpn=x7F.set(5)", Dict.ERROR_FL_HEX_LSB_REQUIRED, "x7F");
+		aeC("0: nrpn=x12.set(x7F)", Dict.ERROR_FL_HEX_LSB_REQUIRED, "x12");
+		aeC("0: nrpn=x123.set(100)", Dict.ERROR_FL_HEX_LSB_REQUIRED, "x123");
+		aeC("0: nrpn=x.set(50)", Dict.ERROR_FL_HEX_LSB_REQUIRED, "x");
+		aeC("0: ctrl=xF.line(1,100)", Dict.ERROR_FUNC_HEX_DIGITS, "xF");
+		aeC("0: nrpn=x00/x123.set(100)", Dict.ERROR_FUNC_HEX_DIGITS, "x123");
+		aeC("0: rpn=x00/x1.set(100)", Dict.ERROR_FUNC_HEX_DIGITS, "x1");
+		aeC("0: nrpn=x123/x5.set(10)", Dict.ERROR_FUNC_HEX_DIGITS, "x123");
+		aeC("0: rpn=x1/x00.set(20)", Dict.ERROR_FUNC_HEX_DIGITS, "x1");
+		aeC("0: ctrl=x.set(6)", Dict.ERROR_FUNC_HEX_DIGITS, "x");
+		aeC("0: rpn=x/x23.set(6)", Dict.ERROR_FUNC_HEX_DIGITS, "x");
+		aeC("0: ctrl=x7F/.set(20)", Dict.ERROR_FL_NUMBER_EMPTY, "ctrl");
+		aeC("0: ctrl=/x7F.set(20)", Dict.ERROR_FL_NUMBER_EMPTY, "ctrl");
+		aeC("0: ctrl=x/x7F.set(20)", Dict.ERROR_FL_NUM_SEP_NOT_ALLOWED, "ctrl");
+		aeC("0: ctrl=x7F/x.set(6)", Dict.ERROR_FL_NUM_SEP_NOT_ALLOWED, "ctrl");
+		aeC("0: rpn=x7F/x.set(6)", Dict.ERROR_FUNC_HEX_DIGITS, "x");
+		aeC("0: rpn=x7F/xAG.set(6)", Dict.ERROR_FL_HEX_FORMAT, "x7F/xAG");
 		
+		// controller destination
+		aeC("0: ctrl_dest.note(c)", Dict.ERROR_FUNC_NOT_SUPPORTED_BY_EFF, "note");
+		aeC(arr("0: ctrl_dest", "0:  .on()"), Dict.ERROR_FUNC_CD_SRC_NOT_SET, "on");
+		aeC(arr("0: ctrl_dest", "0:   .dest(vol,+10%)", "0:   .on()"), Dict.ERROR_FUNC_CD_SRC_NOT_SET, "on");
+		aeC(arr("0: ctrl_dest", "0:   .src(voll)" + LM, "0:   .dest(vol,10%)", "0:   .on()"), Dict.ERROR_FUNC_CD_SRC_CTRL_UNKNOWN, "voll");
+		aeC(arr("0: ctrl_dest", "0:   .src(ctrl=128)" + LM, "0:   .dest(vol,10%)", "0:   .on()"), Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP, "ctrl=128");
+		aeC(arr("0: ctrl_dest", "0:   .src(ctrl=5=7)" + LM, "0:   .dest(vol,10%)", "0:   .on()"), Dict.ERROR_FUNC_CD_SRC_CTRL_UNKNOWN, "ctrl=5=7");
+		aeC(arr("0: ctrl_dest", "0:   .src(ctrl=9999999999999999999999999999)" + LM, "0:   .dest(vol,10%)", "0:   .on()"), Dict.ERROR_FUNC_CD_SRC_CTRL_UNKNOWN, "ctrl=9999999999999999999999999999");
+		aeC(arr("0: ctrl_dest", "0:   .src(ctrl=0)" + LM, "0:   .dest(vol,10%)", "0:   .on()"), Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP, "ctrl=0");
+		aeC(arr("0: ctrl_dest", "0:   .src(ctrl=32)" + LM, "0:   .dest(vol,10%)", "0:   .on()"), Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP, "ctrl=32");
+		aeC(arr("0: ctrl_dest", "0:   .src(ctrl=57)" + LM, "0:   .dest(vol,10%)", "0:   .on()"), Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP, "ctrl=57");
+		aeC(arr("0: ctrl_dest", "0:   .src(ctrl=60)" + LM, "0:   .dest(vol,10%)", "0:   .on()"), Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP, "ctrl=60");
+		aeC(arr("0: ctrl_dest", "0:   .src(mono_mode)" + LM, "0:   .dest(vol,10%)", "0:   .on()"), Dict.ERROR_FUNC_CD_SRC_CTRL_NOT_SUPP, "mono_mode");
+		aeC(arr("0: ctrl_dest", "0:   .src(mono_at)", "0:   .src(poly_at)" + LM, "0:   .on()"), Dict.ERROR_FUNC_CD_SRC_ALREADY_SET, "src");
+		aeC(arr("0: ctrl_dest", "0:   .src(vol)", "0:   .on()"), Dict.ERROR_FUNC_CD_DEST_NOT_SET, "on");
+		aeC(arr("0: ctrl_dest", "0:   .src(vol)", "0:   .dest(voll,10%)" + LM, "0:   .on()"), Dict.ERROR_FUNC_CD_DEST_UNKNOWN, "voll");
+		aeC(arr("0: ctrl_dest", "0:   .src(vol)", "0:   .dest(ctrl=11,10%)" + LM, "0:   .on()"), Dict.ERROR_FUNC_CD_DEST_UNKNOWN, "ctrl=11");
 	}
 	
 	/**
@@ -4821,36 +3535,134 @@ class MidicaPLParserTest extends MidicaPLParser {
 	
 	/**
 	 * Tests the given line, expects a {@link ParseException}, and
+	 * checks the error message (with simple translation).
+	 * 
+	 * aeS stands for: Assert Exception (with SIMPLE error message).
+	 * 
+	 * @param line
+	 * @param key
+	 * @throws Exception if something goes wrong
+	 */
+	private void aeS(String line, String key) throws Exception {
+		aeS(arr(line), key);
+	}
+	
+	/**
+	 * Tests the given lines, expects a {@link ParseException}, and
+	 * checks the error message (with simple translation).
+	 * 
+	 * aeS stands for: Assert Exception (with SIMPLE error message).
+	 * 
+	 * @param lines    source lines to be checked
+	 * @param key      dictionary key of the expected error message
+	 * @param cfgs     optional configs (must have 0 or 1 elements)
+	 * @throws Exception if something goes wrong
+	 */
+	private void aeS(String[] lines, String key, LineTestConfig... cfgs) throws Exception {
+		LineTestConfig cfg = cfg(cfgs);
+		String expectedMsg = Dict.get(key);
+		parseFailingLines(lines, key, expectedMsg, cfg);
+	}
+	
+	/**
+	 * Tests the given line, expects a {@link ParseException}, and
 	 * checks the error message (with concatenation).
 	 * 
-	 * aemC stands for: Assert Error Message (Concatenated).
+	 * aeC stands for: Assert Exception (with CONCATENATED error message).
 	 * 
 	 * @param line             the line to be tested
 	 * @param key              dictionary key for the expected error message
 	 * @param concatenation    string that's concatenated at the end of the expected message
 	 * @throws Exception if something goes wrong
 	 */
-	private void aemC(String line, String key, String concatenation) throws Exception {
+	private void aeC(String line, String key, String concatenation) throws Exception {
+		aeC(arr(line), key, concatenation);
+	}
+	
+	/**
+	 * Tests the given lines, expects a {@link ParseException}, and
+	 * checks the error message (with concatenation).
+	 * 
+	 * aeC stands for: Assert Exception (with CONCATENATED error message).
+	 * 
+	 * @param lines            source lines to be checked
+	 * @param key              dictionary key of the expected error message
+	 * @param concatenation    string that's concatenated at the end of the expected message
+	 * @param cfgs             optional configs (must have 0 or 1 elements)
+	 * @throws Exception if something goes wrong
+	 */
+	private void aeC(String[] lines, String key, String concatenation, LineTestConfig... cfgs) throws Exception {
+		LineTestConfig cfg = cfg(cfgs);
 		String expectedMsg = Dict.get(key) + concatenation;
-		ParseException e = parseFailingLine(line, key, expectedMsg);
-		assertEquals(expectedMsg, e.getMessage());
+		ParseException e = parseFailingLines(lines, key, expectedMsg, cfg);
 	}
 	
 	/**
 	 * Tests the given line, expects a {@link ParseException}, and
 	 * checks the error message (with string format).
 	 * 
-	 * aemF stands for: Assert Error Message (Formatted).
+	 * aeF stands for: Assert Exception (with FORMATTED error message).
 	 * 
 	 * @param line      the line to be tested
 	 * @param key       dictionary key for the expected error message
-	 * @param values    values for the string format
+	 * @param values    values for the string format. The LAST element may be a {@link #LineTestConfig}
 	 * @throws Exception if something goes wrong
 	 */
-	private void aemF(String line, String key, Object... values) throws Exception {
+	private void aeF(String line, String key, Object... values) throws Exception {
+		aeF(arr(line), key, values);
+	}
+	
+	/**
+	 * Tests the given lines, expects a {@link ParseException}, and
+	 * checks the error message (with string format).
+	 * 
+	 * aeF stands for: Assert Exception (with FORMATTED error message).
+	 * 
+	 * @param lines     source lines to be checked
+	 * @param key       dictionary key of the expected error message
+	 * @param values    values for the string format. The LAST element may be a {@link #LineTestConfig}
+	 * @throws Exception if something goes wrong
+	 */
+	private void aeF(String[] lines, String key, Object... values) throws Exception {
+		
+		// get config
+		LineTestConfig cfg = null;
+		if (values.length > 0) {
+			if (values[values.length - 1] instanceof LineTestConfig) {
+				cfg = (LineTestConfig) values[values.length - 1];
+				values = Arrays.copyOf(values, values.length - 1);
+			}
+		}
+		if (null == cfg)
+			cfg = cfg();
+		
 		String expectedMsg = String.format(Dict.get(key), values);
-		ParseException e = parseFailingLine(line, key, expectedMsg);
-		assertEquals(expectedMsg, e.getMessage());
+		parseFailingLines(lines, key, expectedMsg, cfg);
+	}
+	
+	/**
+	 * Returns the the given lines as an array.
+	 * 
+	 * @param lines  the lines
+	 * @return the given lines as a string array
+	 */
+	private String[] arr(String ... lines) {
+		return lines;
+	}
+	
+	/**
+	 * Transforms an optional list of configs into a single config, if available,
+	 * or creates a default config.
+	 * 
+	 * @param cfgs    optional list of configs
+	 * @return the config or a default config
+	 */
+	private LineTestConfig cfg(LineTestConfig... cfgs) {
+		if (0 == cfgs.length)
+			return new LineTestConfig();
+		if (1 == cfgs.length)
+			return cfgs[0];
+		throw new RuntimeException("More than 1 configs not allowed.");
 	}
 	
 	/**
@@ -4859,36 +3671,192 @@ class MidicaPLParserTest extends MidicaPLParser {
 	 * The temp file contains an include with instruments in the 1st line,
 	 * and the given String as the second line.
 	 * 
-	 * @param line    the line that should throw the exception
-	 * @param key     dictionary key for the expected error message
+	 * @param lines          the lines that should throw the exception
+	 * @param key            dictionary key for the expected error message
+	 * @param expectedMsg    expected error message
+	 * @param cfg            failing line test configuration
 	 * @return the ParseException
 	 * @throws Exception 
 	 */
-	private ParseException parseFailingLine(String line, String key, String expectedMsg) throws Exception {
+	private ParseException parseFailingLines(String[] lines, String key, String expectedMsg, LineTestConfig cfg) throws Exception {
 		
 		// get absolute path to the include file
 		String inclPath = TestUtil.getTestfileDirectory()
 				+ "failing" + File.separator + "inc" + File.separator + "instruments.midica";
 		File inclFile = new File(inclPath);
 		
+		// get failing line
+		int    failingContentIndex = -1;
+		int    failingNumberIndex  = -1;
+		String failingContent      = null;
+		boolean cmFound = false;
+		boolean nmFound = false;
+		for (int i = 0; i < lines.length; i++) {
+			
+			boolean hasCm = patContentMarker.matcher(lines[i]).find();
+			boolean hasNm = patNumberMarker.matcher(lines[i]).find();
+			boolean hasLm = patLineMarker.matcher(lines[i]).find();
+			boolean isCm  = hasCm || hasLm;
+			boolean isNm  = hasNm || hasLm;
+			
+			if (isCm) {
+				if (cmFound)
+					throw new RuntimeException("Only one conent marker allowed.");
+				failingContent      = lines[i];
+				failingContentIndex = i;
+				cmFound             = true;
+				if (hasCm)
+					failingContent = failingContent.replace(CM, "");
+				else
+					failingContent = failingContent.replace(LM, "");
+			}
+			if (isNm) {
+				if (nmFound)
+					throw new RuntimeException("Only one number marker allowed.");
+				failingNumberIndex = i;
+				nmFound            = true;
+			}
+		}
+		if (failingNumberIndex < 0)
+			failingNumberIndex = lines.length - 1;
+		if (failingContentIndex < 0) {
+			failingContentIndex = failingNumberIndex;
+			failingContent      = lines[failingContentIndex];
+		}
+		failingContent = clean(failingContent);
+		int failingContentNum = failingContentIndex + 1;
+		int failingNumberNum  = failingNumberIndex + 1;
+		
 		// write (new) content to the test file
 		BufferedWriter writer = Files.newBufferedWriter(tmpTestFile.toPath() , StandardOpenOption.TRUNCATE_EXISTING);
-		writer.append("INCLUDE " + inclFile.getAbsolutePath() + "\n");
-		writer.append(line);
-		writer.append("\n");
+		if (cfg.include) {
+			writer.append("INCLUDE " + inclFile.getAbsolutePath() + "\n");
+			failingContentNum++;
+			failingNumberNum++;
+		}
+		for (int i = 0; i < lines.length; i++) {
+			String line = lines[i];
+			if (i > 0)
+				writer.append("\n");
+			writer.append(line);
+		}
 		writer.close();
 		
-		// check line number and content
+		// parse the file
 		ParseException e = assertThrows(ParseException.class, () -> parse(tmpTestFile));
-		assertEquals(2, e.getLineNumber());
-		assertEquals(line, e.getLineContent());
 		
-		System.err.println("line: " + line);
-		System.err.println("expected msg: " + expectedMsg);
-		System.err.println("got msg     : " + e.getMessage());
-		System.err.println();
+		// check exception
+		boolean ok      = true;
+		String  summary = "failed checks:";
+		if (cfg.msg && !expectedMsg.equals(e.getMessage())) {
+			ok = false;
+			summary += " error-msg";
+		}
+		if (cfg.number && failingNumberNum != e.getLineNumber()) {
+			ok = false;
+			summary += " line-number";
+		}
+		if (cfg.content) {
+			String expectedContent = cfg.lineContent != null ? cfg.lineContent : failingContent;
+			if (!expectedContent.equals(e.getLineContent())) {
+				ok = false;
+				summary += " line-content";
+			}
+		}
+		if (cfg.key && !key.equals(e.getDictKey())) {
+			ok = false;
+			summary += " dict-key";
+		}
+		if (cfg.causedByVar && !e.getFullMessage().contains(Dict.get(Dict.EXCEPTION_CAUSED_BY_INVALID_VAR))) {
+			ok = false;
+			summary += " invalid-var";
+		}
+		if (cfg.causedByBlkCond && !e.getFullMessage().contains(Dict.get(Dict.EXCEPTION_CAUSED_BY_BLK_COND))) {
+			ok = false;
+			summary += " block-condition";
+		}
+		
+		// print result
+		if (1 == lines.length) {
+			logFailingLines(ok, "line : " + failingContent + " \n");
+		}
+		else {
+			String line;
+			int i = 0;
+			boolean numberEqualsContent = failingContentNum == failingNumberNum;
+			try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(tmpTestFile), "UTF-8"))) {
+				while (null != (line = br.readLine())) {
+					if (0 == i)
+						logFailingLines(ok, "file: ");
+					else
+						logFailingLines(ok, "      ");
+					if (failingContentNum == i + 1) {
+						String symbol = numberEqualsContent ? "CN " : "C  ";
+						logFailingLines(ok, symbol + "=>");
+					}
+					else if (failingNumberNum == i + 1) {
+						if (!numberEqualsContent)
+							logFailingLines(ok, "N  =>");
+					}
+					else {
+						logFailingLines(ok, "     ");
+					}
+					logFailingLines(ok, String.format("[%2d] ", i + 1));
+					logFailingLines(ok, line + "\n");
+					i++;
+				}
+			}
+		}
+		if (ok) {
+			logFailingLines(ok, "msg  : " + e.getMessage() + "\n");
+		}
+		else {
+			logFailingLines(ok, "expected msg      : " + expectedMsg + "\n");
+			logFailingLines(ok, "got msg           : " + e.getMessage() + "\n");
+			logFailingLines(ok, "expected line num : " + failingNumberNum + "\n");
+			logFailingLines(ok, "got line num      : " + e.getLineNumber() + "\n");
+			logFailingLines(ok, "expected line     : " + failingContent + "\n");
+			logFailingLines(ok, "got line          : " + e.getLineContent() + "\n");
+			logFailingLines(ok, "expected key      : " + key + "\n");
+			logFailingLines(ok, "got key           : " + e.getDictKey() + "\n");
+			logFailingLines(ok, "SUMMARY           : " + summary + "\n");
+		}
+		String fullMsg = e.getFullMessage()
+				.replace("<html>", "")
+				.replace("&nbsp;", " ")
+				.replace("<br>", "\n       ");
+		logFailingLines(ok, "full : " + fullMsg + "\n\n");
+		
+		if (!ok) {
+			throw new RuntimeException(summary);
+		}
 		
 		return e;
+	}
+	
+	/**
+	 * Removes leading and trailing whitespaces from the given input line.
+	 * 
+	 * @param input  the input line
+	 * @return the cleaned line
+	 */
+	private String clean(String input) {
+		input = input.replaceFirst("^\\s+", ""); // eliminate leading whitespaces
+		input = input.replaceFirst("\\s+$", ""); // eliminate trailing whitespaces
+		return input;
+	}
+	
+	/**
+	 * Logs the result of failing lines to STDOUT or STDERR.
+	 * 
+	 * @param ok   **true**: the exception is like expected; **false**: the exception is different from what was expected
+	 * @param str  the string to be printed
+	 */
+	private void logFailingLines(boolean ok, String str) {
+		if (ok)
+			System.out.print(str);
+		else
+			System.err.print(str);
 	}
 	
 	/**
@@ -5185,5 +4153,93 @@ class MidicaPLParserTest extends MidicaPLParser {
 		
 		// put everything together
 		return channel + "/" + src + "==>" + String.join(",", destinations);
+	}
+	
+	/**
+	 * Configuration for line-based exception checking.
+	 */
+	class LineTestConfig {
+		
+		private boolean msg             = true;
+		private boolean msgContains     = false;
+		private boolean key             = true;
+		private boolean number          = true;
+		private boolean content         = true;
+		private String  lineContent     = null;
+		private boolean include         = true;
+		private boolean causedByVar     = false;
+		private boolean causedByBlkCond = false;
+		
+		/**
+		 * @param msg  **false** if the error message should **not** be checked.
+		 */
+		public LineTestConfig msg(boolean msg) {
+			this.msg = msg;
+			return this;
+		}
+		/**
+		 * @param msgContains    **true** to check if the error message CONTAINS the expected message.
+		 * @return this instance
+		 */
+		public LineTestConfig msgContains(boolean msgContains) {
+			this.msgContains = msgContains;
+			return this;
+		}
+		/**
+		 * @param key  **false** if the translation key should **not** be checked.
+		 * @return this instance
+		 */
+		public LineTestConfig key(boolean key) {
+			this.key = key;
+			return this;
+		}
+		/**
+		 * @param number  **false** if the line number should **not** be checked.
+		 * @return this instance
+		 */
+		public LineTestConfig number(boolean number) {
+			this.number = number;
+			return this;
+		}
+		/**
+		 * @param content  **false** if the line content should **not** be checked.
+		 * @return this instance
+		 */
+		public LineTestConfig content(boolean content) {
+			this.content = content;
+			return this;
+		}
+		/**
+		 * @param content  the expected transformed line content.
+		 * @return this instance
+		 */
+		public LineTestConfig content(String content) {
+			this.lineContent = content;
+			return this;
+		}
+		/**
+		 * @param include  **false** if the instruments file should **not** be included.
+		 * @return this instance
+		 */
+		public LineTestConfig include(boolean include) {
+			this.include = include;
+			return this;
+		}
+		/**
+		 * @param causedByVar  **true** if the exception is expected to be thrown because of an invalid variable.
+		 * @return this instance
+		 */
+		public LineTestConfig causedByVar(boolean causedByVar) {
+			this.causedByVar = causedByVar;
+			return this;
+		}
+		/**
+		 * @param causedByBlkCond  **true** if the exception is expected to be thrown because of an invalid block condition.
+		 * @return this instance
+		 */
+		public LineTestConfig causedByBlkCond(boolean causedByBlkCond) {
+			this.causedByBlkCond = causedByBlkCond;
+			return this;
+		}
 	}
 }

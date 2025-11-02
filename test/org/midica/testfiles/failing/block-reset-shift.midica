@@ -1,5 +1,0 @@
-INCLUDE inc/instruments.midica
-
-{ s=2
-	0  c  /4
-} s=3

@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 import org.midica.config.Dict;
 import org.midica.file.read.MidicaPLParser;
-import org.midica.file.read.ParseException;
+import org.midica.file.read.exception.ParseException;
 import org.midica.file.write.MidicaPLExporter;
 
 /**
@@ -442,7 +442,7 @@ public class Instrument implements Comparable<Instrument> {
 	 */
 	public void setOtoQuantity(int quantity) throws ParseException {
 		if (otoQuantity != null)
-			throw new ParseException(Dict.get(Dict.ERROR_OTO_DUPLICATE_QUANTITY));
+			throw ParseException.simple(Dict.ERROR_OTO_DUPLICATE_QUANTITY);
 		otoQuantity = quantity;
 	}
 	
@@ -462,7 +462,7 @@ public class Instrument implements Comparable<Instrument> {
 	 */
 	public void setOtoTremolo(String tremolo) throws ParseException {
 		if (otoTremolo != null)
-			throw new ParseException(Dict.get(Dict.ERROR_OTO_DUPLICATE_TREMOLO));
+			throw ParseException.simple(Dict.ERROR_OTO_DUPLICATE_TREMOLO);
 		otoTremolo = tremolo;
 	}
 	
@@ -483,7 +483,7 @@ public class Instrument implements Comparable<Instrument> {
 	 */
 	public void setOtoMultiple(boolean multiple) throws ParseException {
 		if (otoMultiple)
-			throw new ParseException(Dict.get(Dict.ERROR_OTO_DUPLICATE_MULTIPLE));
+			throw ParseException.simple(Dict.ERROR_OTO_DUPLICATE_MULTIPLE);
 		otoMultiple = multiple;
 	}
 	

@@ -1,6 +1,0 @@
-INCLUDE inc/instruments.midica
-
-META
-	FUNCTION test
-	END
-END

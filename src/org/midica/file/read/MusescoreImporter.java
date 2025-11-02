@@ -18,6 +18,7 @@ import org.midica.config.Config;
 import org.midica.config.Dict;
 import org.midica.file.Foreign;
 import org.midica.file.ForeignException;
+import org.midica.file.read.exception.ParseException;
 import org.midica.midi.SequenceCreator;
 
 /**
@@ -77,7 +78,7 @@ public class MusescoreImporter extends MidiParser {
 			postprocessSequence(sequence, chosenCharset); // analyze the original sequence
 		}
 		catch (ForeignException | InvalidMidiDataException | IOException e) {
-			throw new ParseException(e.getMessage());
+			throw ParseException.wrapGenericException(e);
 		}
 	}
 }

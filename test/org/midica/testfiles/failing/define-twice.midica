@@ -1,5 +1,0 @@
-INCLUDE inc/instruments.midica
-
-DEFINE CHORD a
-DEFINE CHORD b
-

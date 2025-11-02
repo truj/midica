@@ -1,4 +1,0 @@
-INCLUDE inc/instruments.midica
-
-
-0: poly_at.note(c+6).set(123)

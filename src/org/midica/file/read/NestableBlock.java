@@ -13,6 +13,8 @@ import java.util.Deque;
 import java.util.regex.Pattern;
 
 import org.midica.config.Dict;
+import org.midica.file.read.exception.FatalParseException;
+import org.midica.file.read.exception.ParseException;
 
 /**
  * This class represents a nestable block, used by the MidicaPL parser.
@@ -83,9 +85,8 @@ public class NestableBlock {
 	public void setMultiple(String optId) throws ParseException {
 		
 		// already set?
-		if (isMultipleSet) {
-			throw new ParseException( Dict.get(Dict.ERROR_BLOCK_ARG_ALREADY_SET) + optId );
-		}
+		if (isMultipleSet)
+			throw ParseException.concat(Dict.ERROR_BLOCK_ARG_ALREADY_SET, optId);
 		
 		// set
 		multiple      = true;
@@ -103,9 +104,8 @@ public class NestableBlock {
 	public void setQuantity(int quantity, String optId) throws ParseException {
 		
 		// already set?
-		if (isQuantitySet) {
-			throw new ParseException( Dict.get(Dict.ERROR_BLOCK_ARG_ALREADY_SET) + optId );
-		}
+		if (isQuantitySet)
+			throw ParseException.concat(Dict.ERROR_BLOCK_ARG_ALREADY_SET, optId);
 		
 		// set
 		this.quantity = quantity;
@@ -124,9 +124,8 @@ public class NestableBlock {
 	public void setTuplet(String tuplet, String optId) throws ParseException {
 		
 		// already set?
-		if (isTupletSet) {
-			throw new ParseException( Dict.get(Dict.ERROR_BLOCK_ARG_ALREADY_SET) + optId );
-		}
+		if (isTupletSet)
+			throw ParseException.concat(Dict.ERROR_BLOCK_ARG_ALREADY_SET, optId);
 		
 		this.tuplet = tuplet;
 		isTupletSet = true;
@@ -144,9 +143,8 @@ public class NestableBlock {
 	public void setShift(int shift, String optId) throws ParseException {
 		
 		// already set?
-		if (isShiftSet) {
-			throw new ParseException( Dict.get(Dict.ERROR_BLOCK_ARG_ALREADY_SET) + optId );
-		}
+		if (isShiftSet)
+			throw ParseException.concat(Dict.ERROR_BLOCK_ARG_ALREADY_SET, optId);
 		
 		this.shift += shift;
 		isShiftSet = true;
@@ -159,9 +157,8 @@ public class NestableBlock {
 	 * @throws ParseException  if this option is combined with other if-elsif-else options.
 	 */
 	public void setIf(String condition) throws ParseException {
-		if (isIf || isElsif || isElse) {
-			throw new ParseException( Dict.get(Dict.ERROR_BLOCK_IF_MUST_BE_ALONE) );
-		}
+		if (isIf || isElsif || isElse)
+			throw ParseException.simple(Dict.ERROR_BLOCK_IF_MUST_BE_ALONE);
 		
 		isIf = true;
 		this.condition = condition;
@@ -174,9 +171,8 @@ public class NestableBlock {
 	 * @throws ParseException  if this option is combined with other if-elsif-else options.
 	 */
 	public void setElsif(String condition) throws ParseException {
-		if (isIf || isElsif || isElse) {
-			throw new ParseException( Dict.get(Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE) );
-		}
+		if (isIf || isElsif || isElse)
+			throw ParseException.simple(Dict.ERROR_BLOCK_ELSIF_MUST_BE_ALONE);
 		
 		isElsif = true;
 		this.condition = condition;
@@ -188,9 +184,8 @@ public class NestableBlock {
 	 * @throws ParseException  if this option is combined with other if-elsif-else options.
 	 */
 	public void setElse() throws ParseException {
-		if (isIf || isElsif || isElse) {
-			throw new ParseException( Dict.get(Dict.ERROR_BLOCK_ELSE_MUST_BE_ALONE) );
-		}
+		if (isIf || isElsif || isElse)
+			throw ParseException.simple(Dict.ERROR_BLOCK_ELSE_MUST_BE_ALONE);
 		
 		isElse = true;
 	}
@@ -548,7 +543,7 @@ public class NestableBlock {
 							}
 							if (MidicaPLParser.COND_TYPE_ELSIF == childConditionType || MidicaPLParser.COND_TYPE_ELSE == childConditionType) {
 								if (! condChainOpened)
-									throw new ParseException( Dict.get(Dict.ERROR_BLOCK_NO_IF_FOUND) );
+									throw ParseException.simple(Dict.ERROR_BLOCK_NO_IF_FOUND);
 							}
 							if (MidicaPLParser.COND_TYPE_ELSE == childConditionType)
 								mustPlay = ! condChainHit;
@@ -617,7 +612,7 @@ public class NestableBlock {
 					callStack.pop();
 				}
 				else {
-					throw new ParseException("invalid block element class: " + element.getClass());
+					throw new FatalParseException("invalid block element class: " + element.getClass());
 				}
 			}
 		}

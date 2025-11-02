@@ -1,4 +1,0 @@
-INCLUDE inc/instruments.midica
-
-
-0: chorus.double.set(50)

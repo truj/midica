@@ -1,6 +1,0 @@
-INCLUDE inc/instruments.midica
-
-FUNCTION test
-	SOFT_KARAOKE
-	END
-END

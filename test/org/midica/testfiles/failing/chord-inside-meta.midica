@@ -1,6 +1,0 @@
-INCLUDE inc/instruments.midica
-
-META
-	CHORD testchord c d e
-	0 c /4
-END

@@ -1,4 +1,0 @@
-INCLUDE inc/instruments.midica
-
-
-0: ctrl=123.wait.off()

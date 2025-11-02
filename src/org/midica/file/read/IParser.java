@@ -7,6 +7,8 @@
 
 package org.midica.file.read;
 
+import org.midica.file.read.exception.ParseException;
+
 /**
  * This interface can be implemented by parser classes which can
  * parse an input file.

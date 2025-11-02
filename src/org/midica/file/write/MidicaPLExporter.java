@@ -19,7 +19,7 @@ import java.util.TreeMap;
 import org.midica.config.Dict;
 import org.midica.file.Instrument;
 import org.midica.file.read.MidicaPLParser;
-import org.midica.file.read.ParseException;
+import org.midica.file.read.exception.ParseException;
 import org.midica.midi.KaraokeAnalyzer;
 import org.midica.midi.LyricUtil;
 import org.midica.midi.SequenceAnalyzer;

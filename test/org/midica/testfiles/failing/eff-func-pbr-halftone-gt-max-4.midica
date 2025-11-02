@@ -1,4 +1,0 @@
-INCLUDE inc/instruments.midica
-
-
-0: pitch_range.double.set(127.997)

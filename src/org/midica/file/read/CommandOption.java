@@ -7,6 +7,9 @@
 
 package org.midica.file.read;
 
+import org.midica.file.read.exception.FatalParseException;
+import org.midica.file.read.exception.ParseException;
+
 /**
  * Objects of this class represent a MidicaPL command option.
  * It can be:

@@ -34,9 +34,9 @@ import org.midica.file.read.LilypondImporter;
 import org.midica.file.read.MidiParser;
 import org.midica.file.read.MidicaPLParser;
 import org.midica.file.read.MusescoreImporter;
-import org.midica.file.read.ParseException;
 import org.midica.file.read.SequenceParser;
 import org.midica.file.read.SoundbankParser;
+import org.midica.file.read.exception.ParseException;
 import org.midica.file.write.AbcExporter;
 import org.midica.file.write.AldaExporter;
 import org.midica.file.write.ExportException;
@@ -459,7 +459,7 @@ public class UiController implements ActionListener, WindowListener, ItemListene
 			}
 			catch (InterruptedException | ExecutionException workerException) {
 				workerException.printStackTrace();
-				throw new ParseException(workerException.getMessage());
+				throw ParseException.wrapGenericException(workerException);
 			}
 			
 			// show the filename of the successfully parsed file

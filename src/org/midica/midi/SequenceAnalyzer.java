@@ -32,7 +32,7 @@ import javax.sound.midi.Track;
 
 import org.midica.config.Dict;
 import org.midica.file.CharsetUtils;
-import org.midica.file.read.ParseException;
+import org.midica.file.read.exception.ParseException;
 import org.midica.ui.model.SingleMessage;
 import org.midica.ui.model.MessageTreeNode;
 import org.midica.ui.model.MidicaTreeModel;
@@ -181,7 +181,7 @@ public class SequenceAnalyzer {
 			}
 			else {
 				e.printStackTrace();
-				throw new ParseException(e.getMessage());
+				throw ParseException.wrapGenericException(e);
 			}
 		}
 		
@@ -1092,7 +1092,7 @@ public class SequenceAnalyzer {
 			SequenceCreator.addMarkers(markers);
 		}
 		catch (InvalidMidiDataException e) {
-			throw new ParseException(Dict.get(Dict.ERROR_ANALYZE_POSTPROCESS) + e.getMessage());
+			throw ParseException.concat(Dict.ERROR_ANALYZE_POSTPROCESS, e.getMessage());
 		}
 		
 		// postprocess the lyrics for karaoke

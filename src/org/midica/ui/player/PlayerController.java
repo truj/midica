@@ -33,8 +33,8 @@ import javax.swing.text.Document;
 import org.midica.Midica;
 import org.midica.config.Dict;
 import org.midica.config.Laf;
-import org.midica.file.read.ParseException;
 import org.midica.file.read.SequenceParser;
+import org.midica.file.read.exception.ParseException;
 import org.midica.midi.MidiDevices;
 import org.midica.ui.ErrorMsgView;
 import org.midica.ui.info.InfoView;
@@ -773,7 +773,7 @@ public class PlayerController implements ActionListener, WindowListener, ChangeL
 				}
 			}
 			catch (InterruptedException | ExecutionException workerException) {
-				throw new ParseException(workerException.getMessage());
+				throw ParseException.wrapGenericException(workerException);
 			}
 			
 			// setup the MIDI devices while showing another wait message

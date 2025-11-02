@@ -1,9 +1,0 @@
-INCLUDE inc/instruments.midica
-
-
-0: vol.wait().set(50)
-CALL func
-0: .wait.set(50)
-
-FUNCTION func
-END
