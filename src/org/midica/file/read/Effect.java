@@ -42,6 +42,7 @@ public class Effect {
 	private static EffectFlow flow = null;
 	
 	private static List<TreeMap<Long, Float>> pitchBendRangeByChannel;
+	private static List<TreeMap<Long, Float>> modulationRangeByChannel;
 	
 	private static Set<String> functionNames;
 	private static Set<String> effectNames;
@@ -80,6 +81,14 @@ public class Effect {
 				TreeMap<Long, Float> rangeMap = new TreeMap<>();
 				rangeMap.put(0L, 2f);                // default: 2.0
 				pitchBendRangeByChannel.add(rangeMap);
+			}
+			
+			// modulation range by channel/tick
+			modulationRangeByChannel = new ArrayList<>();
+			for (int channel = 0; channel < 16; channel++) {
+				TreeMap<Long, Float> rangeMap = new TreeMap<>();
+				rangeMap.put(0L, .5f);               // default: 0.5
+				modulationRangeByChannel.add(rangeMap);
 			}
 		}
 		
@@ -1086,19 +1095,38 @@ public class Effect {
 			throw new FatalParseException("Invalid MIDI data when trying to apply (N)RPN " + effectNum + ".");
 		}
 		
-		// special case: pitch bend range
-		if (isRpn && 0x0000 == flow.getEffectNumber()) {
-			TreeMap<Long, Float> rangeMap = pitchBendRangeByChannel.get(channel);
+		// special RPN cases
+		if (isRpn) {
 			
-			// get range in half tone steps
-			float halfToneSteps = values[1];
-			if (values.length > 2) {
-				float cents = values[2] / 100f;
-				halfToneSteps += cents;
+			// special case: pitch bend range
+			if (0x0000 == flow.getEffectNumber()) {
+				TreeMap<Long, Float> rangeMap = pitchBendRangeByChannel.get(channel);
+				
+				// get range in half tone steps
+				float halfToneSteps = values[1];
+				if (values.length > 2) {
+					float cents = values[2] / 100f;
+					halfToneSteps += cents;
+				}
+				
+				// remember pitch bend range
+				rangeMap.put(tick, halfToneSteps);
 			}
 			
-			// remember pitch bend range
-			rangeMap.put(tick, halfToneSteps);
+			// special case: modulation range
+			if (0x0005 == flow.getEffectNumber()) {
+				TreeMap<Long, Float> rangeMap = modulationRangeByChannel.get(channel);
+				
+				// get range in half tone steps
+				float halfToneSteps = values[1];
+				if (values.length > 2) {
+					float cents = values[2] / 128f;
+					halfToneSteps += cents;
+				}
+				
+				// remember pitch bend range
+				rangeMap.put(tick, halfToneSteps);
+			}
 		}
 	}
 	
@@ -1440,32 +1468,57 @@ public class Effect {
 	 */
 	private static int parseHalfToneSteps(String halfToneStr) throws ParseException {
 		
-		int effNum = flow.getEffectNumber();
+		int effNum  = flow.getEffectNumber();
+		int effType = flow.getEffectType();
 		
 		float halfToneSteps = Float.parseFloat(halfToneStr);
 		
-		// pitch bend range
-		if (0x0000 == effNum) {
+		// rpn
+		if (EffectFlow.EFF_TYPE_RPN == effType) {
 			
-			// check range
-			float max = flow.isDouble() ? 127.99f : 127;
-			if (halfToneSteps > max)
-				throw ParseException.format(Dict.ERROR_FUNC_VAL_GREATER_MAX, halfToneStr, max);
+			// pitch bend range
+			if (0x0000 == effNum) {
+				
+				// check range
+				float max = flow.isDouble() ? 127.99f : 127;
+				if (halfToneSteps > max)
+					throw ParseException.format(Dict.ERROR_FUNC_VAL_GREATER_MAX, halfToneStr, max);
+				
+				// only one byte?
+				if (!flow.isDouble())
+					return Math.round(halfToneSteps);
+				
+				// 2 bytes
+				int   msb       = (int) halfToneSteps;
+				float remainder = halfToneSteps - msb;
+				int   lsb       = Math.round(remainder * 100);
+				return msb * 128 + lsb;
+			}
 			
-			// only one byte?
-			if (!flow.isDouble())
-				return Math.round(halfToneSteps);
-			
-			// 2 bytes
-			int   msb       = (int) halfToneSteps;
-			float remainder = halfToneSteps - msb;
-			int   lsb       = Math.round(remainder * 100);
-			return msb * 128 + lsb;
+			// modulation range
+			if (0x0005 == effNum) {
+				
+				// check range
+				float max = flow.isDouble() ? 127f + (127f / 128f) : 127;
+				if (halfToneSteps > max)
+					throw ParseException.format(Dict.ERROR_FUNC_VAL_GREATER_MAX, halfToneStr, max);
+				
+				// only one byte?
+				if (!flow.isDouble())
+					return Math.round(halfToneSteps);
+				
+				// 2 bytes
+				int   msb       = (int) halfToneSteps;
+				float remainder = halfToneSteps - msb;
+				int   lsb       = Math.round(remainder * 128f);
+				return msb * 128 + lsb;
+			}
 		}
 		
 		// channel coarse tune or
 		// controller destination: pitch control
-		if (0x0002 == effNum || 0x7F0900 == effNum) {
+		if ((0x0002 == effNum && EffectFlow.EFF_TYPE_RPN == effType)
+				|| (0x7F0900 == effNum && EffectFlow.EFF_TYPE_SYSEX == effType)) {
 			
 			// don't allow broken values
 			if (halfToneSteps != Math.round(halfToneSteps))
@@ -1475,7 +1528,24 @@ public class Effect {
 			return Math.round(halfToneSteps);
 		}
 		
-		// From here on, we have either channel fine tune or pitch bend.
+		// modulation
+		if (0x01 == effNum && EffectFlow.EFF_TYPE_CTRL == effType) {
+			
+			// get current pitch bend range
+			int  channel = flow.getChannel();
+			long tick    = flow.getCurrentTick();
+			Entry<Long, Float> entry = modulationRangeByChannel.get(channel).floorEntry(tick);
+			float range = entry.getValue();
+			
+			// range exceeded?
+			if (Math.abs(halfToneSteps) > range)
+				throw ParseException.format(Dict.ERROR_FUNC_HALFTONE_GT_MOD_RANGE, halfToneStr, range);
+			
+			int max = flow.isDouble() ? 16383 : 127;
+			return Math.round(max * (halfToneSteps / range));
+		}
+		
+		// From here on, we have either pitch bend or channel fine tune.
 		// Both are signed MSBs that can have up to 2 bytes.
 		// get max value
 		int max;
@@ -1484,20 +1554,8 @@ public class Effect {
 		else
 			max = halfToneSteps < 0 ? 64 : 63;
 		
-		// channel fine tune
-		if (0x0001 == effNum) {
-			
-			// not between +/-1.0?
-			if (halfToneSteps < -1.0)
-				throw ParseException.format(Dict.ERROR_FUNC_VAL_LOWER_MIN, halfToneStr, "-1.0");
-			if (halfToneSteps > 1.0)
-				throw ParseException.format(Dict.ERROR_FUNC_VAL_GREATER_MAX, halfToneStr, "+1.0");
-			
-			return Math.round(halfToneSteps * max);
-		}
-		
 		// pitch bend
-		if (0xE0 == effNum) {
+		if (0xE0 == effNum && EffectFlow.EFF_TYPE_CHANNEL == effType) {
 			
 			// get current pitch bend range
 			int  channel = flow.getChannel();
@@ -1507,9 +1565,21 @@ public class Effect {
 			
 			// range exceeded?
 			if (Math.abs(halfToneSteps) > range)
-				throw ParseException.format(Dict.ERROR_FUNC_HALFTONE_GT_RANGE, halfToneStr, range);
+				throw ParseException.format(Dict.ERROR_FUNC_HALFTONE_GT_PITCH_RANGE, halfToneStr, range);
 			
 			return Math.round(max * (halfToneSteps / range));
+		}
+		
+		// channel fine tune
+		if (0x0001 == effNum && EffectFlow.EFF_TYPE_RPN == effType) {
+			
+			// not between +/-1.0?
+			if (halfToneSteps < -1.0)
+				throw ParseException.format(Dict.ERROR_FUNC_VAL_LOWER_MIN, halfToneStr, "-1.0");
+			if (halfToneSteps > 1.0)
+				throw ParseException.format(Dict.ERROR_FUNC_VAL_GREATER_MAX, halfToneStr, "+1.0");
+			
+			return Math.round(halfToneSteps * max);
 		}
 		
 		// this should never be reached

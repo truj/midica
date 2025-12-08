@@ -112,20 +112,20 @@ INCLUDE inc/instruments.midica
 
 6: mod_range.length(32).wait.set(0)
 6: .wait.set(127)
-6: .wait.set(0%)
-6: .wait.set(100%)
+6: .wait.set(0.4)
+6: .wait.set(126.6)
 
 // double
 6: .double.wait.set(0)
-6: .wait.set(16383)
-6: .wait.set(0%)
-6: .wait.set(50%)
-6: .wait.set(100%)
+6: .wait.set(x7F/x7F)
+6: .wait.set(0.5)
+6: .wait.set(64.25)
+6: .wait.set(127.99219)
 
 6: c c
-6: rpn=0/5.set(50%)
+6: rpn=0/5.set(64)
 6: c
-6: rpn=5.set(0%)
+6: rpn=5.set(0.0)
 6: c
 6: rpn=0/5.double.set(12/30)
 6: c

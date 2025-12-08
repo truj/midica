@@ -266,6 +266,7 @@ public class EffectFlow {
 	 * - pitch bend range
 	 * - channel fine tuning
 	 * - channel coarse tuning
+	 * - channel modulation range
 	 * - controller destination: pitch control
 	 * 
 	 * @return **true** if half tone steps are supported, otherwise **false**.
@@ -290,6 +291,16 @@ public class EffectFlow {
 			
 			// channel coarse tuning
 			if (0x0002 == effectNumber)
+				return true;
+			
+			// modulation range
+			if (0x0005 == effectNumber)
+				return true;
+		}
+		else if (EFF_TYPE_CTRL == effectType) {
+			
+			// modulation wheel
+			if (0x01 == effectNumber)
 				return true;
 		}
 		
@@ -372,6 +383,10 @@ public class EffectFlow {
 			
 			// channel coarse tuning
 			if (0x0002 == effectNumber)
+				return false;
+			
+			// modulation range
+			if (0x0005 == effectNumber)
 				return false;
 		}
 		

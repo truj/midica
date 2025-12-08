@@ -1,0 +1,186 @@
+INCLUDE inc/instruments.midica
+
+INSTRUMENT 0 VIOLIN
+INSTRUMENT 1 VIOLIN
+
+////////////////////////////////////////
+// channel 1: modulation
+////////////////////////////////////////
+
+1: mod_range.set(2.0) c:32 (d=100%)
+
+// percentage values
+/////////////////////
+
+// single byte
+	1: (l=range:_2.0\c_percentage\c_single:\r) -
+	1: mod.set(0%)    (l=0%_c_)    c
+	1: mod.set(25%)   (l=25%_c_)   c
+	1: mod.set(50%)   (l=50%_c_)   c
+	1: mod.set(75%)   (l=75%_c_)   c
+	1: mod.set(100%)  (l=100%_c_)  c
+
+// double
+	1: (l=\rrange:_2.0\c_percentage\c_double:\r) -
+	1: mod.double.set(0%)    (l=0%_c_)    c
+	1: mod.double.set(25%)   (l=25%_c_)   c
+	1: mod.double.set(50%)   (l=50%_c_)   c
+	1: mod.double.set(75%)   (l=75%_c_)   c
+	1: mod.double.set(100%)  (l=100%_c_)  c
+
+// MSB / LSB
+/////////////////////
+
+1: (l=\rMSB/LSB\r) -
+
+// only double allowed
+1: mod.double.set(0/0)     (l=0/0_c_)     c
+1: mod.double.set(64/0)    (l=64/0_c_)    c
+1: mod.double.set(127/127) (l=127/127_c_) c
+
+/////////////////////
+// half tone steps
+/////////////////////
+
+1: (l=\nHALF_TONE_STEPS:) -
+
+// 2.7
+/////////////////////
+1: mod_range.set(2.7) -
+
+// single byte
+	1:                (l=\r2.7\c_single:\r) -
+	1: mod.set(0.5)   (l=0.5_c_)  c
+	1: mod.set(1.0)   (l=1.0_c_)  c
+	1: mod.set(1.5)   (l=1.5_c_)  c
+	1: mod.set(2.0)   (l=2.0_c_)  c
+	1: mod.set(2.7)   (l=2.7_c_)  c
+	1: mod.set(3.0)   (l=2.7_c_)  c
+
+
+// double
+	1:                       (l=\r2.7\c_double:\r) -
+	1: mod.double.set(0.5)   (l=0.5_c_)  c
+	1: mod.double.set(1.0)   (l=1.0_c_)  c
+	1: mod.double.set(1.5)   (l=1.5_c_)  c
+	1: mod.double.set(2.0)   (l=2.0_c_)  c
+	1: mod.double.set(2.7)   (l=2.7_c_)  c
+	1: mod.double.set(3.0)   (l=3.0_c_)  c
+
+// 4.0
+/////////////////////
+1: mod_range.double.set(4.0) -
+
+// single byte
+	1:                (l=\r4.0\c_single:\r) -
+	1: mod.set(0)     (l=0_c_)  c
+	1: mod.set(1)     (l=1_c_)  c
+	1: mod.set(2)     (l=2_c_)  c
+	1: mod.set(3)     (l=3_c_)  c
+	1: mod.set(4)     (l=4_c_)  c
+
+
+// double
+	1:                       (l=\r4.0\c_double:\r) -
+	1: mod.double.set(0)     (l=0_c_)  c
+	1: mod.double.set(1)     (l=1_c_)  c
+	1: mod.double.set(2)     (l=2_c_)  c
+	1: mod.double.set(3)     (l=3_c_)  c
+	1: mod.double.set(4)     (l=4_c_)  c
+
+// 8.0
+/////////////////////
+1: mod_range.set(8.0) -
+
+// single byte
+	1:              (l=\r8.0\c_single:\r) -
+	1: mod.set(0)   (l=0_c_)  c
+	1: mod.set(2)   (l=2_c_)  c
+	1: mod.set(4)   (l=4_c_)  c
+	1: mod.set(6)   (l=6_c_)  c
+	1: mod.set(8)   (l=8_c_)  c
+
+// double
+	1:                     (l=\r8.0\c_double:\r) -
+	1: mod.double.set(0)   (l=0_c_)  c
+	1: mod.double.set(2)   (l=2_c_)  c
+	1: mod.double.set(4)   (l=4_c_)  c
+	1: mod.double.set(6)   (l=6_c_)  c
+	1: mod.double.set(8)   (l=8_c_)  c
+
+// 12.0
+/////////////////////
+1: mod_range.set(12.0) -
+
+// single byte
+	1:               (l=\r12.0\c_single:\r) -
+	1: mod.set(0)    (l=0_c_) c
+	1: mod.set(6)    (l=6_c_)    c
+	1: mod.set(12)   (l=12_c_) c
+
+// double
+	1:                        (l=\r12.0\c_double:\r) -
+	1: mod.double.set(0)    (l=0_c_) c
+	1: mod.double.set(6)    (l=6_c_)    c
+	1: mod.double.set(12)   (l=12_c_) c
+
+// 24.0
+/////////////////////
+1: mod_range.set(24.0) -
+
+// single byte
+	1:                (l=\r24.0\c_single:\r) -
+	1: mod.set(0.0)   (l=0.0_c_)  c
+	1: mod.set(6.0)   (l=6.0_c_)  c
+	1: mod.set(12.0)  (l=12.0_c_) c
+	1: mod.set(18.0)  (l=18.0_c_) c
+	1: mod.set(24.0)  (l=24.0_c_) c
+
+// double
+	1:                       (l=\r24.0\c_double:\r) -
+	1: mod.double.set(0.0)   (l=0.0_c_)  c
+	1: mod.double.set(6.0)   (l=6.0_c_)  c
+	1: mod.double.set(12.0)  (l=12.0_c_) c
+	1: mod.double.set(18.0)  (l=18.0_c_) c
+	1: mod.double.set(24.0)  (l=24.0_c_) c
+
+// 48.0
+/////////////////////
+1: mod_range.set(48) -
+
+// single byte
+	1:                 (l=\r48.0\c_single:\r) -
+	1: mod.set(0.0)   (l=0.0_c_)  c
+	1: mod.set(12.0)  (l=12.0_c_) c
+	1: mod.set(24.0)  (l=24.0_c_) c
+	1: mod.set(36.0)  (l=36.0_c_) c
+	1: mod.set(48.0)  (l=48.0_c_) c
+
+// double
+	1:                       (l=\r48.0\c_double:\r) -
+	1: mod.double.set(0.0)   (l=0.0_c_)  c
+	1: mod.double.set(12.0)  (l=12.0_c_) c
+	1: mod.double.set(24.0)  (l=24.0_c_) c
+	1: mod.double.set(36.0)  (l=36.0_c_) c
+	1: mod.double.set(48.0)  (l=48.0_c_) c
+
+// 127.99
+/////////////////////
+1: mod_range.double.set(127.99) -
+
+// single byte
+	1:                 (l=\r127.99\c_single:\r) -
+	1: mod.set(0.0)    (l=0.0_c_)    c
+	1: mod.set(48.0)   (l=48.0_c_)   c
+	1: mod.set(96.0)   (l=96.0_c_)   c
+	1: mod.set(127.0)  (l=127.0_c_)  c
+	1: mod.set(127.99) (l=127.99_c_) c
+
+// double
+	1:                        (l=\r127.99\c_double:\r) -
+	1: mod.double.set(0.0)    (l=0.0_c_)    c
+	1: mod.double.set(48.0)   (l=48.0_c_)   c
+	1: mod.double.set(96.0)   (l=96.0_c_)   c
+	1: mod.double.set(127.0)  (l=127.0_c_)  c
+	1: mod.double.set(127.99) (l=127.99_c_) c
+

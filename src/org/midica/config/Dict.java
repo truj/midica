@@ -1780,7 +1780,8 @@ public class Dict {
 	public static final String ERROR_FUNC_PERCENT_FORBIDDEN      = "error_func_percent_forbidden";
 	public static final String ERROR_FUNC_BROKEN_HALFTONE        = "error_func_broken_halftone";
 	public static final String ERROR_FUNC_HALFTONE_NOT_ALLOWED   = "error_func_halftone_not_allowed";
-	public static final String ERROR_FUNC_HALFTONE_GT_RANGE      = "error_func_halftone_gt_range";
+	public static final String ERROR_FUNC_HALFTONE_GT_PITCH_RANGE = "error_func_halftone_gt_pitch_range";
+	public static final String ERROR_FUNC_HALFTONE_GT_MOD_RANGE  = "error_func_halftone_gt_mod_range";
 	public static final String ERROR_FUNC_MSB_LSB_NEEDS_DOUBLE   = "error_func_msb_lsb_needs_double";
 	public static final String ERROR_FUNC_MSB_TOO_HIGH           = "error_func_msb_too_high";
 	public static final String ERROR_FUNC_LSB_TOO_HIGH           = "error_func_lsb_too_high";
@@ -3617,8 +3618,10 @@ public class Dict {
 		set( ERROR_FUNC_HEX_LSB_REQUIRED,         "Double Precision needs an LSB, when using Hex values. <br>Invalid parameter: " );
 		set( ERROR_FUNC_BROKEN_HALFTONE,          "The chosen effect does not allow broken halftones. Invalid parameter: " );
 		set( ERROR_FUNC_HALFTONE_NOT_ALLOWED,     "Parameter '%s' not allowed. The effect type does not support half tone steps." );
-		set( ERROR_FUNC_HALFTONE_GT_RANGE,        "Half-tone parameter '%s' exceeds the current pitch bend range (%s)<br>"
+		set( ERROR_FUNC_HALFTONE_GT_PITCH_RANGE,  "Half-tone parameter '%s' exceeds the current pitch bend range (%s)<br>"
 		                                          + "Consider to increase the pitch bend range before setting this value." );
+		set( ERROR_FUNC_HALFTONE_GT_MOD_RANGE,    "Half-tone parameter '%s' exceeds the current modulation range (%s)<br>"
+		                                          + "Consider to increase the modulation range before setting this value." );
 		set( ERROR_FUNC_MSB_LSB_NEEDS_DOUBLE,     "MSB/LSB parameters can only be used with double precision.<br>"
 		                                          + "Parameter not accepted: %s.<br>"
 		                                          + "Consider using '%s'." );
